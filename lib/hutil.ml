@@ -57,7 +57,7 @@ let header_without_http conf title =
     (Util.image_prefix conf);
   Wserver.printf "  <meta name=\"viewport\" content=\"width=device-width, \
                     initial-scale=1, shrink-to-fit=no\">\n";
-  begin match Util.open_templ conf "css" with
+  begin match Util.open_etc_file_name conf "css" with
     Some ic -> Templ.copy_from_templ conf [] ic
   | None -> ()
   end;
@@ -114,7 +114,9 @@ let gen_trailer with_logo conf =
   Templ.include_hed_trl conf "trl";
   if with_logo then Templ.print_copyright_with_logo conf
   else Templ.print_copyright conf;
-  begin match Util.open_templ conf "js" with
+  Wserver.printf "</div>\n";
+  (* balances header_without_http *)
+  begin match Util.open_etc_file_name conf "js" with
     Some ic -> Templ.copy_from_templ conf [] ic
   | None -> ()
   end;
