@@ -183,6 +183,8 @@ let search_approx_key conf base an =
   compact_list base pl
 
 (* recherche par clé, i.e. prenom.occ nom *)
+(* le recherche sur prenom.occ.nom devrait aussi fonctionner *)
+(* see Gutil.split_key for implementation  *)
 let search_by_key conf base an =
   match Gutil.person_of_string_key base an with
     Some ip ->

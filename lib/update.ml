@@ -1,6 +1,7 @@
 (* Copyright (c) 1998-2007 INRIA *)
 
 open Config
+open Path
 open Def
 open Gwdb
 open Util
@@ -238,17 +239,12 @@ let print_err_unknown conf _base (f, s, o) =
   raise @@ ModErr err
 
 let delete_topological_sort_v conf _base =
-  let bfile = Util.base_path [] (conf.bname ^ ".gwb") in
-  let tstab_file = Filename.concat bfile "tstab_visitor" in
-  Mutil.rm tstab_file ;
-  let tstab_file = Filename.concat bfile "restrict" in
-  Mutil.rm tstab_file
+  Mutil.rm conf.path.file_ts_visitor ;
+  Mutil.rm conf.path.file_restrict
 
 let delete_topological_sort conf base =
-  let _ = delete_topological_sort_v conf base in
-  let bfile = Util.base_path [] (conf.bname ^ ".gwb") in
-  let tstab_file = Filename.concat bfile "tstab" in
-  Mutil.rm tstab_file
+  delete_topological_sort_v conf base ;
+  Mutil.rm conf.path.file_ts
 
 let print_someone _conf base p =
   Wserver.printf "%s%s %s" (p_first_name base p)

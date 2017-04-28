@@ -1271,7 +1271,7 @@ let write_file_contents fname text =
 
 let output_wizard_notes bdir wiznotes =
   let wizdir = Filename.concat bdir "wiznotes" in
-  Mutil.remove_dir wizdir;
+  Mutil.rm_rf wizdir;
   if wiznotes = [] then ()
   else
     begin
@@ -1376,7 +1376,7 @@ let link next_family_fun bdir =
       Outbase.output bdir dsk_base;
       output_wizard_notes bdir gen.g_wiznotes;
       output_particles_file bdir dsk_base.data.particles;
-      (try Mutil.remove_dir tmp_dir with _ -> ());
+      (try Mutil.rm_rf tmp_dir with _ -> ());
       (try Unix.rmdir "gw_tmp" with _ -> ());
       output_command_line bdir;
       Util.init_cache_info bdir (Gwdb1.ToGwdb.base base);

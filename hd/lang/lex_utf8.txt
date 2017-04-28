@@ -1,3 +1,260 @@
+<<<<<<< HEAD
+=======
+    select input
+de: wählen
+en: choose file
+fr: sélect. fichier
+
+    portrait
+en: portrait
+fr: portrait
+
+    saved images
+en: saved image/saved images
+fr: image sauvegardée/images sauvegardées
+
+    comment
+en: comment
+fr: comment
+
+    with comment
+en: with a comment
+fr: avec un commentaire 
+
+    send image with comment
+en: send selected image with this comment
+fr: envoyer l’image selectionnée avec ce commentaire
+
+    uploaded
+en: uploaded
+fr: envoyé/envoyée
+
+    save
+en: save
+fr: sauvegarder
+
+    saved
+en: saved
+fr: sauvegardé/sauvegardée
+
+    deleted
+en: deleted
+fr: supprimé/supprimée
+
+    restore
+en: restore
+fr: restaurer
+
+    restored
+en: restored
+fr: restauré/restaurée
+
+    save portrait
+en: the existing portait will be saved to <samp>documents
+fr: le portrait existant sera sauvegardé dans <samp>documents
+
+    previous portrait
+en: the existing save of the portait in this subfolder will be deleted.
+fr: la sauvegarde existante du portrait dans ce sous-répertoire sera supprimée.
+
+    save image
+en: an image with a similar name will moved existing image to <samp>documents
+fr: si une image du même nom existe déjà, elle sera sauvegardée dans <samp>documents
+
+    previous image
+en: if an image with the same name already exists in this subfolder, it will be deleted.
+fr: si une image du même nom existe déjà dans ce sous-répertoire, elle sera supprimée.
+
+    image comment
+en: add a comment for the image.
+fr: ajouter un commentaire à l’image.
+
+    update image comment
+en: update image comment
+fr: mettre à jour le commentaire de l’image
+
+    reset to
+co: risturà
+en: reset to
+fr: restaurer
+
+    select p_mod
+co: selezziunà i mudulli persunalizati
+en: select personalized modules
+fr: selectionner les modules personnalisés
+
+    last sosa level not navigable
+co: l'ultimu livellu di Sosa ùn si pò micca navigà. Impiegate a lista di l'antenati.
+en: last Sosa level not navigable. Use ancestors list.
+fr: le dernier niveau des Sosa n’est pas navigable. Utilisez la liste des ancêtres.
+
+    with root, spouses and unknowns
+co: cù l'antenatu radica, i cumpagni è i scunnisciuti
+en: with root ancestor, spouses and unknowns
+fr: avec l’ancêtre racine, les conjoints et les inconnus
+
+    hide portraits
+co: piattà i ritratti
+en: hide portraits
+fr: ne pas afficher les portraits
+
+    choose a genealogy
+co: sceglie una genealugia
+en: choose a genealogy
+fr: choisir une généalogie
+
+    input database
+co: Ci vole à scrive quì u nome di a basa di dati à impiegà :
+en: Please, enter the name of the database you want to use:
+fr: Tapez à l’identique le nom de la généalogie que vous voulez utiliser :
+
+    available genealogies
+co: lista di e genealugie dispunibule (impiegà gwsetup)
+en: list of available genealogies (use gwsetup)
+fr: listes des généalogies disponibles (utilise gwsetup)
+
+    collapse implex
+co: ripiegà l'implessi
+en: collapse implex
+fr: réduire les implexes
+
+    display implex
+co: affissà l'implessi
+en: display implex
+fr: afficher les implexes
+
+    show implex
+co: identificà l'implessi
+en: show implex
+fr: identifier les implexes
+
+    ignore implex
+co: ignurà l'implessi
+en: ignore implex
+fr: ignorer les implexes
+
+    both
+co: i dui
+en: both
+fr: les deux
+
+    books
+co: dizziunarii
+en: books
+fr: dictionnaires
+oc: diccionaris
+
+    reduce/increase
+co: reduce/aumentà
+en: reduce/increase
+fr: réduire/augmenter
+
+    activate/suppress
+co: attivà/squassà
+en: activate/suppress
+fr: activer/supprimer
+
+    do not
+co: ùn micca
+en: do not
+fr: ne pas
+
+    size
+co: scala
+en: scale
+fr: echelle
+
+    couples
+co: coppii
+en: couples
+fr: couples
+
+    missing %s
+co: %s manchendu
+en: missing %s
+fr: %s manquant
+
+    one additional generation
+co: una generazione di più
+en: one additional generation
+fr: une génération en plus
+
+    compiled on %s from commit %s
+co: cumpilatu u %s à partesi di u commit %s
+en: compiled on %s from commit %s
+fr: compilé le %s à partir du commit %s
+
+    link to children
+co: lea ver di i zitelli
+en: link to children
+fr: lien vers les enfants
+no: lenke til barn
+
+    link back to parents
+co: lea di ritornu ver di i genitori
+en: link back to parents
+fr: lien retour vers les parents
+no: lenke til foreldre
+
+    presentation
+co: Prisentazione
+de: Präsentation
+en: Presentation
+fr: Présentation
+he: הצגה
+it: Presentazione
+pl: Prezentacja
+ru: представление
+no: prensentasjon
+
+    of
+co: di
+en: of
+fr: de
+
+    officer/officer/officers
+co: uffiziante/uffiziante/uffizianti
+en: officer/officer/officers
+fr: officiant/officiante/officiants
+
+    name changed. update linked pages
+co: U nome, a casata, o un occurrenza di sta persona hà cambiatu. Ci vole à rinfrescà e pagine assuciate à l'anziana chjave inghjò.
+fr: Le prénom, nom ou occurrence de cette personne a changé. Pensez à mettre à jour les pages liées à l’ancienne clé ci-dessous.
+en: The first name, name or occurrence of this person has changed. Please update the pages linked to the old key listed below.
+
+    old name
+co: vechju nome
+en: old name
+fr: ancien nom
+no: gammelt navn
+
+    new name
+co: novu nome
+en: new name
+fr: nouveau nom
+no: nytt navn
+
+    scale
+co: anni per generazione
+en: years by generation
+fr: années par génération
+
+    multi relations graph
+co: graficu di rilazioni multiple
+en: multi relations graph
+fr: graphe de relations multiples
+
+    edit tree
+co: mudufucà u graficu
+en: edit the graph
+fr: éditer le graphe
+
+    dag on/dag off
+co: affissà un graficu orientatu aciclicu (dag)/piattà u graficu orientatu aciclicu (dag)
+en: show dag/hide dag
+fr: afficher graphe orienté acyclique (dag)/masquer graphe orienté acyclique (dag)
+
+>>>>>>> Porting Fabien's reorg work to current master. Allow sub-folders
      !dates order
 af: yyyymmdd
 ar: ddmmyyyy
@@ -806,33 +1063,33 @@ sv: januari/februari/mars/april/maj/juni/juli/augusti/september/oktober/november
 zh: 1月/2月/3月/4月/5月/6月/7月/8月/9月/10月/11月/12月
 
     (thousand separator)
-af:  
+af:
 ar: .
-bg:  
+bg:
 br: .
 ca: .
-co:  
-cs:  
+co:
+cs:
 da: .
 de: .
 en: ,
 eo: .
 es: .
-et:  
+et:
 fi: .
-fr:  
+fr:
 he: ,
 is: .
 it: .
 lv: '
 nl: .
 no: .
-oc:  
+oc:
 pl: .
 pt: .
 ro: .
 ru: '
-sk:  
+sk:
 sl: .
 sv: .
 zh: .
@@ -1735,7 +1992,7 @@ co: aghjunghje una fiura
 cs: přidat :a: obrázek
 da: tilføj billede
 de: hinzufügen Bild
-en: add picture
+en: add portrait
 eo: aldoni :a: bildo:a:+n
 es: agregar imagen
 et: lisa pilt
@@ -2357,7 +2614,7 @@ da: og
 de: und
 en: and
 eo: kaj
-es: y/e 
+es: y/e
 et: ja
 fi: ja
 fr: et
@@ -2999,7 +3256,7 @@ sl: začetek
 sv: börjar
 
     benediction
-co: benedizzione	
+co: benedizzione
 de: Segnung
 en: Blessing
 es: bendición
@@ -5147,7 +5404,7 @@ pt: exibir a data de casamento
 ru: показать дату брака
 
     display notes/sources inline
-co: include e note/fonte à u cuntenutu 
+co: include e note/fonte à u cuntenutu
 de: einschließen der Notizen/Quellen und Inhalt
 en: Add notes & sources
 es: incluir las notas/fuentes en el contenido
@@ -7129,7 +7386,7 @@ co: fiura squassata
 cs: obrázek smazán
 da: billede slettet
 de: Bild gelöscht
-en: picture has been deleted
+en: picture deleted
 eo: bildo detruita
 es: imagen suprimida
 et: pilt kustutatud
@@ -7159,12 +7416,12 @@ co: fiura ricevuta
 cs: obrázek přijat
 da: billede indsat
 de: Bild erhalten
-en: picture has been uploaded
+en: picture uploaded
 eo: bildo ricevita
 es: imagen recibida
 et: pilt vastu võetud
 fi: kuva vastaanotettu
-fr: image reçue
+fr: image envoyée
 he:  התמונה התקבלה
 is: mynd móttekin
 it: immagine ricevuta
@@ -7293,7 +7550,7 @@ eo: en
 es: en
 fr: en
 he:  ב-
-is:  
+is:
 it: nel
 lv: gads:
 nl: in
@@ -9332,7 +9589,7 @@ co: mudificà a fiura
 cs: změnit :a: obrázek
 da: ændre billede
 de: ändern +before Bild
-en: update Picture
+en: update portrait
 eo: modifi :a: bildo:a:+n
 es: modificar imagen
 et: muuda :g: pilt
@@ -10632,7 +10889,7 @@ et: :i:
 fi: :e:
 fr: le
 he:   ב-
-is:  
+is:
 it: il
 lv: datums:
 nl: op
@@ -12756,7 +13013,7 @@ sl: sin/hčerka/otrok
 sv: son/dotter/barn
 
     sons/daughters/children
-co: figlioli/figliole/zitelli	
+co: figlioli/figliole/zitelli
 en: sons/daughters/children
 fr: fils/filles/enfants
 pt: filhos/filhas/filhos
@@ -15521,3 +15778,363 @@ ru: ваше сообщение ожидает проверки
 sk: tvoja správa čaká na potvrdenie
 sv: ditt meddelande väntar på giltighet
 
+    database
+af: stamboom
+ar: شجرة العائل
+bg: семейно дърво
+br: bon roadoù
+ca: base de dades
+co: basa geneologica
+cs: rodokmen
+da: family Tree
+de: Stammbaum
+en: family Tree
+eo: family Tree
+es: árbol genealógico
+et: sugupuu
+fi: sukupuu
+fr: base généalogique
+he: אילן יוחסין
+is: ættfræði gagnagrunnur
+it: albero genealogico
+lv: ģimenes koks
+nl: stamboom
+no: family Tree
+pl: drzewo genealogiczne
+pt: árvore genealógica
+ro: arbore genealogic
+ru: генеалогическое дерево
+sl: družinsko drevo
+sv: family Tree
+zh: 家譜
+
+    frequency
+af: frekwensie
+bg: честота на срещане
+br: stankted
+ca: freqüència
+co: frequenza
+cs: četnosti
+da: hyppighed
+de: nach Häufigkeit
+en: frequency
+eo: ofteco
+es: frecuencia
+et: sageduse
+fi: määräjärjestykseen
+fr: fréquence
+fr-cr: ça ki ka ruvini empile
+he:  השכיחות
+is: tíðni
+it: di frequenza
+lv: pēc sastopamības
+nl: aantal
+no: etter frekvens
+pl: według częstości występowania
+pt: frequência
+ro: dupa frecventa
+ru: по частоте
+sl: pogostosti
+sv: frekvensordning
+zh: 访问次数
+
+    by
+af: volgens
+bg: ,&nbsp; подредени по
+br: dre
+ca: per
+co: da
+cs: seřazená podle
+da: sorteret efter
+de: durch
+en: by
+eo: laù
+es: por
+et: järjestatud
+fi: lajiteltuina
+fr: par
+fr-cr: zott pé trappé assou liste-la
+he: לפי
+is: eftir
+it: in ordine
+lv:
+nl: volgens
+no: sortert
+pl: ułożonych
+pt: por
+ro: in
+ru: упорядоченных
+sl: po
+sv: sorterade i
+zh: 根据
+
+    select lang
+af: Taalvoorkeur/Language preference:
+ar: بإمكانك إختيار لغة أخرى من بين اللغات التالية:
+bg: Можете да изберете друг език за съобщения измежду следните:
+br: Dibab a c'hellit ur yezh all etre ar re-mañ:
+ca: Podeu seleccionar una altre llengua, hi ha disponibles les següents:
+co: affissà in :
+cs: Zvolte jazyk pro prohlížení databáze:
+da: Du kan vælge fremstilling på et andet sprog blandt de følgende:
+de: Blick auf:
+en: view in:
+eo: Vi povas elekti alian lingvon inter la sekvantajn:
+es: Ver en:
+et: Võid valida ka mõne muu keele järgnevatest:
+fi: Näytä:
+fr: afficher en :
+is: Þú getur valið milli eftirfarandi tungumála:
+it: Vista in:
+lv: Jūs variet apskatīt datu bāzi arī citās sekojošās valodās:
+nl: Bekijk in het:
+no: Du kan velge sidevisning på et annet språk blant følgende:
+pl: Możesz wybrać inny język spośród następujących:
+ro: poti sa alegi una din urmatoarele limbi pentru afisaj
+sl: Lahko izberete drug jezik:
+sv: Du kan välja ett annat språk bland de följande:
+
+    add the previous name as a first name alias
+co: aghjunghje u nome precedente cum'è cugnome di nome
+en: add the previous name as a first name alias
+fr: ajouter le nom précédent comme un alias de prénom
+
+    add the previous name as a surname alias
+co: aghjunghje u nome precedente cum'è cugnome di casata
+en: add the previous name as a surname alias
+fr: ajouter le nom précédent comme un alias de nom
+
+    :
+af: :
+ar: :
+bg: :
+br:  :
+ca: :
+co:  :
+cs: :
+da: :
+de: :
+en: :
+eo: :
+es: :
+et: :
+fi: :
+fr:  :
+he: :
+is: :
+it: :
+lv: :
+nl: :
+no: :
+oc: :
+pl: :
+pt: :
+ro: :
+ru: :
+sk: :
+sl: :
+sv: :
+
+    move up/down
+co: ricullà/falà/ricullà u cursore/falà u cursore
+en: move up/move down/move up cursor/move down cursor
+fr: remonter/descendre/remonter le curseur/descendre le curseur
+
+    insert
+co: framette
+de: einfügen
+en: insert
+es: insertar
+fr: insérer
+it: inserire
+pt: inserir
+
+    label
+co: etichetta
+de: Etikett
+en: label
+es: etiqueta
+fr: étiquette
+it: etichetta
+nl: etiketje
+pt: etiqueta
+
+    full tree
+co: arburu sanu
+en: full tree
+fr: arbre complet
+
+    compact tree
+co: arburu cumpattu
+en: compact tree
+fr: arbre compact
+
+    implex/implexes
+co: implessu/implessi
+en: implex/implexes
+fr: implexe/implexes
+
+    implex links
+co: ligà l'implessi
+en: link implexes
+fr: relier les implexes
+
+    dag
+co: fusione d'implessi
+en: fusion implexes
+fr: fusionner les implexes
+
+    htree
+co: arburu in H
+en: H-Tree
+fr: arbre en H
+
+    itree
+co: arburu in I
+en: I-Tree
+fr: arbre en I
+
+    mtree
+co: arburu in H di 9 generazione
+en: 9 generations H tree
+fr: arbre en H 9 générations
+
+    h7-tree
+co: arburu in H di 7 generazione
+en: 7 generation H tree
+fr: arbre en H 7 générations
+
+    descendants tree
+co: arburu di discendenza
+en: descendants tree
+fr: arbre de descendance
+
+    by couple
+co: da coppiu
+en: by couple
+fr: par couple
+
+    navigate on tree
+co: navigà nant'à l'arburu
+en: navigate on the tree
+fr: naviguer sur l’arbre
+
+    font size
+co: dimensione di grafia
+en: font size
+fr: taille de police
+
+    horizontal tree
+co: arburu d'ascendenza
+en: horizontal tree
+fr: arborescence ascendante
+
+    tree of witnesses
+co: arburu di i testimoni
+en: tree of witnesses
+fr: arbre des témoins
+
+    shortcuts
+co: accurtatoghji di tastera
+en: keyboard shortcuts
+fr: raccourcis clavier
+
+    family time line
+co: cronulugia di a famiglia
+en: time line of the family
+fr: chronologie de la famille
+
+    witness at %s of
+co: testimone à u %s di
+en: witness at %s of
+fr: témoin au %s de
+
+    relations tree
+co: arburu di e rilazioni
+en: tree of relations
+fr: arbre des relations
+
+    witness tree
+co: arburu di i testimoni
+en: tree of witnesses
+fr: arbre des témoins
+
+    events tree
+co: arburu di l'evvenimenti
+en: tree of events
+fr: arbre des événements
+
+    descendant tree view
+co: arburu di descendenza
+en: descendant tree view
+fr: arborescence descendante
+
+    home
+co: accolta
+en: home
+fr: accueil
+
+    last diff
+co: ultima revisione
+en: last revision
+fr: dernière révision
+
+    intermediate revisions not shown
+co: revisioni intermediarie piattate
+en: intermediate revisions not shown
+fr: révisions intermédiaires masquées
+
+    previous/next diff
+co: revisione precedente/revisione seguente
+en: previous revision/next revision
+fr: révision précédente/révision suivante
+
+    modify person event order
+co: intervertisce l'evvenimenti individuali
+en: permute personnal events
+fr: permuter les événéments individuels
+
+    modify family %s event order
+co: intervertisce l'evvenimenti di a famiglie %s
+en: permute the events of family %s
+fr: permuter les événements de la famille %s
+
+    full width/columns
+co: affissu larghezza sana/affissu nant'à duie culonne
+en: full width display/columns display
+fr: affichage pleine largeur/affichage sur deux colonnes
+
+    dd/mm/yyyy
+co: GG/MM/AAAA
+en: DD/MM/YYYY
+fr: JJ/MM/AAAA
+
+    spouses info
+co: infurmazione di i cumpagni
+en: spouses informations
+fr: informations conjoints
+
+    inline chronology
+co: cronulugia simplice/cronulugia detagliata
+en: simple chronology/detailed chronology
+fr: chronologie simple/chronologie détaillée
+
+    missing date
+co: senza data
+en: no date
+fr: sans date
+
+    custom event
+co: evvenimentu persunalizatu
+en: custom event
+fr: événement personnalisé
+
+    remove last module
+co: caccià l'ultimu modulu aghjuntu
+en: remove the last added module
+fr: retirer le dernier module ajouté
+
+    copy link
+co: cupià a lea in u preme'papei
+en: copy the link to the clipboard
+fr: copier le lien dans le presse-papier

@@ -7,6 +7,7 @@ module Mapp = Api_app_piqi
 module Mext_app = Api_app_piqi_ext
 
 open Config
+open Path
 open Def
 open Gwdb
 open Util
@@ -46,7 +47,7 @@ let print_info_base conf base =
   let last_modified_person =
     let default () = Opt.map (fun p -> Gwdb.string_of_iper (get_iper p)) sosa_p in
     try
-      let ic = Secure.open_in_bin (History.file_name conf) in
+      let ic = Secure.open_in_bin conf.path.Path.file_history in
       let (_, pos, wiz) = (1, in_channel_length ic, "") in
       let vv = (ref (Bytes.create 0), ref 0) in
       let last_modified_person =
@@ -400,7 +401,7 @@ let print_last_modified_persons conf base =
   in
   let list =
     match
-      try Some (Secure.open_in_bin (History.file_name conf))
+      try Some (Secure.open_in_bin conf.path.Path.file_history)
       with Sys_error _ -> None
     with
     | Some ic ->
@@ -700,18 +701,13 @@ let print_img_person conf base =
   let ip = Gwdb.iper_of_string @@ Int32.to_string id.M.Index.index in
   let p = poi base ip in
   let img_addr =
-    match sou base (get_image p) with
-    | "" ->
-        (match Util.auto_image_file conf base p with
-        | Some file -> file
-        | None -> "")
-    | s -> s
+    Opt.string_default
+      (fun () -> Opt.to_string @@ Util.auto_image_file conf base p)
+      (sou base (get_image p))
   in
   let img_from_ip = M.Image_address.({img = img_addr}) in
   let data = Mext.gen_image_address img_from_ip in
   print_result conf data
-
-
 
 (**/**) (* API_UPDT_IMAGE *)
 
@@ -947,7 +943,7 @@ module NameSortMap = Map.Make (String)
      - timestamp de la création de la base
 *)
 let print_export_info conf export_directory =
-  let bname = Util.base_path [] (conf.bname ^ ".gwb") in
+  let bname = conf.path.dir_root in
   let fork_base =
     match try Some (Gwdb.open_base bname) with _ -> None with
     | Some base -> base
@@ -986,7 +982,7 @@ let print_export_info conf export_directory =
      - liste des taille Person, Person (proto app)
 *)
 let print_export_person conf export_directory =
-  let bname = Util.base_path [] (conf.bname ^ ".gwb") in
+  let bname = conf.path.dir_root in
   let fork_base =
     match try Some (Gwdb.open_base bname) with _ -> None with
     | Some base -> base
@@ -1031,7 +1027,7 @@ let print_export_person conf export_directory =
      - liste des taille Family, Family (proto app)
 *)
 let print_export_family conf export_directory =
-  let bname = Util.base_path [] (conf.bname ^ ".gwb") in
+  let bname = conf.path.dir_root in
   let fork_base =
     match try Some (Gwdb.open_base bname) with _ -> None with
     | Some base -> base
@@ -1077,7 +1073,7 @@ let print_export_family conf export_directory =
      - liste des notes individuelles
 *)
 let print_person_note conf export_directory =
-  let bname = Util.base_path [] (conf.bname ^ ".gwb") in
+  let bname = conf.path.dir_root in
   let fork_base =
     match try Some (Gwdb.open_base bname) with _ -> None with
     | Some base -> base
@@ -1123,7 +1119,7 @@ let print_person_note conf export_directory =
      - liste des notes familiales
 *)
 let print_family_note conf export_directory =
-  let bname = Util.base_path [] (conf.bname ^ ".gwb") in
+  let bname = conf.path.dir_root in
   let fork_base =
     match try Some (Gwdb.open_base bname) with _ -> None with
     | Some base -> base
@@ -1241,7 +1237,7 @@ module IntSet =
 
 
 let print_index_search conf export_directory =
-  let bname = Util.base_path [] (conf.bname ^ ".gwb") in
+  let bname = conf.path.dir_root in
   let fork_base =
     match try Some (Gwdb.open_base bname) with _ -> None with
     | Some base -> base
@@ -1295,9 +1291,9 @@ let print_index_search conf export_directory =
             list_inx := NameSort.add (i, sn, fn, r, date) !list_inx;
             (* Faut il faire si y'a plusieurs espaces ? *)
             (* FIXME: Does order matter or not? If not, use List.iter instead *)
-            Util.rev_iter (fun sn -> add_to_map sn i) (String.split_on_char ' ' sn);
-            Util.rev_iter (fun fn -> add_to_map fn i) (String.split_on_char ' ' fn);
-            Util.rev_iter (fun n -> add_to_map n i) (String.split_on_char ' ' r);
+            Mutil.rev_iter (fun sn -> add_to_map sn i) (String.split_on_char ' ' sn);
+            Mutil.rev_iter (fun fn -> add_to_map fn i) (String.split_on_char ' ' fn);
+            Mutil.rev_iter (fun n -> add_to_map n i) (String.split_on_char ' ' r);
           end
       end (Gwdb.persons base) ;
 
@@ -1388,7 +1384,7 @@ let print_index_search conf export_directory =
     -
 *)
 let print_ascends_index conf export_directory =
-  let bname = Util.base_path [] (conf.bname ^ ".gwb") in
+  let bname = conf.path.dir_root in
   let fork_base =
     match try Some (Gwdb.open_base bname) with _ -> None with
     | Some base -> base
@@ -1499,7 +1495,326 @@ let print_export conf base =
     try Unix.rmdir tmp_export_directory with Unix.Unix_error (_, _, _) -> ()
   in
 
+<<<<<<< HEAD
   Util.html conf
+=======
+
+  Util.html conf ;
+;;
+
+
+(**/**) (* Version app, synchro !!! *)
+
+
+module IntIdSet =
+  Set.Make
+    (struct
+      type t = int;;
+      let compare = compare;;
+     end)
+;;
+
+open Database;;
+
+
+let full_synchro conf synchro timestamp =
+  let last_import = ref None in
+  (* Suppression potentiel du fichier patch. *)
+  (match synchro.synch_list with
+  | (last_timestamp, _, _) :: _ ->
+    if Sys.file_exists conf.path.file_cmd
+    then begin
+      let ic = open_in conf.path.file_cmd in
+      let fd = Unix.descr_of_in_channel ic in
+      let stats = Unix.fstat fd in
+      close_in ic;
+      last_import := Some stats.Unix.st_mtime;
+      if float_of_string last_timestamp < stats.Unix.st_mtime
+      then
+        if Sys.file_exists conf.path.file_synchro_patches
+        then Sys.remove conf.path.file_synchro_patches
+    end
+  | _ -> ());
+  (* On clean le fichier synchro des trop vieilles modifs. *)
+  (match !last_import with
+  | Some last_mod ->
+      let bname = conf.path.dir_root in
+      let new_synchro = Database.input_synchro bname in
+      let list =
+        List.fold_right
+          (fun (ts, ipl, ifaml) accu ->
+            if (float_of_string ts < last_mod) then accu
+            else (ts, ipl, ifaml) :: accu)
+          new_synchro.synch_list []
+      in
+      let new_synchro = {synch_list = list} in
+      (* Si on a rien modifier, ça ne sert à rien de faire la mise à *)
+      (* jour du fichier synchro, parce qu'on modifie la date de     *)
+      (* dernière modification pour rien.                            *)
+      if synchro <> new_synchro then begin
+        let fname = conf.path.file_synchro_patches in
+        let tmp_fname = fname ^ ".tmp" in
+        let oc9 =
+          try Secure.open_out_bin tmp_fname
+          with Sys_error _ ->
+            raise (Adef.Request_failure "the database is not writable")
+        in
+        Mutil.output_value_no_sharing oc9 (synchro : Database.synchro_patch);
+        close_out oc9;
+        Mutil.rm (fname ^ "~") ;
+        Sys.rename fname (fname ^ "~") ;
+        Sys.rename tmp_fname fname ;
+      end
+  | _ -> ());
+  (* Si timestamp plus petit que import, alors synchro totale. *)
+  match !last_import with
+  | Some last_mod -> if timestamp < last_mod then true else false
+  | _ -> false
+;;
+
+
+let print_synchro_patch_mobile conf base =
+  let params = get_params conf Mext.parse_synchro_params in
+  let export_directory = params.M.Synchro_params.export_directory in
+  let timestamp = params.M.Synchro_params.timestamp in
+
+  (* On créé un dossier temporaire pour aller plus vite qu'écrire sur le NAS. *)
+  let tmp_export_directory =
+    let _ = Random.self_init () in
+    let rec loop i =
+      let file =
+        "/tmp/" ^ conf.bname ^ "." ^ string_of_int (Random.int 1000000) ^ "/"
+      in
+      if not (Sys.file_exists file) then file
+      else if i < 5 then loop (i + 1)
+      else exit 2
+    in
+    loop 0
+  in
+  let _ =
+    try Unix.mkdir tmp_export_directory 0o777
+    with Unix.Unix_error (_, _, _) -> exit 2
+  in
+
+  (* Récupération du fichier synchro. *)
+  let bname = conf.path.dir_root in
+  let synchro = Database.input_synchro bname in
+  (* Toutes les dernières modifications. *)
+  let timestamp = float_of_string timestamp in
+  let (ip_list, ifam_list) =
+    List.fold_right
+      (fun (t_stamp, ip_list, ifam_list) (accu_ip_list, accu_ifam_list) ->
+        let t_stamp = float_of_string t_stamp in
+        if t_stamp > timestamp then
+          (accu_ip_list @ ip_list, accu_ifam_list @ ifam_list)
+        else (accu_ip_list, accu_ifam_list))
+      synchro.synch_list ([], [])
+  in
+  let last_timestamp =
+    match synchro.synch_list with
+    | (timestamp, _, _) :: _ -> timestamp
+    | _ -> ""
+  in
+  (* On rend unique les ids. *)
+  let ip_list =
+    IntIdSet.elements
+      (List.fold_left
+         (fun accu i -> IntIdSet.add i accu)
+         IntIdSet.empty ip_list)
+  in
+  let ifam_list =
+    IntIdSet.elements
+      (List.fold_left
+         (fun accu i -> IntIdSet.add i accu)
+         IntIdSet.empty ifam_list)
+  in
+  let len_ip_list = List.length ip_list in
+  let len_ifam_list = List.length ifam_list in
+
+  (* Ecriture du fichier synchro. *)
+  let fname = Filename.concat tmp_export_directory "pb_base_synchro.patches" in
+  let () =
+    match
+      try Some (open_out_bin fname)
+      with Sys_error _ -> None
+    with
+    | Some oc ->
+        if full_synchro conf synchro timestamp then
+          (* si 0 il faut re-synchroniser la base. *)
+          output_char oc '\000'
+        else
+          begin
+            (* si 1 il faut appliquer le patch. *)
+            output_char oc '\001';
+            output_binary_int oc (String.length last_timestamp);
+            output_string oc last_timestamp;
+            (* nb persons et families *)
+            output_binary_int oc (Util.real_nb_of_persons conf base);
+            output_binary_int oc (nb_of_families base);
+            (* sosa *)
+            let sosa_ref =
+              match Util.find_sosa_ref conf base with
+              | Some p ->
+                  (output_char oc '\001'; Adef.int_of_iper (get_key_index p))
+              | None -> (output_char oc '\000'; 0)
+            in
+            output_binary_int oc sosa_ref;
+            (* nb pers modified, id len pers *)
+            output_binary_int oc len_ip_list;
+            List.iter
+              (fun i ->
+                let ip = Adef.iper_of_int i in
+                let p = poi base ip in
+                let pers_app = pers_to_piqi_app_person conf base p in
+                let data = Mext_app.gen_person pers_app in
+                let data = data `pb in
+                (* id, longueur de la personne puis données de la personne *)
+                output_binary_int oc i;
+                output_binary_int oc (String.length data);
+                output_string oc data)
+              ip_list;
+            (* nb fam modified, id len fam *)
+            output_binary_int oc len_ifam_list;
+            List.iter
+              (fun i ->
+                let ifam = Adef.ifam_of_int i in
+                let fam_app = fam_to_piqi_app_family base ifam in
+                let data = Mext_app.gen_family fam_app in
+                let data = data `pb in
+                (* id, longueur de la famille puis données de la famille *)
+                output_binary_int oc i;
+                output_binary_int oc (String.length data);
+                output_string oc data)
+              ifam_list;
+            (* nb pers modified, id len pers_note *)
+            output_binary_int oc len_ip_list;
+            List.iter
+              (fun i ->
+                let ip = Adef.iper_of_int i in
+                let p = poi base ip in
+                let data = sou base (get_notes p) in
+                if data = "" then
+                  begin
+                    (* On pointe vers la note vide. *)
+                    output_binary_int oc i;
+                    output_binary_int oc 0
+                  end
+                else
+                  begin
+                    (* id, longueur de la personne puis données de la personne *)
+                    output_binary_int oc i;
+                    output_binary_int oc (String.length data);
+                    output_string oc data
+                  end)
+              ip_list;
+            (* nb fam modified, id len fam_note *)
+            output_binary_int oc len_ifam_list;
+            List.iter
+              (fun i ->
+                let ifam = Adef.ifam_of_int i in
+                let fam = foi base ifam in
+                let data = sou base (get_comment fam) in
+                if data = "" then
+                  begin
+                    (* On pointe vers la note vide. *)
+                    output_binary_int oc i;
+                    output_binary_int oc 0
+                  end
+                else
+                  begin
+                    (* id, longueur de la personne puis données de la personne *)
+                    output_binary_int oc i;
+                    output_binary_int oc (String.length data);
+                    output_string oc data
+                  end)
+              ifam_list;
+            (* nb pers modified, id has_parents id_father id_mother *)
+            output_binary_int oc len_ip_list;
+            List.iter
+              (fun i ->
+                let ip = Adef.iper_of_int i in
+                let p = poi base ip in
+                output_binary_int oc i;
+                match get_parents p with
+                | Some ifam ->
+                    begin
+                      let cpl = foi base ifam in
+                      let father = get_father cpl in
+                      let mother = get_mother cpl in
+                      output_char oc '\001';
+                      output_binary_int oc (Adef.int_of_iper father);
+                      output_binary_int oc (Adef.int_of_iper mother);
+                    end
+                | None ->
+                    begin
+                      output_char oc '\000';
+                      output_binary_int oc 0;
+                      output_binary_int oc 0;
+                    end)
+              ip_list;
+            (* number of character => to be modified
+               when we actually know the number. *)
+            let nb_char = ref 0 in
+            let pos_nb_char = pos_out oc in
+            output_binary_int oc !nb_char;
+            (* id nb_word len_word word *)
+            List.iter
+              (fun i ->
+                let ip = Adef.iper_of_int i in
+                let p = poi base ip in
+                let fn = sou base (get_first_name p) in
+                let sn = sou base (get_surname p) in
+                if sn = "?" && fn = "?" then ()
+                else
+                  begin
+                    let fn = Name.lower fn in
+                    let sn = Name.lower sn in
+                    let r = build_relative_name base p in
+                    output_binary_int oc i;
+                    let (split_l, nb_words, nb_chars) =
+                      List.fold_left
+                        (fun (split_l, nb_words, nb_chars) s ->
+                           (* FIXME: Does order matter or not? *)
+                           let l = String.split_on_char ' ' s |> List.rev in
+                           let sub_nb_chars =
+                             match List.length l with
+                             | 0 -> 0
+                             | x -> String.length s - (x - 1)
+                           in
+                          (List.rev_append split_l l,
+                           nb_words + List.length l,
+                           nb_chars + sub_nb_chars))
+                        ([], 0, 0) (sn :: fn :: r)
+                    in
+                    nb_char := 4 + 4 + (4 * nb_words) + nb_chars + !nb_char;
+                    output_binary_int oc nb_words;
+                    List.iter
+                      (fun s ->
+                        output_binary_int oc (String.length s);
+                        output_string oc s)
+                      split_l
+                  end)
+              ip_list;
+            (* update nb_char *)
+            seek_out oc pos_nb_char;
+            output_binary_int oc !nb_char;
+          end;
+        close_out oc;
+    | _ -> exit 2
+  in
+
+  (* move file *)
+  let _ =
+    (Sys.command ("mv " ^ tmp_export_directory ^ "/* " ^ export_directory))
+  in
+  let _ =
+    try Unix.rmdir tmp_export_directory with Unix.Unix_error (_, _, _) -> ()
+  in
+
+  Util.html conf ;
+;;
+
+>>>>>>> Porting Fabien's reorg work to current master. Allow sub-folders
 
 let print_export_search conf base =
   let () = load_strings_array base in

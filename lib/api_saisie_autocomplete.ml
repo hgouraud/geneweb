@@ -1,12 +1,10 @@
 #ifdef API
 
 open Config
+open Path
 open Def
 open Gwdb
-open Util
 open Api_def
-
-
 
 (**/**) (* Fonctions d'auto-complétion, config, recherche ... *)
 
@@ -82,7 +80,7 @@ let string_start_with ini s =
     [Rem] : Non exporté en clair hors de ce module.                         *)
 (* ************************************************************************ *)
 let get_list_from_cache conf base s max_res mode =
-  let bfile = base_path [] (conf.bname ^ ".gwb") in
+  let bfile = conf.path.dir_root in
   let cache_file =
     match mode with
       `lastname -> Filename.concat bfile "cache_surname"
