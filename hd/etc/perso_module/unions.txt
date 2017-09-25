@@ -320,8 +320,9 @@
                 </div>
               %end;
             </div>
-            <div class="align-self-center">
+            <div class="d-inline-flex flex-row">
               %if;has_children;
+              <br>&nbsp;<br>[*child/children]1[:]
                 %let;prev_count;%count;%in; %( On sauvegarde l'ancienne valeur de count %)
                 <div class="d-inline-flex flex-row">
                   %(<div class="align-self-center ml-2">%if;has_children;%sp;[having as children]0%end;</div>%)
@@ -353,10 +354,11 @@
                 </div>
               %end;
             </div>
-            <div class="mt-2">
+            <div class="d-inline-flex flex-row">
               %if;has_witnesses;
-                <div class="d-flex flex-wrap mb-1">
-                  <span class="align-self-center mr-2">[witness/witnesses]w</span>
+                  <br>&nbsp;<br>[*witness/witnesses]w[:]%sp;
+                <div class="d-inline-flex flex-row flex-wrap">
+                  <div class="d-inline-flex flex-wrap justify-content-start mt-2 ml-1">
                   %foreach;witness;
                     <div class="media d-inline-flex flex-row mr-2">
                       %if;witness.has_image;
@@ -376,7 +378,8 @@
                         %end;
                       </div>
                     </div>
-                   %end;
+                  %end;
+                  </div>
                 </div>
               %end;
             </div>
