@@ -704,9 +704,19 @@ function changeCalendar(e,v,m,c) {
       <label><input type="radio" name="access"%sp;
        value="Private"%if;acc_private; checked="checked"%end;%/>
       [*private]0</label>
+      <label><input type="radio" name="access"%sp;
+       value="Friend"%if;acc_friend; checked="checked"%end;%/>
+      [*friend]0*</label>
     </td>
   </tr>
 </table>
+*
+[
+en: By checking the "Friend" option, one records in the base that the person agrees to have
+    its personnal data kept in Roglo (European RGPD).
+fr: En cochant la case "Ami", on enregistre le fait que la personne a donné son accord pour la
+    conservation de ses données dans Roglo (RGPD).
+]
 
 <h4><label for="notes">[*note/notes]1</label></h4>
 

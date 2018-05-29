@@ -183,8 +183,9 @@ use of database forum by ill-intentioned people to communicate)...
           in
           loop quot_lev pos j (Buff.mstore len t)
       | NotesLinks.WLperson j (fn, sn, oc) name _ ->
+          let name = if wi.wi_person_exists (fn, sn, oc) then name else "x x" in
           let t =
-            if wi.wi_cancel_links then name
+            if wi.wi_cancel_links || name = "x x" then name
             else if wi.wi_person_exists (fn, sn, oc) then
               sprintf "<a id=\"p_%d\" href=\"%sp=%s;n=%s%s\">%s</a>"
                 pos (commd conf) (code_varenv fn) (code_varenv sn)

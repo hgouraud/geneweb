@@ -1,0 +1,43 @@
+# $Id: Makefile.inc.unix,v 1.6 2007-09-12 09:58:44 ddr Exp $
+
+TOP=..
+CAMLP5_COMM=TOP=$(TOP) $(TOP)/tools/camlp5_comm.sh
+CAMLP5F=-DUNIX
+CAMLP5D=~/.opam/3.12.1/lib/camlp5
+LIBUNIX=-cclib -lunix
+OCAMLC=ocamlc.opt -warn-error A
+OCAMLOPT=ocamlopt.opt -warn-error A
+OCAMLI=
+OCAMLD=
+STRIP=strip
+RM=/bin/rm -f
+EXE=
+STATIC=-ccopt -static
+STATIC=
+TEST_DIR=test $$(basename "$<") = "$<" || { echo "Please run 'make' in directory '$$(dirname "$<")' first"; exit 1; }
+
+all::
+opt::
+
+clean::
+	$(RM) *.out *.opt *.cm[oixa] *.cmxa *.pp[oi] *.o *.a *.obj *.lib *.lck *.bak *~ .#* *.annot
+
+.SUFFIXES: .ml .cmo .mli .cmi .cmx
+
+.mli.cmi:
+	@$(TEST_DIR)
+	@$(CAMLP5_COMM) $(CAMLP5F) $< -o $*.ppi
+	$(OCAMLC) $(OCAMLI) -I $(CAMLP5D) -c -intf $*.ppi
+	$(RM) $*.ppi
+
+.ml.cmo:
+	@$(TEST_DIR)
+	@$(CAMLP5_COMM) $(CAMLP5F) $< -o $*.ppo
+	$(OCAMLC) $(OCAMLI) $(OCAMLD) -I $(CAMLP5D) -c -impl $*.ppo
+	$(RM) $*.ppo
+
+.ml.cmx:
+	@$(TEST_DIR)
+	@$(CAMLP5_COMM) $(CAMLP5F) $< -o $*.ppo
+	$(OCAMLOPT) $(OCAMLI) -I $(CAMLP5D) -c -impl $*.ppo
+	$(RM) $*.ppo

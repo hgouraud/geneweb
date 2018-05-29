@@ -9,6 +9,11 @@ open Gwdb;
 open Mutil;
 open Printf;
 
+value is_hide_names conf p =
+  if conf.hide_names || get_access p = Private || (conf.friend && get_access p <> Friend) then True
+  else False
+;
+
 value sharelib =
   List.fold_right Filename.concat [Gwlib.prefix; "share"] "geneweb"
 ;
@@ -516,7 +521,7 @@ value is_old_person conf p =
 ;
 
 value fast_auth_age conf p =
-  if conf.friend || conf.wizard || get_access p = Public then True
+  if (conf.friend && get_access p = Friend) || conf.wizard || get_access p = Public then True
   else if
     conf.public_if_titles && get_access p = IfTitles && get_titles p <> []
   then
@@ -551,7 +556,7 @@ value parent_has_title conf base p =
 ;
 
 value authorized_age conf base p =
-  if conf.wizard || conf.friend || get_access p = Public then True
+  if conf.wizard || (conf.friend && get_access p = Friend) || get_access p = Public then True
   else if
     conf.public_if_titles && get_access p = IfTitles &&
     (nobtit conf base p <> [] || parent_has_title conf base p) then
@@ -603,9 +608,23 @@ value is_public conf base p =
 value accessible_by_key conf base p fn sn =
   conf.access_by_key
   && not (fn = "?" || sn = "?")
-  && (not conf.hide_names || is_public conf base p)
+  && (not (is_hide_names conf p) || is_public conf base p
+      || (conf.friend && get_access p = Friend) || conf.wizard)
 ;
 
+
+(* ********************************************************************** *)
+(*  [Fonc] acces_n : config -> base -> string -> person -> string         *)
+(** [Description] : Renvoie les paramètres URL pour l'accès à la nième
+                    personne.
+    [Args] :
+      - conf : configuration de la base
+      - base : base de donnée
+      - n    : la nième personne (e.g. : calcul de parenté entre p1 et p2)
+      - p    : person
+    [Retour] : string
+    [Rem] : Exporté en clair hors de ce module.                           *)
+(* ********************************************************************** *)
 value acces_n conf base n x =
   let first_name = p_first_name base x in
   let surname = p_surname base x in
