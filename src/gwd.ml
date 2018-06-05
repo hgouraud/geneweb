@@ -1269,6 +1269,9 @@ value make_conf cgi from_addr (addr, request) script_name contents env = do {
      private_years =
        try int_of_string (List.assoc "private_years" base_env) with
        [ Not_found | Failure _ -> 150 ];
+     minor_age =
+       try int_of_string (List.assoc "minor_age" base_env) with
+       [ Not_found | Failure _ -> 18 ];
      hide_names =
        if ar.ar_wizard || ar.ar_friend then False
        else

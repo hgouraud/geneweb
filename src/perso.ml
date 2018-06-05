@@ -789,7 +789,10 @@ value merge_date_place conf base surn ((d1, d2, pl), auth) p =
 value build_surnames_list conf base v p =
   let ht = Hashtbl.create 701 in
   let mark = Array.create (nb_of_persons base) 5 in
-  let auth = conf.wizard || (conf.friend && get_access p = Friend) in
+  let auth = conf.wizard ||
+    (conf.friend && get_access p = Friend) ||
+    (conf.friend && get_access p = Friend_m)
+  in
   let add_surname sosa p surn dp =
     let r =
       try Hashtbl.find ht surn with
@@ -1195,16 +1198,18 @@ and eval_simple_str_var conf base env (p, p_auth) =
   | "comment" ->
       match get_env "fam" env with
       [ Vfam _ fam _ m_auth ->
-          if m_auth then
-            let s =
-              let wi =
-                {Wiki.wi_mode = "NOTES";
-                 Wiki.wi_cancel_links = conf.cancel_links;
-                 Wiki.wi_file_path = Notes.file_path conf base;
-                 Wiki.wi_person_exists = person_exists conf base;
-                 Wiki.wi_always_show_link = conf.wizard || conf.friend}
-              in
-              Wiki.syntax_links conf wi (sou base (get_comment fam))
+          if m_auth && not conf.no_note then
+            let s = sou base (get_comment fam) in
+            let s = string_with_macros conf [] s in
+            let lines = Wiki.html_of_tlsw conf s in
+            let wi =
+              {Wiki.wi_mode = "NOTES";
+               Wiki.wi_cancel_links = conf.cancel_links;
+               Wiki.wi_file_path = Notes.file_path conf base;
+               Wiki.wi_person_exists = person_exists conf base;
+               Wiki.wi_always_show_link = conf.wizard ||
+                (conf.friend && get_access p = Friend) ||
+                (conf.friend && get_access p = Friend_m)}
             in
             string_with_macros conf [] s
           else ""
@@ -1962,6 +1967,7 @@ and eval_bool_person_field conf base env (p, p_auth) =
   | "is_private" -> get_access p = Private
   | "is_public" -> get_access p = Public
   | "is_friend" -> get_access p = Friend
+  | "is_friend_m" -> get_access p = Friend_m
   | "is_restricted" -> is_hidden p
   | _ -> raise Not_found ]
 and eval_str_person_field conf base env ((p, p_auth) as ep) =
@@ -2113,7 +2119,9 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) =
           {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
            Wiki.wi_file_path = Notes.file_path conf base;
            Wiki.wi_person_exists = person_exists conf base;
-           Wiki.wi_always_show_link = conf.wizard || (conf.friend && get_access p = Friend)}
+           Wiki.wi_always_show_link = conf.wizard ||
+            (conf.friend && get_access p = Friend) ||
+            (conf.friend && get_access p = Friend_m)}
         in
         let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
         if conf.pure_xhtml then Util.check_xhtml s else s
@@ -2127,7 +2135,9 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) =
             {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
              Wiki.wi_file_path = Notes.file_path conf base;
              Wiki.wi_person_exists = person_exists conf base;
-             Wiki.wi_always_show_link = conf.wizard || (conf.friend && get_access p = Friend)}
+             Wiki.wi_always_show_link = conf.wizard ||
+              (conf.friend && get_access p = Friend) ||
+              (conf.friend && get_access p = Friend_m)}
           in
           Wiki.syntax_links conf wi s
         in
@@ -2207,7 +2217,9 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) =
                Wiki.wi_cancel_links = conf.cancel_links;
                Wiki.wi_file_path = Notes.file_path conf base;
                Wiki.wi_person_exists = person_exists conf base;
-               Wiki.wi_always_show_link = conf.wizard || (conf.friend && get_access p = Friend)}
+               Wiki.wi_always_show_link = conf.wizard ||
+                (conf.friend && get_access p = Friend) ||
+                (conf.friend && get_access p = Friend_m)}
             in
             Wiki.syntax_links conf wi s
           in
@@ -3031,7 +3043,9 @@ value interp_templ templ_fname conf base p = do {
 
 value print conf base p =
   let passwd =
-    if conf.wizard || (conf.friend && get_access p = Friend) then None
+    if conf.wizard ||
+      (conf.friend && get_access p = Friend) ||
+      (conf.friend && get_access p = Friend_m) then None
     else
       let src =
         match get_parents p with

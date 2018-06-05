@@ -10,7 +10,9 @@ open Mutil;
 open Printf;
 
 value is_hide_names conf p =
-  if conf.hide_names || get_access p = Private || (conf.friend && get_access p <> Friend) then True
+  if conf.hide_names || get_access p = Private ||
+    (conf.friend && get_access p <> Friend) ||
+    (conf.friend && get_access p <> Friend_m) then True
   else False
 ;
 
@@ -521,7 +523,9 @@ value is_old_person conf p =
 ;
 
 value fast_auth_age conf p =
-  if (conf.friend && get_access p = Friend) || conf.wizard || get_access p = Public then True
+  if (conf.friend && get_access p = Friend) ||
+    (conf.friend && get_access p = Friend_m) ||
+    conf.wizard || get_access p = Public then True
   else if
     conf.public_if_titles && get_access p = IfTitles && get_titles p <> []
   then
@@ -556,7 +560,29 @@ value parent_has_title conf base p =
 ;
 
 value authorized_age conf base p =
-  if conf.wizard || (conf.friend && get_access p = Friend) || get_access p = Public then True
+  let access = (get_access p = Friend) in
+  let access_m = (get_access p = Friend_m) in
+  let minor =
+    match
+      (Adef.od_of_codate (get_birth p), Adef.od_of_codate (get_baptism p),
+       get_death p, CheckItem.date_of_death (get_death p))
+    with
+    [ (Some (Dgreg d _), _, _, _) | (_, Some (Dgreg d _), _, _) ->
+        let a = CheckItem.time_elapsed d conf.today in
+        a.year < conf.minor_age
+    | _ -> False ]
+  in
+  let access_p =
+    if minor then
+      match get_parents p with
+      [ Some ifam ->
+        let cpl = foi base ifam in
+        (get_access (poi base (get_father cpl)) = Friend_m) ||
+        (get_access (poi base (get_mother cpl)) = Friend_m)
+      | None -> False ]
+    else (access || access_m)
+  in
+  if conf.wizard || (conf.friend && access_p) || get_access p = Public then True
   else if
     conf.public_if_titles && get_access p = IfTitles &&
     (nobtit conf base p <> [] || parent_has_title conf base p) then
@@ -608,8 +634,10 @@ value is_public conf base p =
 value accessible_by_key conf base p fn sn =
   conf.access_by_key
   && not (fn = "?" || sn = "?")
-  && (not (is_hide_names conf p) || is_public conf base p
-      || (conf.friend && get_access p = Friend) || conf.wizard)
+  && (not (is_hide_names conf p) || is_public conf base p ||
+        (conf.friend && get_access p = Friend) ||
+        (conf.friend && get_access p = Friend_m) ||
+        conf.wizard)
 ;
 
 
@@ -654,7 +682,7 @@ value restricted_txt conf = ".....";
 
 value gen_person_text (p_first_name, p_surname) conf base p =
   if is_hidden p then restricted_txt conf
-  else if conf.hide_names && not (fast_auth_age conf p) then "x x"
+  else if (is_hide_names conf p) && not (authorized_age conf base p) then "x x"
   else
     let beg =
       match (sou base (get_public_name p), get_qualifiers p) with

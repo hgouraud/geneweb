@@ -65,6 +65,7 @@ value rec eval_var conf base env p loc =
   | ["acc_private"] -> bool_val (p.access = Private)
   | ["acc_public"] -> bool_val (p.access = Public)
   | ["acc_friend"] -> bool_val (p.access = Friend)
+  | ["acc_friend_m"] -> bool_val (p.access = Friend_m)
   | ["bapt_place"] -> str_val (quote_escaped p.baptism_place)
   | ["bapt_src"] -> str_val (quote_escaped p.baptism_src)
   | ["birth"; s] -> eval_date_var (Adef.od_of_codate p.birth) s

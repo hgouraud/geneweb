@@ -45,6 +45,7 @@ type config =
     setup_link : mutable bool;
     access_by_key : bool;
     private_years : int;
+    minor_age : int;
     hide_names : bool;
     use_restrict : bool;
     no_image : bool;

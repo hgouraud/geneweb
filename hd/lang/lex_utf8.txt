@@ -4062,6 +4062,10 @@ sv: fosterson/fosterdotter/fosterbarn
 en: friend
 fr: ami
 
+    friend and minors
+en: friend (and minors)
+fr: ami (et mineurs)
+
     full siblings
 af: broers en susters
 bg: братя и сестри

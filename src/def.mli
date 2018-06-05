@@ -48,7 +48,7 @@ type death =
 
 type burial = [ UnknownBurial | Buried of codate | Cremated of codate ];
 
-type access = [ IfTitles | Public | Private | Friend ];
+type access = [ IfTitles | Public | Private | Friend | Friend_m ];
 
 type gen_title_name 'string = [ Tmain | Tname of 'string | Tnone ];
 type gen_title 'string =

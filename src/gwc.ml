@@ -140,7 +140,7 @@ value main () =
     List.iter
       (fun (x, separate, shift) ->
          if Filename.check_suffix x ".gw" then do {
-           try Gwcomp.comp_families x with e -> do {
+           try Gwcomp.comp_families x out_file.val with e -> do {
              printf "File \"%s\", line %d:\n" x line_cnt.val;
              raise e
            };

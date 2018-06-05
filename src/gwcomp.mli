@@ -24,4 +24,5 @@ type gw_syntax =
 value magic_gwo : string;
 value line_cnt : ref int;
 value no_fail : ref bool;
-value comp_families : string -> unit;
+value comp_families : string -> string -> unit;
+value no_picture : ref bool;

@@ -226,6 +226,7 @@ value reconstitute_person conf =
     [ Some "Public" -> Public
     | Some "Private" -> Private
     | Some "Friend" -> Friend
+    | Some "Friend_m" -> Friend_m
     | _ -> IfTitles ]
   in
   let occupation = only_printable (get conf "occu") in

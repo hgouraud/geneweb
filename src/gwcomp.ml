@@ -5,6 +5,8 @@ open Def;
 
 value magic_gwo = "GnWo000o";
 
+value base_name = ref "";
+
 type key = { pk_first_name : string; pk_surname : string; pk_occ : int };
 
 type somebody = [ Undefined of key | Defined of gen_person iper string ];
@@ -415,6 +417,7 @@ value rec get_access str l =
   [ ["#apubl" :: l'] -> (Public, l')
   | ["#apriv" :: l'] -> (Private, l')
   | ["#afriend" :: l'] -> (Friend, l')
+  | ["#afriend_m" :: l'] -> (Friend_m, l')
   | _ -> (IfTitles, l) ]
 ;
 
@@ -543,6 +546,99 @@ value create_person () =
 
 value bogus_def p n o = p = "?" || n = "?";
 
+(* copied from Gutil *)
+value strip_spaces strip_heading str =
+  let start =
+    if strip_heading then
+      loop 0 where rec loop i =
+        if i = String.length str then i
+        else
+          match str.[i] with
+          [ ' ' | '\r' | '\n' | '\t' -> loop (i + 1)
+          | _ -> i ]
+    else 0
+  in
+  let stop =
+    loop (String.length str - 1) where rec loop i =
+      if i = -1 then i + 1
+      else
+        match str.[i] with
+        [ ' ' | '\r' | '\n' | '\t' -> loop (i - 1)
+        | _ -> i + 1 ]
+  in
+  if start = 0 && stop = String.length str then str
+  else if start > stop then ""
+  else String.sub str start (stop - start)
+;
+
+(* copied from gwuLib.ml *)
+value is_printable =
+  fun
+  [ '\000'..'\031' -> False
+  | _ -> True ]
+;
+
+value starting_char no_num s =
+  match s.[0] with
+  [ 'a'..'z' | 'A'..'Z' | 'à'..'ý' | 'À'..'Ý' -> True
+  | '0'..'9' -> not no_num
+  | '?' -> if s = "?" then True else False
+  | _ -> False ]
+;
+
+value raw_output = ref False;
+value no_picture = ref False;
+value isolated = ref False;
+
+value gen_correct_string no_num no_colon s =
+  let s = strip_spaces True s in
+  let s =
+    if Mutil.utf_8_db.val then s
+    else Mutil.utf_8_of_iso_8859_1 s
+  in
+  loop 0 0 where rec loop i len =
+    if i = String.length s then Buff.get len
+    else if len = 0 && not (starting_char no_num s) then
+      loop i (Buff.store len '_')
+    else
+      match s.[i] with
+      [ ' ' | '\n' | '\t' ->
+          if i = String.length s - 1 then Buff.get len
+          else loop (i + 1) (Buff.store len '_')
+      | '_' | '\\' -> loop (i + 1) (Buff.store (Buff.store len '\\') s.[i])
+      | ':' when no_colon ->
+          let len = Buff.store len '\\' in
+          loop (i + 1) (Buff.store (Buff.store len '\\') s.[i])
+      | c ->
+          let c = if is_printable c then c else '_' in
+          loop (i + 1) (Buff.store len c) ]
+;
+
+value s_correct_string s =
+  let s = gen_correct_string False False s in
+  if s = "" then "_" else s
+;
+
+value rgpd_access fn sn occ str l =
+  let (access, l) = get_access str l in
+  let fns = s_correct_string fn in
+  let sns = s_correct_string sn in
+  let ocs = string_of_int occ in
+  let (access, l) =
+    (* keep Private/Public, transform others into Friends or Friends_m *)
+    let d_sep = Filename.dir_sep in
+    let rgpd_file = "." ^ d_sep ^ base_name.val ^
+        ".gwb" ^ d_sep ^ "RGPD" ^ d_sep ^ fns ^ "." ^ ocs ^ "." ^ sns
+    in
+    if access = IfTitles || access = Public || access = Friend || access = Friend_m then
+      if Sys.file_exists (rgpd_file ^ ".pdf") then (Friend, l)
+      else if Sys.file_exists (rgpd_file ^ "-et-mineurs.pdf") then (Friend_m, l)
+      else (access, l)
+    else (access, l)
+  in
+  (access, l)
+;
+
 value set_infos fn sn occ sex comm_psources comm_birth_place str u l =
   let (first_names_aliases, l) = get_fst_names_aliases str l in
   let (surnames_aliases, l) = get_surnames_aliases str l in
@@ -551,7 +647,7 @@ value set_infos fn sn occ sex comm_psources comm_birth_place str u l =
   let (qualifiers, l) = get_qualifiers str l in
   let (aliases, l) = get_aliases str l in
   let (titles, l) = get_titles str l in
-  let (access, l) = get_access str l in
+  let (access, l) = rgpd_access fn sn occ str l in
   let (occupation, l) = get_occu str l in
   let (psources, l) = get_sources str l in
   let (naissance, l) = get_optional_birthdate l in
@@ -898,9 +994,10 @@ value read_family_1 ic fname line =
   else read_family ic fname line
 ;
 
-value comp_families x =
+value comp_families x b_name =
   let out_file = Filename.chop_suffix x ".gw" ^ ".gwo" in
   do {
+    base_name.val := b_name;
     line_cnt.val := 0;
     let oc = open_out_bin out_file in
     try

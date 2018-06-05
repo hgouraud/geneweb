@@ -707,6 +707,9 @@ function changeCalendar(e,v,m,c) {
       <label><input type="radio" name="access"%sp;
        value="Friend"%if;acc_friend; checked="checked"%end;%/>
       [*friend]0*</label>
+      <label><input type="radio" name="access"%sp;
+       value="Friend_m"%if;acc_friend_m; checked="checked"%end;%/>
+      [*friend and minors]0*</label>
     </td>
   </tr>
 </table>
