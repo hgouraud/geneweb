@@ -1083,6 +1083,76 @@ sl: Lahko pregledate:
 sv: Du kan också konsultera
 zh:
 ]
+<br/>
+<div id="tools">
+  <h3 class="with_picto" style=" background-image:url(%image_prefix;/picto_molette.png)"> [*tools]</h3>
+  <div id="list_left">
+  <ul>
+    %if;(wizard and bvar.propose_add_family != "no")
+      <li>
+        <a href="%prefix;m=ADD_FAM">[*add::family/families]0</a><br%/>
+      </li>
+    %end;
+    %if;has_history;
+      <li>
+        <a href="%prefix;m=HIST;k=20">[*history of updates]</a>
+      </li>
+    %end;
+    %if;(wizard and bvar.show_dict = "yes")
+      <li>
+        <a href="%prefix;m=MOD_DATA;data=place">%apply;book_of([places])</a>
+      </li>
+      <li>
+        <a href="%prefix;m=MOD_DATA;data=src">%apply;book_of([source/sources]1)</a>
+      </li>
+      <li>
+        <a href="%prefix;m=MOD_DATA;data=occu">%apply;book_of([occupation/occupations]1)</a>
+      </li>
+    %end;
+    %if;(wizard and not base.has_notes)
+      <li>
+        <a href="%prefix;m=MOD_NOTES">[*add base notes]</a>
+      </li>
+    %end;
+  </ul>
+  <ul>
+    %if;base.has_notes;
+      <li>
+        <a href="%prefix;m=NOTES">[*base notes]</a>%base.title;
+      </li>
+    %end;
+    %if;has_misc_notes;
+      <li>
+        <a href="%prefix;m=MISC_NOTES">[*base index notes]</a>
+      </li>
+    %end;
+    %if;((bvar.wizard_passwd_file != "" or bvar.wizard_descr_file != "")
+         and (wizard or wiznotes_dir_exists) and
+         bvar.authorized_wizards_notes = "yes")
+      <li>
+        <a href="%prefix;m=WIZNOTES">[*base wizard notes]</a>
+      </li>
+    %end;
+    %if;(bvar.disable_forum != "yes")
+      <li>
+        <a href="%prefix;m=FORUM">[*database forum]</a>
+      </li>
+    %end;
+  </ul>
+  </div>
+  <div id="list_right">
+  <ul>
+    <li>
+      <a href="%prefix;m=STAT">[*statistics]</a>
+    </li>
+    <li>
+      <a href="%prefix;m=ANM">[*anniversaries]</a>
+    </li>
+    <li>
+      <a href="%prefix;m=CAL">[*calendar/calendars]1</a>
+    </li>
+  </ul>
+  </div>
 </div>
 
 %( IE seems not to recognize style "display: table"; must use a table %)

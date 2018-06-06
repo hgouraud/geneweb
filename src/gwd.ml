@@ -1287,6 +1287,14 @@ value make_conf cgi from_addr (addr, request) script_name contents env = do {
        else
          try List.assoc "no_image_for_visitor" base_env = "yes" with
          [ Not_found -> False ];
+     no_note =
+       if ar.ar_wizard || ar.ar_friend then False
+       else
+         try List.assoc "no_note_for_visitor" base_env = "yes" with
+         [ Not_found -> False ];
+     show_dict =
+        try List.assoc "show_dict" base_env = "yes" with
+        [ Not_found -> False ];
      bname = base_file; env = env; senv = [];
      henv =
        (if not cgi then []

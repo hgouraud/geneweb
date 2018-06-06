@@ -1,12 +1,13 @@
 # $Id: Makefile.inc.unix,v 1.6 2007-09-12 09:58:44 ddr Exp $
 
+GW_DIR=/Users/Henri/GitHub/geneweb/geneweb-6.08/
 TOP=..
 CAMLP5_COMM=TOP=$(TOP) $(TOP)/tools/camlp5_comm.sh
 CAMLP5F=-DUNIX
-CAMLP5D=~/.opam/3.12.1/lib/camlp5
+CAMLP5D=+camlp5
 LIBUNIX=-cclib -lunix
-OCAMLC=ocamlc.opt -warn-error A
-OCAMLOPT=ocamlopt.opt -warn-error A
+OCAMLC=ocamlc.opt -w -3 -warn-error +a-52 -safe-string
+OCAMLOPT=ocamlopt.opt -w -3 -warn-error +a-52 -safe-string
 OCAMLI=
 OCAMLD=
 STRIP=strip
@@ -15,6 +16,8 @@ EXE=
 STATIC=-ccopt -static
 STATIC=
 TEST_DIR=test $$(basename "$<") = "$<" || { echo "Please run 'make' in directory '$$(dirname "$<")' first"; exit 1; }
+
+include $(GW_DIR)/tools/Makefile.ocaml
 
 all::
 opt::
