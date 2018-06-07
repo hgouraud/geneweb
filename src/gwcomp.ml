@@ -627,7 +627,10 @@ value rgpd_access fn sn occ str l =
   let (access, l) =
     (* keep Private/Public, transform others into Friends or Friends_m *)
     let d_sep = Filename.dir_sep in
-    let rgpd_file = "." ^ d_sep ^ base_name.val ^
+    let rgpd_file = 
+      (if (Filename.basename base_name.val) = base_name.val then 
+        "." ^ d_sep 
+      else "") ^ base_name.val ^
         ".gwb" ^ d_sep ^ "RGPD" ^ d_sep ^ fns ^ "." ^ ocs ^ "." ^ sns
     in
     if access = IfTitles || access = Public || access = Friend || access = Friend_m then
