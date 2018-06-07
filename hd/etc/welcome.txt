@@ -1098,7 +1098,7 @@ zh:
         <a href="%prefix;m=HIST;k=20">[*history of updates]</a>
       </li>
     %end;
-    %if;(wizard and bvar.show_dict = "yes")
+    %if;(wizard)
       <li>
         <a href="%prefix;m=MOD_DATA;data=place">%apply;book_of([places])</a>
       </li>

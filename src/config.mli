@@ -50,7 +50,7 @@ type config =
     use_restrict : bool;
     no_image : bool;
     no_note : bool;
-    show_dict : bool;
+    modify_dict : bool;
     bname : string;
     env : list (string * string);
     senv : mutable list (string * string);
