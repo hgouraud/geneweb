@@ -1,6 +1,6 @@
 # $Id: Makefile.inc.unix,v 1.6 2007-09-12 09:58:44 ddr Exp $
 
-GW_DIR=/data/src/github/geneweb608/
+GW_DIR=/Users/Henri/GitHub/geneweb/geneweb-6.08/
 TOP=..
 CAMLP5_COMM=TOP=$(TOP) $(TOP)/tools/camlp5_comm.sh
 CAMLP5F=-DUNIX

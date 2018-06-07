@@ -636,7 +636,9 @@ value rgpd_access fn sn occ str l =
     if access = IfTitles || access = Public || access = Friend || access = Friend_m then
       if Sys.file_exists (rgpd_file ^ ".pdf") then (Friend, l)
       else if Sys.file_exists (rgpd_file ^ "-et-mineurs.pdf") then (Friend_m, l)
-      else (access, l)
+      else 
+        if access = Friend || access = Friend_m then (Private, l)
+        else (access, l)
     else (access, l)
   in
   (access, l)
