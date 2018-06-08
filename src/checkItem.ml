@@ -6,6 +6,36 @@ open Gwdb;
 
 type base_error = error person;
 type base_warning = warning person family title;
+type base_misc = misc person family title;
+
+
+(* Constants used for computing the warnings.
+value max_age_btw_cpl = 50;
+value max_days_btw_sibl = 10;
+value max_month_btw_sibl = 7;
+value lim_date_death = 1900;
+value max_death_after_lim_date_death = 105;
+value max_death_before_lim_date_death = 100;
+value min_parent_age = 11;
+value max_father_age = 70;
+value max_mother_age = 55;
+value lim_date_marriage = 1850;
+value min_age_marriage = 13;
+value average_marriage_age = 20;
+*)
+(* Constants used for computing the warnings. *)
+value max_age_btw_cpl = 75;     (* De nombreux centenaires épousent des jeunes filles *)
+value max_days_btw_sibl = 6;    (* plus restrictif : 6 jours entre des jumeaux *)
+value max_month_btw_sibl = 4;   (* plus tolérant : naissance de prématuré 4 mois après *)
+value lim_date_death = 1900;
+value max_death_after_lim_date_death = 105;
+value max_death_before_lim_date_death = 100;
+value min_parent_age = 11;
+value max_father_age = 83;      (* âge dépassé par de nombreux pères sur Roglo *)
+value max_mother_age = 58;
+value lim_date_marriage = 1749; (* L'âge au mariage n'est contrôlé que pour les mariages postérieurs à 1749 *)
+value min_age_marriage = 13;
+value average_marriage_age = 20;
 
 value common_prec p1 p2 =
   if p1 = p2 then p1
