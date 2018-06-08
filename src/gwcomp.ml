@@ -625,20 +625,20 @@ value rgpd_access fn sn occ str l =
   let sns = s_correct_string sn in
   let ocs = string_of_int occ in
   let (access, l) =
-    (* keep Private/Public, transform others into Friends or Friends_m *)
     let d_sep = Filename.dir_sep in
-    let rgpd_file = 
+    let rgpd_file =
+        (* test for relative vs absolute path *)
       (if (Filename.basename base_name.val) = base_name.val then 
         "." ^ d_sep 
       else "") ^ base_name.val ^
         ".gwb" ^ d_sep ^ "RGPD" ^ d_sep ^ fns ^ "." ^ ocs ^ "." ^ sns
     in
-    if access = IfTitles || access = Public || access = Friend || access = Friend_m then
-      if Sys.file_exists (rgpd_file ^ ".pdf") then (Friend, l)
-      else if Sys.file_exists (rgpd_file ^ "-et-mineurs.pdf") then (Friend_m, l)
-      else 
-        if access = Friend || access = Friend_m then (Private, l)
-        else (access, l)
+      (* if one of the files exist, set the Friend or Friend_m value *)
+    if Sys.file_exists (rgpd_file ^ ".pdf") then (Friend, l)
+    else if Sys.file_exists (rgpd_file ^ "-et-mineurs.pdf") then (Friend_m, l)
+      (* if none of the file exist and person was Friend, then it becomes Private *)
+    else if access = Friend || access = Friend_m then (Private, l)
+      (* otherwise keep thee current value *)
     else (access, l)
   in
   (access, l)
