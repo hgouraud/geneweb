@@ -634,8 +634,8 @@ value rgpd_access fn sn occ str l =
         ".gwb" ^ d_sep ^ "RGPD" ^ d_sep ^ fns ^ "." ^ ocs ^ "." ^ sns
     in
       (* if one of the files exist, set the Friend or Friend_m value *)
-    if Sys.file_exists (rgpd_file ^ ".pdf") then (Friend, l)
-    else if Sys.file_exists (rgpd_file ^ "-et-mineurs.pdf") then (Friend_m, l)
+    if Sys.file_exists (rgpd_file ^ "-et-mineurs.pdf") then (Friend_m, l)
+    else if Sys.file_exists (rgpd_file ^ ".pdf") then (Friend, l)
       (* if none of the file exist and person was Friend, then it becomes Private *)
     else if access = Friend || access = Friend_m then (Private, l)
       (* otherwise keep thee current value *)
