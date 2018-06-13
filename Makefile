@@ -20,6 +20,7 @@ out::
 	cd doc; $(MAKE) all
 	cd setup; $(MAKE) all
 	cd gwtp; $(MAKE) all
+	cd contrib/gwbase/etc; $(MAKE) all
 
 opt::
 	cd wserver; $(MAKE) opt
@@ -30,6 +31,7 @@ opt::
 	cd doc; $(MAKE) opt
 	cd setup; $(MAKE) opt
 	cd gwtp; $(MAKE) opt
+	cd contrib/gwbase/etc; $(MAKE) opt
 
 install:
 	mkdir -p $(PREFIX)/bin
@@ -174,6 +176,7 @@ clean::
 	cd doc; $(MAKE) clean
 	cd setup; $(MAKE) clean
 	cd gwtp; $(MAKE) clean
+	cd contrib/gwbase/etc; $(MAKE) clean
 	$(RM) -rf $(DESTDIR)
 	$(RM) -f *~ .#*
 
@@ -189,3 +192,4 @@ depend:
 	cd gwb2ged; $(MAKE) depend
 	cd setup; $(MAKE) depend
 	cd gwtp; $(MAKE) depend
+	cd contrib/gwbase/etc; $(MAKE) depend
