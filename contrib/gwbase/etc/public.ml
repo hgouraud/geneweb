@@ -91,12 +91,14 @@ value get_dates base p =
 ;
 
 value mark_old base scanned old p =
-  if not scanned.(Adef.int_of_iper (get_key_index p)) then do {
+  if not scanned.(Adef.int_of_iper (get_key_index p)) &&
+    old.(Adef.int_of_iper (get_key_index p)) = 0
+  then do {
     let (reason, y, old_p) = get_dates base p in
     if old_p > today.val then 
       old.(Adef.int_of_iper (get_key_index p)) := 1
     else
-      old.(Adef.int_of_iper (get_key_index p)) := old_p;
+      old.(Adef.int_of_iper (get_key_index p)) := y;
     for i = 0 to Array.length (get_family p) - 1 do {
       let ifam = (get_family p).(i) in
       let fam = foi base ifam in
@@ -110,18 +112,27 @@ value mark_old base scanned old p =
         match m_date with
         [ Some d -> 
             if d < today.val then do {
+              (*
+              printf "Old1: %s, marriage %d\n" (Gutil.designation base p) (d-lim_m.val); flush stdout;
+              printf "Old1: %s, marriage %d\n" (Gutil.designation base sp) (d-lim_m.val); flush stdout;
+              *)
               old.(Adef.int_of_iper (get_key_index p)) := d-lim_m.val;
               old.(Adef.int_of_iper (get_key_index sp)) := d-lim_m.val;
             }
             else ()
         | None -> ()];
-        if not scanned.(Adef.int_of_iper isp) then do {
+        if not scanned.(Adef.int_of_iper isp) &&
+          old.(Adef.int_of_iper (get_key_index sp)) = 0
+        then do {
           let (reason_sp, y_sp, old_sp) = get_dates base sp in
           scanned.(Adef.int_of_iper (get_key_index sp)) := True;
-          if old_sp > lim_year.val then (* mark spouse itself as old *)
+          (*
+          printf "Old3: %s, spouse %d\n" (Gutil.designation base sp) y_sp; flush stdout;
+          *)
+          if old_sp > today.val then (* mark spouse itself as old *)
             old.(Adef.int_of_iper (get_key_index sp)) := 1
           else
-            old.(Adef.int_of_iper (get_key_index sp)) := old_p;
+            old.(Adef.int_of_iper (get_key_index sp)) := y_sp;
         }
         else ();
       }
@@ -240,10 +251,8 @@ value speclist =
    ("-tst", Arg.Clear execute, "do not perform changes (test only)")]
 ;
 value anonfun i = bname.val := i;
-value usage = "Usage: public [-y #] [-a #] [-everybody] [-ind key] 
-  [-ma] [-md] [-tr] [-tst] base.\n
-  Public if born < y or dead < y+a";
-
+value usage = "Usage: public [-lb #] [-ld #] [-lm #] [-everybody] [-ind key] [-ma] [-tr] [-tst] base.\n";
+  
 value main () =
   do {
     Arg.parse speclist anonfun usage;
