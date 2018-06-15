@@ -180,7 +180,11 @@ value public_everybody bname =
         if execute.val then patch_person base p.key_index p else ()
       else ();
     };
-    commit_patches base;
+    if changes.val > 0 then do {
+      commit_patches base;
+      printf "Patches applied\n"; flush stdout;
+      }
+    else ();
   }
 ;
 
@@ -212,7 +216,11 @@ value public_all bname lim_year =
       }
       else ();
     };
-    if changes.val > 0 then commit_patches base else ();
+    if changes.val > 0 then do {
+      commit_patches base;
+      printf "Patches applied\n"; flush stdout;
+    }
+    else ();
   }
 ;
 
@@ -226,7 +234,12 @@ value public_some bname lim_year key =
       let () = load_couples_array base in
       do {
         mark_ancestors base scanned p;
-        if changes.val > 0 then commit_patches base else ();
+        if changes.val > 0 then do {
+          commit_patches base;
+          printf "Patches applied\n"; flush stdout;
+        }
+        else ();
+        
       }
   | _ ->
       do {
