@@ -446,9 +446,6 @@ value family_m conf base =
   | Some "LEX" -> Srcfile.print_lexicon conf base
   | Some "MISC_NOTES" -> Notes.print_misc_notes conf base
   | Some "MISC_NOTES_SEARCH" -> Notes.print_misc_notes_search conf base
-  | Some "MOD_DATA" when conf.wizard -> UpdateData.print_mod conf base
-  | Some "MOD_DATA_OK" when conf.wizard && conf.modify_dict ->
-      UpdateData.print_mod_ok conf base
   | Some "MOD_FAM" when conf.wizard -> UpdateFam.print_mod conf base
   | Some "MOD_FAM_OK" when conf.wizard -> UpdateFamOk.print_mod conf base
   | Some "MOD_IND" when conf.wizard -> UpdateInd.print_mod conf base

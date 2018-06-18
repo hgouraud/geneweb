@@ -6,8 +6,6 @@ open Gwdb;
 
 type base_error = error person;
 type base_warning = warning person family title;
-type base_misc = misc person family title;
-
 
 (* Constants used for computing the warnings.
 value max_age_btw_cpl = 50;
