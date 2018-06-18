@@ -1,5 +1,5 @@
 (* camlp5r ./q_codes.cmo *)
-(* $Id: iovalue.ml,v 5.9 2009-03-10 21:10:29 ddr Exp $ *)
+(* $Id: iovalue.ml,v 5.15 2012-01-27 16:27:46 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
 value string_tag = Obj.tag (Obj.repr "a");
@@ -10,14 +10,20 @@ value fun_tag = Obj.tag (Obj.repr (fun x -> x));
    read inside a value output by output_value (no headers) must
    match OCaml's input_value system (intern.c) *)
 
-value sizeof_long = Sys.word_size / 8;
-value sign_extend_shift = (sizeof_long - 1) * 8 - 1;
+value sizeof_long = 4;
+value sign_extend_shift = (Sys.word_size / 8 - 1) * 8 - 1;
 value sign_extend x = (x lsl sign_extend_shift) asr sign_extend_shift;
 
 type in_funs 'a =
   { input_byte : 'a -> int;
     input_binary_int : 'a -> int;
     input : 'a -> string -> int -> int -> unit }
+;
+
+value input_binary_int64 ifuns ic =
+  loop 8 0 where rec loop cnt n =
+    if cnt = 0 then n
+    else loop (cnt - 1) (n lsl 8 + ifuns.input_byte ic)
 ;
 
 value rec input_loop ifuns ic =
@@ -45,6 +51,11 @@ value rec input_loop ifuns ic =
     | <<CODE_BLOCK32>> ->
         let header = ifuns.input_binary_int ic in
         Obj.magic (input_block ifuns ic (header land 0xff) (header lsr 10))
+    | <<CODE_BLOCK64>> ->
+        if Sys.word_size = 64 then
+          let header = input_binary_int64 ifuns ic in
+          Obj.magic (input_block ifuns ic (header land 0xff) (header lsr 10))
+        else failwith "input bad code block 64"
     | <<CODE_STRING8>> ->
         let len = ifuns.input_byte ic in
         let s = String.create len in
@@ -90,10 +101,18 @@ value size_64 = ref 0;
 
 value gen_output_block_header ofuns oc tag size =
   do {
+    let hd = size lsl 10 + tag in
     if tag < 16 && size < 8 then
       ofuns.output_byte oc (<<PREFIX_SMALL_BLOCK>> + tag + size lsl 4)
+    else if Sys.word_size = 64 && hd >= 1 lsl 32 then do {
+      ofuns.output_byte oc <<CODE_BLOCK64>>;
+      for i = 1 to 8 do {
+        ofuns.output_byte oc (hd lsr (64 - 8 * i) land 0xFF);
+      };
+    }
     else do {
       ofuns.output_byte oc <<CODE_BLOCK32>>;
+      (* hd = size << 10 + tag *)
       ofuns.output_byte oc (size lsr 14 land 0xFF);
       ofuns.output_byte oc (size lsr 6 land 0xFF);
       ofuns.output_byte oc (size lsl 2 land 0xFF);
@@ -146,9 +165,15 @@ value rec output_loop ofuns oc x =
       failwith "Iovalue.output: floats not implemented"
     else do {
       gen_output_block_header ofuns oc (Obj.tag x) (Obj.size x);
-      for i = 0 to Obj.size x - 1 do {
-        output_loop ofuns oc (Obj.field x i);
-      };
+      (* last case of "for" separated, to make more tail recursive cases
+         when last field is itself, to prevent some stacks overflows *)
+      if Obj.size x > 0 then do {
+        for i = 0 to Obj.size x - 2 do {
+          output_loop ofuns oc (Obj.field x i);
+        };
+        output_loop ofuns oc (Obj.field x (Obj.size x - 1))
+      }
+      else ();
     }
 ;
 
@@ -253,7 +278,11 @@ value digest v =
 ;
 
 value output_value_header_size = 20;
-value array_header_size arr_len = if arr_len < 8 then 1 else 5;
+value array_header_size arr_len =
+  if arr_len < 8 then 1
+  else if Sys.word_size = 64 && arr_len lsl 10 >= 1 lsl 32 then 9
+  else 5
+;
 
 value output_array_access oc arr_get arr_len pos =
   loop (pos + output_value_header_size + array_header_size arr_len) 0
@@ -290,6 +319,12 @@ value create_output_value_header oc = do {
 
 value patch_output_value_header oc (pos_header, pos_start) = do {
   let pos_end = pos_out oc in
+  if Sys.word_size = 64 &&
+     (pos_end >= 1 lsl 32 ||
+      size_32.val >= 1 lsl 32 ||
+      size_64.val >= 1 lsl 32)
+  then failwith "Iovalue.output: object too big"
+  else ();
   (* block_length *)
   seek_out oc pos_header;
   output_binary_int oc (pos_end - pos_start);

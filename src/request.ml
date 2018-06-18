@@ -159,7 +159,7 @@ value find_all conf base an =
   | _ ->
       match person_of_string_key base an with
       [ Some ip ->
-          let pl = 
+          let pl =
             let p = pget conf base ip in
             if is_hidden p then [] else [p]
           in
@@ -183,7 +183,7 @@ value find_all conf base an =
               | None -> (an, ipl) ]
             else (an, ipl)
           in
-          let pl = 
+          let pl =
             List.fold_left
               (fun l ip ->
                  let p = pget conf base ip in
@@ -417,6 +417,7 @@ value family_m conf base =
   | Some "FORUM_ADD" -> Forum.print_add conf base
   | Some "FORUM_ADD_OK" -> Forum.print_add_ok conf base
   | Some "FORUM_DEL" -> Forum.print_del conf base
+  | Some "FORUM_P_P" -> Forum.print_access_switch conf base
   | Some "FORUM_SEARCH" -> Forum.print_search conf base
   | Some "FORUM_VAL" -> Forum.print_valid conf base
   | Some "FORUM_VIEW" -> Forum.print conf base

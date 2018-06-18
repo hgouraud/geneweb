@@ -1,9 +1,11 @@
-(* $Id: db2.ml,v 5.4 2007-02-22 03:50:29 ddr Exp $ *)
+(* $Id: db2.ml,v 5.7 2012-01-20 19:02:51 ddr Exp $ *)
 (* Copyright (c) 2006-2007 INRIA *)
 
-value first_item_pos = 25;
-value empty_string_pos = first_item_pos;
-value quest_string_pos = first_item_pos + 1;
+value first_item_pos len =
+  20 +
+  if Sys.word_size = 64 && len >= 1 lsl (32 - 10) then 9
+  else 5
+;
 
 type key2 =
   [ Key of Adef.istr and Adef.istr and int

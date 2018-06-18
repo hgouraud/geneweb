@@ -1,41 +1,128 @@
 (* camlp5r *)
-(* $Id: db2out.ml,v 5.12 2009-03-10 22:05:46 ddr Exp $ *)
+(* $Id: db2out.ml,v 5.28 2012-01-27 17:14:03 ddr Exp $ *)
 (* Copyright (c) 2007 INRIA *)
 
 value phony_min_size = 8;
 
-value output_item_return_pos oc_dat ht item_cnt compress s =
-  try if compress then Hashtbl.find ht s else raise Not_found with
+value check_input_value func fname len = do {
+()
+(*
+  Printf.eprintf "*** check input_value (%s) %s\n" func fname; flush stderr;
+  let ic = open_in_bin fname in
+  let tab = input_value ic in
+  if not (Obj.is_block (Obj.repr tab)) then failwith "not a block" else ();
+  Printf.eprintf "tab len %d cnt %d\n" (Array.length tab) len;
+  flush stderr;
+  if Array.length tab <> len then failwith "error" else ();
+  close_in ic;
+  Printf.eprintf "check ok\n"; flush stderr;
+*)
+};
+
+value output_item_no_compress_return_pos oc_dat item_cnt s = do {
+  incr item_cnt;
+  let pos = pos_out oc_dat in
+  Iovalue.output oc_dat s;
+  pos
+};
+
+value output_value_array_no_compress bdir e len pad f = do {
+  let oc_acc = open_out_bin (Filename.concat bdir ("access" ^ e)) in
+  let oc_dat = open_out_bin (Filename.concat bdir ("data" ^ e)) in
+  let header_pos = Iovalue.create_output_value_header oc_dat in
+  Iovalue.output_block_header oc_dat 0 (max len phony_min_size);
+  assert (pos_out oc_dat = Db2.first_item_pos len);
+  let nb_items = ref 0 in
+  f oc_acc (output_item_no_compress_return_pos oc_dat nb_items);
+  (* padding to at least 8 items to allow correct read by input_value *)
+  for i = nb_items.val + 1 to 8 do {
+    incr nb_items;
+    Iovalue.output oc_dat (pad : 'a);
+  };
+  assert (Db2.first_item_pos nb_items.val = Db2.first_item_pos len);
+  let _ : int = Iovalue.patch_output_value_header oc_dat header_pos in
+  close_out oc_dat;
+  close_out oc_acc;
+  (* test *)
+  check_input_value "Db2out.output_value_array_no_compress"
+    (Filename.concat bdir ("data" ^ e)) (max len phony_min_size);
+};
+
+value output_item_compress_return_pos oc_dat ht item_cnt s =
+  try Hashtbl.find ht s with
   [ Not_found -> do {
       incr item_cnt;
       let pos = pos_out oc_dat in
       Iovalue.output oc_dat s;
-      if compress then Hashtbl.add ht s pos else ();
+      Hashtbl.add ht s pos;
       pos
     } ]
 ;
 
-value output_value_array oc_dat pad compress f = do {
+value output_value_array_compress bdir e _ pad f = do {
+  let oc_acc = open_out_bin (Filename.concat bdir ("access" ^ e)) in
+  let oc_dat = open_out_bin (Filename.concat bdir ("data" ^ e)) in
   let ht : Hashtbl.t 'a _ = Hashtbl.create 1 in
   let header_pos = Iovalue.create_output_value_header oc_dat in
-  Iovalue.output_block_header oc_dat 0 phony_min_size;
-  assert (pos_out oc_dat = Db2.first_item_pos);
+  let len = phony_min_size in
+  Iovalue.output_block_header oc_dat 0 len;
+  assert (pos_out oc_dat = Db2.first_item_pos len);
   let nb_items = ref 0 in
-  f (output_item_return_pos oc_dat ht nb_items compress);
+  f oc_acc (output_item_compress_return_pos oc_dat ht nb_items);
   (* padding to at least 8 items to allow correct read by input_value *)
-  for i = nb_items.val + 1 to phony_min_size do {
+  for i = nb_items.val + 1 to 8 do {
     incr nb_items;
     Iovalue.output oc_dat (pad : 'a);
   };
-  Iovalue.size_32.val := Iovalue.size_32.val - phony_min_size + nb_items.val;
-  Iovalue.size_64.val := Iovalue.size_64.val - phony_min_size + nb_items.val;
-  ignore (Iovalue.patch_output_value_header oc_dat header_pos : int);
-  Iovalue.output_block_header oc_dat 0 nb_items.val;
+  if Db2.first_item_pos nb_items.val = Db2.first_item_pos len then do {
+    Iovalue.size_32.val := Iovalue.size_32.val - len + nb_items.val;
+    Iovalue.size_64.val := Iovalue.size_64.val - len + nb_items.val;
+    let _ : int = Iovalue.patch_output_value_header oc_dat header_pos in
+    Iovalue.output_block_header oc_dat 0 nb_items.val;
+    assert (pos_out oc_dat = Db2.first_item_pos nb_items.val);
+    close_out oc_dat;
+    close_out oc_acc;
+    (* test *)
+    let fname = Filename.concat bdir ("data" ^ e) in
+    check_input_value "Db2out.output_value_array_compress"
+      fname nb_items.val;
+  }
+  else if Db2.first_item_pos nb_items.val > Db2.first_item_pos len then do {
+    (* may happen one day and to be debugged then *)
+    Printf.eprintf "nb_items %d\n" nb_items.val;
+    Printf.eprintf "first_item_pos nb_items %d\n"
+      (Db2.first_item_pos nb_items.val);
+    flush stderr;
+    Printf.eprintf "rebuilding it...";
+    flush stderr;
+    close_out oc_dat;
+    close_out oc_acc;
+    let fname = Filename.concat bdir ("data" ^ e) in
+    let ic = open_in_bin fname in
+    let oc = open_out_bin (fname ^ "2") in
+    let header_pos = Iovalue.create_output_value_header oc in
+    Iovalue.output_block_header oc 0 nb_items.val;
+    seek_in ic (Db2.first_item_pos len);
+    try while True do { output_byte oc (input_byte ic) } with
+    [ End_of_file -> () ];
+    let _ : int = Iovalue.patch_output_value_header oc header_pos in
+    close_out oc;
+    close_in ic;
+    Mutil.remove_file fname;
+    Sys.rename (fname ^ "2") fname;
+    Printf.eprintf " ok";
+    flush stderr;
+    (* test *)
+    check_input_value "Db2out.output_value_array_compress 1"
+      fname nb_items.val;
+  }
+  else assert False;
 };
 
 type hashtbl_t 'a 'b =
   { size: mutable int;
-    data: mutable array (bucketlist 'a 'b) }
+    data: mutable array (bucketlist 'a 'b);
+    seed: mutable int }
 and bucketlist 'a 'b =
   [ Empty
   | Cons of 'a and 'b and bucketlist 'a 'b ]
@@ -45,25 +132,58 @@ value output_hashtbl dir file ht = do {
   let oc_ht = open_out_bin (Filename.concat dir file) in
   let oc_hta = open_out_bin (Filename.concat dir (file ^ "a")) in
   let ht : hashtbl_t 'a 'b = Obj.magic (ht : Hashtbl.t 'a 'b) in
+  (* check compatibility with version of Hashtbl of OCaml *)
+  assert (Obj.is_block (Obj.repr ht));
+  assert (Obj.tag (Obj.repr ht) = 0);
+  assert (Obj.size (Obj.repr ht) = 2 || Obj.size (Obj.repr (ht)) = 3);
+  assert (Obj.is_int (Obj.repr ht.size));
+  assert (Obj.is_block (Obj.repr ht.data));
+  if Obj.size (Obj.repr ht) = 3 then assert (Obj.is_int (Obj.repr ht.seed))
+  else ();
   output_binary_int oc_hta (Array.length ht.data);
 
-  (* we could alternatively use Iovalue.output_array_access, the
-     advantage would be that we could use output_value into the first
-     file .ht and making the access into the second file .hta, this is
-     probably faster, but the drawback is that we must know exactly
-     where the array starts *)
   let pos_start = Iovalue.create_output_value_header oc_ht in
-  Iovalue.output_block_header oc_ht 0 2;
+  Iovalue.output_block_header oc_ht 0 (Obj.size (Obj.repr ht));
   Iovalue.output oc_ht ht.size;
   Iovalue.output_block_header oc_ht 0 (Array.length ht.data);
   for i = 0 to Array.length ht.data - 1 do {
+    assert
+      (Obj.is_int (Obj.repr ht.data.(i)) &&
+       Obj.magic ht.data.(i) = 0 ||
+       Obj.is_block (Obj.repr ht.data.(i)) &&
+       Obj.tag (Obj.repr ht.data.(i)) = 0 &&
+       Obj.size (Obj.repr ht.data.(i)) = 3);
     output_binary_int oc_hta (pos_out oc_ht);
     Iovalue.output oc_ht ht.data.(i);
   };
-  ignore (Iovalue.patch_output_value_header oc_ht pos_start : int);
+  if Obj.size (Obj.repr ht) = 3 then Iovalue.output oc_ht ht.seed
+  else ();
+  let _ : int = Iovalue.patch_output_value_header oc_ht pos_start in
 
   close_out oc_hta;
   close_out oc_ht;
+
+  (* test *)
+(*
+  let fname = Filename.concat dir file in
+  Printf.eprintf "*** check input_value of hashtb %s\n" fname; flush stderr;
+  let ic = open_in_bin fname in
+  let htr : hashtbl_t _ _ = input_value ic in
+  if not (Obj.is_block (Obj.repr htr)) then failwith "not a block" else ();
+  if not (Obj.tag (Obj.repr htr) = 0) then failwith "tag <> 0" else ();
+  if not (Obj.size (Obj.repr htr) = 3) then failwith "size <> 3" else ();
+  assert (Obj.is_int (Obj.repr htr.size));
+  assert (Obj.is_int (Obj.repr htr.seed));
+  assert (Obj.is_block (Obj.repr htr.data));
+  assert (Obj.tag (Obj.repr htr.data) = 0);
+  Printf.eprintf "htr.len %d ht.len %d\n" (Array.length htr.data)
+    (Array.length ht.data);
+  flush stderr;
+  if Array.length htr.data <> Array.length ht.data then failwith "error"
+  else ();
+  close_in ic;
+  Printf.eprintf "check ok\n"; flush stderr;
+*)
 };
 
 value add_name ht s pos =
@@ -76,31 +196,42 @@ value make_string_of_crush_index bpdir =
   List.iter
     (fun (field, is_surname) -> do {
        let field_d = Filename.concat bpdir field in
-       let ic_dat = open_in_bin (Filename.concat field_d "data") in
+       let pos_1st = do {
+         let ic_acc = open_in_bin (Filename.concat field_d "access") in
+         let pos = try input_binary_int ic_acc with [ End_of_file -> -1 ] in
+         close_in ic_acc;
+         pos
+       }
+       in
        if Mutil.verbose.val then do {
          Printf.eprintf "string_of_crush %s..." field;
          flush stderr;
        }
        else ();
        let ht = Hashtbl.create 1 in
-       seek_in ic_dat Db2.empty_string_pos;
-       loop Db2.empty_string_pos where rec loop pos =
-         match
-           try Some (Iovalue.input ic_dat) with [ End_of_file -> None ]
-         with
-         [ Some s -> do {
-             if s <> "?" then do {
-               add_name ht s pos;
-               if is_surname then
-                 List.iter (fun s -> add_name ht s pos)
-                   (Mutil.surnames_pieces s)
+       if pos_1st >= 0 then do {
+         let ic_dat = open_in_bin (Filename.concat field_d "data") in
+         seek_in ic_dat pos_1st;
+         loop pos_1st where rec loop pos =
+           match
+             try Some (Iovalue.input ic_dat) with [ End_of_file -> None ]
+           with
+           [ Some s -> do {
+               assert (Obj.tag (Obj.repr s) = Obj.string_tag);
+               if s <> "?" then do {
+                 add_name ht s pos;
+                 if is_surname then
+                   List.iter (fun s -> add_name ht s pos)
+                     (Mutil.surnames_pieces s)
+                 else ();
+               }
                else ();
+               loop (pos_in ic_dat)
              }
-             else ();
-             loop (pos_in ic_dat)
-           }
-         | None -> () ];
-       close_in ic_dat;
+           | None -> () ];
+         close_in ic_dat;
+       }
+       else ();
        output_hashtbl field_d "string_of_crush.ht" ht;
        if Mutil.verbose.val then do {
          Printf.eprintf "\n";
@@ -315,28 +446,40 @@ value make_index bdir particles f2 = do {
   let fdir = List.fold_left Filename.concat bdir [f1; f2] in
   let index_dat_fname = Filename.concat fdir "index.dat" in
   let index_ini_fname = Filename.concat fdir "index.ini" in
-  let data_fname = Filename.concat fdir "data" in
-  let ic = open_in_bin data_fname in
-  seek_in ic Db2.first_item_pos;
+  let pos_1st = do {
+    let ic_acc = open_in_bin (Filename.concat fdir "access") in
+    let pos = try input_binary_int ic_acc with [ End_of_file -> -1 ] in
+    close_in ic_acc;
+    pos
+  }
+  in
   let (list, len) =
-    loop [] 0 Db2.first_item_pos where rec loop list len pos =
-      match
-        try Some (Iovalue.input ic : string) with
-        [ End_of_file -> None ]
-      with
-      [ Some s ->
-          let s =
-            try
-              let part = List.find (start_with s) particles in
-              let plen = String.length part in
-              String.sub s plen (String.length s - plen) ^ " (" ^
-              part ^ ")"
-            with
-            [ Not_found -> s ]
-          in
-          let list = [(s, pos) :: list] in
-          loop list (len + 1) (pos_in ic)
-      | None -> (list, len) ]
+    if pos_1st >= 0 then do {
+      let data_fname = Filename.concat fdir "data" in
+      let ic = open_in_bin data_fname in
+      seek_in ic pos_1st;
+      loop [] 0 pos_1st where rec loop list len pos =
+        match
+          try Some (Iovalue.input ic : string) with
+          [ End_of_file -> None ]
+        with
+        [ Some s -> do {
+            assert (Obj.tag (Obj.repr s) = Obj.string_tag);
+            let s =
+              try
+                let part = List.find (start_with s) particles in
+                let plen = String.length part in
+                String.sub s plen (String.length s - plen) ^ " (" ^
+                part ^ ")"
+              with
+              [ Not_found -> s ]
+            in
+            let list = [(s, pos) :: list] in
+            loop list (len + 1) (pos_in ic)
+          }
+        | None -> (list, len) ]
+    }
+    else ([], 0)
   in
   let list = List.sort compare list in
   let a = Array.make len ("", 0) in
