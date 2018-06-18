@@ -1198,7 +1198,7 @@ and eval_simple_str_var conf base env (p, p_auth) =
   | "comment" ->
       match get_env "fam" env with
       [ Vfam _ fam _ m_auth ->
-          if m_auth && not conf.no_note then
+          if m_auth then
             let s = sou base (get_comment fam) in
             let s = string_with_macros conf [] s in
             let lines = Wiki.html_of_tlsw conf s in
@@ -1211,7 +1211,8 @@ and eval_simple_str_var conf base env (p, p_auth) =
                 (conf.friend && get_access p = Friend) ||
                 (conf.friend && get_access p = Friend_m)}
             in
-            string_with_macros conf [] s
+            let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
+            if conf.pure_xhtml then Util.check_xhtml s else s
           else ""
       | _ -> raise Not_found ]
   | "count" ->
