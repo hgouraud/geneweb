@@ -416,8 +416,8 @@ value rec get_access str l =
   match l with
   [ ["#apubl" :: l'] -> (Public, l')
   | ["#apriv" :: l'] -> (Private, l')
-  | ["#afriend" :: l'] -> (Friend, l')
   | ["#afriend_m" :: l'] -> (Friend_m, l')
+  | ["#afriend" :: l'] -> (Friend, l')
   | _ -> (IfTitles, l) ]
 ;
 
