@@ -560,29 +560,27 @@ value parent_has_title conf base p =
 ;
 
 value authorized_age conf base p =
-  let access = (get_access p = Friend) in
-  let access_m = (get_access p = Friend_m) in
-  let minor =
-    match
-      (Adef.od_of_codate (get_birth p), Adef.od_of_codate (get_baptism p),
-       get_death p, CheckItem.date_of_death (get_death p))
-    with
-    [ (Some (Dgreg d _), _, _, _) | (_, Some (Dgreg d _), _, _) ->
-        let a = CheckItem.time_elapsed d conf.today in
-        a.year < conf.minor_age
-    | _ -> False ]
+  let is_access_friend =
+    match get_access p with
+    [ Friend | Friend_m -> True
+    | _ ->
+      match
+        (Adef.od_of_codate (get_birth p), Adef.od_of_codate (get_baptism p),
+         get_death p, CheckItem.date_of_death (get_death p))
+      with
+      [ (Some (Dgreg d _), _, _, _) | (_, Some (Dgreg d _), _, _) ->
+          let a = CheckItem.time_elapsed d conf.today in
+          if a.year < conf.minor_age then
+            match get_parents p with
+            [ Some ifam ->
+              let cpl = foi base ifam in
+              (get_access (poi base (get_father cpl)) = Friend_m) ||
+              (get_access (poi base (get_mother cpl)) = Friend_m)
+            | None -> False ]
+          else False
+      | _ -> False ] ]
   in
-  let access_p =
-    if minor then
-      match get_parents p with
-      [ Some ifam ->
-        let cpl = foi base ifam in
-        (get_access (poi base (get_father cpl)) = Friend_m) ||
-        (get_access (poi base (get_mother cpl)) = Friend_m)
-      | None -> False ]
-    else (access || access_m)
-  in
-  if conf.wizard || (conf.friend && access_p) || get_access p = Public then True
+  if conf.wizard || (conf.friend && is_access_friend) || get_access p = Public then True
   else if
     conf.public_if_titles && get_access p = IfTitles &&
     (nobtit conf base p <> [] || parent_has_title conf base p) then
