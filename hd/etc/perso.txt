@@ -391,7 +391,7 @@
       %end;
     </ul>
   </td>
-  %if;wizard;
+  %if;(wizard and bvar.wizard_not_wizard!="yes")
     <td>
       <a href="%prefix;m=U;%access;"
        class="highlight" accesskey="U">[*update] (U)</a>

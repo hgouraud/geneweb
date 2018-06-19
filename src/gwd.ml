@@ -16,6 +16,7 @@ value redirected_addr = ref None;
 value wizard_passwd = ref "";
 value friend_passwd = ref "";
 value wizard_just_friend = ref False;
+value wizard_not_wizard = ref False;
 value only_addresses = ref [];
 value cgi = ref False;
 value default_lang = ref "fr";
@@ -1209,6 +1210,12 @@ value make_conf cgi from_addr (addr, request) script_name contents env = do {
       try List.assoc "wizard_just_friend" base_env = "yes" with
       [ Not_found -> False ]
   in
+  let wizard_not_wizard =
+    if wizard_not_wizard.val then True
+    else
+      try List.assoc "wizard_not_wizard" base_env = "yes" with
+      [ Not_found -> False ]
+  in
   let is_rtl =
     try Hashtbl.find lexicon " !dir" = "rtl" with [ Not_found -> False ]
   in
@@ -1233,6 +1240,7 @@ value make_conf cgi from_addr (addr, request) script_name contents env = do {
      manitou = manitou;
      supervisor = supervisor;
      wizard = ar.ar_wizard && not wizard_just_friend;
+     not_wizard = ar.ar_wizard && wizard_not_wizard;
      friend = ar.ar_friend || wizard_just_friend && ar.ar_wizard;
      just_friend_wizard = ar.ar_wizard && wizard_just_friend;
      user = ar.ar_user; username = ar.ar_name;
@@ -1896,6 +1904,8 @@ value main () =
         "<passwd>\n       Set a friend password: access to all dates.");
        ("-wjf", Arg.Set wizard_just_friend,
         "\n       Wizard just friend (permanently)");
+       ("-nw", Arg.Set wizard_not_wizard,
+        "\n       Wizard not wizard (permanently)");
        ("-lang", Arg.String (fun x -> default_lang.val := x),
         "<lang>\n       Set a default language (default: fr).");
        ("-blang", Arg.Set choose_browser_lang,
