@@ -233,3 +233,6 @@ value xml_pretty_print : string -> string;
 
 value wprint_in_columns :
   config -> ('a -> string) -> ('a -> unit) -> list 'a -> unit;
+
+value is_hide_names : config -> person -> bool;
+
