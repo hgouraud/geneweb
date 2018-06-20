@@ -1762,6 +1762,7 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc =
       [ Vsosa r -> VVbool (get_sosa conf base env r p <> None)
       | _ -> VVbool False ]
   | ["linked_page"; s] ->
+      if not (is_hide_names conf p) then
       match get_env "nldb" env with
       [ Vnldb db ->
           let key =
@@ -1772,6 +1773,7 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc =
           let s = List.fold_left (linked_page_text conf base p s key) "" db in
           VVstring s
       | _ -> raise Not_found ]
+      else VVstring ""
   | ["marriage_date" :: sl] ->
       match get_env "fam" env with
       [ Vfam _ fam _ True ->
