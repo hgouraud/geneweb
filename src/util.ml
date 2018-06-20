@@ -9,6 +9,32 @@ open Gwdb;
 open Mutil;
 open Printf;
 
+value is_hide_names_full conf base p =
+  let is_access_friend =
+    match get_access p with
+    [ Friend | Friend_m -> True
+    | _ ->
+      match
+        (Adef.od_of_codate (get_birth p), Adef.od_of_codate (get_baptism p),
+         get_death p, CheckItem.date_of_death (get_death p))
+      with
+      [ (Some (Dgreg d _), _, _, _) | (_, Some (Dgreg d _), _, _) ->
+          let a = CheckItem.time_elapsed d conf.today in
+          if a.year < conf.minor_age then
+            match get_parents p with
+            [ Some ifam ->
+              let cpl = foi base ifam in
+              (get_access (poi base (get_father cpl)) = Friend_m) ||
+              (get_access (poi base (get_mother cpl)) = Friend_m)
+            | None -> False ]
+          else False
+      | _ -> False ] ]
+  in
+  if conf.hide_names || get_access p = Private ||
+    (conf.friend && not is_access_friend) then True
+  else False
+;
+
 value is_hide_names conf p =
   if conf.hide_names || get_access p = Private ||
     (conf.friend && get_access p <> Friend) ||

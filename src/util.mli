@@ -235,4 +235,5 @@ value wprint_in_columns :
   config -> ('a -> string) -> ('a -> unit) -> list 'a -> unit;
 
 value is_hide_names : config -> person -> bool;
+value is_hide_names_full : config -> base -> person -> bool;
 

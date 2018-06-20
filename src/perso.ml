@@ -2002,7 +2002,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) =
             p_surname base (pget conf base (get_father (foi base ifam))) <>
               p_surname base p ]
       in
-      if not p_auth && (is_hide_names conf p) then "x x"
+      if not p_auth && (is_hide_names_full conf base p) then "x x"
       else if force_surname then person_text conf base p
       else person_text_no_surn_no_acc_chk conf base p
   | "consanguinity" ->
