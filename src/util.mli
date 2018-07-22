@@ -172,6 +172,7 @@ value relation_txt :
 value string_of_decimal_num : config -> float -> string;
 
 value person_exists : config -> base -> (string * string * int) -> bool;
+value mark_if_not_public : config -> base -> (string * string * int) -> bool;
 
 value find_person_in_env : config -> base -> string -> option person;
 (* Recherche le sosa uniquement dans le fichier gwf *)

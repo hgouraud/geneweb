@@ -203,6 +203,7 @@ value print_whole_wdoc conf fdoc title s =
       {Wiki.wi_mode = "WDOC"; Wiki.wi_cancel_links = conf.cancel_links;
        Wiki.wi_file_path = wdoc_file_path conf.lang;
        Wiki.wi_person_exists _ = True;
+       Wiki.wi_mark_if_not_public _ = False;
        Wiki.wi_always_show_link = conf.wizard || conf.friend}
     in
     Wiki.html_with_summary_of_tlsw conf wi edit_opt s
@@ -243,6 +244,7 @@ value print_part_wdoc conf fdoc title s cnt0 =
       {Wiki.wi_mode = mode; Wiki.wi_cancel_links = conf.cancel_links;
        Wiki.wi_file_path = file_path;
        Wiki.wi_person_exists _ = True;
+       Wiki.wi_mark_if_not_public _ = False;
        Wiki.wi_always_show_link = conf.wizard || conf.friend}
     in
     Wiki.print_sub_part conf wi conf.wizard mode fdoc cnt0 lines;
@@ -369,6 +371,7 @@ value print_mod_wdoc_ok conf base =
   let wi =
     {Wiki.wi_mode = mode; Wiki.wi_cancel_links = conf.cancel_links;
      Wiki.wi_file_path = file_path; Wiki.wi_person_exists _ = True;
+     Wiki.wi_mark_if_not_public _ = False;
      Wiki.wi_always_show_link = conf.wizard || conf.friend}
   in
   Wiki.print_mod_ok conf wi edit_mode fname read_string commit string_filter

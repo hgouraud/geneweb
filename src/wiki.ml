@@ -96,6 +96,7 @@ type wiki_info =
     wi_file_path : string -> string;
     wi_cancel_links : bool;
     wi_person_exists : (string * string * int) -> bool;
+    wi_mark_if_not_public : (string * string * int) -> bool;
     wi_always_show_link : bool }
 ;
 
@@ -187,11 +188,14 @@ use of database forum by ill-intentioned people to communicate)...
             conf.friend && conf.half_rgpd then name else "x x" in
           let t =
             let color = if conf.friend && conf.half_rgpd then "" else " style=\"color:red\"" in
+            let color1 = if wi.wi_mark_if_not_public (fn, sn, oc) then "style=\"color:red\""
+              else "xxx"
+            in
             if wi.wi_cancel_links || name = "x x" then name
             else if wi.wi_person_exists (fn, sn, oc) then
-              sprintf "<a id=\"p_%d\" href=\"%sp=%s;n=%s%s\">%s</a>"
+              sprintf "<a id=\"p_%d\" href=\"%sp=%s;n=%s%s\" %s>%s</a>"
                 pos (commd conf) (code_varenv fn) (code_varenv sn)
-                (if oc = 0 then "" else ";oc=" ^ string_of_int oc) name
+                (if oc = 0 then "" else ";oc=" ^ string_of_int oc) color1 name
             else if wi.wi_always_show_link then
               sprintf "<a id=\"p_%d\" href=\"%sp=%s;n=%s%s\"%s>%s</a>"
                 pos (commd conf) (code_varenv fn) (code_varenv sn)

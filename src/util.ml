@@ -2561,12 +2561,21 @@ value find_person_in_env conf base suff =
 ;
 
 value person_exists conf base (fn, sn, oc) =
-  match p_getenv conf.base_env "red_if_not_exist" with
+  match p_getenv conf.env "red_if_not_exist" with
   [ Some "off" -> True
   | Some _ | None ->
       match person_of_key base fn sn oc with
       [ Some ip -> authorized_age conf base (pget conf base ip)
       | None -> False ] ]
+;
+
+value mark_if_not_public conf base (fn, sn, oc) =
+  match p_getenv conf.env "red_if_not_public" with
+  [ Some "on" ->
+      match person_of_key base fn sn oc with
+      [ Some ip -> ((get_access (poi base ip)) <> Public)
+      | None -> False ]
+  | _ -> False ]
 ;
 
 value default_sosa_ref conf base =
