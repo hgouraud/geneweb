@@ -257,7 +257,7 @@ value test_public old bname =
         incr cnt;
         printf "Public: %s, %s: %d (%d)\n" (Gutil.designation base p) reason bd bd2;
         let gp = {(gen_person_of_person p) with access = IfTitles} in
-        if False then patch_person base gp.key_index gp else ();
+        if execute.val then patch_person base gp.key_index gp else ();
       }
       else ();
     };
