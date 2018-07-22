@@ -257,17 +257,21 @@ value test_public old bname =
         incr cnt;
         printf "Public: %s, %s: %d (%d)\n" (Gutil.designation base p) reason bd bd2;
         let gp = {(gen_person_of_person p) with access = IfTitles} in
-        if execute.val then patch_person base gp.key_index gp else ();
+        if execute.val then do { 
+          patch_person base gp.key_index gp;
+          incr changes;
+        }
+        else ();
       }
       else ();
     };
+    if cnt.val > 0 then
+      printf "Nb of persone: %d\n" cnt.val
+    else ();
     if changes.val > 0 then do {
       commit_patches base;
       printf "Patches applied\n"; flush stdout;
     }
-    else ();
-   if cnt.val > 0 then
-      printf "Nb of persone: %d\n" cnt.val
     else ();
   }
 ;
