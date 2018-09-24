@@ -430,7 +430,8 @@ let phony_person =
    baptism_place = 0; baptism_note = 0; baptism_src = 0;
    death = DontKnowIfDead; death_place = 0; death_note = 0; death_src = 0;
    burial = UnknownBurial; burial_place = 0; burial_note = 0; burial_src = 0;
-   pevents = []; notes = 0; psources = 0; key_index = Adef.iper_of_int 0}
+   pevents = []; notes = 0; has_linked_pages = false;
+   psources = 0; key_index = Adef.iper_of_int 0}
 
 let phony_family =
   {marriage = Adef.codate_None; marriage_place = 0; marriage_note = 0;

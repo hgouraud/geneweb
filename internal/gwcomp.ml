@@ -5,8 +5,8 @@ open Def
 
 let magic_gwo = "GnWo000o"
 
-(* Option qui force a créé les clés des individus. De fait, *)
-(* si la clé est incomplète, on l'enregistre tout de même.  *)
+(* Option qui force a crï¿½ï¿½ les clï¿½s des individus. De fait, *)
+(* si la clï¿½ est incomplï¿½te, on l'enregistre tout de mï¿½me.  *)
 let create_all_keys = ref false
 
 type key = { pk_first_name : string; pk_surname : string; pk_occ : int }
@@ -352,7 +352,7 @@ let get_fst_name str l =
   match l with
     x :: l' ->
       begin match x.[0] with
-        'a'..'z' | 'A'..'Z' | 'à'..'ý' | 'À'..'Ý' | '[' | '0'..'9' | '?' |
+        'a'..'z' | 'A'..'Z' | (*'Ã '..'Ã½' | 'Ã€'..'Ã' | HG TODO*)'[' | '0'..'9' | '?' |
         ' ' ->
           let x = cut_space x in
           let (x, occ) =
@@ -401,7 +401,7 @@ let get_name l =
   | x :: l' ->
     begin match x.[0] with
       |  '{' -> "", l
-      | 'a'..'z' | 'A'..'Z' | 'à'..'ý' | 'À'..'Ý' | '0'..'9' | '?' | ' ' ->
+      | 'a'..'z' | 'A'..'Z' | (*'Ã '..'Ã½' | 'Ã€'..'Ã' | HG TODO*)'0'..'9' | '?' | ' ' ->
         cut_space x, l'
       | _ -> "", l
     end
@@ -650,7 +650,8 @@ let create_person () =
    baptism = Adef.codate_None; baptism_place = ""; baptism_note = "";
    baptism_src = ""; death = DontKnowIfDead; death_place = "";
    death_note = ""; death_src = ""; burial = UnknownBurial; burial_place = "";
-   burial_note = ""; burial_src = ""; pevents = []; notes = ""; psources = "";
+   burial_note = ""; burial_src = ""; pevents = []; 
+   notes = ""; has_linked_pages = false; psources = "";
    key_index = Adef.iper_of_int (-1)}
 
 let bogus_def p n = p = "?" || n = "?"
@@ -707,6 +708,7 @@ let set_infos fn sn occ sex comm_psources comm_birth_place str u l =
   let u =
     {first_name = fn; surname = sn; occ = occ; rparents = u.rparents;
      related = u.related; sex = sex; notes = u.notes; key_index = u.key_index;
+     has_linked_pages = false; (* HG TODO do we know anything yet *)
      first_names_aliases = first_names_aliases;
      surnames_aliases = surnames_aliases; public_name = public_name;
      image = image; qualifiers = qualifiers; aliases = aliases;
@@ -937,7 +939,7 @@ let read_family ic fname =
                   "end fevt" -> fevents, read_line ic
                 | x ->
                     let (str, l) = x, fields x in
-                    (* On récupère le nom, date, lieu, source, cause *)
+                    (* On rï¿½cupï¿½re le nom, date, lieu, source, cause *)
                     let (name, l) = get_fevent_name str l in
                     let (date, l) = get_optional_event_date l in
                     let (place, l) = get_field "#p" l in
@@ -949,9 +951,9 @@ let read_family ic fname =
                       | Some x -> Adef.codate_of_od x
                     in
                     if l <> [] then failwith str;
-                    (* On récupère les témoins *)
+                    (* On rï¿½cupï¿½re les tï¿½moins *)
                     let (witn, line) = loop_witn (input_a_line ic) ic in
-                    (* On récupère les notes *)
+                    (* On rï¿½cupï¿½re les notes *)
                     let (notes, line) = loop_note line ic in
                     let notes = Mutil.strip_all_trailing_spaces notes in
                     let evt = name, date, place, cause, src, notes, witn in
@@ -1071,7 +1073,7 @@ let read_family ic fname =
               "end pevt" -> pevents
             | x ->
                 let (str, l) = x, fields x in
-                (* On récupère le nom, date, lieu, source, cause *)
+                (* On rï¿½cupï¿½re le nom, date, lieu, source, cause *)
                 let (name, l) = get_pevent_name str l in
                 let (date, l) = get_optional_event_date l in
                 let (place, l) = get_field "#p" l in
@@ -1083,9 +1085,9 @@ let read_family ic fname =
                   | Some x -> Adef.codate_of_od x
                 in
                 if l <> [] then failwith str;
-                (* On récupère les témoins *)
+                (* On rï¿½cupï¿½re les tï¿½moins *)
                 let (witn, line) = loop_witn (input_a_line ic) ic in
-                (* On récupère les notes *)
+                (* On rï¿½cupï¿½re les notes *)
                 let (notes, line) = loop_note line ic in
                 let notes = Mutil.strip_all_trailing_spaces notes in
                 let evt = name, date, place, cause, src, notes, witn in

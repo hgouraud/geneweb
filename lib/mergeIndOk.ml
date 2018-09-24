@@ -191,6 +191,7 @@ let reconstitute conf base p1 p2 =
      occupation =
        field "occupation" (fun p -> sou base (get_occupation p)) ((=) "");
      sex = field "sex" get_sex ((=) Neuter);
+     has_linked_pages = get_has_linked_pages p1 || get_has_linked_pages p2;
      access = field "access" get_access ((=) IfTitles);
      birth = field "birth" get_birth ((=) Adef.codate_None);
      birth_place =

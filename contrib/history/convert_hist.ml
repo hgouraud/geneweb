@@ -20,6 +20,7 @@ type ('person, 'string) old_gen_person =
     old_related : iper list;
     old_occupation : 'string;
     old_sex : sex;
+    old_has_linked_pages : bool;
     old_access : access;
     old_birth : codate;
     old_birth_place : 'string;
@@ -115,7 +116,9 @@ let convert_file file tmp_file =
             burial = old_gen_p.old_burial;
             burial_place = old_gen_p.old_burial_place; burial_note = "";
             burial_src = old_gen_p.old_burial_src; pevents = [];
-            notes = old_gen_p.old_notes; psources = old_gen_p.old_psources;
+            notes = old_gen_p.old_notes; 
+            has_linked_pages = old_gen_p.old_has_linked_pages;
+            psources = old_gen_p.old_psources;
             key_index = old_gen_p.old_key_index}
          in
          let gen_f =

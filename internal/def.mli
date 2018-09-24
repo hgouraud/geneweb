@@ -215,6 +215,7 @@ type ('person, 'string) gen_person =
     burial_src : 'string;
     pevents : ('person, 'string) gen_pers_event list;
     notes : 'string;
+    has_linked_pages : bool;
     psources : 'string;
     key_index : iper }
 

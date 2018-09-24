@@ -34,6 +34,7 @@ type ('person, 'string) old_gen_person =
     old_burial_place : 'string;
     old_burial_src : 'string;
     old_notes : 'string;
+    old_has_linked_pages : bool;
     old_psources : 'string;
     old_key_index : iper }
 
@@ -152,6 +153,7 @@ let convert_file_both2 file tmp_file =
                 burial_place = old_gen_p.old_burial_place; burial_note = "";
                 burial_src = old_gen_p.old_burial_src; pevents = [];
                 notes = old_gen_p.old_notes;
+                has_linked_pages = old_gen_p.old_has_linked_pages;
                 psources = old_gen_p.old_psources;
                 key_index = old_gen_p.old_key_index}
              in

@@ -57,6 +57,7 @@ val get_qualifiers : person -> istr list
 val get_related : person -> iper list
 val get_rparents : person -> relation list
 val get_sex : person -> Def.sex
+val get_has_linked_pages : person -> bool
 val get_surname : person -> istr
 val get_surnames_aliases : person -> istr list
 val get_titles : person -> title list

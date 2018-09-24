@@ -414,7 +414,7 @@ let insert_person gen so =
          burial_place = unique_string gen so.burial_place;
          burial_note = unique_string gen so.burial_note;
          burial_src = unique_string gen so.burial_src; pevents = [];
-         notes = empty_string;
+         notes = empty_string; has_linked_pages = false;
          psources =
            unique_string gen
              (if so.psources = "" then !default_source else so.psources);
@@ -1114,7 +1114,9 @@ let persons_record_access gen per_index_ic per_ic persons =
            death_note = empty_string; death_src = empty_string;
            burial = UnknownBurial; burial_place = empty_string;
            burial_note = empty_string; burial_src = empty_string;
-           pevents = []; notes = empty_string; psources = empty_string;
+           pevents = []; notes = empty_string;
+           has_linked_pages = false;
+           psources = empty_string;
            key_index = Adef.iper_of_int 0}
       | _ -> assert false
     in

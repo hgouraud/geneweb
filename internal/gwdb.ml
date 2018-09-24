@@ -31,7 +31,8 @@ let no_person empty_string ip =
    death_note = empty_string; death_src = empty_string;
    burial = UnknownBurial; burial_place = empty_string;
    burial_note = empty_string; burial_src = empty_string; pevents = [];
-   notes = empty_string; psources = empty_string; key_index = ip}
+   notes = empty_string; has_linked_pages = false;
+   psources = empty_string; key_index = ip}
 let no_ascend = {parents = None; consang = Adef.no_consang}
 let no_union = {family = [| |]}
 
@@ -210,6 +211,7 @@ type ('p, 'a, 'u) person_fun =
     get_related : 'p -> iper list;
     get_rparents : 'p -> relation list;
     get_sex : 'p -> Def.sex;
+    get_has_linked_pages : 'p -> bool;
     get_surname : 'p -> istr;
     get_surnames_aliases : 'p -> istr list;
     get_titles : 'p -> title list;
@@ -257,6 +259,7 @@ let person1_fun =
         List.map (Futil.map_relation_ps (fun x -> x) (fun i -> Istr i))
           p.Def.rparents);
    get_sex = (fun p -> p.Def.sex);
+   get_has_linked_pages = (fun p -> p.Def.has_linked_pages);
    get_surname = (fun p -> Istr p.Def.surname);
    get_surnames_aliases =
      (fun p -> List.map (fun i -> Istr i) p.Def.surnames_aliases);
@@ -362,6 +365,7 @@ let person2_fun =
                  (fun _ -> Istr2 (db2, ("", ""), -1)))
               rl);
      get_sex = (fun (db2, i) -> get_field db2 i ("person", "sex"));
+     get_has_linked_pages = (fun (db2, i) -> get_field db2 i ("person", "has_linked_pages"));
      get_surname = (fun (db2, i) -> make_istr2 db2 ("person", "surname") i);
      get_surnames_aliases =
        (fun (db2, i) ->
@@ -406,7 +410,9 @@ let person2_fun =
            burial_place = self.get_burial_place pp;
            burial_note = self.get_burial_note pp;
            burial_src = self.get_burial_src pp; pevents = self.get_pevents pp;
-           notes = self.get_notes pp; psources = self.get_psources pp;
+           notes = self.get_notes pp; 
+           has_linked_pages = self.get_has_linked_pages pp;
+           psources = self.get_psources pp;
            key_index = self.get_key_index pp});
      dsk_person_of_person =
        (fun _p -> failwith "not impl dsk_person_of_person");
@@ -476,6 +482,7 @@ let person2gen_fun =
         List.map (Futil.map_relation_ps (fun x -> x) (fun s -> Istr2New (db2, s)))
           p.Def.rparents);
    get_sex = (fun (_db2, _i, p) -> p.Def.sex);
+   get_has_linked_pages = (fun (_db2, _i, p) -> p.Def.has_linked_pages);
    get_surname = (fun (db2, _i, p) -> Istr2New (db2, p.Def.surname));
    get_surnames_aliases =
      (fun (db2, _i, p) ->
@@ -584,6 +591,7 @@ let get_qualifiers p = let f pf = pf.get_qualifiers in wrap_per f f f p
 let get_related p = let f pf = pf.get_related in wrap_per f f f p
 let get_rparents p = let f pf = pf.get_rparents in wrap_per f f f p
 let get_sex p = let f pf = pf.get_sex in wrap_per f f f p
+let get_has_linked_pages p = let f pf = pf.get_has_linked_pages in wrap_per f f f p
 let get_surname p = let f pf = pf.get_surname in wrap_per f f f p
 let get_surnames_aliases p =
   let f pf = pf.get_surnames_aliases in wrap_per f f f p
@@ -942,6 +950,7 @@ type base =
     nobtit : string list Lazy.t -> string list Lazy.t -> person -> title list;
     p_first_name : person -> string;
     p_surname : person -> string;
+    p_has_linked_pages : person -> bool;
     date_of_last_change : unit -> float;
     apply_base1 : (Dbdisk.dsk_base -> unit) -> unit;
     apply_base2 : (Db2disk.db2 -> unit) -> unit }
@@ -953,6 +962,7 @@ module C_base :
       base -> string list Lazy.t -> string list Lazy.t -> person -> title list
     val p_first_name : base -> person -> string
     val p_surname : base -> person -> string
+    val p_has_linked_pages : person -> bool
   end =
   struct
     let delete_family (self : base) ifam =
@@ -1004,6 +1014,7 @@ module C_base :
                 list
     let p_first_name self p = Mutil.nominative (self.sou (get_first_name p))
     let p_surname self p = Mutil.nominative (self.sou (get_surname p))
+    let p_has_linked_pages p = get_has_linked_pages p (* HG TODO *)
   end
 
 (* Database - implementation 1 *)
@@ -1131,7 +1142,8 @@ let base1 base =
      nobtit = (fun conf p -> C_base.nobtit self conf p);
      p_first_name = (fun p -> C_base.p_first_name self p);
      p_surname = (fun p -> C_base.p_surname self p);
-     date_of_last_change =
+     p_has_linked_pages = (fun p -> C_base.p_has_linked_pages p);
+   date_of_last_change =
        (fun () ->
           let s =
             let bdir = base.data.bdir in
@@ -1363,6 +1375,7 @@ let base2 db2 =
      nobtit = (fun conf p -> C_base.nobtit self conf p);
      p_first_name = (fun p -> C_base.p_first_name self p);
      p_surname = (fun p -> C_base.p_surname self p);
+     p_has_linked_pages = (fun p -> C_base.p_has_linked_pages p);
      date_of_last_change =
        (fun () ->
           let s =

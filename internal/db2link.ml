@@ -429,7 +429,8 @@ let empty_person =
    baptism = Adef.codate_None; baptism_place = ""; baptism_note = "";
    baptism_src = ""; death = DontKnowIfDead; death_place = "";
    death_note = ""; death_src = ""; burial = UnknownBurial; burial_place = "";
-   burial_note = ""; burial_src = ""; pevents = []; notes = ""; psources = "";
+   burial_note = ""; burial_src = ""; pevents = []; 
+   notes = ""; has_linked_pages = false; psources = "";
    key_index = Adef.iper_of_int 0}
 
 let insert_undefined2 gen key fn sn sex =

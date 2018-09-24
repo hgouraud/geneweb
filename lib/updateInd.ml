@@ -868,7 +868,8 @@ let print_add conf base =
      baptism_note = ""; baptism_src = ""; death = DontKnowIfDead;
      death_place = ""; death_note = ""; death_src = "";
      burial = UnknownBurial; burial_place = ""; burial_note = "";
-     burial_src = ""; pevents = []; notes = ""; psources = "";
+     burial_src = ""; pevents = []; 
+     notes = ""; has_linked_pages = false; psources = "";
      key_index = bogus_person_index}
   in
   print_update_ind conf base p ""

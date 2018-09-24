@@ -673,6 +673,7 @@ let reconstitute_person conf =
       Util.sanitize_html
         (only_printable_or_nl (Mutil.strip_all_trailing_spaces (get conf "notes")))
   in
+  let has_linked_pages = false in (* HG TODO *)
   let psources = only_printable (get conf "src") in
   (* Mise à jour des évènements principaux. *)
   let (bi, bp, de, bu, pevents) =
@@ -707,7 +708,8 @@ let reconstitute_person conf =
      baptism_src = bapt_src; death = death; death_place = death_place;
      death_note = death_note; death_src = death_src; burial = burial;
      burial_place = burial_place; burial_note = burial_note;
-     burial_src = burial_src; pevents = pevents; notes = notes;
+     burial_src = burial_src; pevents = pevents;
+     notes = notes; has_linked_pages = has_linked_pages;
      psources = psources; key_index = Adef.iper_of_int key_index}
   in
   p, ext
@@ -1123,7 +1125,8 @@ let effective_del base warning p =
    baptism_note = empty; baptism_src = empty; death = DontKnowIfDead;
    death_place = empty; death_note = empty; death_src = empty;
    burial = UnknownBurial; burial_place = empty; burial_note = empty;
-   burial_src = empty; pevents = []; notes = empty; psources = empty;
+   burial_src = empty; pevents = []; 
+   notes = empty; has_linked_pages = false; psources = empty;
    key_index = ip}
 
 let print_mod_ok conf base wl pgl p ofn osn oocc =

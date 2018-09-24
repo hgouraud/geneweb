@@ -102,7 +102,8 @@ let map_person_ps fp fs p =
    death_note = fs p.death_note; death_src = fs p.death_src;
    burial = p.burial; burial_place = fs p.burial_place;
    burial_note = fs p.burial_note; burial_src = fs p.burial_src;
-   pevents = List.map (map_pers_event fp fs) p.pevents; notes = fs p.notes;
+   pevents = List.map (map_pers_event fp fs) p.pevents; 
+   notes = fs p.notes; has_linked_pages = p.has_linked_pages;
    psources = fs p.psources; key_index = p.key_index}
 
 let map_union_f ff u = {family = Array.map ff u.family}
