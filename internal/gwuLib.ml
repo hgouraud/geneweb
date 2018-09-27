@@ -1,4 +1,4 @@
-(* $Id: gwu.ml,v 5.45 2012-01-19 06:28:42 ddr Exp $ *)
+(* $Id: gwu.ml,v 5.45 2018-09-27 06:28:42 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
 module type Select =
@@ -15,7 +15,7 @@ module Make (Select : Select) =
     open Gwdb
     let old_gw = ref false
     let put_events_in_notes base p =
-      (* Si on est en mode old_gw, on mets tous les évènements *)
+      (* Si on est en mode old_gw, on mets tous les Ã©vÃ¨nements *)
       (* dans les notes.                                       *)
       if !old_gw then
         let rec loop pevents =
@@ -37,7 +37,7 @@ module Make (Select : Select) =
     let ht_dup_occ = Hashtbl.create 20001
     let ht_orig_occ = Hashtbl.create 20001
     let prepare_free_occ base =
-      (* Parce qu'on est obligé ... *)
+      (* Parce qu'on est obligÃ© ... *)
       let sn = "?" in
       let fn = "?" in
       let key = Name.lower fn ^ " #@# " ^ Name.lower sn in
@@ -134,7 +134,8 @@ module Make (Select : Select) =
       | _ -> true
     let starting_char no_num s =
       match s.[0] with
-        'a'..'z' | 'A'..'Z' (* | 'à'..'ý' | 'À'..'Ý' *) -> true
+      (*'a'..'z' | 'A'..'Z' | 'Ã '..'Ã½' | 'Ã€'..'Ã' *)
+        'a'..'z' | 'A'..'Z' | '\xE0'..'\xFD' | '\xC0'..'\xDD' -> true
       | '0'..'9' -> not no_num
       | '?' -> if s = "?" then true else false
       | _ -> false
@@ -190,7 +191,7 @@ module Make (Select : Select) =
       | Dgreg (d, Dhebrew) ->
           print_date_dmy oc (Calendar.hebrew_of_gregorian d); Printf.fprintf oc "H"
       | Dtext t ->
-          (* Dans le cas d'une date texte pour un titre, on échappe les ':' *)
+          (* Dans le cas d'une date texte pour un titre, on Ã©chappe les ':' *)
           let t = gen_correct_string false no_colon t in Printf.fprintf oc "0(%s)" t
     let gen_print_date_option no_colon oc =
       function
@@ -710,8 +711,8 @@ module Make (Select : Select) =
           (lines_list_of_string note)
     let print_comment_for_family oc base gen fam =
       let comm = sou base (get_comment fam) in
-      (* Si on est en mode old_gw, on mets tous les évènements dans les notes. *)
-      (* On supprime les 2 évènements principaux. *)
+      (* Si on est en mode old_gw, on mets tous les Ã©vÃ¨nements dans les notes. *)
+      (* On supprime les 2 Ã©vÃ¨nements principaux. *)
       let fevents =
         List.filter
           (fun evt ->
@@ -936,7 +937,7 @@ module Make (Select : Select) =
       let notes = sou base (get_notes p) in
       let surn = s_correct_string (p_surname base p) in
       let fnam = s_correct_string (p_first_name base p) in
-      (* Si on n'est en mode old_gw, on mets tous les évènements dans les notes. *)
+      (* Si on n'est en mode old_gw, on mets tous les Ã©vÃ¨nements dans les notes. *)
       if (notes <> "" || put_events_in_notes base p) && surn <> "?" &&
          fnam <> "?"
       then
@@ -1603,7 +1604,7 @@ module Make (Select : Select) =
               if not !old_gw then print_pevents oc base gen ml
             end
       done;
-      (* Ajout des personnes isolée à l'export. On leur ajoute des    *)
+      (* Ajout des personnes isolÃ©e Ã  l'export. On leur ajoute des    *)
       (* parents pour pouvoir utiliser les autres fonctions normales. *)
       (* Export que si c'est toute la base.                           *)
       if !isolated && anc = None && desc = None && ancdesc = None then
