@@ -225,10 +225,12 @@ let print_first_name _conf base p =
   Wserver.printf "%s%s" (p_first_name base p)
     (if get_occ p = 0 then "" else "." ^ string_of_int (get_occ p))
 
-let print_someone_strong _conf base p =
-  Printf.sprintf "<strong>%s%s %s</strong>" (p_first_name base p)
+let print_someone_strong conf base p =
+  (Printf.sprintf "<a href=\"%s%s\">" (commd conf) (acces conf base p)) ^
+  (Printf.sprintf "<strong>%s%s %s</strong>" (p_first_name base p)
     (if get_occ p = 0 then "" else "." ^ string_of_int (get_occ p))
-    (p_surname base p)
+    (p_surname base p)) ^
+  (Printf.sprintf "</a>")
 
 let print_first_name_strong _conf base p =
   Wserver.printf "<strong>%s%s</strong>" (p_first_name base p)
