@@ -5,6 +5,7 @@ open Config
 open Def
 open Gwdb
 
+val start_time : float ref
 val add_lang_path : string -> unit
 val set_base_dir : string -> unit
 val cnt_dir : string ref

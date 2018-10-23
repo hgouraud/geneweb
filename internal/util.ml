@@ -17,6 +17,7 @@ let set_base_dir = Secure.set_base_dir
 let _ = add_lang_path sharelib
 let _ = add_lang_path Filename.current_dir_name
 
+let start_time = ref 0.0
 let cnt_dir = ref Filename.current_dir_name
 
 let search_in_path p s =
@@ -1361,7 +1362,7 @@ let url_no_index conf base =
               in
               Some (f, s, oc, n)
         else None
-    with Failure _ -> None 
+    with Failure _ -> None
   in
   let env =
     let rec loop =

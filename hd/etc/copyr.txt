@@ -1,4 +1,4 @@
-<!-- copyr.txt v7.00 28/04/2017 04:05:59 -->
+<!-- copyr.txt v7.00 24/10/2018 04:05:59 -->
 %define;lang(x)
   %apply;nth%with;
     /af/bg/br/ca/co/cs/da/de/en/eo/es/et/fi/fr/he/is/it/lv/nl/no/oc/pl/pt/pt-br/ro/ru/sk/sl/sv/zh/
@@ -86,7 +86,7 @@
         <span class="align-self-center mx-1">
           <a href="https://github.com/geneweb/geneweb/commit/%commit;"%sp;
             title="GeneWeb %version %if;(is_printed_by_template)%apply;compil%with;%compilation_time;%and;%commit;%end;%end;%if;(compilation_time!=commit_date) (%commit_date;)%end;">v.&nbsp;%version;</a>%nn;
-          &copy; <a href="https://www.inria.fr/">INRIA</a> 1998-2017%if;(connections!="") %connections;%end;%nn;
+          &copy; <a href="https://www.inria.fr/">INRIA</a> 1998-2018%if;(connections!="") %connections;%end; (%duration; sec.)%nn;
         </span>
         <a href="https://geneweb.tuxfamily.org/wiki/GeneWeb%if;(lang!="en")/%lang;%end;" class="ml-1 mt-sm-2 mt-md-0" target="_blank" title="GeneWeb documentation MediaWiki">%nn;
         <img src="%image_prefix;/logo_bas_mw.png" alt="Logo GeneWeb wiki"/></a>

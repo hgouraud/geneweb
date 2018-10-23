@@ -1814,6 +1814,7 @@ let make_cnt_dir x =
 let main ~speclist () =
   if Sys.unix then ()
   else begin Wserver.sock_in := "gwd.sin"; Wserver.sock_out := "gwd.sou" end;
+  Util.start_time := Sys.time ();
   let usage =
     "Usage: " ^ Filename.basename Sys.argv.(0) ^
     " [options] where options are:"
