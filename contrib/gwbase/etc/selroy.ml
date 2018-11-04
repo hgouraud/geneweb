@@ -32,12 +32,11 @@ value print_date_dmy oc d =
 ;
 
 value spaces_to_underscore s =
-  do {
-    for i = 0 to String.length s - 1 do {
-      if s.[i] = ' ' then Bytes.set s i '_' else ()
-    };
-    s
-  }
+    String.init (String.length s)
+      (fun i ->
+         match s.[i] with
+         [ ' ' -> '_'
+         | x -> x] )
 ;
 
 value print_date oc =

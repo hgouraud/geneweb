@@ -149,6 +149,15 @@
         <input type="hidden" name="ei" value="%index;"%/>
       %end;
       <input type="hidden" name="m" value="NG"%/>
+      %if;(user.key!="")
+        <label id="rel_search_title">
+          <input type="radio" id="radio_R" name="select" value="input" checked="checked" onclick="main()"%/>
+          [*the user] %user.ident;, %user.name;<br%/>
+        </label>
+        <div id="rel_search_content">
+          <input type="hidden" name="n" value="%user.key;"%/>
+        </div>
+      %end;
       <label id="rel_search_title">
         <input type="radio" id="radio_R" name="select" value="input" checked="checked" onclick="main()"%/>
         [*any individual in the base]<br%/>
