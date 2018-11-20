@@ -105,7 +105,7 @@
             <input type="hidden" id="notes_content_%cnt;" value="%keydir_img_notes;">
           %end;
           <div class="d-flex mt-2">
-            <button type="submit" class="btn btn-danger ml-auto col-6 delete-image-btn" disabled><i class="fa fa-trash-alt mr-2"></i>[*delete selected image]0</button>
+            <button type="submit" class="btn btn-danger ml-auto col-6 del-img-btn" disabled><i class="fa fa-trash-alt mr-2"></i>[*delete selected image]0</button>
           </div>
         </form>
         %(
@@ -129,12 +129,11 @@
 </div>
 %include.js;
 %define;input_snd(xxx,yyy)
-$('.xxx').on('change', function() {
-   %(replace input label with file name%)
+$('.xxx').change(function() {
+   %(replace input label with file name, then enable send button if input is non empty%)
    let fileName = $(this).val().split('\\').pop();
    $(this).next('.custom-file-label').addClass("selected").html(fileName);
-   %(enable send button if input is non empty%)
-   if ($(this).val() != '') { $('.yyy').attr('disabled', false); }
+   $('.yyy').attr('disabled', false);
 });
 %end;
 <script>
@@ -144,8 +143,8 @@ $('.fa-file-alt').click(function() {
   $('.btn-update-comment').attr('disabled', false);
   $('.custom-others').attr('disabled', true);
 });
-$("form input:radio").on('change', function() {
-   if ($(this).val() != '') { $('.delete-image-btn').attr('disabled', false); }
+$("form input:radio").change(function() {
+  $('.del-img-btn').attr('disabled', false);
 });
 %( Initialize Bootstrap tooltip and popover component, dismiss on next click function %)
 $(function () {
