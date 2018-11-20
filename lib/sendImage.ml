@@ -1262,7 +1262,11 @@ let print_send_ok conf base =
     if digest = raw_get conf "digest" then
       let _ = Printf.eprintf "Send file \n" in
       let _ = flush stderr in
-      let file = raw_get conf "file" in effective_send_ok conf base p file kind
+      let which_img_mode = raw_get conf "which_img_mode" in
+      let which_img_name = raw_get conf "which_img_name" in
+      let file = if which_img_mode <> "comment" then raw_get conf "file"
+        else  which_img_name
+      in effective_send_ok conf base p file kind
     else Update.error_digest conf
   with Update.ModErr -> ()
 

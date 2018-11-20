@@ -15,6 +15,11 @@
 <div class="container">
 %message_to_wizard;
 %include_perso_header;
+%( Logic for variables:
+  which_img_name must be defined
+  which_img_mode ="comment" then only the comment file is updated
+  keydir is "on" if we are dealing with "other" images
+%)
 %if;(evar.m="IMAGE")
   <div class="row">
     <div class="col-6 border border-bottom-0 border-top-0 border-left-0">
@@ -26,6 +31,7 @@
         <input type="hidden" name="i" value="%index;">
         <input type="hidden" name="notes" value="%index;">
         <input type="hidden" name="which_img_mode" id="which_img_mode_1" value="portrait">
+        <input type="hidden" name="which_img_name" id="which_img_name_1" value="">
         <div class="custom-file col">
           <input type="file" name="file" class="custom-file-input custom-portrait" id="portrait_file" accept="image/*" lang="%lang;">
           <label class="custom-file-label text-truncate" for="portrait_file">[*select] [image/images]0</label>
@@ -36,7 +42,7 @@
       <small class="mt-3">[*previous portrait exist]</small>
       %if;(has_image)
         <div class="d-flex">
-          <a role="button" href="%prefix;m=DEL_IMAGE&i=%index;" class="btn btn-danger ml-auto mt-2" title="[*delete portrait]"><i class="fas fa-trash-alt mr-2"></i>[*delete portrait]</a> 
+          <a role="button" href="%prefix;m=DEL_IMAGE&i=%index;" class="btn btn-danger ml-auto mt-2" title="[*delete portrait]"><i class="fas fa-trash-alt mr-2"></i>[*delete portrait]</a>
         </div>
       %end;
       <hr>
@@ -50,8 +56,8 @@
         <input type="hidden" name="digest" value="%digest;">
         <input type="hidden" name="i" value="%index;">
         <input type="hidden" name="keydir" value="on">
-        <input type="hidden" name="which_img_name" id="which_img_name" value="">
         <input type="hidden" name="which_img_mode" id="which_img_mode_2" value="both">
+        <input type="hidden" name="which_img_name" id="which_img_name_2" value="">
         <textarea class="form-control col-12" id="notes_comments" name="notes" rows="5" placeholder="[*image comment]"></textarea>
         <button class="btn btn-primary mt-2 col-12 btn-update-comment" type="submit" disabled>[*update image comment] <span id="which_img_show"></span></button>
         <div class="custom-file col mt-2">
@@ -80,6 +86,7 @@
           <input type="hidden" name="i" value="%index;">
           <input type="hidden" name="keydir" value="on">
           <input type="hidden" name="which_img_mode" id="which_img_mode_3" value="both">
+          <input type="hidden" name="which_img_name" id="which_img_name_3" value="">
           %foreach;img_in_keydir;
             %( remplir le champ file de l'autre form (XX) quand on clique sur le radio bouton %)
             <div class="custom-control custom-radio">
@@ -162,7 +169,7 @@ var notes = "notes_content_"+cnt;
 var item = document.getElementById(notes).value;
 document.getElementById("notes_comments").value=item;
 document.getElementById("which_img_show").textContent=name;
-document.getElementById("which_img_name").value=name;
+document.getElementById("which_img_name_2").value=name;
 document.getElementById("which_img_mode_2").value="comment";
 }
 %(
