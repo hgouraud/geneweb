@@ -57,6 +57,10 @@ let obsolete version var new_var r =
 let bool_val x = VVbool x
 let str_val x = VVstring x
 
+let strip_br str =
+  let len = String.length str in
+  if (String.sub str (len - 4) 4) = "<br>" then (String.sub str 0 (len - 4)) else str
+
 let rec eval_var conf base env p _loc sl =
   try eval_special_var conf base sl with
     Not_found -> eval_simple_var conf base env p sl
@@ -292,7 +296,7 @@ and eval_simple_var conf base env p =
                 in
                 begin
                   match (String.index_opt s1 '\n') with
-                    Some j -> str_val (String.sub s1 0 j)
+                    Some j -> str_val (strip_br (String.sub s1 0 j))
                   | None -> str_val ""
                 end
             | None -> str_val ""
@@ -307,8 +311,7 @@ and eval_simple_var conf base env p =
             let fname = Filename.chop_suffix f ext in
             let n = get_keydir_img_notes conf base (poi base p.key_index) fname in
             match (String.index_opt n '\n') with
-              Some i ->
-                str_val (String.sub n 0 i)
+              Some i -> str_val (strip_br (String.sub n 0 i))
             | None -> str_val ""
           end
       | _ -> raise Not_found
