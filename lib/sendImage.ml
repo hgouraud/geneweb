@@ -1231,7 +1231,7 @@ let effective_send_ok conf base p file kind =
   if filename <> "" && which_img_mode <> "comment" then
     write_file (fname ^ extension_of_type typ) content;
   if notes <> "" then
-    write_file (fname ^ ".txt") notes;
+    write_file (fname ^ ".txt") (notes ^ "\n");
   let changed =
     U_Send_image (Util.string_gen_person base (gen_person_of_person p))
   in
