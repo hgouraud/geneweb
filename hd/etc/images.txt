@@ -18,9 +18,7 @@
 %if;(evar.m="IMAGE")
   <div class="row">
     <div class="col-6 border border-bottom-0 border-top-0 border-left-0">
-      <div class="d-inline-flex justify-content-around">
-        <h1>%(<i class="fa fa-portrait fa-fw mr-1"></i>%)%if;(has_image)[*modify picture]%else;[*add picture]%end;</h1>
-      </div>
+      <h1 class="display-4">%(<i class="fa fa-portrait fa-fw mr-1"></i>%)%if;(has_image)[*modify picture]%else;[*add picture]%end;</h1>
       <form class="form-row" method="post" action="%action;"
         enctype="multipart/form-data">
         <input type="hidden" name="m" value="IMAGE_OK">
@@ -35,16 +33,16 @@
         <button class="btn btn-primary ml-2 col-2 snd-btn-portrait" type="submit" disabled>[*send]</button>
       </form>
       %(TODO: print only if old img already exists%)
-      <span>[*previous portrait exist]</span><br>
+      <small class="mt-3">[*previous portrait exist]</small>
       %if;(has_image)
         <div class="d-flex">
-          <a role="button" href="%prefix;m=DEL_IMAGE&i=%index;" class="btn btn-danger ml-auto mt-2" title="[*delete portrait]"><i class="fas fa-trash-alt mr-2"></i>[*delete portrait]</a>
+          <a role="button" href="%prefix;m=DEL_IMAGE&i=%index;" class="btn btn-danger ml-auto mt-2" title="[*delete portrait]"><i class="fas fa-trash-alt mr-2"></i>[*delete portrait]</a> 
         </div>
       %end;
       <hr>
       <div class="d-flex">
-        <h1 class="mt-3">%(<i class="far fa-file-image fa-fw mr-1"></i>%)[*add] [image/images]0</h1>
-        <span class="ml-auto align-self-end">%include.toolbar;</span>
+        <h1 class="display-4">%(<i class="far fa-file-image fa-fw mr-1"></i>%)[*add] [image/images]0</h1>
+        <span class="mb-1 ml-auto align-self-end">%include.toolbar;</span>
       </div>
       <form class="form-row" method="post" action="%action;"
         enctype="multipart/form-data">
@@ -65,16 +63,16 @@
         </div>
         <button class="btn btn-primary ml-2 mt-2 col-2 snd-btn-others" type="submit" disabled>[*send]</button>
         %(TODO: print only if old img already exists%)
-        <span>[*previous image]/%keydir;</code>.<br>[*if previous image exists]</span>
+        <small class="mt-1">[*previous image]/%keydir;</samp>.<br>[*if previous image exists]</small>
       </form>
     </div>
     <div class="col-6">
       %if;(keydir_img_nbr>0)
-        <h1>[*delete] [image/images]0</h1>
-        <code><i class="far fa-folder-open mr-1" aria-hidden="true">
-          </i>/documents/others/%keydir;</code>
-          <span class="ml-1">%keydir_img_nbr; %nn;
-            %if;(keydir_img_nbr>1)[image/images]1%elseif;(keydir_img_nbr=1)[image/images]0%end;
+        <h1 class="display-4">[*delete] [image/images]0</h1>
+        <samp><i class="far fa-folder-open mr-1" aria-hidden="true">
+          </i>/documents/others/%keydir;</samp>
+          <span class="ml-1">(%keydir_img_nbr; %nn;
+            %if;(keydir_img_nbr>1)[image/images]1%elseif;(keydir_img_nbr=1)[image/images]0%end;)
           </span>
         <form class="form" method="post" action="%action;" enctype="multipart/form-data">
           <input type="hidden" name="m" value="DEL_IMAGE_OK">
@@ -86,9 +84,9 @@
             %( remplir le champ file de l'autre form (XX) quand on clique sur le radio bouton %)
             <div class="custom-control custom-radio">
               <input type="radio" id="customRadio%cnt;" name="file_name" class="custom-control-input" value="%keydir_img;">
-              <label class="custom-control-label" for="customRadio%cnt;">
+              <label class="custom-control-label" for="customRadio%cnt;"><samp>
                 %if;(keydir_img_title!="")%keydir_img_title;%else;%keydir_img;%end; %nn;
-                %if;(keydir_img_src!="")(%keydir_img_src;)%end;
+                %if;(keydir_img_src!="")(%keydir_img_src;)%end;</samp>
                 <a class="ml-1" href="%prefix_base_password;&m=IM&s=others/%keydir;/%keydir_img;" target="_blank"
                    title="[*image/images]0"><i class="far fa-file-image fa-fw text-primary"></i></a>
                 <a href="%prefix_base_password;&m=IMAGE&i=%index;&get_notes=on&notes_name=%keydir_img;" title="[*image comment]" %nn;
@@ -122,7 +120,7 @@
   </div>
 %elseif;(evar.m="DEL_IMAGE")
   <div class="col-6">
-    <h1><i class="fas fa-portrait fa-fw text-danger mr-1"></i>[*delete portrait]</h1>
+    <h1 class="display-4"><i class="fas fa-portrait fa-fw text-danger mr-1"></i>[*delete portrait]</h1>
     <a role="button" href="%prefix;m=DEL_IMAGE_OK&i=%index;" class="btn btn-danger ml-5 col-6">[*validate/delete]0%( [add picture]1%)</a>
   </div>
 %end;

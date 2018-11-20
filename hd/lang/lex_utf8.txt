@@ -12,12 +12,12 @@ en: delete selected image
 fr: supprimer l’image séléctionnée
 
     previous portrait exist
-en: previous portait will be moved to <code>/documents/old</code>.<br>If a previous portait already exists in this subfolder, it will be destroyed.
-fr: le portrait précédent sera déplacé dans <code>/documents/old</code>.<br>Si un ancien portrait existe déjà dans ce sous-répertoire, il sera détruit.
+en: previous portait will be moved to <samp>/documents/old</samp>.<br>If a previous portait already exists in this subfolder, it will be destroyed.
+fr: le portrait précédent sera déplacé dans <samp>/documents/old</samp>.<br>Si un ancien portrait existe déjà dans ce sous-répertoire, il sera détruit.
 
     previous image
-en: previous image will be moved to <code>/documents/old
-fr: l’image précédente sera déplacée dans <code>/documents/old
+en: previous image will be moved to <samp>/documents/old
+fr: l’image précédente sera déplacée dans <samp>/documents/old
 
     if previous image exists
 en: if a previous image already exists in this subfolder, it will be destroyed.
