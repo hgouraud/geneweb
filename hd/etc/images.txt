@@ -20,12 +20,11 @@
   which_img_mode ="comment" then only the comment file is updated
   keydir is "on" if we are dealing with "other" images
 %)
-%if;(evar.m="IMAGE")
+%if;(wizard and evar.m="IMAGE")
   <div class="row">
     <div class="col-6 border border-bottom-0 border-top-0 border-left-0">
       <h1 class="display-4">%(<i class="fa fa-portrait fa-fw mr-1"></i>%)%if;(has_image)[*modify picture]%else;[*add picture]%end;</h1>
-      <form class="form-row" method="post" action="%action;"
-        enctype="multipart/form-data">
+      <form class="form-row" method="post" action="%action;" enctype="multipart/form-data">
         <input type="hidden" name="m" value="IMAGE_OK">
         <input type="hidden" name="digest" value="%digest;">
         <input type="hidden" name="i" value="%index;">
@@ -39,48 +38,48 @@
         <button class="btn btn-primary ml-2 col-2 snd-btn-portrait" type="submit" disabled>[*send]</button>
       </form>
       %(TODO: print only if old img already exists%)
-      <small class="mt-3">[*previous portrait exist]</small>
+      <div class="small mt-2">[*previous portrait exist]</div>
       %if;(has_image)
         <div class="d-flex">
           <a role="button" href="%prefix;m=DEL_IMAGE&i=%index;" class="btn btn-danger ml-auto mt-2" title="[*delete portrait]"><i class="fas fa-trash-alt mr-2"></i>[*delete portrait]</a>
         </div>
       %end;
-      <hr>
-      <div class="d-flex">
-        <h1 class="display-4">%(<i class="far fa-file-image fa-fw mr-1"></i>%)[*add] [image/images]0</h1>
-        <span class="mb-1 ml-auto align-self-end">%include.toolbar;</span>
-      </div>
-      <form class="form-row" method="post" action="%action;"
-        enctype="multipart/form-data">
+      <h1 class="display-4">%(<i class="far fa-file-image fa-fw mr-1"></i>%)[*add] [image/images]0</h1>
+      <form class="form-row" method="post" action="%action;" enctype="multipart/form-data">
         <input type="hidden" name="m" value="IMAGE_OK">
         <input type="hidden" name="digest" value="%digest;">
         <input type="hidden" name="i" value="%index;">
         <input type="hidden" name="keydir" value="on">
         <input type="hidden" name="which_img_mode" id="which_img_mode_2" value="both">
         <input type="hidden" name="which_img_name" id="which_img_name_2" value="">
-        <textarea class="form-control col-12" id="notes_comments" name="notes" rows="5" placeholder="[*image comment]"></textarea>
-        <button class="btn btn-primary mt-2 col-12 btn-update-comment" type="submit" disabled>[*update image comment] <span id="which_img_show"></span></button>
-        <div class="custom-file col mt-2">
-          <input type="file" name="file" class="custom-file-input custom-others"
-            id="others_file" accept="image/*" %( multiple%) lang="%lang;"
+        <div class="custom-file col">
+          <input type="file" name="file" class="custom-file-input custom-others" %nn;
+            id="others_file" accept="image/*"%( multiple%) autofocus lang="%lang;" %nn;
             %(onclick="reset_notes("[below]"); return false;"%)>
-          <label class="custom-file-label text-truncate" for="others_file">
-            <span>[*select] [image/images]0</span></label>
+          <label class="custom-file-label text-truncate" for="others_file">%nn;
+            [*select] [image/images]0%nn;
+          </label>
         </div>
-        <button class="btn btn-primary ml-2 mt-2 col-2 snd-btn-others" type="submit" disabled>[*send]</button>
+        <button class="btn btn-primary ml-2 col-2 snd-btn-others" type="submit" disabled>[*send]</button>
         %(TODO: print only if old img already exists%)
-        <small class="mt-1">[*previous image]/%keydir;</samp>.<br>[*if previous image exists]</small>
+        <div class="small col-12 mt-1">[*previous image]/%keydir;</samp>.<br>[*if previous image exists]</div>
+        <div class="d-flex col">
+          <h1 class="display-4">%(<i class="far fa-file-image fa-fw mr-1"></i>%)[*comment]</h1>
+          <span class="mb-1 ml-auto align-self-end">%include.toolbar;</span>
+        </div>
+        <textarea class="form-control col-12" id="notes_comments" name="notes" rows="5" placeholder="[*image comment]" disabled></textarea>
+        <button class="btn btn-primary mt-2 col-12 btn-update-comment" type="submit" disabled>[*update image comment] <span id="which_img_show"></span></button>
       </form>
     </div>
     <div class="col-6">
-      %if;(keydir_img_nbr>0)
+      %if;(keydir_img_nbr>=0)
         <h1 class="display-4">[*delete] [image/images]0</h1>
         <samp><i class="far fa-folder-open mr-1" aria-hidden="true">
           </i>/documents/others/%keydir;</samp>
           <span class="ml-1">(%keydir_img_nbr; %nn;
-            %if;(keydir_img_nbr>1)[image/images]1%elseif;(keydir_img_nbr=1)[image/images]0%end;)
+            %if;(keydir_img_nbr>1)[image/images]1%else;[image/images]0%end;)
           </span>
-        <form class="form" method="post" action="%action;" enctype="multipart/form-data">
+        <form class="form-row col-12" method="post" action="%action;" enctype="multipart/form-data">
           <input type="hidden" name="m" value="DEL_IMAGE_OK">
           <input type="hidden" name="digest" value="%digest;">
           <input type="hidden" name="i" value="%index;">
@@ -89,31 +88,31 @@
           <input type="hidden" name="which_img_name" id="which_img_name_3" value="">
           %foreach;img_in_keydir;
             %( remplir le champ file de l'autre form (XX) quand on clique sur le radio bouton %)
-            <div class="custom-control custom-radio">
-              <input type="radio" id="customRadio%cnt;" name="file_name" class="custom-control-input" value="%keydir_img;">
-              <label class="custom-control-label" for="customRadio%cnt;"><samp>%nn;
-                %if;(keydir_img_title!="")%keydir_img_title;%else;%keydir_img;%end;%nn;
-                %if;(keydir_img_src!="") <small>(%keydir_img_src;)</small>%end;</samp>
-                <a class="ml-1" href="%prefix_base_password;&m=IM&s=others/%keydir;/%keydir_img;" target="_blank"
-                   title="[*image/images]0"><i class="far fa-file-image fa-fw text-primary"></i></a>%nn;
-                <a href="%prefix_base_password;&m=IMAGE&i=%index;&get_notes=on&notes_name=%keydir_img;" title="[*comment]" %nn;
-                  %if;(evar.get_notes="on" and keydir_img=evar.notes_name)
-                    id="get_notes" %nn;
-                  %end; onclick='get_notes(%cnt;, "%keydir_img;"); return false;' %nn;
-                  %if;(keydir_img_notes!="")
-                    tabindex="0" data-trigger="focus" data-toggle="popover" %nn;
-                    data-placement="bottom" data-html="true" %nn;
-                    data-content="%keydir_img_notes;" %nn;
-                  %end;><i class="far fa-file-alt fa-fw text-primary"></i></a>
-              </label>
+            <div class="d-flex">
+              <div class="custom-control custom-radio col">
+                <input type="radio" id="customRadio%cnt;" name="file_name" class="custom-control-input" value="%keydir_img;">
+                <label class="custom-control-label" for="customRadio%cnt;"><samp>%keydir_img;</samp></label>
+              </div>
+              <a href="%prefix_base_password;&m=IM&s=others/%keydir;/%keydir_img;" class="ml-auto" target="_blank" rel="noopener"
+                 title="[*see] [image/images]0"><i class="far fa-file-image fa-fw text-primary"></i></a>%nn;
+              <a href="#" class="mb-1 text-%if;(keydir_img_notes="")danger%else;primary%end;"
+                onclick='get_notes(%cnt;, "%keydir_img;"); return false;' %nn;
+                data-toggle="tooltip" data-html="true"
+                %(data-trigger="focus"%) data-placement="left"
+                data-content="%keydir_img_notes;" title="<em>[*modify] [comment]</em><br><br>
+                %if;(keydir_img_title!="")%keydir_img_title;%end;%nn;
+                %if;(keydir_img_src!="") <small>(%keydir_img_src;)</small>%end;
+                <br>%keydir_img_notes;">%nn;
+                <i class="far fa-file-alt fa-fw"></i>
+              </a>
             </div>
             <input type="hidden" name="file" value="%keydir_img;">
             %( on a déjà el contenu de %keydir_img_notes;!! Comment le partager avec le popover? %)
             <input type="hidden" id="notes_content_%cnt;" value="%keydir_img_notes;">
           %end;
-          <div class="d-flex mt-2">
-            <button type="submit" class="btn btn-danger ml-auto col-6 del-img-btn" disabled><i class="fa fa-trash-alt mr-2"></i>[*delete selected image]0</button>
-          </div>
+          %if;(keydir_img_nbr>0)
+            <button type="submit" class="btn btn-danger del-img-btn ml-2 mt-2" disabled><i class="fa fa-trash-alt mr-2"></i>[*delete selected image]0</button>
+          %end;
         </form>
         %(
         <div class="d-flex mt-2">
@@ -125,7 +124,7 @@
       %end;
     </div>
   </div>
-%elseif;(evar.m="DEL_IMAGE")
+%elseif;(wizard and evar.m="DEL_IMAGE")
   <div class="col-6 mb-3">
     <h1 class="display-4">%(<i class="fas fa-portrait fa-fw text-danger mr-1"></i>%)[*delete portrait]</h1>
     <a role="button" href="%prefix;m=DEL_IMAGE_OK&i=%index;" class="btn btn-danger ml-4">[*validate/delete]1%( [add picture]1%)</a>
@@ -141,14 +140,24 @@ $('.xxx').change(function() {
    let fileName = $(this).val().split('\\').pop();
    $(this).next('.custom-file-label').addClass("selected").html(fileName);
    $('.yyy').attr('disabled', false);
+   %if;("yyy"="snd-btn-others")
+     $('textarea').attr('disabled', false);
+     $('textarea').focus();
+   %end;
 });
 %end;
 <script>
 %apply;input_snd("custom-portrait","snd-btn-portrait")
 %apply;input_snd("custom-others","snd-btn-others")
-$('.fa-file-alt').click(function() {
+$('#notes_comments').bind('input propertychange', function() {
+  if(this.value.length){
   $('.btn-update-comment').attr('disabled', false);
+  }
+});
+$('.fa-file-alt').click(function() {
   $('.custom-others').attr('disabled', true);
+  $('textarea').attr('disabled', false);
+  $('textarea').focus();
 });
 $("form input:radio").change(function() {
   $('.del-img-btn').attr('disabled', false);
