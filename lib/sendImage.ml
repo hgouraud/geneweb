@@ -1148,7 +1148,8 @@ let get conf key =
   | None -> failwith (key ^ " unbound")
 
 let effective_send_ok conf base p file kind =
-  let _ = Printf.eprintf "Effective_send_ok\n" in
+  let keydir = if kind = KeyImage then "KeyImage" else "KeyDict" in
+  let _ = Printf.eprintf "Effective_send_ok: %s\n" keydir in
   let _ =  List.iter
     (fun (k, v) ->
        if k <> "file" then Printf.eprintf "Env_var: %s, %s\n" k v)
@@ -1208,24 +1209,24 @@ let effective_send_ok conf base p file kind =
       List.fold_right Filename.concat
         [Util.base_path conf.bname; "documents"; "others"] keyname
   in
+  let _ = Printf.eprintf "Testing bfdir: %s\n" bfdir in
+
   let bfdir =
     if Sys.file_exists bfdir then bfdir
     else
+      let _ = Printf.eprintf "Create non existant folders\n" in
       let d = Filename.concat (Util.base_path conf.bname) "documents" in
       let d1 = Filename.concat d "portraits" in
       let d2 = Filename.concat d "others" in
+      let d3 = Filename.concat d2 keyname in
       (try Unix.mkdir d 0o777 with Unix.Unix_error (_, _, _) -> ());
       (try Unix.mkdir d1 0o777 with Unix.Unix_error (_, _, _) -> ());
       (try Unix.mkdir d2 0o777 with Unix.Unix_error (_, _, _) -> ());
-      if kind = KeyImage then d1 else d2
+      (try Unix.mkdir d3 0o777 with Unix.Unix_error (_, _, _) -> ());
+      if kind = KeyImage then d1 else d3
   in
-  let bfdir =
-    if kind = KeyDir && Sys.file_exists bfdir then bfdir
-    else
-      let d1 = bfdir in
-      (try Unix.mkdir d1 0o777 with Unix.Unix_error (_, _, _) -> ());
-      d1
-  in
+  let _ = Printf.eprintf "Writing file in: %s\n" bfdir in
+  let _ = flush stderr in
   let fname = Filename.concat bfdir bfname in
   let _moved = if which_img_mode = "comment" then 0
     else move_file_to_old conf fname bfname keyname
@@ -1255,17 +1256,14 @@ let print_send_ok conf base =
       let s = raw_get conf "i" in
       try int_of_string s with Failure _ -> incorrect conf
     in
-    let kind = try List.assoc "keydir" conf.env with Not_found -> "KeyImage" in
+    let kind = try List.assoc "keydir" conf.env with Not_found -> "" in
+    let kk = kind in
     let kind = if kind = "on" then KeyDir else KeyImage in
-    let _ = Printf.eprintf "Get p (ip) (%d) \n" ip in
+    let _ = Printf.eprintf "Get p (ip) (%d), keydir: %s\n" ip kk in
     let _ = flush stderr in
     let p = poi base (Adef.iper_of_int ip) in
-    let _ = Printf.eprintf "Have p (ip) (%d) \n" ip in
-    let _ = flush stderr in
     let digest = Update.digest_person (UpdateInd.string_person_of base p) in
     if digest = raw_get conf "digest" then
-      let _ = Printf.eprintf "Send file \n" in
-      let _ = flush stderr in
       let which_img_mode = raw_get conf "which_img_mode" in
       let which_img_name = raw_get conf "which_img_name" in
       let file = if which_img_mode <> "comment" then raw_get conf "file"

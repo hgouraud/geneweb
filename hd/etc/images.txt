@@ -28,7 +28,7 @@
         <input type="hidden" name="m" value="IMAGE_OK">
         <input type="hidden" name="digest" value="%digest;">
         <input type="hidden" name="i" value="%index;">
-        <input type="hidden" name="notes" value="%index;">
+        <input type="hidden" name="notes" value="">
         <input type="hidden" name="which_img_mode" id="which_img_mode_1" value="portrait">
         <input type="hidden" name="which_img_name" id="which_img_name_1" value="">
         <div class="custom-file col">
