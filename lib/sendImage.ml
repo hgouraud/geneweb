@@ -964,38 +964,6 @@ let print_send_image conf base sp digest =
      Templ.print_foreach = print_foreach conf base}
     env sp
 
-(*
-let print_get_notes conf base =
-  let ip =
-    let s = raw_get conf "i" in
-    try int_of_string s with Failure _ -> incorrect conf
-  in
-  let p = poi base (Adef.iper_of_int ip) in
-  let sp = string_person_of base p in
-  let digest = try List.assoc "digest" conf.env with Not_found -> "" in
-  let keydir = default_image_name base p in
-  let name = try List.assoc "file_name" conf.env with Not_found -> "" in
-  let ext = Filename.extension name in
-  let name = Filename.chop_suffix name ext in
-  let fname = List.fold_right
-    Filename.concat [Util.base_path conf.bname; "documents"; "others"; keydir] name
-  in
-  let env =
-    ("digest", Vstring digest) ::
-    ("keydir_img", Vstring fname) ::
-    ("keydir_img_notes", Vstring fname) ::
-    ("keydir_img_src", Vstring fname) ::
-    ("keydir_img_title", Vstring fname) :: env
-  in
-  Hutil.interp conf "images"
-    {Templ.eval_var = eval_var conf base;
-     Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
-     Templ.eval_predefined_apply = (fun _ -> raise Not_found);
-     Templ.get_vother = get_vother; Templ.set_vother = set_vother;
-     Templ.print_foreach = print_foreach conf base}
-    env sp
-*)
-
 let print conf base =
   let _ = Printf.eprintf "\nPrintx\n" in
   let _ =  List.iter
@@ -1037,6 +1005,24 @@ let print_del conf base =
 (* Send and delete image form validated *)
 
 let print_confirm conf base p message =
+let _ = message in
+let sp = string_person_of base p in
+let conf =
+    {(conf) with env =
+      ("i", (string_of_int (Adef.int_of_iper (get_key_index p)))) ::
+      ("m", "IMAGE") ::
+      ("digest", (Update.digest_person (UpdateInd.string_person_of base p))) ::
+    conf.env }
+in
+Hutil.interp conf "images"
+  {Templ.eval_var = eval_var conf base;
+   Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
+   Templ.eval_predefined_apply = (fun _ -> raise Not_found);
+   Templ.get_vother = get_vother; Templ.set_vother = set_vother;
+   Templ.print_foreach = print_foreach conf base}
+  [] sp
+
+(*
   let title _ =
     Wserver.printf "%s" (capitale (transl conf message))
   in
@@ -1052,6 +1038,7 @@ let print_confirm conf base p message =
   Wserver.printf "</a></li><br>";
   Wserver.printf "\n</ul>\n";
   Hutil.trailer conf
+*)
 
 let write_file fname content =
   let oc = Secure.open_out_bin fname in
@@ -1262,14 +1249,11 @@ let print_send_ok conf base =
     let _ = Printf.eprintf "Get p (ip) (%d), keydir: %s\n" ip kk in
     let _ = flush stderr in
     let p = poi base (Adef.iper_of_int ip) in
-    let digest = Update.digest_person (UpdateInd.string_person_of base p) in
-    if digest = raw_get conf "digest" then
-      let which_img_mode = raw_get conf "which_img_mode" in
-      let which_img_name = raw_get conf "which_img_name" in
-      let file = if which_img_mode <> "comment" then raw_get conf "file"
-        else  which_img_name
-      in effective_send_ok conf base p file kind
-    else Update.error_digest conf
+    let which_img_mode = raw_get conf "which_img_mode" in
+    let which_img_name = raw_get conf "which_img_name" in
+    let file = if which_img_mode <> "comment" then raw_get conf "file"
+      else  which_img_name
+    in effective_send_ok conf base p file kind
   with Update.ModErr -> ()
 
 let effective_delete_ok conf base p =
