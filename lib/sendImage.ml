@@ -1054,8 +1054,6 @@ let print_confirm conf base p message =
   Hutil.trailer conf
 
 let write_file fname content =
-  let _ = Printf.eprintf "Content: %s\n" content in
-  let _ = flush stderr in
   let oc = Secure.open_out_bin fname in
   output_string oc content; flush oc; close_out oc
 
@@ -1142,6 +1140,8 @@ let dump_bad_image conf s =
       end
   | _ -> ()
 
+let space_to_unders = Mutil.tr ' ' '_'
+
 let get conf key =
   match p_getenv conf.env key with
     Some v -> v
@@ -1161,6 +1161,7 @@ let effective_send_ok conf base p file kind =
   let filename = if which_img_mode = "comment" then raw_get conf ("which_img_name")
     else raw_get conf ("file_name")
   in
+  let filename = space_to_unders filename in
   let _ = Printf.eprintf "New filename: %s (%s)\n" filename which_img_mode in
   let notes =
     Util.sanitize_html
