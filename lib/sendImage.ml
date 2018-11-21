@@ -1005,12 +1005,12 @@ let print_del conf base =
 (* Send and delete image form validated *)
 
 let print_confirm conf base p message =
-let _ = message in
 let sp = string_person_of base p in
 let conf =
     {(conf) with env =
       ("i", (string_of_int (Adef.int_of_iper (get_key_index p)))) ::
       ("m", "IMAGE") ::
+      ("confirm", message) ::
       ("digest", (Update.digest_person (UpdateInd.string_person_of base p))) ::
     conf.env }
 in
@@ -1228,7 +1228,10 @@ let effective_send_ok conf base p file kind =
     U_Send_image (Util.string_gen_person base (gen_person_of_person p))
   in
   History.record conf base changed
-    (if kind = KeyImage then "si" else "ki"); print_confirm conf base p "image received"
+    (if kind = KeyImage then "si" else
+      if filename <> "" && notes <> "" then "sb"
+      else if filename <> "" then "so"
+      else if notes <> "" then "sc" else "sn"); print_confirm conf base p "image sent"
 
 let print_send_ok conf base =
   let _ = Printf.eprintf "\nPrint_send_ok\n" in
@@ -1283,7 +1286,7 @@ let effective_delete_ok conf base p =
     U_Delete_image (Util.string_gen_person base (gen_person_of_person p))
   in
   History.record conf base changed
-    (if kind = KeyImage then "di" else "dk"); print_confirm conf base p "image deleted"
+    (if kind = KeyImage then "di" else "do"); print_confirm conf base p "image deleted"
 
 let print_del_ok conf base =
   (*let fname = Util.p_getenv env "name" in*)

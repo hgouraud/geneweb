@@ -70,6 +70,7 @@
         <textarea class="form-control col-12" id="notes_comments" name="notes" rows="5" placeholder="[*image comment]" disabled></textarea>
         <button class="btn btn-primary mt-2 col-12 btn-update-comment" type="submit" disabled>[*update image comment] <span id="which_img_show"></span></button>
       </form>
+      %if;(evar.confirm!="")%evar.confirm;%else;&nbsp;%end;
     </div>
     <div class="col-6">
       %if;(keydir_img_nbr>=0)

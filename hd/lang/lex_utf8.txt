@@ -7,6 +7,18 @@ fr: sélect. fichier
 en: delete portrait
 fr: supprimer le portrait
 
+    portrait
+en: protrait
+fr: portrait
+
+    comment
+en: comment
+fr: comment
+
+    other image
+en: other image
+fr: autre image
+
     delete selected image
 en: delete selected image
 fr: supprimer l’image séléctionnée
