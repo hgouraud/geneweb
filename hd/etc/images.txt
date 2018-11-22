@@ -157,10 +157,11 @@
                   onclick='set_old(%cnt;, "%keydir_img_old;")' class="custom-control-input" value="">
                 <label class="custom-control-label" for="customRadio_r%cnt;"><samp>%nn;
                 %keydir_img_old;
-              <a href="%prefix_base_password;&m=IMAGE&i=%index&em=DEL&s=%keydir_img_old;"
-                  class="ml-auto danger" target="_blank" rel="noopener"
-                  title="[*see] [image/images]0"><i class="far fa-trash-alt fa-fw text-primary"></i></a>%nn;
               </div>
+              <a href="%prefix_base_password;&m=DEL_IMAGE_OK&i=%index&%nn
+                  file_name=%keydir_img_old;&which_img_mode=both&keydir=on&delete=on"
+                  class="ml-auto" rel="noopener"
+                  title="[*delete] [image/images]0"><i class="far fa-trash-alt text-danger fa-fw text-primary"></i></a>%nn;
             </div>
           %end;
           %if;(keydir_img_nbr>0)

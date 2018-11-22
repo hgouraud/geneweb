@@ -1078,6 +1078,25 @@ let write_file fname content =
   let oc = Secure.open_out_bin fname in
   output_string oc content; flush oc; close_out oc
 
+let delete_old_file conf bfname =
+  let _ = Printf.eprintf "Delete old file: %s \n" bfname in
+  let filename = List.fold_right
+    Filename.concat [Util.base_path conf.bname; "documents"; "old"] bfname
+  in
+  List.fold_left
+    (fun cnt typ ->
+      let ext = extension_of_type typ in
+      let file = filename ^ ext in
+      let file_t = filename ^ ".txt" in
+      if Sys.file_exists file then
+        begin
+          (try Sys.remove file with Sys_error _ -> ());
+          if Sys.file_exists file_t then (try Sys.remove file_t with Sys_error _ -> ());
+          cnt + 1
+        end
+      else cnt)
+    0 image_types
+
 (* Move fname to old_dir if it exists with some extension.
    Returns the number of moved files *)
 let move_file_to_old conf fname bfname keydir =
@@ -1105,8 +1124,7 @@ let move_file_to_old conf fname bfname keydir =
           (try Sys.remove old_file_t with Sys_error _ -> ());
         (try Unix.mkdir old_dir 0o777 with Unix.Unix_error (_, _, _) -> ());
         (try Unix.mkdir old_dir_key 0o777 with Unix.Unix_error (_, _, _) -> ());
-        if Sys.file_exists cur_file then
-          (try Unix.rename cur_file old_file with Unix.Unix_error (_, _, _) -> ());
+        (try Unix.rename cur_file old_file with Unix.Unix_error (_, _, _) -> ());
         if Sys.file_exists cur_file_t then
           (try Unix.rename cur_file_t old_file_t with Unix.Unix_error (_, _, _) -> ());
         cnt + 1
@@ -1314,7 +1332,6 @@ let effective_send_ok conf base p file kind =
         [Util.base_path conf.bname; "documents"; "others"] keydir
   in
   let _ = Printf.eprintf "Testing bfdir: %s\n" bfdir in
-
   let bfdir =
     if Sys.file_exists bfdir then bfdir
     else
@@ -1390,6 +1407,7 @@ let effective_delete_ok conf base p =
   let _ = flush stderr in
   let keydir = default_image_name base p in
   let name = try List.assoc "file_name" conf.env with Not_found -> "" in
+  let delete = try (List.assoc "delete" conf.env = "on") with Not_found -> false in
   let ext = Filename.extension name in
   let name = Filename.chop_suffix name ext in
   let name = if name = "" then keydir else name in
@@ -1401,8 +1419,10 @@ let effective_delete_ok conf base p =
     Filename.concat [Util.base_path conf.bname; "documents"; keyrep] bfname
   in
   let _ = Printf.eprintf "Delete: %s\n" fname in
+  if delete then if delete_old_file conf bfname = 0 then incorrect conf else ()
+  else if move_file_to_old conf fname bfname keydir = 0 then incorrect conf;
+  let _ = Printf.eprintf "Deleted/moved\n" in
   let _ = flush stderr in
-  if move_file_to_old conf fname bfname keydir = 0 then incorrect conf;
   let changed =
     U_Delete_image (Util.string_gen_person base (gen_person_of_person p))
   in
