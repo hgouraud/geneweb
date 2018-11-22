@@ -286,6 +286,11 @@ and eval_simple_var conf base env p =
         Vstring s -> str_val s
       | _ -> raise Not_found
       end
+  | ["keydir_img_old"] ->
+      begin match get_env "keydir_img_old" env with
+        Vstring s -> str_val s
+      | _ -> raise Not_found
+      end
   | ["keydir_img_nbr"] ->
       str_val (string_of_int (List.length (get_keydir conf base (poi base p.key_index))))
   | ["keydir_img_notes"] ->
@@ -822,6 +827,9 @@ let print_foreach conf base print_ast _eval_expr =
     | ["img_in_keydir"] ->
         print_foreach_img_in_keydir env p al
           (get_keydir conf base (poi base p.key_index))
+    | ["img_in_keydir_old"] ->
+        print_foreach_img_in_keydir_old env p al
+          (get_keydir_old conf base (poi base p.key_index))
     | ["qualifier"] -> print_foreach_string env p al p.qualifiers s
     | ["surname_alias"] -> print_foreach_string env p al p.surnames_aliases s
     | ["relation"] -> print_foreach_relation env p al p.rparents
@@ -838,6 +846,18 @@ let print_foreach conf base print_ast _eval_expr =
             ("keydir_img_notes", Vstring a) ::
             ("keydir_img_src", Vstring a) ::
             ("keydir_img_title", Vstring a) ::
+            ("cnt", Vint cnt) :: env
+          in
+          List.iter (print_ast env p) al; loop (cnt + 1) l
+      | [] -> ()
+    in
+    loop 1 list
+  and print_foreach_img_in_keydir_old env p al list =
+    let rec loop cnt =
+      function
+        a :: l ->
+          let env =
+            ("keydir_img_old", Vstring a) ::
             ("cnt", Vint cnt) :: env
           in
           List.iter (print_ast env p) al; loop (cnt + 1) l
@@ -1148,7 +1168,7 @@ let get conf key =
     Some v -> v
   | None -> failwith (key ^ " unbound")
 
-let print_reset_image_ok conf base =
+let print_restore_image_ok conf base =
   let _ = Printf.eprintf "\nPrint_reset_image_ok\n" in
   let _ =  List.iter
     (fun (k, v) ->
@@ -1180,10 +1200,12 @@ let print_reset_image_ok conf base =
     let _ = flush stderr in
     if Sys.file_exists old_file then
       (try Sys.rename old_file new_file with Sys_error _ -> ());
-    Printf.eprintf "Done: %s -> %s\n" old_file new_file;
+    Printf.eprintf "Done portrait: %s -> %s\n" old_file new_file;
     end
   else
     begin
+    let _ = Printf.eprintf "Mode other: %s\n" filename in
+    let _ = flush stderr in
     let filename_t = Filename.chop_suffix filename ext in
     let old_file = List.fold_right Filename.concat
       [Util.base_path conf.bname; "documents"; "old"; keydir] filename
@@ -1203,15 +1225,14 @@ let print_reset_image_ok conf base =
       (try Sys.rename old_file new_file with Sys_error _ -> ());
     if Sys.file_exists old_file_t then
       (try Sys.rename old_file_t new_file_t with Sys_error _ -> ());
-    Printf.eprintf "Done: %s\n" old_file;
+    Printf.eprintf "Done other: %s -> %s\n" old_file new_file;
     end;
   let message = if which_img_mode = "portrait" then
     (capitale ((transl conf "portrait") ^ " " ^
-      (transl conf "restaured")))
+      (transl conf "restored")))
     else
     (capitale ((transl conf "other image") ^ " " ^
-      (transl conf "restaured")))
-
+      (transl conf "restored")))
   in
   let _ = Printf.eprintf "Starting new IMAGE page: %s\n" message in
   let sp = string_person_of base p in

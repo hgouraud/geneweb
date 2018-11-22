@@ -96,14 +96,14 @@
     </div>
     <div class="col-6">
       %if;(keydir_img_nbr>=0)
-        <h1 class="display-4">[*delete] [image/images]0</h1>
+        <h1 class="display-4">[*available images]0</h1>
         <samp><i class="far fa-folder-open mr-1" aria-hidden="true">
           </i>/documents/others/%keydir;</samp>
           <span class="ml-1">(%keydir_img_nbr; %nn;
             %if;(keydir_img_nbr>1)[image/images]1%else;[image/images]0%end;)
           </span>
         <form class="form-row col-12" method="post" action="%action;" enctype="multipart/form-data">
-          <input type="hidden" name="m" value="DEL_IMAGE_OK">
+          <input type="hidden" id="m_del_img" name="m" value="DEL_IMAGE_OK">
           <input type="hidden" name="digest" value="%digest;">
           <input type="hidden" name="i" value="%index;">
           <input type="hidden" name="keydir" value="on">
@@ -136,7 +136,36 @@
             <input type="hidden" id="notes_content_%cnt;" value="%keydir_img_notes;">
           %end;
           %if;(keydir_img_nbr>0)
-            <button type="submit" class="btn btn-danger del-img-btn ml-2 mt-2" disabled><i class="fa fa-trash-alt mr-2"></i>[*delete selected image]0</button>
+            <button type="submit" id="ok-del-oth" class="btn btn-danger del-img-btn ml-2 mt-2"
+              disabled><i class="fa fa-trash-alt mr-2"></i>[*delete] [selected image]0</button>
+          %end;
+        </form>
+
+        <h1 class="display-4">[*saved images]0</h1>
+        <form class="form-row col-12" method="post" action="%action;" enctype="multipart/form-data">
+          <input type="hidden" name="m" value="GET_IMAGE_OK">
+          <input type="hidden" name="digest" value="%digest;">
+          <input type="hidden" name="i" value="%index;">
+          <input type="hidden" name="keydir" value="on">
+          <input type="hidden" name="which_img_mode" id="which_img_mode_4" value="both">
+          <input type="hidden" name="which_img_name" id="which_img_name_4" value="">
+          %foreach;img_in_keydir_old;
+            %( remplir le champ file de l'autre form (XX) quand on clique sur le radio bouton %)
+            <div class="d-flex">
+              <div class="custom-control custom-radio col">
+                <input type="radio" id="customRadio_r%cnt;" name="file_name"
+                  onclick='set_old(%cnt;, "%keydir_img_old;")' class="custom-control-input" value="">
+                <label class="custom-control-label" for="customRadio_r%cnt;"><samp>%nn;
+                %keydir_img_old;
+              <a href="%prefix_base_password;&m=IMAGE&i=%index&em=DEL&s=%keydir_img_old;"
+                  class="ml-auto danger" target="_blank" rel="noopener"
+                  title="[*see] [image/images]0"><i class="far fa-trash-alt fa-fw text-primary"></i></a>%nn;
+              </div>
+            </div>
+          %end;
+          %if;(keydir_img_nbr>0)
+            <button type="submit" id="ok-del-oth" class="btn btn-danger del-img-btn ml-2 mt-2"
+              disabled><i class="fa fa-trash-alt mr-2"></i>[*restore] [selected image]0</button>
           %end;
         </form>
         %(
@@ -197,6 +226,7 @@ $(function () {
 $('.popover-dismiss').popover({
   trigger: 'focus'
 })
+
 %( On doit pouvoir faie mieux et éviter l'appel au serveur à la façon popover %)
 function get_notes (cnt, name) {
 var notes = "notes_content_"+cnt;
@@ -206,6 +236,12 @@ document.getElementById("which_img_show").textContent=name;
 document.getElementById("which_img_name_2").value=name;
 document.getElementById("which_img_mode_2").value="comment";
 }
+
+function set_old (cnt, name) {
+document.getElementById("which_img_name_4").value=name;
+document.getElementById("which_img_mode_4").value="both";
+}
+
 %(
 function reset_notes (cmt) {
 alert("reset notes");

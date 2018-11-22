@@ -2655,6 +2655,14 @@ let keydir conf base p =
   else None
   with Sys_error _ -> None
 
+let keydir_old conf base p =
+  let s = default_image_name base p in
+  let f = List.fold_right
+    Filename.concat [base_path conf.bname; "documents"; "old"] s in
+  try if Sys.is_directory f then Some f
+  else None
+  with Sys_error _ -> None
+
 let get_keydir_img_notes conf base p fname =
   let keyd = default_image_name base p in
   let fname = List.fold_right
@@ -2675,6 +2683,20 @@ let out_keydir_img_notes conf base p fname s =
     output_string oc s;
     close_out oc;
   with Sys_error _ -> ()
+
+let get_keydir_old conf base p =
+  match keydir_old conf base p with
+    Some f ->
+      List.fold_right (fun f1 l ->
+        if f1.[0] <> '.' && Filename.extension f1 <> ".txt" &&
+          ( Filename.extension f1 = ".jpg" ||
+            Filename.extension f1 = ".gif" ||
+            Filename.extension f1 = ".png" )
+        then
+          (* vérifier ici le type des images autorisées  *)
+          ( f1 :: l ) else l)
+          (Array.to_list (Sys.readdir f)) []
+  | None -> []
 
 let get_keydir conf base p =
   match keydir conf base p with

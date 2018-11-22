@@ -862,7 +862,7 @@ let defaultHandler : handler =
   ; forum_view = if_enabled_forum Forum.print
 
   ; get_image_ok = begin fun self conf base ->
-      if conf.wizard && conf.can_send_image then SendImage.print_reset_image_ok conf base
+      if conf.wizard && conf.can_send_image then SendImage.print_restore_image_ok conf base
       else self.incorrect_request self conf base
     end
 

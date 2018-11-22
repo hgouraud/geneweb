@@ -19,6 +19,14 @@ fr: comment
 en: other image
 fr: autre image
 
+    available images
+en: available images
+fr: images disponibles
+
+    saved images
+en: saved images
+fr: images sauvegardées
+
     sent
 en: sent
 fr: envoyé
@@ -26,6 +34,10 @@ fr: envoyé
     deleted
 en: deleted
 fr: supprimé
+
+    delete
+en: delete
+fr: supprimer
 
     restored
 en: restored
@@ -35,9 +47,9 @@ fr: restauré
 en: restore
 fr: restaurer
 
-    delete selected image
-en: delete selected image
-fr: supprimer l’image séléctionnée
+    selected image
+en: selected image
+fr: l’image séléctionnée
 
     previous portrait exist
 en: previous portait will be moved to <samp>/documents/old</samp>.<br>If a previous portait already exists in this subfolder, it will be destroyed.
