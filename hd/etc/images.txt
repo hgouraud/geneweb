@@ -49,8 +49,22 @@
             <input type="hidden" name="which_img_name" id="which_img_name_1" value="%keydir_img;">
             <button class="btn btn-danger ml-auto mt-2" type="submit" %if;(not has_image)disabled%end;>%nn;
               <i class="fas fa-trash-alt mr-2"></i>[*delete portrait]
-          </button>
+            </button>
           </form>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          %if;(has_old_image)
+          <form class="form-row" method="post" action="%action;" enctype="multipart/form-data">
+            <input type="hidden" name="m" value="GET_IMAGE_OK">
+            <input type="hidden" name="digest" value="">
+            <input type="hidden" name="i" value="%index;">
+            <input type="hidden" name="notes" value="">
+            <input type="hidden" name="which_img_mode" id="which_img_mode_1" value="portrait">
+            <input type="hidden" name="which_img_name" id="which_img_name_1" value="%keydir;">
+            <button class="btn btn-danger ml-auto mt-2" type="submit" >%nn;
+              <i class="fas fa-trash-alt mr-2"></i>[*restore] [portrait]
+            </button>
+          </form>
+          %end;
         </div>
       <h1 class="display-4">%(<i class="far fa-file-image fa-fw mr-1"></i>%)[*add] [image/images]0</h1>
       <form class="form-row" method="post" action="%action;" enctype="multipart/form-data">

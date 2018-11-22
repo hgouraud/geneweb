@@ -87,7 +87,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                     </div>
                     <a role="button" class="btn btn-outline-%if;(evar.wide="on")danger%else;primary%end; my-3"%sp;
                       href="%prefix_base_password;%nn;
-                            %foreach;env_binding;%if;(env.key!="wide")%env.key=%env.val;;%end;%end;%nn;
+                            %foreach;env_binding;%if;(env.key!="wide" and env.key!="file")%env.key=%env.val;;%end;%end;%nn;
                             %if;(evar.wide!="on")wide=on;%end;"%sp;
                       title="%if;(evar.wide="on")[*user/password/cancel]2 [full width/columns]0 %else;[*full width/columns]0%end;">%nn;
                       <i class="fa fa-desktop fa-fw" aria-hidden="true"></i>%nn;
@@ -109,7 +109,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
             %if;(sosa_prev.index!="")
               <li class="nav-item">
                 <a class="nav-link" href="%prefix_base_password;%if;(bvar.access_by_key="yes")%sosa_prev.access;%else;i=%sosa_prev.index;%end;;%nn;
-                  %foreach;env_binding;%if;(env.key!="p" and env.key!="n" and env.key!="oc" and env.key!="i")%env.key=%env.val;;%end;%end;"
+                  %foreach;env_binding;%if;(env.key!="p" and env.key!="n" and env.key!="oc" and env.key!="i" and env.key!="file")%env.key=%env.val;;%end;%end;"
                   title="[Sosa] %sosa_prev.sosa;[:] %sosa_prev;"><span class="fa fa-chevron-left" aria-hidden="true"></span><span class="sr-only"><</span></a>%nn;
               </li>
             %end;
@@ -121,7 +121,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
               %end;%)
               <li class="nav-item">
                 <a class="nav-link" href="%prefix_base_password;%if;(bvar.access_by_key="yes")%sosa_next.access;%else;i=%sosa_next.index;%end;;%nn;
-                  %foreach;env_binding;%if;(env.key!="p" and env.key!="n" and env.key!="oc" and env.key!="i")%env.key=%env.val;;%end;%end;"
+                  %foreach;env_binding;%if;(env.key!="p" and env.key!="n" and env.key!="oc" and env.key!="i" and env.key!="file")%env.key=%env.val;;%end;%end;"
                   title="[Sosa] %sosa_next.sosa;[:] %sosa_next;"><span class="fa fa-chevron-right" aria-hidden="true"></span><span class="sr-only">></span></a>
               </li>
             %end;
@@ -165,11 +165,11 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                   <i class="far fa-dot-circle fa-fw %sexcolor; mr-1"></i> [*modify] [n° Sosa] 1%nn;
                 </a>
               %else;
-                <a class="dropdown-item" href="%prefix_no_iz;%suffix;" title="%if;(bvar.default_sosa_ref!="")%nl;[back to default sosa reference] %bvar.default_sosa_ref;%else;[*user/password/cancel]2 [navigation] [with] %sosa_ref.first_name_key_strip; %sosa_ref.surname_key_strip;%end;">%nn;
+                <a class="dropdown-item" href="%prefix_no_iz;pz=%first_name_key;;nz=%surname_key;;%if;(evar.oc!="" and evar.oc!=0)ocz=%occ;;%end;%access;" title="%if;(bvar.default_sosa_ref!="")%nl;[back to default sosa reference] %bvar.default_sosa_ref;%else;[*user/password/cancel]2 [navigation] [with] %sosa_ref.first_name_key_strip; %sosa_ref.surname_key_strip;%end;">%nn;
                   <i class="far fa-stop-circle fa-fw %sexcolor; mr-1"></i> [*user/password/cancel]2 [navigation] [Sosa]%nn;
                 </a>
               %end;
-              %if;(evar.m!="ADD_FAM" and evar.m!="MOD_FAM" and evar.m!="MOD_IND" and evar.m!="R" and evar.m!="U")
+              %if;(evar.m!="ADD_FAM" and evar.m!="MOD_FAM" and evar.m!="MOD_IND" and evar.m!="R" and evar.m!="U" and evar.m!="IMAGE")
                 <a class="dropdown-item" href="%url;cgl=on" target="_blank"><i class="fa fa-unlink fa-fw mr-2" title="[*cancel GeneWeb links]"></i>[*cancel GeneWeb links]</a>%nn;
               %end;
           %if;(not (bvar.wizard_just_friend="yes") and wizard)

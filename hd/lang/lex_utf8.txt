@@ -27,6 +27,14 @@ fr: envoyé
 en: deleted
 fr: supprimé
 
+    restored
+en: restored
+fr: restauré
+
+    restore
+en: restore
+fr: restaurer
+
     delete selected image
 en: delete selected image
 fr: supprimer l’image séléctionnée
