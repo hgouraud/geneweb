@@ -59,7 +59,7 @@ let str_val x = VVstring x
 
 let strip_br str =
   let len = String.length str in
-  if (String.sub str (len - 4) 4) = "<br>" then (String.sub str 0 (len - 4)) else str
+  if len > 4 && (String.sub str (len - 4) 4) = "<br>" then (String.sub str 0 (len - 4)) else str
 
 let rec eval_var conf base env p _loc sl =
   try eval_special_var conf base sl with
@@ -1005,22 +1005,22 @@ let print_del conf base =
 (* Send and delete image form validated *)
 
 let print_confirm conf base p message =
-let sp = string_person_of base p in
-let conf =
-    {(conf) with env =
-      ("i", (string_of_int (Adef.int_of_iper (get_key_index p)))) ::
-      ("m", "IMAGE") ::
-      ("confirm", message) ::
-      ("digest", (Update.digest_person (UpdateInd.string_person_of base p))) ::
-    conf.env }
-in
-Hutil.interp conf "images"
-  {Templ.eval_var = eval_var conf base;
-   Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
-   Templ.eval_predefined_apply = (fun _ -> raise Not_found);
-   Templ.get_vother = get_vother; Templ.set_vother = set_vother;
-   Templ.print_foreach = print_foreach conf base}
-  [] sp
+  let sp = string_person_of base p in
+  let conf =
+      {(conf) with env =
+        ("i", (string_of_int (Adef.int_of_iper (get_key_index p)))) ::
+        ("m", "IMAGE") ::
+        ("confirm", message) ::
+        ("digest", (Update.digest_person (UpdateInd.string_person_of base p))) ::
+      conf.env }
+  in
+  Hutil.interp conf "images"
+    {Templ.eval_var = eval_var conf base;
+     Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
+     Templ.eval_predefined_apply = (fun _ -> raise Not_found);
+     Templ.get_vother = get_vother; Templ.set_vother = set_vother;
+     Templ.print_foreach = print_foreach conf base}
+    [] sp
 
 (*
   let title _ =
