@@ -39,11 +39,19 @@
       </form>
       %(TODO: print only if old img already exists%)
       <div class="small mt-2">[*previous portrait exist]</div>
-      %if;(has_image)
         <div class="d-flex">
-          <a role="button" href="%prefix;m=DEL_IMAGE&i=%index;" class="btn btn-danger ml-auto mt-2" title="[*delete portrait]"><i class="fas fa-trash-alt mr-2"></i>[*delete portrait]</a>
+          <form class="form-row" method="post" action="%action;" enctype="multipart/form-data">
+            <input type="hidden" name="m" value="DEL_IMAGE_OK">
+            <input type="hidden" name="digest" value="">
+            <input type="hidden" name="i" value="%index;">
+            <input type="hidden" name="notes" value="">
+            <input type="hidden" name="which_img_mode" id="which_img_mode_1" value="portrait">
+            <input type="hidden" name="which_img_name" id="which_img_name_1" value="%keydir_img;">
+            <button class="btn btn-danger ml-auto mt-2" type="submit" %if;(not has_image)disabled%end;>%nn;
+              <i class="fas fa-trash-alt mr-2"></i>[*delete portrait]
+          </button>
+          </form>
         </div>
-      %end;
       <h1 class="display-4">%(<i class="far fa-file-image fa-fw mr-1"></i>%)[*add] [image/images]0</h1>
       <form class="form-row" method="post" action="%action;" enctype="multipart/form-data">
         <input type="hidden" name="m" value="IMAGE_OK">

@@ -1231,7 +1231,11 @@ let effective_send_ok conf base p file kind =
     (if kind = KeyImage then "si" else
       if filename <> "" && notes <> "" then "sb"
       else if filename <> "" then "so"
-      else if notes <> "" then "sc" else "sn"); print_confirm conf base p "image sent"
+      else if notes <> "" then "sc" else "sn"); print_confirm conf base p
+        (capitale ((transl conf "portrait") ^ " " ^
+          (transl conf "or") ^ " " ^
+          (transl conf "other image") ^ " " ^
+          (transl conf "sent")))
 
 let print_send_ok conf base =
   let _ = Printf.eprintf "\nPrint_send_ok\n" in
@@ -1286,7 +1290,11 @@ let effective_delete_ok conf base p =
     U_Delete_image (Util.string_gen_person base (gen_person_of_person p))
   in
   History.record conf base changed
-    (if kind = KeyImage then "di" else "do"); print_confirm conf base p "image deleted"
+    (if kind = KeyImage then "di" else "do"); print_confirm conf base p
+        (capitale ((transl conf "portrait") ^ " " ^
+          (transl conf "or") ^ " " ^
+          (transl conf "other image") ^ " " ^
+          (transl conf "deleted")))
 
 let print_del_ok conf base =
   (*let fname = Util.p_getenv env "name" in*)

@@ -19,6 +19,14 @@ fr: comment
 en: other image
 fr: autre image
 
+    sent
+en: sent
+fr: envoyé
+
+    deleted
+en: deleted
+fr: supprimé
+
     delete selected image
 en: delete selected image
 fr: supprimer l’image séléctionnée
