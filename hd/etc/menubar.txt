@@ -345,10 +345,16 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
             <li class="nav-item">
               <a class="nav-link" data-toggle="modal" data-target="#carousel_modal" title="[*photos & documents]">
                 <span class="fa fa-images fa-fw" aria-hidden="true"></span>%nn;
-                <span class="sr-only">[*add]/[remove] [image/images]1</span>%nn;
+                <span class="sr-only">[*image/images]1</span>%nn;
               </a>
             </li>
           %end;
+          <li class="nav-item">
+            <a class="nav-link"href="%prefix;&m=IMAGE&i=%index;" title="[*add]/[remove] [image/images]0">
+              <span class="fa fa-image fa-fw" aria-hidden="true"></span>%nn;
+              <span class="sr-only">[*add]/[remove] [image/images]0</span>%nn;
+            </a>
+          </li>
         </ul>
       </div>
     </nav>
