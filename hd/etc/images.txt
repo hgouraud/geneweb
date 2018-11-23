@@ -6,7 +6,8 @@
   <title>[*add]/[delete::image/images]0 #%index;</title>
   <meta name="robots" content="none">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width,
+    initial-scale=1, shrink-to-fit=no">
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png">
   %include.css;
   %base_header;
@@ -16,27 +17,30 @@
 %message_to_wizard;
 %include_perso_header;
 %( Logic for variables:
-  which_img_name must be defined
-  which_img_mode ="comment" then only the comment file is updated
+  file_name must be defined
+  mode ="comment" then only the comment file is updated
   keydir is "on" if we are dealing with "other" images
 %)
-
+%(*** Col 1 ***%)
 %if;(wizard)
   %( WIP~70% alert message, waiting BS4.2 toasts, ces variables… !!
-  %if;(evar.file_name!="" or evar.which_img_name!="")
-    <div class="alert alert-%if;(evar.m="DEL_IMAGE_OK")danger%else;success%end; alert-dismissible fade show" role="alert">
-      <strong>%if;(evar.which_img_mode="portrait")
-                %if;(evar.m="DEL_IMAGE_OK")[*portrait deleted]%elseif;(evar.m="IMAGE_OK")[*portrait received]%end;
+  %if;(evar.file_name!="" or evar.file_name!="")
+    <div class="alert alert-%if;(evar.m="DEL_IMAGE_OK")danger%else;success%end;
+      alert-dismissible fade show" role="alert">
+      <strong>%if;(evar.mode="portrait")
+                %if;(evar.m="DEL_IMAGE_OK")[*portrait deleted]%nn;
+                %elseif;(evar.m="IMAGE_OK")[*portrait received]%end;
               %elseif;(evar.keydir="on")
-                %if;(evar.m="DEL_IMAGE_OK")[*image deleted]%elseif;(evar.m="SND_IMAGE_OK")[*image received]%end;
+                %if;(evar.m="DEL_IMAGE_OK")[*image deleted]%nn;
+                %elseif;(evar.m="SND_IMAGE_OK")[*image received]%end;
               %end;
               %if;(evar.delete="on") définitivement%end;[:]</strong>
               %if;(evar.delete="on") old
-              %elseif;(evar.which_img_mode!="portrait") portraits
+              %elseif;(evar.mode!="portrait") portraits
               %else;others
               %end;
               %if;(evar.keydir="on")/%keydir;/%evar.file_name;%nn;
-              %elseif;(evar.which_img_mode="portrait");%keydir;.jpg%nn;
+              %elseif;(evar.mode="portrait");%keydir;.jpg%nn;
               %end;
       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
@@ -45,57 +49,83 @@
   %end;%)
   <div class="row">
     <div class="col-6 border border-bottom-0 border-top-0 border-left-0">
-      <h1 class="display-4">%(<i class="fa fa-portrait fa-fw mr-1"></i>%)%if;(has_image)[*modify picture]%else;[*add picture]%end;</h1>
-      <form class="form-row" method="post" action="%action;" enctype="multipart/form-data">
-        <input type="hidden" name="m" value="IMAGE_OK">
-        <input type="hidden" name="digest" value="%digest;">
+      <h1 class="display-4">
+        %(<i class="fa fa-portrait fa-fw mr-1"></i>%)
+        %if;(has_image)[*modify picture]%else;[*add picture]%end;</h1>
+      <form class="form-row" method="post" action="%action;"
+        enctype="multipart/form-data">
+        <input type="hidden" name="m" value="SND_IMAGE_OK">
         <input type="hidden" name="i" value="%index;">
         <input type="hidden" name="notes" value="">
-        <input type="hidden" name="which_img_mode" value="portrait">
-        <input type="hidden" name="which_img_name" value="">
         <div class="custom-file col">
-          <input type="file" name="file" class="custom-file-input custom-portrait" id="portrait_file" accept="image/*" lang="%lang;">
-          <label class="custom-file-label text-truncate" for="portrait_file">[*select] [image/images]0</label>
+          <input type="file" name="file"
+            class="custom-file-input custom-portrait"
+            id="portrait_file" accept="image/*" lang="%lang;">
+          <label class="custom-file-label text-truncate"
+            for="portrait_file">[*select] [image/images]0</label>
         </div>
-        <button class="btn btn-primary ml-2 col-2 snd-btn-portrait" type="submit" disabled>[*send]</button>
+        <button class="btn btn-primary ml-2 col-2 snd-btn-portrait"
+          type="submit" disabled>[*send]</button>
       </form>
       %(TODO: transfert to alert message + print only second part if has_old_image %)
       <div class="small mt-2">[*previous portrait exist]</div>
       <div class="d-flex">
         %if;has_image;
-          <a role="button" href="%prefix_base_password;m=DEL_IMAGE_OK&i=%index;" class="btn btn-danger ml-auto mt-2" title="[*delete portrait]"><i class="fas fa-trash-alt mr-2"></i>[*delete portrait]</a>
+          <a role="button" href="%prefix_base_password;m=DEL_IMAGE_OK&i=%index;"
+          class="btn btn-danger ml-auto mt-2"
+          title="[*delete portrait]">
+          <i class="fas fa-trash-alt mr-2"></i>[*delete portrait]</a>
         %end;
         %if;has_old_image;
-          <a role="button" href="%prefix_base_password;m=GET_IMAGE_OK&i=%index;&which_img_mode=portrait&which_img_name=%keydir;" class="btn btn-primary ml-auto mt-2" title="[*restore old portrait]"><i class="fas fa-file-image mr-2"></i>[*restore old portrait]</a>
+          <a role="button" href="%prefix_base_password;%nn;
+            m=RESET_IMAGE_OK&i=%index;&mode=portrait&file_name=%keydir;"
+            class="btn btn-primary ml-auto mt-2"
+            title="[*restore old portrait]">
+            <i class="fas fa-file-image mr-2"></i>[*restore old portrait]</a>
         %end;
       </div>
-      <h1 class="display-4">%(<i class="far fa-file-image fa-fw mr-1"></i>%)[*add] [image/images]0</h1>
-      <form class="form-row" method="post" action="%action;" enctype="multipart/form-data">
-        <input type="hidden" name="m" value="IMAGE_OK">
-        <input type="hidden" name="digest" value="%digest;">
+      <h1 class="display-4">
+        %(<i class="far fa-file-image fa-fw mr-1"></i>%)[*add] [image/images]0</h1>
+      <form class="form-row" method="post" action="%action;"
+        enctype="multipart/form-data">
+        <input type="hidden" name="m" value="SND_IMAGE_OK">
         <input type="hidden" name="i" value="%index;">
-        <input type="hidden" name="keydir" value="on">
-        <input type="hidden" name="which_img_mode" id="which_img_mode_2" value="both">
-        <input type="hidden" name="which_img_name" id="which_img_name_2" value="">
+        <input type="hidden" name="mode" id="mode_2" value="others">
+        %( file_name is automatically provided by the type="file" item %)
+        %( file_name_2 is used when updating the comment file after selection %)
+        %( with the radiobutton of the old folder content (right column) %)
+        <input type="hidden" name="file_name_2" id="file_name_2" value="">
         <div class="custom-file col">
-          <input type="file" name="file" class="custom-file-input custom-others" %nn;
-            id="others_file" accept="image/*"%( multiple%) autofocus lang="%lang;"">
+          <input type="file" name="file"
+            class="custom-file-input custom-others" %nn;
+            id="others_file" accept="image/*"%( multiple%) autofocus lang="%lang
+            ">
           <label class="custom-file-label text-truncate" for="others_file">%nn;
             [*select] [image/images]0%nn;
           </label>
         </div>
-        <button class="btn btn-primary ml-2 col-2 snd-btn-others" type="submit" disabled>[*send]</button>
+        <button class="btn btn-primary ml-2 col-2 snd-btn-others"
+          type="submit" disabled>[*send]
+        </button>
         %(TODO: print only if old img already exists%)
-        <div class="small col-12 mt-1">[*previous image]/%keydir;</samp>.<br>[*if previous image exists]</div>
+        <div class="small col-12 mt-1">
+          [*previous image]/%keydir;</samp>.<br>[*if previous image exists]</div>
         <div class="d-flex col">
-          <h1 class="display-4">%(<i class="far fa-file-image fa-fw mr-1"></i>%)[*comment]</h1>
+          <h1 class="display-4">
+            %(<i class="far fa-file-image fa-fw mr-1"></i>%)[*comment]</h1>
           <span class="mb-1 ml-auto align-self-end">%include.toolbar;</span>
         </div>
-        <textarea class="form-control col-12" id="notes_comments" name="notes" rows="5" placeholder="[*image comment]" disabled></textarea>
-        <button class="btn btn-primary mt-2 col-12 btn-update-comment" type="submit" disabled>[*update image comment] <span id="which_img_show"></span></button>
+        <textarea class="form-control col-12" id="notes_comments"
+          name="notes" rows="5" placeholder="[*image comment]"
+          disabled encoding="multipart/form-data">
+        </textarea>
+        <button class="btn btn-primary mt-2 col-12 btn-update-comment"
+          type="submit" disabled>
+          [*update image comment] <span id="which_img_show"></span></button>
       </form>
       %if;(evar.confirm!="")%evar.confirm;%else;&nbsp;%end;
     </div>
+    %(*** Col 2 ***%)
     <div class="col-6">
       %if;(keydir_img_nbr>=0)
         <h1 class="display-4">[*available images]0</h1>
@@ -104,28 +134,34 @@
           <span class="ml-1">(%keydir_img_nbr; %nn;
             %if;(keydir_img_nbr>1)[image/images]1%else;[image/images]0%end;)
           </span>
-        <form class="form-row col-12 del-image-form mt-2" method="post" action="%action;" enctype="multipart/form-data">
+        <form class="form-row col-12 del-image-form mt-2" method="post"
+          action="%action;" enctype="multipart/form-data">
           <input type="hidden" name="m" value="DEL_IMAGE_OK">
-          <input type="hidden" name="digest" value="%digest;">
           <input type="hidden" name="i" value="%index;">
-          <input type="hidden" name="keydir" value="on">
-          <input type="hidden" name="which_img_mode" value="both">
-          <input type="hidden" name="which_img_name" value="">
+          <input type="hidden" name="mode" value="others">
           %foreach;img_in_keydir;
             <div class="custom-control custom-radio col-11">
-              <input type="radio" id="customRadio%cnt;" name="file_name" class="custom-control-input" value="%keydir_img;">
+              <input type="radio" id="customRadio%cnt;" name="file_name"
+                class="custom-control-input" value="%keydir_img;">
               <label class="custom-control-label" for="customRadio%cnt;"><samp>%nn;
-              %if;(keydir_img_title!="")%keydir_img_title;%else;%keydir_img;%end;%nn;
-              %if;(keydir_img_src!="") <small>(%keydir_img_src;)</small>%end;</samp></label>
+              %if;(keydir_img_title!="")%keydir_img_title;%else;%keydir_img;
+              %end;%nn;
+              %if;(keydir_img_src!="") %nn;
+                <small>(%keydir_img_src;)</small>
+              %end;</samp></label>
             </div>
             <div class="ml-auto">
-            <a href="%prefix_base_password;&m=IM&s=others/%keydir;/%keydir_img;" class="ml-auto" target="_blank" rel="noopener"
-               title="[*see] [image/images]0"><i class="far fa-file-image fa-fw text-primary"></i></a>%nn;
-            <a href="#" class="mb-1 text-%if;(keydir_img_notes="")danger%else;primary%end;"
+            <a href="%prefix_base_password;&m=IM&s=others/%keydir;/%keydir_img;"
+                class="ml-auto" target="_blank" rel="noopener" %nn;
+                title="[*see] [image/images]0">%nn;
+                <i class="far fa-file-image fa-fw text-primary"></i></a>%nn;
+            <a href="#"
+              class="mb-1 text-%if;(keydir_img_notes="")danger%else;primary%end;"
               onclick='get_notes(%cnt;, "%keydir_img;"); return false;' %nn;
               data-toggle="tooltip" data-html="true"
               %(data-trigger="focus"%) data-placement="left"
-              data-content="%keydir_img_notes;" title="<em>[*modify] [comment]</em><br><br>
+              data-content="%keydir_img_notes;"
+              title="<em>[*modify] [comment]</em><br><br>
               %if;(keydir_img_title!="")%keydir_img_title;%end;%nn;
               %if;(keydir_img_src!="") <small>(%keydir_img_src;)</small>%end;
               <br>%keydir_img_notes;">%nn;
@@ -133,35 +169,43 @@
             </a>
             </div>
             <input type="hidden" name="file" value="%keydir_img;">
-            %( on a déjà el contenu de %keydir_img_notes;!! Comment le partager avec le popover? %)
-            <input type="hidden" id="notes_content_%cnt;" value="%keydir_img_notes;">
+            %( on a déjà le contenu de %keydir_img_notes;!!
+              Comment le partager avec le popover? %)
+            <input type="hidden" id="notes_content_%cnt;"
+              value="%keydir_img_notes;">
           %end;
           %if;(keydir_img_nbr>0)
             <button type="submit" class="btn btn-danger del-img-btn ml-2 mt-2"
-              disabled><i class="fa fa-trash-alt mr-2"></i>[*delete] [selected image]0</button>
+              disabled><i class="fa fa-trash-alt mr-2">
+              </i>[*delete] [selected image]0</button>
           %end;
         </form>
 
         <h1 class="display-4">[*saved images]0</h1>
-        <i class="far fa-folder-open mr-1" aria-hidden="true"></i><samp>/documents/old/%keydir;</samp>
-        <form class="form-row col-12 restore-form mt-2" method="post" action="%action;" enctype="multipart/form-data">
-          <input type="hidden" name="m" value="GET_IMAGE_OK">
+        <i class="far fa-folder-open mr-1" aria-hidden="true"></i>
+        <samp>/documents/old/%keydir;</samp>
+        <form class="form-row col-12 restore-form mt-2"
+          method="post" action="%action;" enctype="multipart/form-data">
+          <input type="hidden" name="m" value="RESET_IMAGE_OK">
           <input type="hidden" name="i" value="%index;">
-          <input type="hidden" name="keydir" value="on">
-          <input type="hidden" name="which_img_mode" value="both">
+          <input type="hidden" name="mode" value="others">
           %foreach;img_in_keydir_old;
               <div class="custom-control custom-radio col-11">
-                <input type="radio" id="customRadio_r%cnt;" name="which_img_name"
+                <input type="radio" id="customRadio_r%cnt;" name="file_name"
                    class="custom-control-input" value="%keydir_img_old;">
-                <label class="custom-control-label" for="customRadio_r%cnt;"><samp>%keydir_img_old;</samp>
+                <label class="custom-control-label" for="customRadio_r%cnt;">
+                <samp>%keydir_img_old;</samp>
               </div>
-              <a href="%prefix_base_password;&m=DEL_IMAGE_OK&i=%index&file_name=%keydir_img_old;&keydir=on;delete=on"
-                 class="ml-auto" rel="noopener"
-                 title="[*delete] [image/images]0"><i class="far fa-trash-alt text-danger fa-fw text-primary"></i></a>
+              <a href="%prefix_base_password;&m=DEL_IMAGE_OK&i=%index%nn;
+                &file_name=%keydir_img_old;&mode=others&keydir=on;delete=on"
+                class="ml-auto" rel="noopener"
+                title="[*delete] [image/images]0">
+                <i class="far fa-trash-alt text-danger fa-fw text-primary"></i></a>
           %end;
           %if;(keydir_img_nbr>0)
             <button type="submit" class="btn btn-danger rst-img-btn ml-2 mt-2"
-              disabled><i class="fa fa-trash-alt mr-2"></i>[*restore] [selected image]0</button>
+              disabled><i class="fa fa-trash-alt mr-2"></i>
+              [*restore] [selected image]0</button>
           %end;
         </form>
       %end;
@@ -219,8 +263,8 @@ var notes = "notes_content_"+cnt;
 var item = document.getElementById(notes).value;
 document.getElementById("notes_comments").value=item;
 document.getElementById("which_img_show").textContent=name;
-document.getElementById("which_img_name_2").value=name;
-document.getElementById("which_img_mode_2").value="comment";
+document.getElementById("file_name_2").value=name;
+document.getElementById("mode_2").value="comment";
 }
 </script>
 %( Possible heavier futur script to manage multiple files inputs

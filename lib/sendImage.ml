@@ -303,36 +303,28 @@ and eval_simple_var conf base env p =
       end
   | ["keydir_img_src"] ->
       begin match get_env "keydir_img_src" env with
-        Vstring f ->
-          begin
-            let ext = Filename.extension f in
-            let fname = Filename.chop_suffix f ext in
-            let n = get_keydir_img_notes conf base (poi base p.key_index) fname in
-            match (String.index_opt n '\n') with
-              Some i ->
-                let s1 = if (String.length n) > i then (String.sub n (i + 1)
-                  (String.length n - i - 1)) else ""
-                in
-                begin
-                  match (String.index_opt s1 '\n') with
-                    Some j -> str_val (strip_br (String.sub s1 0 j))
-                  | None -> str_val ""
-                end
-            | None -> str_val ""
-          end
+      | Vstring str ->
+          let src =
+            try
+              let i = String.index str '\n' in
+              let len = String.length str in
+              if i < len then String.sub str i (len - i - 1)
+              else ""
+            with Not_found -> ""
+          in
+          str_val src
       | _ -> raise Not_found
       end
   | ["keydir_img_title"] ->
       begin match get_env "keydir_img_title" env with
-        Vstring f ->
-          begin
-            let ext = Filename.extension f in
-            let fname = Filename.chop_suffix f ext in
-            let n = get_keydir_img_notes conf base (poi base p.key_index) fname in
-            match (String.index_opt n '\n') with
-              Some i -> str_val (strip_br (String.sub n 0 i))
-            | None -> str_val ""
-          end
+      | Vstring str ->
+          let title =
+            try
+              let i = String.index str '\n' in
+              String.sub str 0 i
+            with Not_found -> ""
+          in
+          str_val title
       | _ -> raise Not_found
       end
   | ["nb_pevents"] -> str_val (string_of_int (List.length p.pevents))
@@ -928,16 +920,14 @@ let print_foreach conf base print_ast _eval_expr =
   in
   print_foreach conf base
 
-(* ******** *)
+(* ****************************************************** *)
 
 type image_type = JPEG | GIF | PNG
-type image_kind = KeyImage | KeyDir
-
 let image_types = [JPEG; GIF; PNG]
 
 let extension_of_type =
   function
-    JPEG -> ".jpg"
+  | JPEG -> ".jpg"
   | GIF -> ".gif"
   | PNG -> ".png"
 
@@ -984,79 +974,7 @@ let raw_get conf key =
     let _ = flush stderr in
     incorrect conf
 
-(* Send image form *)
-
-let print_send_image conf base sp digest =
-  let env =
-    ["digest", Vstring digest]
-  in
-  Hutil.interp conf "images"
-    {Templ.eval_var = eval_var conf base;
-     Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
-     Templ.eval_predefined_apply = (fun _ -> raise Not_found);
-     Templ.get_vother = get_vother; Templ.set_vother = set_vother;
-     Templ.print_foreach = print_foreach conf base}
-    env sp
-
-let print conf base =
-  let _ = Printf.eprintf "\nPrintx\n" in
-  let _ =  List.iter
-    (fun (k, v) ->
-       if k <> "file" then Printf.eprintf "Env_var: %s, %s\n" k v)
-    conf.env
-  in
-  let _ = Printf.eprintf "-----\n" in
-  let _ = flush stderr in
-  match p_getint conf.env "i" with
-    Some ip ->
-      let p = poi base (Adef.iper_of_int ip) in
-      let fn = p_first_name base p in
-      let sn = p_surname base p in
-      let sp = string_person_of base p in
-      let digest = Update.digest_person (UpdateInd.string_person_of base p) in
-      if sou base (get_image p) <> "" || fn = "?" || sn = "?" then
-        Hutil.incorrect_request conf
-      else
-        print_send_image conf base sp digest
-  | _ ->
-      Hutil.incorrect_request conf
-
-(* Delete image form *)
-
-let print_del conf base =
-  match p_getint conf.env "i" with
-    Some i ->
-      let sp = string_person_of base (poi base (Adef.iper_of_int i)) in
-      Hutil.interp conf "images"
-        {Templ.eval_var = eval_var conf base;
-         Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
-         Templ.eval_predefined_apply = (fun _ -> raise Not_found);
-         Templ.get_vother = get_vother; Templ.set_vother = set_vother;
-         Templ.print_foreach = print_foreach conf base}
-        [] sp
-  | _ -> Hutil.incorrect_request conf
-
-(* Send and delete image form validated *)
-
-let print_confirm conf base p message =
-  let sp = string_person_of base p in
-  let conf =
-      {(conf) with env =
-        ("i", (string_of_int (Adef.int_of_iper (get_key_index p)))) ::
-        ("m", "IMAGE") ::
-        ("confirm", message) ::
-        ("digest", (Update.digest_person (UpdateInd.string_person_of base p))) ::
-      conf.env }
-  in
-  Hutil.interp conf "images"
-    {Templ.eval_var = eval_var conf base;
-     Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
-     Templ.eval_predefined_apply = (fun _ -> raise Not_found);
-     Templ.get_vother = get_vother; Templ.set_vother = set_vother;
-     Templ.print_foreach = print_foreach conf base}
-    [] sp
-
-(*
+(* old code
   let title _ =
     Wserver.printf "%s" (capitale (transl conf message))
   in
@@ -1080,54 +998,21 @@ let write_file fname content =
 
 let delete_old_file conf bfname =
   let _ = Printf.eprintf "Delete old file: %s \n" bfname in
-  let filename = List.fold_right
-    Filename.concat [Util.base_path conf.bname; "documents"; "old"] bfname
+  let file_name =
+    String.concat
+      Filename.dir_sep [Util.base_path conf.bname; "documents"; "old"; bfname]
   in
   List.fold_left
     (fun cnt typ ->
       let ext = extension_of_type typ in
-      let file = filename ^ ext in
-      let file_t = filename ^ ".txt" in
+      let file = file_name ^ ext in
+      let file_t = file_name ^ ".txt" in
       if Sys.file_exists file then
         begin
           (try Sys.remove file with Sys_error _ -> ());
-          if Sys.file_exists file_t then (try Sys.remove file_t with Sys_error _ -> ());
+          (try Sys.remove file_t with Sys_error _ -> ());
           cnt + 1
         end
-      else cnt)
-    0 image_types
-
-(* Move fname to old_dir if it exists with some extension.
-   Returns the number of moved files *)
-let move_file_to_old conf fname bfname keydir =
-  let _ = Printf.eprintf "Move to old %s (%s)\n" fname bfname in
-  List.fold_left
-    (fun cnt typ ->
-      let ext = extension_of_type typ in
-      let cur_file = fname ^ ext in
-      let cur_file_t = fname ^ ".txt" in
-      if Sys.file_exists cur_file then
-        let _ = Printf.eprintf "Move file: %s\n" cur_file in
-        let _ = flush stderr in
-        let old_dir = List.fold_right
-          Filename.concat [Util.base_path conf.bname; "documents"] "old"
-        in
-        let old_dir_key = Filename.concat old_dir keydir in
-        let old_file = Filename.concat old_dir bfname ^ ext in
-        let old_file_t = Filename.concat old_dir bfname ^ ".txt" in
-        let _ = Printf.eprintf "Move old file: %s to %s\n" cur_file old_file in
-        let _ = Printf.eprintf "Move old file: %s to %s\n" cur_file_t old_file_t in
-        let _ = flush stderr in
-        if Sys.file_exists old_file then
-          (try Sys.remove old_file with Sys_error _ -> ());
-        if Sys.file_exists old_file_t then
-          (try Sys.remove old_file_t with Sys_error _ -> ());
-        (try Unix.mkdir old_dir 0o777 with Unix.Unix_error (_, _, _) -> ());
-        (try Unix.mkdir old_dir_key 0o777 with Unix.Unix_error (_, _, _) -> ());
-        (try Unix.rename cur_file old_file with Unix.Unix_error (_, _, _) -> ());
-        if Sys.file_exists cur_file_t then
-          (try Unix.rename cur_file_t old_file_t with Unix.Unix_error (_, _, _) -> ());
-        cnt + 1
       else cnt)
     0 image_types
 
@@ -1186,121 +1071,117 @@ let get conf key =
     Some v -> v
   | None -> failwith (key ^ " unbound")
 
-let print_restore_image_ok conf base =
-  let _ = Printf.eprintf "\nPrint_reset_image_ok\n" in
+(*
+let get_extension_from conf keydir =
+  let file_in_old =
+    String.concat
+      Filename.dir_sep [Util.base_path conf.bname; "documents"; "old"; keydir]
+  in
+  List.fold_left
+    (fun "" typ ->
+      let ext = extension_of_type typ in
+      if Sys.file_exists (file_in_old ^ ext) then ext else "")
+    "" image_types
+*)
+
+let get_extension_from conf keydir =
+  let _ = Printf.eprintf "Get_extension_from\n" in
+  let _ =
+    String.concat
+      Filename.dir_sep [Util.base_path conf.bname; "documents"; "old"; keydir]
+  in
+  ".jpg"
+
+
+let move_file_to_old conf fname bfname keydir =
+  let _ = Printf.eprintf "Move to old (no ext) %s (%s)\n" fname bfname in
+  let old_dir =
+    String.concat
+      Filename.dir_sep [Util.base_path conf.bname; "documents"; "old"]
+  in
+  let old_dir_1 = Filename.concat old_dir keydir in
+  (try Unix.mkdir old_dir 0o777 with Unix.Unix_error (_, _, _) -> ());
+  (try Unix.mkdir old_dir_1 0o777 with Unix.Unix_error (_, _, _) -> ());
+  List.fold_left
+    (fun cnt typ ->
+      let ext = extension_of_type typ in
+      let _ = Printf.eprintf "Testing: %s\n" ext in
+      let cur_file = fname ^ ext in
+      let cur_file_t = fname ^ ".txt" in
+      if Sys.file_exists cur_file then
+        let _ = Printf.eprintf "Move file: %s\n" cur_file in
+        let old_file = Filename.concat old_dir (bfname ^ ext) in
+        let old_file_t = Filename.concat old_dir (bfname ^ ".txt") in
+        let _ = Printf.eprintf "Move old file: %s to %s\n" cur_file old_file in
+        let _ = flush stderr in
+        (try Sys.rename cur_file old_file with Sys_error _ -> ());
+        if Sys.file_exists cur_file_t then
+          (try Sys.rename cur_file_t old_file_t with Sys_error _ -> ());
+        cnt + 1
+      else cnt)
+    0 image_types
+
+
+let print_confirm conf base message =
+  match p_getint conf.env "i" with
+  | Some ip ->
+      let p = poi base (Adef.iper_of_int ip) in
+      let sp = string_person_of base p in
+      let new_env =
+        List.fold_left
+          (fun accu (k, v) ->
+             if k = "m" then ("m", "IMAGE") :: accu
+             else (k, v) :: accu)
+          [] conf.env
+      in
+      let new_env = ("confirm", message) :: new_env in
+      let conf = { (conf) with env = new_env } in
+      Hutil.interp conf "images"
+        {Templ.eval_var = eval_var conf base;
+         Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
+         Templ.eval_predefined_apply = (fun _ -> raise Not_found);
+         Templ.get_vother = get_vother; Templ.set_vother = set_vother;
+         Templ.print_foreach = print_foreach conf base}
+        [] sp
+    | None -> Hutil.incorrect_request conf
+
+let print_image conf base = print_confirm conf base ""
+
+(* ************************************************************************ *)
+(*  send, delete and reset functions                                        *)
+(*                                                                          *)
+(*  print_xxx_ok require i=index and test for it                            *)
+(*        before calling effective_xxx_ok                                   *)
+(* ************************************************************************ *)
+
+
+(* depending on mode, write file/file_name into portraits or others area *)
+
+let effective_send_ok conf base p file file_name mode =
+  let _ = Printf.eprintf "\nEffective_send_ok\n" in
   let _ =  List.iter
     (fun (k, v) ->
        if k <> "file" then Printf.eprintf "Env_var: %s, %s\n" k v)
     conf.env
   in
-  let _ = Printf.eprintf "----\n" in
-  let ip =
-    let s = raw_get conf "i" in
-    try int_of_string s with Failure _ -> incorrect conf
-  in
-  let p = poi base (Adef.iper_of_int ip) in
-  let which_img_mode = raw_get conf "which_img_mode" in
-  let filename = raw_get conf "which_img_name" in
-  let ext = Filename.extension filename in
-  let filename = space_to_unders filename in
-  let keydir = default_image_name base p in
-  if which_img_mode = "portrait" then
-    begin
-    let _ = Printf.eprintf "Mode portrait: %s\n" filename in
-    let _ = flush stderr in
-    let old_file = List.fold_right Filename.concat
-      [Util.base_path conf.bname; "documents"; "old"] filename ^ ".jpg"
-    in
-    let new_file = List.fold_right Filename.concat
-      [Util.base_path conf.bname; "documents"; "portraits"] filename ^ ".jpg"
-    in
-    let _ = Printf.eprintf "Mode portrait: %s\n" old_file in
-    let _ = flush stderr in
-    if Sys.file_exists old_file then
-      (try Sys.rename old_file new_file with Sys_error _ -> ());
-    Printf.eprintf "Done portrait: %s -> %s\n" old_file new_file;
-    end
-  else
-    begin
-    let _ = Printf.eprintf "Mode other: %s\n" filename in
-    let _ = flush stderr in
-    let filename_t = Filename.chop_suffix filename ext in
-    let old_file = List.fold_right Filename.concat
-      [Util.base_path conf.bname; "documents"; "old"; keydir] filename
-    in
-    let old_file_t = List.fold_right Filename.concat
-      [Util.base_path conf.bname; "documents"; "old"; keydir] filename_t ^ ".txt"
-    in
-    let new_file = List.fold_right Filename.concat
-      [Util.base_path conf.bname; "documents"; "others"; keydir] filename
-    in
-    let new_file_t = List.fold_right Filename.concat
-      [Util.base_path conf.bname; "documents"; "others"; keydir] filename_t ^ ".txt"
-    in
-    let _ = Printf.eprintf "Mode comment: %s/%s\n" keydir filename in
-    let _ = flush stderr in
-    if Sys.file_exists old_file then
-      (try Sys.rename old_file new_file with Sys_error _ -> ());
-    if Sys.file_exists old_file_t then
-      (try Sys.rename old_file_t new_file_t with Sys_error _ -> ());
-    Printf.eprintf "Done other: %s -> %s\n" old_file new_file;
-    end;
-  let message = if which_img_mode = "portrait" then
-    (capitale ((transl conf "portrait") ^ " " ^
-      (transl conf "restored")))
-    else
-    (capitale ((transl conf "other image") ^ " " ^
-      (transl conf "restored")))
-  in
-  let _ = Printf.eprintf "Starting new IMAGE page: %s\n" message in
-  let sp = string_person_of base p in
-  let _ = Printf.eprintf "Getting sp: \n" in
+  let _ = Printf.eprintf "-----------\n" in
   let _ = flush stderr in
-  let conf =
-      {(conf) with env =
-        ("i", (string_of_int (Adef.int_of_iper (get_key_index p)))) ::
-        ("m", "IMAGE") ::
-        ("confirm", message) ::
-      conf.env }
-  in
-  let _ = Printf.eprintf "Getting conf: \n" in
-  let _ = flush stderr in
-  Hutil.interp conf "images"
-    {Templ.eval_var = eval_var conf base;
-     Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
-     Templ.eval_predefined_apply = (fun _ -> raise Not_found);
-     Templ.get_vother = get_vother; Templ.set_vother = set_vother;
-     Templ.print_foreach = print_foreach conf base}
-    [] sp
-
-
-let effective_send_ok conf base p file kind =
-  let keydir = if kind = KeyImage then "KeyImage" else "KeyDict" in
-  let _ = Printf.eprintf "Effective_send_ok: %s\n" keydir in
-  let _ = flush stderr in
-  (* filename est vide si on a pas sélactionné de fichier *)
-  (* remplir le champ file quand on clique sur le radio bouton *)
-  let which_img_mode = raw_get conf ("which_img_mode") in
-  let filename = if which_img_mode = "comment" then raw_get conf ("which_img_name")
-    else raw_get conf ("file_name")
-  in
-  let filename = space_to_unders filename in
-  let _ = Printf.eprintf "New filename: %s (%s)\n" filename which_img_mode in
+  let _notes = try List.assoc "notes" conf.env with Not_found -> "" in
   let notes =
     Util.sanitize_html
-      (only_printable_or_nl (Mutil.strip_all_trailing_spaces (get conf "notes")))
+      (*only_printable_or_nl (Mutil.strip_all_trailing_spaces notes)*)
+      (only_printable_or_nl
+        (Mutil.strip_all_trailing_spaces (get conf "notes")))
   in
-  let _ = Printf.eprintf "Notes: %s\n" notes in
-  let _ = flush stderr in
   let strm = Stream.of_string file in
   let (request, content) = Wserver.get_request_and_content strm in
   let content =
-    if which_img_mode = "content" then ""
+    if mode = "comment" then ""
       else
         let s =
           let rec loop len (strm__ : _ Stream.t) =
             match Stream.peek strm__ with
-              Some x -> Stream.junk strm__; loop (Buff.store len x) strm
+            | Some x -> Stream.junk strm__; loop (Buff.store len x) strm
             | _ -> Buff.get len
           in
           loop 0 strm
@@ -1308,32 +1189,33 @@ let effective_send_ok conf base p file kind =
         content ^ s
   in
   let (typ, content) =
-    if which_img_mode = "both" then
+    if mode = "others" then
       match image_type content with
-        None ->
+      | None ->
           let ct = Wserver.extract_param "content-type: " '\n' request in
           dump_bad_image conf content; incorrect_content_type conf base p ct
       | Some (typ, content) ->
           match p_getint conf.base_env "max_images_size" with
-            Some len when String.length content > len ->
+          | Some len when String.length content > len ->
               error_too_big_image conf base p (String.length content) len
           | _ -> typ, content
     else JPEG, content
   in
   let keydir = default_image_name base p in
-  let bfname = if kind = KeyImage then keydir
-    else Filename.remove_extension filename
+  let file_name = if mode = "portraits" then keydir
+    else Filename.remove_extension file_name
   in
-  let bfdir = if kind = KeyImage then
-      List.fold_right Filename.concat
-        [Util.base_path conf.bname; "documents"] "portraits"
+  let bf_dir =
+    if mode = "portraits" then
+      String.concat Filename.dir_sep
+        [Util.base_path conf.bname; "documents"; "portraits"]
     else
-      List.fold_right Filename.concat
-        [Util.base_path conf.bname; "documents"; "others"] keydir
+      String.concat Filename.dir_sep
+        [Util.base_path conf.bname; "documents"; "others"; keydir]
   in
-  let _ = Printf.eprintf "Testing bfdir: %s\n" bfdir in
-  let bfdir =
-    if Sys.file_exists bfdir then bfdir
+  let _ = Printf.eprintf "Testing bfdir: %s\n" bf_dir in
+  let bf_dir =
+    if Sys.file_exists bf_dir then bf_dir
     else
       let _ = Printf.eprintf "Create non existant folders\n" in
       let d = Filename.concat (Util.base_path conf.bname) "documents" in
@@ -1344,58 +1226,64 @@ let effective_send_ok conf base p file kind =
       (try Unix.mkdir d1 0o777 with Unix.Unix_error (_, _, _) -> ());
       (try Unix.mkdir d2 0o777 with Unix.Unix_error (_, _, _) -> ());
       (try Unix.mkdir d3 0o777 with Unix.Unix_error (_, _, _) -> ());
-      if kind = KeyImage then d1 else d3
+      if mode = "portraits" then d1 else d3
   in
-  let _ = Printf.eprintf "Writing file in: %s\n" bfdir in
+  let _ = Printf.eprintf "Writing file in: %s\n" bf_dir in
   let _ = flush stderr in
-  let fname = Filename.concat bfdir bfname in
-  let _moved = if which_img_mode = "comment" then 0
-    else move_file_to_old conf fname bfname keydir
+  let full_name = Filename.concat bf_dir file_name in
+  let _moved = if mode = "comment" then 0
+    else move_file_to_old conf full_name file_name keydir
   in
-  let _ = Printf.eprintf "Trying to write: (%s) and (%s)\n" filename notes in
+  let _ = Printf.eprintf "Trying to write: (%s) and (%s)\n" file_name notes in
   let _ = flush stderr in
-  if filename <> "" && which_img_mode <> "comment" then
-    write_file (fname ^ extension_of_type typ) content;
+  if file_name <> "" then
+    write_file (full_name ^ extension_of_type typ) content;
   if notes <> "" then
-    write_file (fname ^ ".txt") (notes ^ "\n");
+    write_file (full_name ^ ".txt") (notes ^ "\n");
   let changed =
     U_Send_image (Util.string_gen_person base (gen_person_of_person p))
   in
   History.record conf base changed
-    (if kind = KeyImage then "si" else
-      if filename <> "" && notes <> "" then "sb"
-      else if filename <> "" then "so"
-      else if notes <> "" then "sc" else "sn"); print_confirm conf base p
-        (capitale ((transl conf "portrait") ^ " " ^
-          (transl conf "or") ^ " " ^
-          (transl conf "other image") ^ " " ^
-          (transl conf "sent")))
+    (if mode = "portraits" then "si" else
+      if file_name <> "" && notes <> "" then "sb"
+      else if file_name <> "" then "so"
+      else if notes <> "" then "sc" else "sn");
+  let report =
+    (capitale ((transl conf "portrait") ^ " " ^
+      (transl conf "or") ^ " " ^
+      (transl conf "other image") ^ " " ^
+      (transl conf "sent")))
+  in
+  print_confirm conf base report
 
 let print_send_ok conf base =
-  let _ = Printf.eprintf "\nPrint_send_ok\n" in
-  let _ =  List.iter
-    (fun (k, v) ->
-       if k <> "file" then Printf.eprintf "Env_var: %s, %s\n" k v)
-    conf.env
-  in
-  let _ = Printf.eprintf "----\n" in
   try
-    let ip =
-      let s = raw_get conf "i" in
-      try int_of_string s with Failure _ -> incorrect conf
-    in
-    let kind = try List.assoc "keydir" conf.env with Not_found -> "" in
-    let kk = kind in
-    let kind = if kind = "on" then KeyDir else KeyImage in
-    let _ = Printf.eprintf "Get p (ip) (%d), keydir: %s\n" ip kk in
-    let _ = flush stderr in
-    let p = poi base (Adef.iper_of_int ip) in
-    let which_img_mode = raw_get conf "which_img_mode" in
-    let which_img_name = raw_get conf "which_img_name" in
-    let file = if which_img_mode <> "comment" then raw_get conf "file"
-      else  which_img_name
-    in effective_send_ok conf base p file kind
+    match p_getint conf.env "i" with
+      Some ip ->
+        let p = poi base (Adef.iper_of_int ip) in
+        let mode =
+          try List.assoc "mode" conf.env with Not_found -> "portraits"
+        in
+        let file_name =
+          space_to_unders
+            (try List.assoc "file_name" conf.env with Not_found -> "")
+        in
+        let file_name =
+          if file_name = "" then
+            (try List.assoc "file_name_2" conf.env with Not_found -> "")
+          else file_name
+        in
+        let file =
+          if mode <> "comment" then raw_get conf "file"
+          else "file_name"
+        in
+        effective_send_ok conf base p file file_name mode
+    | None -> Hutil.incorrect_request conf
   with Update.ModErr -> ()
+
+
+(* removes portrait or other image and saves it into old folder *)
+(* if delete=on permanently deletes the file in old folder *)
 
 let effective_delete_ok conf base p =
   let _ = Printf.eprintf "\nEffective_delete_ok\n" in
@@ -1406,39 +1294,157 @@ let effective_delete_ok conf base p =
   in
   let _ = flush stderr in
   let keydir = default_image_name base p in
-  let name = try List.assoc "file_name" conf.env with Not_found -> "" in
-  let delete = try (List.assoc "delete" conf.env = "on") with Not_found -> false in
-  let ext = Filename.extension name in
-  let name = Filename.chop_suffix name ext in
-  let name = if name = "" then keydir else name in
-  let kind = try List.assoc "keydir" conf.env with Not_found -> "" in
-  let kind = if kind = "on" then KeyDir else KeyImage in
-  let keyrep = if kind = KeyImage then "portraits" else "others" in
-  let bfname = if kind = KeyDir then Filename.concat keydir name else name in
-  let fname = List.fold_right
-    Filename.concat [Util.base_path conf.bname; "documents"; keyrep] bfname
+  let file_name = try List.assoc "file_name" conf.env with Not_found -> "" in
+  let mode = try List.assoc "mode" conf.env with Not_found -> "portraits" in
+  let delete =
+    try (List.assoc "delete" conf.env = "on") with Not_found -> false
   in
-  let _ = Printf.eprintf "Delete: %s\n" fname in
-  if delete then if delete_old_file conf bfname = 0 then incorrect conf else ()
-  else if move_file_to_old conf fname bfname keydir = 0 then incorrect conf;
+  let ext = Filename.extension file_name in
+  let file_name = Filename.chop_suffix file_name ext in
+  let file_name = if file_name = "" then keydir else file_name in
+  let bfname =
+    if mode <> "portraits" then Filename.concat keydir file_name else file_name
+  in
+  let folder = (if mode = "portraits" then "portraits" else "others") in
+  let full_name =
+    String.concat Filename.dir_sep
+      [Util.base_path conf.bname; "documents"; folder; bfname]
+  in
+  let _ = Printf.eprintf "Delete: %s\n" full_name in
+  if delete then
+    if delete_old_file conf bfname = 0 then incorrect conf else ()
+  else
+    if move_file_to_old conf full_name bfname keydir = 0 then incorrect conf;
   let _ = Printf.eprintf "Deleted/moved\n" in
   let _ = flush stderr in
   let changed =
     U_Delete_image (Util.string_gen_person base (gen_person_of_person p))
   in
   History.record conf base changed
-    (if kind = KeyImage then "di" else "do"); print_confirm conf base p
-        (capitale ((transl conf "portrait") ^ " " ^
-          (transl conf "or") ^ " " ^
-          (transl conf "other image") ^ " " ^
-          (transl conf "deleted")))
+    (if mode = "portraits" then "di" else "do");
+  let report =
+    (capitale ((transl conf "portrait") ^ " " ^
+      (transl conf "or") ^ " " ^
+      (transl conf "other image") ^ " " ^
+      (transl conf "destroyed")))
+  in
+  print_confirm conf base report
 
 let print_del_ok conf base =
-  (*let fname = Util.p_getenv env "name" in*)
   try
     match p_getint conf.env "i" with
       Some ip ->
         let p = poi base (Adef.iper_of_int ip) in
         effective_delete_ok conf base p
-    | None -> incorrect conf
+    | None -> Hutil.incorrect_request conf
   with Update.ModErr -> ()
+
+
+(* reset portrait or image from old folder to portrait or others *)
+
+let effective_reset_ok conf base p =
+  let _ = Printf.eprintf "\nPrint_reset_image_ok\n" in
+  let _ =  List.iter
+    (fun (k, v) ->
+       if k <> "file" then Printf.eprintf "Env_var: %s, %s\n" k v)
+    conf.env
+  in
+  let _ = Printf.eprintf "----\n" in
+  let mode = try List.assoc "mode" conf.env with Not_found -> "portraits" in
+  let keydir = default_image_name base p in
+  if mode = "portrait" then
+    begin
+    let _ = Printf.eprintf "Mode portrait: %s\n" keydir in
+    let _ = flush stderr in
+    let file_name = keydir in
+    let ext = get_extension_from conf keydir in
+    let old_file =
+      String.concat Filename.dir_sep (* determine correct ext ?? *)
+        [Util.base_path conf.bname; "documents"; "old"; (file_name ^ ext)]
+    in
+    let new_file =
+      String.concat Filename.dir_sep
+        [Util.base_path conf.bname; "documents"; "portraits"; (file_name ^ ext)]
+    in
+    let _ = Printf.eprintf "Mode portrait: %s\n" old_file in
+    let _ = flush stderr in
+    if Sys.file_exists old_file then
+      (try Sys.rename old_file new_file with Sys_error _ -> ());
+    Printf.eprintf "Done portrait: %s -> %s\n" old_file new_file;
+    end
+  else
+    begin
+    let file_name =
+      try List.assoc "file_name" conf.env with Not_found -> ""
+    in
+    let _ = Printf.eprintf "Mode other: %s\n" file_name in
+    let _ = flush stderr in
+    let ext = Filename.extension file_name in
+    let file_name_t = Filename.chop_suffix file_name ext in
+    let old_file =
+      String.concat Filename.dir_sep
+        [Util.base_path conf.bname; "documents"; "old"; keydir; file_name]
+    in
+    let old_file_t =
+      String.concat Filename.dir_sep
+        [Util.base_path conf.bname; "documents"; "old"; keydir;
+          (file_name_t ^ ".txt")]
+    in
+    let new_file =
+      String.concat Filename.dir_sep
+        [Util.base_path conf.bname; "documents"; "others"; keydir; file_name]
+    in
+    let new_file_t =
+      String.concat Filename.dir_sep
+        [Util.base_path conf.bname; "documents"; "others"; keydir;
+          (file_name_t ^ ".txt")]
+    in
+    let _ = Printf.eprintf "Mode comment: %s/%s\n" keydir file_name in
+    let _ = flush stderr in
+    if Sys.file_exists old_file then
+      (try Sys.rename old_file new_file with Sys_error _ -> ());
+    if Sys.file_exists old_file_t then
+      (try Sys.rename old_file_t new_file_t with Sys_error _ -> ());
+    Printf.eprintf "Done other: %s -> %s\n" old_file new_file;
+    end;
+  let message =
+    if mode = "portrait" then
+      (capitale ((transl conf "portrait") ^ " " ^
+        (transl conf "restored")))
+      else
+      (capitale ((transl conf "other image") ^ " " ^
+        (transl conf "restored")))
+  in
+  let _ = Printf.eprintf "Starting new IMAGE page: %s\n" message in
+  let sp = string_person_of base p in
+  let _ = Printf.eprintf "Getting sp: \n" in
+  let _ = flush stderr in
+  let new_env =
+    List.fold_left
+      (fun accu (k, v) ->
+         if k = "m" then ("m", "IMAGE") :: accu
+         else (k, v) :: accu)
+      [] conf.env
+  in
+  let new_env = ("confirm", message) :: new_env in
+  let conf = { (conf) with env = new_env } in
+  let _ = Printf.eprintf "Getting conf: \n" in
+  let _ = flush stderr in
+  Hutil.interp conf "images"
+    {Templ.eval_var = eval_var conf base;
+     Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
+     Templ.eval_predefined_apply = (fun _ -> raise Not_found);
+     Templ.get_vother = get_vother; Templ.set_vother = set_vother;
+     Templ.print_foreach = print_foreach conf base}
+    [] sp
+
+let print_reset_ok conf base =
+  try
+    match p_getint conf.env "i" with
+      Some ip ->
+        let p = poi base (Adef.iper_of_int ip) in
+        effective_reset_ok conf base p
+    | None -> Hutil.incorrect_request conf
+  with Update.ModErr -> ()
+
+(* TODO need to lock base (keydir!!) , see request.ml list appels which need lock *)

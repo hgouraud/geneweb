@@ -102,7 +102,6 @@ let family_m conf base =
       | "DAG" -> handler.dag
       | "DEL_FAM" -> handler.del_fam
       | "DEL_FAM_OK" -> handler.del_fam_ok
-      | "DEL_IMAGE" -> handler.del_image
       | "DEL_IMAGE_OK" -> handler.del_image_ok
       | "DEL_IND" -> handler.del_ind
       | "DEL_IND_OK" -> handler.del_ind_ok
@@ -115,7 +114,6 @@ let family_m conf base =
       | "FORUM_SEARCH" -> handler.forum_search
       | "FORUM_VAL" -> handler.forum_val
       | "FORUM_VIEW" -> handler.forum_view
-      | "GET_IMAGE_OK" -> handler.get_image_ok
       | "H" -> handler.h
       | "HIST" -> handler.hist
       | "HIST_CLEAN" -> handler.hist_clean
@@ -123,7 +121,6 @@ let family_m conf base =
       | "HIST_DIFF" -> handler.hist_diff
       | "HIST_SEARCH" -> handler.hist_search
       | "IMAGE" -> handler.image
-      | "IMAGE_OK" -> handler.image_ok
       | "IMH" -> handler.imh
       | "INV_FAM" -> handler.inv_fam
       | "INV_FAM_OK" -> handler.inv_fam_ok
@@ -167,8 +164,10 @@ let family_m conf base =
       | "R" -> handler.r
       | "REQUEST" -> handler.request
       | "RL" -> handler.rl
+      | "RESET_IMAGE_OK" -> handler.reset_image_ok
       | "RLM" -> handler.rlm
       | "S" -> handler.s
+      | "SND_IMAGE_OK" -> handler.snd_image_ok
       | "SRC" -> handler.src
       | "STAT" -> handler.stat
       | "CHANGE_WIZ_VIS" -> handler.change_wiz_vis
