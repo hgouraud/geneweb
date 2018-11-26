@@ -1110,13 +1110,13 @@ let move_file_to_old conf fname bfname keydir =
       let cur_file_t = fname ^ ".txt" in
       if Sys.file_exists cur_file then
         let _ = Printf.eprintf "Move file: %s\n" cur_file in
-        let old_file = Filename.concat old_dir (bfname ^ ext) in
-        let old_file_t = Filename.concat old_dir (bfname ^ ".txt") in
-        let _ = Printf.eprintf "Move old file: %s to %s\n" cur_file old_file in
+        let saved_file = Filename.concat old_dir (bfname ^ ext) in
+        let saved_file_t = Filename.concat old_dir (bfname ^ ".txt") in
+        let _ = Printf.eprintf "Move old file: %s to %s\n" cur_file saved_file in
         let _ = flush stderr in
-        (try Sys.rename cur_file old_file with Sys_error _ -> ());
+        (try Sys.rename cur_file saved_file with Sys_error _ -> ());
         if Sys.file_exists cur_file_t then
-          (try Sys.rename cur_file_t old_file_t with Sys_error _ -> ());
+          (try Sys.rename cur_file_t saved_file_t with Sys_error _ -> ());
         cnt + 1
       else cnt)
     0 image_types
@@ -1203,7 +1203,7 @@ let effective_send_ok conf base p file file_name mode =
   in
   let keydir = default_image_name base p in
   let file_name = if mode = "portraits" then keydir
-    else Filename.remove_extension file_name
+    else Filename.concat keydir (Filename.remove_extension file_name)
   in
   let bf_dir =
     if mode = "portraits" then
@@ -1211,7 +1211,7 @@ let effective_send_ok conf base p file file_name mode =
         [Util.base_path conf.bname; "documents"; "portraits"]
     else
       String.concat Filename.dir_sep
-        [Util.base_path conf.bname; "documents"; "others"; keydir]
+        [Util.base_path conf.bname; "documents"; "others";]
   in
   let _ = Printf.eprintf "Testing bfdir: %s\n" bf_dir in
   let bf_dir =
