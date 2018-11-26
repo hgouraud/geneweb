@@ -189,6 +189,14 @@
         <h1 class="display-4">[*saved images]0</h1>
         <i class="far fa-folder-open mr-1" aria-hidden="true"></i>
         <samp>/documents/old/%keydir;</samp>
+        %if;has_old_image;
+          <samp class="ml-5">([portrait])</samp>
+            <a href="%prefix_base_password;&m=DEL_IMAGE_OK&i=%index%nn;
+            &digest=%digest;&file_name=%keydir;.jpg&mode=portraits%nn;
+            &delete=on"
+            title="[*delete] [portrait]0">
+            <i class="far fa-trash-alt text-danger fa-fw text-primary"></i></a>
+        %end;
         <form class="form-row col-12 restore-form mt-2"
           method="post" action="%action;" enctype="multipart/form-data">
           <input type="hidden" name="m" value="RESET_IMAGE_OK">
@@ -205,7 +213,6 @@
               <a href="%prefix_base_password;&m=DEL_IMAGE_OK&i=%index%nn;
                 &digest=%digest;&file_name=%keydir_img_old;&mode=others%nn;
                 &keydir=on;delete=on"
-                class="ml-auto" rel="noopener"
                 title="[*delete] [image/images]0">
                 <i class="far fa-trash-alt text-danger fa-fw text-primary"></i></a>
           %end;

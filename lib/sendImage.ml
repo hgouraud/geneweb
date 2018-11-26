@@ -1360,7 +1360,8 @@ let print_del_ok conf base =
     match p_getint conf.env "i" with
       Some ip ->
         let p = poi base (Adef.iper_of_int ip) in
-        let digest = Update.digest_person (UpdateInd.string_person_of base p) in
+        let _digest = Update.digest_person (UpdateInd.string_person_of base p) in
+        let digest = (default_image_name base p) in
         if digest = raw_get conf "digest" then
           effective_delete_ok conf base p
         else Update.error_digest conf
@@ -1471,7 +1472,8 @@ let print_reset_ok conf base =
     match p_getint conf.env "i" with
       Some ip ->
         let p = poi base (Adef.iper_of_int ip) in
-        let digest = Update.digest_person (UpdateInd.string_person_of base p) in
+        let _digest = Update.digest_person (UpdateInd.string_person_of base p) in
+        let digest = (default_image_name base p) in
         if digest = raw_get conf "digest" then
           effective_reset_ok conf base p
         else Update.error_digest conf
