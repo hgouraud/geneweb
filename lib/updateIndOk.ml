@@ -903,7 +903,7 @@ let check_sex_married conf base sp op =
 
 let rename_image_file conf base op sp =
   match auto_image_file conf base op with
-    Some old_f ->
+  | Some old_f ->
       let s = default_image_name_of_key sp.first_name sp.surname sp.occ in
       let f = List.fold_right
         Filename.concat [Util.base_path conf.bname; "documents"; "portraits"] s in
@@ -914,15 +914,30 @@ let rename_image_file conf base op sp =
       (* old_f is of the form ppp.oc.nnn/filename.ext *)
       let old_f = Filename.basename old_f in
       let old_key = Filename.chop_suffix old_f ext in
-      let old_d = List.fold_right
-        Filename.concat [Util.base_path conf.bname; "documents"; "others"] old_key
+      let old_d =
+        String.concat
+          Filename.dir_sep
+            [Util.base_path conf.bname; "documents"; "others"; old_key]
       in
-      let new_d = List.fold_right
-        Filename.concat [Util.base_path conf.bname; "documents"; "others"] s
+      let new_d =
+        String.concat
+          Filename.dir_sep
+            [Util.base_path conf.bname; "documents"; "others"; s]
+      in
+      let old_d1 =
+        String.concat
+          Filename.dir_sep
+            [Util.base_path conf.bname; "documents"; "old"; old_key]
+      in
+      let new_d1 =
+        String.concat
+          Filename.dir_sep
+            [Util.base_path conf.bname; "documents"; "old"; s]
       in
       let _ = Printf.eprintf "Renaming folders: %s -> %s\n" old_d new_d in
       let _ = flush stderr in
-      (try Sys.rename old_d new_d with Sys_error _ -> ())
+      (try Sys.rename old_d new_d with Sys_error _ -> ());
+      (try Sys.rename old_d1 new_d1 with Sys_error _ -> ());
   | _ -> ()
 
 let rparents_of rparents =
