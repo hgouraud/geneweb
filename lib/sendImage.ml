@@ -129,7 +129,8 @@ and eval_simple_var conf base env p =
   | ["death_note"] -> str_val (quote_escaped p.death_note)
   | ["death_src"] -> str_val (quote_escaped p.death_src)
   | ["died_young"] -> bool_val (p.death = DeadYoung)
-  | ["digest"] -> eval_string_env "digest" env
+  (*| ["digest"] -> eval_string_env "digest" env*)
+  | ["digest"] -> str_val (default_image_name base (poi base p.key_index))
   | ["dont_know_if_dead"] -> bool_val (p.death = DontKnowIfDead)
   | ["dr_disappeared"] -> eval_is_death_reason Disappeared p.death
   | ["dr_executed"] -> eval_is_death_reason Executed p.death
@@ -1127,15 +1128,26 @@ let print_confirm conf base message =
   | Some ip ->
       let p = poi base (Adef.iper_of_int ip) in
       let sp = string_person_of base p in
+      let _digest = Update.digest_person (UpdateInd.string_person_of base p) in
+      let digest = (default_image_name base p) in
       let new_env =
         List.fold_left
           (fun accu (k, v) ->
              if k = "m" then ("m", "IMAGE") :: accu
+             else if k = "digest" || k = "" then accu
              else (k, v) :: accu)
           [] conf.env
       in
       let new_env = ("confirm", message) :: new_env in
+      let new_env = ("digest", digest) :: new_env in
       let conf = { (conf) with env = new_env } in
+      let _ = Printf.eprintf "Initial digest= %s\n" digest in
+      let _ =  List.iter
+        (fun (k, v) ->
+           if k <> "file" then Printf.eprintf "Env_var: %s, %s\n" k v)
+        conf.env
+      in
+      let _ = flush stderr in
       Hutil.interp conf "images"
         {Templ.eval_var = eval_var conf base;
          Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
@@ -1257,6 +1269,14 @@ let effective_send_ok conf base p file file_name mode =
   print_confirm conf base report
 
 let print_send_ok conf base =
+  let _ = Printf.eprintf "\nPrint_send_ok\n" in
+  let _ =  List.iter
+    (fun (k, v) ->
+       if k <> "file" then Printf.eprintf "Env_var: %s, %s\n" k v)
+    conf.env
+  in
+  let _ = Printf.eprintf "-----------\n" in
+  let _ = flush stderr in
   try
     match p_getint conf.env "i" with
       Some ip ->
@@ -1277,7 +1297,12 @@ let print_send_ok conf base =
           if mode <> "comment" then raw_get conf "file"
           else "file_name"
         in
-        effective_send_ok conf base p file file_name mode
+        let _digest = Update.digest_person (UpdateInd.string_person_of base p) in
+        let digest = (default_image_name base p) in
+        let _ = Printf.eprintf "\nNew digest= %s\n" digest in
+        if digest = raw_get conf "digest" then
+          effective_send_ok conf base p file file_name mode
+        else Update.error_digest conf
     | None -> Hutil.incorrect_request conf
   with Update.ModErr -> ()
 
@@ -1335,7 +1360,10 @@ let print_del_ok conf base =
     match p_getint conf.env "i" with
       Some ip ->
         let p = poi base (Adef.iper_of_int ip) in
-        effective_delete_ok conf base p
+        let digest = Update.digest_person (UpdateInd.string_person_of base p) in
+        if digest = raw_get conf "digest" then
+          effective_delete_ok conf base p
+        else Update.error_digest conf
     | None -> Hutil.incorrect_request conf
   with Update.ModErr -> ()
 
@@ -1443,7 +1471,10 @@ let print_reset_ok conf base =
     match p_getint conf.env "i" with
       Some ip ->
         let p = poi base (Adef.iper_of_int ip) in
-        effective_reset_ok conf base p
+        let digest = Update.digest_person (UpdateInd.string_person_of base p) in
+        if digest = raw_get conf "digest" then
+          effective_reset_ok conf base p
+        else Update.error_digest conf
     | None -> Hutil.incorrect_request conf
   with Update.ModErr -> ()
 

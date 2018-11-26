@@ -57,6 +57,7 @@
         <input type="hidden" name="m" value="SND_IMAGE_OK">
         <input type="hidden" name="i" value="%index;">
         <input type="hidden" name="notes" value="">
+        <input type="hidden" name="digest" value=%digest;>
         <div class="custom-file col">
           <input type="file" name="file"
             class="custom-file-input custom-portrait"
@@ -71,14 +72,16 @@
       <div class="small mt-2">[*previous portrait exist]</div>
       <div class="d-flex">
         %if;has_image;
-          <a role="button" href="%prefix_base_password;m=DEL_IMAGE_OK&i=%index;"
+          <a role="button" href="%prefix_base_password;m=DEL_IMAGE_OK%nn;
+            &i=%index;&digest=%digest;"
           class="btn btn-danger ml-auto mt-2"
           title="[*delete portrait]">
           <i class="fas fa-trash-alt mr-2"></i>[*delete portrait]</a>
         %end;
         %if;has_old_image;
           <a role="button" href="%prefix_base_password;%nn;
-            m=RESET_IMAGE_OK&i=%index;&mode=portrait&file_name=%keydir;"
+            m=RESET_IMAGE_OK&i=%index;&digest=%digest;%nn;
+              &mode=portrait&file_name=%keydir;"
             class="btn btn-primary ml-auto mt-2"
             title="[*restore old portrait]">
             <i class="fas fa-file-image mr-2"></i>[*restore old portrait]</a>
@@ -91,6 +94,7 @@
         <input type="hidden" name="m" value="SND_IMAGE_OK">
         <input type="hidden" name="i" value="%index;">
         <input type="hidden" name="mode" id="mode_2" value="others">
+        <input type="hidden" name="digest" value=%digest;>
         %( file_name is automatically provided by the type="file" item %)
         %( file_name_2 is used when updating the comment file after selection %)
         %( with the radiobutton of the old folder content (right column) %)
@@ -139,6 +143,7 @@
           <input type="hidden" name="m" value="DEL_IMAGE_OK">
           <input type="hidden" name="i" value="%index;">
           <input type="hidden" name="mode" value="others">
+          <input type="hidden" name="digest" value=%digest;>
           %foreach;img_in_keydir;
             <div class="custom-control custom-radio col-11">
               <input type="radio" id="customRadio%cnt;" name="file_name"
@@ -189,6 +194,7 @@
           <input type="hidden" name="m" value="RESET_IMAGE_OK">
           <input type="hidden" name="i" value="%index;">
           <input type="hidden" name="mode" value="others">
+          <input type="hidden" name="digest" value=%digest;>
           %foreach;img_in_keydir_old;
               <div class="custom-control custom-radio col-11">
                 <input type="radio" id="customRadio_r%cnt;" name="file_name"
@@ -197,7 +203,8 @@
                 <samp>%keydir_img_old;</samp>
               </div>
               <a href="%prefix_base_password;&m=DEL_IMAGE_OK&i=%index%nn;
-                &file_name=%keydir_img_old;&mode=others&keydir=on;delete=on"
+                &digest=%digest;&file_name=%keydir_img_old;&mode=others%nn;
+                &keydir=on;delete=on"
                 class="ml-auto" rel="noopener"
                 title="[*delete] [image/images]0">
                 <i class="far fa-trash-alt text-danger fa-fw text-primary"></i></a>
