@@ -189,7 +189,7 @@
         <h1 class="display-4">[*saved images]0</h1>
         <i class="far fa-folder-open mr-1" aria-hidden="true"></i>
         <samp>/documents/old/%keydir;</samp>
-        %if;has_old_image;
+        %if;has_old_image; %( TODO manage other ext?? %)
           <samp class="ml-5">([portrait])</samp>
             <a href="%prefix_base_password;&m=DEL_IMAGE_OK&i=%index%nn;
             &digest=%digest;&file_name=%keydir;.jpg&mode=portraits%nn;

@@ -901,6 +901,8 @@ let check_sex_married conf base sp op =
     in
     if no_check then () else print_cannot_change_sex conf base op
 
+(* TODO find where conflicts are detected. *)
+(* signal different portraits *)
 let rename_image_file conf base op sp =
   match auto_image_file conf base op with
   | Some old_f ->
@@ -934,6 +936,7 @@ let rename_image_file conf base op sp =
           Filename.dir_sep
             [Util.base_path conf.bname; "documents"; "old"; s]
       in
+      (* TODO check for pre-existing new_d *)
       let _ = Printf.eprintf "Renaming folders: %s -> %s\n" old_d new_d in
       let _ = flush stderr in
       (try Sys.rename old_d new_d with Sys_error _ -> ());
