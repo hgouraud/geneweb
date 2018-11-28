@@ -192,7 +192,7 @@
         %if;has_old_image; %( TODO manage other ext?? %)
           <samp class="ml-5">([portrait])</samp>
             <a href="%prefix_base_password;&m=DEL_IMAGE_OK&i=%index%nn;
-            &digest=%digest;&file_name=%keydir;.jpg&mode=portraits%nn;
+            &digest=%digest;&file_name=%image_file;&mode=portraits%nn;
             &delete=on"
             title="[*delete] [portrait]0">
             <i class="far fa-trash-alt text-danger fa-fw text-primary"></i></a>

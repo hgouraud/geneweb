@@ -268,6 +268,11 @@ and eval_simple_var conf base env p =
   | ["has_surnames_aliases"] -> bool_val (p.surnames_aliases <> [])
   | ["has_titles"] -> bool_val (p.titles <> [])
   | ["image"] -> str_val (quote_escaped p.image)
+  | ["image_file"] ->
+      begin match auto_image_file conf base (poi base p.key_index) with
+        Some s -> str_val (Filename.basename s)
+      | None -> str_val ""
+      end
   | ["index"] -> str_val (string_of_int (Adef.int_of_iper p.key_index))
   | ["is_female"] -> bool_val (p.sex = Female)
   | ["is_male"] -> bool_val (p.sex = Male)
