@@ -941,7 +941,10 @@ let rename_image_file conf base op sp =
       let _ = flush stderr in
       (try Sys.rename old_d new_d with Sys_error _ -> ());
       (try Sys.rename old_d1 new_d1 with Sys_error _ -> ());
-  | _ -> ()
+  | _ ->
+      let _ = Printf.eprintf "Pas de rename !!\n" in
+      let _ = flush stderr in
+      ()
 
 let rparents_of rparents =
   List.fold_left
@@ -968,6 +971,10 @@ let effective_mod conf base sp =
   let ofn = p_first_name base op in
   let osn = p_surname base op in
   let oocc = get_occ op in
+  let _ = Printf.eprintf "Effective mod: %s.%d %s -> %s.%d %s\n"
+    ofn oocc osn sp.first_name sp.occ sp.surname
+  in
+  let _ = flush stderr in
   if ofn = sp.first_name && osn = sp.surname && oocc = sp.occ then ()
   else
     begin let ipl = Gutil.person_ht_find_all base key in

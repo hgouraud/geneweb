@@ -268,10 +268,10 @@ and eval_simple_var conf base env p =
   | ["has_surnames_aliases"] -> bool_val (p.surnames_aliases <> [])
   | ["has_titles"] -> bool_val (p.titles <> [])
   | ["image"] -> str_val (quote_escaped p.image)
-  | ["image_file"] ->
+  | ["image_file"] -> (* see auto_image_file_name in perso.ml *)
       begin match auto_image_file conf base (poi base p.key_index) with
         Some s -> str_val (Filename.basename s)
-      | None -> str_val ""
+      | _ -> str_val ""
       end
   | ["index"] -> str_val (string_of_int (Adef.int_of_iper p.key_index))
   | ["is_female"] -> bool_val (p.sex = Female)
@@ -299,6 +299,8 @@ and eval_simple_var conf base env p =
       end
   | ["keydir_img_nbr"] ->
       str_val (string_of_int (List.length (get_keydir conf base (poi base p.key_index))))
+  | ["keydir_old_img_nbr"] ->
+      str_val (string_of_int (List.length (get_keydir_old conf base (poi base p.key_index))))
   | ["keydir_img_notes"] ->
       begin match get_env "keydir_img_notes" env with
         Vstring f ->
@@ -1175,7 +1177,7 @@ let print_image conf base = print_confirm conf base ""
 (* depending on mode, write file/file_name into portraits or others area *)
 
 let effective_send_ok conf base p file file_name mode =
-  let _ = Printf.eprintf "\nEffective_send_ok\n" in
+  let _ = Printf.eprintf "\nEffective_send_ok: %s\n" file_name in
   let _ =  List.iter
     (fun (k, v) ->
        if k <> "file" then Printf.eprintf "Env_var: %s, %s\n" k v)
@@ -1219,21 +1221,16 @@ let effective_send_ok conf base p file file_name mode =
     else JPEG, content
   in
   let keydir = default_image_name base p in
-  let file_name = if mode = "portraits" then keydir
-    else Filename.concat keydir (Filename.remove_extension file_name)
-  in
-  let bf_dir =
+  let full_dir =
     if mode = "portraits" then
       String.concat Filename.dir_sep
-        [Util.base_path conf.bname; "documents"; "portraits"]
+        [Util.base_path conf.bname; "documents"; "portraits";]
     else
       String.concat Filename.dir_sep
-        [Util.base_path conf.bname; "documents"; "others";]
+        [Util.base_path conf.bname; "documents"; "others"; keydir]
   in
-  let _ = Printf.eprintf "Testing bfdir: %s\n" bf_dir in
-  let bf_dir =
-    if Sys.file_exists bf_dir then bf_dir
-    else
+  let _ =
+    if not (Sys.file_exists full_dir) then
       let _ = Printf.eprintf "Create non existant folders\n" in
       let d = Filename.concat (Util.base_path conf.bname) "documents" in
       let d1 = Filename.concat d "portraits" in
@@ -1243,16 +1240,11 @@ let effective_send_ok conf base p file file_name mode =
       (try Unix.mkdir d1 0o777 with Unix.Unix_error (_, _, _) -> ());
       (try Unix.mkdir d2 0o777 with Unix.Unix_error (_, _, _) -> ());
       (try Unix.mkdir d3 0o777 with Unix.Unix_error (_, _, _) -> ());
-      if mode = "portraits" then d1 else d3
   in
-  let _ = Printf.eprintf "Writing file in: %s\n" bf_dir in
-  let _ = flush stderr in
-  let full_name = Filename.concat bf_dir file_name in
+  let full_name = Filename.concat full_dir file_name in
   let _moved = if mode = "comment" then 0
     else move_file_to_old conf full_name file_name keydir
   in
-  let _ = Printf.eprintf "Trying to write: (%s) and (%s)\n" file_name notes in
-  let _ = flush stderr in
   if file_name <> "" then
     write_file (full_name ^ extension_of_type typ) content;
   if notes <> "" then

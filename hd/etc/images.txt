@@ -214,7 +214,7 @@
                 title="[*delete] [image/images]0">
                 <i class="far fa-trash-alt text-danger fa-fw text-primary"></i></a>
           %end;
-          %if;(keydir_img_nbr>0)
+          %if;(keydir_old_img_nbr>0)
             <button type="submit" class="btn btn-danger rst-img-btn ml-2 mt-2"
               disabled><i class="fa fa-trash-alt mr-2"></i>
               [*restore] [selected image]0</button>
