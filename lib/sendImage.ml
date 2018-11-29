@@ -1386,7 +1386,7 @@ let effective_reset_ok conf base p =
   let _ = Printf.eprintf "----\n" in
   let mode = try List.assoc "mode" conf.env with Not_found -> "portraits" in
   let keydir = default_image_name base p in
-  if mode = "portrait" then
+  if mode = "portraits" then
     begin
     let _ = Printf.eprintf "Mode portrait: %s\n" keydir in
     let _ = flush stderr in
@@ -1411,7 +1411,7 @@ let effective_reset_ok conf base p =
     let file_name =
       try List.assoc "file_name" conf.env with Not_found -> ""
     in
-    let _ = Printf.eprintf "Mode other: %s\n" file_name in
+    let _ = Printf.eprintf "Mode others: %s\n" file_name in
     let _ = flush stderr in
     let ext = Filename.extension file_name in
     let file_name_t = Filename.chop_suffix file_name ext in
@@ -1433,7 +1433,7 @@ let effective_reset_ok conf base p =
         [Util.base_path conf.bname; "documents"; "others"; keydir;
           (file_name_t ^ ".txt")]
     in
-    let _ = Printf.eprintf "Mode comment: %s/%s\n" keydir file_name in
+    let _ = Printf.eprintf "Mode others: %s/%s\n" keydir file_name in
     let _ = flush stderr in
     if Sys.file_exists old_file then
       (try Sys.rename old_file new_file with Sys_error _ -> ());
