@@ -1100,7 +1100,6 @@ let get_extension_from conf keydir =
   in
   ".jpg"
 
-
 let move_file_to_old conf fname bfname keydir =
   let _ = Printf.eprintf "Move to old (no ext) %s (%s)\n" fname bfname in
   let old_dir =
@@ -1177,7 +1176,7 @@ let print_image conf base = print_confirm conf base ""
 (* depending on mode, write file/file_name into portraits or others area *)
 
 let effective_send_ok conf base p file file_name mode =
-  let _ = Printf.eprintf "\nEffective_send_ok: %s\n" file_name in
+  let _ = Printf.eprintf "\nEffective_send_ok: %s (%s)\n" file_name mode in
   let _ =  List.iter
     (fun (k, v) ->
        if k <> "file" then Printf.eprintf "Env_var: %s, %s\n" k v)
@@ -1196,16 +1195,16 @@ let effective_send_ok conf base p file file_name mode =
   let (request, content) = Wserver.get_request_and_content strm in
   let content =
     if mode = "comment" then ""
-      else
-        let s =
-          let rec loop len (strm__ : _ Stream.t) =
-            match Stream.peek strm__ with
-            | Some x -> Stream.junk strm__; loop (Buff.store len x) strm
-            | _ -> Buff.get len
-          in
-          loop 0 strm
+    else
+      let s =
+        let rec loop len (strm__ : _ Stream.t) =
+          match Stream.peek strm__ with
+          | Some x -> Stream.junk strm__; loop (Buff.store len x) strm
+          | _ -> Buff.get len
         in
-        content ^ s
+        loop 0 strm
+      in
+      content ^ s
   in
   let (typ, content) =
     if mode = "others" then
@@ -1241,8 +1240,10 @@ let effective_send_ok conf base p file file_name mode =
       (try Unix.mkdir d2 0o777 with Unix.Unix_error (_, _, _) -> ());
       (try Unix.mkdir d3 0o777 with Unix.Unix_error (_, _, _) -> ());
   in
-  let full_name = Filename.concat full_dir
-    (Filename.remove_extension file_name)
+  let file_name = if mode = "portraits" then keydir else file_name in
+  let full_name =
+    if mode = "portraits" then Filename.concat full_dir file_name
+    else Filename.concat full_dir (Filename.remove_extension file_name)
   in
   let _moved = if mode = "comment" then 0
     else move_file_to_old conf full_name file_name keydir
@@ -1291,7 +1292,6 @@ let print_send_ok conf base =
             (try List.assoc "file_name_2" conf.env with Not_found -> "")
           else file_name
         in
-        let file_name = Wserver.decode file_name in
         let file =
           if mode <> "comment" then raw_get conf "file"
           else "file_name"
@@ -1387,19 +1387,29 @@ let effective_reset_ok conf base p =
     let _ = flush stderr in
     let file_name = keydir in
     let ext = get_extension_from conf keydir in
-    let old_file =
-      String.concat Filename.dir_sep (* determine correct ext ?? *)
+    let file_in_old =
+      String.concat Filename.dir_sep
         [Util.base_path conf.bname; "documents"; "old"; (file_name ^ ext)]
     in
     let new_file =
       String.concat Filename.dir_sep
         [Util.base_path conf.bname; "documents"; "portraits"; (file_name ^ ext)]
     in
-    let _ = Printf.eprintf "Mode portrait: %s\n" old_file in
+    let _ = Printf.eprintf "Mode portrait: %s\n" file_in_old in
     let _ = flush stderr in
-    if Sys.file_exists old_file then
-      (try Sys.rename old_file new_file with Sys_error _ -> ());
-    Printf.eprintf "Done portrait: %s -> %s\n" old_file new_file;
+    let tmp_file =
+      String.concat Filename.dir_sep
+        [Util.base_path conf.bname; "documents"; "old"; "tempfile.tmp"]
+    in
+    if Sys.file_exists new_file then
+      begin
+        (try Sys.rename new_file tmp_file with Sys_error _ -> ());
+        (try Sys.rename file_in_old new_file with Sys_error _ -> ());
+        (try Sys.rename tmp_file file_in_old with Sys_error _ -> ());
+      end
+    else if Sys.file_exists file_in_old then
+      (try Sys.rename file_in_old new_file with Sys_error _ -> ());
+    Printf.eprintf "Done portrait: %s -> %s\n" file_in_old new_file;
     end
   else
     begin
@@ -1411,11 +1421,11 @@ let effective_reset_ok conf base p =
     let _ = flush stderr in
     let ext = Filename.extension file_name in
     let file_name_t = Filename.chop_suffix file_name ext in
-    let old_file =
+    let file_in_old =
       String.concat Filename.dir_sep
         [Util.base_path conf.bname; "documents"; "old"; keydir; file_name]
     in
-    let old_file_t =
+    let file_in_old_t =
       String.concat Filename.dir_sep
         [Util.base_path conf.bname; "documents"; "old"; keydir;
           (file_name_t ^ ".txt")]
@@ -1431,11 +1441,11 @@ let effective_reset_ok conf base p =
     in
     let _ = Printf.eprintf "Mode others: %s/%s\n" keydir file_name in
     let _ = flush stderr in
-    if Sys.file_exists old_file then
-      (try Sys.rename old_file new_file with Sys_error _ -> ());
-    if Sys.file_exists old_file_t then
-      (try Sys.rename old_file_t new_file_t with Sys_error _ -> ());
-    Printf.eprintf "Done other: %s -> %s\n" old_file new_file;
+    if Sys.file_exists file_in_old then
+      (try Sys.rename file_in_old new_file with Sys_error _ -> ());
+    if Sys.file_exists file_in_old_t then
+      (try Sys.rename file_in_old_t new_file_t with Sys_error _ -> ());
+    Printf.eprintf "Done other: %s -> %s\n" file_in_old new_file;
     end;
   let message =
     if mode = "portrait" then

@@ -2656,19 +2656,13 @@ let default_image_name base p =
 
 let auto_image_file conf base p =
   let s = default_image_name base p in
-  let f1 =
+  let f =
     String.concat
       Filename.dir_sep [base_path conf.bname; "documents"; "portraits"; s]
   in
-  let f2 =
-    String.concat
-      Filename.dir_sep [base_path conf.bname; "documents"; "others"; s]
-  in
-  if Sys.file_exists (f1 ^ ".gif") then Some (f1 ^ ".gif")
-  else if Sys.file_exists (f1 ^ ".jpg") then Some (f1 ^ ".jpg")
-  else if Sys.file_exists (f1 ^ ".png") then Some (f1 ^ ".png")
-  (* we need some extension *)
-  else if Sys.file_exists f2 then Some (f2 ^ ".ext")
+  if Sys.file_exists (f ^ ".gif") then Some (f ^ ".gif")
+  else if Sys.file_exists (f ^ ".jpg") then Some (f ^ ".jpg")
+  else if Sys.file_exists (f ^ ".png") then Some (f ^ ".png")
   else None
 
 let keydir conf base p =

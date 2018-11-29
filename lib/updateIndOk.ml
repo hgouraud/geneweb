@@ -904,8 +904,17 @@ let check_sex_married conf base sp op =
 (* TODO find where conflicts are detected. *)
 (* signal different portraits *)
 let rename_image_file conf base op sp =
-  match auto_image_file conf base op with
-  | Some old_f ->
+  let old_f =
+    match auto_image_file conf base op with
+    | Some old_f -> old_f
+    | None -> ""
+  in
+  let old_d =
+    match keydir conf base op with
+    | Some old_d -> old_d
+    | None -> ""
+  in
+  if old_f <> "" || old_d <> "" then
       let s = default_image_name_of_key sp.first_name sp.surname sp.occ in
       let f = List.fold_right
         Filename.concat [Util.base_path conf.bname; "documents"; "portraits"] s in
@@ -941,7 +950,7 @@ let rename_image_file conf base op sp =
       let _ = flush stderr in
       (try Sys.rename old_d new_d with Sys_error _ -> ());
       (try Sys.rename old_d1 new_d1 with Sys_error _ -> ());
-  | _ ->
+  else
       let _ = Printf.eprintf "Pas de rename !!\n" in
       let _ = flush stderr in
       ()
