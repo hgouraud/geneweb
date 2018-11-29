@@ -59,7 +59,8 @@ ALL_EXE = \
 	contrib/oneshot/gwRemoveImgGallery \
 	contrib/oneshot/gwBaseCompatiblePlus \
 	contrib/oneshot/gwFixDateText \
-	contrib/oneshot/gwExportAscCSV
+	contrib/oneshot/gwExportAscCSV \
+	contrib/oneshot/new_org
 
 EVERYTHING_EXE = \
 	$(ALL_EXE) \

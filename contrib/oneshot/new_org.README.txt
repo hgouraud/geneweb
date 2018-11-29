@@ -1,0 +1,49 @@
+Current folder structure        Proposed folder structure
+
+bases/                          bases/
+  cnt/                            mybase1.gwb/
+    mybase1.txt                     various_data_base_files
+    mybase1.lck                     cnt/
+    mybase2.txt                       counts.txt     (ex mybase1.txt)
+    mybase2.lck                       counts.lck     (ex mybase1.lck)
+    robot                           documents/
+  etc/                                some_files     {.txt|.pdf|.html}
+    template_files                    images/        (ex src/mybase1/images)
+    modules/                            some_files   {.jpg|.png|.gif}
+    mybase1/                            fn.oc.sn/    (files for carrousel)
+    mybase2/                              some_files {.jpg|.png|.gif}
+  images/                                 some_files {.txt} (comments)
+    some_files.ext                        saved/     (saved images for fn.oc.sn)
+    mybase1/                          portraits/     (ex images/mybase1)
+    mybase2/                            saved/       (saved portraits)
+  mybase.gwb/                         src/           (ex src/mybase1/*.txt)
+    various_files                       file.txt
+    history_d/                          lg/          (lg specific txt files)
+    notes_d/                        etc/             (ex etc/mybase1)
+    wiznotes_d/                       mybase.conf    (ex mybase1.gwf)
+  mybase.gwf                        history/         (ex history_d)
+  lang/                               history.txt    (ex history)
+    mybase1/                        lang/            (ex lang/mybase1)
+    mybase2/                        notes/           (ex notes_d)
+  src/                                notes.txt      (ex  notes)
+  mybase1/                            other_notes.txt
+    some_files.txt
+    images/                         mybase2.gwb/
+  mybase2/
+
+If your folder structure differs significantly from the structure
+above, using new_org.exe is discouraged.
+
+In the notes section of your pages,
+<a href="%sm=IMH;s=file.jpg">text</a>  ->  <a href="%sm=IMH;s=file.jpg">
+<a href="%sm=SRC;v=file">text</a>      ->  <a href="%sm=SRC;v=file">text</a>
+                                       or  <a href="%sm=DOC;s=file.txt">text</a>
+
+images as portraits are searched in documents/portraits
+other images (m=IM, m=IMH, m=DOC) are searched in documents/images
+or documents.
+text documents (m=SRC, m=DOC&s=file.txt) are searched in documents/src
+or documents
+
+In documents and its sub-folders, other sub-folders are allowed.
+
