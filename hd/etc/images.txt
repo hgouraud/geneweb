@@ -147,12 +147,9 @@
             <div class="custom-control custom-radio col-11">
               <input type="radio" id="customRadio%cnt;" name="file_name"
                 class="custom-control-input" value="%keydir_img;">
-              <label class="custom-control-label" for="customRadio%cnt;"><samp>%nn;
-              %if;(keydir_img_title!="")%keydir_img_title;%else;%keydir_img;
-              %end;%nn;
-              %if;(keydir_img_src!="") %nn;
-                <small>(%keydir_img_src;)</small>
-              %end;</samp></label>
+              <label class="custom-control-label" for="customRadio%cnt;">
+              <samp>%keydir_img;</samp>
+              </label>
             </div>
             <div class="ml-auto">
             <a href="%prefix_base_password;&m=IM&s=others/%keydir;/%keydir_img;"
@@ -210,7 +207,7 @@
               </div>
               <a href="%prefix_base_password;&m=DEL_IMAGE_OK&i=%index%nn;
                 &digest=%digest;&file_name=%keydir_img_old;&mode=others%nn;
-                &keydir=on;delete=on"
+                &delete=on"
                 title="[*delete] [image/images]0">
                 <i class="far fa-trash-alt text-danger fa-fw text-primary"></i></a>
           %end;

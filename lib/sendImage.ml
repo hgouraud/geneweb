@@ -1241,7 +1241,9 @@ let effective_send_ok conf base p file file_name mode =
       (try Unix.mkdir d2 0o777 with Unix.Unix_error (_, _, _) -> ());
       (try Unix.mkdir d3 0o777 with Unix.Unix_error (_, _, _) -> ());
   in
-  let full_name = Filename.concat full_dir file_name in
+  let full_name = Filename.concat full_dir
+    (Filename.remove_extension file_name)
+  in
   let _moved = if mode = "comment" then 0
     else move_file_to_old conf full_name file_name keydir
   in
@@ -1282,7 +1284,6 @@ let print_send_ok conf base =
           try List.assoc "mode" conf.env with Not_found -> "portraits"
         in
         let file_name =
-          space_to_unders
             (try List.assoc "file_name" conf.env with Not_found -> "")
         in
         let file_name =
@@ -1290,6 +1291,7 @@ let print_send_ok conf base =
             (try List.assoc "file_name_2" conf.env with Not_found -> "")
           else file_name
         in
+        let file_name = Wserver.decode file_name in
         let file =
           if mode <> "comment" then raw_get conf "file"
           else "file_name"
@@ -1317,6 +1319,7 @@ let effective_delete_ok conf base p =
   let _ = flush stderr in
   let keydir = default_image_name base p in
   let file_name = try List.assoc "file_name" conf.env with Not_found -> "" in
+  let file_name = Wserver.decode file_name in
   let mode = try List.assoc "mode" conf.env with Not_found -> "portraits" in
   let delete =
     try (List.assoc "delete" conf.env = "on") with Not_found -> false
@@ -1403,6 +1406,7 @@ let effective_reset_ok conf base p =
     let file_name =
       try List.assoc "file_name" conf.env with Not_found -> ""
     in
+    let file_name = Wserver.decode file_name in
     let _ = Printf.eprintf "Mode others: %s\n" file_name in
     let _ = flush stderr in
     let ext = Filename.extension file_name in
