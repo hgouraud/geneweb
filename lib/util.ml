@@ -2342,23 +2342,26 @@ let string_of_decimal_num conf f =
 
 let personal_image_file_name conf str =
   let fname1 =
-    List.fold_right
-      Filename.concat [base_path conf.bname; "documents"; "portraits"] str
+    String.concat
+      Filename.dir_sep [base_path conf.bname; "documents"; "portraits"; str]
   in
   fname1
 
 let source_image_file_name conf str =
   let fname1 =
-    List.fold_right Filename.concat [base_path conf.bname; "documents"] str
+    String.concat
+      Filename.dir_sep [base_path conf.bname; "documents"; str]
   in
   let fname2 =
-    List.fold_right Filename.concat [Secure.base_dir (); "documents"] str
+    String.concat
+      Filename.dir_sep [Secure.base_dir (); "documents"; str]
   in
   if Sys.file_exists fname1 then fname1 else fname2
 
 let image_file_name str =
   let fname1 =
-    List.fold_right Filename.concat [Secure.base_dir (); "images"] str
+    String.concat
+      Filename.dir_sep [Secure.base_dir (); "images"; str]
   in
   let fname2 =
     search_in_lang_path (Filename.concat "images" str)
@@ -2513,8 +2516,8 @@ let find_sosa_ref conf base =
 let write_default_sosa conf key =
   let gwf = List.remove_assoc "default_sosa_ref" conf.base_env in
   let gwf = List.rev (("default_sosa_ref", key) :: gwf) in
-  let fname = List.fold_right
-    Filename.concat [base_path conf.bname; "etc"] conf.bname ^ ".conf"
+  let fname = String.concat
+      Filename.dir_sep [base_path conf.bname; "etc"; conf.bname ^ ".conf"]
   in
   let tmp_fname = fname ^ "2" in
   let oc =
