@@ -1179,9 +1179,6 @@ let gw_etc_file fname =
   let etc_file = Filename.concat (search_in_lang_path "etc") fname in
   (* cette ligne est probablement inutile search_in_lg_path fait le travail *)
   let share_file = Filename.concat sharelib fname in
-  let _ = Printf.eprintf "Gw_etc_file: %s\n" etc_file in
-  let _ = Printf.eprintf "Gw_share_file: %s\n" share_file in
-  let _ = flush stderr in
   if Sys.file_exists etc_file then etc_file
   else if Sys.file_exists share_file then share_file
   else ""
@@ -2663,6 +2660,8 @@ let auto_image_file conf base p =
     String.concat
       Filename.dir_sep [base_path conf.bname; "documents"; "portraits"; s]
   in
+  let _ = Printf.eprintf "Auto_image_file: %s\n" f in
+  let _ = flush stderr in
   if Sys.file_exists (f ^ ".gif") then Some (f ^ ".gif")
   else if Sys.file_exists (f ^ ".jpg") then Some (f ^ ".jpg")
   else if Sys.file_exists (f ^ ".png") then Some (f ^ ".png")

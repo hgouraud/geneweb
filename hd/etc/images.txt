@@ -80,8 +80,7 @@
         %end;
         %if;has_old_image;
           <a role="button" href="%prefix_base_password;%nn;
-            m=RESET_IMAGE_OK&i=%index;&digest=%digest;%nn;
-              &mode=portrait&file_name=%keydir;"
+            m=RESET_IMAGE_OK&i=%index;&digest=%digest;"
             class="btn btn-primary ml-auto mt-2"
             title="[*restore old portrait]">
             <i class="fas fa-file-image mr-2"></i>[*restore old portrait]</a>
@@ -192,8 +191,7 @@
         %if;has_old_image; %( TODO manage other ext?? %)
           <samp class="ml-5">([portrait])</samp>
             <a href="%prefix_base_password;&m=DEL_IMAGE_OK&i=%index%nn;
-            &digest=%digest;&file_name=%image_file;&mode=portraits%nn;
-            &delete=on"
+            &digest=%digest;&delete=on"
             title="[*delete] [portrait]0">
             <i class="far fa-trash-alt text-danger fa-fw text-primary"></i></a>
         %end;
