@@ -2085,7 +2085,7 @@ and eval_simple_str_var conf base env (_, p_auth) =
                Wiki.wi_always_show_link = conf.wizard || conf.friend}
             in
             let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-            Util.safe_html @@ if conf.pure_xhtml then Util.check_xhtml s else s
+            if conf.pure_xhtml then Util.check_xhtml s else s
           else ""
       | _ -> raise Not_found
       end
@@ -2240,7 +2240,7 @@ and eval_simple_str_var conf base env (_, p_auth) =
                Wiki.wi_always_show_link = conf.wizard || conf.friend}
             in
             let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-            Util.safe_html @@ if conf.pure_xhtml then Util.check_xhtml s else s
+            if conf.pure_xhtml then Util.check_xhtml s else s
           else ""
       | _ -> raise Not_found
       end
@@ -2259,7 +2259,7 @@ and eval_simple_str_var conf base env (_, p_auth) =
                Wiki.wi_always_show_link = conf.wizard || conf.friend}
             in
             let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-            Util.safe_html @@ if conf.pure_xhtml then Util.check_xhtml s else s
+            if conf.pure_xhtml then Util.check_xhtml s else s
           else ""
       | _ -> raise Not_found
       end
@@ -3535,6 +3535,10 @@ and eval_str_event_field conf base (p, p_auth)
   | "src" ->
       if p_auth then
         let env = ['i', (fun () -> Util.default_image_name base p)] in
+        let env = ('k', (fun () ->
+          string_of_int (Adef.int_of_iper (get_key_index p)))) :: env
+        in
+        let src = string_with_macros conf env src in
         let src =
           let wi =
             {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
@@ -4089,7 +4093,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
            Wiki.wi_always_show_link = conf.wizard || conf.friend}
         in
         let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        Util.safe_html @@ if conf.pure_xhtml then Util.check_xhtml s else s
+        if conf.pure_xhtml then Util.check_xhtml s else s
       else ""
   | "baptism_place" ->
       if p_auth then
@@ -4108,7 +4112,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
            Wiki.wi_always_show_link = conf.wizard || conf.friend}
         in
         let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        Util.safe_html @@ if conf.pure_xhtml then Util.check_xhtml s else s
+        if conf.pure_xhtml then Util.check_xhtml s else s
       else ""
   | "burial_place" ->
       if p_auth then Util.string_of_place conf (sou base (get_burial_place p))
@@ -4126,7 +4130,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
            Wiki.wi_always_show_link = conf.wizard || conf.friend}
         in
         let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        Util.safe_html @@ if conf.pure_xhtml then Util.check_xhtml s else s
+        if conf.pure_xhtml then Util.check_xhtml s else s
       else ""
   | "child_name" ->
       let force_surname =
@@ -4179,7 +4183,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
            Wiki.wi_always_show_link = conf.wizard || conf.friend}
         in
         let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        Util.safe_html @@ if conf.pure_xhtml then Util.check_xhtml s else s
+        if conf.pure_xhtml then Util.check_xhtml s else s
       else ""
   | "died" -> string_of_died conf p p_auth
   | "fam_access" ->
@@ -4351,7 +4355,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
            Wiki.wi_always_show_link = conf.wizard || conf.friend}
         in
         let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        Util.safe_html @@ if conf.pure_xhtml then Util.check_xhtml s else s
+        if conf.pure_xhtml then Util.check_xhtml s else s
       else ""
   | "occ" ->
       if is_hide_names conf p && not p_auth then ""
@@ -4359,6 +4363,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
   | "occupation" ->
       if p_auth then
         let s = sou base (get_occupation p) in
+        let s = string_with_macros conf [] s in
         let s =
           let wi =
             {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
@@ -4368,7 +4373,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
           in
           Wiki.syntax_links conf wi s
         in
-        Util.safe_html @@ string_with_macros conf [] s
+        if conf.pure_xhtml then Util.check_xhtml s else s
       else ""
   | "on_baptism_date" ->
       begin match p_auth, Adef.od_of_cdate (get_baptism p) with
@@ -4432,7 +4437,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
            Wiki.wi_always_show_link = conf.wizard || conf.friend}
         in
         let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        Util.safe_html @@ if conf.pure_xhtml then Util.check_xhtml s else s
+        if conf.pure_xhtml then Util.check_xhtml s else s
       else ""
   | "slash_burial_date" ->
       begin match get_burial p with
@@ -4543,6 +4548,10 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
       begin match get_env "src" env with
         Vstring s ->
           let env = ['i', (fun () -> Util.default_image_name base p)] in
+          let env = ('k', (fun () ->
+            string_of_int (Adef.int_of_iper (get_key_index p)))) :: env
+          in
+          let s = string_with_macros conf env s in
           let s =
             let wi =
               {Wiki.wi_mode = "NOTES";
@@ -4553,7 +4562,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
             in
             Wiki.syntax_links conf wi s
           in
-          Util.safe_html @@ string_with_macros conf env s
+          if conf.pure_xhtml then Util.check_xhtml s else s
       | _ -> raise Not_found
       end
   | "surname" ->
