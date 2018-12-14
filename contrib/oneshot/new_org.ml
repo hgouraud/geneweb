@@ -75,6 +75,8 @@ let one_base cur_dir new_dir basename save =
     with Unix.Unix_error (_, _, _) -> ());
   (try Unix.mkdir (Filename.concat new_base "etc") 0o777
     with Unix.Unix_error (_, _, _) -> ());
+  (try Unix.mkdir (Filename.concat new_base "etc"; "cnt") 0o777
+    with Unix.Unix_error (_, _, _) -> ());
   (try Unix.mkdir (Filename.concat new_base "lang") 0o777
     with Unix.Unix_error (_, _, _) -> ());
   (try Unix.mkdir (Filename.concat new_base "wiznotes") 0o777
@@ -83,8 +85,6 @@ let one_base cur_dir new_dir basename save =
   (try Unix.mkdir (Filename.concat documents "images") 0o777
     with Unix.Unix_error (_, _, _) -> ());
   (try Unix.mkdir (Filename.concat documents "portraits") 0o777
-    with Unix.Unix_error (_, _, _) -> ());
-  (try Unix.mkdir (Filename.concat documents "src") 0o777
     with Unix.Unix_error (_, _, _) -> ());
 
   let images = String.concat Filename.dir_sep [cur_dir; "images";] in
@@ -168,7 +168,7 @@ let one_base cur_dir new_dir basename save =
   if Sys.file_exists from then
     do_one_comm (Printf.sprintf "cp -R %s %s%s"
       (Filename.concat from "*")
-      (String.concat Filename.dir_sep [documents; "images";])
+      (String.concat Filename.dir_sep [documents;])
       (Filename.dir_sep))
       (Printf.sprintf "Failed to copy src/images/* for %s\n" basename);
 
@@ -198,6 +198,40 @@ let one_base cur_dir new_dir basename save =
       (String.concat Filename.dir_sep [new_base; "lang";])
       (Filename.dir_sep))
       (Printf.sprintf "Failed to copy lang for %s\n" basename);
+
+  let from =
+    String.concat Filename.dir_sep
+      [cur_dir; "cnt";]
+  in
+  if Sys.file_exists from then
+    begin
+    do_one_comm (Printf.sprintf "cp %s %s%s"
+      (Filename.concat from bname ^ "_cnt.lck 2> /dev/null || :")
+      (String.concat Filename.dir_sep [new_base; "etc"; "cnt"; "counts.lck"])
+      (Filename.dir_sep))
+      (Printf.sprintf "Failed to copy counts.lck for %s\n" basename);
+    do_one_comm (Printf.sprintf "cp %s %s%s"
+      (Filename.concat from bname ^ "_cnt.txt 2> /dev/null || :")
+      (String.concat Filename.dir_sep [new_base; "etc"; "cnt"; "counts.txt"])
+      (Filename.dir_sep))
+      (Printf.sprintf "Failed to copy counts.txt for %s\n" basename);
+    do_one_comm (Printf.sprintf "cp %s %s%s"
+      (Filename.concat from bname ^ "_f.txt 2> /dev/null || :")
+      (String.concat Filename.dir_sep [new_base; "etc"; "cnt"; "friends.log"])
+      (Filename.dir_sep))
+      (Printf.sprintf "Failed to copy friends.log for %s\n" basename);
+    do_one_comm (Printf.sprintf "cp %s %s%s"
+      (Filename.concat from bname ^ "_w.txt 2> /dev/null || :")
+      (String.concat Filename.dir_sep [new_base; "etc"; "cnt"; "wizards.log"])
+      (Filename.dir_sep))
+      (Printf.sprintf "Failed to copy wizards.log for %s\n" basename);
+    do_one_comm (Printf.sprintf "cp %s %s%s"
+      (Filename.concat from bname ^ "_u.txt 2> /dev/null || :")
+      (String.concat Filename.dir_sep [new_base; "etc"; "cnt"; "updates.log"])
+      (Filename.dir_sep))
+      (Printf.sprintf "Failed to copy updates.log for %s\n" basename)
+    end;
+
   Printf.eprintf "done\n";
   flush stderr
 
