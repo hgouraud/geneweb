@@ -157,7 +157,7 @@ let one_base cur_dir new_dir basename save =
   if Sys.file_exists from then
     do_one_comm (Printf.sprintf "cp -R %s %s%s"
       (Filename.concat from "*.txt")
-      (String.concat Filename.dir_sep [documents; "src";])
+      (String.concat Filename.dir_sep [documents;])
       (Filename.dir_sep))
       (Printf.sprintf "Failed to copy src/*.txt for %s\n" basename);
 
@@ -258,7 +258,11 @@ let main () =
           (Array.to_list (Sys.readdir cur_dir)) []
   in
   if !basename <> "" then
-    one_base cur_dir new_dir !basename !save
+    let basename = if (Filename.extension !basename) = ".gwb"
+      then !basename
+      else (!basename ^ ".gwb")
+    in
+    one_base cur_dir new_dir basename !save
   else
     List.iter (fun basename -> one_base cur_dir new_dir basename !save) base_list;
   Printf.eprintf "Finished\n";
