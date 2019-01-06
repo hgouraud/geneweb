@@ -86,6 +86,8 @@ let one_base cur_dir new_dir basename save =
     with Unix.Unix_error (_, _, _) -> ());
   (try Unix.mkdir (Filename.concat documents "portraits") 0o777
     with Unix.Unix_error (_, _, _) -> ());
+  (try Unix.mkdir (Filename.concat documents "src") 0o777
+    with Unix.Unix_error (_, _, _) -> ());
 
   let images = String.concat Filename.dir_sep [cur_dir; "images"] in
   let ls_images = (Array.to_list (Sys.readdir images)) in
@@ -157,7 +159,7 @@ let one_base cur_dir new_dir basename save =
   if Sys.file_exists from then
     do_one_comm (Printf.sprintf "cp -R %s %s%s"
       (Filename.concat from "*.txt")
-      (String.concat Filename.dir_sep [documents;])
+      (String.concat Filename.dir_sep [documents; "src"])
       (Filename.dir_sep))
       (Printf.sprintf "Failed to copy src/*.txt for %s\n" basename);
 
@@ -168,7 +170,7 @@ let one_base cur_dir new_dir basename save =
   if Sys.file_exists from then
     do_one_comm (Printf.sprintf "cp -R %s %s%s"
       (Filename.concat from "*")
-      (String.concat Filename.dir_sep [documents;])
+      (String.concat Filename.dir_sep [documents; "images"])
       (Filename.dir_sep))
       (Printf.sprintf "Failed to copy src/images/* for %s\n" basename);
 

@@ -12,24 +12,24 @@ bases/                          bases/
     modules/                              some_files  {.jpg|.png|.gif}
     mybase1/                              some_files  {.txt} (comments)
     mybase2/                              saved/      (saved images for fn.oc.sn)
-  images/                              portraits/     (ex images/mybase1)
-    some_files.ext                       saved/       (saved portraits)
-    mybase1/                        etc/              (ex etc/mybase1)
-    mybase2/                          mybase.conf     (ex mybase1.gwf)
-  mybase.gwb/                         cnt/
-    various_files                       counts.lck
-    history_d/                          counts.txt
-    notes_d/                            {wizards/friends/updates}.log
-    wiznotes_d/                       comm.log
-  mybase.gwf                        history/         (ex history_d)
-  lang/                               history.txt    (ex history)
-    mybase1/                          other history sub-folders
-    mybase2/                        notes/           (ex notes_d)
-  src/                                notes.txt      (ex  notes)
-  mybase1/                            other_notes.txt
-    some_files.txt
+  images/                             portraits/      (ex images/mybase1)
+    some_files.ext                      saved/        (saved portraits)
+    mybase1/                          src/
+    mybase2/                            some_files    (ex src/mybase/*.txt)
+  mybase.gwb/                       etc/              (ex etc/mybase1)
+    various_files                     mybase.conf     (ex mybase1.gwf)
+    history_d/                      cnt/
+    notes_d/                          counts.lck
+    wiznotes_d/                       counts.txt
+  mybase.gwf                          {wizards/friends/updates}.log
+  lang/                               comm.log
+    mybase1/                        history/         (ex history_d)
+    mybase2/                          history.txt    (ex history)
+  src/                                other history sub-folders
+  mybase1/                          notes/           (ex notes_d)
+    some_files.txt                    notes.txt      (ex  notes)
     images/                         mybase2.gwb/
-  mybase2/
+  mybase2/                          mybase2.gwb/
 
 If your folder structure differs significantly from the structure
 above, using new_org.exe is discouraged.
