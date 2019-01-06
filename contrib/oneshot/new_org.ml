@@ -87,7 +87,7 @@ let one_base cur_dir new_dir basename save =
   (try Unix.mkdir (Filename.concat documents "portraits") 0o777
     with Unix.Unix_error (_, _, _) -> ());
 
-  let images = String.concat Filename.dir_sep [cur_dir; "images";] in
+  let images = String.concat Filename.dir_sep [cur_dir; "images"] in
   let ls_images = (Array.to_list (Sys.readdir images)) in
   let ls_images =
     List.fold_right (fun f l ->
@@ -120,19 +120,19 @@ let one_base cur_dir new_dir basename save =
       do_one_comm (Printf.sprintf "cp %s%s%s %s%s 2> /dev/null || :"
         (String.concat Filename.dir_sep [cur_dir; "images";])
         (Filename.dir_sep) ("*.jpg")
-        (String.concat Filename.dir_sep [documents; "portraits";])
+        (String.concat Filename.dir_sep [documents; "portraits"])
         (Filename.dir_sep))
         (Printf.sprintf "Failed to copy *.jpg for %s\n" basename);
       do_one_comm (Printf.sprintf "cp %s%s%s %s%s 2> /dev/null || :"
         (String.concat Filename.dir_sep [cur_dir; "images";])
         (Filename.dir_sep) ("*.gif")
-        (String.concat Filename.dir_sep [documents; "portraits";])
+        (String.concat Filename.dir_sep [documents; "portraits"])
         (Filename.dir_sep))
         (Printf.sprintf "Failed to copy *.gif for %s\n" basename);
       do_one_comm (Printf.sprintf "cp %s%s%s %s%s 2> /dev/null || :"
         (String.concat Filename.dir_sep [cur_dir; "images";])
         (Filename.dir_sep) ("*.png")
-        (String.concat Filename.dir_sep [documents; "portraits";])
+        (String.concat Filename.dir_sep [documents; "portraits"])
         (Filename.dir_sep))
         (Printf.sprintf "Failed to copy *.png for %s\n" basename);
     end;
@@ -140,19 +140,19 @@ let one_base cur_dir new_dir basename save =
   flush stderr;
 
   let from =
-    String.concat Filename.dir_sep [cur_dir; "images"; bname;]
+    String.concat Filename.dir_sep [cur_dir; "images"; bname]
   in
   if Sys.file_exists from then
     do_one_comm (Printf.sprintf "cp %s %s%s"
       (Filename.concat from "*")
-      (String.concat Filename.dir_sep [documents; "portraits";])
+      (String.concat Filename.dir_sep [documents; "portraits"])
       (Filename.dir_sep))
       (Printf.sprintf "Failed to copy portraits for %s\n" basename);
 
 
   let from =
     String.concat Filename.dir_sep
-      [cur_dir; "src"; bname;]
+      [cur_dir; "src"; bname]
   in
   if Sys.file_exists from then
     do_one_comm (Printf.sprintf "cp -R %s %s%s"
@@ -174,7 +174,7 @@ let one_base cur_dir new_dir basename save =
 
   let from =
     String.concat Filename.dir_sep
-      [cur_dir; "etc"; bname;]
+      [cur_dir; "etc"; bname]
   in
   if Sys.file_exists from then
     do_one_comm (Printf.sprintf "cp -R %s %s%s"
@@ -185,12 +185,12 @@ let one_base cur_dir new_dir basename save =
 
   do_one_comm (Printf.sprintf "cp %s %s"
      (Filename.concat cur_dir (bname ^ ".gwf"))
-     (String.concat Filename.dir_sep [new_base; "etc"; bname ^ ".conf"]))
+     (String.concat Filename.dir_sep [new_base; "etc"; "config.txt"]))
      (Printf.sprintf "Failed to copy .gwf %s\n" basename);
 
   let from =
     String.concat Filename.dir_sep
-      [cur_dir; "lang"; bname;]
+      [cur_dir; "lang"; bname]
   in
   if Sys.file_exists from then
     do_one_comm (Printf.sprintf "cp -R %s %s%s"
@@ -201,7 +201,7 @@ let one_base cur_dir new_dir basename save =
 
   let from =
     String.concat Filename.dir_sep
-      [cur_dir; "cnt";]
+      [cur_dir; "cnt"]
   in
   if Sys.file_exists from then
     begin
