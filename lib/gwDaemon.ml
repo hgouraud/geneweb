@@ -16,6 +16,7 @@ module Make
 let green_color = "#2f6400"
 let selected_addr = ref None
 let selected_port = ref 2317
+let gwsetup_port = ref 2316
 let redirected_addr = ref None
 let wizard_passwd = ref ""
 let friend_passwd = ref ""
@@ -1226,6 +1227,7 @@ let make_conf from_addr request script_name env =
        | _ -> false
        end;
      setup_link = !setup_link;
+     setup_port = !gwsetup_port;
      access_by_key =
        begin try List.assoc "access_by_key" base_env = "yes" with
          Not_found -> ar.ar_wizard && ar.ar_friend
@@ -1837,6 +1839,9 @@ let main ~speclist () =
      string_of_int !selected_port ^ "); > 1024 for normal users.") ::
     ("-setup_link", Arg.Set setup_link,
      "\n       Display a link to local gwsetup in bottom of pages.") ::
+    ("-gws_p", Arg.Int (fun x -> gwsetup_port := x),
+      "<number>\n     Specify the port number of gwsetup (default = " ^
+      string_of_int !gwsetup_port ^ "); > 1024 for normal users.") ::
     ("-allowed_tags", Arg.String (fun x -> Util.allowed_tags_file := x),
      "<file>\n       \
       HTML tags which are allowed to be displayed. One tag per line in file.") ::

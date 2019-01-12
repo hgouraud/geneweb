@@ -22,7 +22,7 @@
 </form>
 
 
-<a href="http://localhost:2316/gwsetup?v=list.htm">[*available genealogies]</a>
+<a href="%setup_href;/gwsetup?v=list.htm">[*available genealogies]</a>
 </div>
 
 <h3 class="text-center mt-5">[*select lang]</h3>

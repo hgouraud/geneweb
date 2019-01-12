@@ -53,6 +53,7 @@ type config =
     public_if_no_date : bool;
     mutable cancel_links : bool;
     mutable setup_link : bool;
+    mutable setup_port : int;
     access_by_key : bool;
     private_years : int;
     hide_names : bool;

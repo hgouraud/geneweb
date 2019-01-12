@@ -240,6 +240,9 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
               %if;(wizard and bvar.propose_add_family != "no")
                 <a class="btn btn-outline-success mt-4" href="%prefix;m=ADD_FAM" role="button" title="[*add::family/families]0 ([wizard/wizards/friend/friends/exterior]0)">[*add::family/families]0</a>
               %end;
+              %if;(not cgi and wizard and bvar.setup_link!="no") %( TODO cgi variant %)
+                <a class="btn btn-outline-success mt-4" href="%setup_href;/gwsetup?v=welcome.htm" role="button" title="gwsetup">gwsetup</a>
+              %end;
             </div>
           </div>
         </div>

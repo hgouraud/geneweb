@@ -666,12 +666,17 @@ let not_impl func x =
   in
   "Templ." ^ func ^ ": not impl " ^ desc
 
-let setup_link conf =
+let setup_href conf =
   let s = Wserver.extract_param "host: " '\r' conf.request in
   try
-    let i = String.rindex s ':' in
-    let s = "http://" ^ String.sub s 0 i ^ ":2316/" in
-    "<a href=\"" ^ s ^ "gwsetup?v=main.htm\">gwsetup</a>"
+    Printf.sprintf "http://%s:%s"
+      (String.sub s 0 (String.rindex s ':')) (string_of_int conf.setup_port)
+  with Not_found -> ""
+
+let setup_link conf =
+  let s = setup_href conf in
+  try
+    Printf.sprintf "<a href=\"%s/gwsetup?v=welcome.htm\">gwsetup</a>" s
   with Not_found -> ""
 
 let rec eval_variable conf =
@@ -812,6 +817,7 @@ and eval_simple_variable conf =
   | "referer" -> Util.get_referer conf
   | "right" -> conf.right
   | "setup_link" -> if conf.setup_link then " - " ^ setup_link conf else ""
+  | "setup_href" -> if conf.setup_link then setup_href conf else ""
   | "sp" -> " "
   | "suffix" ->
       (* On supprime de env toutes les paires qui sont dans (henv @ senv) *)
