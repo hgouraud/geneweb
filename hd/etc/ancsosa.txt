@@ -1300,7 +1300,29 @@
       %if;(evar.marr = "on" or evar.marr_date = "on" or evar.marr_place = "on")
         %foreach;ancestor.family;
           %if;(family_cnt = 1)
-            <td class="align-middle text-center">%nb_children;</td>
+            <td class="border-top-0 align-middle
+                  %if;(evar.ns="on")
+                    %if;(has_fnotes and not has_fsources) note%nn;
+                    %elseif;(not has_fnotes and has_fsources) source%nn;
+                    %elseif;(has_fnotes and has_fsources) notesource%nn;
+                    %end;
+                  %end;"
+                %if;(evar.ns="on")
+                tabindex="0" data-trigger="focus" data-toggle="popover" data-placement="bottom" data-html="true"%sp;
+                data-content='%if;(has_fnotes)%fnotes;%end;
+                              %if;(has_fsources)
+                                %if;(has_fnotes)<hr>%end;
+                                %fsources;
+                              %end;'
+                  title="%if;(has_psources or has_pnotes)
+                           %if;(has_fnotes and not has_fsources)[*note/notes]1%nn;
+                           %elseif;(not has_fnotes and has_fsources)[*source/sources]1%nn;
+                           %elseif;(has_fnotes and has_fsources)[*note/notes]1 [and] [source/sources]1%nn;
+                           %end;
+                         %end;"%nn;
+                %end;>
+            
+            %nb_children;</td>
           %end;
         %end;
       %else;
