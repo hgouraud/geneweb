@@ -1892,7 +1892,6 @@ let get_note_source conf base env auth no_note note_source =
     let s = sou base note_source in
     let s = string_with_macros conf env s in
     let lines = Wiki.html_of_tlsw conf s in
-    (*
     let lines =
       (* remove enclosing <p> .. </p> if any *)
       if List.length lines > 2 then
@@ -1904,7 +1903,6 @@ let get_note_source conf base env auth no_note note_source =
         | _ -> lines
       else lines
     in
-    *)
     let wi =
       {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
        Wiki.wi_file_path = Notes.file_path conf base;
