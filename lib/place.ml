@@ -90,18 +90,19 @@ let get_all =
     (dummy_value : 'c)
     (fold_place : string -> 'a)
     (filter : 'a -> bool)
-    (mk_value : 'b option -> person -> 'b)
-    (foo : 'b -> 'c) :
+    (mk_value : 'b option -> person -> istr -> 'b)
+    (foo : 'b -> 'c)
+    (baz : 'b -> 'c) :
     ('a * 'c) array ->
   let add_marriage = p_getenv conf.env "ma" = Some "on" in
   let ht_size = 2048 in (* FIXME: find the good heuristic *)
-  let ht : ('a, 'b) Hashtbl.t = Hashtbl.create ht_size in
+  let ht : ('a, 'b, 'c) Hashtbl.t = Hashtbl.create ht_size in
   let ht_add istr p =
     let key : 'a = sou base istr |> normalize |> fold_place in
     if filter key then
       match Hashtbl.find_opt ht key with
-      | Some _ as prev -> Hashtbl.replace ht key (mk_value prev p)
-      | None -> Hashtbl.add ht key (mk_value None p)
+      | Some _ as prev -> Hashtbl.replace ht key (mk_value prev p istr)
+      | None -> Hashtbl.add ht key (mk_value None p istr)
   in
   if add_birth || add_death || add_baptism || add_burial then begin
     let len = nb_of_persons base in
@@ -149,7 +150,7 @@ let get_all =
   let i = ref 0 in
   Hashtbl.iter
     (fun k v ->
-       Array.unsafe_set array !i (k, foo v) ;
+       Array.unsafe_set array !i (k, baz v, foo v) ;
        incr i)
     ht ;
   array
@@ -306,7 +307,7 @@ let get_new_list conf list =
   let list1 =
     let rec loop acc =
       function
-      | (pl, snl) :: l ->
+      | (s, pl, snl) :: l ->
         let pln = if k1 = "" then pl else if List.length pl > 0 then List.tl pl else [] in
         loop ((pln, pl, snl) :: acc) l
       | [] -> acc
@@ -365,7 +366,7 @@ let print_section conf opt ps1 =
     (commd conf) opt "&long=on" ("&k1=" ^(Util.code_varenv ps1)) ps1
 
 let print_html_places_surnames_long conf _base
-  (array : (string list * (string * Adef.iper list) list) array) =
+  (array : (string * string list * (string * Adef.iper list) list) array) =
   let opt = get_opt conf in
   let k1 = match p_getenv conf.env "k1" with | Some s -> s | _ -> "" in
   let k2 = match p_getenv conf.env "k2" with | Some s -> s | _ -> "" in
@@ -431,7 +432,7 @@ let print_html_places_surnames_long conf _base
   let title = transl conf "long/short display" in
   let rec loop prev =
     function
-    | (plo, snl) :: list ->
+    | (s, plo, snl) :: list ->
         let pl =
           if k1 = "" then plo
           else if List.length plo > 0 then List.tl plo else []
@@ -483,7 +484,7 @@ let print_html_places_surnames_long conf _base
   Wserver.printf "</ul>\n"
 
 let print_html_places_surnames_short conf _base
-  (array : (string list * (string * Adef.iper list) list) array) =
+  (array : (string * string list * (string * Adef.iper list) list) array) =
   let k1 = match p_getenv conf.env "k1" with | Some s -> s | _ -> "" in
   let long = p_getenv conf.env "long" = Some "on" in
   let opt = get_opt conf in
@@ -493,14 +494,14 @@ let print_html_places_surnames_short conf _base
   let new_list =
     if p_getenv conf.env "f_sort" = Some "on" then
       List.rev (List.sort
-      (fun (_, _, cnt1, _, _) (_, _, cnt2, _, _) -> (cnt1 - cnt2)) new_list)
+      (fun (_, _, _, cnt1, _, _) (_, _, _, cnt2, _, _) -> (cnt1 - cnt2)) new_list)
     else new_list
   in
   let title = transl conf "long/short display" in
   (* in new_list, ps is a string, pl was a list of strings *)
   (* let conf = {conf with env = ("k1_cnt", (string_of_int cntt)) :: conf.env} in *)
   Mutil.list_iter_first
-    (fun first (_pl, plo, _cnt, _, ipl) ->
+    (fun first (_, _pl, plo, _cnt, _, ipl) ->
       let ps1 = if List.length plo > 0 then List.hd plo else "" in
       let ps2 = if List.length plo > 1 then List.hd (List.tl plo) else ps1 in
       let (k3, k4) = get_k3 plo in
@@ -621,18 +622,18 @@ let match_place str1 str2 exact substr =
 let filter_array array place i exact substr =
   if place <> "" then
     Array.of_list (Array.fold_left
-      (fun acc (pl, snl) ->
+      (fun acc (s, pl, snl) ->
         if i = 0 then
           if match_place (if List.length pl > 0 then List.hd pl else "")
            place exact substr
-          then (pl, snl) :: acc else acc
+          then (s, pl, snl) :: acc else acc
         else
           (* let _ = Printf.eprintf "Test: %s %s\n"
             place (if List.length pl > 1 then (List.hd (List.tl pl)) else "") in *)
           if match_place
             (if List.length pl > 1 then (List.hd (List.tl pl)) else "")
             place exact substr
-          then (pl, snl) :: acc else acc) [] array)
+          then (s, pl, snl) :: acc else acc) [] array)
   else array
 
 let search_array array k exact =
@@ -643,7 +644,7 @@ let search_array array k exact =
         (if exact then p else (Name.lower (Some.name_unaccent p))) k) l
     in
     Array.fold_left
-      (fun acc (pl, _) -> if is_in_list k pl then pl :: acc else acc) [] array
+      (fun acc (_, pl, _) -> if is_in_list k pl then pl :: acc else acc) [] array
   else []
 
 let print_places_surnames_some conf base array =
@@ -688,7 +689,7 @@ let print_all_places_surnames conf base =
   let array =
     get_all conf base ~add_birth ~add_baptism ~add_death ~add_burial
       [] [] (fold_place_long inverted) (fun _ -> true)
-      (fun prev p ->
+      (fun prev p istr ->
          let value = (get_surname p, get_key_index p) in
          match prev with Some list -> value :: list | None -> [ value ])
       (fun v ->
