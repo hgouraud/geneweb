@@ -78,6 +78,16 @@
       <th  scope="col" class="text-center" rowspan="2">[*birth place]0</th>
       %incr_count;
     %end;
+    %if;(evar.baptism="on" and evar.baptism_place="on")
+      <th class="text-center" colspan="2">[*baptism]</th>
+      %incr_count;%incr_count;
+    %elseif;(evar.baptism="on" and evar.baptism_place!="on")
+      <th scope="row" class="text-center" rowspan="2">[*date of baptism]</th>
+      %incr_count;
+    %elseif;(evar.baptism!="on" and evar.baptism_place="on")
+      <th scope="row" class="text-center" rowspan="2">[*baptism place]</th>
+      %incr_count;
+    %end;
     %if;(evar.marr="on" and evar.t="H")
       <th scope="col" class="pl-2 align-middle" rowspan="2">[*spouse/spouses]1</th>
       %incr_count;
@@ -125,6 +135,10 @@
     %if;(evar.birth="on" and evar.birth_place="on")
       <th class="text-right pr-2" title="[*date of birth]">[*date/dates]0</th>
       <th class="pl-2" title="[*birth place]">[*place]</th>
+    %end;
+    %if;(evar.baptism="on" and evar.baptism_place="on")
+      <th class="text-right pr-2" title="[*date of baptism]">[*date/dates]0</th>
+      <th class="pl-2" title="[*baptism place]">[*place]</th>
     %end;
     %if;((evar.marr_date="on" and evar.marr_place="on") or
          (evar.marr_date="on" and evar.child="on") or (evar.marr_place="on" and evar.child="on"))
@@ -279,57 +293,83 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
     <td class="align-middle text-right table_big_cell"%rowspan;>
       %if;(wizard and not cancel_links)
         <a class="d-block table_big_anchor" href="%prefix;m=MOD_IND;i=%xxx.index;#birth"%sp;
-          title="%if;(xxx.has_approx_birth_date)[*update::birth]%else;[*add::birth]%end;&#010;
+          title="%if;(xxx.has_birth_date)[*update::birth]%else;[*add::birth]%end;&#010;
            %xxx.first_name; %xxx.surname; %if;(xxx.occ!="0")(%xxx.occ;)%end;&#010;%if;(xxx.has_birth_date and xxx.birth_date.prec="" or xxx.birth_date.prec="?")° %xxx.birth_date;%end;">%nn;
-        %if;(xxx.has_approx_birth_date)%xxx.slash_approx_birth_date;%else;°%end;%nn;
+        %if;(xxx.has_birth_date)%xxx.slash_birth_date;%else;°%end;%nn;
         </a>
       %else;
-        %xxx.slash_approx_birth_date;
+        %xxx.slash_birth_date;
       %end;
     </td>
   %end;
 %( Lieu de naissance %)
   %if;(evar.birth_place="on" and famx=1)
-    <td class="align-middle%nn;
-      %if;(evar.ns="on")
-        %if;((xxx.has_birth_note or xxx.has_baptism_note) and not
-             (xxx.has_birth_source or xxx.has_baptism_source)) note%nn;
-        %elseif;(not (xxx.has_birth_note or xxx.has_baptism_note) and
-             (xxx.has_birth_source or xxx.has_baptism_source)) source%nn;
-        %elseif;((xxx.has_birth_note or xxx.has_baptism_note) and
-             (xxx.has_birth_source or xxx.has_baptism_source)) notesource%nn;
-        %end;
-      %end;"%nn;
-      %rowspan;%nn;
-      %if;(evar.ns="on") tabindex="0"%sp;
-        data-trigger="focus" data-toggle="popover" data-placement="bottom" data-html="true"%sp;
-        data-content='%if;(xxx.has_birth_note or xxx.has_baptism_note)
-                        %if;(xxx.has_birth_note)%if;(xxx.has_baptism_note)[*birth][:] %end;%xxx.birth_note;%end;%nn;
-                        %if;(xxx.has_baptism_note)[*baptism][:] %xxx.baptism_note;%end;%nn;
-                      %end;
-                      %if;(xxx.has_birth_source or xxx.has_baptism_source)
-                        %if;(xxx.has_birth_note or xxx.has_baptism_note)<hr>%end;
-                        %let;birthbaptism;[birth], [baptism]%in;
-                        %let;birthdeath;[birth], [death]%in;
-                        %foreach;xxx.source;
-                          %if;(not xxx.has_baptism_note and ((not xxx.has_baptism_source and source_type=[birth]) or source_type=birthbaptism or source_type=birthdeath))
-                            %apply;capitalize(xxx.source).%nn;
-                          %elseif;((xxx.has_baptism_note or xxx.has_baptism_source) and (source_type=[birth] or source_type=[baptism]))
-                            <li>%apply;capitalize(source_type)[:] %xxx.source;.</li>%nn;
-                          %end;
-                        %end;
-                      %end;'%sp;
-        title="%if;(xxx.has_birth_source or xxx.has_baptism_source or xxx.has_birth_note or xxx.has_baptism_note)
-                 %if;((xxx.has_birth_note or xxx.has_baptism_note) and not (xxx.has_birth_source or xxx.has_baptism_source))[*note/notes]1%nn;
-                 %elseif;(not (xxx.has_birth_note or xxx.has_baptism_note) and (xxx.has_birth_source or xxx.has_baptism_source))[*source/sources]1%nn;
-                 %elseif;((xxx.has_birth_note or xxx.has_baptism_note) and (xxx.has_birth_source or xxx.has_baptism_source))[*note/notes]1 [and] [source/sources]1%nn;
-                 %end;
-               %end;"%nn;
+    <td %rowspan;
+      class="align-middle%nn;
+        %if;(evar.ns="on")
+          %if;(xxx.has_birth_note and not xxx.has_birth_source) note%nn;
+          %elseif;(not xxx.has_birth_note and xxx.has_birth_source) source%nn;
+          %elseif;(xxx.has_birth_note and xxx.has_birth_source) notesource%nn;
+          %end;
+        %end;"%sp;
+        %if;(evar.ns="on")
+          tabindex="0" data-trigger="focus" data-toggle="popover" data-placement="bottom" data-html="true"%sp;
+          data-content='%if;xxx.has_birth_note;%apply;capitalize(xxx.birth_note)%end;
+                        %if;xxx.has_birth_source;%if;xxx.has_birth_note;<hr>%end;%apply;capitalize(xxx.birth_source)%end;'
+          title="%if;(xxx.has_birth_note or xxx.has_birth_source)
+                   <span class='font-weight-bold'>
+                     %apply;a_of_b%with;
+                       %if;(xxx.has_birth_note and not xxx.has_birth_source)[*note/notes]1%nn;
+                       %elseif;(not xxx.has_birth_note and xxx.has_birth_source)[*source/sources]1%nn;
+                       %elseif;(xxx.has_birth_note and xxx.has_birth_source)[*note/notes]1 [and] [source/sources]1%nn;
+                       %end;
+                     %and;[birth]%end;
+                   </span>
+                 %end;"%nn;
+        %end;>%nn;
+      %if;xxx.has_birth_place;%xxx.birth_place;%end;
+    </td>
+  %end;
+%( Date de baptême %)
+  %if;(evar.baptism="on" and famx=1)
+    <td class="align-middle text-right table_big_cell"%rowspan;>
+      %if;(wizard and not cancel_links)
+        <a class="d-block table_big_anchor" href="%prefix;m=MOD_IND;i=%xxx.index;#baptism"%sp;
+          title="%if;(xxx.has_baptism_date)[*update::baptism]%else;[*add::baptism]%end;&#010;
+           %xxx.first_name; %xxx.surname; %if;(xxx.occ!="0")(%xxx.occ;)%end;&#010;%if;(xxx.has_baptism_date and xxx.baptism_date.prec="" or xxx.baptism_date.prec="?")° %xxx.baptism_date;%end;">%nn;
+        %if;(xxx.has_baptism_date)%xxx.slash_baptism_date;%else;°%end;%nn;
+        </a>
+      %else;
+        %xxx.slash_baptism_date;
       %end;
-    >
-    %if;xxx.has_approx_birth_place;
-      %xxx.approx_birth_place;
-    %end;
+    </td>
+  %end;
+%( Lieu de baptême %)
+  %if;(evar.baptism_place="on" and famx=1)
+    <td %rowspan;
+      class="align-middle%nn;
+        %if;(evar.ns="on")
+          %if;(xxx.has_baptism_note and not xxx.has_baptism_source) note%nn;
+          %elseif;(not xxx.has_baptism_note and xxx.has_baptism_source) source%nn;
+          %elseif;(xxx.has_baptism_note and xxx.has_baptism_source) notesource%nn;
+          %end;
+        %end;"%sp;
+        %if;(evar.ns="on")
+          tabindex="0" data-trigger="focus" data-toggle="popover" data-placement="bottom" data-html="true"%sp;
+          data-content='%if;xxx.has_baptism_note;%apply;capitalize(xxx.baptism_note)%end;
+                        %if;xxx.has_baptism_source;%if;xxx.has_baptism_note;<hr>%end;%apply;capitalize(xxx.baptism_source)%end;'
+          title="%if;(xxx.has_baptism_note or xxx.has_baptism_source)
+                   <span class='font-weight-bold'>
+                     %apply;a_of_b%with;
+                       %if;(xxx.has_baptism_note and not xxx.has_baptism_source)[*note/notes]1%nn;
+                       %elseif;(not xxx.has_baptism_note and xxx.has_baptism_source)[*source/sources]1%nn;
+                       %elseif;(xxx.has_baptism_note and xxx.has_baptism_source)[*note/notes]1 [and] [source/sources]1%nn;
+                       %end;
+                     %and;[baptism]%end;
+                   </span>
+                 %end;"%nn;
+        %end;>%nn;
+      %if;xxx.has_baptism_place;%xxx.baptism_place;%end;
     </td>
   %end;
 %( En mode H, conjoints %)

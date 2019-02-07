@@ -193,6 +193,16 @@ function table_spouse_disabled () {
         </p>
         <p>
           <label>
+            <input type="checkbox" id="t_baptism" name="baptism" value="on"%/>
+            [*date of baptism]
+          </label>
+          <label>
+            <input type="checkbox" id="t_baptism_place" name="baptism_place" value="on"%/>
+            [*baptism place]
+          </label>
+        </p>
+        <p>
+          <label>
             <input type="checkbox" id="t_marr" name="marr" value="on"%/>
             [*spouse/spouses]1
           </label>

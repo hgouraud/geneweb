@@ -4516,6 +4516,10 @@ pt: data de nascimento
 sv: födelsedatum
 ru: дата рождения
 
+    date of baptism
+en: date of baptism
+fr: date du baptême
+
     date of death
 co: data di trapassu
 de: Todestag
@@ -4545,6 +4549,10 @@ oc: data de maridatge
 pt: data de casamento
 sv: vigseldatum
 ru: дата бракосочетания
+
+    date of burial
+en: date of burial
+fr: date de la sépulture
 
     date/dates
 af: datum
