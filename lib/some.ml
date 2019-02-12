@@ -136,7 +136,7 @@ let print_alphabetic_to_branch conf x =
   Wserver.printf "</tr>";
   Wserver.printf "</table>";
   Wserver.printf "<br%s>\n" conf.xhs
-
+  
 let persons_of_fsname conf base base_strings_of_fsname find proj x =
   (* list of strings index corresponding to the crushed lower first name
      or surname "x" *)
@@ -221,6 +221,15 @@ let name_unaccent s =
   in
   copy 0 0
 
+let print_other_list conf _base list =
+  let s_title = Printf.sprintf "%s" (capitale (transl conf "see also")) in
+  Wserver.printf "<h5>%s</h5>\n" s_title;
+  Mutil.list_iter_first (fun first (_k, str, cnt) ->
+    Wserver.printf "%s<a href=\"%sm=P&v=%s&t=A\">%s</a> (%d)"
+      (if first then "" else ", ") (commd conf) (code_varenv str)
+      str cnt)
+    list
+
 let first_name_print_list conf base x1 xl liste =
   let liste =
     let l =
@@ -272,6 +281,20 @@ let first_name_print_list conf base x1 xl liste =
   let list = List.sort compare list in
   print_alphab_list (fun (ord, _, _) -> first_char ord)
     (fun (_, txt, ipl) -> print_elem conf base true (txt, ipl)) list;
+  if p_getenv conf.env "tt" = Some "S" then
+    begin
+      let x = List.hd (StrSet.elements xl) in
+      let xx = Name.lower x in
+      let (list, _len) = Alln.select_names conf base false "" true in
+      let list = List.fold_left
+        (fun l (k, fn, c) ->
+          let fnl = Name.lower fn in
+          if xx <> fnl && Mutil.contains fnl xx
+          then (k, fn, c) :: l else l) [] list
+      in
+      if list <> [] then print_other_list conf base list
+    end
+  else ();
   Hutil.trailer conf
 
 let select_first_name conf n list =
