@@ -5,6 +5,7 @@ open Config
 open Def
 open Gwdb
 open Util
+open TemplAst
 
 module StrSet = Mutil.StrSet
 
@@ -137,6 +138,138 @@ let print_alphabetic_to_branch conf x =
   Wserver.printf "</table>";
   Wserver.printf "<br%s>\n" conf.xhs
 
+type cache_fname_t = (string, (string * int)) Hashtbl.t
+
+let (ht_cache_fname : cache_fname_t) =
+  Hashtbl.create 1
+
+let cache_fname conf =
+  let bname =
+    if Filename.check_suffix conf.bname ".gwb" then conf.bname
+    else conf.bname ^ ".gwb"
+  in
+  Filename.concat (base_path [] bname) "cache_fname"
+
+let read_cache_fname conf =
+  let fname = cache_fname conf in
+  match try Some (Secure.open_in_bin fname) with Sys_error _ -> None with
+  | Some ic ->
+      begin
+        let ht : cache_fname_t = input_value ic in
+        close_in ic; ht
+      end
+  | None -> ht_cache_fname
+
+let write_cache_fname conf =
+  let ht_cache = read_cache_fname conf in
+  let () =
+    Hashtbl.iter
+      (fun k v ->
+         if not (Hashtbl.mem ht_cache_fname k) then
+           Hashtbl.add ht_cache_fname k v
+         else ())
+      ht_cache
+  in
+  let fname = cache_fname conf in
+  match try Some (Secure.open_out_bin fname) with Sys_error _ -> None with
+  | Some oc ->
+      begin
+        output_value oc ht_cache_fname;
+        close_out oc
+      end
+  | None -> ()
+
+(* keep a ref count for v.
+  ok = "" -> add new entry
+  v = "" -> suppress entry
+  if count reaches 0, suppress entry *)
+let patch_cache_fname conf ok k v merge =
+  let ht_cache_fname = read_cache_fname conf in
+  if v <> "" then
+    begin
+    let _ = Printf.eprintf "V<>0: %s\n" v in
+    if not (Hashtbl.mem ht_cache_fname k) then
+      let _ = Printf.eprintf "New: %s\n" v in
+      Hashtbl.add ht_cache_fname k (v, 1)
+    else
+      if not merge then
+        begin
+          let _ = Printf.eprintf "Add: %s\n" v in
+          let (vv, i) = Hashtbl.find ht_cache_fname k in
+          Hashtbl.replace ht_cache_fname k (vv, i + 1)
+        end
+      else ()
+    end
+  else
+    begin
+    let _ = Printf.eprintf "V=0:\n" in
+    if not (Hashtbl.mem ht_cache_fname k) then
+      Printf.eprintf "Inconsistent cache_fname\n"
+    else
+      begin
+        let (vv, i) = Hashtbl.find ht_cache_fname k in
+        if i = 1 then
+          let _ = Printf.eprintf "remove: %s\n" k in
+          Hashtbl.remove ht_cache_fname k
+        else
+          let _ = Printf.eprintf "replace: %s\n" k in
+          Hashtbl.replace ht_cache_fname k (vv, i - 1)
+      end
+    end;
+  let _ = Printf.eprintf "Mid:\n" in
+  if ok <> "" then
+    begin
+      let _ = Printf.eprintf "Ok<>0:\n" in
+      if not (Hashtbl.mem ht_cache_fname ok) then
+        Printf.eprintf "Inconsistent cache_fname: %s\n" ok
+      else
+        begin
+          let (vv, i) = Hashtbl.find ht_cache_fname ok in
+          if i = 1 then
+            Hashtbl.remove ht_cache_fname ok
+          else
+            Hashtbl.replace ht_cache_fname ok (vv, i - 1)
+        end
+    end
+  else ();
+  let _ = Printf.eprintf "End:\n" in
+  let fname = cache_fname conf in
+  match try Some (Secure.open_out_bin fname) with Sys_error _ -> None with
+  | Some oc ->
+      begin
+        let _ = Printf.eprintf "Writing:\n" in
+        output_value oc ht_cache_fname;
+        close_out oc
+      end
+  | None ->
+      let _ = Printf.eprintf "None:\n" in
+      ()
+
+let other_fsnames conf base x =
+  let ht = if p_getenv conf.env "reset" = Some "on" then Hashtbl.create 1
+    else read_cache_fname conf
+  in
+  if Hashtbl.length ht = 0 then
+    begin
+      for i = 0 to nb_of_persons base - 1 do
+        let ip = Adef.iper_of_int i in
+        let p = poi base ip in
+        let fn = sou base (get_first_name p) in
+        let key = Wserver.encode (Name.lower fn) in
+        if not (Hashtbl.mem ht key) then Hashtbl.add ht key (fn, 1)
+        else
+          let (vv, i) = Hashtbl.find ht key in
+          Hashtbl.replace ht key (vv, i + 1)
+      done;
+      write_cache_fname conf
+    end;
+  let exact = p_getenv conf.env "t" = Some "A" in
+  let x = if exact then x else Name.lower x in
+  Hashtbl.fold
+    (fun _k (str, c) l ->
+      let strl = if exact then str else Name.lower str in
+      if (Mutil.contains strl x && strl <> x) then (str, c) :: l else l) ht []
+  
 let persons_of_fsname conf base base_strings_of_fsname find proj x =
   (* list of strings index corresponding to the crushed lower first name
      or surname "x" *)
@@ -221,6 +354,130 @@ let name_unaccent s =
   in
   copy 0 0
 
+let print_other_list conf _base list =
+  let s_title = Printf.sprintf "%s" (capitale (transl conf "see also")) in
+  Wserver.printf "<h5>%s</h5>\n" s_title;
+  Mutil.list_iter_first (fun first (fn, c) ->
+    Wserver.printf "%s<a href=\"%sm=P&v=%s&other=on\">%s</a> (%d)"
+      (if first then "" else ", ") (commd conf) (code_varenv fn) fn c)
+    list
+
+type 'a env =
+    Vlist_data of (string * (string * int) list) list
+  | Vlist_ini of string list
+  | Vlist_value of (string * (string * int) list) list
+  | Venv_keys of (string * int) list
+  | Vint of int
+  | Vstring of string
+  | Vbool of bool
+  | Vother of 'a
+  | Vnone
+
+let get_env v env = try List.assoc v env with Not_found -> Vnone
+let get_vother =
+  function
+    Vother x -> Some x
+  | _ -> None
+let set_vother x = Vother x
+let bool_val x = VVbool x
+let str_val x = VVstring x
+
+let string_to_list str =
+  let rec loop acc =
+    function
+      s ->
+        if String.length s > 0 then
+          let nbc = Name.nbc s.[0] in
+          let c = String.sub s 0 nbc in
+          let s1 = String.sub s nbc (String.length s - nbc) in
+          loop (c :: acc) s1
+        else acc
+  in loop [] str
+
+let rec eval_var conf base env xx _loc sl =
+  try eval_simple_var conf base env xx sl with
+    Not_found -> eval_compound_var conf base env xx sl
+and eval_simple_var conf base env xx =
+  function
+    [s] ->
+      begin try bool_val (eval_simple_bool_var conf base env xx s) with
+        Not_found -> str_val (eval_simple_str_var conf base env xx s)
+      end
+  | _ -> raise Not_found
+and eval_simple_bool_var _conf _base env _xx =
+  function
+  | "is_first" ->
+      begin match get_env "first" env with
+        Vbool x -> x
+      | _ -> raise Not_found
+      end
+  | _ -> raise Not_found
+and eval_simple_str_var _conf _base env _xx =
+  function
+  | "substr" -> eval_string_env "substr" env
+  | "cnt" -> eval_int_env "cnt" env
+  | "max" -> eval_int_env "max" env
+  | "tail" -> eval_string_env "tail" env
+  | "keys" ->
+      let k =
+        match get_env "keys" env with
+          Venv_keys k -> k
+        | _ -> []
+      in
+      List.fold_left
+        (fun accu (k, i) -> accu ^ k ^ "=" ^ string_of_int i ^ "&") "" k
+  | "env_key" -> eval_string_env "env_key" env
+  | "env_val" -> eval_string_env "env_val" env
+  | _ -> raise Not_found
+and eval_compound_var conf base env xx sl =
+  let rec loop =
+    function
+      [s] -> eval_simple_str_var conf base env xx s
+    | ["evar"; "p"; s] ->
+        begin match p_getenv conf.env s with
+          Some s -> if String.length s > 1 then String.sub s 0 (String.length s - 1) else ""
+        | None -> ""
+        end
+    | ["evar"; s] ->
+        begin match p_getenv conf.env s with
+          Some s -> s
+        | None -> ""
+        end
+    | ["subs"; n; s] ->
+        let n = int_of_string n in
+        if String.length s > n then String.sub s 0 (String.length s - n) else ""
+    | "encode" :: sl -> code_varenv (loop sl)
+    | "escape" :: sl -> quote_escaped (loop sl)
+    | "html_encode" :: sl -> no_html_tags (loop sl)
+    | "printable" :: sl -> only_printable (loop sl)
+    | _ -> raise Not_found
+  in
+  str_val (loop sl)
+and eval_string_env s env =
+  match get_env s env with
+    Vstring s -> s
+  | _ -> raise Not_found
+and eval_int_env s env =
+  match get_env s env with
+    Vint i -> string_of_int i
+  | _ -> raise Not_found
+let print_foreach conf print_ast _eval_expr =
+  let rec print_foreach env xx _loc s sl el al =
+    match s :: sl with
+    | ["env_binding"] -> print_foreach_env_binding env xx el al
+    | _ -> raise Not_found
+  and print_foreach_env_binding env xx _el al =
+    let rec loop =
+      function
+        (k, v) :: l ->
+          let env = ("env_key", Vstring k) :: ("env_val", Vstring v) :: env in
+          List.iter (print_ast env xx) al; loop l
+      | [] -> ()
+    in
+    loop conf.env
+  in
+  print_foreach
+
 let first_name_print_list conf base x1 xl liste =
   let liste =
     let l =
@@ -259,6 +516,13 @@ let first_name_print_list conf base x1 xl liste =
   in
   Hutil.header conf title;
   Hutil.print_link_to_welcome conf true;
+  Hutil.interp_no_header conf "buttons_fnames"
+    {Templ.eval_var = eval_var conf base;
+     Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
+     Templ.eval_predefined_apply = (fun _ -> raise Not_found);
+     Templ.get_vother = get_vother; Templ.set_vother = set_vother;
+     Templ.print_foreach = print_foreach conf}
+    [] () ;
   (* Si on est dans un calcul de parenté, on affiche *)
   (* l'aide sur la sélection d'un individu.          *)
   Util.print_tips_relationship conf;
@@ -272,6 +536,16 @@ let first_name_print_list conf base x1 xl liste =
   let list = List.sort compare list in
   print_alphab_list (fun (ord, _, _) -> first_char ord)
     (fun (_, txt, ipl) -> print_elem conf base true (txt, ipl)) list;
+  if p_getenv conf.env "other" = Some "on" then
+    begin
+    let listo = 
+      List.fold_left (fun l x ->
+        (other_fsnames conf base x) :: l) [] (StrSet.elements xl)
+    in
+    let listo = List.flatten listo |> List.sort_uniq compare in
+    if listo <> [] then print_other_list conf base listo
+    end
+  else ();
   Hutil.trailer conf
 
 let select_first_name conf n list =

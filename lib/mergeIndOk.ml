@@ -474,6 +474,12 @@ let effective_mod_merge o_conf base o_p1 o_p2 sp =
       let key1 = Name.lower ofn1, Name.lower osn1, oocc1 in
       let pgl1 = Perso.links_to_ind conf base db key1 in
       let (ofn2, osn2, oocc2) = (o_p2.first_name, o_p2.surname, o_p2.occ) in
+      if ofn1 <> ofn2 then
+        begin
+          let ok = Wserver.encode (Name.lower ofn2) in
+          let k = Wserver.encode (Name.lower ofn1) in
+          FnameCache.patch_cache_fname conf ok k ofn1 true
+        end;
       let key2 = Name.lower ofn2, Name.lower osn2, oocc2 in
       let pgl2 = Perso.links_to_ind conf base db key2 in
       let ip2 = Adef.iper_of_int i2 in

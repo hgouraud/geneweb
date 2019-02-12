@@ -1,3 +1,23 @@
+    hide others
+en: hide other first mames
+fr: cacher les autres prénoms
+
+    show others
+en: show otehr first names
+fr: montrer les autres prénoms
+
+    exact match
+en: exact match
+fr: correspondance exacte
+
+    approxim match
+en: no capitale or accents
+fr: sans capitales ni accents
+
+    refresh fnames cache
+en: refresh fnames cache
+fr: reconstruire le cache des prénoms
+
     reset to
 co: risturà
 en: reset to
@@ -11692,7 +11712,7 @@ de: siehe auch
 en: see also
 es: ver también
 fi: näytä myös
-fr: à voir aussi
+fr: voir aussi
 it: vedi anche
 nl: ook te bekijken
 no: vis også

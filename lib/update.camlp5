@@ -1246,6 +1246,8 @@ let insert_person conf base src new_persons (f, s, o, create, var) =
         in
         let a = {parents = None; consang = Adef.fix (-1)} in
         let u = {family = [| |]} in
+        let key = Wserver.encode (sou base p.first_name) in
+        FnameCache.patch_cache_fname conf "" key (sou base p.first_name) false;
         patch_person base p.key_index p;
         patch_ascend base p.key_index a;
         patch_union base p.key_index u;

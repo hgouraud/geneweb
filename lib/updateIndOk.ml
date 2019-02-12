@@ -939,6 +939,12 @@ let effective_mod conf base sp =
     begin let ipl = Gutil.person_ht_find_all base key in
       check_conflict conf base sp ipl; rename_image_file conf base op sp
     end;
+  if ofn <> sp.first_name then
+    begin
+      let key = Wserver.encode (Name.lower sp.first_name) in
+      let okey = Wserver.encode (Name.lower ofn) in
+      FnameCache.patch_cache_fname conf okey key sp.first_name false
+    end;
   let same_fn_sn =
     Name.lower (Mutil.nominative sp.first_name) = Name.lower ofn &&
     Name.lower (Mutil.nominative sp.surname) = Name.lower osn
@@ -985,6 +991,8 @@ let effective_add conf base sp =
   let ipl = Gutil.person_ht_find_all base key in
   check_conflict conf base sp ipl;
   patch_key base pi fn sn sp.occ;
+  let key = Wserver.encode (Name.lower sp.first_name) in
+  FnameCache.patch_cache_fname conf "" key sp.first_name false;
   Gutil.person_ht_add base key pi;
   patch_cache_info conf Util.cache_nb_base_persons
     (fun v -> let v = int_of_string v + 1 in string_of_int v);
@@ -1307,6 +1315,7 @@ let print_add o_conf base =
     in
     if ext || redisp then UpdateInd.print_update_ind conf base sp ""
     else
+      let _ = Printf.eprintf "Print add:\n" in
       let sp = strip_person sp in
       match check_person conf sp with
         Some err -> error_person conf err
@@ -1325,6 +1334,8 @@ let print_del conf base =
       let ip = Adef.iper_of_int i in
       let p = poi base ip in
       let fn = sou base (get_first_name p) in
+      let key = Wserver.encode (Name.lower fn) in
+      FnameCache.patch_cache_fname conf "" key "" false;
       let sn = sou base (get_surname p) in
       let occ = get_occ p in
       let old_related = get_related p in
