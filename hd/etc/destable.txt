@@ -55,13 +55,8 @@
   %if;(wizard and not cancel_links)</a>%end;
 %end;
 
-<<<<<<< HEAD
-%define;link(aa, xxx, yyy)
-  %if;(evar.cgl="on")xxx%else;<a id="i_yyy" href="%prefix;aa">xxx</a>%end;
-=======
 %define;link(aaa,xxx,nnn)
   %if;(evar.cgl="on")xxx%else;<a id="i_nnn" href="%prefix;aaa">xxx</a>%end;
->>>>>>> Fix wron indexes in link functions
 %end;
 
 %define;table_header()
@@ -306,13 +301,7 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
         <div class="d-flex justify-content-between">
           <div class="align-self-center mr-2">
             %apply;image_MF("xxx")
-<<<<<<< HEAD
-            %apply;link%with;%xxx.access;%and;
-              %xxx;%and;%xxx.index;
-            %end;
-=======
             %apply;link%with;%xxx.access;%and;%xxx;%and;%xxx.index;%end;
->>>>>>> Fix wron indexes in link functions
             %if;(evar.title="on" and xxx.title!=""), %xxx.title;%end;
           </div>
           %if;(evar.image!="off" and xxx.has_image)
@@ -349,13 +338,7 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
           %end;
           <div class="align-self-center px-1">
             %apply;image_MF("xxx")
-<<<<<<< HEAD
-            %apply;link%with;%xxx.access;%and;
-              %xxx;%and;%xxx.index;
-            %end;
-=======
             %apply;link%with;%xxx.access;%and;%xxx;%and;%xxx.index;%end;
->>>>>>> Fix wron indexes in link functions
             %if;(evar.title="on" and xxx.title!=""), %xxx.title;%end;
           </div>
         </div>
@@ -397,13 +380,7 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
             %apply;add_in_sorted_list(spouse.index)
             %if;(zzz.nb_families>1)<span class="mr-1">%apply;letter(family_cnt)</span>%end;
             %apply;image_MF("spouse")
-<<<<<<< HEAD
-            %apply;link%with;%spouse.access;%and;
-              %spouse;%and;%spouse.index;
-            %end;
-=======
             %apply;link%with;%spouse.access;%and;%spouse;%and;%spouse.index;%end;
->>>>>>> Fix wron indexes in link functions
           </td>
         %end;
       %end;
@@ -598,13 +575,7 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
   %let;prfx;%if;("prefx"="-1")%else;prefx%end;%in;
   %if;(evar.t="A")
     <br>%prfx; %apply;image_MF("xxx")
-<<<<<<< HEAD
-        %apply;link%with;%xxx.access;%and;
-          %xxx.first_name; %xxx.surname;%nn;%and;%xxx.index;
-        %end;%nn;
-=======
         %apply;link%with;%xxx.access;%and;%xxx.first_name; %xxx.surname;%nn;%and;%xxx.index;%end;%nn;
->>>>>>> Fix wron indexes in link functions
         %xxx.title;%nn;
     %if;(has_families)
       %foreach;family;
@@ -616,13 +587,7 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
           %slash_marriage_date;%nn;
         %end;
         %apply;image_MF("xxx.spouse")
-<<<<<<< HEAD
-        %apply;link%with;%xxx.spouse.access;%and;
-          %xxx.spouse.first_name; %xxx.spouse.surname;&and;%xxx.spouse.index;
-        %end;
-=======
         %apply;link%with;%xxx.spouse.access;%and;%xxx.spouse.first_name; %xxx.spouse.surname;%and;%xxx.index;%end;%nn;
->>>>>>> Fix wron indexes in link functions
         %xxx.spouse.title;
       %end;
     %end;
@@ -710,13 +675,7 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
   %let;fam;%if;(fam_cnt>0)%apply;letter(fam_cnt)%end;%in;
   %if;("prefx"!="")<br>prefx.%end;
   %sp;%apply;image_MF("xxx")
-<<<<<<< HEAD
-  %apply;link%with;%xxx.access;%and;
-      %xxx.first_name; %xxx.surname;%nn;%and;%xxx.index;
-      %end;
-=======
   %apply;link%with;%xxx.access;%and;%xxx.first_name; %xxx.surname;%and;%xxx.index;%end;%nn;
->>>>>>> Fix wron indexes in link functions
   %if;(xxx.title!=""), %xxx.title;%end;
   %if;(has_families)
     %foreach;family;
