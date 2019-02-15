@@ -180,7 +180,7 @@
 %end;
 
 %define;date_popup(xxx,yyy)
-  %let;symb;%if;(yyy=birth)°%elseif;(yyy=death and xxx.is_dead)†%end;%in;
+  %let;symb;%if;("yyy"="birth")°%elseif;("yyy"="death" and xxx.is_dead)†%end;%in;
   %if;(evar.yyy="on" and famx=1)
     <td class="align-middle text-right table_big_cell"%rowspan;>
       %if;(wizard and not cancel_links)
