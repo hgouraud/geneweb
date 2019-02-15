@@ -3410,7 +3410,7 @@ sv: begravning
     burial place
 co: locu di sepultura
 de: Ort der Bestattung
-en: Place of burial
+en: place of burial
 es: lugar de inhumación
 fi: Hautauspaikka
 fr: lieu d’inhumation
@@ -3425,7 +3425,7 @@ ru: место погребения
     burial src
 co: fonte di sepultura
 de: Ouellenangabe-Bestattung
-en: Source of burial
+en: source of burial
 es: fuente inhumación
 fi: Hautaustietojen lähde
 fr: source inhumation
