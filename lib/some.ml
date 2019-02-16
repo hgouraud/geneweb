@@ -556,13 +556,20 @@ let first_name_print_list conf base x1 xl liste =
   else ();
   Hutil.trailer conf
 
-let select_first_name conf n list =
+let select_first_name conf base n list =
   let title _ =
     Wserver.printf "%s \"%s\" : %s"
       (capitale (transl_nth conf "first name/first names" 0)) n
       (transl conf "specify")
   in
   Hutil.header conf title;
+  Hutil.interp_no_header conf "buttons_fnames"
+    {Templ.eval_var = eval_var conf base;
+     Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
+     Templ.eval_predefined_apply = (fun _ -> raise Not_found);
+     Templ.get_vother = get_vother; Templ.set_vother = set_vother;
+     Templ.print_foreach = print_foreach conf}
+    [] () ;
   Wserver.printf "<ul>";
   List.iter
     (fun (sstr, (strl, _)) ->
@@ -577,6 +584,12 @@ let select_first_name conf n list =
        Wserver.printf "</a>\n")
     list;
   Wserver.printf "</ul>\n";
+  if p_getenv conf.env "other" = Some "on" then
+    begin
+    let listo = other_fsnames conf base n in
+    if listo <> [] then print_other_list conf base listo
+    end
+  else ();
   Hutil.trailer conf
 
 let rec merge_insert (sstr, (strl, iperl) as x) =
@@ -640,7 +653,7 @@ let first_name_print conf base x =
           pl []
       in
       first_name_print_list conf base x strl pl
-  | _ -> select_first_name conf x list
+  | _ -> select_first_name conf base x list
 
 let has_children_with_that_name conf base des name =
   let compare_name n1 n2 =
@@ -927,6 +940,13 @@ let print_several_possible_surnames x conf base (_, homonymes) =
   let access txt sn =
     geneweb_link conf ("m=N&v=" ^ code_varenv sn ^ "&t=N") txt
   in
+  Hutil.interp_no_header conf "buttons_fnames"
+    {Templ.eval_var = eval_var conf base;
+     Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
+     Templ.eval_predefined_apply = (fun _ -> raise Not_found);
+     Templ.get_vother = get_vother; Templ.set_vother = set_vother;
+     Templ.print_foreach = print_foreach conf}
+    [] () ;
   Util.wprint_in_columns conf (fun (ord, _, _) -> ord)
     (fun (_, txt, sn) -> Wserver.printf "%s" (access txt sn)) list;
   Wserver.printf "<p>\n";
@@ -939,6 +959,14 @@ let print_several_possible_surnames x conf base (_, homonymes) =
   Wserver.printf "%s" (transl conf "for the first names by alphabetic order");
   Wserver.printf ".</em>\n";
   Wserver.printf "</p>\n";
+  if p_getenv conf.env "other" = Some "on" then
+  begin
+  let listo = other_fsnames conf base fx in
+  if listo <> [] then print_other_list conf base listo
+  end
+  else ();
+
+
   Hutil.trailer conf
 
 let print_family_alphabetic x conf base liste =
@@ -1301,4 +1329,4 @@ let search_first_name_print conf base x =
           pl []
       in
       first_name_print_list conf base x strl pl
-  | _ -> select_first_name conf x list
+  | _ -> select_first_name conf base x list

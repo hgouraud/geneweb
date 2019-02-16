@@ -22,7 +22,7 @@
   </a>
   <a class="ml-3"
     href="%prefix_base_password;%nn;
-    %foreach;env_binding;%if;(env_val!="" and env_key!="reset" and env_key!="mode")%nn;
+    %foreach;env_binding;%if;(env_val!="" and env_key!="reset" and env_key!="word")%nn;
      &%env_key=%env_val;%end;%nn;
     %end;%nn;
     %if;(evar.word!="on")&word=on%end;%nn;"

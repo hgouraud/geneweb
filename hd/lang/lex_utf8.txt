@@ -3,20 +3,28 @@ en: hide other first mames
 fr: cacher les autres prénoms
 
     show others
-en: show otehr first names
-fr: montrer les autres prénoms
+en: show other first names
+fr: afficher les autres prénoms
 
     exact match
 en: exact match
 fr: correspondance exacte
 
     approxim match
-en: no capitale or accents
-fr: sans capitales ni accents
+en: match with no capitale nor accents
+fr: correspondance sans capitales ni accents
 
     refresh fnames cache
 en: refresh fnames cache
 fr: reconstruire le cache des prénoms
+
+    word boundaries
+en: match full words
+fr: correspondance de mots entiers
+
+    anywhere
+en: match anywhere
+fr: correspondance sans contrainte
 
     reset to
 co: risturà
