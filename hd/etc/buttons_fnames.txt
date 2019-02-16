@@ -20,6 +20,15 @@
     title="%if;(evar.t!="A")[*exact match]%else;[*approxim match]%end;">%nn;
     %if;(evar.t!="A")<i class="fa fa-equals "></i>%else;<i class="fa fa-less-than-equal"></i>%end;
   </a>
+  <a class="ml-3"
+    href="%prefix_base_password;%nn;
+    %foreach;env_binding;%if;(env_val!="" and env_key!="reset" and env_key!="mode")%nn;
+     &%env_key=%env_val;%end;%nn;
+    %end;%nn;
+    %if;(evar.word!="on")&word=on%end;%nn;"
+    title="%if;(evar.word!="on")[*word boundaries]%else;[*anywhere]%end;">%nn;
+    <i class="fa fa-crop%if;(evar.word!="on")-alt%end;"></i>
+  </a>
   <a role="button" class="ml-auto mr-2"
     href="%prefix_base_password;
     %foreach;env_binding;%if;(env_val!="" and env_key!="reset")%nn;

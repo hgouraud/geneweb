@@ -245,6 +245,12 @@ let patch_cache_fname conf ok k v merge =
       let _ = Printf.eprintf "None:\n" in
       ()
 
+let match_fnames word str x =
+  if word then
+    let rexp = Str.regexp (".*\\b" ^ x ^ "\\b.*") in
+    Str.string_match rexp str 0
+  else Mutil.contains str x
+
 let other_fsnames conf base x =
   let ht = if p_getenv conf.env "reset" = Some "on" then Hashtbl.create 1
     else read_cache_fname conf
@@ -264,11 +270,13 @@ let other_fsnames conf base x =
       write_cache_fname conf
     end;
   let exact = p_getenv conf.env "t" = Some "A" in
+  let word = p_getenv conf.env "word" = Some "on" in
   let x = if exact then x else Name.lower x in
   Hashtbl.fold
     (fun _k (str, c) l ->
       let strl = if exact then str else Name.lower str in
-      if (Mutil.contains strl x && strl <> x) then (str, c) :: l else l) ht []
+      if (match_fnames word strl x && strl <> x)
+      then (str, c) :: l else l) ht []
   
 let persons_of_fsname conf base base_strings_of_fsname find proj x =
   (* list of strings index corresponding to the crushed lower first name
