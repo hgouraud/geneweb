@@ -25,7 +25,7 @@ let read_cache_fname conf =
       end
   | None -> ht_cache_fname
 
-let write_cache_fname conf =
+let write_cache_fname conf ht_cache_fname =
   let ht_cache = read_cache_fname conf in
   let () =
     Hashtbl.iter
@@ -36,13 +36,25 @@ let write_cache_fname conf =
       ht_cache
   in
   let fname = cache_fname conf in
-  match try Some (Secure.open_out_bin fname) with Sys_error _ -> None with
+  begin match try Some (Secure.open_out_bin fname) with Sys_error _ -> None with
   | Some oc ->
       begin
         output_value oc ht_cache_fname;
         close_out oc
       end
   | None -> ()
+  end;
+  begin match try Some (Secure.open_out (fname ^ ".cach")) with Sys_error _ -> None with
+  | Some oc ->
+      begin
+        Hashtbl.iter
+          (fun _k (v, _) -> output_string oc ("<option>" ^ v ^ "\n"))
+            ht_cache_fname;
+        close_out oc;
+      Printf.eprintf "done\n";
+      end
+  | None -> ()
+  end
 
 (* keep a ref count for v.
   ok = "" -> add new entry
@@ -52,14 +64,11 @@ let patch_cache_fname conf ok k v merge =
   let ht_cache_fname = read_cache_fname conf in
   if v <> "" then
     begin
-    let _ = Printf.eprintf "V<>0: %s\n" v in
     if not (Hashtbl.mem ht_cache_fname k) then
-      let _ = Printf.eprintf "New: %s\n" v in
       Hashtbl.add ht_cache_fname k (v, 1)
     else
       if not merge then
         begin
-          let _ = Printf.eprintf "Add: %s\n" v in
           let (vv, i) = Hashtbl.find ht_cache_fname k in
           Hashtbl.replace ht_cache_fname k (vv, i + 1)
         end
@@ -67,24 +76,19 @@ let patch_cache_fname conf ok k v merge =
     end
   else
     begin
-    let _ = Printf.eprintf "V=0:\n" in
     if not (Hashtbl.mem ht_cache_fname k) then
       Printf.eprintf "Inconsistent cache_fname\n"
     else
       begin
         let (vv, i) = Hashtbl.find ht_cache_fname k in
         if i = 1 then
-          let _ = Printf.eprintf "remove: %s\n" k in
           Hashtbl.remove ht_cache_fname k
         else
-          let _ = Printf.eprintf "replace: %s\n" k in
           Hashtbl.replace ht_cache_fname k (vv, i - 1)
       end
     end;
-  let _ = Printf.eprintf "Mid:\n" in
   if ok <> "" then
     begin
-      let _ = Printf.eprintf "Ok<>0:\n" in
       if not (Hashtbl.mem ht_cache_fname ok) then
         Printf.eprintf "Inconsistent cache_fname: %s\n" ok
       else
@@ -97,15 +101,11 @@ let patch_cache_fname conf ok k v merge =
         end
     end
   else ();
-  let _ = Printf.eprintf "End:\n" in
   let fname = cache_fname conf in
   match try Some (Secure.open_out_bin fname) with Sys_error _ -> None with
   | Some oc ->
       begin
-        let _ = Printf.eprintf "Writing:\n" in
         output_value oc ht_cache_fname;
         close_out oc
       end
-  | None ->
-      let _ = Printf.eprintf "None:\n" in
-      ()
+  | None -> ()

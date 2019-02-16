@@ -161,7 +161,7 @@ let other_fsnames conf base x =
           let (vv, i) = Hashtbl.find ht key in
           Hashtbl.replace ht key (vv, i + 1)
       done;
-      FnameCache.write_cache_fname conf
+      FnameCache.write_cache_fname conf ht
     end;
   let exact = p_getenv conf.env "t" = Some "A" in
   let word = p_getenv conf.env "word" = Some "on" in
