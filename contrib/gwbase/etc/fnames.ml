@@ -18,7 +18,8 @@ let cache_fname bname fname =
 let write_cache_file bname fname list =
   let fname = cache_fname bname fname in
   Printf.eprintf "Write to : %s\n" (fname ^ ".cache");
-  begin match try Some (Secure.open_out (fname ^ ".cache")) with Sys_error _ -> None with
+  begin match try Some (Secure.open_out (fname ^ ".cache"))
+    with Sys_error _ -> None with
   | Some oc ->
       begin
         List.iter
@@ -77,7 +78,8 @@ let places_all bname =
   ProgrBar.finish ();
   flush stderr;
   let places_list = Hashtbl.fold (fun k v acc -> (v, 1) :: acc) ht [] in
-  let places_list = List.sort (fun (v1, _) (v2, _) -> compare v1 v2) places_list in
+  let places_list = List.sort (fun (v1, _) (v2, _) ->
+    Gutil.alphabetic_utf_8 v1 v2) places_list in
   write_cache_file bname "cache_places" places_list;
   flush stderr;
   let stop = Unix.gettimeofday () in
