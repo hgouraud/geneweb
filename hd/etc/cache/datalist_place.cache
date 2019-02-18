@@ -19,11 +19,11 @@
 <option>Abrest
 <option>Abscon
 <option>Achain
-<option>Achâtel
-<option>Achâtel – Sailly-Achâtel
 <option>Achen
 <option>Acheville
 <option>Achicourt
+<option>Achâtel
+<option>Achâtel – Sailly-Achâtel
 <option>Acquaviva Platani, Sicile
 <option>Acquin-Westbécourt
 <option>Acy-Romance
@@ -47,7 +47,6 @@
 <option>Aix-en-Provence
 <option>Aix-la-Chapelle
 <option>Aixe-sur-Vienne
-<option>Aïn-el-Turk – Oran
 <option>Ajaccio
 <option>Ajoncourt
 <option>Alaincourt
@@ -61,19 +60,16 @@
 <option>Albestroff
 <option>Albi
 <option>Albreschviller
-<option>Alençon
 <option>Alenquer
+<option>Alençon
 <option>Ales
 <option>Alex (Haute-Savoie)
-<option>Alémont
-<option>Alémont – Saint-Jure
-<option>Alémont – Vigny
 <option>Alfortville
 <option>Alger
 <option>Alger, Algérie
-<option>Algérie
 <option>Algrange
 <option>Alguena, Alicante, Espagne
+<option>Algérie
 <option>Alicante, Espagne
 <option>Aling – Folschviller
 <option>Alise-Sainte-Reine
@@ -122,6 +118,9 @@
 <option>Altwiese – Mondorf
 <option>Alvimare
 <option>Alzing
+<option>Alémont
+<option>Alémont – Saint-Jure
+<option>Alémont – Vigny
 <option>Amance (Meurthe-et-Moselle)
 <option>Amancey
 <option>Amanvillers
@@ -129,18 +128,18 @@
 <option>Ambleny
 <option>Ambleny – Pontarcher
 <option>Amboise
-<option>Amelécourt
 <option>Amelsagen
+<option>Amelécourt
 <option>Amenoncourt
 <option>Ameuvelle
-<option>Amélecourt
-<option>Amérique
 <option>Amiens
 <option>Amillis
 <option>Ammerschwihr
 <option>Amnéville
 <option>Amondans
 <option>Amsterdam
+<option>Amélecourt
+<option>Amérique
 <option>Ancerville
 <option>Ancerville (Meuse)
 <option>Ancerville (Moselle)
@@ -180,8 +179,8 @@
 <option>Annoday
 <option>Annoeullin
 <option>Annonay
-<option>Annœullin
 <option>Annweiler/Pfalz
+<option>Annœullin
 <option>Anor
 <option>Anould
 <option>Anoux
@@ -215,7 +214,6 @@
 <option>Arcelin (Płońsk)
 <option>Archigny
 <option>Arcueil
-<option>Arçon
 <option>Ardennes
 <option>Ardentes
 <option>Argancy
@@ -267,6 +265,7 @@
 <option>Arville, Luxembourg, Belgique
 <option>Arzheim, Allemagne
 <option>Arzviller
+<option>Arçon
 <option>Aschreyhane, Belgique
 <option>Asnières
 <option>Asnières (lequel ?)
@@ -286,17 +285,16 @@
 <option>Asswiler, Allemagne
 <option>Asswiller
 <option>Astrakhan, Volga, Russie
-<option>Aßweiler – Blieskastel
 <option>Ath
-<option>Athènes
 <option>Athienville
 <option>Athies-sous-Laon
+<option>Athènes
 <option>Attainville
 <option>Attenschwiller
 <option>Attiggio – Fabriano
-<option>Attignéville
 <option>Attigny
 <option>Attigny (Vosges)
+<option>Attignéville
 <option>Attilloncourt
 <option>Attiloncourt
 <option>Atton
@@ -309,9 +307,6 @@
 <option>Aubecourt
 <option>Aubenas
 <option>Aubervilliers
-<option>Aubécourt
-<option>Aubécourt – Rémilly
-<option>Aubérive
 <option>Aubigny (Calvados)
 <option>Aubigny – Coincy (Moselle)
 <option>Aubigny – Colombey
@@ -324,6 +319,9 @@
 <option>Aubrives
 <option>Aubure
 <option>Auby
+<option>Aubécourt
+<option>Aubécourt – Rémilly
+<option>Aubérive
 <option>Auch
 <option>Auchel
 <option>Audeloncourt
@@ -411,14 +409,15 @@
 <option>Awoingt
 <option>Ay
 <option>Ay-sur-Moselle
-<option>Aÿ
 <option>Azelot
 <option>Azerailles
 <option>Azille
 <option>Azincourt
 <option>Azoudange
 <option>Azzano Decimo, Italie
-<option>Âchatel
+<option>Aßweiler – Blieskastel
+<option>Aïn-el-Turk – Oran
+<option>Aÿ
 <option>BU
 <option>Babrowa, Wielun ?
 <option>Baccarat
@@ -436,16 +435,15 @@
 <option>Baerendorf
 <option>Baerenthal
 <option>Bagneux
-<option>Bagnères-de-Luchon
-<option>Bagnèse-de-Luchon
 <option>Bagnols (Puy-de-Dôme)
 <option>Bagnols – Bagnols-sur-Cèze
+<option>Bagnères-de-Luchon
+<option>Bagnèse-de-Luchon
 <option>Baie-Mahault
 <option>Baillet-en-France
 <option>Bainville – Autigny-la-Tour
 <option>Bainville-aux-Miroirs
 <option>Bale, Suisse
-<option>Balès – Valles – Esplas-de-Sérou
 <option>Balkans
 <option>Ballainvilliers
 <option>Ballaison
@@ -455,12 +453,13 @@
 <option>Ballern – Merzig
 <option>Ballersdorf
 <option>Balleville
-<option>Balléville
 <option>Ballot – La Goutelle
 <option>Ballweiler
+<option>Balléville
 <option>Baltimore, Maryland
 <option>Baltimore, Maryland, États-Unis
 <option>Baltzenheim
+<option>Balès – Valles – Esplas-de-Sérou
 <option>Bamberg
 <option>Bamberg, Franconie, Allemagne
 <option>Bambiderstroff
@@ -478,7 +477,6 @@
 <option>Bannost-Villegagnon
 <option>Bannstein – Éguelshardt
 <option>Bantron
-<option>Bañolas
 <option>Baone Provine Padova
 <option>Bar-le-Duc
 <option>Bar-sur-Aube
@@ -541,8 +539,8 @@
 <option>Baume-les-Dames
 <option>Bauzemont
 <option>Bavans
-<option>Bavière
 <option>Bavilliers
+<option>Bavière
 <option>Bayengem-lès-Eperlecques
 <option>Bayenghem-lès-Eperlecques
 <option>Bayern, Allemagne
@@ -560,10 +558,7 @@
 <option>Bazoilles-sur-Meuse
 <option>Bazoncourt
 <option>Bazouges – Château-Gontier
-<option>Bâle (canton)
-<option>Bâle, Suisse
-<option>Bärendorf
-<option>Bærenthal
+<option>Bañolas
 <option>Beauchemin
 <option>Beauchery-Saint-Martin
 <option>Beaucourt
@@ -605,8 +600,8 @@
 <option>Befey
 <option>Befey – Vigy
 <option>Befey – Villers-Bettnach
-<option>Begnécourt
 <option>Begnins
+<option>Begnécourt
 <option>Behren – Behren-lès-Forbach
 <option>Behren-lès-Forbach
 <option>Beilstein (Mosel)
@@ -634,18 +629,18 @@
 <option>Bellevesvre
 <option>Belleville (Meurthe-et-Moselle)
 <option>Belleville, St. Clair, Illinois
-<option>Bellême
 <option>Bellicourt
 <option>Bellignat
 <option>Bellinzona
 <option>Bellinzona ?
+<option>Bellême
 <option>Belmont-sur-Buttant
 <option>Belmont-sur-Vair
-<option>Belœil
 <option>Belrupt
 <option>Belval – Portieux
 <option>Belvaux
 <option>Belvoir
+<option>Belœil
 <option>Ben Thuy – Vinh
 <option>Benassay
 <option>Benfeld
@@ -769,45 +764,15 @@
 <option>Beyren-lès-Sierck
 <option>Beyrouth, Liban
 <option>Beyrouth, Syrie
-<option>Beÿren – Beyren-lès-Sierck
 <option>Bezange-la-Grande
 <option>Bezange-la-Petite
 <option>Bezonvaux
-<option>Béchamp
-<option>Bécherel
-<option>Béchy
-<option>Bédarieux
-<option>Béfey – Saint-Hubert
-<option>Béfey – Vigy
-<option>Béfey – Villers-Bettnach
-<option>Béhagnies
-<option>Békéscsaba
-<option>Bénaménil
-<option>Bénestroff
-<option>Bénéstroff
-<option>Bénévent-l’Abbaye
-<option>Béning
-<option>Béning-lès-Harprich
-<option>Béning-lès-Saint-Avold
-<option>Bérentzwiller
-<option>Bérig
-<option>Bérig – Bérig-Vintrange
-<option>Bérig-Vintrange
-<option>Bérus
-<option>Bérus – Falck
-<option>Bérus, Sarre, Allemagne
-<option>Béthisy-Saint-Pierre
-<option>Béthune
-<option>Bévilard
-<option>Béville – Glatigny
-<option>Béville – Retonfey
-<option>Béville-le-Comte
-<option>Bézaudun-sur-Bîne
+<option>Beÿren – Beyren-lès-Sierck
 <option>Bialoglovy
+<option>Biarritz
 <option>Białcz
 <option>Białcz Nowy
 <option>Białcz Stary – Alt-Bialcz
-<option>Biarritz
 <option>Biberach, Bade, Allemagne
 <option>Biberkirch – Troisfontaines
 <option>Bibiche
@@ -827,12 +792,12 @@
 <option>Bihain
 <option>Bildsdorf
 <option>Bildstock – Friedrichsthal
-<option>Billère
 <option>Billom
 <option>Billy – Billy-sous-Mangiennes
 <option>Billy-Chevannes
 <option>Billy-sous-Mangiennes
 <option>Billy-sous-les-Côtes
+<option>Billère
 <option>Bilten, Glaris, Suisse
 <option>Bindemheim
 <option>Binge
@@ -889,22 +854,15 @@
 <option>Blaubeuren
 <option>Blaubeuren, Tübingen
 <option>Blaye
-<option>Blâmont
 <option>Bleienbach, Berne, Haute Argovie, Suisse
 <option>Blettange – Bousse
 <option>Bleurville
 <option>Blevaincourt
-<option>Blécourt
-<option>Blénod-lès-Pont-à-Mousson
-<option>Blénod-lès-Toul
-<option>Bléré
-<option>Bléré (Saint-Christophe)
-<option>Blériot-Plage
 <option>Blida, Algérie
 <option>Blies-Ebersing
-<option>Blies-Ébersing
 <option>Blies-Guersviller
 <option>Blies-Schweyen
+<option>Blies-Ébersing
 <option>Bliesbruck
 <option>Blieskastel
 <option>Bliesmengen
@@ -915,11 +873,18 @@
 <option>Blumerey
 <option>Blussangeaux
 <option>Blussans
+<option>Blâmont
+<option>Blécourt
+<option>Blénod-lès-Pont-à-Mousson
+<option>Blénod-lès-Toul
+<option>Blériot-Plage
+<option>Bléré
+<option>Bléré (Saint-Christophe)
 <option>Bobigny
 <option>Bobingy
-<option>Bocé
 <option>Bockange – Piblange
 <option>Bocquegney
+<option>Bocé
 <option>Bodilis
 <option>Bodman – Bodman-Ludwigshafen
 <option>Boersch
@@ -1026,7 +991,7 @@
 <option>Boussenacker – Kirschnaumen
 <option>Bousseviller
 <option>Boussières-sous-Frémont
-<option>Boussières ?
+<option>Boussières ?
 <option>Boust
 <option>Boustroff
 <option>Bousval
@@ -1046,9 +1011,6 @@
 <option>Boyer – Sennecey-le-Grand
 <option>Bozoulls
 <option>Bozouls
-<option>Bône – Annaba, Algérie
-<option>Bône, Algérie
-<option>Böhringen (Radolfzell)
 <option>Br
 <option>Brabant, Belgique
 <option>Brain-sur-Allonnes
@@ -1092,17 +1054,6 @@
 <option>Breuschwickersheim
 <option>Breuvannes-en-Bassigny
 <option>Brevilliers
-<option>Bréauté
-<option>Bréhain
-<option>Bréhain-la-Ville
-<option>Brélevenez – Lannion
-<option>Brélévenez
-<option>Brélévenez – Lannion
-<option>Bréménil
-<option>Brémoncourt
-<option>Bréno (Italie)
-<option>Brésil
-<option>Brévilly
 <option>Briançon
 <option>Bridel, Luxembourg
 <option>Brie-Comte-Robert
@@ -1144,6 +1095,17 @@
 <option>Bruxelles
 <option>Bruxelles (Récollets)
 <option>Bruyères
+<option>Bréauté
+<option>Bréhain
+<option>Bréhain-la-Ville
+<option>Brélevenez – Lannion
+<option>Brélévenez
+<option>Brélévenez – Lannion
+<option>Brémoncourt
+<option>Bréménil
+<option>Bréno (Italie)
+<option>Brésil
+<option>Brévilly
 <option>Brû
 <option>Buchenschachen
 <option>Buchholz – Flaxweiler
@@ -1200,19 +1162,55 @@
 <option>Buysscheure
 <option>Buzy
 <option>Buzy-Darmont
+<option>Bydgoszcz, Pologne
+<option>Bâle (canton)
+<option>Bâle, Suisse
+<option>Bärendorf
+<option>Bærenthal
+<option>Béchamp
+<option>Bécherel
+<option>Béchy
+<option>Bédarieux
+<option>Béfey – Saint-Hubert
+<option>Béfey – Vigy
+<option>Béfey – Villers-Bettnach
+<option>Béhagnies
+<option>Békéscsaba
+<option>Bénaménil
+<option>Bénestroff
+<option>Béning
+<option>Béning-lès-Harprich
+<option>Béning-lès-Saint-Avold
+<option>Bénéstroff
+<option>Bénévent-l’Abbaye
+<option>Bérentzwiller
+<option>Bérig
+<option>Bérig – Bérig-Vintrange
+<option>Bérig-Vintrange
+<option>Bérus
+<option>Bérus – Falck
+<option>Bérus, Sarre, Allemagne
+<option>Béthisy-Saint-Pierre
+<option>Béthune
+<option>Bévilard
+<option>Béville – Glatigny
+<option>Béville – Retonfey
+<option>Béville-le-Comte
+<option>Bézaudun-sur-Bîne
+<option>Bône – Annaba, Algérie
+<option>Bône, Algérie
+<option>Böhringen (Radolfzell)
 <option>Büdesheim
 <option>Büdesheim – Schöneck (Hessen)
 <option>Büdesheim, Hesse
 <option>Büdingen – Merzig
 <option>Büren, Allemagne
-<option>Bydgoszcz, Pologne
 <option>Cabrespines – Tauriac-de-Naucelle
 <option>Cabrières (Gard)
 <option>Cabry?
 <option>Cadenbronn – Nousseville-Saint-Nabor
 <option>Caen
 <option>Caestre
-<option>Caëstre
 <option>Cahors
 <option>Calais
 <option>Calembourg
@@ -1258,8 +1256,8 @@
 <option>Carpentras
 <option>Carrouges
 <option>Carspach
-<option>Cartagène, Murcie, Espagne
 <option>Cartaghène, Murcie, Espagne
+<option>Cartagène, Murcie, Espagne
 <option>Carvin
 <option>Casablanca
 <option>Casablanca, Maroc
@@ -1279,7 +1277,7 @@
 <option>Caunes-Minervois
 <option>Caurel
 <option>Cayenne
-<option>Călărași (Roumanie)
+<option>Caëstre
 <option>Celfcy
 <option>Celles-sur-Plaine
 <option>Celliers – La Léchère
@@ -1300,9 +1298,6 @@
 <option>Cessey-sur-Tille
 <option>Ceto, Brescia
 <option>Ceyrac – Gabriac
-<option>Cébazat
-<option>Cérisy
-<option>Céroux-Mousty
 <option>Chabris
 <option>Chaffourt
 <option>Chagey
@@ -1327,7 +1322,6 @@
 <option>Chamalières
 <option>Chamalières, Puy-de-Dôme
 <option>Chambery
-<option>Chambéry
 <option>Chambley
 <option>Chambley-Bussières
 <option>Chambord
@@ -1335,6 +1329,7 @@
 <option>Chambrey
 <option>Chambrey (Moselle)
 <option>Chambry (Aisne)
+<option>Chambéry
 <option>Chamesey
 <option>Chammes
 <option>Chamonix
@@ -1446,42 +1441,6 @@
 <option>Chazelles-sur-Lyon
 <option>Chazets – Saint-Émiland
 <option>Chazot
-<option>Châlon-sur-Marne
-<option>Châlon-sur-Saône
-<option>Châlons-en-Champagne
-<option>Châlons-sur Marne – Châlons-en-Champagne (Saint-Sulpice)
-<option>Châlons-sur-Marne
-<option>Châlons-sur-Saône
-<option>Château de Combalat – Chaponost
-<option>Château de Layum – Lay-Saint-Christophe
-<option>Château-Bréhain
-<option>Château-Fromage
-<option>Château-Porcien
-<option>Château-Rouge
-<option>Château-Salin
-<option>Château-Salins
-<option>Château-Voué
-<option>Château-de-Genas
-<option>Château-du-Loir
-<option>Château-l’Abbaye
-<option>Châteauneuf-du-Faou
-<option>Châteauneuf-sur-Cher
-<option>Châteauponsac
-<option>Châteauroux
-<option>Châteauvillain
-<option>Châtel-Moron
-<option>Châtel-Saint-Blaise
-<option>Châtel-Saint-Germain
-<option>Châtel-sur-Moselle
-<option>Châtelaillon – Châtelaillon-Plage
-<option>Châtelet
-<option>Châtelineau
-<option>Châtellerault
-<option>Châtelus-le-Marcheix
-<option>Châtenay-Malabry
-<option>Châtenois, Vosges
-<option>Châtillon (Hauts-de-Seine)
-<option>Châtillon-sur-Oise
 <option>Chelaincourt
 <option>Chelaincourt – Flévy
 <option>Chelles
@@ -1520,16 +1479,6 @@
 <option>Chevrières (grand moulins)
 <option>Chevroux
 <option>Chevry-Cossigny
-<option>Chèvremont
-<option>Chéhange
-<option>Chémery
-<option>Chémery-la-Vieille – Chémery-les-Deux
-<option>Chémery-les-Deux
-<option>Chémery-les-Faulquemont
-<option>Chénières
-<option>Chénois
-<option>Chérisey
-<option>Chênée, Belgique
 <option>Chicago, Cook, Illinois
 <option>Chicourt
 <option>Chieulles
@@ -1554,6 +1503,52 @@
 <option>Chorey-les-Époisses
 <option>Christburg-Stuhm
 <option>Chur
+<option>Châlon-sur-Marne
+<option>Châlon-sur-Saône
+<option>Châlons-en-Champagne
+<option>Châlons-sur Marne – Châlons-en-Champagne (Saint-Sulpice)
+<option>Châlons-sur-Marne
+<option>Châlons-sur-Saône
+<option>Château de Combalat – Chaponost
+<option>Château de Layum – Lay-Saint-Christophe
+<option>Château-Bréhain
+<option>Château-Fromage
+<option>Château-Porcien
+<option>Château-Rouge
+<option>Château-Salin
+<option>Château-Salins
+<option>Château-Voué
+<option>Château-de-Genas
+<option>Château-du-Loir
+<option>Château-l’Abbaye
+<option>Châteauneuf-du-Faou
+<option>Châteauneuf-sur-Cher
+<option>Châteauponsac
+<option>Châteauroux
+<option>Châteauvillain
+<option>Châtel-Moron
+<option>Châtel-Saint-Blaise
+<option>Châtel-Saint-Germain
+<option>Châtel-sur-Moselle
+<option>Châtelaillon – Châtelaillon-Plage
+<option>Châtelet
+<option>Châtelineau
+<option>Châtellerault
+<option>Châtelus-le-Marcheix
+<option>Châtenay-Malabry
+<option>Châtenois, Vosges
+<option>Châtillon (Hauts-de-Seine)
+<option>Châtillon-sur-Oise
+<option>Chèvremont
+<option>Chéhange
+<option>Chémery
+<option>Chémery-la-Vieille – Chémery-les-Deux
+<option>Chémery-les-Deux
+<option>Chémery-les-Faulquemont
+<option>Chénières
+<option>Chénois
+<option>Chérisey
+<option>Chênée, Belgique
 <option>Cierges-sous-Montfaucon
 <option>Cimetière de l’Est – Metz
 <option>Cimetière paroissial
@@ -1579,14 +1574,6 @@
 <option>Clequial – Bodolis
 <option>Clermont-Ferrand
 <option>Clerval (Doubs)
-<option>Clèves
-<option>Cléder
-<option>Clémery
-<option>Cléron
-<option>Cléry
-<option>Cléry-Saint-André
-<option>Cléry-le-Petit
-<option>Clézentaine
 <option>Clichy
 <option>Clichy-la-Garenne
 <option>Clichy-sous-Bois
@@ -1598,6 +1585,14 @@
 <option>Cluis
 <option>Cluis Dessus – Cluis
 <option>Cluis Dessus – Maison-Dieu – Cluis
+<option>Clèves
+<option>Cléder
+<option>Clémery
+<option>Cléron
+<option>Cléry
+<option>Cléry-Saint-André
+<option>Cléry-le-Petit
+<option>Clézentaine
 <option>Coatoroch – Tréouergat
 <option>Coaturiouall – Saint-Vougay
 <option>Cochem
@@ -1618,14 +1613,14 @@
 <option>Coire, Suisse
 <option>Coise
 <option>Coisevaux
-<option>Collège de France – Paris 5e
 <option>Colligny
 <option>Collo
 <option>Collonge-en-Charollais
 <option>Collorec
+<option>Collège de France – Paris 5e
 <option>Colmar
 <option>Colmen
-<option>Colmen ?
+<option>Colmen ?
 <option>Colmey
 <option>Cologne
 <option>Cologne, Allemagne
@@ -1656,10 +1651,10 @@
 <option>Condat (Cantal)
 <option>Condat-en-Combraille
 <option>Condes (Jura)
+<option>Condom
 <option>Condé-Northen
 <option>Condé-en-Barrois
 <option>Condé-sur-Noireau
-<option>Condom
 <option>Conflans
 <option>Congé (Orne)
 <option>Coni
@@ -1667,12 +1662,12 @@
 <option>Conques- Saint-Marcel – Ladrech
 <option>Cons-la-Grandville
 <option>Consdorf
-<option>Conségudes
 <option>Consolation-Maisonnettes
 <option>Constantine
 <option>Constantine, Algérie
 <option>Constantinople
 <option>Constantinople, Turquie
+<option>Conségudes
 <option>Cont-Buret – La Peyratte
 <option>Contensouses – Villecomtal
 <option>Contern
@@ -1752,29 +1747,18 @@
 <option>Coutures
 <option>Coutures – Château-Salins
 <option>Coyviller
-<option>Cœuvres-et-Valsery
 <option>Cracovie, Pologne
 <option>Craincourt
 <option>Cran-Gévrier
 <option>Crandall, Spink, SD
 <option>Craywick
 <option>Crazannes
-<option>Crâonne
 <option>Crehange
 <option>Creil
 <option>Crest
-<option>Creuë
 <option>Creutzwald
 <option>Creutzwald-la-Croix
-<option>Crécy (bataille de)
-<option>Créhange
-<option>Crépey
-<option>Crépy
-<option>Crépy-Peltre
-<option>Crépy-en-Valois
-<option>Créteil
-<option>Crével – Lopérec
-<option>Crévic
+<option>Creuë
 <option>Crion
 <option>Criquetot-L’Esneval
 <option>Crocy
@@ -1788,6 +1772,16 @@
 <option>Crozon
 <option>Crupies
 <option>Crusnes
+<option>Crâonne
+<option>Crécy (bataille de)
+<option>Créhange
+<option>Crépey
+<option>Crépy
+<option>Crépy-Peltre
+<option>Crépy-en-Valois
+<option>Créteil
+<option>Crével – Lopérec
+<option>Crévic
 <option>Cuesmes
 <option>Cuevas del Almanzora
 <option>Cugney-aux-Aulx
@@ -1805,6 +1799,11 @@
 <option>Cysoing
 <option>Czacz
 <option>Czarnożyły
+<option>Cébazat
+<option>Cérisy
+<option>Céroux-Mousty
+<option>Călărași (Roumanie)
+<option>Cœuvres-et-Valsery
 <option>Dabo
 <option>Dachau (camp)
 <option>Dagersheim – Böblingen
@@ -1821,9 +1820,9 @@
 <option>Dalheim (Luxembourg)
 <option>Dalheim, Luxembourg
 <option>Dalhunden
-<option>Dalías, Almería, Espagne
 <option>Dallon
 <option>Dalstein
+<option>Dalías, Almería, Espagne
 <option>Daman, établissements portugais de l’Inde, Inde
 <option>Damas-aux-Bois
 <option>Damas-et-Bettegney
@@ -1889,12 +1888,8 @@
 <option>Devant-lès-Pont – Metz
 <option>Devant-lès-Ponts – Metz
 <option>Devant-lès-Pont–Metz
-<option>Devirenbarchig (Bade) ?
+<option>Devirenbarchig (Bade) ?
 <option>Dezize-lès-Maranges
-<option>Dédeling
-<option>Désandans
-<option>Déservillers
-<option>Déville-lès-Rouen
 <option>Diane-Capelle
 <option>Diarville
 <option>Dicy
@@ -1935,10 +1930,10 @@
 <option>Dinan (Saint-Malo)
 <option>Dinant
 <option>Dinard
-<option>Dinéault
 <option>Dingenhart, Thurgau, Suisse
-<option>Dingé
 <option>Dingué
+<option>Dingé
+<option>Dinéault
 <option>Dion-le-Mont
 <option>Dion-le-Val
 <option>Dippach
@@ -1973,10 +1968,6 @@
 <option>Dombrot-le-Sec
 <option>Dombrot-sur-Vair
 <option>Dombrowa, Russie
-<option>Domè
-<option>Domèvre-sous-Montfort
-<option>Domèvre-sur-Vezouve
-<option>Domèvre-sur-Vezouze
 <option>Domfessel
 <option>Domgermain
 <option>Dommartin
@@ -1996,6 +1987,10 @@
 <option>Domrbrot-le-Sec
 <option>Domremy-la-Canne
 <option>Domvallier
+<option>Domè
+<option>Domèvre-sous-Montfort
+<option>Domèvre-sur-Vezouve
+<option>Domèvre-sur-Vezouze
 <option>Doncières
 <option>Doncourt-aux-Templiers
 <option>Doncourt-auxt-Templiers
@@ -2020,7 +2015,6 @@
 <option>Douai
 <option>Doubs
 <option>Doue
-<option>Doué (Maine-et-Loire)
 <option>Douilly
 <option>Doulevant-le-Château
 <option>Dourbes
@@ -2028,7 +2022,7 @@
 <option>Dourdhal
 <option>Douvieux – Monchy-Lagache
 <option>Douvres-la-Délivrande
-<option>Dörsdorf
+<option>Doué (Maine-et-Loire)
 <option>Draguignan
 <option>Draize
 <option>Drancy
@@ -2066,6 +2060,11 @@
 <option>Duttlenheim
 <option>Duvy
 <option>Duzey
+<option>Dédeling
+<option>Désandans
+<option>Déservillers
+<option>Déville-lès-Rouen
+<option>Dörsdorf
 <option>Düren
 <option>Düren – Sarrelouis
 <option>Dürrenroth
@@ -2264,69 +2263,6 @@
 <option>Eving, Allemagne
 <option>Eygurande
 <option>Eywiller
-<option>ÉUA
-<option>Ébersviller
-<option>Ébersvilles
-<option>Éblange
-<option>Éblange – Valmunster
-<option>Écajeul – Le Mesnil-Mauger
-<option>Échemiré
-<option>Échevannes
-<option>Échiré
-<option>Échirolles
-<option>Écly
-<option>Écourt-Saint-Quentin
-<option>Écoyeux
-<option>Écretteville-lès-Baons
-<option>Écrouves
-<option>Écuisses
-<option>Écurcey
-<option>Égreville
-<option>Éguelshardt
-<option>Élange
-<option>Élange – Thionville
-<option>Éméville
-<option>Épange
-<option>Épange – Charleville-sous-Bois
-<option>Épannes
-<option>Épernay
-<option>Épernon
-<option>Épieds-en-Beauce
-<option>Épiez-sur-Chiers
-<option>Épinac
-<option>Épinal
-<option>Épinant
-<option>Épinoy
-<option>Éply
-<option>Équeurdreville
-<option>Équevillon
-<option>Érondelle
-<option>Étables – Binic-Étables-sur-Mer
-<option>Étables-sur-Mer
-<option>Étain
-<option>Étampes
-<option>États-Unis
-<option>Éternoz
-<option>Étival-Clairefontaine
-<option>Étival-lès-le-Mans
-<option>Étobon
-<option>Étreillers
-<option>Étrelliers
-<option>Étrungt
-<option>Étupes
-<option>Évange
-<option>Évaux-et-Ménil
-<option>Évian-les-Bains
-<option>Évian-lès-Bains
-<option>Évillers
-<option>Évillers – Déservillers
-<option>Évital-lès-le-Mans
-<option>Évran
-<option>Évrange
-<option>Évrange, Frisange
-<option>Évreux
-<option>Ézerville – Enegenville
-<option>Ézerville – Engenville
 <option>Fabriano
 <option>Faha, Mettlach, LK Merzig-Wadern, Saarland, Deutschland
 <option>Failly
@@ -2337,11 +2273,11 @@
 <option>Fallais
 <option>Famechon
 <option>Fameck
-<option>Farébersviller
 <option>Fargniers
 <option>Faro, Portugal
 <option>Farquelfing
 <option>Farschviller
+<option>Farébersviller
 <option>Faucompierre
 <option>Faulquemont
 <option>Faust-en-Forêt – Vittoncourt
@@ -2379,22 +2315,6 @@
 <option>Feulen, Luxembourg
 <option>Feurs
 <option>Fey
-<option>Fère-Champenoise
-<option>Fère-en-Tardenois
-<option>Fèves
-<option>Féas
-<option>Fécamp
-<option>Fécocourt
-<option>Fénétrange
-<option>Fénétrange?
-<option>Fépin
-<option>Férange
-<option>Férange – Ebersviler
-<option>Férange – Ébersviller
-<option>Férolles-Attilly
-<option>Féternes
-<option>Féy
-<option>Fiães – Santa Maria da Feira
 <option>Fieffes-Montrelet
 <option>Fieulaine
 <option>Filain
@@ -2408,6 +2328,7 @@
 <option>Fismes
 <option>Fitten
 <option>Fixem
+<option>Fiães – Santa Maria da Feira
 <option>Flagnac
 <option>Flanville
 <option>Flanville – Montoy-Flanville
@@ -2432,11 +2353,6 @@
 <option>Fleury-lès-Aubrais
 <option>Fleury-sur-Aire – Nubécourt
 <option>Fleury-sur-Andelle
-<option>Fléland
-<option>Flétrange
-<option>Flétrange – Florange
-<option>Fléville (château)
-<option>Flévy
 <option>Flines-lès-Mortagne
 <option>Flirey
 <option>Flistroff
@@ -2445,10 +2361,15 @@
 <option>Flon – Féternes
 <option>Florange
 <option>Floreffe
-<option>Florémont
 <option>Florissant, Missouri
+<option>Florémont
 <option>Fluquières
 <option>Fluscbach
+<option>Fléland
+<option>Flétrange
+<option>Flétrange – Florange
+<option>Fléville (château)
+<option>Flévy
 <option>Foameix
 <option>Folckling
 <option>Folgensbourg
@@ -2506,7 +2427,6 @@
 <option>Foville
 <option>Fox-Amphoux
 <option>Foxboro
-<option>Föhren, Rhénanie
 <option>Frahan – Bouillon
 <option>Fraimbois
 <option>Fraisnes-en-Saintois
@@ -2569,14 +2489,6 @@
 <option>Freyming – Freyming-Merlebach
 <option>Freyming – Freyming-Merlebech
 <option>Freyming-Merlebach
-<option>Frécourt
-<option>Frécourt – Servigny-lès-Raville
-<option>Fréjus
-<option>Fréland
-<option>Frémery
-<option>Frémestroff
-<option>Fréménil
-<option>Fréméréville-sous-les-Côtes
 <option>Friauville
 <option>Fribourg
 <option>Fribourg (Moselle)
@@ -2598,8 +2510,16 @@
 <option>Frotey-lès-Lue
 <option>Frouard
 <option>Frouzins
-<option>Frœschwiller
 <option>Fruges – Hézecques
+<option>Frécourt
+<option>Frécourt – Servigny-lès-Raville
+<option>Fréjus
+<option>Fréland
+<option>Frémery
+<option>Frémestroff
+<option>Fréménil
+<option>Fréméréville-sous-les-Côtes
+<option>Frœschwiller
 <option>Fuans
 <option>Fumal
 <option>Fumay
@@ -2608,6 +2528,22 @@
 <option>Furndenheim
 <option>Furnes
 <option>Furnes, Belgique
+<option>Fère-Champenoise
+<option>Fère-en-Tardenois
+<option>Fèves
+<option>Féas
+<option>Fécamp
+<option>Fécocourt
+<option>Fénétrange
+<option>Fénétrange?
+<option>Fépin
+<option>Férange
+<option>Férange – Ebersviler
+<option>Férange – Ébersviller
+<option>Férolles-Attilly
+<option>Féternes
+<option>Féy
+<option>Föhren, Rhénanie
 <option>Fürweiler
 <option>Ga(u)weistroff – Villing
 <option>Gabriac (Aveyron)
@@ -2625,22 +2561,22 @@
 <option>Ganttersschwill, Suisse
 <option>Garche
 <option>Garches
-<option>Garéoult
 <option>Gargenville
 <option>Garngenville
 <option>Garnish, Luxembourg
+<option>Garéoult
 <option>Gassicourt – Mantes-la-Jolie
 <option>Gatey
 <option>Gaubiving
 <option>Gaubiving – Folkling
 <option>Gaudiempré
 <option>Gauweisdorf
-<option>Gaüwiesen
 <option>Gavisse
 <option>Gayme – Picherande
 <option>Gazeran
 <option>Gazipaşa
 <option>Gazzada Schianno, Lombardie, Italie
+<option>Gaüwiesen
 <option>Gehweiler – Wadern
 <option>Geisesheim, Allemagne
 <option>Geislautern
@@ -2654,8 +2590,6 @@
 <option>Gelvécourt-et-Adompt
 <option>Genaville
 <option>Gendreville
-<option>Genève
-<option>Genève, Suisse
 <option>Genga
 <option>Genlis
 <option>Gennevilliers
@@ -2663,6 +2597,8 @@
 <option>Gensbach
 <option>Gentilly
 <option>Genval
+<option>Genève
+<option>Genève, Suisse
 <option>Gerardmer
 <option>Gerbeviller
 <option>Gerbécourt
@@ -2681,9 +2617,6 @@
 <option>Gertwiller
 <option>Gesrtheim
 <option>Gevresin
-<option>Génaville – Les Baroches
-<option>Gérardmer
-<option>Gézoncourt
 <option>Ghlin
 <option>Ghoy – Lessines
 <option>Ghyvelde
@@ -2771,9 +2704,6 @@
 <option>Goux – Goux-les-Usiers
 <option>Goviller
 <option>Goxwiller
-<option>Górne Wymiary, Pologne
-<option>Gœtzenbruck
-<option>Gœtzenbruck Soucht
 <option>Grafenschlag, Autriche
 <option>Graffigny-Chemin
 <option>Grafinthal
@@ -2827,11 +2757,6 @@
 <option>Gresswillers
 <option>Grevenmacher
 <option>Grevenmacher, Luxembourg
-<option>Grèce
-<option>Grémecey
-<option>Gréning
-<option>Grézieu la Marché
-<option>Grézieu le Marché
 <option>Gries
 <option>Griesborn – Schwalbach
 <option>Griesheim
@@ -2867,6 +2792,11 @@
 <option>Grundviller
 <option>Grupont
 <option>Grury
+<option>Grèce
+<option>Grémecey
+<option>Gréning
+<option>Grézieu la Marché
+<option>Grézieu le Marché
 <option>Guadeloupe
 <option>Gualdo Tadino, Italie
 <option>Guarbecque
@@ -2887,16 +2817,9 @@
 <option>Guerstling
 <option>Guerting
 <option>Guerville
-<option>Guer ?
+<option>Guer ?
 <option>Guessling
 <option>Guessling-Hémering
-<option>Guéblange
-<option>Guéblange-lès-Dieuze
-<option>Guébling
-<option>Guémar
-<option>Guénange
-<option>Guénestroff – Val-de-Bride
-<option>Guérande
 <option>Gugney
 <option>Gugney-aux-Aulx
 <option>Gugney-sous-Vaudémont
@@ -2932,8 +2855,21 @@
 <option>Gusing
 <option>Gut Nienrode – Ohlendorf
 <option>Guyans-Vennes
-<option>Güdingen, Sarre, Allemagne
+<option>Guéblange
+<option>Guéblange-lès-Dieuze
+<option>Guébling
+<option>Guémar
+<option>Guénange
+<option>Guénestroff – Val-de-Bride
+<option>Guérande
 <option>Gyvricourt
+<option>Génaville – Les Baroches
+<option>Gérardmer
+<option>Gézoncourt
+<option>Górne Wymiary, Pologne
+<option>Güdingen, Sarre, Allemagne
+<option>Gœtzenbruck
+<option>Gœtzenbruck Soucht
 <option>HIrsingue
 <option>Haasrode
 <option>Habay-la-Vieille
@@ -2957,22 +2893,20 @@
 <option>Hagnéville-et-Rancourt
 <option>Hagondage
 <option>Hagondange
-<option>Hagondange ?
+<option>Hagondange ?
 <option>Haguenau
 <option>Haguenau (Saint-Nicolas)
 <option>Haigneville
 <option>Haillainville
 <option>Hainaut, Belgique
 <option>Hainfeld, royaume de Bavière
-<option>Haïfa
-<option>Haïfa, Palestine
 <option>Halanzy
 <option>Halanzy, Belgique
 <option>Haleine
 <option>Hall, Tyrol, Autriche
 <option>Hallering
 <option>Halling – Boulay
-<option>Halling-le… ?
+<option>Halling-le… ?
 <option>Halloville
 <option>Halstroff
 <option>Ham
@@ -2981,10 +2915,10 @@
 <option>Ham-sous-Vasberg
 <option>Hambach
 <option>Hamel
-<option>Hamégicourt
 <option>Hamm
 <option>Hamme-Mille
 <option>Hampont
+<option>Hamégicourt
 <option>Han-sur-Nied
 <option>Hanau
 <option>Hanau, Hesse
@@ -2998,18 +2932,18 @@
 <option>Hannonville-sous-les-Côtes
 <option>Hannonville-sous-lès-Côtes
 <option>Hannoville-Suzémont
+<option>Hanovre
 <option>Hanoï
 <option>Hanoï, Vietnam
-<option>Hanovre
 <option>Hanvec
 <option>Hanviller
 <option>Haraucourt
 <option>Haraucourt-sur-Seille
 <option>Harcanville
-<option>Harchéchamps
 <option>Harcholins – Cirey-sur-Vezouse
-<option>Hardécourt-aux-Bois
+<option>Harchéchamps
 <option>Hardinghen
+<option>Hardécourt-aux-Bois
 <option>Harfleur
 <option>Hargarten
 <option>Hargarten-aux-Mines
@@ -3070,7 +3004,8 @@
 <option>Hayes (Moselle)
 <option>Hazebrouck
 <option>Hazembourg
-<option>Hâcourt
+<option>Haïfa
+<option>Haïfa, Palestine
 <option>Heckenransbach
 <option>Heckling
 <option>Heckling – Bouzonvilel
@@ -3132,8 +3067,8 @@
 <option>Hermance
 <option>Hermelange
 <option>Hermeray
-<option>Hermé
 <option>Hermolsheim – Mutzig
+<option>Hermé
 <option>Herne
 <option>Herny
 <option>Herny – Rémilly (Moselle)
@@ -3163,22 +3098,6 @@
 <option>Heuilly-sur-Saône
 <option>Heusden
 <option>Heusweiler
-<option>Hégenheim
-<option>Hélesmes
-<option>Hémilly
-<option>Héming
-<option>Hénaménil
-<option>Hénin Liétard
-<option>Hénin-Beaumont
-<option>Hénin-Liétard
-<option>Hénonville
-<option>Héricourt
-<option>Héricourt (Haute-Saone)
-<option>Héricourt (Haute-Saône)
-<option>Hérimenil
-<option>Hériménil
-<option>Hérimoncourt
-<option>Hérinnes
 <option>Hierscheid – Eppelborn
 <option>Hilbersheim
 <option>Hilbesheim
@@ -3218,7 +3137,6 @@
 <option>Hoelling
 <option>Hoelling – Bettviller
 <option>Hoenheim
-<option>Hoéville
 <option>Hoff – Sarrebourg
 <option>Hofstetten
 <option>Hohengoeft
@@ -3247,9 +3165,9 @@
 <option>Hombourg-Haut
 <option>Hombourt-Haut
 <option>Homburg
-<option>Homécourt
 <option>Hommarting
 <option>Hommert
+<option>Homécourt
 <option>Hondeghem
 <option>Honfleur
 <option>Hongrie
@@ -3258,7 +3176,7 @@
 <option>Honzrath
 <option>Horbourg – Horbourg-Wihr
 <option>Hornbach, Rheinland-Pfalz, Allemagne
-<option>Hornbach ?
+<option>Hornbach ?
 <option>Horst, Allemagne
 <option>Hoste
 <option>Hostenbach, Sarre, Allemagne
@@ -3266,20 +3184,16 @@
 <option>Hottviller Neunkircherhof
 <option>Houdelmont
 <option>Houdeng-Aimeries
-<option>Houécourt
 <option>Houilles
 <option>Houssay
 <option>Housseras
 <option>Houthem
+<option>Houécourt
 <option>Howald
-<option>Hôpital – Saignelégier
-<option>Höheischweiler
-<option>Höhmühlbach
-<option>Hönningen, Allemagne
+<option>Hoéville
 <option>Huccorgne
 <option>Hudiviller
 <option>Hueffler-Wahnwegen
-<option>Hué
 <option>Huffler
 <option>Huggenberg
 <option>Huiliécourt
@@ -3311,19 +3225,40 @@
 <option>Huttenheim
 <option>Hutterdorf
 <option>Hutterdorff
+<option>Hué
+<option>Hymont – Mattaincourt
+<option>Hyon
+<option>Hyuton
+<option>Hyères
+<option>Hyémondans
+<option>Hâcourt
+<option>Hégenheim
+<option>Hélesmes
+<option>Hémilly
+<option>Héming
+<option>Hénaménil
+<option>Hénin Liétard
+<option>Hénin-Beaumont
+<option>Hénin-Liétard
+<option>Hénonville
+<option>Héricourt
+<option>Héricourt (Haute-Saone)
+<option>Héricourt (Haute-Saône)
+<option>Hérimenil
+<option>Hérimoncourt
+<option>Hériménil
+<option>Hérinnes
+<option>Hôpital – Saignelégier
+<option>Höheischweiler
+<option>Höhmühlbach
+<option>Hönningen, Allemagne
 <option>Hüffler – Kusel
 <option>Hüll – Krailling (Bavière)
 <option>Hüshenhausen
 <option>Hüttenheim
 <option>Hüttigweiler – Illingen, Sarre, Allemagne
-<option>Hyères
-<option>Hyémondans
-<option>Hymont – Mattaincourt
-<option>Hyon
-<option>Hyuton
 <option>Ibigny
 <option>Ibrick – Virming
-<option>Iéna, Saxe
 <option>Igney (Meurthe-et-Moselle)
 <option>Igney (Vosges)
 <option>Ihn
@@ -3387,11 +3322,7 @@
 <option>Ixelles
 <option>Ixelles – Bruxelles
 <option>Ixelles, Bruxelles
-<option>Île Gorée, Sénégal
-<option>Île Maurice
-<option>Île-d'Arz
-<option>Île-de-Bréhat
-<option>Île-d’Arz
+<option>Iéna, Saxe
 <option>Jaberg
 <option>Jallaucourt
 <option>Jalles – Saint-Vincent-de-Xaintes  – Dax
@@ -3419,8 +3350,6 @@
 <option>Jeu-les-Bois
 <option>Jeumont
 <option>Jezainville
-<option>Jérusalem
-<option>Jìmò Shì, Qīngdǎo Shì, Shandong, Chine
 <option>Jodoigne
 <option>Joigny
 <option>Joinville (Haute-Marne)
@@ -3429,14 +3358,13 @@
 <option>Josnes
 <option>Jouaville
 <option>Joudreville
-<option>Joué-sur-Erdre
 <option>Journet
 <option>Jours-lès-Baigneux
 <option>Jouy-aux-Arches
 <option>Jouy-le-Châtel
 <option>Jouy-sous-les-Côtes
 <option>Jouy-sur-Morin
-<option>Jœuf
+<option>Joué-sur-Erdre
 <option>Jugon-les-Lacs
 <option>Jumet
 <option>Jumilhac-le-Grand
@@ -3451,6 +3379,9 @@
 <option>Juville – Chevillon
 <option>Juvisy-sur-Orge
 <option>Juvrecourt
+<option>Jérusalem
+<option>Jìmò Shì, Qīngdǎo Shì, Shandong, Chine
+<option>Jœuf
 <option>Kaiserlautern
 <option>Kaiserslautern
 <option>Kalenberg – Soucht
@@ -3473,9 +3404,6 @@
 <option>Katzweiler
 <option>Kauffenheim
 <option>Kavadarchi, Macédoine
-<option>Käsershaus – Leimiswil
-<option>Kądziołki, Mielec, Rszeszów, Poland
-<option>Kąty, Czarnożyły
 <option>Kedange-sur-Canner
 <option>Kehl, Allemagne
 <option>Kehlen
@@ -3524,9 +3452,6 @@
 <option>Kervinic – Lopérec
 <option>Keskastel
 <option>Keslauten-Nassau, Sarre, Allemagne
-<option>Kédange – Kédange-sur-Canner
-<option>Kédange-sur-Canner
-<option>Kérity-Paimpol
 <option>Kielce, Pologne
 <option>Kiełków, Pologne
 <option>Kiełków, powiet de Mielec, Pologne
@@ -3569,7 +3494,6 @@
 <option>Koenigshoffen
 <option>Koenigsmacker
 <option>Koetzingue
-<option>Koënigsmacker
 <option>Kogenheim
 <option>Kolin
 <option>Koniaczow, Pologne
@@ -3583,22 +3507,15 @@
 <option>Kossovo, Pologne
 <option>Koulikoro
 <option>Kouzacʼh – Rosnoën
-<option>Köllerbach – Püttlingen
-<option>Köllertal, Sarre, Allemagne
-<option>Königsbach – Weinstrasse, Allemagne
-<option>Königsegg, Allemagne
-<option>Körprich – Nalbach
-<option>Kœnigsmacker
-<option>Kœtzingue
-<option>Kœur-la-Grande
+<option>Koënigsmacker
 <option>Kraainem
 <option>Krafft – Erstein
 <option>Krautergersheim
 <option>Krecisela? – Rosnoën
 <option>Kremlin-Bicêtre
-<option>Kreßberg, Stuttgart
 <option>Kretków, Pologne
 <option>Kreuzweiller, Allemagne
+<option>Kreßberg, Stuttgart
 <option>Kriens, Lucerne, Suisse
 <option>Križevci, Slovénie
 <option>Kroeppen Vinningen, Palatinat, Allemagne
@@ -3611,6 +3528,20 @@
 <option>Kusel
 <option>Kuttlau
 <option>Kutzenhausen
+<option>Käsershaus – Leimiswil
+<option>Kédange – Kédange-sur-Canner
+<option>Kédange-sur-Canner
+<option>Kérity-Paimpol
+<option>Köllerbach – Püttlingen
+<option>Köllertal, Sarre, Allemagne
+<option>Königsbach – Weinstrasse, Allemagne
+<option>Königsegg, Allemagne
+<option>Körprich – Nalbach
+<option>Kądziołki, Mielec, Rszeszów, Poland
+<option>Kąty, Czarnożyły
+<option>Kœnigsmacker
+<option>Kœtzingue
+<option>Kœur-la-Grande
 <option>La Banut – Trémouille
 <option>La Batie – Saint-Martin-en-Haut
 <option>La Baule-Escoublac
@@ -3658,8 +3589,8 @@
 <option>La Ferte-Chevresis
 <option>La Ferté-Hubert – La Ferté-Saint-Cyr
 <option>La Ferté-sous-Jouarre
-<option>La Fère
 <option>La Flèche
+<option>La Fère
 <option>La Fôt, Noth
 <option>La Garrigue
 <option>La Garrigue – Campuac
@@ -3685,9 +3616,6 @@
 <option>La Maucemie – Champs-sur-Tarentaine-Marchal
 <option>La Maxe
 <option>La Maxe (Saint-Baudier)
-<option>La Mée – Dingé
-<option>La Ménardière – La Peyratte
-<option>La Ménaudière – Chissay-en-Touraine
 <option>La Montagne – Saint-Martin-du-Fouilloux (Deux-Sèvres)
 <option>La Morra
 <option>La Motte d’Aigues
@@ -3696,6 +3624,9 @@
 <option>La Moussière – Perreuil
 <option>La Mulonnière – Joué-sur-Erdre
 <option>La Mure
+<option>La Mée – Dingé
+<option>La Ménardière – La Peyratte
+<option>La Ménaudière – Chissay-en-Touraine
 <option>La Neuveville-lès-Raon
 <option>La Neuveville-sous-Châtenois
 <option>La Neuveville-sous-Montfort
@@ -3708,13 +3639,12 @@
 <option>La Petite-Pierre
 <option>La Petite-Raon
 <option>La Peyratte
-<option>La Planée
 <option>La Plantaz - Féternes
 <option>La Plantaz – Féternes
+<option>La Planée
 <option>La Poterie – Lamballe
 <option>La Potterée – Flobecq
 <option>La Queue-en-Brie
-<option>La Réunion
 <option>La Richardière – Saint-Savinien
 <option>La Rixouse
 <option>La Roche-Mabile
@@ -3727,6 +3657,7 @@
 <option>La Rodde – La Goutelle
 <option>La Romagne
 <option>La Roque-sur-Pernes
+<option>La Réunion
 <option>La Sablière – Saint-Martin-en-Haut
 <option>La Salle (Vosges)
 <option>La Saunade – Landogne
@@ -3796,9 +3727,9 @@
 <option>Lambach
 <option>Lambesc
 <option>Lambezellec
+<option>Lambsborn, Mont Tonnerre
 <option>Lambézellec
 <option>Lambézellec – Brest
-<option>Lambsborn, Mont Tonnerre
 <option>Lametz
 <option>Lamguimberg
 <option>Lamorteau
@@ -3816,7 +3747,6 @@
 <option>Landernau (Saint-Houardon)
 <option>Landerneau
 <option>Landerneau (Saint-Houardon)
-<option>Landévennec
 <option>Landivisiau
 <option>Landogne
 <option>Landonvillers
@@ -3833,6 +3763,7 @@
 <option>Landsweiler
 <option>Landsweiller
 <option>Landunvez
+<option>Landévennec
 <option>Laneuvevile-aux-Bois
 <option>Laneuville
 <option>Laneuville – Vry
@@ -3886,9 +3817,9 @@
 <option>Largitzen
 <option>Largo
 <option>Larochebeaucourt
+<option>Larringes
 <option>Larré
 <option>Larré (Orne)
-<option>Larringes
 <option>Las Vegas
 <option>Las Vegas, comté de Clark, Nevada
 <option>Lascougiraud – Saint-Étienne-de-Fursac
@@ -3935,7 +3866,6 @@
 <option>Le Ban Saint-Pierre
 <option>Le Ban-Saint-Martin
 <option>Le Begude Blanche – Rochefort-du-Gard
-<option>Le Bélieu
 <option>Le Biot
 <option>Le Blanc-Mesnil
 <option>Le Bonhomme
@@ -3943,19 +3873,20 @@
 <option>Le Bourg – Apchon
 <option>Le Bourg – Bénévent-l’Abbaye
 <option>Le Bourg – Marsac
-<option>Le Bourg – Mourioux
+<option>Le Bourg – Mourioux
 <option>Le Breuil
 <option>Le Breuil (Saône-et-Loire)
 <option>Le Briffoul – Bessuéjouls
 <option>Le Broailly — Saint-Denis-sur-Coise
 <option>Le Bulle - Reyvroz
+<option>Le Bélieu
 <option>Le Cannet
 <option>Le Cerneux-Péquignot
-<option>Le Château-d’Oléron
 <option>Le Chesnay
 <option>Le Chesne
 <option>Le Chesne (Ardennes)
 <option>Le Chipal - Mandray
+<option>Le Château-d’Oléron
 <option>Le Clerjus
 <option>Le Colombier – Saint-Firmin
 <option>Le Coteau
@@ -3970,8 +3901,8 @@
 <option>Le Grand-Bourg
 <option>Le Grand-Valtin
 <option>Le Gué – Saint-Avit (Puy-de-Dôme)
-<option>Le Guédéniau
 <option>Le Guédiniau
+<option>Le Guédéniau
 <option>Le Havre
 <option>Le Kremlin-Bicêtre
 <option>Le Lac-des-Places – Sorges
@@ -3987,12 +3918,12 @@
 <option>Le Masroy – Le-Grand-Bourg
 <option>Le Mesnil-Amelot
 <option>Le Metz – Combourg
-<option>Le Ménil
-<option>Le Ménil-Broût
-<option>Le Ménil-Thillot
 <option>Le Montôt – La Goutelle
 <option>Le Mousseau – Mesvres
 <option>Le Moustoir (Côtes-d’Armor)
+<option>Le Ménil
+<option>Le Ménil-Broût
+<option>Le Ménil-Thillot
 <option>Le Nayrac
 <option>Le Payré – La Peyratte
 <option>Le Pellerin
@@ -4001,9 +3932,9 @@
 <option>Le Pin (Seine-et-Marne)
 <option>Le Plan-du-Castellet – Le Castellet
 <option>Le Planois
+<option>Le Pouzin
 <option>Le Poët-Célard
 <option>Le Poët-Cétard
-<option>Le Pouzin
 <option>Le Puy-en-Velay
 <option>Le Quaireux – Gourgé
 <option>Le Quesnoy-sur-Deule
@@ -4011,8 +3942,8 @@
 <option>Le Relecq-Kerhuon
 <option>Le Roc de Tuiles – Chastreix
 <option>Le Rousset
-<option>Le Rœulx
 <option>Le Rudlin
+<option>Le Rœulx
 <option>Le Sablon
 <option>Le Sablon – Metz
 <option>Le Saulcy
@@ -4095,11 +4026,8 @@
 <option>Les Chevreaux – Saint-Firmin
 <option>Les Combes – Bénévent-l’Abbaye
 <option>Les Coulots – Le Breuil (Saône-et-Loire)
-<option>Les Côtes – Guyans-Vennes
 <option>Les Crozets
-<option>Les Éparges
-<option>Les Étangs
-<option>Les Étangs – Retonfey
+<option>Les Côtes – Guyans-Vennes
 <option>Les Fins
 <option>Les Forges (Deux-Sèvres)
 <option>Les Fourgs
@@ -4127,6 +4055,9 @@
 <option>Les Touches
 <option>Les Vilettes
 <option>Les Voivres
+<option>Les Éparges
+<option>Les Étangs
+<option>Les Étangs – Retonfey
 <option>Les, Val d’Aran, province de Lérida, Espagne
 <option>Lesconach, 22, Côte d'Armor
 <option>Lescure
@@ -4143,9 +4074,9 @@
 <option>Leudelange
 <option>Levallois
 <option>Levallois-Perret
-<option>Levécourt
 <option>Levier
 <option>Levroux
+<option>Levécourt
 <option>Lewes, Sussex, England
 <option>Ley
 <option>Ley (Moselle)
@@ -4153,16 +4084,6 @@
 <option>Leyr
 <option>Leyviller
 <option>Lezey
-<option>Légéville-et-Bonfays
-<option>Léguevin
-<option>Léning
-<option>Lénoncourt
-<option>Lénvegies 02
-<option>Léogâne, Haïti
-<option>Léovillé
-<option>Lésigny
-<option>Lésigny (Seine-et-Marne)
-<option>Létricourt
 <option>Lhor
 <option>Liban
 <option>Libaville
@@ -4181,14 +4102,9 @@
 <option>Lieser
 <option>Liessdorf, pays de Trèves
 <option>Liessies
-<option>Liège
-<option>Liège, Belgique
-<option>Lièvremont
-<option>Liéhon
-<option>Liévin
-<option>Lignéville
 <option>Lignières-la-Doucelle
 <option>Ligny-en-Barrois
+<option>Lignéville
 <option>Ligsdorf
 <option>Lille
 <option>Lille (camp près de), Flandre
@@ -4206,8 +4122,8 @@
 <option>Lindre-Haute
 <option>Lindscheid
 <option>Lindscheid – Tholey
-<option>Lingé
 <option>Lingolsheim
+<option>Lingé
 <option>Linkebeek
 <option>Linsdorf
 <option>Linstroff – Grostenquin
@@ -4220,7 +4136,7 @@
 <option>Lipsheim
 <option>Lisbonne
 <option>Lisdorf
-<option>Lisdorf ?
+<option>Lisdorf ?
 <option>Lisguen – Pleyben
 <option>Lishouarn – Saint-Frégant
 <option>Lisieux
@@ -4232,17 +4148,22 @@
 <option>Liverdun
 <option>Livry-Gargan
 <option>Lixheim
-<option>Lixières
-<option>Lixières (église)
 <option>Lixing
 <option>Lixing-lès-Rouhling
 <option>Lixing-lès-Saint-Avold
+<option>Lixières
+<option>Lixières (église)
 <option>Lixy
 <option>Lizeray
 <option>Lizouarn – Guissény
 <option>Lizouarn – Saint-Frégant
 <option>Lizouré – Guissény
 <option>Lizy-sur-Ourcq
+<option>Liège
+<option>Liège, Belgique
+<option>Lièvremont
+<option>Liéhon
+<option>Liévin
 <option>Llíber, Alicante, Espagne
 <option>Lobsann
 <option>Lochwiller
@@ -4285,8 +4206,8 @@
 <option>Lons-le-Saunier
 <option>Lons-le-Saunier, Jura
 <option>Loos-en-Gohelle
-<option>Lopérec
 <option>Lopigneux – Arrancy-sur-Crusne
+<option>Lopérec
 <option>Loqueffret
 <option>Lorentzen
 <option>Lorgies
@@ -4307,7 +4228,6 @@
 <option>Los Molinos, Espagne
 <option>Losheim am See
 <option>Lostroff
-<option>Loßburg, Allemagne
 <option>Lotzen – Klipphausen
 <option>Louannec
 <option>Louargat
@@ -4335,18 +4255,16 @@
 <option>Louvroil
 <option>Loverval
 <option>Loyat
-<option>Lódz
-<option>Lódz, Pologne
-<option>Lubécourt
+<option>Loßburg, Allemagne
 <option>Lubine
 <option>Lubljana
 <option>Lubumbashi
+<option>Lubécourt
 <option>Lucerne, Suisse
 <option>Lucey
 <option>Lucey (Meurthe-et-Moselle)
 <option>Lucy
 <option>Lucy – Chicourt
-<option>Luçon
 <option>Ludenberg
 <option>Ludweiller, Sarre, Allemagne
 <option>Ludwigshafen am Rhein, Rheinland-Pflaz, Deutschland
@@ -4377,7 +4295,7 @@
 <option>Luxembourg-Ville
 <option>Luze
 <option>Luzy
-<option>Lübeck
+<option>Luçon
 <option>Lyaud
 <option>Lyaud-Armoy
 <option>Lyon
@@ -4390,6 +4308,19 @@
 <option>Lyon 7e
 <option>Lyon 8e
 <option>Lyriller – Saint-Loup-sur-Semouse
+<option>Léguevin
+<option>Légéville-et-Bonfays
+<option>Léning
+<option>Lénoncourt
+<option>Lénvegies 02
+<option>Léogâne, Haïti
+<option>Léovillé
+<option>Lésigny
+<option>Lésigny (Seine-et-Marne)
+<option>Létricourt
+<option>Lódz
+<option>Lódz, Pologne
+<option>Lübeck
 <option>L’Aolosq – Ploudalmézeau
 <option>L’Arbre Sec – Courcy-aux-Loges
 <option>L’Aubépin
@@ -4403,8 +4334,6 @@
 <option>L’Isle-Jourdain (Gers)
 <option>L’Isle-d’Espagnac
 <option>L’oiseau – Sainte-Thérence
-<option>Łączki Brzeskie, Łączki Brzeskie, Kraków, Poland
-<option>Łuszczanów, Pologne
 <option>Machelen
 <option>Machemont
 <option>Macheren
@@ -4453,7 +4382,6 @@
 <option>Maizières-lès-Metz
 <option>Maizières-lès-Vic
 <option>Maizières-sur-Issoire
-<option>Maîche
 <option>Majunga, Madagascar
 <option>Malaincourt
 <option>Malancourt
@@ -4484,14 +4412,13 @@
 <option>Mandres-aux-Quatre-Tours
 <option>Mandres-sur-Vair
 <option>Mandrevillars
-<option>Manéhouville
 <option>Mangonville – Roville-devant-Bayon
 <option>Manhoué
 <option>Manigod
 <option>Mannebach, Allemagne
 <option>Mannheim
 <option>Mannheim-Neckarau
-<option>Mannheim-Neckarau (St. Jakobus)
+<option>Mannheim-Neckarau (St. Jakobus)
 <option>Manom
 <option>Manoncourt-en-Woëvre
 <option>Manoncourt-sur-Seille
@@ -4503,6 +4430,7 @@
 <option>Mantes-sur-Seine – Mantes-la-Jolie
 <option>Many
 <option>Many (Moselle)
+<option>Manéhouville
 <option>Marac
 <option>Marainviller
 <option>Marais – Annœullin
@@ -4517,7 +4445,6 @@
 <option>Marbourg
 <option>Marcelcave
 <option>Marcellaz
-<option>Marcé
 <option>Marchal
 <option>Marchal – Champs-sur-Tarentaine-Marchal
 <option>Marche-les-Dames
@@ -4532,6 +4459,7 @@
 <option>Marck
 <option>Marckolsheim
 <option>Marco, Collier, Florida
+<option>Marcé
 <option>Mardigny
 <option>Mardigny – Lorry-Mardigny
 <option>Mareilles
@@ -4548,9 +4476,9 @@
 <option>Marienwerder
 <option>Marieulles
 <option>Marieulles Vezon
-<option>Marigné-Peuton
 <option>Marignier
 <option>Marigny (Manche)
+<option>Marigné-Peuton
 <option>Marillac – Marillac-le-Franc
 <option>Marimont
 <option>Marimont-lès-Bénestroff
@@ -4622,16 +4550,16 @@
 <option>Mauthausen-Gusen (KZ)
 <option>Mauvilly
 <option>Mauzac (Haute-Garonne)
-<option>Maxéville
 <option>Maxilly-sur-Léman
 <option>Maxilly-sur-Saône
 <option>Maxstadt
+<option>Maxéville
 <option>Mayence
 <option>Mayo, Connacht, Irlande
 <option>Mazarrón, Murcie, Espagne
 <option>Mazayes
 <option>Mazerier
-<option>Mâcon
+<option>Maîche
 <option>Meauwataka, Colfax Township, Wexford County, Michigan
 <option>Meaux
 <option>Meaux (Saint-Étienne)
@@ -4698,9 +4626,9 @@
 <option>Mettlach
 <option>Mettnich – Primstal
 <option>Metz
-<option>Metz (Célestins)
 <option>Metz (Chambières)
 <option>Metz (Cordeliers)
+<option>Metz (Célestins)
 <option>Metz (Frères Prêcheurs)
 <option>Metz (Jacobin)
 <option>Metz (Petit-Clairvaux)
@@ -4709,9 +4637,6 @@
 <option>Metz (Saint-Clément)
 <option>Metz (Saint-Eucaire 2)
 <option>Metz (Saint-Eucaire)
-<option>Metz (Saint-Étienne)
-<option>Metz (Saint-Étienne, notaire)
-<option>Metz (Saint-Étienne-le-Dépenné)
 <option>Metz (Saint-Ferroy)
 <option>Metz (Saint-Ferroy, notaire)
 <option>Metz (Saint-Gengoulf)
@@ -4743,6 +4668,9 @@
 <option>Metz (Saint-Victor 2)
 <option>Metz (Saint-Victor)
 <option>Metz (Saint-Vincent)
+<option>Metz (Saint-Étienne)
+<option>Metz (Saint-Étienne, notaire)
+<option>Metz (Saint-Étienne-le-Dépenné)
 <option>Metz (Sainte-Croix)
 <option>Metz (Sainte-Croix, notaire)
 <option>Metz (Sainte-Ségolène)
@@ -4777,44 +4705,11 @@
 <option>Meyerheim
 <option>Meyrargues
 <option>Meysembourg
-<option>Mègeve
-<option>Méchy
-<option>Méchy – Sanry-lès-Vigy
-<option>Mécleuves
-<option>Mécleuves Champel
-<option>Mécleuves – Frontigny
-<option>Mécleuves, Orny
-<option>Mécrin
-<option>Médonville
-<option>Mégance
-<option>Mégange
-<option>Mégange – Rurange-lès-Mégange
-<option>Mélicocq
-<option>Mélin
-<option>Mélin, Belgique
-<option>Mélin, Brabant Wallon, Belgique
-<option>Ménigoute
-<option>Ménil-en-Xaintois
-<option>Ménil-la-Horgne
-<option>Ménil-sur-Belvitte
-<option>Ménil-sur-Vair – Balléville
-<option>Mérac
-<option>Méry
-<option>Métairies-Saint-Quirin
-<option>Métrich
-<option>Métrich – Koenigsmacker
-<option>Méy
-<option>Mézières
-<option>Mézières-en-Brenne
-<option>Mézières-sur-Issoire
-<option>Mézières-sur-Oise
-<option>Mézin
 <option>Michelbach – Michelbach-le-Bas
 <option>Miderche
 <option>Mieszków
 <option>Mietesheim
 <option>Mietessheim
-<option>Mièges
 <option>Milan
 <option>Milan, Italy
 <option>Millau
@@ -4823,7 +4718,6 @@
 <option>Millonfosse
 <option>Millstadt Rd., St. Clair, Illinois
 <option>Milwaukee, Wisconsin, ÉUA
-<option>Miłosław
 <option>Minneapolis, Hennepin, MN
 <option>Minorville
 <option>Minversheim
@@ -4839,6 +4733,8 @@
 <option>Mittelwihr
 <option>Mitterseim
 <option>Mittersheim
+<option>Mièges
+<option>Miłosław
 <option>Mohbach
 <option>Mohon – Charleville-Mézières
 <option>Mohrange
@@ -4880,7 +4776,6 @@
 <option>Mondrepuis
 <option>Monforte del Cid, Alicante, Espagne
 <option>Monneren
-<option>Monóvar, Alicante, Espane
 <option>Mons
 <option>Mons (Cordeliers)
 <option>Mons (Saint-Germain)
@@ -4920,13 +4815,13 @@
 <option>Montauville (nécropole du Pétant)
 <option>Montbenoît
 <option>Montbenoît – Montflovin
-<option>Montbéliard
-<option>Montbéliard (Saint-Martin)
-<option>Montbéliard (temple Saint-Martin)
 <option>Montbouton
 <option>Montbrisan
 <option>Montbrison
 <option>Montbronn
+<option>Montbéliard
+<option>Montbéliard (Saint-Martin)
+<option>Montbéliard (temple Saint-Martin)
 <option>Montceau-les-Mines
 <option>Montcenis
 <option>Montdidier
@@ -4936,8 +4831,6 @@
 <option>Montereau-Fault-Yonne
 <option>Montesquieu (Lot-et-Garonne)
 <option>Montey-Flanville
-<option>Montécheroux
-<option>Montélimar
 <option>Montfaucon-en-Velay
 <option>Montfermeil
 <option>Montfermy
@@ -4950,8 +4843,8 @@
 <option>Monthault (Loire-et-Chèr)
 <option>Monthelie
 <option>Monthermé
-<option>Monthélie
 <option>Monthureux-sur-Saône
+<option>Monthélie
 <option>Montignies-sur-Sambre
 <option>Montigny
 <option>Montigny-Lengrain
@@ -4991,12 +4884,15 @@
 <option>Montreuil (Seine-Saint-Denis)
 <option>Montreux-Jeune
 <option>Montreux-Vieux
-<option>Montréal
-<option>Montréal (Yonne)
 <option>Montrouge
 <option>Montrozier
+<option>Montréal
+<option>Montréal (Yonne)
 <option>Montsoult
 <option>Montville – Engenville
+<option>Montécheroux
+<option>Montélimar
+<option>Monóvar, Alicante, Espane
 <option>Morainen, Marienwerder
 <option>Morbach, Pflatz
 <option>Morbecque
@@ -5004,7 +4900,6 @@
 <option>Moret-sur-Loing
 <option>Morey
 <option>Morey – Belleau
-<option>Morée – Saint-Germain-le-Fouilloux
 <option>Morfontaine
 <option>Morhange
 <option>Moriensart
@@ -5014,11 +4909,11 @@
 <option>Morionvilliers
 <option>Moriville
 <option>Moriville Châtel
-<option>Morlaàs
 <option>Morlaix
 <option>Morlange
 <option>Morlange – Bionville-sur-Nied
 <option>Morlange-sur-Nied
+<option>Morlaàs
 <option>Mornac-sur-Seudre
 <option>Mornans
 <option>Morsbach
@@ -5037,6 +4932,7 @@
 <option>Morville-lès-Vic
 <option>Morville-sur-Nied
 <option>Morville-sur-Seille
+<option>Morée – Saint-Germain-le-Fouilloux
 <option>Moselle
 <option>Mosrbronn
 <option>Mostaganem, Algérie
@@ -5112,6 +5008,39 @@
 <option>Mutterholtz
 <option>Muttersholtz
 <option>Mutzig
+<option>Mâcon
+<option>Mègeve
+<option>Méchy
+<option>Méchy – Sanry-lès-Vigy
+<option>Mécleuves
+<option>Mécleuves Champel
+<option>Mécleuves – Frontigny
+<option>Mécleuves, Orny
+<option>Mécrin
+<option>Médonville
+<option>Mégance
+<option>Mégange
+<option>Mégange – Rurange-lès-Mégange
+<option>Mélicocq
+<option>Mélin
+<option>Mélin, Belgique
+<option>Mélin, Brabant Wallon, Belgique
+<option>Ménigoute
+<option>Ménil-en-Xaintois
+<option>Ménil-la-Horgne
+<option>Ménil-sur-Belvitte
+<option>Ménil-sur-Vair – Balléville
+<option>Mérac
+<option>Méry
+<option>Métairies-Saint-Quirin
+<option>Métrich
+<option>Métrich – Koenigsmacker
+<option>Méy
+<option>Mézin
+<option>Mézières
+<option>Mézières-en-Brenne
+<option>Mézières-sur-Issoire
+<option>Mézières-sur-Oise
 <option>Mühlhausen
 <option>Münchingen – Wutach
 <option>Münsbach
@@ -5121,12 +5050,12 @@
 <option>Nain – Cléron
 <option>Naix-aux-Forges
 <option>Nalbach
-<option>Namèche – Marche-les-Dames
-<option>Namêche
 <option>Namien, Luxembourg
 <option>Namur
 <option>Namur (Saint-Jean-L’Évangeliste)
 <option>Namur (Saint-Michel)
+<option>Namèche – Marche-les-Dames
+<option>Namêche
 <option>Nances
 <option>Nancy
 <option>Nancy (Notre-Dame)
@@ -5138,14 +5067,14 @@
 <option>Nancy (Saint-Roch)
 <option>Nancy (Saint-Sébastien)
 <option>Nancy (hospices)
-<option>Nancy ?
+<option>Nancy ?
 <option>Nangis
 <option>Nans-sous-Sainte-Anne
 <option>Nanterre
 <option>Nantes
 <option>Narbefontaine
-<option>Narbéfontaine
 <option>Narbonne
+<option>Narbéfontaine
 <option>Nargis
 <option>Nassen
 <option>Neckarsulm – Stuttgart
@@ -5200,10 +5129,6 @@
 <option>New York, États-Unis
 <option>Newport, Campbell, KY
 <option>Nexon
-<option>Nébing
-<option>Nébing – Bourgaltroff
-<option>Nérac
-<option>Néry
 <option>Nice
 <option>Nice (Sainte-Reparate)
 <option>Nidange
@@ -5248,7 +5173,6 @@
 <option>Nitting
 <option>Nivelle (Nord)
 <option>Nivelles
-<option>Nîmes
 <option>Nogent
 <option>Nogent-le-Roi
 <option>Nogent-sur-Aube
@@ -5259,10 +5183,10 @@
 <option>Noisy-le-Grand
 <option>Noisy-le-Sec
 <option>Nomeny
-<option>Nomény
 <option>Nommay
 <option>Nommern
 <option>Nommern – Schrondweiler
+<option>Nomény
 <option>Nonsard
 <option>Nontron
 <option>Noordpeene
@@ -5287,11 +5211,11 @@
 <option>Nousseviller-lès-Saint-Nabor
 <option>Novalaise
 <option>Novare, Italie
+<option>Noviant-aux-Près
+<option>Noviant-aux-Prés
 <option>Novéant – Novéant-sur-Moselle
 <option>Novéant-aux-Prés
 <option>Novéant-sur-Moselle
-<option>Noviant-aux-Près
-<option>Noviant-aux-Prés
 <option>Nowe Podlesie, Kretków, Pologne
 <option>Nowy Port
 <option>Noyelles-sous-Lens
@@ -5302,8 +5226,13 @@
 <option>Nuit-Saint-Georges
 <option>Nuits-Saint-Georges
 <option>Nunkirchen, Sarre, Allemagne
-<option>Nünschweiler
 <option>Nyon
+<option>Nébing
+<option>Nébing – Bourgaltroff
+<option>Nérac
+<option>Néry
+<option>Nîmes
+<option>Nünschweiler
 <option>Obenheim
 <option>Oberbronn
 <option>Oberbruck
@@ -5340,7 +5269,7 @@
 <option>Obersteinbach
 <option>Oberstinzel
 <option>Obervisse
-<option>Oberwarken ?
+<option>Oberwarken ?
 <option>Oberwesel, Rhénanie-Palatinat, Allemagne
 <option>Oberwil im Simmental
 <option>Oberwil im Simmental, Bern, Suisse
@@ -5418,9 +5347,9 @@
 <option>Orcinas
 <option>Ordorf – Dudeldorf
 <option>Oriocourt
+<option>Orly
 <option>Orléan
 <option>Orléans
-<option>Orly
 <option>Ormelle, Italie
 <option>Ormersviller
 <option>Ormersvillers
@@ -5469,10 +5398,6 @@
 <option>Oyrières
 <option>Ozerailles
 <option>Ozouer-le-Voulgis
-<option>Östefärnebo, Sandviken, Gävleborg, Suède
-<option>Œting
-<option>Œtringen
-<option>Œutrange
 <option>Padoux
 <option>Pagney
 <option>Pagney-derrière-Barine
@@ -5496,7 +5421,6 @@
 <option>Pannes (Meurthe-et-Moselle)
 <option>Pannessières
 <option>Pantin
-<option>Parçay-les-Pins
 <option>Pareid
 <option>Parey-Saint-Ouen – Saint-Ouen-lès-Parey
 <option>Parfondrupt
@@ -5509,7 +5433,6 @@
 <option>Paris (Saint-Antoine)
 <option>Paris (Saint-Bernard)
 <option>Paris (Saint-Eustache)
-<option>Paris (Saint-Étienne-au-Mont)
 <option>Paris (Saint-Germain)
 <option>Paris (Saint-Germain-dès-Près)
 <option>Paris (Saint-Laurent)
@@ -5520,9 +5443,10 @@
 <option>Paris (Saint-Roch)
 <option>Paris (Saint-Sulpice)
 <option>Paris (Saint-Victor)
+<option>Paris (Saint-Étienne-au-Mont)
 <option>Paris (Sainte-Marguerite)
 <option>Paris (hospice)
-<option>Paris (région parisienne ?)
+<option>Paris (région parisienne ?)
 <option>Paris 10e
 <option>Paris 11e
 <option>Paris 13e
@@ -5573,6 +5497,7 @@
 <option>Parux
 <option>Parvillers
 <option>Parvillers-le-Quesnoy
+<option>Parçay-les-Pins
 <option>Pas-en-Artois
 <option>Pas-en-artois
 <option>Passau, Bavière, Allemagne
@@ -5608,10 +5533,10 @@
 <option>Petit Landau
 <option>Petit-Ebersviller
 <option>Petit-Enghien
-<option>Petit-Ébersviller
 <option>Petit-Réderching
 <option>Petit-Tenquin
 <option>Petit-Tenquin – Hellimer
+<option>Petit-Ébersviller
 <option>Petite Bibiche
 <option>Petite-Chaux
 <option>Petite-Hettange
@@ -5624,15 +5549,6 @@
 <option>Peypin-d’Aigues
 <option>Peyrolles-en-Provence
 <option>Peyssies
-<option>Pécs
-<option>Pédernec
-<option>Pékin
-<option>Périgeux
-<option>Périgueux
-<option>Périssac
-<option>Péroy-les-Gombries
-<option>Pétange
-<option>Pétange – Esch-sur-Alzette
 <option>Pfaffenhoffen
 <option>Pfaffenthal
 <option>Pfastatt
@@ -5648,7 +5564,7 @@
 <option>Piblange (Saint-Bernard)
 <option>Piblange – Burtoncourt
 <option>Piblange, Boulay-Moselle
-<option>Piblange ?
+<option>Piblange ?
 <option>Picardie
 <option>Picherande
 <option>Pidhaïtsi, Pologne
@@ -5690,16 +5606,8 @@
 <option>Pleumeur-Bodou
 <option>Pleurtuit
 <option>Pleyben
-<option>Plédéliac
-<option>Pléhédel
-<option>Plélauff
-<option>Plélo
-<option>Pléneuf-Val-André
-<option>Plévin
 <option>Ploemeur
 <option>Ploermel
-<option>Ploërmel
-<option>Ploëzal
 <option>Plombières
 <option>Plombières-lès-Dijon
 <option>Plomodiern
@@ -5709,15 +5617,12 @@
 <option>Ploudalmézeau
 <option>Ploudalmézeau?
 <option>Plouescat
-<option>Plouénan
-<option>Plouënan
-<option>Plouëzec
 <option>Plougoulm
 <option>Plouguer – Carhaix-Plouguer
 <option>Plouguerneau
 <option>Plouguernével
 <option>Plouguin
-<option>Plouguin ?
+<option>Plouguin ?
 <option>Plouha
 <option>Plouider
 <option>Ploumilliau
@@ -5733,8 +5638,19 @@
 <option>Plouvorn
 <option>Plouzané
 <option>Plouzélambre
+<option>Plouénan
+<option>Plouënan
+<option>Plouëzec
+<option>Ploërmel
+<option>Ploëzal
 <option>Plufur
 <option>Pluguffan
+<option>Plédéliac
+<option>Pléhédel
+<option>Plélauff
+<option>Plélo
+<option>Pléneuf-Val-André
+<option>Plévin
 <option>Podlesie nova, Kretków, Pologne
 <option>Poeuilly
 <option>Poinson-lès-Nogent
@@ -5759,24 +5675,24 @@
 <option>Pomponne
 <option>Pondichéry
 <option>Pondichéry, établissements français de l’Inde, Inde
-<option>Pont-À-Mousson (Saint-Martin)
 <option>Pont-Saint-Esprit
 <option>Pont-Saint-Marie
 <option>Pont-Saint-Pierre
 <option>Pont-Saint-Vincent
 <option>Pont-Sainte-Marie
 <option>Pont-Sainte-Maxence
-<option>Pont-à-Celles
-<option>Pont-à-Chaussy – Courcelles-Chaussy
-<option>Pont-à-Mousson
-<option>Pont-à-Mousson (Saint-Laurent)
-<option>Pont-à-Vendin
 <option>Pont-de-Montvert
 <option>Pont-de-Roide
 <option>Pont-du-Bois – Vauvillers
 <option>Pont-la-Ville (Haute-Marne)
 <option>Pont-sur-Madon
 <option>Pont-sur-Seine
+<option>Pont-À-Mousson (Saint-Martin)
+<option>Pont-à-Celles
+<option>Pont-à-Chaussy – Courcelles-Chaussy
+<option>Pont-à-Mousson
+<option>Pont-à-Mousson (Saint-Laurent)
+<option>Pont-à-Vendin
 <option>Pontailler-sur-Saône
 <option>Pontarlier
 <option>Pontarlier (temple)
@@ -5785,9 +5701,9 @@
 <option>Pontfavergre-Moronvilliers
 <option>Ponthierry
 <option>Pontierre
-<option>Pontigné
 <option>Pontigny
 <option>Pontigny – Condé-Northen
+<option>Pontigné
 <option>Pontivy
 <option>Pontoise
 <option>Pontoy
@@ -5799,8 +5715,8 @@
 <option>Porcellette
 <option>Pornic
 <option>Porrentruy
-<option>Port-Bouët, Côte d’Ivoire
 <option>Port-Bourbon, Île Maurice
+<option>Port-Bouët, Côte d’Ivoire
 <option>Port-Brillet
 <option>Port-Louis (Saint-Louis), Île Maurice
 <option>Port-Louis, Île Maurice
@@ -5820,10 +5736,10 @@
 <option>Postsroff
 <option>Pouancé, Maine-et-Loire
 <option>Pouilley-les-Vignes
-<option>Pouillé (Vendée)
 <option>Pouilloux
 <option>Pouilly
 <option>Pouilly (Moselle)
+<option>Pouillé (Vendée)
 <option>Pourcieux
 <option>Pourivo
 <option>Pournoy
@@ -5847,11 +5763,6 @@
 <option>Pressoir-Prompt
 <option>Preux-au-Bois
 <option>Prezcław
-<option>Préaux
-<option>Précy-sur-Oise
-<option>Préfontaines
-<option>Présentevillers
-<option>Prévocourt
 <option>Primskaya, URSS
 <option>Primsweiler
 <option>Primsweiller
@@ -5872,6 +5783,11 @@
 <option>Przecław, powiat de Mielec, Pologne
 <option>Przecław, powiat de Mielecki, Pologne
 <option>Przemęt
+<option>Préaux
+<option>Précy-sur-Oise
+<option>Préfontaines
+<option>Présentevillers
+<option>Prévocourt
 <option>Puberg
 <option>Puche – Ogy (Moselle)
 <option>Puche – Saint-Agnan – Ogy (Moselle)
@@ -5898,6 +5814,15 @@
 <option>Puyrredon, Argentine
 <option>Puzieux
 <option>Puzieux (Vosges)
+<option>Pécs
+<option>Pédernec
+<option>Pékin
+<option>Périgeux
+<option>Périgueux
+<option>Périssac
+<option>Péroy-les-Gombries
+<option>Pétange
+<option>Pétange – Esch-sur-Alzette
 <option>Pütscheid – Gralingen
 <option>Püttlingen
 <option>Quatzenheim
@@ -5905,11 +5830,6 @@
 <option>Quessoy
 <option>Quetzenheim
 <option>Queuleu – Metz
-<option>Quéant
-<option>Québriac
-<option>Quétigny
-<option>Quévy
-<option>Quévy-le-Petit
 <option>Quierzy
 <option>Quimerch
 <option>Quimper
@@ -5919,14 +5839,19 @@
 <option>Quintenas
 <option>Quirnbach/Pfalz
 <option>Quito
+<option>Quéant
+<option>Québriac
+<option>Quétigny
+<option>Quévy
+<option>Quévy-le-Petit
 <option>Ra
 <option>Rabas – Vigy
 <option>Rabastens
 <option>Rabat, Maroc
 <option>Rabiemont
-<option>Racécourt
 <option>Racrange
 <option>Raczyn
+<option>Racécourt
 <option>Radmozanci, Yougoslavie
 <option>Radon (Orne)
 <option>Radon (Ornes)
@@ -5949,9 +5874,9 @@
 <option>Rance – Sivry-Rance
 <option>Rancourt
 <option>Rangeval
+<option>Ranguevaux
 <option>Rangéval
 <option>Rangéval – Jouy-sous-les-Côtes
-<option>Ranguevaux
 <option>Ranrupt
 <option>Ransart – Charleroi
 <option>Ranspach
@@ -5969,7 +5894,6 @@
 <option>Raves (Vosges)
 <option>Raville
 <option>Ravin Raz el Aïn – Oran
-<option>Râmnicu Vâlcea, Roumanie
 <option>Rebecq
 <option>Recanati, Macerata, Italie
 <option>Recey-sur-Ource
@@ -5983,10 +5907,10 @@
 <option>Reding
 <option>Redlach – Tritteling
 <option>Regney
-<option>Regnévelle
 <option>Regniéville – Thiaucourt-Regniéville
 <option>Regniéville – Thiaucourt-Régniéville
 <option>Regny
+<option>Regnévelle
 <option>Reguisheim
 <option>Rehaincourt
 <option>Rehaupal
@@ -6045,28 +5969,6 @@
 <option>Reyersviller
 <option>Reyvroz
 <option>Rezonville
-<option>Réchicourt-la-Petite
-<option>Réchicourt-le-Château
-<option>Rédange
-<option>Rédange (Moselle)
-<option>Rédange Att
-<option>Rédlack Tritteling
-<option>Régné
-<option>Régnierville
-<option>Réherrey
-<option>Rémelange
-<option>Rémelfang
-<option>Rémeling
-<option>Rémering
-<option>Rémering-lès-Hargarten
-<option>Rémering-lès-Hargaten
-<option>Rémering-lès-Puttelange
-<option>Réméréville
-<option>Rémilly
-<option>Rémilly (Moselle)
-<option>Réning
-<option>République dominicaine
-<option>Réty
 <option>Rgb. – Pflugscheid
 <option>Rheineck, Allemagne
 <option>Rheinfelden (Argovie)
@@ -6151,9 +6053,9 @@
 <option>Roeselare
 <option>Roesnen
 <option>Rogaszyce, Żerków, Pologne
-<option>Rogéville
 <option>Roggenhouse
 <option>Rognes
+<option>Rogéville
 <option>Rohr
 <option>Rohrbach
 <option>Rohrbach (Heidelberg)
@@ -6226,7 +6128,6 @@
 <option>Rouen
 <option>Rouen (Saint-Maclou)
 <option>Rouen (Saint-Pierre-l’Honoré)
-<option>Rouécourt
 <option>Rouffach
 <option>Rougemont
 <option>Rouhe
@@ -6243,20 +6144,19 @@
 <option>Rouvres-en-Xaintois
 <option>Rouvroy-en-Santerre
 <option>Rouziers-de-Touraine
+<option>Rouécourt
 <option>Rovereto Borgo, Tyrol
 <option>Roville-devant-Bayon
 <option>Roy-Boissy
 <option>Royan
 <option>Royat
 <option>Rozelieures
+<option>Rozières – Sommevoire
+<option>Rozières-en-Haye
 <option>Rozélieures
 <option>Rozérieules
 <option>Rozérieulles
 <option>Rozérieulles-Gorze
-<option>Rozières – Sommevoire
-<option>Rozières-en-Haye
-<option>Rödersheim, Allemagne
-<option>Rœschwoog
 <option>Rubenheim
 <option>Rubenheim, Sarre, Allemagne
 <option>Ruckenbach, canton de Lucerne, Suisse
@@ -6288,10 +6188,35 @@
 <option>Russange (Moselle)
 <option>Russange Redange
 <option>Russie
-<option>Rußhütte
-<option>Rußhütte – Malstatt
 <option>Rutesheim, Wurtemberg, Allemagne
 <option>Ruvo di Puglia
+<option>Rußhütte
+<option>Rußhütte – Malstatt
+<option>Râmnicu Vâlcea, Roumanie
+<option>Réchicourt-la-Petite
+<option>Réchicourt-le-Château
+<option>Rédange
+<option>Rédange (Moselle)
+<option>Rédange Att
+<option>Rédlack Tritteling
+<option>Régnierville
+<option>Régné
+<option>Réherrey
+<option>Rémelange
+<option>Rémelfang
+<option>Rémeling
+<option>Rémering
+<option>Rémering-lès-Hargarten
+<option>Rémering-lès-Hargaten
+<option>Rémering-lès-Puttelange
+<option>Rémilly
+<option>Rémilly (Moselle)
+<option>Réméréville
+<option>Réning
+<option>République dominicaine
+<option>Réty
+<option>Rödersheim, Allemagne
+<option>Rœschwoog
 <option>S. Agata
 <option>Saarbrücken
 <option>Saarlouis
@@ -6299,8 +6224,8 @@
 <option>Saarwellingen
 <option>Saarwellingen, Allemagne
 <option>Saasenheim
-<option>Sablé-sur-Sarthe
 <option>Sablon – Metz
+<option>Sablé-sur-Sarthe
 <option>Sabré – Coin-lès-Cuvry
 <option>Sacred Heart Cemetery, Iowa
 <option>Sadek, powiat Limanowski, Pologne
@@ -6370,7 +6295,6 @@
 <option>Saint-Bernard – Aboncourt (Moselle)
 <option>Saint-Bernard – Bouzonville
 <option>Saint-Bernard – Piblange
-<option>Saint-Bérain-sur-Dheune
 <option>Saint-Boingt
 <option>Saint-Bonnet-de-Chavagne
 <option>Saint-Bonnet-de-Chavagne, Isère
@@ -6379,8 +6303,8 @@
 <option>Saint-Brice-sous-Forêt
 <option>Saint-Brieuc
 <option>Saint-Brieuc--des-Iffs
+<option>Saint-Bérain-sur-Dheune
 <option>Saint-Cernin
-<option>Saint-Césaire (Charente-Maritime)
 <option>Saint-Chamond de Provence (Saint-Laurent)
 <option>Saint-Chély-d’Apcher
 <option>Saint-Ciergues
@@ -6395,16 +6319,17 @@
 <option>Saint-Cyr-L’École
 <option>Saint-Cyr-sur-Loire
 <option>Saint-Cyr-sur-Morin
+<option>Saint-Césaire (Charente-Maritime)
 <option>Saint-Denis
 <option>Saint-Denis, Réunion
 <option>Saint-Denis-du-Chevain – Le Chevain
 <option>Saint-Denis-du-Port
 <option>Saint-Didier, Jura
-<option>Saint-Dié
-<option>Saint-Dié (Vosges)
 <option>Saint-Divy
 <option>Saint-Dizier
 <option>Saint-Dizier-en-Diois
+<option>Saint-Dié
+<option>Saint-Dié (Vosges)
 <option>Saint-Donat
 <option>Saint-Donat (Puy-de-Dôme)
 <option>Saint-Doulchard
@@ -6414,14 +6339,6 @@
 <option>Saint-Epvre
 <option>Saint-Etienne-de-Coise (La Viallière)
 <option>Saint-Eugène – Bologhine
-<option>Saint-Éloy-les-Mines
-<option>Saint-Émiland
-<option>Saint-Étienne
-<option>Saint-Étienne-de-Chomeil
-<option>Saint-Étienne-de-Fursac
-<option>Saint-Félicien (Ardèche)
-<option>Saint-Félix-de-Lunel
-<option>Saint-Félix-de-Lunet
 <option>Saint-Fiacre
 <option>Saint-Firmin
 <option>Saint-Firmin (Saône-et-Loire)
@@ -6431,18 +6348,21 @@
 <option>Saint-François
 <option>Saint-François – Monneren
 <option>Saint-François – Saint-François-Lacroix
+<option>Saint-Front-sur-Lemance
 <option>Saint-Frégant
 <option>Saint-Frégant (bourg)
-<option>Saint-Front-sur-Lemance
+<option>Saint-Félicien (Ardèche)
+<option>Saint-Félix-de-Lunel
+<option>Saint-Félix-de-Lunet
 <option>Saint-Galmier
 <option>Saint-Gardoul
 <option>Saint-Gaudens
 <option>Saint-Gelais
 <option>Saint-Genest
 <option>Saint-Genest-Malifaux
+<option>Saint-Geniez-des-Ers, Verières
 <option>Saint-Genès-Champespe
 <option>Saint-Genès-la-Tourette
-<option>Saint-Geniez-des-Ers, Verières
 <option>Saint-Georges
 <option>Saint-Georges-de-Pointindoux
 <option>Saint-Georges-du-Bois
@@ -6464,7 +6384,6 @@
 <option>Saint-Gratien
 <option>Saint-Grégoire (Ille-et-Vilaine)
 <option>Saint-Guilhem-le-Désert
-<option>Saint-Hélène
 <option>Saint-Hilaine-en-Woëvre
 <option>Saint-Hilaire (Isère)
 <option>Saint-Hilaire-Montgru
@@ -6481,6 +6400,7 @@
 <option>Saint-Hubert – Villers-Bettnach
 <option>Saint-Hubret
 <option>Saint-Hyppolite-le-Graveyron
+<option>Saint-Hélène
 <option>Saint-Igny-de-Vers
 <option>Saint-Ingbert
 <option>Saint-Ingbert, Sarre, Allemagne
@@ -6529,10 +6449,6 @@
 <option>Saint-Leger, Belgique
 <option>Saint-Leu, Réunion
 <option>Saint-Leu-d’Esserent
-<option>Saint-Léger-du-Gennetey
-<option>Saint-Léon
-<option>Saint-Léonard – Bœrsch
-<option>Saint-Léonard-de-Noblat
 <option>Saint-Liguaire
 <option>Saint-Lizier
 <option>Saint-Louis
@@ -6541,6 +6457,10 @@
 <option>Saint-Louis-lès-Bitche
 <option>Saint-Lucien
 <option>Saint-Lupicin
+<option>Saint-Léger-du-Gennetey
+<option>Saint-Léon
+<option>Saint-Léonard – Bœrsch
+<option>Saint-Léonard-de-Noblat
 <option>Saint-Maixent
 <option>Saint-Maixent-L’École
 <option>Saint-Malo
@@ -6586,19 +6506,13 @@
 <option>Saint-Maure-des-Fosses
 <option>Saint-Maurice
 <option>Saint-Maurice (Doubs)
-<option>Saint-Maurice-Échelotte – Colombier-Châtelot
 <option>Saint-Maurice-lès-Couches
 <option>Saint-Maurice-sous-les-Côtes
 <option>Saint-Maurice-sur-Mortagne
+<option>Saint-Maurice-Échelotte – Colombier-Châtelot
 <option>Saint-Max (Meurthe-et-Moselle)
 <option>Saint-Menge
 <option>Saint-Mesmes
-<option>Saint-Médard
-<option>Saint-Médard (Moselle)
-<option>Saint-Médard-de-Mussidan
-<option>Saint-Méen
-<option>Saint-Mélaine – Morlaix
-<option>Saint-Ménéhould
 <option>Saint-Micaud
 <option>Saint-Michel – Castelnau-Durban
 <option>Saint-Michel – Hurtigheim
@@ -6609,6 +6523,12 @@
 <option>Saint-Mihiel
 <option>Saint-Momelin
 <option>Saint-Mont – Saint-Amé
+<option>Saint-Médard
+<option>Saint-Médard (Moselle)
+<option>Saint-Médard-de-Mussidan
+<option>Saint-Méen
+<option>Saint-Mélaine – Morlaix
+<option>Saint-Ménéhould
 <option>Saint-Nabor
 <option>Saint-Nabor (Bas-Rhin)
 <option>Saint-Nicolas - Ath
@@ -6630,12 +6550,11 @@
 <option>Saint-Paul (Vosges)
 <option>Saint-Paul, Réunion
 <option>Saint-Paul-en-Chablais
-<option>Saint-Pétersbourg (Russie)
 <option>Saint-Pierre (Bas-Rhin)
 <option>Saint-Pierre – Libramont-Chevigny, Belgique
 <option>Saint-Pierre – Saumur
-<option>Saint-Pierre, États-Unis d’Amérique
 <option>Saint-Pierre, Réunion
+<option>Saint-Pierre, États-Unis d’Amérique
 <option>Saint-Pierre-Brouck
 <option>Saint-Pierre-Capelle – Hérinnes-lez-Enghien
 <option>Saint-Pierre-Quiberon
@@ -6652,7 +6571,6 @@
 <option>Saint-Pol-de-Léon
 <option>Saint-Porchaire
 <option>Saint-Potan
-<option>Saint-Pôtan
 <option>Saint-Priest-Sous-Aixe
 <option>Saint-Priest-en-Jarez
 <option>Saint-Priest-le-Roche
@@ -6660,6 +6578,8 @@
 <option>Saint-Privat – Montigny-lès-Metz
 <option>Saint-Privat-la-Montagne
 <option>Saint-Projet – Cassaniouze
+<option>Saint-Pétersbourg (Russie)
+<option>Saint-Pôtan
 <option>Saint-Quay
 <option>Saint-Quay-Portrieux
 <option>Saint-Quentin
@@ -6669,6 +6589,9 @@
 <option>Saint-Raphaël
 <option>Saint-Remimont
 <option>Saint-Remy-Geest
+<option>Saint-Romain-la-Motte
+<option>Saint-Romain-sous-Gourdon
+<option>Saint-Romay - Lauwil, Suisse
 <option>Saint-Rémy
 <option>Saint-Rémy (Châlon-sur-Marne)
 <option>Saint-Rémy (Moselle)
@@ -6676,9 +6599,6 @@
 <option>Saint-Rémy-aux-Bois
 <option>Saint-Rémy-lès-Chevreuse
 <option>Saint-Révérend (Vendée)
-<option>Saint-Romain-la-Motte
-<option>Saint-Romain-sous-Gourdon
-<option>Saint-Romay - Lauwil, Suisse
 <option>Saint-Saturnin – Port-d’Envaux
 <option>Saint-Saturnin – Saint-Maixent-L’École
 <option>Saint-Saturnin — Port-d’Envau
@@ -6691,8 +6611,6 @@
 <option>Saint-Servais
 <option>Saint-Servan
 <option>Saint-Servan – Saint-Malo
-<option>Saint-Sébastien-sur-Loire
-<option>Saint-Ségal
 <option>Saint-Siméon
 <option>Saint-Sulpice-le-Dunois
 <option>Saint-Sylvestre-Cappel
@@ -6701,6 +6619,8 @@
 <option>Saint-Symphorien-de-Lay
 <option>Saint-Symphorien-de-Mahun
 <option>Saint-Symphorien-de-Marmagne
+<option>Saint-Sébastien-sur-Loire
+<option>Saint-Ségal
 <option>Saint-Thégonnec
 <option>Saint-Vallerin
 <option>Saint-Vallier
@@ -6714,15 +6634,20 @@
 <option>Saint-Ylie
 <option>Saint-Yrieix
 <option>Saint-Yrieix – Saint-Yrieix-la-Perche
+<option>Saint-Éloy-les-Mines
+<option>Saint-Émiland
+<option>Saint-Étienne
+<option>Saint-Étienne-de-Chomeil
+<option>Saint-Étienne-de-Fursac
 <option>Sainte-Barbe
 <option>Sainte-Barbe (
 <option>Sainte-Barbe (Moselle)
 <option>Sainte-Barbe (Vosges)
 <option>Sainte-Blaise-la-Roche, Saales
-<option>Sainte-Cécile (Vendée)
 <option>Sainte-Croix (Moselle)
 <option>Sainte-Croix-Volvestre
 <option>Sainte-Croix-aux-Mines
+<option>Sainte-Cécile (Vendée)
 <option>Sainte-Flaive-des-Loups
 <option>Sainte-Fontaine
 <option>Sainte-Fontaine – Saint-Avold
@@ -6757,8 +6682,8 @@
 <option>Sainte-Suzanne
 <option>Sainte-Suzanne (Doubs)
 <option>Sainte-Suzanne, Réunion
-<option>Sainte-Thérence
 <option>Sainte-Thorette
+<option>Sainte-Thérence
 <option>Saintes
 <option>Saintes (Charente-Maritime)
 <option>Saintines
@@ -6767,11 +6692,11 @@
 <option>Sala (paroisse de), Italie
 <option>Salenthal
 <option>Salies-du-Salat
-<option>Salière – Saint-Pierre-de-Varennes
 <option>Salindres
 <option>Salins-les-Bains
 <option>Salival – Moyenvic
 <option>Salives
+<option>Salière – Saint-Pierre-de-Varennes
 <option>Sallanches
 <option>Salles - Lugan (Aveyron)
 <option>Salles-Curan
@@ -6884,7 +6809,6 @@
 <option>Schalbach
 <option>Schandel – Useldange
 <option>Schaudweiller, Palatinat
-<option>Schæferhof – Dabo
 <option>Scheiden – Losheim am See
 <option>Scherwiller
 <option>Scheuerwald
@@ -6908,10 +6832,6 @@
 <option>Schoeneck
 <option>Schopperten
 <option>Schorbach
-<option>Schönenberg-Kübelberg
-<option>Schönstedt
-<option>Schönstedt beï Langensalza
-<option>Schönteichen – Rohrbach
 <option>Schrassig
 <option>Schrassig, Luxembourg
 <option>Schrassig?
@@ -6921,9 +6841,6 @@
 <option>Schutteren
 <option>Schuttrange
 <option>Schuttrange, Luxembourg
-<option>Schümberg
-<option>Schüttringen
-<option>Schüttringen, Luxembourg
 <option>Schvarzaulz, Prusse
 <option>Schwalbach (Sarre)
 <option>Schwanau – Ottenheim
@@ -6931,7 +6848,6 @@
 <option>Schwanz
 <option>Schwarzenholz
 <option>Schwarzenholz–Sarrevailingue
-<option>Schwäbisch Gmünd
 <option>Schwebsange
 <option>Schweighausen
 <option>Schweighaussen
@@ -6948,6 +6864,15 @@
 <option>Schwerdorff
 <option>Schweyen
 <option>Schwobsheim
+<option>Schwäbisch Gmünd
+<option>Schæferhof – Dabo
+<option>Schönenberg-Kübelberg
+<option>Schönstedt
+<option>Schönstedt beï Langensalza
+<option>Schönteichen – Rohrbach
+<option>Schümberg
+<option>Schüttringen
+<option>Schüttringen, Luxembourg
 <option>Scy
 <option>Scy – Scy-Chazelles
 <option>Scy-Chazelles
@@ -6963,10 +6888,10 @@
 <option>Seloncourt
 <option>Selva di Progno
 <option>Selvigny – Walincourt-Selvigny
-<option>Semécourt
 <option>Semilly
 <option>Semming – Rodemack
 <option>Sempach
+<option>Semécourt
 <option>Senargent-Mignafans
 <option>Seneffe?
 <option>Senhaja, province de Séfrou, Maroc
@@ -6988,9 +6913,6 @@
 <option>Serbonne
 <option>Serbonnes
 <option>Sercœur
-<option>Serémange
-<option>Serémange – Serémange-Erzange
-<option>Serémange-Erzange
 <option>Sermaise
 <option>Sermaises
 <option>Sermaize-les-Bains
@@ -7005,26 +6927,13 @@
 <option>Servigny – Failly
 <option>Servigny-lès-Raville
 <option>Servigny-lès-Sainte-Barbe
+<option>Serémange
+<option>Serémange – Serémange-Erzange
+<option>Serémange-Erzange
 <option>Sesseslang Ysamar, Allgäu, Tirol, Autriche
 <option>Seuzey
 <option>Sevran
 <option>Seyweiler – Gersheim
-<option>Sèvres
-<option>Sèvres (Hautes-de-Seine)
-<option>Sébazac-Concourès
-<option>Sécheras
-<option>Sécourt
-<option>Sécourt (Moselle)
-<option>Sélange, Luxembourg, Belgique
-<option>Sélestat
-<option>Sémeries
-<option>Sénergues
-<option>Sérémange
-<option>Sérémange-Hertzange
-<option>Séry-Magneval
-<option>Séry-lès-Mézières
-<option>Sétif, Algérie
-<option>Sézanne
 <option>Shangaï (Chine)
 <option>Shanghai
 <option>Shreckling
@@ -7046,7 +6955,6 @@
 <option>Sigonce
 <option>Silbertal, Tyrol
 <option>Silesia, Prusse
-<option>Silésie
 <option>Sillegny
 <option>Silleny
 <option>Silly
@@ -7058,6 +6966,7 @@
 <option>Silvingen, Allemagne
 <option>Silwingen, Merzig, LK Merzig-Wadern, Saarland, Deutschland
 <option>Silwingen, Sarre, Allemagne
+<option>Silésie
 <option>Simonswald, Land Baden-Württemberg, Allemagne
 <option>Sindelsberg
 <option>Singling –  Gros-Réderching
@@ -7116,8 +7025,8 @@
 <option>Soucy (Aisne)
 <option>Souillac
 <option>Souliers – Marsac
-<option>Soulièvres
 <option>Souligné-sous-Vallon
+<option>Soulièvres
 <option>Soultz
 <option>Soultz-Haut-Rhin
 <option>Soultz-sous-Forêts
@@ -7129,7 +7038,6 @@
 <option>Souveraincourt
 <option>Souvigné-sur-Sarthe
 <option>Souzy
-<option>Sœtrich
 <option>Sp. Log 11, Sava
 <option>Sp. Log 18-19
 <option>Sp. log 11
@@ -7196,9 +7104,9 @@
 <option>Strate – Saint-Geours-de-Maremne
 <option>Streißlingen
 <option>Strejou – Saint-Servais
-<option>Strépy-Bracquegnies
 <option>Struth
 <option>Struth (Bas-Rhin)
+<option>Strépy-Bracquegnies
 <option>Stublau
 <option>Stuckange
 <option>Stutzheim-Offenheim
@@ -7223,16 +7131,29 @@
 <option>Syren
 <option>Syren – Weiler-la-Tour
 <option>Szczepocice
-<option>Śmigiel (Posnie)
-<option>Śmigiel, Pologne
-<option>Šmartno
+<option>Sèvres
+<option>Sèvres (Hautes-de-Seine)
+<option>Sébazac-Concourès
+<option>Sécheras
+<option>Sécourt
+<option>Sécourt (Moselle)
+<option>Sélange, Luxembourg, Belgique
+<option>Sélestat
+<option>Sémeries
+<option>Sénergues
+<option>Séry-Magneval
+<option>Séry-lès-Mézières
+<option>Sérémange
+<option>Sérémange-Hertzange
+<option>Sétif, Algérie
+<option>Sézanne
+<option>Sœtrich
 <option>Taben – Taben-Rodt
 <option>Tagolsheim
 <option>Tahure
 <option>Taillebourg
 <option>Taillefontaine
 <option>Taintignies
-<option>Taïwan
 <option>Talange
 <option>Talant
 <option>Talence
@@ -7258,6 +7179,7 @@
 <option>Taugon-la-Ronde
 <option>Taulignan
 <option>Tavaux
+<option>Taïwan
 <option>Tchenak
 <option>Tellancourt
 <option>Tenetiše 1
@@ -7277,27 +7199,18 @@
 <option>Teting – Teting-sur-Nied
 <option>Teting-sur-Nied
 <option>Tettnang
-<option>Téterchen
-<option>Téterchern
-<option>Téting
-<option>Téting-sur-Nied
-<option>Thaïlande
 <option>Thal-Drulingen
 <option>Thal-Marmoutier
 <option>Thann
 <option>Thaon-les-Vosges
 <option>Thaur
+<option>Thaïlande
 <option>Thel
 <option>They-sous-Vaudémont
-<option>Théding
-<option>Thénisy
-<option>Thézey
-<option>Thézey-Saint-Martin
 <option>Thiaucourt
 <option>Thiaucourt – Thiaucourt-Regniéville
 <option>Thiaucourt-Regniéville
 <option>Thicourt
-<option>Thièze - Féternes
 <option>Thignonville
 <option>Thil
 <option>Thimonville
@@ -7308,6 +7221,7 @@
 <option>Thise
 <option>Thivet
 <option>Thizay
+<option>Thièze - Féternes
 <option>Tholet – Gabriac
 <option>Thonon-les-Bains
 <option>Thonon-lès-Bain
@@ -7317,12 +7231,16 @@
 <option>Thorigny
 <option>Thorigny-sur-Marne
 <option>Thouarcé
-<option>Thônes
 <option>Thuin, Hainaut, Belgique
 <option>Thuisy – Val-de-Vesle
 <option>Thumeréville
 <option>Thury – La Maxe
 <option>Thury – Woippy
+<option>Théding
+<option>Thénisy
+<option>Thézey
+<option>Thézey-Saint-Martin
+<option>Thônes
 <option>Tieffenbach
 <option>Tieffenbcah
 <option>Tignécourt
@@ -7389,24 +7307,6 @@
 <option>Tremblay-lès-Gonesse (Tremblay-en-France)
 <option>Tremouille – Marchal
 <option>Treviglio, Italie
-<option>Trèves
-<option>Trèves, Rhénanie-Palatinat, Allemagne
-<option>Trébeurden
-<option>Trégomeur
-<option>Tréguier
-<option>Tréguier (Côtes-d’Armor)
-<option>Tréguirier
-<option>Trélissac
-<option>Trélon
-<option>Trémel
-<option>Trémery
-<option>Trémignon – Combourg
-<option>Trémoins
-<option>Trémont-sur-Saux
-<option>Trémouille
-<option>Trémouille – Marchal
-<option>Tréompan – Ploudalmézeau
-<option>Trépail
 <option>Tri Lễ — Nghệ An
 <option>Tricot
 <option>Triembach-au-Val
@@ -7427,6 +7327,24 @@
 <option>Troyon
 <option>Trulben, Rhénanie-Palatinat, Allemagne
 <option>Trumilly
+<option>Trèves
+<option>Trèves, Rhénanie-Palatinat, Allemagne
+<option>Trébeurden
+<option>Trégomeur
+<option>Tréguier
+<option>Tréguier (Côtes-d’Armor)
+<option>Tréguirier
+<option>Trélissac
+<option>Trélon
+<option>Trémel
+<option>Trémery
+<option>Trémignon – Combourg
+<option>Trémoins
+<option>Trémont-sur-Saux
+<option>Trémouille
+<option>Trémouille – Marchal
+<option>Tréompan – Ploudalmézeau
+<option>Trépail
 <option>Tubize
 <option>Tucquegnieux
 <option>Tudela, Navarra, Espagne
@@ -7444,6 +7362,10 @@
 <option>Tyniec, Pologne
 <option>Tyrol
 <option>Tyrol, Autriche
+<option>Téterchen
+<option>Téterchern
+<option>Téting
+<option>Téting-sur-Nied
 <option>URSS
 <option>Uberach
 <option>Uberherrn
@@ -7478,8 +7400,6 @@
 <option>Uxegney
 <option>Uxem
 <option>Uzès
-<option>Überherrn
-<option>Überherrn, Sarre, Allemagne
 <option>Vacqueville
 <option>Vagney
 <option>Vahl
@@ -7570,12 +7490,12 @@
 <option>Vaucourt
 <option>Vaucremont
 <option>Vaucremont – Bazoncourt
-<option>Vaudémont
 <option>Vaudoncourt – Varize-Vaudoncourt
 <option>Vaudreching
 <option>Vaudrevange
 <option>Vaudreville – Retonfey
 <option>Vaudrivillers
+<option>Vaudémont
 <option>Vaugirard
 <option>Vaugirard – Paris
 <option>Vaugirard – Paris 15e
@@ -7606,10 +7526,10 @@
 <option>Vence
 <option>Vendenheim
 <option>Vendeuil (Aisne)
-<option>Vendée
 <option>Vendin-lès-Béthune
 <option>Vendrennes (Vendées)
 <option>Vendresse
+<option>Vendée
 <option>Venelles
 <option>Venesmes
 <option>Venette
@@ -7626,9 +7546,9 @@
 <option>Vergnies
 <option>Vermandois, Picardy
 <option>Verneuil-sur-Seine
-<option>Vernéville
 <option>Vernon (Eure)
 <option>Verny
+<option>Vernéville
 <option>Verpel
 <option>Verrerie Sophie – Stiring-Wendel
 <option>Verrines – Néry
@@ -7650,12 +7570,6 @@
 <option>Vezelise
 <option>Vezin, Belgique
 <option>Vezon
-<option>Véringe – Féternes
-<option>Véron
-<option>Vérone (province de), Italie
-<option>Véronnes
-<option>Véry
-<option>Vézelise
 <option>Vialars – Trémouille
 <option>Vianden
 <option>Vianne
@@ -7667,8 +7581,8 @@
 <option>Vichy
 <option>Vicq (Haute-Marne)
 <option>Videndorff, Tyrol, Autriche
-<option>Vieille-Église
 <option>Vieille-Verrerie – Forbach
+<option>Vieille-Église
 <option>Vienna
 <option>Viennay
 <option>Vienne
@@ -7684,8 +7598,6 @@
 <option>Vieux-Lixheim
 <option>Vieux-Moulins
 <option>Vieux-Pont
-<option>Viéville-en-Haye
-<option>Viéville-sous-les-Côtes
 <option>Vigneulles
 <option>Vigneulles – Lorry-lès-Metz
 <option>Vigneulles-lès-Hattonchâtel
@@ -7736,7 +7648,6 @@
 <option>Viller – Viller-lès-Landroff
 <option>Viller-en-Haye
 <option>Viller-lès-Landroff
-<option>Villeréal
 <option>Villers
 <option>Villers (Vosges)
 <option>Villers-Bettnach
@@ -7771,6 +7682,7 @@
 <option>Villers-sur-Nied
 <option>Villerupt
 <option>Villerwald – Forbach
+<option>Villeréal
 <option>Villes-au-Montois
 <option>Villesanges – Le-Grand-Bourg
 <option>Villeseneux
@@ -7780,8 +7692,6 @@
 <option>Villeurbanne
 <option>Villevoques
 <option>Villey-le-Sec
-<option>Villé
-<option>Villé (Bas-Rhin)
 <option>Villiers
 <option>Villiers-Charlemagne
 <option>Villiers-Saint-Georges
@@ -7792,6 +7702,8 @@
 <option>Villing
 <option>Villosanges
 <option>Villouxel
+<option>Villé
+<option>Villé (Bas-Rhin)
 <option>Vilsberg
 <option>Vimoutier
 <option>Vimoutiers
@@ -7832,6 +7744,8 @@
 <option>Viviers
 <option>Viviers (Moselle)
 <option>Viviers – Delme
+<option>Viéville-en-Haye
+<option>Viéville-sous-les-Côtes
 <option>Vocance
 <option>Voefling-lès-Bouzonville
 <option>Voellerdingen
@@ -7854,30 +7768,36 @@
 <option>Vomécourt-sur-Madon
 <option>Vors – Rodelle
 <option>Vosges
-<option>Vougécourt
 <option>Vougron - Féternes
 <option>Vougron – Féternes
+<option>Vougécourt
 <option>Vouhé
 <option>Voujeaucourt
 <option>Vouthons-le-Haut
 <option>Vouxey
 <option>Vouzailles
 <option>Voyer
-<option>Völklingen
-<option>Völklingen – Obervölklingen, Sarre, Allemagne
-<option>Vœlfing
-<option>Vœlfling-lès-Bouzonville
-<option>Vrémy
-<option>Vrémy – Failly
 <option>Vrigny (Loiret)
 <option>Vroncourt-la-Côte
 <option>Vry
+<option>Vrémy
+<option>Vrémy – Failly
 <option>Vuillafans
 <option>Vulmont
 <option>Vuny
 <option>Vyans
 <option>Vyans-le-Val
 <option>Vyt-lès-Belvoir
+<option>Véringe – Féternes
+<option>Véron
+<option>Vérone (province de), Italie
+<option>Véronnes
+<option>Véry
+<option>Vézelise
+<option>Völklingen
+<option>Völklingen – Obervölklingen, Sarre, Allemagne
+<option>Vœlfing
+<option>Vœlfling-lès-Bouzonville
 <option>Wadelancourt
 <option>Wadern – Merzig-Wadern
 <option>Wadern, Sarre, Allemagne
@@ -7985,7 +7905,6 @@
 <option>Wey, Thüringen, Allemagne
 <option>Weyer
 <option>Weyersheim
-<option>Wéris – Durbuy, Belgique
 <option>Wickersheim
 <option>Widensolen
 <option>Wieluń
@@ -8030,8 +7949,6 @@
 <option>Woelfling
 <option>Woelfling-lès-Sarreguemines
 <option>Woellenheim
-<option>Woël
-<option>Woël-en-Woëvre
 <option>Woinville
 <option>Woippy
 <option>Wolfgantzen
@@ -8050,8 +7967,8 @@
 <option>Worsley, Lancashire, Royaume-Uni
 <option>Woustviller
 <option>Woutsviller
-<option>Wœlfling – Wœlfling-lès-Sarreguemines
-<option>Wœlfling-lès-Sarreguemines
+<option>Woël
+<option>Woël-en-Woëvre
 <option>Wrabczynek
 <option>Wszowa
 <option>Wuisse
@@ -8060,6 +7977,9 @@
 <option>Wylów,  powiat de Mielec, Pologne
 <option>Wylów, powiat de Mielec, Pologne
 <option>Wyompont – Erneuville
+<option>Wéris – Durbuy, Belgique
+<option>Wœlfling – Wœlfling-lès-Sarreguemines
+<option>Wœlfling-lès-Sarreguemines
 <option>Xalo – Jalon, Alicante, Espagne
 <option>Xanrey
 <option>Xaronval
@@ -8072,13 +7992,13 @@
 <option>Xouaxange
 <option>Xures
 <option>Yaté, Province Sud, Nouvelle-Calédonie
-<option>Yèbles
 <option>Yougoslavie
 <option>Ypres
 <option>Yutz
 <option>Yutz (ancien cimetière est)
 <option>Yverdon
 <option>Yvetot
+<option>Yèbles
 <option>Zaesinge
 <option>Zaesingue
 <option>Zaessingue
@@ -8095,7 +8015,6 @@
 <option>Zerpa Belfiore
 <option>Zeurange
 <option>Zeurange – Flastroff
-<option>Zéralda, Algérie
 <option>Ziegelhütte – Neunkirchen
 <option>Zimming
 <option>Zincourt
@@ -8111,10 +8030,8 @@
 <option>Zusingen – Schwanden, Glaris, Suisse
 <option>Zutkerque
 <option>Zuydcoote
+<option>Zéralda, Algérie
 <option>Zürich, Suisse
-<option>Żerków, Pologne
-<option>Żerków,  Pologne
-<option>Żerniki, Kretków, Pologne
 <option>bois Saint-Père – Meilleray
 <option>château de La Renaudie en Pg
 <option>château de La Roche Faudouin  – Saint-Révérend
@@ -8129,6 +8046,89 @@
 <option>cimetière d’Ottonville
 <option>cimetière paroissial
 <option>en mer (à bord de La Diane)
-<option>église paroissiale
 <option>maison de Retraite st Jean. Metz
 <option>moulin du Fresne – Gourgé
+<option>Âchatel
+<option>ÉUA
+<option>Ébersviller
+<option>Ébersvilles
+<option>Éblange
+<option>Éblange – Valmunster
+<option>Écajeul – Le Mesnil-Mauger
+<option>Échemiré
+<option>Échevannes
+<option>Échirolles
+<option>Échiré
+<option>Écly
+<option>Écourt-Saint-Quentin
+<option>Écoyeux
+<option>Écretteville-lès-Baons
+<option>Écrouves
+<option>Écuisses
+<option>Écurcey
+<option>Égreville
+<option>Éguelshardt
+<option>Élange
+<option>Élange – Thionville
+<option>Éméville
+<option>Épange
+<option>Épange – Charleville-sous-Bois
+<option>Épannes
+<option>Épernay
+<option>Épernon
+<option>Épieds-en-Beauce
+<option>Épiez-sur-Chiers
+<option>Épinac
+<option>Épinal
+<option>Épinant
+<option>Épinoy
+<option>Éply
+<option>Équeurdreville
+<option>Équevillon
+<option>Érondelle
+<option>Étables – Binic-Étables-sur-Mer
+<option>Étables-sur-Mer
+<option>Étain
+<option>Étampes
+<option>États-Unis
+<option>Éternoz
+<option>Étival-Clairefontaine
+<option>Étival-lès-le-Mans
+<option>Étobon
+<option>Étreillers
+<option>Étrelliers
+<option>Étrungt
+<option>Étupes
+<option>Évange
+<option>Évaux-et-Ménil
+<option>Évian-les-Bains
+<option>Évian-lès-Bains
+<option>Évillers
+<option>Évillers – Déservillers
+<option>Évital-lès-le-Mans
+<option>Évran
+<option>Évrange
+<option>Évrange, Frisange
+<option>Évreux
+<option>Ézerville – Enegenville
+<option>Ézerville – Engenville
+<option>Île Gorée, Sénégal
+<option>Île Maurice
+<option>Île-d'Arz
+<option>Île-de-Bréhat
+<option>Île-d’Arz
+<option>Östefärnebo, Sandviken, Gävleborg, Suède
+<option>Überherrn
+<option>Überherrn, Sarre, Allemagne
+<option>église paroissiale
+<option>Łuszczanów, Pologne
+<option>Łączki Brzeskie, Łączki Brzeskie, Kraków, Poland
+<option>Œting
+<option>Œtringen
+<option>Œutrange
+<option>Śmigiel (Posnie)
+<option>Śmigiel, Pologne
+<option>Šmartno
+<option>Żerków, Pologne
+<option>Żerków,  Pologne
+<option>Żerniki, Kretków, Pologne
