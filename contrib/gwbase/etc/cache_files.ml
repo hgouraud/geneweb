@@ -14,16 +14,17 @@ let all = ref false
 
 
 let cache_fname bname fname =
-  let basename =
-    if Filename.check_suffix bname ".gwb" then bname
-    else bname ^ ".gwb"
-  in
+  let basename = bname ^ ".gwb" in
   Filename.concat (Util.base_path [] basename) fname
 
 let write_cache_file bname fname list =
-  let fname = cache_fname bname ("cache_" ^ fname) in
-  Printf.printf "Write to : %s\n" (fname ^ ".cache");
-  begin match try Some (Secure.open_out (fname ^ ".cache"))
+  let bname =  if Filename.check_suffix bname ".gwb" then
+    Filename.remove_extension bname
+    else bname
+  in
+  let fname = cache_fname bname (bname ^ "_" ^ fname ^ "_cache.txt") in
+  Printf.printf "Write to : %s\n" fname;
+  begin match try Some (Secure.open_out fname )
     with Sys_error _ -> None with
   | Some oc ->
       begin
