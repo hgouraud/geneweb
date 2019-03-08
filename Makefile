@@ -199,20 +199,20 @@ distrib: install-exe
 	cp etc/a.gwf $(DISTRIB_DIR)/gw/.
 	echo "127.0.0.1" > $(DISTRIB_DIR)/gw/only.txt
 	echo "-setup_link" > $(DISTRIB_DIR)/gw/gwd.arg
-	cp $(BUILD_DISTRIB_DIR)gwc1.exe $(DISTRIB_DIR)/gw/gwc$(EXE);
-	cp $(BUILD_DISTRIB_DIR)gwc1.exe $(DISTRIB_DIR)/gw/gwc1$(EXE);
-	cp $(BUILD_DISTRIB_DIR)gwc2.exe $(DISTRIB_DIR)/gw/gwc2$(EXE);
-	cp $(BUILD_DISTRIB_DIR)mk_consang.exe $(DISTRIB_DIR)/gw/consang$(EXE);
-	cp $(BUILD_DISTRIB_DIR)mk_consang.exe $(DISTRIB_DIR)/gw/mk_consang$(EXE);
-	cp $(BUILD_DISTRIB_DIR)gwd.exe $(DISTRIB_DIR)/gw/gwd$(EXE);
-	cp $(BUILD_DISTRIB_DIR)gwu.exe $(DISTRIB_DIR)/gw/gwu$(EXE);
-	cp $(BUILD_DISTRIB_DIR)ged2gwb.exe $(DISTRIB_DIR)/gw/ged2gwb$(EXE);
-	cp $(BUILD_DISTRIB_DIR)ged2gwb2.exe $(DISTRIB_DIR)/gw/ged2gwb2$(EXE);
-	cp $(BUILD_DISTRIB_DIR)gwb2ged.exe $(DISTRIB_DIR)/gw/gwb2ged$(EXE);
-	cp $(BUILD_DISTRIB_DIR)connex.exe $(DISTRIB_DIR)/gw/connex$(EXE);
-	cp $(BUILD_DISTRIB_DIR)gwdiff.exe $(DISTRIB_DIR)/gw/gwdiff$(EXE);
-	cp $(BUILD_DISTRIB_DIR)setup.exe $(DISTRIB_DIR)/gw/gwsetup$(EXE);
-	cp $(BUILD_DISTRIB_DIR)update_nldb.exe $(DISTRIB_DIR)/gw/update_nldb$(EXE);
+	cp $(BUILD_DISTRIB_DIR)/gwc1.exe $(DISTRIB_DIR)/gw/gwc$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/gwc1.exe $(DISTRIB_DIR)/gw/gwc1$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/gwc2.exe $(DISTRIB_DIR)/gw/gwc2$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/mk_consang.exe $(DISTRIB_DIR)/gw/consang$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/mk_consang.exe $(DISTRIB_DIR)/gw/mk_consang$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/gwd.exe $(DISTRIB_DIR)/gw/gwd$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/gwu.exe $(DISTRIB_DIR)/gw/gwu$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/ged2gwb.exe $(DISTRIB_DIR)/gw/ged2gwb$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/ged2gwb2.exe $(DISTRIB_DIR)/gw/ged2gwb2$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/gwb2ged.exe $(DISTRIB_DIR)/gw/gwb2ged$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/connex.exe $(DISTRIB_DIR)/gw/connex$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/gwdiff.exe $(DISTRIB_DIR)/gw/gwdiff$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/setup.exe $(DISTRIB_DIR)/gw/gwsetup$(EXE); \
+	cp $(BUILD_DISTRIB_DIR)/update_nldb.exe $(DISTRIB_DIR)/gw/update_nldb$(EXE); \
 	mkdir $(DISTRIB_DIR)/gw/gwtp_tmp
 	mkdir $(DISTRIB_DIR)/gw/gwtp_tmp/lang
 	cp bin/distrib/gwtp/README $(DISTRIB_DIR)/gw/gwtp_tmp/.
