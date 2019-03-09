@@ -50,24 +50,28 @@ type t =
   ; file_cache_info : string
   }
 
+(* some paths are relative to the current base dir (full_bdir) *)
+
 let path_from_bname s =
   let bdir =
     if Filename.check_suffix s ".gwb" then s
     else if Filename.check_suffix s ".gwb/" then Filename.chop_suffix s "/"
     else s ^ ".gwb"
   in
-  let dir_cnt = List.fold_left Filename.concat bdir [ "etc" ; "cnt" ] in
-  { dir_portraits = List.fold_left Filename.concat bdir [ "documents" ; "portraits" ]
-  ; dir_documents = Filename.concat bdir "documents"
-  ; file_conf = List.fold_left Filename.concat bdir [ "etc" ; "config.txt" ]
+  let bases_dir = Secure.base_dir () in (* -bd argument *)
+  let full_bdir = Filename.concat bases_dir bdir in 
+  let dir_cnt = List.fold_left Filename.concat full_bdir [ "etc" ; "cnt" ] in
+  { dir_portraits = List.fold_left Filename.concat full_bdir [ "documents" ; "portraits" ]
+  ; dir_documents = Filename.concat full_bdir "documents"
+  ; file_conf = List.fold_left Filename.concat full_bdir [ "etc" ; "config.txt" ]
   ; dir_notes = Filename.concat bdir "notes"
   ; dir_wiznotes = Filename.concat bdir "wiznotes"
-  ; dir_root = bdir
-  ; dir_images = List.fold_left Filename.concat bdir [ "documents" ; "images" ]
-  ; dir_portraits_bak = List.fold_left Filename.concat bdir [ "documents" ; "portraits" ; "saved" ]
-  ; dir_password = bdir
+  ; dir_root = full_bdir
+  ; dir_images = List.fold_left Filename.concat full_bdir [ "documents" ; "images" ]
+  ; dir_portraits_bak = List.fold_left Filename.concat full_bdir [ "documents" ; "portraits" ; "saved" ]
+  ; dir_password = bases_dir
   ; dir_cnt
-  ; dir_history = Filename.concat bdir "history"
+  ; dir_history = Filename.concat full_bdir "history"
   ; file_ts = Filename.concat bdir "tstab"
   ; file_ts_visitor = Filename.concat bdir "tstab_visitor"
   ; file_snames_dat = Filename.concat bdir "snames.dat"
@@ -76,7 +80,7 @@ let path_from_bname s =
   ; file_fnames_inx = Filename.concat bdir "fnames.inx"
   ; file_restrict = Filename.concat bdir "restrict"
   ; file_synchro_patches = Filename.concat bdir "synchro_patches"
-  ; file_cmd = Filename.concat bdir "command.txt"
+  ; file_cmd = Filename.concat full_bdir "command.txt"
   ; file_base = Filename.concat bdir "base"
   ; file_particles = Filename.concat bdir "particles.txt"
   ; file_base_acc = Filename.concat bdir "base.acc"
@@ -84,10 +88,10 @@ let path_from_bname s =
   ; file_names_inx = Filename.concat bdir "names.inx"
   ; file_names_acc = Filename.concat bdir "names.acc"
   ; file_patches = Filename.concat bdir "patches"
-  ; file_notes_aliases = Filename.concat bdir "notes.alias"
-  ; file_forum = Filename.concat bdir "forum"
-  ; file_history = List.fold_left Filename.concat bdir [ "history" ; "history.txt" ]
-  ; file_notes_links = Filename.concat bdir "note_links"
+  ; file_notes_aliases = Filename.concat full_bdir "notes.alias"
+  ; file_forum = Filename.concat full_bdir "forum"
+  ; file_history = List.fold_left Filename.concat full_bdir [ "history" ; "history.txt" ]
+  ; file_notes_links = Filename.concat full_bdir "notes_links"
   ; file_wizard_log = Filename.concat dir_cnt "wizard.log"
   ; file_friend_log = Filename.concat dir_cnt "friends.log"
   ; file_counts = Filename.concat dir_cnt "counts.txt"

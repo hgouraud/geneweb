@@ -162,6 +162,7 @@ let syntax_links conf wi s =
           in
           let c =
             let f = wi.wi_file_path (fname_of_path fpath) in
+            let f = Filename.concat conf.path.dir_password f in
             if Sys.file_exists f then "" else " style=\"color:red\""
           in
           let t =
