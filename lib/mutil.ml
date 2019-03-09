@@ -86,7 +86,7 @@ let mkdir_p x =
   let rec loop x =
     let y = Filename.dirname x in
     if y <> x && String.length y < String.length x then loop y;
-    Unix.mkdir x 0o755
+    try Unix.mkdir x 0o755 with Unix.Unix_error (_, _, _) -> ()
   in
   loop x
 

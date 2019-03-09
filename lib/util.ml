@@ -1212,12 +1212,13 @@ let search_in_lang_path fname =
   loop @@ Secure.lang_path ()
 
 let template_file_path conf fname =
-  Array.fold_left Filename.concat conf.path.dir_root [| "etc" ; fname |]
+  Array.fold_left Filename.concat conf.path.dir_root [| "etc" ; fname ^ ".txt" |]
 
 let open_template conf fname =
+  let _ = Printf.eprintf "Open_template: %s\n" (template_file_path conf fname) in
   try Some (Secure.open_in @@ template_file_path conf fname)
   with Sys_error _ ->
-  try Some (Secure.open_in @@ search_in_lang_path (Filename.concat "etc" fname) )
+  try Some (Secure.open_in @@ search_in_lang_path (Filename.concat "etc" (fname ^ ".txt")) )
   with Sys_error _ -> None
 
 let body_prop conf =
