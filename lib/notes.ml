@@ -178,6 +178,7 @@ let merge_possible_aliases conf db =
 
 let notes_links_db conf base eliminate_unlinked =
   let db = NotesLinks.read_db_from_file conf.path.file_notes_links in
+  let _ = Printf.eprintf "Notes_links: %s\n" conf.path.file_notes_links in
   let db = merge_possible_aliases conf db in
   let db2 =
     List.fold_left
@@ -554,12 +555,14 @@ let print_misc_notes conf base =
                in
                let c =
                  let f = file_path conf (path_of_fnotes f) in
+                 (* FIXME dir_password = dir_bases *)
+                 let f = Filename.concat conf.path.dir_password f in
+                 let _ = Printf.eprintf "Note file name: %s\n" f in
                  if Sys.file_exists f then "" else " style=\"color:red\""
                in
                Wserver.printf "<li class=\"file\">\n";
                Wserver.printf "<tt>[";
-               Wserver.printf "<a href=\"%sm=NOTES&f=%s\"%s>" (commd conf) f
-                 c;
+               Wserver.printf "<a href=\"%sm=NOTES&f=%s\"%s>" (commd conf) f c;
                Wserver.printf "%s" r;
                Wserver.printf "</a>";
                Wserver.printf "]</tt>%s\n"

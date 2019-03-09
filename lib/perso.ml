@@ -6066,6 +6066,7 @@ let gen_interp_templ menu title templ_fname conf base p =
     in
     let nldb () =
       let db = NotesLinks.read_db_from_file conf.path.file_notes_links in
+      let _ = Printf.eprintf "Notes_links (p2): %s\n" conf.path.file_notes_links in
       let db = Notes.merge_possible_aliases conf db in Vnldb db
     in
     let all_gp () = Vallgp (get_all_generations conf base p) in
@@ -6202,6 +6203,7 @@ let print_what_links conf base p =
       let sn = Name.lower (sou base (get_surname p)) in fn, sn, get_occ p
     in
     let db = NotesLinks.read_db_from_file conf.path.file_notes_links in
+    let _ = Printf.eprintf "Notes_links (p): %s\n" conf.path.file_notes_links in
     let db = Notes.merge_possible_aliases conf db in
     let pgl = links_to_ind conf base db key in
     let title h =
