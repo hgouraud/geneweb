@@ -412,6 +412,9 @@ let rn fname s =
   if Sys.file_exists fname then Sys.rename fname s
 
 let rm_rf dir =
-  let (directories, files) = ls_r [dir] |> List.partition Sys.is_directory in
-  List.iter Unix.unlink files ;
-  List.iter Unix.rmdir directories
+  if Sys.file_exists dir then
+    begin
+      let (directories, files) = ls_r [dir] |> List.partition Sys.is_directory in
+      List.iter Unix.unlink files ;
+      List.iter Unix.rmdir directories
+    end

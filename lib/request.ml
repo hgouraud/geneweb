@@ -496,7 +496,6 @@ let this_request_updates_database conf =
 
 let treat_request_on_base conf =
   let bfile = conf.path.dir_root in
-  let _ = Printf.eprintf "Bfile: %s\n" bfile in
   if this_request_updates_database conf then
     Lock.control (Mutil.lock_file bfile) false
       ~onerror:(fun () -> Update.error_locked conf)

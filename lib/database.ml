@@ -612,7 +612,6 @@ let opendb bname =
   let patches = input_patches path.Path.file_patches in
   let synchro = input_synchro path.Path.file_synchro_patches in
   let particles = Mutil.input_particles path.file_particles in
-  let _ = Printf.eprintf "Patches: %s\n" path.Path.file_patches in
   let ic =
     let ic = Secure.open_in_bin path.file_base in
     Dutil.check_magic ic;
@@ -717,7 +716,6 @@ let opendb bname =
   let commit_synchro () =
     let fname = path.file_synchro_patches in
     let tmp_fname = fname ^ ".tmp" in
-    let _ = Printf.eprintf "Synchro_patches: %s\n" tmp_fname in
     let oc9 =
       try Secure.open_out_bin tmp_fname with
         Sys_error _ ->

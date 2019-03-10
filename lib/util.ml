@@ -1112,7 +1112,6 @@ let template_file_path conf fname =
   Array.fold_left Filename.concat conf.path.dir_root [| "etc" ; fname ^ ".txt" |]
 
 let open_template conf fname =
-  let _ = Printf.eprintf "Open_template: %s\n" (template_file_path conf fname) in
   try Some (Secure.open_in @@ template_file_path conf fname)
   with Sys_error _ ->
   try Some (Secure.open_in @@ search_in_lang_path (Filename.concat "etc" (fname ^ ".txt")) )
@@ -2402,7 +2401,6 @@ let auto_image_file ?bak:(b=false) conf base p =
     Filename.concat
       (if b then conf.path.dir_portraits_bak else conf.path.dir_portraits) s
   in
-  let _ = Printf.eprintf "Auto_image_file: %s\n" f in
   if Sys.file_exists (f ^ ".jpg") then Some (f ^ ".jpg")
   else if Sys.file_exists (f ^ ".gif") then Some (f ^ ".gif")
   else if Sys.file_exists (f ^ ".png") then Some (f ^ ".png")
@@ -2866,7 +2864,6 @@ type auth_user = { au_user : string; au_passwd : string; au_info : string }
 let read_gen_auth_file fname =
   let conf_path = Path.path_from_bname "" in (* FIXME *)
   let fname = Filename.concat conf_path.dir_password fname in
-  let _ = Printf.eprintf "Read_auth_file: %s\n" fname in
   try
     let ic = Secure.open_in fname in
     let rec loop data =

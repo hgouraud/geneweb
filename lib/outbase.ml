@@ -391,9 +391,9 @@ let gen_output no_patches bname base =
   end;
   close_base base;
   Mutil.rm path.file_base ;
-  Sys.rename tmp_base_fn path.file_base ;
+  Mutil.rn tmp_base_fn path.file_base ;
   Mutil.rm path.file_base_acc;
-  Sys.rename tmp_base_acc_fn path.file_base_acc;
+  Mutil.rn tmp_base_acc_fn path.file_base_acc;
   if not no_patches then
     begin
       let mv src dst = Mutil.rm dst ; Sys.rename src dst in
@@ -406,10 +406,11 @@ let gen_output no_patches bname base =
       mv tmp_strings_inx_fn path.file_strings_inx ;
       (* REORG Mutil.rm (Filename.concat bname "notes");
       if Sys.file_exists tmp_notes then
-        Sys.rename tmp_notes (Filename.concat bname "notes");*)
+        Mutil.rn tmp_notes (Filename.concat bname "notes");*)
       if Sys.file_exists tmp_notes_d then
         begin let notes_d = Filename.concat bname "notes" in
-          Mutil.rm_rf notes_d; Sys.rename tmp_notes_d notes_d
+          Mutil.rm_rf notes_d; 
+          Mutil.rn tmp_notes_d notes_d
         end;
       Mutil.rm path.file_patches;
       Mutil.rm path.file_ts;
