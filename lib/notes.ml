@@ -437,6 +437,7 @@ let commit_notes conf base fnotes s =
   let fname = path_of_fnotes fnotes in
   let fpath = Filename.concat conf.path.dir_notes fname in
   Mutil.mkdir_p (Filename.dirname fpath);
+  let _ = Printf.eprintf "Commit notes: %s, %s\n" fpath fname in
   begin try Gwdb.commit_notes base fname s with
     Sys_error _ -> Hutil.incorrect_request conf; raise Update.ModErr
   end;

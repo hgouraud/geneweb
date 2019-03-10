@@ -89,6 +89,11 @@ val rm_rf : string -> unit
 *)
 val rm : string -> unit
 
+(** [rn fname s]
+    Rename [fname] to [s]. If [fname] does not exists, do nothing.
+*)
+val rn : string -> string -> unit
+
 (** [mkdir_p d]
     Create [d] directory.
     No error if existing, make parent directories as needed
