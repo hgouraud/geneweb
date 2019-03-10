@@ -251,7 +251,7 @@ let output_first_name_index oc2 base oc_fn_inx oc_fn_dat =
 
 let gen_output no_patches bname base =
   let open Path in
-  let tmp fname = Filename.open_temp_file ~mode:[ Open_binary ] ~perms:0644 fname "" in
+  let tmp fname = Filename.open_temp_file ~mode:[ Open_binary ] ~perms:0o644 fname "" in
   let path = path_from_bname bname in
   Mutil.mkdir_p path.dir_root ;
   let tmp_base_fn, tmp_base_oc =  tmp "base" in
