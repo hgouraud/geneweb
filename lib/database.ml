@@ -851,7 +851,7 @@ let opendb bname =
     let fname = if fnotes = "" then "notes" else fnotes in
     let fname = Filename.concat path.dir_notes (fname ^ ".txt") in
     Mutil.rm (fname ^ "~");
-    Sys.rename fname (fname ^ "~");
+    Mutil.rn fname (fname ^ "~");
     if s <> "" then begin
       let oc = Secure.open_out fname in
       output_string oc s;

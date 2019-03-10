@@ -408,6 +408,9 @@ let ls_r dirs =
 let rm fname =
   if Sys.file_exists fname then Sys.remove fname
 
+let rn fname s =
+  if Sys.file_exists fname then Sys.rename fname s
+
 let rm_rf dir =
   let (directories, files) = ls_r [dir] |> List.partition Sys.is_directory in
   List.iter Unix.unlink files ;
