@@ -136,7 +136,6 @@ let misc_notes_link s i =
   else WLnone
 
 let read_db_from_file fname =
-  let _ = Printf.eprintf "Read_db_from_file: %s\n" fname in
   match try Some (open_in_bin fname) with Sys_error _ -> None with
     Some ic ->
       let b = really_input_string ic (String.length magic_notes_links) in
