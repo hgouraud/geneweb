@@ -731,6 +731,7 @@ and eval_simple_variable conf =
           else ""
       | None -> ""
       end
+  | "direct" -> if !Path.direct then "yes" else "no"
   | "doctype" -> Util.doctype conf ^ "\n"
   | "doctype_transitional" ->
       let doctype =

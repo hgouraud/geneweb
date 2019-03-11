@@ -208,7 +208,7 @@ let input_lexicon lang =
 let add_lexicon bname fname lang ht =
   (* TODO add Path.dir_root/"etc" to lang_path *)
   Secure.add_lang_path 
-    (Filename.concat (Path.path_from_bname bname).Path.dir_root "etc");
+    (Filename.concat Path.((path_from_bname bname).dir_root) "etc");
   let fname = Filename.concat !Path.lang fname in
   Mutil.input_lexicon lang ht
     (fun () -> Secure.open_in (Util.search_in_lang_path fname))

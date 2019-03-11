@@ -1099,14 +1099,14 @@ let string_of_witness_kind conf sex witness_kind =
 let image_prefix conf = conf.image_prefix
 
 let search_in_lang_path fname =
-    let rec loop =
-      function
-      | [] -> fname
-      | d :: dl ->
-        let f = Filename.concat d fname in
-        if Sys.file_exists f then f else loop dl
-    in
-    loop @@ Secure.lang_path ()
+  let rec loop =
+    function
+    | [] -> fname
+    | d :: dl ->
+      let f = Filename.concat d fname in
+      if Sys.file_exists f then f else loop dl
+  in
+  loop @@ Secure.lang_path ()
 
 let search_in_etc_path conf fname =
   let config_templ =
