@@ -210,10 +210,6 @@ let add_lexicon bname fname lang ht =
   Secure.add_lang_path 
     (Filename.concat (Path.path_from_bname bname).Path.dir_root "etc");
   let fname = Filename.concat !Path.lang fname in
-  let _ = Printf.eprintf "Add lexicon %s/%s\n" 
-    (Filename.concat (Path.path_from_bname bname).Path.dir_root "etc")
-    fname
-  in
   Mutil.input_lexicon lang ht
     (fun () -> Secure.open_in (Util.search_in_lang_path fname))
 
@@ -1087,7 +1083,6 @@ let authorization from_addr request base_env passwd access_type utm base_file
           base_file command
 
 let make_conf from_addr request script_name env =
-  let _ = Printf.eprintf "Script_name: %s\n" script_name in
   let utm = Unix.time () in
   let tm = Unix.localtime utm in
   let b_arg_for_basename = !(Wserver.cgi) in
@@ -1096,7 +1091,6 @@ let make_conf from_addr request script_name env =
       let (x, env) = extract_assoc "b" env in
       if x <> "" || b_arg_for_basename then x, env else script_name, env
     in
-    let _ = Printf.eprintf "Base_passwd: %s\n" base_passwd in
     let ip = index base_passwd '_' in
     let base_file =
       let s = String.sub base_passwd 0 ip in
@@ -1104,13 +1098,10 @@ let make_conf from_addr request script_name env =
         if Filename.check_suffix s ".gwb" then Filename.chop_suffix s ".gwb"
         else s
       in
-      let _ = Printf.eprintf "S: %s\n" s in
       let i = index_not_name s in
-      let _ = Printf.eprintf "I: %d, %d\n" i (String.length s) in
       if i = String.length s then s
       else refresh_url request b_arg_for_basename (String.sub s 0 i)
     in
-    let _ = Printf.eprintf "Base_file 1: %s\n" base_file in
     let (passwd, env, access_type) =
       let has_passwd = List.mem_assoc "w" env in
       let (x, env) = extract_assoc "w" env in
@@ -1161,7 +1152,6 @@ let make_conf from_addr request script_name env =
   in
   let lexicon = input_lexicon (if lang = "" then default_lang else lang) in
   (* additionnal user defined lexicons *)
-  let _ = Printf.eprintf "Base_file 2: %s\n" base_file in
   List.iter
     (fun fname ->
       if base_file <> "" then
@@ -1934,7 +1924,8 @@ let main ~speclist () =
     ("-nolock", Arg.Set Lock.no_lock_flag,
      "\n       Do not lock files before writing.") ::
     ("-direct", Arg.Set Path.direct,
-     "\n       Do not search mybase.gwb/etc sub dirs (default false).") ::
+     "\n       Do not search mybase.gwb/etc sub dirs for template files \
+     (default false).") ::
     ("-version", Arg.Unit Util.print_version_commit,
      "\n       Print version and commit number.") ::
     (if Sys.unix then

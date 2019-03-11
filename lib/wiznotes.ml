@@ -205,7 +205,6 @@ let print_old_wizards conf list =
     end
 
 let wizard_list_from_dir conf =
-  let _ = Printf.eprintf "Wizard list\n" in
   match try Some (Sys.readdir conf.path.dir_wiznotes) with Sys_error _ -> None with
     Some arr ->
       List.fold_left
@@ -476,7 +475,6 @@ let print_view conf =
 let commit_wiznotes conf wz s =
   let wddir = conf.path.dir_wiznotes in
   let fname = wzfile wddir wz in
-  let _ = Printf.eprintf "Commit wiznotes\n" in
   Mutil.mkdir_p wddir ;
   write_wizard_notes fname s;
   let pg = NotesLinks.PgWizard wz in Notes.update_notes_links_db conf pg s
