@@ -1202,23 +1202,43 @@ let string_of_witness_kind conf sex witness_kind =
 let image_prefix conf = conf.image_prefix
 
 let search_in_lang_path fname =
-  let rec loop =
-    function
-    | [] -> fname
-    | d :: dl ->
-      let f = Filename.concat d fname in
-      if Sys.file_exists f then f else loop dl
-  in
-  loop @@ Secure.lang_path ()
+  let _ = Printf.eprintf "New search in lang:\n" in
+    let rec loop =
+      function
+      | [] -> fname
+      | d :: dl ->
+        let f = Filename.concat d fname in
+        let _ = Printf.eprintf "Search in lang: %s\n" f in
+        if Sys.file_exists f then f else loop dl
+    in
+    loop @@ Secure.lang_path ()
+
+let search_in_etc_path fname =
+  let _ = Printf.eprintf "New search in etc:\n" in
+    let rec loop =
+      function
+      | [] -> fname
+      | d :: dl ->
+        let f = Filename.concat d fname in
+        let _ = Printf.eprintf "Search in etc: %s\n" f in
+        if Sys.file_exists f then f else loop dl
+    in
+    loop @@ Secure.etc_path ()
 
 let template_file_path conf fname =
   Array.fold_left Filename.concat conf.path.dir_root [| "etc" ; fname ^ ".txt" |]
 
 let open_template conf fname =
-  try Some (Secure.open_in @@ template_file_path conf fname)
-  with Sys_error _ ->
-  try Some (Secure.open_in @@ search_in_lang_path (Filename.concat "etc" (fname ^ ".txt")) )
-  with Sys_error _ -> None
+  if !Path.direct then
+    let _ = Printf.eprintf "Search in etc: %s\n" fname in
+    try Some (Secure.open_in @@ Filename.concat !Path.etc (fname ^ ".txt"))
+    with Sys_error _ -> None
+  else
+    let _ = Printf.eprintf "Search in template_file_path: %s\n" (template_file_path conf fname) in
+    try Some (Secure.open_in @@ template_file_path conf fname)
+    with Sys_error _ ->
+    try Some (Secure.open_in @@ search_in_etc_path (Filename.concat "etc" (fname ^ ".txt")) )
+    with Sys_error _ -> None
 
 let body_prop conf =
   try
