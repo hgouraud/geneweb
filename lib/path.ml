@@ -6,6 +6,7 @@ let sharelib =
     [| "share" ; "geneweb" |]
 let lang = ref "lang"
 let cnt = ref "cnt"
+let direct = ref false
 
 (* Lazy so that we can set [cnt] before actually accessing the file. *)
 let gwd_lock_file = lazy (Filename.concat !cnt "gwd.lck")
@@ -20,6 +21,8 @@ type t =
   ; dir_root : string
   ; dir_images : string
   ; dir_password : string
+  ; dir_bases : string
+  ; dir_binaries : string
   ; dir_cnt : string
   ; dir_history : string
   ; file_ts : string
@@ -58,8 +61,9 @@ let path_from_bname s =
     else if Filename.check_suffix s ".gwb/" then Filename.chop_suffix s "/"
     else s ^ ".gwb"
   in
-  let bases_dir = Secure.base_dir () in (* -bd argument *)
-  let full_bdir = Filename.concat bases_dir bdir in 
+  let dir_bases = Secure.base_dir () in (* -bd argument *)
+  let dir_binaries = Filename.current_dir_name in
+  let full_bdir = Filename.concat dir_bases bdir in 
   let dir_cnt = List.fold_left Filename.concat full_bdir [ "etc" ; "cnt" ] in
   { dir_portraits = List.fold_left Filename.concat full_bdir [ "documents" ; "portraits" ]
   ; dir_documents = Filename.concat full_bdir "documents"
@@ -69,7 +73,9 @@ let path_from_bname s =
   ; dir_root = full_bdir
   ; dir_images = List.fold_left Filename.concat full_bdir [ "documents" ; "images" ]
   ; dir_portraits_bak = List.fold_left Filename.concat full_bdir [ "documents" ; "portraits" ; "saved" ]
-  ; dir_password = bases_dir
+  ; dir_password = dir_bases
+  ; dir_bases = dir_bases
+  ; dir_binaries = dir_binaries
   ; dir_cnt
   ; dir_history = Filename.concat full_bdir "history"
   ; file_ts = Filename.concat bdir "tstab"
