@@ -1108,15 +1108,60 @@ let search_in_lang_path fname =
     in
     loop @@ Secure.lang_path ()
 
-let search_in_etc_path fname =
+let search_in_etc_path conf fname =
+  let config_templ =
+    try
+      let s = List.assoc "template" conf.base_env in
+      let rec loop list i len =
+        if i = String.length s then List.rev (Buff.get len :: list)
+        else if s.[i] = ',' then loop (Buff.get len :: list) (i + 1) 0
+        else loop list (i + 1) (Buff.store len s.[i])
+      in
+      loop [] 0 0
+    with
+      Not_found -> [conf.bname; "*"] (* bname is an implicit template *)
+  in
+  let url_templ =
+    match p_getenv conf.env "templ" with
+      Some x when List.mem "*" config_templ -> x
+    | Some x when List.mem x config_templ -> x
+    | Some _ | None ->
+        match config_templ with
+          [] | ["*"] -> ""
+        | x :: _ -> x
+  in
+  let tpl = url_templ :: config_templ in
+  let tpl = List.fold_left
+    (fun accu tpl -> if not (List.mem tpl accu) then tpl :: accu else accu)
+    [] tpl
+  in
+  let tpl = List.rev tpl in
+  let file =
+    let rec loop tpl =
+      match tpl with
+        [] -> ""
+      | t :: l ->
+          let t = if t = "*" then "" else t in
+          let etc_tpl_file =
+              (String.concat Filename.dir_sep [!Path.etc; t; fname])
+          in
+          (* let _ = Printf.eprintf "Trying: %s\n" etc_tpl_file in *)
+          if Sys.file_exists etc_tpl_file then etc_tpl_file
+          else loop l
+    in
+    loop tpl
+  in
+  if file = "" then
     let rec loop =
       function
       | [] -> fname
       | d :: dl ->
         let f = Filename.concat d fname in
+        (* let _ = Printf.eprintf "Trying: %s\n" f in *)
         if Sys.file_exists f then f else loop dl
     in
     loop @@ Secure.etc_path ()
+  else file
 
 let template_file_path conf fname =
   Array.fold_left Filename.concat conf.path.dir_root [| "etc" ; fname ^ ".txt" |]
@@ -1128,7 +1173,7 @@ let open_template conf fname =
   else
     try Some (Secure.open_in @@ template_file_path conf fname)
     with Sys_error _ ->
-    try Some (Secure.open_in @@ search_in_etc_path (Filename.concat "etc" (fname ^ ".txt")) )
+    try Some (Secure.open_in @@ search_in_etc_path conf (fname ^ ".txt") )
     with Sys_error _ -> None
 
 let body_prop conf =
