@@ -30,7 +30,7 @@
            <span class="fa fa-id-card" aria-hidden="true"></span>%nn;
            <span class="sr-only">switch to %if(evar.templ!="templm")templm%else;defaut template%end;</span>%nn;
         </a>
-        %if;(evar.templ="")
+        %if;(evar.templ="" or direct="yes")
         <div class="ml-sm-1 btn-group dropup">
           <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenu1"%sp;
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"%sp;
