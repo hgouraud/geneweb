@@ -58,6 +58,16 @@ let obsolete version var new_var r =
 let bool_val x = VVbool x
 let str_val x = VVstring x
 
+let strip_br str =
+  let len = String.length str in
+  if len > 4 && (String.sub str (len - 4) 4) = "<br>" then
+    (String.sub str 0 (len - 4)) else str
+
+let include_hed_trl conf name =
+  match Util.open_template conf name with
+    Some ic -> Templ.copy_from_templ conf [] ic
+  | None -> ()
+
 let rec eval_var conf base env p _loc sl =
   try eval_special_var conf base sl with
     Not_found -> eval_simple_var conf base env p sl
@@ -75,6 +85,7 @@ and eval_simple_var conf base env p =
   | ["birth_note"] -> str_val (quote_escaped p.birth_note)
   | ["birth_src"] -> str_val (quote_escaped p.birth_src)
   | ["bapt"; s] -> eval_date_var (Adef.od_of_cdate p.baptism) s
+  | ["base"; "name"] -> str_val conf.bname
   | ["bt_buried"] ->
       bool_val
         (match p.burial with
@@ -111,6 +122,7 @@ and eval_simple_var conf base env p =
   | ["death_src"] -> str_val (quote_escaped p.death_src)
   | ["died_young"] -> bool_val (p.death = DeadYoung)
   | ["digest"] -> eval_string_env "digest" env
+  | ["idigest"] -> str_val (default_image_name base (poi base p.key_index))
   | ["dont_know_if_dead"] -> bool_val (p.death = DontKnowIfDead)
   | ["dr_disappeared"] -> eval_is_death_reason Disappeared p.death
   | ["dr_executed"] -> eval_is_death_reason Executed p.death
@@ -172,6 +184,15 @@ and eval_simple_var conf base env p =
   | ["first_name_alias"] -> eval_string_env "first_name_alias" env
   | ["has_aliases"] -> bool_val (p.aliases <> [])
   | ["has_birth_date"] -> bool_val (Adef.od_of_cdate p.birth <> None)
+  | ["has_image"] -> bool_val (Util.has_image conf base (poi base p.key_index))
+  | ["has_old_image"] ->
+      begin match Util.auto_image_file ~bak:true conf base (poi base p.key_index) with
+        Some _s -> bool_val true
+      | _ -> bool_val false
+      end
+  | ["has_keydir"] ->
+        let p = poi base p.key_index in
+        bool_val (Util.has_keydir conf base p)
   | ["has_pevent_birth"] ->
       let rec loop pevents =
         match pevents with
@@ -243,6 +264,16 @@ and eval_simple_var conf base env p =
   | ["has_surnames_aliases"] -> bool_val (p.surnames_aliases <> [])
   | ["has_titles"] -> bool_val (p.titles <> [])
   | ["image"] -> str_val (quote_escaped p.image)
+  | ["portrait"] -> (* see auto_image_file_name in perso.ml *)
+      begin match auto_image_file conf base (poi base p.key_index) with
+        Some s -> str_val (Filename.basename s)
+      | _ -> str_val ""
+      end
+  | ["portrait_saved"] ->
+      begin match auto_image_file ~bak:false conf base (poi base p.key_index) with
+        Some s -> str_val (Filename.basename s)
+      | _ -> str_val ""
+      end
   | ["index"] -> str_val (string_of_int (Adef.int_of_iper p.key_index))
   | ["is_female"] -> bool_val (p.sex = Female)
   | ["is_male"] -> bool_val (p.sex = Male)
@@ -254,6 +285,90 @@ and eval_simple_var conf base env p =
   | ["is_last"] ->
       begin match get_env "last" env with
         Vbool x -> bool_val x
+      | _ -> raise Not_found
+      end
+  | ["keydir"] -> str_val (default_image_name base (poi base p.key_index))
+  | ["keydir_img"] ->
+      begin match get_env "keydir_img" env with
+        Vstring s -> str_val s
+      | _ -> raise Not_found
+      end
+  | ["keydir_notes"] ->
+      begin match get_env "keydir_img" env with
+        Vstring s -> str_val ((Filename.remove_extension s) ^ ".txt")
+      | _ -> raise Not_found
+      end
+  | ["keydir_img_key"] ->
+      begin match get_env "keydir_img" env with
+        Vstring s -> str_val (Mutil.tr '+' ' ' (code_varenv s))
+      | _ -> raise Not_found
+      end
+  | ["keydir_img_old"] ->
+      begin match get_env "keydir_img_old" env with
+        Vstring s -> str_val s
+      | _ -> raise Not_found
+      end
+  | ["keydir_img_old_key"] ->
+      begin match get_env "keydir_img_old" env with
+        Vstring s -> str_val (Mutil.tr '+' ' ' (code_varenv s))
+      | _ -> raise Not_found
+      end
+  | ["keydir_img_nbr"] ->
+      str_val (string_of_int
+        (List.length (get_keydir conf base (poi base p.key_index))))
+  | ["keydir_old_img_nbr"] ->
+      str_val (string_of_int
+        (List.length (get_keydir_old conf base (poi base p.key_index))))
+  | ["keydir_img_notes"] ->
+      begin match get_env "keydir_img_notes" env with
+        Vstring f ->
+          let ext = Filename.extension f in
+          let fname = Filename.chop_suffix f ext in
+          str_val
+            (get_keydir_img_notes conf base (poi base p.key_index) fname)
+      | _ -> raise Not_found
+      end
+  | ["keydir_img_src"] ->
+      begin match get_env "keydir_img_src" env with
+        Vstring f ->
+          let ext = Filename.extension f in
+          let fname = Filename.chop_suffix f ext in
+          let str =
+            get_keydir_img_notes conf base (poi base p.key_index) fname
+          in
+          let str =
+            try
+              let i = String.index str '\n' in
+              let len = String.length str in
+              if i < len then String.sub str (i + 1) (len - i - 2)
+              else ""
+            with Not_found -> ""
+          in
+          let src =
+            try
+              let i = String.index str '\n' in
+              String.sub str 0 i
+            with Not_found -> ""
+          in
+          str_val (strip_br src)
+      | _ -> raise Not_found
+      end
+  | ["keydir_img_title"] ->
+      begin match get_env "keydir_img_title" env with
+        Vstring f ->
+          let ext = Filename.extension f in
+          let fname = Filename.chop_suffix f ext in
+          let str =
+            get_keydir_img_notes conf base (poi base p.key_index) fname
+          in
+          let title =
+            try
+              let i = String.index str '\n' in
+              String.sub str 0 i
+            with Not_found -> ""
+          in
+          let title = if title = "" && str <> "" then str else title in
+          str_val (strip_br title)
       | _ -> raise Not_found
       end
   | ["nb_pevents"] -> str_val (string_of_int (List.length p.pevents))
@@ -282,6 +397,7 @@ and eval_simple_var conf base env p =
         | _ -> None
       in
       eval_relation_var r sl
+  | ["X"] -> str_val (Filename.dir_sep)
   | ["sources"] -> str_val (quote_escaped p.psources)
   | ["surname"] -> str_val (quote_escaped p.surname)
   | ["surname_alias"] -> eval_string_env "surname_alias" env
@@ -727,6 +843,8 @@ and eval_special_var conf base =
             VVstring ""
       | None -> VVstring ""
       end
+  | ["base_header"] -> include_hed_trl conf "hed"; VVstring ""
+  | ["base_trailer"] -> include_hed_trl conf "trl"; VVstring ""
   | _ -> raise Not_found
 and eval_int_env var env =
   match get_env var env with
@@ -739,12 +857,18 @@ and eval_string_env var env =
 
 (* print *)
 
-let print_foreach print_ast _eval_expr =
-  let rec print_foreach env p _loc s sl _ al =
+let print_foreach conf base print_ast _eval_expr =
+  let rec print_foreach conf base env p _loc s sl _ al =
     match s :: sl with
       ["alias"] -> print_foreach_string env p al p.aliases s
     | ["first_name_alias"] ->
         print_foreach_string env p al p.first_names_aliases s
+    | ["img_in_keydir"] ->
+        print_foreach_img_in_keydir env p al
+          (get_keydir conf base (poi base p.key_index))
+    | ["img_in_keydir_old"] ->
+        print_foreach_img_in_keydir_old env p al
+          (get_keydir_old conf base (poi base p.key_index))
     | ["qualifier"] -> print_foreach_string env p al p.qualifiers s
     | ["surname_alias"] -> print_foreach_string env p al p.surnames_aliases s
     | ["relation"] -> print_foreach_relation env p al p.rparents
@@ -752,6 +876,33 @@ let print_foreach print_ast _eval_expr =
     | ["pevent"] -> print_foreach_pevent env p al p.pevents
     | ["witness"] -> print_foreach_witness env p al p.pevents
     | _ -> raise Not_found
+  and print_foreach_img_in_keydir env p al list =
+    let rec loop cnt =
+      function
+        a :: l ->
+          let env =
+            ("keydir_img", Vstring a) ::
+            ("keydir_img_notes", Vstring a) ::
+            ("keydir_img_src", Vstring a) ::
+            ("keydir_img_title", Vstring a) ::
+            ("cnt", Vint cnt) :: env
+          in
+          List.iter (print_ast env p) al; loop (cnt + 1) l
+      | [] -> ()
+    in
+    loop 1 list
+  and print_foreach_img_in_keydir_old env p al list =
+    let rec loop cnt =
+      function
+        a :: l ->
+          let env =
+            ("keydir_img_old", Vstring a) ::
+            ("cnt", Vint cnt) :: env
+          in
+          List.iter (print_ast env p) al; loop (cnt + 1) l
+      | [] -> ()
+    in
+    loop 1 list
   and print_foreach_string env p al list lab =
     let _ =
       List.fold_left
@@ -814,7 +965,7 @@ let print_foreach print_ast _eval_expr =
         end
     | _ -> ()
   in
-  print_foreach
+  print_foreach conf base
 
 let print_update_ind conf base p digest =
   match p_getenv conf.env "m" with
@@ -829,7 +980,7 @@ let print_update_ind conf base p digest =
          Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
          Templ.eval_predefined_apply = (fun _ -> raise Not_found);
          Templ.get_vother = get_vother; Templ.set_vother = set_vother;
-         Templ.print_foreach = print_foreach}
+         Templ.print_foreach = print_foreach conf base}
         env p
   | _ -> Hutil.incorrect_request conf
 
@@ -896,6 +1047,6 @@ let print_change_event_order conf base =
          Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
          Templ.eval_predefined_apply = (fun _ -> raise Not_found);
          Templ.get_vother = get_vother; Templ.set_vother = set_vother;
-         Templ.print_foreach = print_foreach}
+         Templ.print_foreach = print_foreach conf base}
         [] p
   | _ -> Hutil.incorrect_request conf
