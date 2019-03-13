@@ -225,17 +225,17 @@ let move_file_to_old conf fname bfname mode keydir =
       Filename.dir_sep
         [conf.path.dir_root; "documents"; "images"; keydir; "saved"]
   in
-  (try Unix.mkdir old_dir_p 0o777 with Unix.Unix_error (_, _, _) -> ());
-  (try Unix.mkdir old_dir_i0 0o777 with Unix.Unix_error (_, _, _) -> ());
-  (try Unix.mkdir old_dir_i 0o777 with Unix.Unix_error (_, _, _) -> ());
+  Mutil.mkdir_p old_dir_p;
+  Mutil.mkdir_p old_dir_i0;
+  Mutil.mkdir_p old_dir_i;
   let saved_file =
     if mode = "portraits" then Filename.concat old_dir_p bfname
     else Filename.concat old_dir_i bfname
   in
-  (try Sys.rename fname saved_file with Sys_error _ -> ());
+  Mutil.rn fname saved_file;
   let fname_t = (Filename.remove_extension fname) ^ ".txt" in
   let saved_file_t = (Filename.remove_extension saved_file) ^ ".txt" in
-  (try Sys.rename fname_t saved_file_t with Sys_error _ -> ());
+  Mutil.rn fname_t saved_file_t;
   if Sys.file_exists saved_file then 1 else 0
 
 let print_confirm conf base save_m report =
@@ -325,14 +325,12 @@ let effective_send_ok conf base p file file_name mode =
   in
   let _ =
     if not (Sys.file_exists full_dir) then
-      let d = Filename.concat conf.path.dir_root "documents" in
-      let d1 = Filename.concat d "portraits" in
-      let d2 = Filename.concat d "images" in
-      let d3 = Filename.concat d2 keydir in
-      (try Unix.mkdir d 0o777 with Unix.Unix_error (_, _, _) -> ());
-      (try Unix.mkdir d1 0o777 with Unix.Unix_error (_, _, _) -> ());
-      (try Unix.mkdir d2 0o777 with Unix.Unix_error (_, _, _) -> ());
-      (try Unix.mkdir d3 0o777 with Unix.Unix_error (_, _, _) -> ());
+      let d1 = String.concat
+        Filename.dir_sep [conf.path.dir_root; "documents"; "portraits"] in
+      let d2 = String.concat
+        Filename.dir_sep [conf.path.dir_root; "documents"; "images"; keydir] in
+      Mutil.mkdir_p d1;
+      Mutil.mkdir_p d2;
   in
   let full_name = Filename.concat full_dir
      (if mode = "portraits" then
@@ -426,11 +424,9 @@ let swap_files conf file1 file2 txt =
   in
   let ext_1 = Filename.extension file1 in
   let ext_2 = Filename.extension file2 in
-  (try Sys.rename file1 tmp_file with Sys_error _ -> ());
-  (try Sys.rename file2
-    ((Filename.remove_extension file1) ^ ext_2) with Sys_error _ -> ());
-  (try Sys.rename tmp_file
-    ((Filename.remove_extension file2) ^ ext_1) with Sys_error _ -> ());
+  Mutil.rn file1 tmp_file;
+  Mutil.rn file2 ((Filename.remove_extension file1) ^ ext_2);
+  Mutil.rn tmp_file ((Filename.remove_extension file2) ^ ext_1);
   if txt then
     let tmp_file_t =
       String.concat Filename.dir_sep
@@ -438,16 +434,16 @@ let swap_files conf file1 file2 txt =
     in
     let file1_t = (Filename.remove_extension file1) ^ ".txt" in
     let file2_t = (Filename.remove_extension file2) ^ ".txt" in
-    (try Sys.rename file1_t tmp_file_t with Sys_error _ -> ());
-    (try Sys.rename file2_t file1_t with Sys_error _ -> ());
-    (try Sys.rename tmp_file_t file2_t with Sys_error _ -> ())
+    Mutil.rn file1_t tmp_file_t;
+    Mutil.rn file2_t file1_t;
+    Mutil.rn tmp_file_t file2_t
 
 let rename_files file1 file2 txt =
-  (try Sys.rename file1 file2 with Sys_error _ -> ());
+  Mutil.rn file1 file2;
   if txt then
     let file1_t = (Filename.remove_extension file1) ^ ".txt" in
     let file2_t = (Filename.remove_extension file2) ^ ".txt" in
-    (try Sys.rename file1_t file2_t with Sys_error _ -> ())
+    Mutil.rn file1_t file2_t
 
 let effective_reset_ok conf base p =
   let mode = try List.assoc "mode" conf.env with Not_found -> "portraits" in

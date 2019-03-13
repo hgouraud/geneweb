@@ -967,13 +967,13 @@ let print_foreach conf base print_ast _eval_expr =
   in
   print_foreach conf base
 
-let print_update_ind conf base p digest =
+let print_update_ind conf base sp digest =
   match p_getenv conf.env "m" with
     Some ("MRG_IND_OK" | "MRG_MOD_IND_OK") | Some ("MOD_IND" | "MOD_IND_OK") |
     Some ("ADD_IND" | "ADD_IND_OK") ->
       let env =
         ["digest", Vstring digest;
-         "next_pevent", Vcnt (ref (List.length p.pevents + 1))]
+         "next_pevent", Vcnt (ref (List.length sp.pevents + 1))]
       in
       Hutil.interp conf "updind"
         {Templ.eval_var = eval_var conf base;
@@ -981,7 +981,7 @@ let print_update_ind conf base p digest =
          Templ.eval_predefined_apply = (fun _ -> raise Not_found);
          Templ.get_vother = get_vother; Templ.set_vother = set_vother;
          Templ.print_foreach = print_foreach conf base}
-        env p
+        env sp
   | _ -> Hutil.incorrect_request conf
 
 let print_del1 conf base p =
