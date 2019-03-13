@@ -103,7 +103,9 @@ let family_m conf base =
       | "DAG" -> handler.dag
       | "DEL_FAM" -> handler.del_fam
       | "DEL_FAM_OK" -> handler.del_fam_ok
+      | "DEL_IMAGE" -> handler.del_image
       | "DEL_IMAGE_OK" -> handler.del_image_ok
+      | "DEL_IMAGE_C_OK" -> handler.del_image_c_ok
       | "DEL_IND" -> handler.del_ind
       | "DEL_IND_OK" -> handler.del_ind_ok
       | "F" -> handler.f
@@ -121,7 +123,7 @@ let family_m conf base =
       | "HIST_CLEAN_OK" -> handler.hist_clean_ok
       | "HIST_DIFF" -> handler.hist_diff
       | "HIST_SEARCH" -> handler.hist_search
-      | "IMAGE" -> handler.image
+      | "IMAGE_C" -> handler.image_c
       | "IMH" -> handler.imh
       | "INV_FAM" -> handler.inv_fam
       | "INV_FAM_OK" -> handler.inv_fam_ok
@@ -165,10 +167,12 @@ let family_m conf base =
       | "R" -> handler.r
       | "REQUEST" -> handler.request
       | "RL" -> handler.rl
-      | "RESET_IMAGE_OK" -> handler.reset_image_ok
+      | "RESET_IMAGE_C_OK" -> handler.reset_image_c_ok
       | "RLM" -> handler.rlm
       | "S" -> handler.s
+      | "SND_IMAGE" -> handler.snd_image
       | "SND_IMAGE_OK" -> handler.snd_image_ok
+      | "SND_IMAGE_C_OK" -> handler.snd_image_c_ok
       | "SRC" -> handler.src
       | "STAT" -> handler.stat
       | "CHANGE_WIZ_VIS" -> handler.change_wiz_vis
@@ -450,49 +454,29 @@ let treat_request_on_possibly_locked_base conf bfile =
       Hutil.trailer conf
 
 let this_request_updates_database conf =
-  p_getenv conf.env "m" |> Opt.map_default false begin function
-    | "API_PRINT_SYNCHRO" | "FORUM_ADD_OK" | "FORUM_DEL" | "FORUM_VAL" -> true
-    | "ADD_FAM_OK"
-    | "ADD_IND_OK"
-    | "API_ADD_CHILD_OK"
-    | "API_ADD_FAMILY_OK"
-    | "API_ADD_FIRST_FAM_OK"
-    | "API_ADD_PARENTS_OK"
-    | "API_ADD_PERSON_OK"
-    | "API_ADD_PERSON_START_OK"
-    | "API_ADD_SIBLING_OK"
-    | "API_BASE_WARNINGS"
-    | "API_DEL_FAMILY_OK"
-    | "API_DEL_PERSON_OK"
-    | "API_EDIT_FAMILY_OK"
-    | "API_EDIT_PERSON_OK"
-    | "API_IMAGE_UPDATE"
-    | "API_REMOVE_IMAGE_EXT"
-    | "API_REMOVE_IMAGE_EXT_ALL"
-    | "CHANGE_WIZ_VIS"
-    | "CHG_CHN_OK"
-    | "CHG_EVT_FAM_ORD_OK"
-    | "CHG_EVT_IND_ORD_OK"
-    | "CHG_FAM_ORD_OK"
-    | "DEL_FAM_OK"
-    | "DEL_IMAGE_OK"
-    | "DEL_IND_OK"
-    | "IMAGE_OK"
-    | "INV_FAM_OK"
-    | "KILL_ANC"
-    | "MOD_DATA_OK"
-    | "MOD_FAM_OK"
-    | "MOD_IND_OK"
-    | "MOD_NOTES_OK"
-    | "MOD_WIZNOTES_OK"
-    | "MRG_DUP_FAM_Y_N"
-    | "MRG_DUP_IND_Y_N"
-    | "MRG_IND"
-    | "MRG_MOD_FAM_OK"
-    | "MRG_MOD_IND_OK"
-      when conf.wizard -> true
-    | _ -> false
-  end
+  match p_getenv conf.env "m" with
+    Some ("FORUM_ADD_OK" | "FORUM_DEL" | "FORUM_VAL") -> true
+  | Some "API_PRINT_SYNCHRO" -> true
+  | Some x when conf.wizard ->
+      begin match x with
+        "ADD_FAM_OK" | "ADD_IND_OK" | "CHANGE_WIZ_VIS" | "CHG_CHN_OK" |
+        "CHG_EVT_IND_ORD_OK" | "CHG_EVT_FAM_ORD_OK" | "CHG_FAM_ORD_OK" |
+        "DEL_FAM_OK" | "DEL_IMAGE_OK" | "DEL_IND_OK" | "INV_FAM_OK" |
+        "KILL_ANC" | "MOD_FAM_OK" | "MOD_IND_OK" | "MOD_NOTES_OK" |
+        "MOD_WIZNOTES_OK" | "MRG_DUP_IND_Y_N" | "MRG_DUP_FAM_Y_N" |
+        "MRG_IND" | "MRG_MOD_FAM_OK" | "MRG_MOD_IND_OK" | "MOD_DATA_OK" |
+        "SND_IMAGE_OK" ->
+          true
+      | "API_BASE_WARNINGS" | "API_IMAGE_UPDATE" | "API_REMOVE_IMAGE_EXT" |
+        "API_REMOVE_IMAGE_EXT_ALL" | "API_DEL_PERSON_OK" |
+        "API_EDIT_PERSON_OK" | "API_ADD_CHILD_OK" | "API_ADD_PERSON_OK" |
+        "API_ADD_PARENTS_OK" | "API_ADD_FAMILY_OK" | "API_ADD_FIRST_FAM_OK" |
+        "API_EDIT_FAMILY_OK" | "API_DEL_FAMILY_OK" | "API_ADD_SIBLING_OK" |
+        "API_ADD_PERSON_START_OK" | "API_PRINT_SYNCHRO" ->
+          true
+      | _ -> false
+      end
+  | _ -> false
 
 let treat_request_on_base conf =
   let bfile = conf.path.dir_root in

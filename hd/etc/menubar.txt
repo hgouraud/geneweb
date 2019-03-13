@@ -154,7 +154,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
             </li>
           %end;
           <li class="nav-item dropdown">
-            <a id="load_once_copylink" class="nav-link dropdown-toggle %if;(evar.m="CHG_EVT_IND_ORD" or evar.m="IMAGE" or evar.m="MRG" or evar.m="DEL_IND")active%end;"
+            <a id="load_once_copylink" class="nav-link dropdown-toggle %if;(evar.m="CHG_EVT_IND_ORD" or evar.m="IMAGE_C" or evar.m="MRG" or evar.m="DEL_IND")active%end;"
                data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="[*tools] [person/persons]0">%nn;
               <span class="fa fa-user-cog" aria-hidden="true"></span>%nn;
               <span class="sr-only">[*tools] [person/persons]0</span>%nn;
@@ -169,14 +169,14 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                   <i class="far fa-stop-circle fa-fw %sexcolor; mr-1"></i> [*user/password/cancel]2 [navigation] [Sosa]%nn;
                 </a>
               %end;
-              %if;(evar.m!="ADD_FAM" and evar.m!="MOD_FAM" and evar.m!="MOD_IND" and evar.m!="R" and evar.m!="U" and evar.m!="IMAGE")
+              %if;(evar.m!="ADD_FAM" and evar.m!="MOD_FAM" and evar.m!="MOD_IND" and evar.m!="R" and evar.m!="U" and evar.m!="IMAGE_C")
                 <a class="dropdown-item" href="%url;cgl=on" target="_blank"><i class="fa fa-unlink fa-fw mr-2" title="[*cancel GeneWeb links]"></i>[*cancel GeneWeb links]</a>%nn;
               %end;
           %if;(not (bvar.wizard_just_friend="yes") and wizard)
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="%prefix;m=CHG_EVT_IND_ORD;i=%index;" title="[*changed order of person's events]"><span class="fa fa-sort fa-fw mr-2"></span>[*invert::event/events]1</a>
                 %if;(bvar.can_send_image != "no" and image = "" and first_name != "?" and surname != "?")
-                  <a class="dropdown-item" href="%prefix;m=IMAGE;i=%index;" %laI;><span class="far fa-image fa-fw mr-2"></span>[*add]/[delete] [image/images]0</a>
+                  <a class="dropdown-item" href="%prefix;m=IMAGE_C;i=%index;" %laI;><span class="far fa-image fa-fw mr-2"></span>[*add]/[delete] [image/images]0</a>
                 %end;
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="%prefix;m=MRG;i=%index;" title="[*merge] %first_name;.%occ; %surname; [with]…"><span class="fa fa-compress fa-fw text-danger mr-2"></span>[*merge::person/persons]1</a>
@@ -350,7 +350,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
             </li>
           %end;
           <li class="nav-item">
-            <a class="nav-link" href="%prefix;&m=IMAGE&i=%index;" title="[*add]/[remove] [image/images]0">
+            <a class="nav-link" href="%prefix;&m=IMAGE_C&i=%index;" title="[*add]/[remove] [image/images]0">
               <span class="fa fa-image fa-fw" aria-hidden="true"></span>%nn;
               <span class="sr-only">[*add]/[remove] [image/images]0</span>%nn;
             </a>
@@ -370,7 +370,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="carouselmodal">
-          <a href="?m=IMAGE;i=%index;" title="[*add]/[delete] [image/images]1">
+          <a href="?m=IMAGE_C;i=%index;" title="[*add]/[delete] [image/images]1">
             <i class="far fa-folder-open fa-fw mr-1" aria-hidden="true"></i>%first_name; %surname;%if;(occ!="0") (%occ;)%end; |
             <i class="far fa-image fa-fw mr-1" aria-hidden="true"></i>%keydir_img_nbr;%nn;
           </a>
