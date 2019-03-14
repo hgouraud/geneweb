@@ -200,7 +200,7 @@ let rec extract_assoc key =
 
 let input_lexicon lang =
   let ht = Hashtbl.create 501 in
-  let fname = Filename.concat !Path.lang "lex_utf8.txt" in
+  let fname = Filename.concat "lang" "lex_utf8.txt" in
   Mutil.input_lexicon lang ht
     (fun () -> Secure.open_in (Util.search_in_lang_path fname));
   ht
@@ -209,7 +209,7 @@ let add_lexicon bname fname lang ht =
   (* TODO add Path.dir_root/"etc" to lang_path *)
   Secure.add_lang_path 
     (Filename.concat Path.((path_from_bname bname).dir_root) "etc");
-  let fname = Filename.concat !Path.lang fname in
+  let fname = Filename.concat "lang" fname in
   Mutil.input_lexicon lang ht
     (fun () -> Secure.open_in (Util.search_in_lang_path fname))
 
@@ -1537,6 +1537,7 @@ let print_misc_file misc_fname =
     Ttf fname | Woff2 fname ->
       begin
         try
+          (*let _ = Printf.eprintf "Trying misc request: %s\n" fname in*)
           let ic = Secure.open_in_bin fname in
           let buf = Bytes.create 1024 in
           let len = in_channel_length ic in
@@ -1855,10 +1856,16 @@ let main ~speclist () =
     " [options] where options are:"
   in
   let force_cgi = ref false in
+  let etc = Filename.dir_sep ^ "etc" in
+  let lang = Filename.dir_sep ^ "lang" in
+  let cnt = Filename.dir_sep ^ "lang" in
   let speclist =
-    ("-hd", Arg.String Util.add_lang_path,
-     "<dir>\n       Directory where the static files are installed (templates, icons, lexicon).") ::
-    ("-bd", Arg.String Util.set_base_dir,
+    ("-hd", Arg.String (fun x ->
+      Path.etc := (x ^ etc); Path.lang := (x ^ lang); Path.cnt := (x ^ cnt);
+      Secure.add_etc_path x; Secure.add_lang_path x;),
+     "<dir>\n       Directory where the static files are installed \
+     (templates, icons, lexicon).") ::
+    ("-bd", Arg.String Secure.set_base_dir,
      "<dir>\n       Directory where the databases are installed.") ::
     ("-wd", Arg.String init_windows_sockets,
      "<dir>\n       \
