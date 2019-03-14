@@ -1104,6 +1104,7 @@ let search_in_lang_path fname =
     | [] -> fname
     | d :: dl ->
       let f = Filename.concat d fname in
+      (*let _ = Printf.eprintf "Trying (lang): %s\n" f in*)
       if Sys.file_exists f then f else loop dl
   in
   loop @@ Secure.lang_path ()
@@ -1145,7 +1146,7 @@ let search_in_etc_path conf fname =
           let etc_tpl_file =
               (String.concat Filename.dir_sep [!Path.etc; t; fname])
           in
-          (* let _ = Printf.eprintf "Trying: %s\n" etc_tpl_file in *)
+          (*let _ = Printf.eprintf "Trying (tpl): %s\n" etc_tpl_file in*)
           if Sys.file_exists etc_tpl_file then etc_tpl_file
           else loop l
     in
@@ -1156,8 +1157,9 @@ let search_in_etc_path conf fname =
       function
       | [] -> fname
       | d :: dl ->
+        let d = Filename.concat d "etc" in
         let f = Filename.concat d fname in
-        (* let _ = Printf.eprintf "Trying: %s\n" f in *)
+        (*let _ = Printf.eprintf "Trying (etc): %s\n" f in*)
         if Sys.file_exists f then f else loop dl
     in
     loop @@ Secure.etc_path ()

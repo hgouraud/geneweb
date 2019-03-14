@@ -1,11 +1,12 @@
 (* Some global path, independant from base used. *)
 let etc = ref "etc"
+let lang = ref "lang"
+let cnt = ref "cnt"
+(* all three paths are reset by the -hd parameter (if present) at start time *)
 let sharelib =
   Array.fold_left Filename.concat
     (try Sys.getenv "GWPREFIX" with Not_found -> "/usr") (* FIXME *)
     [| "share" ; "geneweb" |]
-let lang = ref "lang"
-let cnt = ref "cnt"
 let direct = ref false
 
 (* Lazy so that we can set [cnt] before actually accessing the file. *)
