@@ -1131,26 +1131,32 @@ let search_in_etc_path conf fname =
           [] | ["*"] -> ""
         | x :: _ -> x
   in
-  let tpl = url_templ :: config_templ in
+  let _ = Printf.eprintf "Tpl: %s\n" url_templ in
+  let tpl = [ url_templ ] (*:: config_templ*) in
+  (* FIXME why do we concatenate both? *)
   let tpl = List.fold_left
     (fun accu tpl -> if not (List.mem tpl accu) then tpl :: accu else accu)
     [] tpl
   in
   let tpl = List.rev tpl in
+  (* FIXME verify what we really want *)
+  (* tpl is a list of template names!! which ones?? *)
   let file =
-    let rec loop tpl =
-      match tpl with
-        [] -> ""
-      | t :: l ->
-          let t = if t = "*" then "" else t in
-          let etc_tpl_file =
-              (String.concat Filename.dir_sep [!Path.etc; t; fname])
-          in
-          (*let _ = Printf.eprintf "Trying (tpl): %s\n" etc_tpl_file in*)
-          if Sys.file_exists etc_tpl_file then etc_tpl_file
-          else loop l
-    in
-    loop tpl
+    if List.length tpl > 0 then
+      let rec loop tpl =
+        match tpl with
+          [] -> ""
+        | t :: l ->
+            let t = if t = "*" then "" else t in
+            let etc_tpl_file =
+                (String.concat Filename.dir_sep ["etc"; t; fname])
+            in
+            (*let _ = Printf.eprintf "Trying (tpl): %s\n" etc_tpl_file in*)
+            if Sys.file_exists etc_tpl_file then etc_tpl_file
+            else loop l
+      in
+      loop tpl
+    else ""
   in
   if file = "" then
     let rec loop =
