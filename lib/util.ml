@@ -1141,8 +1141,9 @@ let search_in_etc_path conf fname =
   let tpl = List.rev tpl in
   (* FIXME verify what we really want *)
   (* tpl is a list of template names!! which ones?? *)
+  (* do we really expect a template list or just one!! *)
   let file =
-    if List.length tpl > 0 then
+    if List.length tpl > 0 && List.hd tpl <> "" then
       let rec loop tpl =
         match tpl with
           [] -> ""
@@ -1151,7 +1152,18 @@ let search_in_etc_path conf fname =
             let etc_tpl_file =
                 (String.concat Filename.dir_sep ["etc"; t; fname])
             in
-            (*let _ = Printf.eprintf "Trying (tpl): %s\n" etc_tpl_file in*)
+            let etc_tpl_file =
+              (* here we want to scan etc_path for possible template folder *)
+              let rec loop1 =
+                function
+                | [] -> etc_tpl_file
+                | d :: dl ->
+                  let f = Filename.concat d etc_tpl_file in
+                  let _ = Printf.eprintf "Trying (tpl): %s\n" f in
+                  if Sys.file_exists f then f else loop1 dl
+              in
+              loop1 @@ Secure.etc_path ()
+            in
             if Sys.file_exists etc_tpl_file then etc_tpl_file
             else loop l
       in
@@ -1165,7 +1177,7 @@ let search_in_etc_path conf fname =
       | d :: dl ->
         let d = Filename.concat d "etc" in
         let f = Filename.concat d fname in
-        (*let _ = Printf.eprintf "Trying (etc): %s\n" f in*)
+        let _ = Printf.eprintf "Trying (etc): %s\n" f in
         if Sys.file_exists f then f else loop dl
     in
     loop @@ Secure.etc_path ()
