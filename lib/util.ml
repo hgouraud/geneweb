@@ -3611,7 +3611,7 @@ let nb_char_occ c s =
   !cnt
 
 let print_version_commit () =
-  Printf.eprintf "GeneWeb %s, commit %s\n" Version.txt Compilation.commit;
+  Printf.eprintf "GeneWeb %s\n" Version.txt;
   exit 0
 
 let groupby ~key ~value list =

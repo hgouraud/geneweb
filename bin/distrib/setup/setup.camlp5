@@ -1537,12 +1537,12 @@ let gwf conf =
         [!bin_dir; "etc"; "trl.txt"]
     in
     let trailer_sys =
-      Util.quote_escaped
+      Util.escape_html
         (file_contents trl_sys)
     in
     let trailer_user =
       (* REORG trl.txt *)
-      Util.quote_escaped
+      Util.escape_html
         (file_contents
           (String.concat Filename.dir_sep
             [in_base ^ ".gwb"; "etc"; "trl.txt"]))

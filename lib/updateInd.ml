@@ -263,7 +263,7 @@ and eval_simple_var conf base env p =
   | ["has_relations"] -> bool_val (p.rparents <> [])
   | ["has_surnames_aliases"] -> bool_val (p.surnames_aliases <> [])
   | ["has_titles"] -> bool_val (p.titles <> [])
-  | ["image"] -> str_val (quote_escaped p.image)
+  | ["image"] -> str_val (Util.escape_html p.image)
   | ["portrait"] -> (* see auto_image_file_name in perso.ml *)
       begin match auto_image_file conf base (poi base p.key_index) with
         Some s -> str_val (Filename.basename s)
@@ -398,8 +398,8 @@ and eval_simple_var conf base env p =
       in
       eval_relation_var r sl
   | ["X"] -> str_val (Filename.dir_sep)
-  | ["sources"] -> str_val (quote_escaped p.psources)
-  | ["surname"] -> str_val (quote_escaped p.surname)
+  | ["sources"] -> str_val (Util.escape_html p.psources)
+  | ["surname"] -> str_val (Util.escape_html p.surname)
   | ["surname_alias"] -> eval_string_env "surname_alias" env
   | "title" :: sl ->
       let t =

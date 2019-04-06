@@ -341,22 +341,10 @@ val name_key : Gwdb.base -> string -> string
 (** [nb_char_occ c s] return the number of times [c] appears in [s]. *)
 val nb_char_occ : char -> string -> int
 
-<<<<<<< HEAD
-(** [filter_map fn list] is a combination of map and filter.
-    Not tail-recursive.
-*)
-val filter_map : ('a -> 'b option) -> 'a list -> 'b list
-
-(** [rev_iter fn list] is like [List.iter fn (List.rev list)].
-    Not tail-recursive.
-*)
-val rev_iter : ('a -> unit) -> 'a list -> unit
-=======
 (** [print_version_commit]
     Print geneweb version and commit number on stdout and exit.
 *)
 val print_version_commit : unit -> unit
->>>>>>> WIP: Path module
 
 (** [group_by ~key ~value list]
     Group the elements returning the same key together.
@@ -394,11 +382,6 @@ val ls_r : string list -> string list
     Remove directory [dir] and everything inside [dir].
 *)
 val rm_rf : string -> unit
-
-(** [rm fname]
-    Remove [fname]. If [fname] does not exists, do nothing.
-*)
-val rm : string -> unit
 
 (** [escape_html str] replaces '&', '"', '\'', '<' and '>'
     with their corresponding character entities (using entity number) *)
