@@ -197,6 +197,20 @@ let parameters =
   in
   loop ""
 
+(* TODO copied from secure.ml *)
+let decompose =
+  let rec loop r s =
+    let b = Filename.basename s in
+    if b = "" || b = Filename.current_dir_name || b = Filename.dir_sep then
+      let d = Filename.dirname s in
+      if d = "" || d = Filename.current_dir_name then r
+      else if d = s then d :: r
+      else loop r d
+    else if b = s then b :: r
+    else loop (b :: r) (Filename.dirname s)
+  in
+  loop []
+
 let parameters_1 =
   let rec loop comm bname =
     function
@@ -217,14 +231,11 @@ let parameters_1 =
         else if k = "exact" then loop (comm ^ " -exact") bname env
         else if k = "o1" && s <> "" then
           let out = stringify s in
-          comm ^ " -o " ^ out ^ " > " ^ out
-        else if k = "o" && s <> "" then
-          if s = "choice" then loop comm bname env
-          else
-            let out = stringify s in
-            let out = if out = "/notes/connex.txt" then bname  ^ ".gwb" ^ out else out in
-            let out = slashify_linux_dos out in
-            comm ^ " -o " ^ out ^ " > " ^ out
+          let out1 = String.concat Filename.dir_sep [bname ^ ".gwb"; "notes"; out] in
+          Mutil.rm out1;
+          let _ = Printf.eprintf "Out: %s\n" out in
+          comm ^ " -o " ^ out ^ " > " ^ out1
+        else if k = "o" && s = "file" then loop comm bname env
         else loop comm bname env
     | [] -> comm
   in
@@ -359,17 +370,11 @@ let macro conf =
   | 'y' -> Filename.basename (only_file_name ())
   | 'z' -> string_of_int !port
   | '%' -> "%"
-  | 'K' -> (* print the name of -o filename, prepend bname or -o1 filename *)
-    let outfile1 = strip_spaces (s_getenv conf.env "o") in
-    let bname = strip_spaces (s_getenv conf.env "anon") in
-    let outfile2 = strip_spaces (s_getenv conf.env "o1") in
-    let outfile =
-      if outfile2 <> "" then outfile2
-      else if bname <> ""
-      then slashify_linux_dos bname ^ ".gwb" ^ outfile1
-      else outfile1
-    in
-    outfile
+  | 'K' -> (* print the name of -o filename or -o1 filename *)
+      let outfile = strip_spaces (s_getenv conf.env "o") in
+      let outfile1 = strip_spaces (s_getenv conf.env "o1") in
+      let outfile = if outfile1 <> "" then outfile1 else outfile in
+      outfile
   | 'P' -> string_of_int !gwd_port
   | 'Q' -> parameters_1 conf.env
   | 'R' -> parameters_2 conf.env
@@ -521,8 +526,8 @@ let rec copy_from_stream conf print strm =
               (* see r *)
                 let in_file = get_variable strm in
                 let s =
-                  file_contents
-                    (slashify_linux_dos (!bin_dir ^ "/setup/" ^ in_file))
+                  file_contents (String.concat
+                    Filename.dir_sep [ !bin_dir; "setup"; in_file ])
                 in
                 let in_base = strip_spaces (s_getenv conf.env "anon") in
                 let benv = read_base_env in_base in
@@ -584,7 +589,7 @@ let rec copy_from_stream conf print strm =
                   let outfile = strip_spaces (s_getenv conf.env "o") in
                   let bname = strip_spaces (s_getenv conf.env "anon") in
                   let outfile = if bname <> ""
-                    then slashify_linux_dos bname ^ ".gwb" ^ outfile
+                    then Filename.concat (bname ^ ".gwb") outfile
                     else outfile
                   in
                   print_specific_file conf print outfile strm;
@@ -1082,8 +1087,68 @@ let gwdiff ok_file conf =
     in
     print_file conf ok_file
 
+
+(*
+let parameters_1 =
+  let rec loop comm bname =
+    function
+      (k, s) :: env ->
+        let k = strip_spaces (decode_varenv k) in
+        let s = strip_spaces (decode_varenv s) in
+        if k = "" || s = "" then loop comm bname env
+        else if k = "opt" then loop comm bname env
+        else if k = "gwd_p" && s <> "" then
+          loop (comm ^ " -gwd_p " ^ stringify s) bname env
+        else if k = "anon" && s <> "" then
+          loop (comm ^ " " ^ stringify s) (stringify s) env
+        else if k = "a" then loop (comm ^ " -a") bname env
+        else if k = "s" then loop (comm ^ " -s") bname env
+        else if k = "d" && s <> "" then
+          loop (comm ^ " -d " ^ stringify s) bname env
+        else if k = "i" && s <> "" then
+          loop (comm ^ " -i " ^ stringify s) bname env
+        else if k = "bf" then loop (comm ^ " -bf") bname env
+        else if k = "del" && s <> "" then
+          loop (comm ^ " -del " ^ stringify s) bname env
+        else if k = "cnt" && s <> "" then
+          loop (comm ^ " -cnt " ^ stringify s) bname env
+        else if k = "exact" then loop (comm ^ " -exact") bname env
+        else if k = "o1" && s <> "" then
+          let out = stringify s in
+          let out1 =
+            String.concat Filename.dir_sep [bname ^ ".gwb"; "notes"; out]
+          in
+          Mutil.rm out1;
+          let _ = Printf.eprintf "Out: %s\n" out in
+          comm ^ " -o " ^ out ^ " > " ^ out1
+        else if k = "o" && s = "file" then loop comm bname env
+        else loop comm bname env
+    | [] -> comm
+  in
+  loop "" ""
+*)
+
+let get_anom =
+  let rec loop =
+    function
+    | (k, s) :: env ->
+        let k = strip_spaces (decode_varenv k) in
+        let s = strip_spaces (decode_varenv s) in
+        if k = "anon" && s <> "" then (stringify s)
+        else loop env
+    | [] -> ""
+  in
+  loop
+
 let connex_check conf =
-  print_file conf "bsi_connex.htm"
+  let anom = get_anom conf.env in
+  if anom = "" then
+    let conf =
+      conf_with_env conf "no_name" "yes"
+    in
+    print_file conf "connex.htm"
+  else
+    print_file conf "bsi_connex.htm"
 
 let connex ok_file conf =
   let ic = Unix.open_process_in "uname" in
@@ -1104,7 +1169,8 @@ let connex ok_file conf =
     else if Sys.win32 then
       (* à compléter et tester ! *)
       let commnd = (stringify (Filename.concat !bin_dir "connex")) ^ " " ^
-                   parameters_1 conf.env in
+        parameters_1 conf.env
+      in
       Sys.command (commnd)
     else begin
       Printf.eprintf "%s (%s) %s (%s)\n"
@@ -1385,7 +1451,7 @@ let cleanup_1 conf =
   Sys.rename in_base_dir (Filename.concat "old" in_base_dir);
   let c =
     Filename.concat !bin_dir "gwc" ^ " tmp.gw -nofail -o " ^ in_base ^
-    " > " ^ (comm_log conf) ^ "2>&1"
+    " > " ^ "gwsetup.log2>&1"
   in
   Printf.eprintf "$ %s\n" c;
   flush stderr;

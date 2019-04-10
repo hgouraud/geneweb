@@ -31,10 +31,12 @@ fr: Liste des composantes connexes
 <input type="hidden" name="server" value="%m">
 <input type="hidden" name="gwd_p" value="%P">
 
+%Ino_name;yes;{<span style="color:red">|<span>}
 [
 en: Select your database by clicking on the associated button:
 fr: Sélectionnez votre base de données en cliquant sur le bouton associé :
 ]
+</span>
 <p>
 <table class="setup">
 %b{
@@ -152,24 +154,22 @@ fr: Limite la suppression aux branches de taille = -del.
 <table class="setup">
 <tr align="left">
 <td>
-<input type="radio" name="o" id="o" value="choice">
-<label for="o1" style="font-family: monospace">-o &nbsp;
+<input type="radio" name="o" id="o" value="file">
+<label for="o" style="font-family: monospace">-o &nbsp;
 <input type="input" name="o1" size="20" maxlength="50" style="padding-left:4px"></label>&nbsp;&nbsp;[
-en: Output results to this file in basename.gwb%/.
-fr: Rediriger les résultats vers ce fichier dans basename.gwb%/.
+en: Output results to this file in basename.gwb%/notes%/ (without extension).<br>
+    <span class="comment">
+    Reading this file with the NOTES
+    command will give access to the families at the root of each connected component.</span>
+fr: Rediriger les résultats vers ce fichier dans basename.gwb%/notes%/ (sans extension).<br>
+    <span class="comment">
+    La lecture de ce fichier avec la fonction NOTES
+    donne accès aux familles racines des composantes connexes.</span>
 ]</td>
 </tr>
 <p>
 <tr align="left">
-<td><input type="radio" name="o" id="o" value="notes%/connex.txt">
-<label for="o" style="font-family: monospace">&nbsp;&nbsp;</label>[
-en: Output results in basename.gwb%/notes%/connex.txt (-o must stay empty and notes must exist).
-fr: Redirige le résultat vers basename.gwb%/notes%/connex.txt (-o doit rester vide et notes doit exister).
-]</td>
-</tr>
-<p>
-<tr align="left">
-<td><input type="radio" name="o" id="o" value="" checked/>
+<td><input type="radio" name="o" id="o" value="none" checked/>
 <label for="o" style="font-family: monospace">&nbsp;&nbsp;</label>[
 en: No redirection of results which will appear in a terminal window.
 fr: Pas de redirection des résultats qui seront affichés dans une fenêtre terminal.
