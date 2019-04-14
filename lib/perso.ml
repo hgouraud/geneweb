@@ -2213,7 +2213,7 @@ and eval_simple_str_var conf base env (_, p_auth) =
   | "marriage_source" ->
       begin match get_env "fam" env with
         Vfam (_, fam, _, m_auth) ->
-          get_note_source conf base [] m_auth true (get_marriage_src fam)
+          get_note_source conf base [] m_auth false (get_marriage_src fam)
       | _ -> raise Not_found
       end
   | "max_anc_level" ->
@@ -3475,7 +3475,7 @@ and eval_str_event_field conf base (p, p_auth)
       get_note_source conf base env p_auth conf.no_note note
   | "src" ->
       let env = ['i', (fun () -> Util.default_image_name base p)] in
-      get_note_source conf base env p_auth conf.no_note src
+      get_note_source conf base env p_auth false src
   | _ -> raise Not_found
 and eval_event_field_var conf base env (p, p_auth)
     (name, date, place, note, src, w, isp) loc =
@@ -4009,6 +4009,9 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
   | "birth_note" ->
       let env = ['i', (fun () -> Util.default_image_name base p)] in
       get_note_source conf base env p_auth conf.no_note (get_birth_note p)
+  | "birth_source" ->
+      let env = ['i', (fun () -> Util.default_image_name base p)] in
+      get_note_source conf base env p_auth conf.no_note (get_birth_src p)
   | "baptism_place" ->
       if p_auth then
         Util.string_of_place conf (sou base (get_baptism_place p))
@@ -4016,12 +4019,18 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
   | "baptism_note" ->
       let env = ['i', (fun () -> Util.default_image_name base p)] in
       get_note_source conf base env p_auth conf.no_note (get_baptism_note p)
+  | "baptism_source" ->
+      let env = ['i', (fun () -> Util.default_image_name base p)] in
+      get_note_source conf base env p_auth conf.no_note (get_baptism_src p)
   | "burial_place" ->
       if p_auth then Util.string_of_place conf (sou base (get_burial_place p))
       else ""
   | "burial_note" ->
       let env = ['i', (fun () -> Util.default_image_name base p)] in
       get_note_source conf base env p_auth conf.no_note (get_burial_note p)
+  | "burial_source" ->
+      let env = ['i', (fun () -> Util.default_image_name base p)] in
+      get_note_source conf base env p_auth conf.no_note (get_burial_src p)
   | "child_name" ->
       let force_surname =
         match get_parents p with
@@ -4063,6 +4072,9 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
   | "death_note" ->
       let env = ['i', (fun () -> Util.default_image_name base p)] in
       get_note_source conf base env p_auth conf.no_note (get_death_note p)
+  | "death_source" ->
+      let env = ['i', (fun () -> Util.default_image_name base p)] in
+      get_note_source conf base env p_auth conf.no_note (get_death_src p)
   | "died" -> string_of_died conf p p_auth
   | "fam_access" ->
       (* deprecated since 5.00: rather use "i=%family.index;&ip=%index;" *)
@@ -4228,7 +4240,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
       else string_of_int (get_occ p)
   | "occupation" ->
       let env = ['i', (fun () -> Util.default_image_name base p)] in
-      get_note_source conf base env p_auth true (get_occupation p)
+      get_note_source conf base env p_auth false (get_occupation p)
   | "on_baptism_date" ->
       begin match p_auth, Adef.od_of_cdate (get_baptism p) with
         true, Some d ->
@@ -4280,7 +4292,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
       end
   | "psources" ->
       let env = ['i', (fun () -> Util.default_image_name base p)] in
-      get_note_source conf base env p_auth conf.no_note (get_psources p)
+      get_note_source conf base env p_auth false (get_psources p)
   | "slash_burial_date" ->
       begin match get_burial p with
         Buried cod ->

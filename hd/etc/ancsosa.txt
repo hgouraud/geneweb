@@ -1184,7 +1184,7 @@
                           %let;birthbaptism;[birth], [baptism]%in;
                           %let;birthdeath;[birth], [death]%in;
                           %if;(not ancestor.has_baptism_note and ((not ancestor.has_baptism_source and source_type=[birth]) or source_type=birthbaptism or source_type=birthdeath))
-                            %apply;capitalize(ancestor.source).%nn;
+                            %apply;capitalize(ancestor.source)%nn;
                           %elseif;((ancestor.has_baptism_note or ancestor.has_baptism_source) and (source_type=[birth] or source_type=[baptism]))
                             <li>%apply;capitalize(source_type)[:] %ancestor.source;.</li>%nn;
                           %end;
@@ -1337,7 +1337,7 @@
                           %let;deathburial;[death], [burial]%in;
                           %let;birthdeath;[birth], [death]%in;
                           %if;(not ancestor.has_burial_note and ((not ancestor.has_burial_source and source_type=[death]) or source_type=deathburial or source_type=birthdeath))
-                            %apply;capitalize(ancestor.source).
+                            %apply;capitalize(ancestor.source)
                           %elseif;((ancestor.has_burial_note or ancestor.has_burial_source) and (source_type=[death] or source_type=[burial]))
                             %if;(source_type=[burial] and ancestor.is_cremated)
                                <li>%apply;capitalize([cremation])[:] %ancestor.source;.</li>%nn;
@@ -1444,7 +1444,7 @@
                 data-content='%if;(has_marriage_note)%marriage_note;%end;
                               %if;(has_marriage_source)
                                 %if;(has_marriage_note)<hr>%end;
-                                %apply;capitalize(marriage_source).
+                                %apply;capitalize(marriage_source)
                               %end;'
                 title='%if;(has_marriage_note or has_marriage_source)
                          %if;(has_marriage_note and not has_marriage_source)[*note/notes]1%nn;
