@@ -1125,8 +1125,10 @@
     %if;(evar.ns="on" and (ancestor.has_notes or ancestor.has_psources))
       tabindex="0" data-trigger="focus" data-toggle="popover" data-placement="right" data-html="true"%sp;
       data-content='%if;(ancestor.has_notes)%ancestor.notes;%end;
-                    %if;(ancestor.has_notes and ancestor.has_psources)<hr>%end;
-                    %if;(ancestor.has_psources)%apply;capitalize(ancestor.psources)%end;'%sp;
+                    %if;(ancestor.has_psources)
+                      %if;(ancestor.has_notes)<hr>%end;
+                      %apply;capitalize(ancestor.psources)
+                    %end;'%sp;
       title="%if;(ancestor.has_notes and not ancestor.has_psources)[*note/notes]1%nn;
             %elseif;(not ancestor.has_notes and ancestor.has_psources)[*source/sources]1%nn;
             %elseif;(ancestor.has_notes and ancestor.has_psources)[*note/notes]1 [and] [source/sources]1%nn;
@@ -1177,8 +1179,12 @@
         %if;(evar.ns="on")
           tabindex="0" data-trigger="focus" data-toggle="popover" data-placement="bottom" data-html="true"%sp;
           data-content='%if;(ancestor.has_birth_note or ancestor.has_baptism_note)
-                          %if;(ancestor.has_birth_note)%if;(ancestor.has_baptism_note)[*birth][:] %end;%ancestor.birth_note;%end;%nn;
+                          %if;(ancestor.has_birth_note)%if;(ancestor.has_baptism_note)[*birth][:] %end;%ancestor.birth_note;%nn;
+                          %if;(ancestor.has_baptism_note)<br> %end;%end;%nn;
                           %if;(ancestor.has_baptism_note)[*baptism][:] %ancestor.baptism_note;%end;%nn;
+                        %end;
+                        %if;(ancestor.has_birth_note or ancestor.has_baptism_note and 
+                            ancestor.has_birth_source or ancestor.has_baptism_source)<hr>%nn;
                         %end;
                         %foreach;ancestor.source;
                           %let;birthbaptism;[birth], [baptism]%in;
@@ -1186,7 +1192,7 @@
                           %if;(not ancestor.has_baptism_note and ((not ancestor.has_baptism_source and source_type=[birth]) or source_type=birthbaptism or source_type=birthdeath))
                             %apply;capitalize(ancestor.source)%nn;
                           %elseif;((ancestor.has_baptism_note or ancestor.has_baptism_source) and (source_type=[birth] or source_type=[baptism]))
-                            <li>%apply;capitalize(source_type)[:] %ancestor.source;.</li>%nn;
+                            <li>%apply;capitalize(source_type)[:] %ancestor.source;</li>%nn;
                           %end;
                         %end;'%sp;
             title="%if;(ancestor.has_birth_source or ancestor.has_baptism_source or ancestor.has_birth_note or ancestor.has_baptism_note)
@@ -1265,8 +1271,10 @@
             %if;(evar.ns="on")
               tabindex="0" data-trigger="focus" data-toggle="popover" data-placement="bottom" data-html="true"%sp;
               data-content='%if;(has_marriage_note)%marriage_note;%end;
-                            %if;(has_marriage_note and has_marriage_source)<hr>%end;
-                            %if;(has_marriage_source)%apply;capitalize(marriage_source)%end;'%sp;
+                            %if;(has_marriage_source)
+                              %if;(has_marriage_note)<hr>%end;
+                              %apply;capitalize(marriage_source)
+                            %end;'%sp;
               title="%if;(has_marriage_source or has_marriage_note)
                        %if;(has_marriage_note and not has_marriage_source)[*note/notes]1%nn;
                        %elseif;(not has_marriage_note and has_marriage_source)[*source/sources]1%nn;
@@ -1330,8 +1338,12 @@
         %if;(evar.ns="on")
           tabindex="0" data-trigger="focus" data-toggle="popover" data-placement="bottom" data-html="true"%sp;
           data-content='%if;(ancestor.has_death_note or ancestor.has_burial_note)
-                          %if;(ancestor.has_death_note)%if;(ancestor.has_burial_note)[*death][:] %end;%ancestor.death_note;%end;%nn;
+                          %if;(ancestor.has_death_note)%if;(ancestor.has_burial_note)[*death][:] %end;%ancestor.death_note;
+                          %if;(ancestor.has_burial_note)<br> %end;%end;%nn;
                           %if;(ancestor.has_burial_note)[*burial][:] %ancestor.burial_note;%end;%nn;
+                        %end;
+                        %if;(ancestor.has_death_note or ancestor.has_burial_note and 
+                            ancestor.has_death_source or ancestor.has_burial_source)<hr>%nn;
                         %end;
                         %foreach;ancestor.source;
                           %let;deathburial;[death], [burial]%in;
