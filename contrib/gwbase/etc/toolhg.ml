@@ -678,7 +678,7 @@ value find_same_name_viet base p =
   let ipl = person_ht_find_all base (f ^ " " ^ s) in
   let f = Name.lower f in
   let s = Name.lower s in
-  let _ = if s = "gouraudxx" then
+  let _ = if f = "sebastien" then
       printf "Found %s %s\n" f s
     else ()
   in
