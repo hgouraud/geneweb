@@ -606,6 +606,7 @@ value unaccent_utf_8 lower s i =
           | _ -> String.sub s i nbc]
       (* Code pour supprimer l'apostrophe typographique u2019 *)
       (* et le caractère "prime" u2032 *)
+      (*
       | 0xE2 ->
           match Char.code s.[i+1] with
           [ 0x80 ->
@@ -613,6 +614,7 @@ value unaccent_utf_8 lower s i =
             [ 0x99 | 0xB2 -> " "
             | _ -> String.sub s i nbc ]
           | _ -> String.sub s i nbc]
+          *)
       | c ->
           String.sub s i nbc ]
     in
