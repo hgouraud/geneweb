@@ -704,7 +704,7 @@ value check_accents base bname = do {
     let f = sou base (Gwdb.get_first_name p) in 
     let s = sou base (Gwdb.get_surname p) in 
     let o = Gwdb.get_occ p in
-    if i > 1755590 && i < 1755599 then do {
+    if i > start.val && i < (start.val + 10) then do {
     printf "Person %d %s.%d %s\n" i f o s;
     flush stdout } else ();
     if s <> "N" && s <> "?" && f <> "?" then
@@ -717,7 +717,7 @@ value check_accents base bname = do {
               let f1 = sou base (Gwdb.get_first_name p) in
               let s1 = sou base (Gwdb.get_surname p) in
               let o1 = Gwdb.get_occ p in
-              let _ = if i > 1755590 && i < 1755599 then do {
+              let _ = if i > start.val && i < (start.val + 10) then do {
                 printf "Homonym %d %s.%d %s\n" ip f1 o1 s1;
                 flush stdout } else ()
               in
