@@ -678,9 +678,17 @@ value find_same_name_viet base p =
   let ipl = person_ht_find_all base (f ^ " " ^ s) in
   let f = Name.lower f in
   let s = Name.lower s in
-  let _ = if f = "sebastien" then
-      printf "Found %s %s (%d homonyms)\n" f s (List.length ipl)
-    else ()
+  let _ = if f = "sebastien" then do {
+      printf "Found %s %s (%d homonyms)\n" f s (List.length ipl);
+      List.iter
+        (fun ip -> 
+          let p = poi base ip in
+          let f = sou base (Gwdb.get_first_name p) in 
+          let s = sou base (Gwdb.get_surname p) in 
+          let o = Gwdb.get_occ p in
+          printf "Homonym %d %s.%d %s\n"
+            (Adef.int_of_iper ip) f o s) ipl }
+    else () 
   in
   let pl =
     List.fold_left
