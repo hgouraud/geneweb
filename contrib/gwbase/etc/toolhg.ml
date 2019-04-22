@@ -74,6 +74,7 @@ value testhg1 = ref False;
 value set_friends = ref False;
 value marriages = ref False;
 value accents = ref False;
+value start = ref 0;
 value cnt = ref 0;
 value rgpd_files = ref ".";
 value pr_nldb = ref False;
@@ -675,8 +676,8 @@ value find_same_name_viet base p =
   let f = p_first_name base p in
   let s = p_surname base p in
   let ipl = person_ht_find_all base (f ^ " " ^ s) in
-  let f = Name.lower_viet f in
-  let s = Name.lower_viet s in
+  let f = Name.lower f in
+  let s = Name.lower s in
   let _ = if s = "gouraudxx" then
       printf "Found %s %s\n" f s
     else ()
@@ -685,8 +686,8 @@ value find_same_name_viet base p =
     List.fold_left
       (fun pl ip ->
          let p = poi base ip in
-         if Name.lower_viet (p_first_name base p) = f &&
-            Name.lower_viet (p_surname base p) = s then
+         if Name.lower (p_first_name base p) = f &&
+            Name.lower (p_surname base p) = s then
            [p :: pl]
          else pl)
       [] ipl
@@ -698,7 +699,7 @@ value check_accents base bname = do {
   printf "Checking accent duplicates for %s\n" bname;
   flush stdout;
   let nb_ind = nb_of_persons base in
-  for i = 0 to nb_ind - 1 do {
+  for i = start.val to nb_ind - 1 do {
     let p = poi base (Adef.iper_of_int i) in
     let f = sou base (Gwdb.get_first_name p) in 
     let s = sou base (Gwdb.get_surname p) in 
@@ -712,12 +713,13 @@ value check_accents base bname = do {
           List.iter
             (fun p ->
               let ip = Adef.int_of_iper (get_key_index p) in
-              let f0 = sou base (Gwdb.get_first_name p) in
-              let s0 = sou base (Gwdb.get_surname p) in
+              let f1 = sou base (Gwdb.get_first_name p) in
+              let s1 = sou base (Gwdb.get_surname p) in
               let o1 = Gwdb.get_occ p in
-              if (f <> "?" && s <> "?") && i <> ip && i < ip && o = o1 then do {
+              if (f <> "?" && s <> "?") && i <> ip && i < ip &&
+                (f <> f1 || s <> s1) && o = o1 then do {
                 printf "Conflict between (%d %s.%d %s)\n" i f o s;
-                printf "and (%d %s.%d %s)\n" ip f0 o1 s0;
+                printf "and (%d %s.%d %s)\n" ip f1 o1 s1;
                 flush stdout }
               else ()
               ) pl ] 
@@ -808,7 +810,8 @@ value speclist =
    ("-count", Arg.Set count_notes, "count nbr of notes");
    ("-list", Arg.Set list_notes, "list notes");
    ("-marriages", Arg.Set marriages, "check order of marriages");
-   ("-accents", Arg.Set accents, "check possible duplicates because of accents")
+   ("-accents", Arg.Set accents, "check possible duplicates because of accents");
+   ("-start", Arg.Int (fun i -> start.val := i), "start at index i")
    ]
 ;
 value anonfun i = bname.val := i;
