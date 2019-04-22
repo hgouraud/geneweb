@@ -693,8 +693,6 @@ value find_same_name_viet base p =
 value check_accents base bname = do {
   printf "Checking accent duplicates for %s\n" bname;
   flush stdout;
-  ProgrBar.full.val := '*';
-  ProgrBar.start ();
   let nb_ind = nb_of_persons base in
   for i = 0 to nb_ind - 1 do {
     let p = poi base (Adef.iper_of_int i) in
@@ -715,11 +713,12 @@ value check_accents base bname = do {
               let o1 = Gwdb.get_occ p in
               if (f <> "?" && s <> "?") && i <> ip && o = o1 then do {
                 printf "Conflict between (%d %s.%d %s)\n" i f o s;
-                printf "and (%d %s.%d %s)\n" ip f0 o1 s0 } else ()
-              ) pl ] else ();
-    ProgrBar.run i nb_ind
+                printf "and (%d %s.%d %s)\n" ip f0 o1 s0;
+                flush stdout }
+              else ()
+              ) pl ] 
+    else ()
   };
-  ProgrBar.finish ();
   printf "Done checking accent duplicates\n";
   flush stdout;
 };
