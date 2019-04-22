@@ -709,9 +709,7 @@ value check_accents base bname = do {
           (fun p ->
             let ip = Adef.int_of_iper (get_key_index p) in
             let f0 = sou base (Gwdb.get_first_name p) in
-            let f1 = Name.strip_lower_viet (sou base (Gwdb.get_first_name p)) in
             let s0 = sou base (Gwdb.get_surname p) in
-            let s1 = Name.strip_lower_viet (sou base (Gwdb.get_surname p)) in
             let o1 = Gwdb.get_occ p in
             if (f <> "?" && s <> "?") && i <> ip && o = o1 then do {
               printf "Conflict between (%d %s.%d %s)\n" i f o s;
