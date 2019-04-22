@@ -701,6 +701,7 @@ value check_accents base bname = do {
     let f = sou base (Gwdb.get_first_name p) in 
     let s = sou base (Gwdb.get_surname p) in 
     let o = Gwdb.get_occ p in
+    printf "Person %d %s.%d %s\n" i f o s;
     match find_same_name_viet base p with
     [ [_] -> ()
     | pl ->
