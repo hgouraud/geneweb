@@ -703,19 +703,20 @@ value check_accents base bname = do {
     let o = Gwdb.get_occ p in
     printf "Person %d %s.%d %s\n" i f o s;
     flush stdout;
-    match find_same_name_viet base p with
-    [ [_] -> ()
-    | pl ->
-        List.iter
-          (fun p ->
-            let ip = Adef.int_of_iper (get_key_index p) in
-            let f0 = sou base (Gwdb.get_first_name p) in
-            let s0 = sou base (Gwdb.get_surname p) in
-            let o1 = Gwdb.get_occ p in
-            if (f <> "?" && s <> "?") && i <> ip && o = o1 then do {
-              printf "Conflict between (%d %s.%d %s)\n" i f o s;
-              printf "and (%d %s.%d %s)\n" ip f0 o1 s0 } else ()
-            ) pl ];
+    if f <> "Ne" || f <> "Nn" || s <> "N" then
+      match find_same_name_viet base p with
+      [ [_] -> ()
+      | pl ->
+          List.iter
+            (fun p ->
+              let ip = Adef.int_of_iper (get_key_index p) in
+              let f0 = sou base (Gwdb.get_first_name p) in
+              let s0 = sou base (Gwdb.get_surname p) in
+              let o1 = Gwdb.get_occ p in
+              if (f <> "?" && s <> "?") && i <> ip && o = o1 then do {
+                printf "Conflict between (%d %s.%d %s)\n" i f o s;
+                printf "and (%d %s.%d %s)\n" ip f0 o1 s0 } else ()
+              ) pl ] else ();
     ProgrBar.run i nb_ind
   };
   ProgrBar.finish ();
