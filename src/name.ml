@@ -932,7 +932,7 @@ value unaccent_utf_8_viet lower s i =
           match Char.code s.[i+1] with
           [ 0x80 ->
             match Char.code s.[i+2] with
-            [ 0x99 -> " "
+            [ 0x99 -> "'"
             | _ -> String.sub s i nbc ]
           | _ -> String.sub s i nbc]
       | c ->
