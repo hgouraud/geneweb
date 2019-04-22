@@ -29,6 +29,7 @@ value crush : string -> string;
      - no double lowercase consons *)
 
 value strip_lower : string -> string;
+value strip_lower_viet : string -> string;
   (* strip_lower = strip o lower, as first comparison of names.
      First names and Surnames comparison is strip_lower equality. *)
 

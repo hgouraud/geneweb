@@ -73,6 +73,7 @@ value testhg = ref False;
 value testhg1 = ref False;
 value set_friends = ref False;
 value marriages = ref False;
+value accents = ref False;
 value cnt = ref 0;
 value rgpd_files = ref ".";
 value pr_nldb = ref False;
@@ -670,6 +671,58 @@ value check_marriages base bname = do {
   flush stdout;
 };
 
+value find_same_name_viet base p =
+  let f = p_first_name base p in
+  let s = p_surname base p in
+  let ipl = person_ht_find_all base (f ^ " " ^ s) in
+  let f = Name.strip_lower f in
+  let s = Name.strip_lower s in
+  let pl =
+    List.fold_left
+      (fun pl ip ->
+         let p = poi base ip in
+         if Name.strip_lower (p_first_name base p) = f &&
+            Name.strip_lower (p_surname base p) = s then
+           [p :: pl]
+         else pl)
+      [] ipl
+  in
+  List.sort (fun p1 p2 -> compare (get_occ p1) (get_occ p2)) pl
+;
+
+value check_accents base bname = do {
+  printf "Checking accent duplicates for %s\n" bname;
+  flush stdout;
+  ProgrBar.full.val := '*';
+  ProgrBar.start ();
+  let nb_ind = nb_of_persons base in
+  for i = 0 to nb_ind - 1 do {
+    let p = poi base (Adef.iper_of_int i) in
+    let f = sou base (Gwdb.get_first_name p) in 
+    let s = sou base (Gwdb.get_surname p) in 
+    let o = Gwdb.get_occ p in
+    match find_same_name_viet base p with
+    [ [_] -> ()
+    | pl ->
+        List.iter
+          (fun p ->
+            let ip = Adef.int_of_iper (get_key_index p) in
+            let f0 = sou base (Gwdb.get_first_name p) in
+            let f1 = Name.strip_lower_viet (sou base (Gwdb.get_first_name p)) in
+            let s0 = sou base (Gwdb.get_surname p) in
+            let s1 = Name.strip_lower_viet (sou base (Gwdb.get_surname p)) in
+            let o1 = Gwdb.get_occ p in
+            if (f <> "?" && s <> "?") && i <> ip && o = o1 then do {
+              printf "Conflict between (%d %s.%d %s)\n" i f o s;
+              printf "and (%d %s.%d %s)\n" ip f0 o1 s0 } else ()
+            ) pl ];
+    ProgrBar.run i nb_ind
+  };
+  ProgrBar.finish ();
+  printf "Done checking accent duplicates\n";
+  flush stdout;
+};
+
 value print_nldb bname = do {
   let base = Gwdb.open_base bname in
   let bdir = bname ^ ".gwb" in
@@ -750,7 +803,8 @@ value speclist =
    ("-details", Arg.Set details, "give details");
    ("-count", Arg.Set count_notes, "count nbr of notes");
    ("-list", Arg.Set list_notes, "list notes");
-   ("-marriages", Arg.Set marriages, "check order of marriages")
+   ("-marriages", Arg.Set marriages, "check order of marriages");
+   ("-accents", Arg.Set accents, "check possible duplicates because of accents")
    ]
 ;
 value anonfun i = bname.val := i;
@@ -773,6 +827,7 @@ value main () =
     let old = Array.make (nb_of_persons base) 0 in
     if testhg.val then test_dead_child old base bname.val
     else if marriages.val then check_marriages base bname.val
+    else if accents.val then check_accents base bname.val
     else if testhg1.val then test_public old base bname.val
     else if set_friends.val then set_friend_all base bname.val
     else if everybody.val then public_everybody old base bname.val
