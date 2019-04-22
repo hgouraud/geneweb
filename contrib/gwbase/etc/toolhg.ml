@@ -696,7 +696,7 @@ value find_same_name_viet base p =
 ;
 
 value check_accents base bname = do {
-  printf "Checking accent duplicates for %s\n" bname;
+  printf "Checking accent duplicates for %s (i0=%d)\n" bname start.val;
   flush stdout;
   let nb_ind = nb_of_persons base in
   for i = start.val to nb_ind - 1 do {
@@ -704,8 +704,9 @@ value check_accents base bname = do {
     let f = sou base (Gwdb.get_first_name p) in 
     let s = sou base (Gwdb.get_surname p) in 
     let o = Gwdb.get_occ p in
-    (* printf "Person %d %s.%d %s\n" i f o s;
-    flush stdout; *)
+    if i > 1755590 && i < 1755599 then do {
+    printf "Person %d %s.%d %s\n" i f o s;
+    flush stdout } else ();
     if s <> "N" && s <> "?" && f <> "?" then
       match find_same_name_viet base p with
       [ [_] -> ()
