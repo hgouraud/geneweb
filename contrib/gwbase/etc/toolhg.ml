@@ -679,7 +679,7 @@ value find_same_name_viet base p =
   let f = Name.lower f in
   let s = Name.lower s in
   let _ = if f = "sebastien" then
-      printf "Found %s %s\n" f s
+      printf "Found %s %s (%d homonyms)\n" f s (List.length ipl)
     else ()
   in
   let pl =
