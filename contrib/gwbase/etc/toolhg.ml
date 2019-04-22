@@ -675,14 +675,18 @@ value find_same_name_viet base p =
   let f = p_first_name base p in
   let s = p_surname base p in
   let ipl = person_ht_find_all base (f ^ " " ^ s) in
-  let f = Name.strip_lower f in
-  let s = Name.strip_lower s in
+  let f = Name.lower_viet f in
+  let s = Name.lower_viet s in
+  let _ = if s = "gouraudxx" then
+      printf "Found %s %s\n" f s
+    else ()
+  in
   let pl =
     List.fold_left
       (fun pl ip ->
          let p = poi base ip in
-         if Name.strip_lower (p_first_name base p) = f &&
-            Name.strip_lower (p_surname base p) = s then
+         if Name.lower_viet (p_first_name base p) = f &&
+            Name.lower_viet (p_surname base p) = s then
            [p :: pl]
          else pl)
       [] ipl
@@ -701,7 +705,7 @@ value check_accents base bname = do {
     let o = Gwdb.get_occ p in
     (* printf "Person %d %s.%d %s\n" i f o s;
     flush stdout; *)
-    if s <> "N" then
+    if s <> "N" && s <> "?" && f <> "?" then
       match find_same_name_viet base p with
       [ [_] -> ()
       | pl ->
@@ -711,7 +715,7 @@ value check_accents base bname = do {
               let f0 = sou base (Gwdb.get_first_name p) in
               let s0 = sou base (Gwdb.get_surname p) in
               let o1 = Gwdb.get_occ p in
-              if (f <> "?" && s <> "?") && i <> ip && o = o1 then do {
+              if (f <> "?" && s <> "?") && i <> ip && i < ip && o = o1 then do {
                 printf "Conflict between (%d %s.%d %s)\n" i f o s;
                 printf "and (%d %s.%d %s)\n" ip f0 o1 s0;
                 flush stdout }

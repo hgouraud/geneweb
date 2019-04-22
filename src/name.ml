@@ -35,7 +35,7 @@ value nbc c =
   else -1
 ;
 
-value unaccent_utf_8_viet lower s i =
+value unaccent_utf_8 lower s i =
   let f s = if lower then String.lowercase s else s in
   let nbc = nbc s.[i] in
   if nbc = 1 || nbc < 0 || i + nbc > String.length s then
@@ -621,7 +621,7 @@ value unaccent_utf_8_viet lower s i =
 
 
 
-value unaccent_utf_8 lower s i =
+value unaccent_utf_8_viet lower s i =
   let f s = if lower then String.lowercase s else s in
   let nbc = nbc s.[i] in
   if nbc = 1 || nbc < 0 || i + nbc > String.length s then
