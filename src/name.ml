@@ -928,7 +928,6 @@ value unaccent_utf_8_viet lower s i =
           | 0x86 -> "f"
           | _ -> String.sub s i nbc ]
       (* Code pour supprimer l'apostrophe typographique *)
-      (*
       | 0xE2 ->
           match Char.code s.[i+1] with
           [ 0x80 ->
@@ -936,7 +935,6 @@ value unaccent_utf_8_viet lower s i =
             [ 0x99 -> " "
             | _ -> String.sub s i nbc ]
           | _ -> String.sub s i nbc]
-      *)
       | c ->
           String.sub s i nbc ]
     in
