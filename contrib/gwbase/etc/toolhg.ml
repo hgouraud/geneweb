@@ -703,7 +703,7 @@ value check_accents base bname = do {
     let o = Gwdb.get_occ p in
     printf "Person %d %s.%d %s\n" i f o s;
     flush stdout;
-    if f <> "Ne" || f <> "Nn" || s <> "N" then
+    if s <> "N" then
       match find_same_name_viet base p with
       [ [_] -> ()
       | pl ->
