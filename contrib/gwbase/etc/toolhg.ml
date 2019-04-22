@@ -717,6 +717,10 @@ value check_accents base bname = do {
               let f1 = sou base (Gwdb.get_first_name p) in
               let s1 = sou base (Gwdb.get_surname p) in
               let o1 = Gwdb.get_occ p in
+              let _ = if i > 1755590 && i < 1755599 then do {
+                printf "Homonym %d %s.%d %s\n" ip f1 o1 s1;
+                flush stdout } else ()
+              in
               if (f <> "?" && s <> "?") && i <> ip && i < ip &&
                 (f <> f1 || s <> s1) && o = o1 then do {
                 printf "Conflict between (%d %s.%d %s)\n" i f o s;
