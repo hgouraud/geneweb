@@ -496,15 +496,7 @@ let print_branch conf base psn name =
              | Some (_, false) -> ()
              | None ->
                  if Array.length children <> 0 then
-                   begin
-                     Wserver.printf "<dl>";
-                     begin
-                       Wserver.printf "<dd>";
-                       Wserver.printf "...";
-                       Wserver.printf "</dd>"
-                     end;
-                     Wserver.printf "</dl>\n"
-                   end
+                   Wserver.printf "...\n";
              end;
              false)
           true family_list
