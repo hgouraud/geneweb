@@ -1158,6 +1158,35 @@ let tree_generation_list conf base gv p =
   in
   enrich_tree gen
 
+let string_of_source2 conf base s =
+  let src_with_link d_src src opt =
+    Printf.sprintf "<a href=\"%sm=NOTES&f=%s\"%s>%s</a>"
+      (commd conf) d_src opt src
+  in
+  let src_exists d_src =
+    let p =
+      match NotesLinks.check_file_name d_src with
+        Some (dl, f) -> List.fold_right Filename.concat dl f
+      | None -> ""
+    in
+    Sys.file_exists (Notes.file_path conf base p)
+  in
+  let slink src =
+    let d_src = "Sources:" ^ src in
+    if src_exists d_src then src_with_link d_src src ""
+    else if conf.wizard then
+      let d_src = "p:Sources:" ^ src in
+      if src_exists d_src then src_with_link d_src src " style=\"color:orange\""
+      else src_with_link d_src src " style=\"color:red\""
+    else src
+  in
+  List.fold_left
+    (fun txt l ->
+       match txt with
+         "" -> (slink l)
+       | _ -> txt ^ ", " ^ (slink l))
+    "" (Str.split (Str.regexp ", +") s)
+
 (* Ancestors surnames list *)
 
 let get_date_place conf base auth_for_all_anc p =
@@ -2410,6 +2439,11 @@ and eval_simple_str_var conf base env (_, p_auth) =
       end
   | "source_type" ->
       begin match get_env "src_typ" env with
+        Vstring s -> s
+      | _ -> raise Not_found
+      end
+  | "source_type2" ->
+      begin match get_env "src_typ2" env with
         Vstring s -> s
       | _ -> raise Not_found
       end
@@ -3985,7 +4019,7 @@ and eval_bool_person_field conf base env (p, p_auth) =
       end
   | "has_sources" ->
       p_auth &&
-      (sou base (get_psources p) <> "" || sou base (get_birth_src p) <> "" ||
+      (sou base (get_birth_src p) <> "" ||
        sou base (get_baptism_src p) <> "" ||
        sou base (get_death_src p) <> "" ||
        sou base (get_burial_src p) <> "" ||
@@ -3997,8 +4031,20 @@ and eval_bool_person_field conf base env (p, p_auth) =
             (* On sait que p_auth vaut vrai. *)
             let m_auth = authorized_age conf base sp in
             m_auth &&
-            (sou base (get_marriage_src fam) <> "" ||
-             sou base (get_fsources fam) <> ""))
+            (sou base (get_marriage_src fam) <> ""))
+         (Array.to_list (get_family p)))
+  | "has_sources2" ->
+      p_auth &&
+      (sou base (get_psources p) <> "" ||
+       List.exists
+         (fun ifam ->
+           let fam = foi base ifam in
+           let isp = Gutil.spouse (get_key_index p) fam in
+           let sp = poi base isp in
+           (* On sait que p_auth vaut vrai. *)
+           let m_auth = authorized_age conf base sp in
+           m_auth &&
+           (sou base (get_fsources fam) <> ""))
          (Array.to_list (get_family p)))
   | "has_surnames_aliases" ->
       if not p_auth && is_hide_names conf p then false
@@ -4556,6 +4602,19 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
           Util.safe_html @@ string_with_macros conf env s
       | _ -> raise Not_found
       end
+  | "source2" ->
+      begin match get_env "src2" env with
+        Vstring s ->
+          let param =
+            try List.assoc "linked_sources" conf.base_env
+            with Not_found -> ""
+          in
+          begin match param with
+            "yes" -> string_of_source2 conf base s
+          | _ -> s
+          end
+      | _ -> raise Not_found
+      end
   | "surname" ->
       if not p_auth && is_hide_names conf p then "x" else p_surname base p
   | "surname_begin" ->
@@ -4979,6 +5038,7 @@ let print_foreach conf base print_ast eval_expr =
     | "sorted_listb_item" -> print_foreach_sorted_listb_item env al ep
     | "sorted_listc_item" -> print_foreach_sorted_listc_item env al ep
     | "source" -> print_foreach_source env al ep
+    | "source2" -> print_foreach_source2 env al ep
     | "surname_alias" -> print_foreach_surname_alias env al ep
     | "witness" -> print_foreach_witness env al ep efam
     | "witness_relation" -> print_foreach_witness_relation env al ep
@@ -5718,10 +5778,6 @@ let print_foreach conf base print_ast eval_expr =
       if p_auth then
         let srcl = [] in
         let srcl =
-          insert (transl_nth conf "person/persons" 0)
-            (sou base (get_psources p)) srcl
-        in
-        let srcl =
           insert (transl_nth conf "birth" 0) (sou base (get_birth_src p)) srcl
         in
         let srcl =
@@ -5741,13 +5797,8 @@ let print_foreach conf base print_ast eval_expr =
                    if Array.length (get_family p) = 1 then ""
                    else " " ^ string_of_int i
                  in
-                 let srcl =
-                   let src_typ = transl_nth conf "marriage/marriages" 0 in
-                   insert (src_typ ^ lab) (sou base (get_marriage_src fam))
-                     srcl
-                 in
-                 let src_typ = transl_nth conf "family/families" 0 in
-                 insert (src_typ ^ lab) (sou base (get_fsources fam)) srcl,
+                 let src_typ = transl_nth conf "marriage/marriages" 0 in
+                 insert (src_typ ^ lab) (sou base (get_marriage_src fam)) srcl,
                  i + 1
                else srcl, i + 1)
             (srcl, 1) (get_family p)
@@ -5776,6 +5827,59 @@ let print_foreach conf base print_ast eval_expr =
       | [] -> ()
     in
     loop true srcl
+  and print_foreach_source2 env al ((p, p_auth) as ep) =
+    let rec insert_loop typ src =
+      function
+        (typ1, src1) :: srcl ->
+          if src = src1 then (typ1 ^ ", " ^ typ, src1) :: srcl
+          else (typ1, src1) :: insert_loop typ src srcl
+      | [] -> [typ, src]
+    in
+    let insert typ src srcl =
+      if src = "" then srcl
+      else insert_loop (Util.translate_eval typ) src srcl
+    in
+    let srcl2 =
+      if p_auth then
+        (* On ajoute les source dans cet ordre :                             *)
+        (* psource, fsource. *)
+        let srcl2 = [] in
+        let srcl2 =
+          insert (transl_nth conf "person/persons" 0)
+            (sou base (get_psources p)) srcl2
+        in
+        let (srcl2, _) =
+          Array.fold_left
+            (fun (srcl2, i) ifam ->
+               let fam = foi base ifam in
+               let isp = Gutil.spouse (get_key_index p) fam in
+               let sp = poi base isp in
+               (* On sait que p_auth vaut vrai. *)
+               let m_auth = authorized_age conf base sp in
+               if m_auth then
+                 let lab =
+                   if Array.length (get_family p) = 1 then ""
+                   else " " ^ string_of_int i
+                 in
+                 let src_typ = transl_nth conf "family/families" 0 in
+                 (insert (src_typ ^ lab) (sou base (get_fsources fam)) srcl2, i + 1)
+               else (srcl2, i + 1))
+            (srcl2, 1) (get_family p)
+        in
+        srcl2
+      else []
+    in
+    (* Affiche les sources et met à jour les variables "first" et "last". *)
+    let rec loop first =
+      function
+        (src_typ, src) :: srcl ->
+          let env =
+             ("first", Vbool first) :: ("last", Vbool (srcl = [])) ::
+             ("src_typ2", Vstring src_typ) :: ("src2", Vstring src) :: env
+          in
+          List.iter (print_ast env ep) al; loop false srcl
+      | [] -> ()
+    in loop true srcl2
   and print_foreach_surname_alias env al (p, p_auth as ep) =
     if not p_auth && is_hide_names conf p then ()
     else
