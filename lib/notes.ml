@@ -386,6 +386,15 @@ let print conf base =
       Some f -> if NotesLinks.check_file_name f <> None then f else ""
     | None -> ""
   in
+  let fnotes =
+    try
+      if (not conf.wizard && not conf.friend &&
+          String.sub fnotes 0 2 = "p:") ||
+         (not conf.wizard && String.sub fnotes 0 3 = "pw:") then
+        "p:MsgPrivate"
+      else fnotes
+    with Invalid_argument _ -> fnotes
+  in
   match p_getenv conf.env "ref" with
     Some "on" -> print_what_links conf base fnotes
   | _ ->
@@ -501,6 +510,16 @@ let print_misc_notes conf base =
       Some d -> d
     | None -> ""
   in
+  let d =
+    try
+      if (not conf.wizard && not conf.friend && d = "p") ||
+         (not conf.wizard && d = "pw") ||
+         (not conf.wizard && not conf.friend && String.sub d 0 2 = "p:") ||
+         (not conf.wizard && String.sub d 0 3 = "pw:") then
+        "Private Zone"
+      else d
+    with Invalid_argument _ -> d
+  in
   let title h =
     Wserver.printf "%s"
       (if d = "" then
@@ -577,16 +596,21 @@ let print_misc_notes conf base =
                  (if txt = "" then "" else " : " ^ txt);
                Wserver.printf "</li>\n"
            | None ->
-               Wserver.printf "<li class=\"folder\">\n";
-               Wserver.printf "<tt>";
-               Wserver.printf "<a href=\"%sm=MISC_NOTES&d=%s\">" (commd conf)
-                 (if d = "" then r
-                  else d ^ String.make 1 NotesLinks.char_dir_sep ^ r);
-               Wserver.printf "%s " r;
-               Wserver.printf "--&gt;";
-               Wserver.printf "</a>";
-               Wserver.printf "</tt>";
-               Wserver.printf "</li>\n")
+               if d = "" &&
+                  ((not conf.wizard && not conf.friend && r = "p") ||
+                   (not conf.wizard && r = "pw")) then ()
+               else begin
+                 Wserver.printf "<li class=\"folder\">\n";
+                 Wserver.printf "<tt>";
+                 Wserver.printf "<a href=\"%sm=MISC_NOTES&d=%s\">" (commd conf)
+                   (if d = "" then r
+                    else d ^ String.make 1 NotesLinks.char_dir_sep ^ r);
+                 Wserver.printf "%s " r;
+                 Wserver.printf "--&gt;";
+                 Wserver.printf "</a>";
+                 Wserver.printf "</tt>";
+                 Wserver.printf "</li>\n"
+               end)
         db;
       Wserver.printf "</ul>\n"
     end;
@@ -615,6 +639,13 @@ let search_text conf base s =
     let rec loop =
       function
         fnotes :: list ->
+          if try (not conf.wizard && not conf.friend &&
+                  String.sub fnotes 0 2 = "p:") ||
+                 (not conf.wizard && String.sub fnotes 0 3 = "pw:")
+             with Invalid_argument _ -> false
+          then
+            loop list
+          else
           let (nenv, nt) = read_notes base fnotes in
           let tit = try List.assoc "TITLE" nenv with Not_found -> "" in
           if in_text case_sens s tit || in_text case_sens s nt then
