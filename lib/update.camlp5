@@ -174,6 +174,32 @@ let print_same_name conf base p =
       Wserver.printf "</ul>\n";
       Wserver.printf "</p>\n"
 
+let print_same_name_radio conf base p =
+  let plist = Gutil.find_same_name base p in
+  let plist = Gutil.sort_person_list base plist in
+  match plist with
+    [] -> ()
+  | _ ->
+      Wserver.printf "<dl><dt>\n";
+      Wserver.printf "<ul>\n";
+      Mutil.list_iter_first
+        (fun first p -> begin
+           Wserver.printf "<li>";
+           let checked =
+             if first then " checked=\"checked\""
+             else ""
+           in
+           Wserver.printf "<input type=\"radio\" name=\"link_occ\" value=\"%d\"%s%s>"
+             (get_occ p) checked conf.xhs;
+           Wserver.printf "<a href=\"%s%s\">%s.%d %s</a>" (commd conf) (acces conf base p)
+     	 (p_first_name base p) (get_occ p) (p_surname base p);
+           Wserver.printf "%s\n" (Date.short_dates_text conf base p);
+           Wserver.printf "</li>";
+         end)
+        plist;
+      Wserver.printf "</ul>\n";
+      Wserver.printf "</dt></dl>\n"
+
 
 (* ************************************************************************* *)
 (*  [Fonc] is_label_note : string -> bool                                    *)
@@ -1151,14 +1177,16 @@ let print_create_conflict conf base p var =
   Wserver.printf (ftransl conf "click on \"%s\"") (transl conf "back");
   Wserver.printf " %s %s." (transl_nth conf "and" 0)
     (transl conf "use \"link\" instead of \"create\"");
+  print_same_name_radio conf base p;
   Wserver.printf "</li>";
   Wserver.printf "</ul>\n";
   Wserver.printf "<input type=\"submit\" name=\"create\" value=\"%s\"%s>\n"
     (capitale (transl conf "create")) conf.xhs;
+  Wserver.printf "<input type=\"submit\" name=\"link\" value=\"%s\"%s>\n"
+    (capitale (transl conf "link")) conf.xhs;
   Wserver.printf "<input type=\"submit\" name=\"return\" value=\"%s\"%s>\n"
     (capitale (transl conf "back")) conf.xhs;
   Wserver.printf "</form>\n";
-  print_same_name conf base p;
   Hutil.trailer conf;
   raise ModErr
 
