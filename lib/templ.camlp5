@@ -1504,7 +1504,8 @@ and print_var print_ast_list conf ifun env ep loc sl =
       | VVother f -> print_var1 f []
     with Not_found ->
       match sl with
-        ["include"; templ] ->
+      | ["base"; "name"] -> Wserver.printf "%s" conf.bname
+      | ["include"; templ] ->
           begin match input_templ conf templ with
             Some astl -> print_ast_list env ep astl
           | None -> Wserver.printf " %%%s?" (String.concat "." sl)
@@ -1514,8 +1515,6 @@ and print_var print_ast_list conf ifun env ep loc sl =
   let eval_var = eval_var conf ifun env ep loc in print_var1 eval_var sl
 and print_simple_variable conf =
   function
-    "base_header" -> include_hed_trl conf "hed"
-  | "base_trailer" -> include_hed_trl conf "trl"
   | "body_prop" -> print_body_prop conf
   | "copyright" -> print_copyright_with_logo conf
   | "copyright_nologo" -> print_copyright conf

@@ -1104,7 +1104,6 @@ let search_in_lang_path fname =
     | [] -> fname
     | d :: dl ->
       let f = Filename.concat d fname in
-      (*let _ = Printf.eprintf "Trying (lang): %s\n" f in*)
       if Sys.file_exists f then f else loop dl
   in
   loop @@ Secure.lang_path ()
@@ -1131,7 +1130,6 @@ let search_in_etc_path conf fname =
           [] | ["*"] -> ""
         | x :: _ -> x
   in
-  let _ = Printf.eprintf "Tpl: %s\n" url_templ in
   let tpl = [ url_templ ] (*:: config_templ*) in
   (* FIXME why do we concatenate both? *)
   let tpl = List.fold_left
@@ -1159,7 +1157,6 @@ let search_in_etc_path conf fname =
                 | [] -> etc_tpl_file
                 | d :: dl ->
                   let f = Filename.concat d etc_tpl_file in
-                  let _ = Printf.eprintf "Trying (tpl): %s\n" f in
                   if Sys.file_exists f then f else loop1 dl
               in
               loop1 @@ Secure.etc_path ()
@@ -1177,7 +1174,6 @@ let search_in_etc_path conf fname =
       | d :: dl ->
         let d = Filename.concat d "etc" in
         let f = Filename.concat d fname in
-        let _ = Printf.eprintf "Trying (etc): %s\n" f in
         if Sys.file_exists f then f else loop dl
     in
     loop @@ Secure.etc_path ()

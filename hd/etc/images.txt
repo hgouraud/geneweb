@@ -9,12 +9,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png">
   %include.css;
-  %base_header;
+  %include.hed;
 </head>
 <body%body_prop; id="person">
 <div class="container">
 %message_to_wizard;
-%include_perso_header;
+%include.perso_header;
 %( Logic for variables:
   file_name must be defined
   mode="comment" then only the comment file is updated
@@ -270,7 +270,7 @@
     </div>
   %end;
 %end;
-%base_trailer;
+%include.trl;
 %include.copyr;
 </div>
 %include.js;

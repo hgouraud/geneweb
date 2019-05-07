@@ -1537,7 +1537,6 @@ let print_misc_file misc_fname =
     Ttf fname | Woff2 fname ->
       begin
         try
-          (*let _ = Printf.eprintf "Trying misc request: %s\n" fname in*)
           let ic = Secure.open_in_bin fname in
           let buf = Bytes.create 1024 in
           let len = in_channel_length ic in

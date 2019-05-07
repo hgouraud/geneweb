@@ -85,7 +85,6 @@ and eval_simple_var conf base env p =
   | ["birth_note"] -> str_val (quote_escaped p.birth_note)
   | ["birth_src"] -> str_val (quote_escaped p.birth_src)
   | ["bapt"; s] -> eval_date_var (Adef.od_of_cdate p.baptism) s
-  | ["base"; "name"] -> str_val conf.bname
   | ["bt_buried"] ->
       bool_val
         (match p.burial with
@@ -828,23 +827,23 @@ and eval_is_relation_type rt =
   | _ -> bool_val false
 and eval_special_var conf base =
   function
-    ["include_perso_header"] -> (* TODO merge with mainstream includes ?? *)
+    ["include"; "perso_header"] ->
+      (* TODO merge with mainstream includes ?? *)
+      (* for perso_header, we need a person! *)
       begin match p_getint conf.env "i" with
         Some i ->
           let has_base_loop =
             try let _ = Util.create_topological_sort conf base in false with
               Consang.TopologicalSortError _ -> true
           in
-          if has_base_loop then VVstring ""
+          if has_base_loop then str_val (Printf.sprintf "has base loop")
           else
             let p = poi base (Adef.iper_of_int i) in
             Perso.interp_templ_with_menu (fun _ -> ()) "perso_header" conf
               base p;
-            VVstring ""
-      | None -> VVstring ""
+            str_val ""
+      | None -> str_val (Printf.sprintf "cannot include perso_header")
       end
-  | ["base_header"] -> include_hed_trl conf "hed"; VVstring ""
-  | ["base_trailer"] -> include_hed_trl conf "trl"; VVstring ""
   | _ -> raise Not_found
 and eval_int_env var env =
   match get_env var env with

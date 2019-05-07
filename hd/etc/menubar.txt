@@ -10,6 +10,7 @@
 %let;laY;title="[*tree] (Y)" accesskey="Y"%in;
 %let;acc;%if;access_by_key;ep=%first_name_key;;en=%surname_key;;%if;(occ!= "0")eoc=%occ;;%end;%else;ei=%index;;%end;%in;
 %let;sexcolor;%if;is_male;male%elseif;is_female;female%else;neuter%end;%in;
+%( TODO review i= and ip= depending on IND or FAM context %)
 %define;spousesexcolor()
   %foreach;family;
     %if;(family_cnt=1)
