@@ -160,12 +160,31 @@ let print_html_places_surnames conf base (array : (string list * (string * Adef.
     Wserver.printf "\n";
     Wserver.printf "</li>\n"
   in
+  let rebuild_place pl =
+    let pl = List.rev pl in
+    List.fold_left
+      (fun a b ->
+        if a = "" then b
+        else a ^ ", " ^ b)
+      "" pl
+  in
   let rec loop prev =
     function
-      (pl, snl) :: list ->
+      (f_pl, snl) :: list ->
         let rec loop1 prev pl =
           match prev, pl with
-            [], l2 -> List.iter (fun x -> Wserver.printf "<li>%s<ul>\n" x) l2
+            [], [x2] ->
+            let link =
+              if conf.wizard then
+                Printf.sprintf " <a href=\"%sm=MOD_DATA;data=place;s=%s\" target=\"_blank\"><img src=\"%s/edit.png\" alt=\"%s\"%s></a>"
+                    (commd conf) (rebuild_place f_pl) (Util.image_prefix conf)
+                    (capitale (Util.transl_decline conf "modify" "")) conf.xhs
+              else ""
+            in
+            Wserver.printf "<li>%s%s<ul>\n" x2 link
+          | [], x2 :: l2 ->
+              Wserver.printf "<li>%s<ul>\n" x2;
+              loop1 [] l2
           | x1 :: l1, x2 :: l2 ->
               if x1 = x2 then loop1 l1 l2
               else
@@ -176,9 +195,9 @@ let print_html_places_surnames conf base (array : (string list * (string * Adef.
                 end
           | _ -> assert false
         in
-        loop1 prev pl;
+        loop1 prev f_pl;
         print_sn_list snl;
-        loop pl list
+        loop f_pl list
     | [] -> List.iter (fun _ -> Wserver.printf "</ul></li>\n") prev
   in
   Wserver.printf "<ul>\n";
