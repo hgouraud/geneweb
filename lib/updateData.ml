@@ -1482,3 +1482,10 @@ let print_mod conf base =
        Templ.get_vother = get_vother; Templ.set_vother = set_vother;
        Templ.print_foreach = fun _ -> raise Not_found}
       [] ()
+
+let print_all_places_json conf base =
+  let list = build_list conf base in
+  Wserver.printf "var lieux=[";
+  List.iter (fun (s, _) -> Wserver.printf "\"%s\"," s) list;
+  Wserver.printf "\"\"];"
+

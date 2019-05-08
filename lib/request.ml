@@ -124,6 +124,7 @@ let family_m conf base =
       | "IMH" -> handler.imh
       | "INV_FAM" -> handler.inv_fam
       | "INV_FAM_OK" -> handler.inv_fam_ok
+      | "JSON_P" -> handler.json_p
       | "KILL_ANC" -> handler.kill_anc
       | "LB" -> handler.lb
       | "LD" -> handler.ld

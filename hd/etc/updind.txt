@@ -14,10 +14,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png">
+  <script type="text/javascript" src="%prefix;m=JSON_P&data=place"></script>
+  <script type="text/javascript">
+  function init_lieux() {
+    var datalist = document.getElementById('lieux');
+    lieux.forEach( function(item) {
+      var option = document.createElement('option');
+      option.value = item;
+      datalist.appendChild(option);
+    });
+  }
+  </script>
   %include;css
   %include;hed
 </head>
-<body%body_prop; id="person">
+<body%body_prop; id="person" onload="init_lieux();">
+<datalist id="lieux"></datalist>
 <div class="container">
 %message_to_wizard;
 %( do not use %include;perso_header %)
@@ -440,7 +452,7 @@
     <div class="row">
       <label for="e_placexcnt" class="col-2 col-form-label">[*place]</label>
       <div class="col-10">
-        <input type="text" class="form-control" name="e_placexcnt" maxlength="200" value="%event.e_place;" id="e_placexcnt" %if;("evt_name" = "#deat") onfocus='set_death_focus(xcnt)'%elseif;("evt_name" = "buri_or_crem") onfocus='set_burial_focus(xcnt)'%end; placeholder="[*place]">
+        <input type="text" class="form-control" name="e_placexcnt" list="lieux" maxlength="200" value="%event.e_place;" id="e_placexcnt" %if;("evt_name" = "#deat") onfocus='set_death_focus(xcnt)'%elseif;("evt_name" = "buri_or_crem") onfocus='set_burial_focus(xcnt)'%end; placeholder="[*place]">
         <a class="astuce" onmouseover="show_explain('updind','place',event)" onmouseout="hide_explain('updind',event)"></a>
       </div>
     </div>
@@ -575,7 +587,7 @@
     <div class="row">
       <label for="e_placexcnt" class="col-sm-2 col-form-label">[*place]</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control" name="e_placexcnt" maxlength="200" value="%event.e_place;"%sp; id="e_placexcnt" %if;("evt_name" = "#deat") onfocus='set_death_focus(xcnt)'%end; placeholder="[*place]">
+        <input type="text" class="form-control" name="e_placexcnt" list="lieux" maxlength="200" value="%event.e_place;"%sp; id="e_placexcnt" %if;("evt_name" = "#deat") onfocus='set_death_focus(xcnt)'%end; placeholder="[*place]">
       </div>
     </div>
     %apply;date%with;[*date/dates]0%and;e_datexcnt%and;event_date%and;%if;("evt_name" = "#deat")onfocus='set_death_focus(xcnt)'%end;%end;
@@ -669,7 +681,7 @@
   <div class="row">
     <label for="e_placexcnt" class="col-sm-2 col-form-label">[*place]</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" name="e_placexcnt" maxlength="200" value="" id="e_placexcnt" %if;("evt_name" = "#deat") onfocus='set_death_focus(xcnt)'%elseif;("evt_name" = "buri_or_crem") onfocus='set_buri(xcnt)'%end; placeholder="[*place]">
+      <input type="text" class="form-control" name="e_placexcnt" list="lieux" maxlength="200" value="" id="e_placexcnt" %if;("evt_name" = "#deat") onfocus='set_death_focus(xcnt)'%elseif;("evt_name" = "buri_or_crem") onfocus='set_buri(xcnt)'%end; placeholder="[*place]">
     </div>
   </div>
   %if;("evt_name"="#deat")
@@ -945,7 +957,7 @@
             <td>[*born]2...</td>
             <td><label for="birth_place">[*place]</label></td>
             <td>
-              <input type="text" name="birth_place" size="90" maxlength="200" value="%birth_place;" id="birth_place"%/>
+              <input type="text" name="birth_place" list="lieux" size="90" maxlength="200" value="%birth_place;" id="birth_place"%/>
             </td>
           </tr>
         </table>
@@ -973,7 +985,7 @@
             <td>[*baptized]2...</td>
             <td><label for="bapt_place">[*place]</label></td>
             <td>
-              <input class="form-control" type="text" name="bapt_place" size="90" maxlength="200" value="%bapt_place;" id="bapt_place"%/>
+              <input class="form-control" type="text" name="bapt_place" list="lieux" size="90" maxlength="200" value="%bapt_place;" id="bapt_place"%/>
             </td>
           </tr>
         </table>
@@ -1012,7 +1024,7 @@
             </td>
             <td>
               <label>[*place]0
-                <input type="text" name="death_place" size="90" maxlength="200" value="%death_place;" onfocus='setDead()'%/></label>
+                <input type="text" name="death_place" list="lieux" size="90" maxlength="200" value="%death_place;" onfocus='setDead()'%/></label>
             </td>
           </tr>
         </table>
@@ -1063,7 +1075,7 @@
             </td>
             <td>
               <label>[*place]0
-                <input type="text" name="burial_place" size="90" maxlength="200" value="%burial_place;"%/>
+                <input type="text" name="burial_place" list="lieux" size="90" maxlength="200" value="%burial_place;"%/>
               </label>
             </td>
           </tr>

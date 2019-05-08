@@ -18,10 +18,22 @@
       [*merge::family/families]1 # %evar_i;
     %end;
   </title>
+  <script type="text/javascript" src="%prefix;m=JSON_P&data=place"></script>
+  <script type="text/javascript">
+  function init_lieux() {
+    var datalist = document.getElementById('lieux');
+    lieux.forEach( function(item) {
+      var option = document.createElement('option');
+      option.value = item;
+      datalist.appendChild(option);
+    });
+  }
+  </script>
   %include;css
   %include;hed
 </head>
-<body%body_prop; id="family">
+<body%body_prop; id="family" onload="init_lieux();">
+<datalist id="lieux"></datalist>
 %message_to_wizard;
 <div class="container">
 %( do not use %include;perso_header %)
@@ -264,7 +276,7 @@ $(document).ready(function(){
     </div>
     <label for="xvar_pl" class="%if;(verbose=true)sr-only%end; col-sm-1 col-form-label">[place]</label>%nn;
     <div class="col-sm">
-      <input type="text" class="form-control" name="xvar_pl" value="%xx.create.kind_place;" id="xvar_pl" placeholder="[*place]" %readonly;>
+      <input type="text" class="form-control" name="xvar_pl" value="%xx.create.kind_place;" list="lieux" id="xvar_pl" placeholder="[*place]" %readonly;>
     </div>
   </div>
 %end;
@@ -456,7 +468,7 @@ $(document).ready(function(){
   <div class="row">
     <label for="e_placexcnt" class="col-sm-2 col-form-label">[*place]</label>
     <div class="col-sm-10">
-      <input class="form-control" type="text" name="e_placexcnt" value="%event.e_place;" id="e_placexcnt" placeholder="[*place]">
+      <input class="form-control" type="text" name="e_placexcnt" list="lieux" value="%event.e_place;" id="e_placexcnt" placeholder="[*place]">
     </div>
   </div>
   %apply;date([*date/dates]0, "e_datexcnt", "event_date")
@@ -597,7 +609,7 @@ $(document).ready(function(){
       <tr>
         <td><label for="marr_place">[*place]</label></td>
         <td>
-          <input type="text" name="marr_place" size="40" maxlength="200" value="%marriage_place;" id="marr_place"%/>
+          <input type="text" name="marr_place" list="lieux" size="40" maxlength="200" value="%marriage_place;" id="marr_place"%/>
         </td>
       </tr>
     </table>

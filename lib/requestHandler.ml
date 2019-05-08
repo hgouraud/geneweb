@@ -330,6 +330,7 @@ and handler =
   ; imh : handler_base
   ; inv_fam : handler_base
   ; inv_fam_ok : handler_base
+  ; json_p : handler_base
   ; kill_anc : handler_base
   ; lb : handler_base
   ; ld : handler_base
@@ -509,6 +510,7 @@ let dummyHandler =
   ; imh = dummy_base
   ; inv_fam = dummy_base
   ; inv_fam_ok = dummy_base
+  ; json_p = dummy_base
   ; kill_anc = dummy_base
   ; lb = dummy_base
   ; ld = dummy_base
@@ -900,6 +902,11 @@ let defaultHandler : handler =
 
   ; inv_fam_ok = begin fun self conf base ->
       if conf.wizard then UpdateFamOk.print_inv conf base
+      else self.incorrect_request self conf base
+    end
+
+  ; json_p = begin fun self conf base ->
+      if conf.wizard then UpdateData.print_all_places_json conf base
       else self.incorrect_request self conf base
     end
 
