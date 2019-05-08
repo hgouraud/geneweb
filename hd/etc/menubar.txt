@@ -144,6 +144,20 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
               <span class="sr-only">%first_name;%if;(occ!=0).%occ%end; %surname;</span>
             </a>
           </li>
+          %if;(cvar_var_doc != "")
+            <li class="nav-item">
+              <a class="nav-link" href="%cvar_var_doc;%image_txt;&amp;Prefix=%prefix;" title="Lister les documents liés">
+                <span class="fa fa-book fa-fw" aria-hidden="true"></span>
+              </a>
+            </li>
+          %end;
+          %if;(cvar_var_img != "" and (friend or wizard))
+            <li class="nav-item">
+              <a class="nav-link" href="%cvar_var_img;%image_txt;&amp;Prefix=%prefix;" title="Lister les photos liées">
+                <span class="fa fa-images fa-fw" aria-hidden="true"></span>
+              </a>
+            </li>
+          %end;
           %if;(not (bvar.wizard_just_friend="yes") and wizard)
             <li class="nav-item">
               <a class="nav-link %if;(evar.m="MOD_IND" or evar.m="MOD_IND_OK")active%end;" id="mod_ind" href="%prefix;m=MOD_IND;i=%index;" %laP;>%nn;

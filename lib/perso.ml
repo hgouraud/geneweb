@@ -4288,6 +4288,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
   | "image_size" -> string_of_image_size conf base ep
   | "image_medium_size" -> string_of_image_medium_size conf base ep
   | "image_small_size" -> string_of_image_small_size conf base ep
+  | "image_txt" -> Util.default_image_name base p
   | "image_url" -> string_of_image_url conf base ep false
   | "ind_access" ->
       (* deprecated since 5.00: rather use "i=%index;" *)
