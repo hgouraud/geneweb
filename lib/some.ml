@@ -577,7 +577,7 @@ let print_one_surname_by_branch conf base x xl (bhl, str) =
       begin let _ =
         List.fold_left
           (fun n bh ->
-             Wserver.printf "<dt>";
+             Wserver.printf "<dt class=\"branch_start\">";
              if conf.cancel_links then Wserver.printf "%d." n
              else
                begin
