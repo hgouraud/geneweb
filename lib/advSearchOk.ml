@@ -63,6 +63,11 @@ let string_incl x y =
   in
   loop 0
 
+let my_string_incl s1 s2 =
+ let re = Str.regexp_string (Str.quote s1) in
+ try ignore (Str.search_forward re s2 0); true
+ with Not_found -> false
+
 let name_incl x y =
   let x = Name.abbrev (Name.lower x) in
   let y = Name.abbrev (Name.lower y) in string_incl x y
@@ -136,38 +141,53 @@ let advanced_search conf base max_answers =
        | _ -> true)
       empty_default_value
   in
-  let bapt_date_field_name =
-    get_event_field_name gets "date" "bapt" search_type
+  let baptism_src_field_name =
+    get_event_field_name gets "src" "baptism" search_type
+  in
+  let baptism_date_field_name =
+    get_event_field_name gets "date" "baptism" search_type
+  in
+  let baptism_place_field_name =
+    get_event_field_name gets "place" "baptism" search_type
   in
   let birth_date_field_name =
     get_event_field_name gets "date" "birth" search_type
   in
-  let death_date_field_name =
-    get_event_field_name gets "date" "death" search_type
+  let birth_place_field_name =
+    get_event_field_name gets "place" "birth" search_type
+  in
+  let birth_src_field_name =
+    get_event_field_name gets "src" "birth" search_type
   in
   let burial_date_field_name =
     get_event_field_name gets "date" "burial" search_type
   in
-  let marriage_date_field_name =
-    get_event_field_name gets "date" "marriage" search_type
+  let burial_place_field_name =
+    get_event_field_name gets "place" "burial" search_type
   in
-  let bapt_place_field_name =
-    get_event_field_name gets "place" "bapt" search_type
+  let burial_src_field_name =
+    get_event_field_name gets "src" "burial" search_type
   in
-  let birth_place_field_name =
-    get_event_field_name gets "place" "birth" search_type
+  let death_date_field_name =
+    get_event_field_name gets "date" "death" search_type
   in
   let death_place_field_name =
     get_event_field_name gets "place" "death" search_type
   in
-  let burial_place_field_name =
-    get_event_field_name gets "place" "burial" search_type
+  let death_src_field_name =
+    get_event_field_name gets "src" "death" search_type
+  in
+  let marriage_date_field_name =
+    get_event_field_name gets "date" "marriage" search_type
   in
   let marriage_place_field_name =
     get_event_field_name gets "place" "marriage" search_type
   in
+  let marriage_src_field_name =
+    get_event_field_name gets "src" "marriage" search_type
+  in
   let match_baptism_date p empty_default_value =
-    match_date p bapt_date_field_name
+    match_date p baptism_date_field_name
       (fun () -> Adef.od_of_cdate (get_baptism p)) empty_default_value
   in
   let match_birth_date p empty_default_value =
@@ -192,24 +212,68 @@ let advanced_search conf base max_answers =
       empty_default_value
   in
   let match_baptism_place p empty_default_value =
-    apply_to_field_value p bapt_place_field_name
-      (fun x -> name_incl x (sou base (get_baptism_place p)))
-      empty_default_value
+    let cmp =
+      match gets "baptism_place_oper" with
+        "on" -> fun x -> x = (sou base (get_baptism_place p))
+      | _ -> fun x -> my_string_incl x (sou base (get_baptism_place p))
+    in
+    apply_to_field_value p baptism_place_field_name cmp empty_default_value
   in
   let match_birth_place p empty_default_value =
-    apply_to_field_value p birth_place_field_name
-      (fun x -> name_incl x (sou base (get_birth_place p)))
-      empty_default_value
+    let cmp =
+      match gets "birth_place_oper" with
+        "on" -> fun x -> x = (sou base (get_birth_place p))
+      | _ -> fun x -> my_string_incl x (sou base (get_birth_place p))
+    in
+    apply_to_field_value p birth_place_field_name cmp empty_default_value
   in
   let match_death_place p empty_default_value =
-    apply_to_field_value p death_place_field_name
-      (fun x -> name_incl x (sou base (get_death_place p)))
-      empty_default_value
+    let cmp =
+      match gets "death_place_oper" with
+        "on" -> fun x -> x = (sou base (get_death_place p))
+      | _ -> fun x -> my_string_incl x (sou base (get_death_place p))
+    in
+    apply_to_field_value p death_place_field_name cmp empty_default_value
   in
   let match_burial_place p empty_default_value =
-    apply_to_field_value p burial_place_field_name
-      (fun x -> name_incl x (sou base (get_burial_place p)))
-      empty_default_value
+    let cmp =
+      match gets "burial_place_oper" with
+        "on" -> fun x -> x = (sou base (get_burial_place p))
+      | _ -> fun x -> my_string_incl x (sou base (get_burial_place p))
+    in
+    apply_to_field_value p burial_place_field_name cmp empty_default_value
+  in
+  let match_baptism_src p empty_default_value =
+    let cmp =
+      match gets "baptism_src_oper" with
+        "on" -> fun x -> my_string_incl x (sou base (get_baptism_src p))
+      | _ -> fun x -> not (my_string_incl x (sou base (get_baptism_src p)))
+    in
+    apply_to_field_value p baptism_src_field_name cmp empty_default_value
+  in
+  let match_birth_src p empty_default_value =
+    let cmp =
+      match gets "birth_src_oper" with
+        "on" -> fun x -> my_string_incl x (sou base (get_birth_src p))
+      | _ -> fun x -> not (my_string_incl x (sou base (get_birth_src p)))
+    in
+    apply_to_field_value p birth_src_field_name cmp empty_default_value
+  in
+  let match_death_src p empty_default_value =
+    let cmp =
+      match gets "death_src_oper" with
+        "on" -> fun x -> my_string_incl x (sou base (get_death_src p))
+      | _ -> fun x -> not (my_string_incl x (sou base (get_death_src p)))
+    in
+    apply_to_field_value p death_src_field_name cmp empty_default_value
+  in
+  let match_burial_src p empty_default_value =
+    let cmp =
+      match gets "burial_src_oper" with
+        "on" -> fun x -> my_string_incl x (sou base (get_burial_src p))
+      | _ -> fun x -> not (my_string_incl x (sou base (get_burial_src p)))
+    in
+    apply_to_field_value p burial_src_field_name cmp empty_default_value
   in
   let match_occupation p empty_default_value =
     apply_to_field_value p "occu"
@@ -231,17 +295,28 @@ let advanced_search conf base max_answers =
        | _ -> true)
       empty_default_value
   in
-  let match_marriage p x y empty_default_value =
+  let match_marriage p fd fp fs empty_default_value =
     let (d1, d2) =
-      try Hashtbl.find hd x with
+      try Hashtbl.find hd fd with
         Not_found ->
           let v =
-            reconstitute_date conf (x ^ "1"), reconstitute_date conf (x ^ "2")
+            reconstitute_date conf (fd ^ "1"), reconstitute_date conf (fd ^ "2")
           in
-          Hashtbl.add hd x v; v
+          Hashtbl.add hd fd v; v
     in
-    let y = gets y in
-    let test_date_place df =
+    let fp = gets fp in
+    let dp =
+      if fp = "" then function _ -> empty_default_value
+      else if "on" = (gets (fp ^ "_oper")) then function fam -> my_string_incl fp (sou base (get_marriage_place fam))
+      else function fam -> fp = (sou base (get_marriage_place fam))
+    in
+    let fs = gets fs in
+    let ds =
+      if fs = "" then function _ -> empty_default_value
+      else if "on" = (gets (fs ^ "_oper")) then function fam -> my_string_incl fs (sou base (get_marriage_src fam))
+      else function fam -> fs = (sou base (get_marriage_src fam))
+    in
+    let test_date_place_src df =
       List.exists
         (fun ifam ->
            let fam = foi base ifam in
@@ -249,17 +324,13 @@ let advanced_search conf base max_answers =
            let mother = poi base (get_mother fam) in
            if authorized_age conf base father &&
               authorized_age conf base mother
-           then
-             if y = "" then df (Adef.od_of_cdate (get_marriage fam))
-             else
-               name_incl y (sou base (get_marriage_place fam)) &&
-               df (Adef.od_of_cdate (get_marriage fam))
+           then dp fam && ds fam && df (Adef.od_of_cdate (get_marriage fam))
            else false)
         (Array.to_list (get_family p))
     in
     match d1, d2 with
       Some d1, Some d2 ->
-        test_date_place
+        test_date_place_src
           (function
              Some (Dgreg (_, _) as d) ->
                if CheckItem.strictly_before d d1 then false
@@ -267,19 +338,19 @@ let advanced_search conf base max_answers =
                else true
            | _ -> false)
     | Some d1, _ ->
-        test_date_place
+        test_date_place_src
           (function
              Some (Dgreg (_, _) as d) when authorized_age conf base p ->
                if CheckItem.strictly_before d d1 then false else true
            | _ -> false)
     | _, Some d2 ->
-        test_date_place
+        test_date_place_src
           (function
              Some (Dgreg (_, _) as d) when authorized_age conf base p ->
                if CheckItem.strictly_after d d2 then false else true
            | _ -> false)
     | _ ->
-        if y = "" then empty_default_value
+        if fp = "" && fs = "" then empty_default_value
         else
           List.exists
             (fun ifam ->
@@ -288,8 +359,7 @@ let advanced_search conf base max_answers =
                let mother = poi base (get_mother fam) in
                if authorized_age conf base father &&
                   authorized_age conf base mother
-               then
-                 name_incl y (sou base (get_marriage_place fam))
+               then dp fam && ds fam
                else false)
             (Array.to_list (get_family p))
   in
@@ -302,29 +372,26 @@ let advanced_search conf base max_answers =
   in
   let match_person p search_type =
     if search_type <> "OR" then
-      (if match_civil_status p && match_baptism_date p true &&
-          match_baptism_place p true && match_birth_date p true &&
-          match_birth_place p true && match_burial_date p true &&
-          match_burial_place p true && match_death_date p true &&
-          match_death_place p true &&
-          match_marriage p marriage_date_field_name marriage_place_field_name
-            true
+      (if match_civil_status p &&
+          match_birth_date p true && match_birth_place p true && match_birth_src p true &&
+          match_baptism_date p true && match_baptism_place p true && match_baptism_src p true &&
+          match_burial_date p true && match_burial_place p true && match_death_src p true &&
+          match_death_date p true && match_death_place p true && match_burial_src p true &&
+          match_marriage p marriage_date_field_name marriage_place_field_name marriage_src_field_name true
        then
          begin list := p :: !list; incr len end)
     else if
       match_civil_status p &&
-      (gets "place" = "" && gets "date2_yyyy" = "" &&
-       gets "date1_yyyy" = "" ||
-       (match_baptism_date p false || match_baptism_place p false) &&
-       match_baptism_date p true && match_baptism_place p true ||
-       (match_birth_date p false || match_birth_place p false) &&
-       match_birth_date p true && match_birth_place p true ||
-       (match_burial_date p false || match_burial_place p false) &&
-       match_burial_date p true && match_burial_place p true ||
-       (match_death_date p false || match_death_place p false) &&
-       match_death_date p true && match_death_place p true ||
-       match_marriage p marriage_date_field_name marriage_place_field_name
-         false)
+      (gets "place" = "" && gets "date2_yyyy" = "" && gets "date1_yyyy" = "" ||
+       (match_baptism_date p false || match_baptism_place p false || match_baptism_src p false) &&
+       match_baptism_date p true && match_baptism_place p true && match_baptism_src p true ||
+       (match_birth_date p false || match_birth_place p false || match_birth_src p false) &&
+       match_birth_date p true && match_birth_place p true && match_birth_src p true ||
+       (match_burial_date p false || match_burial_place p false || match_burial_src p false) &&
+       match_burial_date p true && match_burial_place p true && match_burial_src p true ||
+       (match_death_date p false || match_death_place p false || match_death_src p false) &&
+       match_death_date p true && match_death_place p true && match_death_src p true ||
+       match_marriage p marriage_date_field_name marriage_place_field_name marriage_src_field_name false)
     then
       begin list := p :: !list; incr len end
   in
