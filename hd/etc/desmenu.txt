@@ -245,6 +245,14 @@ function table_spouse_disabled () {
       </div>
     </div>
     <div class="col-md-5">
+      %if;(bvar.var_cartol != "")
+      <label>
+        <input type="radio" name="t" value="CARTO" onclick="no_options()"%/> <span class="fa fa-map-marked-alt fa-fw"></span> [
+en: Cartography
+fr: Cartographie
+]
+      </label><br%/><br%/>
+      %end;
       <label>
         <input type="radio" name="t" value="T" onclick="no_options ()"%/>
          <span class="fa fa-sitemap fa-fw"></span> [*tree]

@@ -1378,6 +1378,7 @@ let print conf base p =
     | Some "D" -> "deslist_hr"
     | Some ("H" | "I" | "A") -> "destable"
     | Some "V" -> "destree"
+    | Some "CARTO" -> "descarto"
     | Some _ -> ""
     | _ -> "desmenu"
   in

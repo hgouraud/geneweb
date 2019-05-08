@@ -79,35 +79,35 @@
     %if;has_birth_date;
       <li>%apply;capitalize(nth([born],sex)) %on_birth_date;
       %if;birthday; ([happy birthday to you!])%end;
-      %if;has_birth_place; - %birth_place;%end;</li>%nl;
+      %if;has_birth_place; - %apply;place_check(birth_place)%end;</li>%nl;
     %else;
       %if;has_birth_place;
-        <li>%apply;capitalize(nth([born],sex)) - %birth_place;</li>%nl;
+        <li>%apply;capitalize(nth([born],sex)) - %apply;place_check(birth_place)</li>%nl;
       %end;
     %end;
     %if;has_baptism_date;
       <li>%apply;capitalize(nth([baptized],sex)) %on_baptism_date;
-      %if;has_baptism_place; - %baptism_place;%end;</li>%nl;
+      %if;has_baptism_place; - %apply;place_check(baptism_place)%end;</li>%nl;
     %else;
       %if;has_baptism_place;
-        <li>%apply;capitalize(nth([baptized],sex)) - %baptism_place;</li>%nl;
+        <li>%apply;capitalize(nth([baptized],sex)) - %apply;place_check(baptism_place)</li>%nl;
       %end;
     %end;
     %if;is_dead;
       <li>%apply;capitalize(died)
       %if;has_death_date; %on_death_date;%end;
-      %if;has_death_place; - %death_place;%end;
+      %if;has_death_place; - %apply;place_check(death_place)%end;
       %if;(has_linked_page.DEATH and linked_page.DEATH!="") (%linked_page.DEATH;)%end;</li>%nl;
     %end;
     %if;is_buried;
       <li>%apply;capitalize(nth([buried],sex))
       %if;has_burial_date; %on_burial_date;%end;
-      %if;has_burial_place; - %burial_place;%end;</li>%nl;
+      %if;has_burial_place; - %apply;place_check(burial_place)%end;</li>%nl;
     %end;
     %if;is_cremated;
       <li>%apply;capitalize(nth([cremated],sex))
       %if;has_cremation_date; %on_cremation_date;%end;
-      %if;has_cremation_place; - %cremation_place;%end;</li>%nl;
+      %if;has_cremation_place; - %apply;place_check(cremation_place)%end;</li>%nl;
     %end;
     %if;has_occupation;
       <li>%apply;capitalize(occupation)</li>%nl;

@@ -299,6 +299,12 @@
   %end;
 %end;
 
+%define;place_check(pp)
+  %if;(wizard and evar.copl != "on" and evar.t != "CARTO")<span class="place_check">%if;(bvar.var_carto != "")<a class="place" href="%bvar.var_carto;?lieu=pp">pp</a>%else;pp%end;</span>%nn;
+  %else;%if;(bvar.var_carto != "")<a class="place" href="%bvar.var_carto;?lieu=pp">pp</a>%else;pp%end;%nn;
+  %end;
+%end;
+
 %define;long_display_person(xx)
   %apply;image_MF("xx")
   %apply;display_sosa("xx")
@@ -534,6 +540,23 @@
       %else; %on_marriage_date;
         %if;wedding_birthday; ([happy birthday to them!])%end;
         , %marriage_place,
+      %end;
+    %end;
+  %end;
+%end;
+
+%define;long_married_check(xx)
+  %apply;married_to%with;%xx.sex%and;
+    %if;(marriage_place = "")
+      %if;(on_marriage_date = "")
+      %else; %on_marriage_date;%nn;
+        %if;wedding_birthday; ([happy birthday to them!])%end;
+      %end;
+    %else;
+      %if;(on_marriage_date = ""), %apply;place_check(marriage_place),
+      %else; %on_marriage_date;
+        %if;wedding_birthday; ([happy birthday to them!])%end;
+        , %apply;place_check(marriage_place),
       %end;
     %end;
   %end;
