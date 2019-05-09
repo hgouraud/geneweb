@@ -133,14 +133,14 @@ var prefix="%bvar.var_cartol;";
 <p>%apply;togen("v").</p>
 
 <div><b>Légende :</b> nombre d'événement(s)
-<img src="%bvar.var_cartol;/icone_0.png" />1
-<span id="bloc_leg1"><img src="%bvar.var_cartol;/icone_1.png" /><span id="leg1"></span></span>
-<span id="bloc_leg2"><img src="%bvar.var_cartol;/icone_2.png" /><span id="leg2"></span></span>
-<span id="bloc_leg3"><img src="%bvar.var_cartol;/icone_3.png" /><span id="leg3"></span></span>
-<span id="bloc_leg4"><img src="%bvar.var_cartol;/icone_4.png" /><span id="leg4"></span></span>
+<img src="%image_prefix;/js/icone_0.png" />1
+<span id="bloc_leg1"><img src="%image_prefix;/js/icone_1.png" /><span id="leg1"></span></span>
+<span id="bloc_leg2"><img src="%image_prefix;/js/icone_2.png" /><span id="leg2"></span></span>
+<span id="bloc_leg3"><img src="%image_prefix;/js/icone_3.png" /><span id="leg3"></span></span>
+<span id="bloc_leg4"><img src="%image_prefix;/js/icone_4.png" /><span id="leg4"></span></span>
 
 <span id="nbr"></span>
-<a class="right" href="#" onclick="resetZoom();"><img src="%bvar.var_cartol;/reset.png"/></a>
+<a class="right" href="#" onclick="resetZoom();"><img src="%image_prefix;/js/reset.png"/></a>
 </div>
 <div id="EmplacementDeMaCarte"></div>
 
