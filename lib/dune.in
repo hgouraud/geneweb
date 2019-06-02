@@ -14,6 +14,7 @@
             geneweb.def
             geneweb.util
             geneweb.wserver.mli
+            yojson
             markup)
  (modules_without_implementation config templAst)
 )
