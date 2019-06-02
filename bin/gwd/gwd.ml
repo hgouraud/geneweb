@@ -1491,6 +1491,8 @@ type misc_fname =
   | Ttf of string
   | Woff of string
   | Woff2 of string
+  | Xml of string
+  | Other of string
 
 let content_misc conf len misc_fname =
   Output.status conf Def.OK;
@@ -1507,7 +1509,8 @@ let content_misc conf len misc_fname =
     | Ttf fname -> fname, "application/font-ttf"
     | Woff fname -> fname, "application/font-woff"
     | Woff2 fname -> fname, "application/font-woff2"
-
+    | Xml fname -> fname, "application/xml"
+    | Other fname -> fname, "text/plain"
   in
   Output.header conf "Content-type: %s" t;
   Output.header conf "Content-length: %d" len;
@@ -1530,6 +1533,25 @@ let find_misc_file name =
 
 let print_misc_file conf misc_fname =
   match misc_fname with
+    Css fname | Js fname | Otf fname | Svg fname | Woff fname | Eot fname |
+    Ttf fname | Woff2 fname | Xml fname ->
+      begin
+        try
+          let ic = Secure.open_in_bin fname in
+          let buf = Bytes.create 1024 in
+          let len = in_channel_length ic in
+          content_misc len misc_fname;
+          let rec loop len =
+            if len = 0 then ()
+            else
+              let olen = min (Bytes.length buf) len in
+              really_input ic buf 0 olen;
+              Wserver.printf "%s" (Bytes.sub_string buf 0 olen);
+              loop (len - olen)
+          in
+          loop len; close_in ic; true
+        with Sys_error _ -> false
+      end
   | Other _ -> false
   | Css fname
   | Eot fname
@@ -1572,6 +1594,7 @@ let misc_request conf fname =
       else if Filename.check_suffix fname ".ttf" then Ttf fname
       else if Filename.check_suffix fname ".woff2" then Woff2 fname
       else if Filename.check_suffix fname ".png" then Png fname
+      else if Filename.check_suffix fname ".xml" then Xml fname
       else Other fname
     in
     print_misc_file conf misc_fname

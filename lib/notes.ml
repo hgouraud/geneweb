@@ -125,7 +125,202 @@ let notes_links_db conf base eliminate_unlinked =
       Gutil.alphabetic_order (Name.lower s1) (Name.lower s2))
     db2
 
-let update_notes_links_db base fnotes s =
+let print_linked_list conf base pgl =
+  Wserver.printf "<ul>\n";
+  List.iter
+    (fun pg ->
+       Wserver.printf "<li>";
+       begin match pg with
+         NotesLinks.PgInd ip ->
+           Wserver.printf "<tt>";
+           if conf.wizard then
+             begin
+               Wserver.printf "<a class=\"mx-2\" href=\"%s&i=%d&\">"
+                 (commd conf) (Adef.int_of_iper ip);
+               Wserver.printf "</sup><i class=\"fa fa-cog\"></i></sup>";
+               Wserver.printf "</a>"
+             end;
+           begin
+             let p = pget conf base ip in
+             Wserver.printf "<span class=\"mx-2\">";
+             Wserver.printf "%s%s"
+               (Util.referenced_person_title_text conf base p)
+               (Date.short_dates_text conf base p);
+             Wserver.printf "</span>"
+           end;
+           Wserver.printf "</tt>\n"
+       | NotesLinks.PgFam ifam ->
+           let fam = foi base ifam in
+           let fath = pget conf base (get_father fam) in
+           let moth = pget conf base (get_mother fam) in
+           Wserver.printf "<tt>";
+           if conf.wizard then
+             begin
+               Wserver.printf
+                 "<a class=\"mx-2\" href=\"%sm=MOD_FAM&i=%d&ip=%d&\">"
+                 (commd conf) (Adef.int_of_ifam ifam)
+                 (Adef.int_of_iper (Gwdb.get_key_index fath));
+               Wserver.printf "</sup><i class=\"fa fa-cog\"></i></sup>";
+               Wserver.printf "</a>"
+             end;
+           Wserver.printf "<span class=\"mx-2\">";
+           Wserver.printf "%s%s &amp; %s %s"
+             (Util.referenced_person_title_text conf base fath)
+             (Date.short_dates_text conf base fath)
+             (Util.referenced_person_title_text conf base moth)
+             (Date.short_dates_text conf base moth);
+           Wserver.printf "</span>";
+           Wserver.printf "</tt>\n"
+       | NotesLinks.PgNotes ->
+           Wserver.printf "<tt>";
+           if conf.wizard then
+             begin
+               Wserver.printf "<a class=\"mx-2\" href=\"%sm=MOD_NOTES&\">"
+                 (commd conf);
+               Wserver.printf "</sup><i class=\"fa fa-cog\"></i></sup>";
+               Wserver.printf "</a>"
+             end;
+           Wserver.printf "<a class=\"mx-2\" href=\"%sm=NOTES\">"
+             (commd conf);
+           Wserver.printf "%s" (transl_nth conf "note/notes" 1);
+           Wserver.printf "</a>\n";
+           Wserver.printf "</tt>\n"
+       | NotesLinks.PgMisc fnotes ->
+           let (nenv, _) = read_notes base fnotes in
+           let title = try List.assoc "TITLE" nenv with Not_found -> "" in
+           let title = Util.safe_html title in
+           Wserver.printf "<tt>";
+           if conf.wizard then
+             begin
+               Wserver.printf
+                 "<a class=\"mx-2\" href=\"%sm=MOD_NOTES&f=%s&\">"
+                 (commd conf) fnotes;
+               Wserver.printf "</sup><i class=\"fa fa-cog\"></i></sup>";
+               Wserver.printf "</a>"
+             end;
+           Wserver.printf "<a class=\"mx-2\" href=\"%sm=NOTES&f=%s&\">"
+             (commd conf) fnotes;
+           Wserver.printf "%s" fnotes;
+           Wserver.printf "</a>";
+           if title <> "" then Wserver.printf "(%s)" title;
+           Wserver.printf "</tt>\n"
+       | NotesLinks.PgWizard wizname ->
+           Wserver.printf "<tt>";
+           if conf.wizard then
+             begin
+               Wserver.printf
+                 "<a class=\"mx-2\" href=\"%sm=MOD_WIZNOTES&f=%s&\">"
+                 (commd conf) (code_varenv wizname);
+               Wserver.printf "</sup><i class=\"fa fa-cog\"></i></sup>";
+               Wserver.printf "</a>"
+             end;
+           Wserver.printf "<a class=\"mx-2\" href=\"%sm=WIZNOTES&v=%s\">"
+             (commd conf) (code_varenv wizname);
+           Wserver.printf "%s" wizname;
+           Wserver.printf "</a>";
+           Wserver.printf "<i>";
+           Wserver.printf "(%s)"
+             (transl_nth conf "wizard/wizards/friend/friends/exterior" 0);
+           Wserver.printf "</i>";
+           Wserver.printf "</tt>\n"
+       end;
+       Wserver.printf "</li>\n")
+    pgl;
+  Wserver.printf "</ul>\n"
+
+let print_what_links conf base fnotes =
+  let title h =
+    Wserver.printf "%s " (capitale (transl conf "linked pages"));
+    if h then Wserver.printf "[%s]" fnotes
+    else
+      begin
+        Wserver.printf "<tt>";
+        Wserver.printf "[";
+        begin
+          Wserver.printf "<a href=\"%sm=NOTES&f=%s\">" (commd conf) fnotes;
+          Wserver.printf "%s" fnotes;
+          Wserver.printf "</a>"
+        end;
+        Wserver.printf "]";
+        Wserver.printf "</tt>"
+      end
+  in
+  let db = notes_links_db conf base false in
+  Hutil.header conf title;
+  Hutil.print_link_to_welcome conf true;
+  begin match (try Some (List.assoc fnotes db) with Not_found -> None) with
+    Some pgl -> print_linked_list conf base pgl
+  | None -> ()
+  end;
+  Hutil.trailer conf
+
+let print conf base =
+  let fnotes =
+    match p_getenv conf.env "f" with
+      Some f -> if NotesLinks.check_file_name f <> None then f else ""
+    | None -> ""
+  in
+  match p_getenv conf.env "ref" with
+    Some "on" -> print_what_links conf base fnotes
+  | _ ->
+      let (nenv, s) = read_notes base fnotes in
+      let templ =
+        try
+          let fname = "notes_" ^ (List.assoc "TYPE" nenv) in
+          Util.open_templ conf fname
+        with Not_found -> None
+      in
+      match templ with
+      | Some ic ->
+         begin match p_getenv conf.env "ajax" with
+         | Some "on" ->
+            let charset = if conf.charset = "" then "utf-8" else conf.charset in
+            Wserver.header "Content-type: application/json; charset=%s" charset ;
+            Wserver.printf "%s" s
+         | _ -> Templ.copy_from_templ conf [] ic
+         end
+      | None ->
+         let title = try List.assoc "TITLE" nenv with Not_found -> "" in
+         let title = Util.safe_html title in
+         match p_getint conf.env "v" with
+         | Some cnt0 -> print_notes_part conf base fnotes title s cnt0
+         | None -> print_whole_notes conf base fnotes title s None
+
+let print_mod conf base =
+  let fnotes =
+    match p_getenv conf.env "f" with
+      Some f -> if NotesLinks.check_file_name f <> None then f else ""
+    | None -> ""
+  in
+  let (env, s) = read_notes base fnotes in
+  let typ = try List.assoc "TYPE" env with Not_found -> "" in
+  let templ =
+    let fname = "notes_upd_" ^ typ in
+    Util.open_templ conf fname
+  in
+  let title _ =
+    Wserver.printf "%s - %s%s" (capitale (transl conf "base notes"))
+      conf.bname (if fnotes = "" then "" else " (" ^ fnotes ^ ")")
+  in
+  match templ, p_getenv conf.env "notmpl" with
+  | Some _, Some "on" ->
+     Wiki.print_mod_view_page conf true "NOTES" fnotes title env s
+  | Some ic, _ ->
+      begin match p_getenv conf.env "ajax" with
+      | Some "on" ->
+         let s_digest =
+           List.fold_left (fun s (k, v) -> s ^ k ^ "=" ^ v ^ "\n") "" env ^ s
+         in
+         let digest = Iovalue.digest s_digest in
+         let charset = if conf.charset = "" then "utf-8" else conf.charset in
+         Wserver.header "Content-type: application/json; charset=%s" charset ;
+         Wserver.printf "{\"digest\":\"%s\",\"r\":%s}" digest s
+      | _ -> Templ.copy_from_templ conf [] ic
+      end
+  | _ ->
+     Wiki.print_mod_view_page conf true "NOTES" fnotes title env s
+
+let update_notes_links_db conf fnotes s =
   let slen = String.length s in
   let list_nt, list_ind =
     let rec loop list_nt list_ind pos i =
@@ -160,7 +355,11 @@ let commit_notes conf base fnotes s =
       [ base_notes_dir base; fname ]
   in
   Mutil.mkdir_p (Filename.dirname fpath);
-  Gwdb.commit_notes base fname s;
+  begin try Gwdb.commit_notes base fname s with
+    Sys_error m ->
+      Printf.eprintf "Sys_error: %s\n" m;
+      Hutil.incorrect_request conf; raise Update.ModErr
+  end;
   History.record conf base (Def.U_Notes (p_getint conf.env "v", fnotes)) "mn";
   update_notes_links_db base pg s
 
