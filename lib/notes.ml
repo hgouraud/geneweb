@@ -91,7 +91,7 @@ let print_whole_notes conf base fnotes title s ho =
   | None -> ()
   end;
   let file_path = file_path conf base in
-  let s = string_with_macros conf [] s in
+  let s = string_with_macros ~inc:true conf [] s in
   let edit_opt = Some (conf.wizard, "NOTES", fnotes) in
   let s =
     let wi =
@@ -130,7 +130,7 @@ let print_notes_part conf base fnotes title s cnt0 =
       Wserver.printf "<br%s>\n" conf.xhs;
       Wserver.printf "<h1>%s</h1>\n" title
     end;
-  let s = string_with_macros conf [] s in
+  let s = string_with_macros ~inc:true conf [] s in
   let lines = Wiki.extract_sub_part s cnt0 in
   let mode = "NOTES" in
   let wi =
@@ -459,7 +459,7 @@ let print_mod_ok conf base =
   let mode = "NOTES" in
   let read_string = read_notes base in
   let commit = commit_notes conf base in
-  let string_filter = string_with_macros conf [] in
+  let string_filter = string_with_macros ~inc:true conf [] in
   let file_path = file_path conf base in
   let wi =
     {Wiki.wi_mode = mode; Wiki.wi_cancel_links = conf.cancel_links;

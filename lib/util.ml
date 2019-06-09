@@ -1691,7 +1691,7 @@ let expand_env =
         loop 0
     | _ -> s
 
-let rec string_with_macros conf env s =
+let rec string_with_macros ?(inc=false) conf env s =
   let start_with s i p =
     i + String.length p <= String.length s &&
     String.lowercase_ascii (String.sub s i (String.length p)) = p
@@ -1713,23 +1713,28 @@ let rec string_with_macros conf env s =
                       else loop (j + 1)
                     in loop (i + 2)
                   in
-                  let file =
-                    base_path []
-                      (List.fold_left Filename.concat (conf.bname ^ ".gwb")
-                        ["notes_d"; fname ^ ".txt"])
-                  in
                   let r =
-                    try
-                      let ic = Secure.open_in file in
-                      let rec loop acc =
-                        match input_line ic with
-                        | line -> loop (acc ^ "\n" ^ line)
-                        | exception End_of_file -> close_in ic ; acc ^ "\n"
-                      in loop ""
-                    with Sys_error _ -> "failed: " ^ fname ^ ";"
+                    if inc then
+                      let file =
+                        base_path []
+                          (List.fold_left Filename.concat (conf.bname ^ ".gwb")
+                            ["notes_d"; fname ^ ".txt"])
+                      in
+                      let r =
+                        try
+                          let ic = Secure.open_in file in
+                          let rec loop acc =
+                            match input_line ic with
+                            | line -> loop (acc ^ "\n" ^ line)
+                            | exception End_of_file -> close_in ic ; acc ^ "\n"
+                          in loop ""
+                        with Sys_error _ -> "failed: " ^ fname ^ ";"
+                      in
+                      string_with_macros ~inc:inc conf env r
+                    else
+                      "%r" ^ fname ^ "?"
                   in
-                  let r = string_with_macros conf env r in
-                  Buffer.add_string buff r; i + 6
+                  Buffer.add_string buff r; (i + (String.length fname) + 2)
               | 's' -> Buffer.add_string buff (commd conf); i + 2
               | 'v' ->
                   let (k, vl, j) = get_variable s (i + 2) in

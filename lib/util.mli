@@ -113,7 +113,7 @@ val open_etc_file : string -> in_channel option
 val open_hed_trl : config -> string -> in_channel option
 val open_templ : config -> string -> in_channel option
 val open_templ_fname : config -> string -> (in_channel * string) option
-val string_with_macros :
+val string_with_macros : ?inc:bool ->
   config -> (char * (unit -> string)) list -> string -> string
 val string_of_place : config -> string -> string
 val place_of_string : config -> string -> place option
