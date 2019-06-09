@@ -1691,7 +1691,7 @@ let expand_env =
         loop 0
     | _ -> s
 
-let string_with_macros conf env s =
+let rec string_with_macros conf env s =
   let start_with s i p =
     i + String.length p <= String.length s &&
     String.lowercase_ascii (String.sub s i (String.length p)) = p
@@ -1704,7 +1704,33 @@ let string_with_macros conf env s =
           try Buffer.add_string buff (List.assoc s.[i+1] env ()); i + 2 with
             Not_found ->
               match s.[i+1] with
-                's' -> Buffer.add_string buff (commd conf); i + 2
+              | 'r' ->
+                  let fname =
+                    let rec loop j =
+                      (* FIXME is this \n ok in win world *)
+                      if j = String.length s || s.[j] = ' ' || s.[j] = '\n'
+                      then String.sub s (i + 2) (j - i - 2)
+                      else loop (j + 1)
+                    in loop (i + 2)
+                  in
+                  let file =
+                    base_path []
+                      (List.fold_left Filename.concat (conf.bname ^ ".gwb")
+                        ["notes_d"; fname ^ ".txt"])
+                  in
+                  let r =
+                    try
+                      let ic = Secure.open_in file in
+                      let rec loop acc =
+                        match input_line ic with
+                        | line -> loop (acc ^ "\n" ^ line)
+                        | exception End_of_file -> close_in ic ; acc ^ "\n"
+                      in loop ""
+                    with Sys_error _ -> "failed: " ^ fname ^ ";"
+                  in
+                  let r = string_with_macros conf env r in
+                  Buffer.add_string buff r; i + 6
+              | 's' -> Buffer.add_string buff (commd conf); i + 2
               | 'v' ->
                   let (k, vl, j) = get_variable s (i + 2) in
                   let (v, i) =
