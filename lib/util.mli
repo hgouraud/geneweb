@@ -184,6 +184,7 @@ val person_text_without_title : config -> base -> person -> Adef.safe_string
 (** Makes call to [gen_person_text_without_title] with [std_access] *)
 
 val main_title : config -> base -> person -> title option
+
 (** Returns main person's title. If person doesn't have it, then returns first title
     from the list. *)
 
