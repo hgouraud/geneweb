@@ -12,6 +12,7 @@ open Util
 open Gwd_lib
 
 module StrSet = Mutil.StrSet
+module GwdLog = Gwd_lib.GwdLog
 
 let output_conf =
   { status = Wserver.http
@@ -1492,7 +1493,6 @@ type misc_fname =
   | Woff of string
   | Woff2 of string
   | Xml of string
-  | Other of string
 
 let content_misc conf len misc_fname =
   Output.status conf Def.OK;
@@ -1510,7 +1510,6 @@ let content_misc conf len misc_fname =
     | Woff fname -> fname, "application/font-woff"
     | Woff2 fname -> fname, "application/font-woff2"
     | Xml fname -> fname, "application/xml"
-    | Other fname -> fname, "text/plain"
   in
   Output.header conf "Content-type: %s" t;
   Output.header conf "Content-length: %d" len;

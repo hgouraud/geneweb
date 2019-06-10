@@ -127,71 +127,71 @@ let notes_links_db conf base eliminate_unlinked =
 
 let print_linked_list conf base pgl =
   let typ = p_getenv conf.env "type" in
-  Wserver.printf "<ul>\n";
+  Output.print_sstring conf "<ul>\n";
   List.iter
     (fun pg ->
        begin match pg, typ with
-         NotesLinks.PgInd ip, None ->
-           Wserver.printf "<li>";
-           Wserver.printf "<tt>";
+         Def.NLDB.PgInd ip, None ->
+           Output.print_sstring conf "<li>";
+           Output.print_sstring conf "<tt>";
            if conf.wizard then
              begin
-               Wserver.printf "<a class=\"mx-2\" href=\"%s&i=%d&\">"
-                 (commd conf) (Adef.int_of_iper ip);
-               Wserver.printf "</sup><i class=\"fa fa-cog\"></i></sup>";
-               Wserver.printf "</a>"
+               Output.print_string conf (Printf.sprintf {|<a class="mx-2" href="%s&i=%d&">|}
+                 (commd conf :> string) (Adef.int_of_iper ip));
+               Output.print_sstring conf {|</sup><i class="fa fa-cog"></i></sup>";
+               Output.print_sstring conf "</a>"
              end;
            begin
              let p = pget conf base ip in
-             Wserver.printf "<span class=\"mx-2\">";
-             Wserver.printf "%s%s"
+             Output.print_sstring conf {|<span class="mx-2">|};
+             Output.print_string conf (Printf.sprintf "%s%s"
                (Util.referenced_person_title_text conf base p)
-               (Date.short_dates_text conf base p);
-             Wserver.printf "</span>"
+               (Date.short_dates_text conf base p));
+             Output.print_sstring conf "</span>"
            end;
-           Wserver.printf "</tt>\n";
-           Wserver.printf "</li>\n"
-       | NotesLinks.PgFam ifam, None ->
+           Output.print_sstring conf "</tt>\n";
+           Output.print_sstring conf "</li>\n"
+       | Def.NLDB.PgFam ifam, None ->
            let fam = foi base ifam in
            let fath = pget conf base (get_father fam) in
            let moth = pget conf base (get_mother fam) in
-           Wserver.printf "<li>";
-           Wserver.printf "<tt>";
+           Output.print_sstring conf "<li>";
+           Output.print_sstring conf "<tt>";
            if conf.wizard then
              begin
-               Wserver.printf
-                 "<a class=\"mx-2\" href=\"%sm=MOD_FAM&i=%d&ip=%d&\">"
-                 (commd conf) (Adef.int_of_ifam ifam)
-                 (Adef.int_of_iper (Gwdb.get_key_index fath));
-               Wserver.printf "</sup><i class=\"fa fa-cog\"></i></sup>";
-               Wserver.printf "</a>"
+               Output.print_string conf
+                 (Printf.sprintf {|<a class="mx-2" href="%sm=MOD_FAM&i=%d&ip=%d&">|}
+                 (commd conf :> string) (Adef.int_of_ifam ifam)
+                 (Adef.int_of_iper (Gwdb.get_key_index fath)));
+               Output.print_sstring conf {|</sup><i class="fa fa-cog"></i></sup>|};
+               Output.print_sstring conf "</a>"
              end;
-           Wserver.printf "<span class=\"mx-2\">";
-           Wserver.printf "%s%s &amp; %s %s"
+           Output.print_sstring conf {|<span class="mx-2">|};
+           Output.print_string conf (Printf.sprintf {|%s%s &amp; %s %s|}
              (Util.referenced_person_title_text conf base fath)
              (Date.short_dates_text conf base fath)
              (Util.referenced_person_title_text conf base moth)
-             (Date.short_dates_text conf base moth);
-           Wserver.printf "</span>";
-           Wserver.printf "</tt>\n";
-           Wserver.printf "</li>\n"
-       | NotesLinks.PgNotes, None ->
-           Wserver.printf "<li>";
-           Wserver.printf "<tt>";
+             (Date.short_dates_text conf base moth));
+           Output.print_sstring conf "</span>";
+           Output.print_sstring conf "</tt>\n";
+           Output.print_sstring conf "</li>\n"
+       | Def.NLDB.PgNotes, None ->
+           Output.print_sstring conf "<li>";
+           Output.print_sstring conf "<tt>";
            if conf.wizard then
              begin
-               Wserver.printf "<a class=\"mx-2\" href=\"%sm=MOD_NOTES&\">"
-                 (commd conf);
-               Wserver.printf "</sup><i class=\"fa fa-cog\"></i></sup>";
-               Wserver.printf "</a>"
+               Output.print_string conf (Printf.sprintf {|<a class="mx-2" href="%sm=MOD_NOTES&">|}
+                 (commd conf :> string));
+               Output.print_sstring conf {|</sup><i class="fa fa-cog"></i></sup>|};
+               Output.print_sstring conf "</a>"
              end;
-           Wserver.printf "<a class=\"mx-2\" href=\"%sm=NOTES\">"
-             (commd conf);
-           Wserver.printf "%s" (transl_nth conf "note/notes" 1);
-           Wserver.printf "</a>\n";
-           Wserver.printf "</tt>\n";
-           Wserver.printf "</li>\n"
-       | NotesLinks.PgMisc fnotes, typ ->
+           Output.print_string conf (Printf.sprintf {|<a class="mx-2" href="%sm=NOTES">|}
+             (commd conf :> string));
+           Output.print_string conf (Printf.sprintf "%s" (transl_nth conf "note/notes" 1));
+           Output.print_sstring conf "</a>\n";
+           Output.print_sstring conf "</tt>\n";
+           Output.print_sstring conf "</li>\n"
+       | Def.NLDB.PgMisc fnotes, typ ->
            let (nenv, _) = read_notes base fnotes in
            if match typ with
              | Some t ->
@@ -201,65 +201,65 @@ let print_linked_list conf base pgl =
            then begin
            let title = try List.assoc "TITLE" nenv with Not_found -> "" in
            let title = Util.safe_html title in
-           Wserver.printf "<li>";
-           Wserver.printf "<tt>";
+           Output.print_sstring conf "<li>";
+           Output.print_sstring conf "<tt>";
            if conf.wizard then
              begin
-               Wserver.printf
-                 "<a class=\"mx-2\" href=\"%sm=MOD_NOTES&f=%s&\">"
-                 (commd conf) fnotes;
-               Wserver.printf "</sup><i class=\"fa fa-cog\"></i></sup>";
-               Wserver.printf "</a>"
+               Output.print_string conf
+                 (Printf.sprintf {|<a class="mx-2" href="%sm=MOD_NOTES&f=%s&">|}
+                 (commd conf :> string) fnotes);
+               Output.print_sstring conf {|</sup><i class="fa fa-cog"></i></sup>|};
+               Output.print_sstring conf "</a>"
              end;
-           Wserver.printf "<a class=\"mx-2\" href=\"%sm=NOTES&f=%s&\">"
-             (commd conf) fnotes;
-           Wserver.printf "%s" fnotes;
-           Wserver.printf "</a>";
-           if title <> "" then Wserver.printf "(%s)" title;
-           Wserver.printf "</tt>\n";
-           Wserver.printf "</li>\n"
+           Output.print_string conf (Printf.sprintf {|<a class="mx-2" href="%sm=NOTES&f=%s&">|}
+             (commd conf :> string) fnotes);
+           Output.print_string conf (Printf.sprintf "%s" fnotes);
+           Output.print_sstring conf "</a>";
+           if title <> "" then Output.print_string conf (Printf.sprintf "(%s)" title);
+           Output.print_sstring conf "</tt>\n";
+           Output.print_sstring conf "</li>\n"
            end
-       | NotesLinks.PgWizard wizname, None ->
-           Wserver.printf "<li>";
-           Wserver.printf "<tt>";
+       | Def.NLDB.PgWizard wizname, None ->
+           Output.print_sstring conf "<li>";
+           Output.print_sstring conf "<tt>";
            if conf.wizard then
              begin
-               Wserver.printf
-                 "<a class=\"mx-2\" href=\"%sm=MOD_WIZNOTES&f=%s&\">"
-                 (commd conf) (code_varenv wizname);
-               Wserver.printf "</sup><i class=\"fa fa-cog\"></i></sup>";
-               Wserver.printf "</a>"
+               Output.print_string conf
+                 (Printf.sprintf {|<a class="mx-2" href="%sm=MOD_WIZNOTES&f=%s&">|}
+                 (commd conf :> string) (code_varenv wizname));
+               Output.print_sstring conf {|</sup><i class="fa fa-cog"></i></sup>|};
+               Output.print_sstring conf "</a>"
              end;
-           Wserver.printf "<a class=\"mx-2\" href=\"%sm=WIZNOTES&v=%s\">"
-             (commd conf) (code_varenv wizname);
-           Wserver.printf "%s" wizname;
-           Wserver.printf "</a>";
-           Wserver.printf "<i>";
-           Wserver.printf "(%s)"
-             (transl_nth conf "wizard/wizards/friend/friends/exterior" 0);
-           Wserver.printf "</i>";
-           Wserver.printf "</tt>\n";
-           Wserver.printf "</li>\n"
+           Output.print_string conf (Printf.sprintf {|<a class="mx-2" href="%sm=WIZNOTES&v=%s"|}
+             (commd conf :> string) (code_varenv wizname));
+           Output.print_string conf (Printf.sprintf "%s" wizname);
+           Output.print_sstring conf "</a>";
+           Output.print_sstring conf "<i>";
+           Output.print_sstring conf (Printf.sprintf "(%s)"
+             (transl_nth conf "wizard/wizards/friend/friends/exterior" 0));
+           Output.print_sstring conf "</i>";
+           Output.print_sstring conf "</tt>\n";
+           Output.print_sstring conf "</li>\n"
        | _ -> ()
        end)
     pgl;
-  Wserver.printf "</ul>\n"
+  Output.print_sstring conf "</ul>\n"
 
 let print_what_links conf base fnotes =
   let title h =
-    Wserver.printf "%s " (capitale (transl conf "linked pages"));
-    if h then Wserver.printf "[%s]" fnotes
+    Output.print_sstring conf "%s " (capitale (transl conf "linked pages"));
+    if h then Output.print_sstring conf "[%s]" fnotes
     else
       begin
-        Wserver.printf "<tt>";
-        Wserver.printf "[";
+        Output.print_sstring conf "<tt>";
+        Output.print_sstring conf "[";
         begin
-          Wserver.printf "<a href=\"%sm=NOTES&f=%s\">" (commd conf) fnotes;
-          Wserver.printf "%s" fnotes;
-          Wserver.printf "</a>"
+          Output.print_sstring conf (Printf.sprintf {|<a href="%sm=NOTES&f=%s">|} (commd conf :> string) fnotes);
+          Output.print_sstring conf (Printf.sprintf "%s" fnotes);
+          Output.print_sstring conf "</a>"
         end;
-        Wserver.printf "]";
-        Wserver.printf "</tt>"
+        Output.print_sstring conf "]";
+        Output.print_sstring conf "</tt>"
       end
   in
   let db = notes_links_db conf base false in
@@ -293,8 +293,8 @@ let print conf base =
          | Some "on" ->
             let charset = if conf.charset = "" then "utf-8" else conf.charset in
             Wserver.header "Content-type: application/json; charset=%s" charset ;
-            (* FIXME: safe_html_no_escape replace \" with " for attributes *)
-            Wserver.printf "%s" (safe_html_no_escape (string_with_macros conf [] s))
+            (* FIXME: find a way to use safe_html *)
+            Output.print_sstring conf "%s" (string_with_macros conf [] s)
          | _ -> Templ.copy_from_templ conf [] ic
          end
       | None ->
@@ -317,7 +317,7 @@ let print_mod conf base =
     Util.open_templ conf fname
   in
   let title _ =
-    Wserver.printf "%s - %s%s" (capitale (transl conf "base notes"))
+    Output.print_sstring conf "%s - %s%s" (capitale (transl conf "base notes"))
       conf.bname (if fnotes = "" then "" else " (" ^ fnotes ^ ")")
   in
   match templ, p_getenv conf.env "notmpl" with
@@ -332,7 +332,7 @@ let print_mod conf base =
          let digest = Iovalue.digest s_digest in
          let charset = if conf.charset = "" then "utf-8" else conf.charset in
          Wserver.header "Content-type: application/json; charset=%s" charset ;
-         Wserver.printf "{\"digest\":\"%s\",\"r\":%s}" digest s
+         Output.print_sstring conf "{\"digest\":\"%s\",\"r\":%s}" digest s
       | _ -> Templ.copy_from_templ conf [] ic
       end
   | _ ->
