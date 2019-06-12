@@ -16,6 +16,7 @@
             geneweb-lib.sosa.mli
             geneweb-lib.util
             geneweb-lib.wserver.mli
+            yojson
             markup)
  (modules_without_implementation templAst)
 )
