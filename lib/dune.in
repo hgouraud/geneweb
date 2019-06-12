@@ -16,6 +16,10 @@
             geneweb_gwdb
             geneweb_sosa_mli
             geneweb_util
+            camlp5
+            camlp5.gramlib
+            geneweb.wserver
+            yojson
             markup)
  (modules_without_implementation templAst)
 )
