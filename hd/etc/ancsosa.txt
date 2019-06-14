@@ -111,7 +111,20 @@
     /a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z
   %and;xx%end;
 %end;
-%( fin recopie eprso_utils %)
+%( fin recopie perso_utils %)
+
+%define;link(aaa,xxx,nnn)
+  %if;(evar.cgl="on")xxx%else;<a id="i_nnn" href="%prefix;aaa">xxx</a>%end;
+%end;
+
+%define;link2(xxx, nnn)
+  %if;(evar.cgl="on")%xxx;%else;<a id="innn" href="%prefix;%xxx.access;">%xxx;</a>%end;
+  %xxx.title;%xxx.dates;
+%end;
+
+%define;my_link(aaa, xxx, rrr, nnn)
+  %if;(evar.cgl="on" or rrr)xxx%else;<a id="innn" href="%prefix;aaa">xxx</a>%end;
+%end;
 
 %define;living_interval_dates(xxx, yyy)
   %if;(evar.after != "" and evar.before != "")
@@ -212,19 +225,6 @@
   %if;xx.computable_death_age;%sp;
     ([age at death:] %xx.death_age;)%nn;
   %end;
-%end;
-
-%define;link(aaa, xxx, nnn)
-  %if;(evar.cgl="on")xxx%else;<a id="innn" href="%prefix;aaa">xxx</a>%end;
-%end;
-
-%define;link2(xxx, nnn)
-  %if;(evar.cgl="on")%xxx;%else;<a id="innn" href="%prefix;%xxx.access;">%xxx;</a>%end;
-  %xxx.title;%xxx.dates;
-%end;
-
-%define;my_link(aaa, xxx, rrr, nnn)
-  %if;(evar.cgl="on" or rrr)xxx%else;<a id="innn" href="%prefix;aaa">xxx</a>%end;
 %end;
 
 %define;somebody_extra_info(xx)
@@ -1209,8 +1209,7 @@
     <div class="d-flex justify-content-between">
       <div class="align-self-center mr-2">
         %apply;image_MF("ancestor")
-        %apply;link%with;%ancestor.access;%and;
-          %ancestor;%and;%ancestor.index;%end;
+        %apply;link%with;%ancestor.access;%and;%ancestor;%and;%ancestor.index;%end;
         %if;(evar.title="on" and ancestor.title!=""), %ancestor.title;%end;
         %if;(ancestor.same != "" and evar.repeat = "on" and evar.num!="on")
           %apply;implex()
@@ -1238,9 +1237,7 @@
         %if;(family_cnt = 1)
           <td class="align-middle">
             %apply;image_MF("spouse")
-            %apply;link%with;%spouse.access;%and;
-              %spouse;%and;%spouse.index;
-            %end;
+            %apply;link%with;%spouse.access;%and;%spouse;%and;%spouse.index;%end;
           </td>
         %end;
       %end;
@@ -1405,9 +1402,7 @@
                        %end;"%nn;
               %end;>
               %apply;image_MF("spouse")
-              %apply;link%with;%spouse.access;%and;
-                %spouse;%and;%spouse.index;
-              %end;
+              %apply;link%with;%spouse.access;%and;%spouse;%and;%spouse.index;%end;
             </td>
           %end;
           %if;(evar.marr_date = "on")
@@ -1867,7 +1862,7 @@ TODO: obtenir les secondes valeurs valeurs jj/mm/aaaa pour les cas « ou | » 
                 <td> &nbsp; </td>
                 <td>
                   %apply;image_MF("ancestor")
-                  %apply;link(ancestor.access, ancestor, ancestor.index)
+                  %apply;link%with;ancestor.access%and;ancestor%and;ancestor.index%end;
                   %ancestor.title;
                 </td>
                 %apply;display_missing_ancestor_info("ancestor")
