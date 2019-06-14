@@ -1962,6 +1962,33 @@ let mode_local env =
   | Vfam _ -> false
   | _ -> true
 
+let get_note_source conf base p auth no_note note_source =
+  if auth && not no_note then
+    let env = ['i', (fun () -> Util.default_image_name base p)] in
+    let s = sou base note_source in
+    let s = string_with_macros conf env s in
+    let lines = Wiki.html_of_tlsw conf s in
+    let lines =
+      if List.length lines > 2 then
+        match lines with
+        | "<p>" :: remain ->
+            if List.hd (List.rev remain) = "</p>" then
+              List.rev (List.tl (List.rev remain))
+            else remain
+        | _ -> lines
+      else lines
+    in
+    let wi =
+      {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
+       Wiki.wi_file_path = Notes.file_path conf base;
+       Wiki.wi_person_exists = person_exists conf base;
+       Wiki.wi_always_show_link = conf.wizard || conf.friend}
+    in
+    let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
+    let s = Util.replace_quotes s in
+    if conf.pure_xhtml then Util.check_xhtml s else s
+  else ""
+
 let rec eval_var conf base env ep loc sl =
   try eval_simple_var conf base env ep sl with
     Not_found -> eval_compound_var conf base env ep loc sl
@@ -2143,28 +2170,9 @@ and eval_simple_str_var conf base env (_, p_auth) =
   | "comment" | "fnotes" ->
       begin match get_env "fam" env with
         Vfam (_, fam, _, m_auth) ->
-          if m_auth && not conf.no_note then
-            let s = sou base (get_comment fam) in
-            let s = string_with_macros conf [] s in
-            let lines = Wiki.html_of_tlsw conf s in
-            let lines =
-              if List.length lines > 2 then
-                match lines with
-                | "<p>" :: remain -> List.rev (List.tl (List.rev remain))
-                | _ -> lines
-              else lines
-            in
-            let wi =
-              {Wiki.wi_mode = "NOTES";
-               Wiki.wi_cancel_links = conf.cancel_links;
-               Wiki.wi_file_path = Notes.file_path conf base;
-               Wiki.wi_person_exists = person_exists conf base;
-               Wiki.wi_always_show_link = conf.wizard || conf.friend}
-            in
-            let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-            let s = Util.replace_quotes s in
-            if conf.pure_xhtml then Util.check_xhtml s else s
-          else ""
+          get_note_source conf base
+            (Gwdb.empty_person base (Adef.iper_of_int (-1)))
+            m_auth conf.no_note (get_comment fam)
       | _ -> raise Not_found
       end
   | "count" ->
@@ -2306,41 +2314,17 @@ and eval_simple_str_var conf base env (_, p_auth) =
   | "marriage_note" ->
       begin match get_env "fam" env with
         Vfam (_, fam, _, m_auth) ->
-          if m_auth && not conf.no_note then
-            let s = sou base (get_marriage_note fam) in
-            let s = string_with_macros conf [] s in
-            let lines = Wiki.html_of_tlsw conf s in
-            let wi =
-              {Wiki.wi_mode = "NOTES";
-               Wiki.wi_cancel_links = conf.cancel_links;
-               Wiki.wi_file_path = Notes.file_path conf base;
-               Wiki.wi_person_exists = person_exists conf base;
-               Wiki.wi_always_show_link = conf.wizard || conf.friend}
-            in
-            let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-            let s = Util.replace_quotes s in
-            if conf.pure_xhtml then Util.check_xhtml s else s
-          else ""
+          get_note_source conf base
+            (Gwdb.empty_person base (Adef.iper_of_int (-1)))
+            m_auth conf.no_note (get_marriage_note fam)
       | _ -> raise Not_found
       end
   | "marriage_source" ->
       begin match get_env "fam" env with
         Vfam (_, fam, _, m_auth) ->
-          if m_auth then
-            let s = sou base (get_marriage_src fam) in
-            let s = string_with_macros conf [] s in
-            let lines = Wiki.html_of_tlsw conf s in
-            let wi =
-              {Wiki.wi_mode = "NOTES";
-               Wiki.wi_cancel_links = conf.cancel_links;
-               Wiki.wi_file_path = Notes.file_path conf base;
-               Wiki.wi_person_exists = person_exists conf base;
-               Wiki.wi_always_show_link = conf.wizard || conf.friend}
-            in
-            let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-            let s = Util.replace_quotes s in
-            if conf.pure_xhtml then Util.check_xhtml s else s
-          else ""
+          get_note_source conf base
+            (Gwdb.empty_person base (Adef.iper_of_int (-1)))
+            m_auth false (get_marriage_src fam)
       | _ -> raise Not_found
       end
   | "max_anc_level" ->
@@ -4159,60 +4143,24 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
       if p_auth then Util.string_of_place conf (sou base (get_birth_place p))
       else ""
   | "birth_note" ->
-      if p_auth && not conf.no_note then
-        let env = ['i', (fun () -> Util.default_image_name base p)] in
-        let s = sou base (get_birth_note p) in
-        let s = string_with_macros conf env s in
-        let lines = Wiki.html_of_tlsw conf s in
-        let wi =
-          {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
-           Wiki.wi_file_path = Notes.file_path conf base;
-           Wiki.wi_person_exists = person_exists conf base;
-           Wiki.wi_always_show_link = conf.wizard || conf.friend}
-        in
-        let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        let s = Util.replace_quotes s in
-        if conf.pure_xhtml then Util.check_xhtml s else s
-      else ""
+      get_note_source conf base p p_auth conf.no_note (get_birth_note p)
+  | "birth_source" ->
+      get_note_source conf base p p_auth false (get_birth_src p)
   | "baptism_place" ->
       if p_auth then
         Util.string_of_place conf (sou base (get_baptism_place p))
       else ""
   | "baptism_note" ->
-      if p_auth && not conf.no_note then
-        let env = ['i', (fun () -> Util.default_image_name base p)] in
-        let s = sou base (get_baptism_note p) in
-        let s = string_with_macros conf env s in
-        let lines = Wiki.html_of_tlsw conf s in
-        let wi =
-          {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
-           Wiki.wi_file_path = Notes.file_path conf base;
-           Wiki.wi_person_exists = person_exists conf base;
-           Wiki.wi_always_show_link = conf.wizard || conf.friend}
-        in
-        let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        let s = Util.replace_quotes s in
-        if conf.pure_xhtml then Util.check_xhtml s else s
-      else ""
+      get_note_source conf base p p_auth conf.no_note (get_baptism_note p)
+  | "baptism_source" ->
+      get_note_source conf base p p_auth false (get_baptism_src p)
   | "burial_place" ->
       if p_auth then Util.string_of_place conf (sou base (get_burial_place p))
       else ""
   | "burial_note" ->
-      if p_auth && not conf.no_note then
-        let env = ['i', (fun () -> Util.default_image_name base p)] in
-        let s = sou base (get_burial_note p) in
-        let s = string_with_macros conf env s in
-        let lines = Wiki.html_of_tlsw conf s in
-        let wi =
-          {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
-           Wiki.wi_file_path = Notes.file_path conf base;
-           Wiki.wi_person_exists = person_exists conf base;
-           Wiki.wi_always_show_link = conf.wizard || conf.friend}
-        in
-        let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        let s = Util.replace_quotes s in
-        if conf.pure_xhtml then Util.check_xhtml s else s
-      else ""
+      get_note_source conf base p p_auth conf.no_note (get_burial_note p)
+  | "burial_source" ->
+      get_note_source conf base p p_auth false (get_burial_src p)
   | "child_name" ->
       let force_surname =
         match get_parents p with
@@ -4252,21 +4200,9 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
       if p_auth then Util.string_of_place conf (sou base (get_death_place p))
       else ""
   | "death_note" ->
-      if p_auth && not conf.no_note then
-        let env = ['i', (fun () -> Util.default_image_name base p)] in
-        let s = sou base (get_death_note p) in
-        let s = string_with_macros conf env s in
-        let lines = Wiki.html_of_tlsw conf s in
-        let wi =
-          {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
-           Wiki.wi_file_path = Notes.file_path conf base;
-           Wiki.wi_person_exists = person_exists conf base;
-           Wiki.wi_always_show_link = conf.wizard || conf.friend}
-        in
-        let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        let s = Util.replace_quotes s in
-        if conf.pure_xhtml then Util.check_xhtml s else s
-      else ""
+      get_note_source conf base p p_auth conf.no_note (get_death_note p)
+  | "death_source" ->
+      get_note_source conf base p p_auth false (get_death_src p)
   | "died" -> string_of_died conf p p_auth
   | "fam_access" ->
       (* deprecated since 5.00: rather use "i=%family.index;&ip=%index;" *)
@@ -4425,39 +4361,12 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
       | _ -> string_of_int (Array.length (get_family p))
       end
   | "notes" | "pnotes" ->
-      if p_auth && not conf.no_note then
-        let env = ['i', (fun () -> Util.default_image_name base p)] in
-        let s = sou base (get_notes p) in
-        let s = string_with_macros conf env s in
-        let lines = Wiki.html_of_tlsw conf s in
-        let wi =
-          {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
-           Wiki.wi_file_path = Notes.file_path conf base;
-           Wiki.wi_person_exists = person_exists conf base;
-           Wiki.wi_always_show_link = conf.wizard || conf.friend}
-        in
-        let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        let s = Util.replace_quotes s in
-        if conf.pure_xhtml then Util.check_xhtml s else s
-      else ""
+      get_note_source conf base p p_auth conf.no_note (get_notes p)
   | "occ" ->
       if is_hide_names conf p && not p_auth then ""
       else string_of_int (get_occ p)
   | "occupation" ->
-      if p_auth then
-        let s = sou base (get_occupation p) in
-        let s =
-          let wi =
-            {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
-             Wiki.wi_file_path = Notes.file_path conf base;
-             Wiki.wi_person_exists = person_exists conf base;
-             Wiki.wi_always_show_link = conf.wizard || conf.friend}
-          in
-          Wiki.syntax_links conf wi s
-        in
-        let s = Util.replace_quotes s in
-        string_with_macros conf [] s
-      else ""
+      get_note_source conf base p p_auth conf.no_note (get_occupation p)
   | "on_baptism_date" ->
       begin match p_auth, Adef.od_of_cdate (get_baptism p) with
         true, Some d ->
@@ -4508,21 +4417,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
       | _ -> raise Not_found
       end
   | "psources" ->
-      if p_auth && not conf.no_note then
-        let env = ['i', (fun () -> Util.default_image_name base p)] in
-        let s = sou base (get_psources p) in
-        let s = string_with_macros conf env s in
-        let lines = Wiki.html_of_tlsw conf s in
-        let wi =
-          {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
-           Wiki.wi_file_path = Notes.file_path conf base;
-           Wiki.wi_person_exists = person_exists conf base;
-           Wiki.wi_always_show_link = conf.wizard || conf.friend}
-        in
-        let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
-        let s = Util.replace_quotes s in
-        if conf.pure_xhtml then Util.check_xhtml s else s
-      else ""
+      get_note_source conf base p p_auth false (get_psources p)
   | "slash_burial_date" ->
       begin match get_burial p with
         Buried cod ->
@@ -4628,7 +4523,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
           end
       | _ -> raise Not_found
       end
-  | "source" ->
+  | "source" -> (* see if can be homogeneized with get_note_source *)
       begin match get_env "src" env with
         Vstring s ->
           let env = ['i', (fun () -> Util.default_image_name base p)] in

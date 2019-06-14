@@ -89,7 +89,7 @@ let rec capitale_utf_8 s =
     else if String.length s = 1 then s
     else
       match Char.code c with
-        0xC3 when Char.code s.[1] <> 0xBF ->
+      | 0xC3 when Char.code s.[1] <> 0xBF && Char.code s.[1] >= 0x9F ->
           let c1 = Char.chr (Char.code s.[1] - 0xA0 + 0x80) in
           Printf.sprintf "%c%c%s" c c1 (String.sub s 2 (String.length s - 2))
       | 0xC3 when Char.code s.[1] = 0xBF ->
