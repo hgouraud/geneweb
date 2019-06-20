@@ -439,7 +439,70 @@ let redirect_added_families base p ip2 p2_family =
     patch_couple base ifam cpl
   done
 
-let effective_mod_merge o_conf base o_p1 o_p2 sp print_mod_merge_ok =
+let effective_mod_merge o_conf base o_p1 o_p2 sp =
+  match p_getint o_conf.env "i2" with
+    Some i2 ->
+      let conf = Update.update_conf o_conf in
+      let bdir = Util.base_path [] (conf.bname ^ ".gwb") in
+      let fname = Filename.concat bdir "notes_links" in
+      let db = NotesLinks.read_db_from_file fname in
+      let (ofn1, osn1, oocc1) = (o_p1.first_name, o_p1.surname, o_p1.occ) in
+      let key1 = Name.lower ofn1, Name.lower osn1, oocc1 in
+      let pgl1 = Perso.links_to_ind conf base db key1 None in
+      let (ofn2, osn2, oocc2) = (o_p2.first_name, o_p2.surname, o_p2.occ) in
+      let key2 = Name.lower ofn2, Name.lower osn2, oocc2 in
+      let pgl2 = Perso.links_to_ind conf base db key2 None in
+      let ip2 = Adef.iper_of_int i2 in
+      let p2 = poi base ip2 in
+      let rel_chil = get_related p2 in
+      let p_family = get_family (poi base sp.key_index) in
+      let p2_family = get_family p2 in
+      let warning _ = () in
+      MergeInd.reparent_ind base warning sp.key_index ip2;
+      delete_key base (sou base (get_first_name p2))
+        (sou base (get_surname p2)) (get_occ p2);
+      let warning _ = () in
+      let p2 = UpdateIndOk.effective_del base warning p2 in
+      patch_person base p2.key_index p2;
+      let u2 = {family = [| |]} in
+      patch_union base p2.key_index u2;
+      let p = UpdateIndOk.effective_mod conf base sp in
+      let p = redirect_relations_of_added_related base p ip2 rel_chil in
+      redirect_added_families base p ip2 p2_family;
+      Update.update_misc_names_of_family base p.sex {family = p_family};
+      patch_person base p.key_index p;
+      patch_cache_info conf Util.cache_nb_base_persons
+        (fun v -> let v = int_of_string v - 1 in string_of_int v);
+      let u = {family = Array.append p_family p2_family} in
+      if p2_family <> [| |] then patch_union base p.key_index u;
+      Consang.check_noloop_for_person_list base (Update.error conf base)
+        [p.key_index];
+      let wl =
+        let a = poi base p.key_index in
+        let a = {parents = get_parents a; consang = get_consang a} in
+        UpdateIndOk.all_checks_person base p a u
+      in
+      Util.commit_patches conf base;
+      let changed =
+        U_Merge_person (o_p1, o_p2, Util.string_gen_person base p)
+      in
+      History.record conf base changed "fp";
+      Update.delete_topological_sort conf base;
+      print_mod_merge_ok conf base wl p pgl1 ofn1 osn1 oocc1 pgl2 ofn2 osn2 oocc2
+  | _ -> Hutil.incorrect_request o_conf
+
+let print_mod_merge o_conf base =
+  let get_gen_person i =
+    match p_getint o_conf.env i with
+      Some i ->
+        Util.string_gen_person base
+          (gen_person_of_person (poi base (Adef.iper_of_int i)))
+    | None ->
+        Util.string_gen_person base
+          (gen_person_of_person (poi base (Adef.iper_of_int (-1))))
+  in
+  let o_p1 = get_gen_person "i" in
+  let o_p2 = get_gen_person "i2" in
   let conf = Update.update_conf o_conf in
   let p_family = get_family (poi base sp.key_index) in
   let p2_family = get_family (poi base o_p2.key_index) in

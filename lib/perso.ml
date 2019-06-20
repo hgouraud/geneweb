@@ -1117,23 +1117,33 @@ let linked_page_text conf base p s key (str : Adef.safe_string) (pg, (_, il)) :
     ->
       str
 
-let links_to_ind conf base db key =
-  let l =
+let links_to_ind conf base db key typ =
+  let list =
     List.fold_left
       (fun pgl (pg, (_, il)) ->
-        let record_it =
-          match pg with
-          | Def.NLDB.PgInd ip -> authorized_age conf base (pget conf base ip)
-          | Def.NLDB.PgFam ifam ->
-              authorized_age conf base
-                (pget conf base (get_father @@ foi base ifam))
-          | Def.NLDB.PgNotes | Def.NLDB.PgMisc _ | Def.NLDB.PgWizard _ -> true
-        in
-        if record_it then
-          List.fold_left
-            (fun pgl (k, _) -> if k = key then pg :: pgl else pgl)
-            pgl il
-        else pgl)
+         let record_it =
+           match pg, typ with
+           | Def.NLDB.PgInd ip, None ->
+               authorized_age conf base (pget conf base ip)
+           | Def.NLDB.PgFam ifam, None ->
+               authorized_age conf base (pget conf base (get_father @@ foi base ifam))
+           | Def.NLDB.PgMisc n, typ ->
+               begin match typ with
+               | None -> true
+               | Some t ->
+                  let (nenv, _) = Notes.read_notes base n in
+                  let n_type = try List.assoc "TYPE" nenv with Not_found -> "" in
+                  t = n_type
+               end
+           | Def.NLDB.PgNotes, None
+           | Def.NLDB.PgWizard _, None ->
+               true
+           | _ -> false
+         in
+         if record_it then
+           List.fold_left
+             (fun pgl (k, _) -> if k = key then pg :: pgl else pgl) pgl il
+         else pgl)
       [] db
   in
   List.sort_uniq compare l
@@ -2814,15 +2824,40 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc = function
                 let sn = Name.lower (sou base (get_surname p)) in
                 (fn, sn, get_occ p)
               in
-              links_to_ind conf base db key <> []
+              links_to_ind conf base db key None <> []
             else false
           in
           VVbool r
+<<<<<<< HEAD
       | _ -> raise Not_found)
   | [ "has_sosa" ] -> (
       match get_env "p_link" env with
       | Vbool _ -> VVbool false
       | _ -> (
+=======
+      | _ -> raise Not_found
+      end
+  | ["nb_linked_pages_type"; s] ->
+      begin match get_env "nldb" env with
+        Vnldb db ->
+          let n =
+            if p_auth then
+              let key =
+                let fn = Name.lower (sou base (get_first_name p)) in
+                let sn = Name.lower (sou base (get_surname p)) in
+                fn, sn, get_occ p
+              in
+              List.length (links_to_ind conf base db key (Some s))
+            else 0
+          in
+          VVstring (string_of_int n)
+      | _ -> raise Not_found
+      end
+  | ["has_sosa"] ->
+      begin match get_env "p_link" env with
+        Vbool _ -> VVbool false
+      | _ ->
+>>>>>>> Several improvements
           match get_env "sosa" env with
           | Vsosa r -> VVbool (get_sosa conf base env r p <> None)
           | _ -> VVbool false))
@@ -5349,7 +5384,7 @@ let print_what_links conf base p =
     in
     let db = Gwdb.read_nldb base in
     let db = Notes.merge_possible_aliases conf db in
-    let pgl = links_to_ind conf base db key in
+    let pgl = links_to_ind conf base db key None in
     let title h =
       transl conf "linked pages" |> Utf8.capitalize_fst
       |> Output.print_sstring conf;

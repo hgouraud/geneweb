@@ -60,6 +60,18 @@ val string_of_parent_age :
 val string_of_image_url :
   config -> base -> person * bool -> bool -> Adef.escaped_string
 
+val build_sosa_tree_ht : config -> base -> person -> unit
+val build_sosa_ht : config -> base -> unit
+val get_sosa_person : person -> Sosa.t
+val get_single_sosa : config -> base -> person -> Sosa.t
+val print_sosa : config -> base -> person -> bool -> unit
+
+val string_of_num : string -> Sosa.t -> string
+
+module IperSet : sig include Set.S with type elt = Adef.iper end
+
+val max_ancestor_level : config -> base -> Adef.iper -> int -> int
+
 val round_2_dec : float -> float
 
 (* TODO put in lib/image.ml *)
