@@ -205,21 +205,14 @@ let move_file_to_old conf fname bfname =
        let ext = extension_of_type typ in
        let new_file = fname ^ ext in
        if Sys.file_exists new_file then
-         (*let old_dir =
-           Filename.concat (Util.base_path ["images"] conf.bname) "old"
-         in*)
          let old_dir =
-           String.concat Filename.dir_sep [conf.path.dir_root; "images"; conf.bname; "old"]
+           String.concat Filename.dir_sep
+            [conf.path.dir_root; "documents"; "images"; "saved"]
          in
          let old_file = Filename.concat old_dir bfname ^ ext in
-<<<<<<< HEAD
-         Mutil.rm old_file ;
-         Mutil.mkdir_p old_dir ;
-=======
          if Sys.file_exists old_file then
            (try Sys.remove old_file with Sys_error _ -> ());
          (try Unix.mkdir old_dir 0o777 with Unix.Unix_error (_, _, _) -> ());
->>>>>>> Porting Fabien's reorg work to current master. Allow sub-folders
          begin try Unix.rename new_file old_file with
            Unix.Unix_error (_, _, _) -> ()
          end;
@@ -302,14 +295,13 @@ let effective_send_ok conf base p file =
   in
   let bfname = default_image_name base p in
   let bfdir =
-    (*let bfdir = Util.base_path ["images"] conf.bname in*)
     let bfdir =
-       String.concat Filename.dir_sep [conf.path.dir_root; "images"; conf.bname]
+       String.concat Filename.dir_sep [conf.path.dir_root; "documents"; "portraits";]
     in
     if Sys.file_exists bfdir then bfdir
     else
-      let d = Filename.concat (Secure.base_dir ()) "images" in
-      let d1 = Filename.concat d conf.bname in
+      let d = String.concat Filename.dir_sep [conf.path.dir_root; "documents"] in
+      let d1 = Filename.concat d "portraits" in
       (try Unix.mkdir d 0o777 with Unix.Unix_error (_, _, _) -> ());
       (try Unix.mkdir d1 0o777 with Unix.Unix_error (_, _, _) -> ());
       d1
@@ -345,10 +337,9 @@ let print_deleted conf base p =
 
 let effective_delete_ok conf base p =
   let bfname = default_image_name base p in
-  (*let fname = Filename.concat (Util.base_path ["images"] conf.bname) bfname in*)
   let fname =
      String.concat
-      Filename.dir_sep [conf.path.dir_root; "images"; conf.bname; bfname]
+      Filename.dir_sep [conf.path.dir_root; "documents"; "portraits"; bfname]
   in
   if move_file_to_old conf fname bfname = 0 then incorrect conf;
   let changed =
@@ -778,5 +769,3 @@ let print_c conf base =
   | Some _ -> print_confirm_c conf base "IMAGE_C" ""
   end
 
-
->>>>>>> Porting Fabien's reorg work to current master. Allow sub-folders
