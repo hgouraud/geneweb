@@ -99,6 +99,7 @@ val rm : string -> unit
 (** [string_of_int_sep "," 1000000] is ["1,000,000"]
 *)
 val string_of_int_sep : string -> int -> string
+
 (** [ls_rs dirs]
     List directories (and subdirectories) contents of [dirs], including [dirs] themselves.
 *)
@@ -124,3 +125,8 @@ val rn : string -> string -> unit
     No error if existing, make parent directories as needed
 *)
 val mkdir_p : string -> unit
+
+(** [copy_r s d]
+    Copy recirsively source [s] into destination [d]
+*)
+val copy_r : string -> string -> unit
