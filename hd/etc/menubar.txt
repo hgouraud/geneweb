@@ -33,7 +33,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="nav nav-tabs">
+        <ul class="nav nav-tabs pr-0">
           %( personnal modules selection menu %)
           <li class="nav-item dropdown">
             <a id="load_once_p_mod" class="nav-link dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
@@ -142,18 +142,6 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
               href="%prefix_no_all;%if;(evar.templ!="")templ=%evar.templ;;%end;%access;%if;(evar.image="off");image=off%end;" title="%first_name;%if;(occ!=0).%occ%end; %surname;">
               <span class="fa fa-user-alt fa-fw %sexcolor;" aria-hidden="true"></span>
               <span class="sr-only">%first_name;%if;(occ!=0).%occ%end; %surname;</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="%prefix;m=LINKED;%access;&type=" title="[*linked pages]">
-              <span class="fa fa-book fa-fw" aria-hidden="true"></span>
-              <span class="small align-top"><sup>%nb_linked_pages_type.;</sup></span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="%prefix;m=LINKED;%access;&type=gallery" title="[*linked pages]">
-              <span class="fa fa-images fa-fw" aria-hidden="true"></span>
-              <span class="small align-top"><sup>%nb_linked_pages_type.gallery;</sup></span>
             </a>
           </li>
           %if;(not (bvar.wizard_just_friend="yes") and wizard)
@@ -352,6 +340,21 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
               %end;
             </div>
           </li>
+          %let;nlpt;%nb_linked_pages_type.;%in;<!-- fixme can't use nb_linked_pages_type. directly as condition behind if-->
+          %if;(nlpt!=0)
+            <li class="nav-item">
+              <a class="nav-link" href="%prefix;m=LINKED&%access;" title="[*list linked pages]">
+                %nb_linked_pages_type.; <span class="fa fa-file-alt fa-fw" aria-hidden="true"></span>
+              </a>
+            </li>
+          %end;
+          %if;(nb_linked_pages_type.gallery!=0)
+            <li class="nav-item">
+              <a class="nav-link" href="%prefix;m=LINKED&type=gallery&%access;" title="[*list linked imagemaps]">
+                %nb_linked_pages_type.gallery; <span class="far fa-file-image fa-fw" aria-hidden="true"></span>
+              </a>
+            </li>
+          %end;
         </ul>
       </div>
     </nav>

@@ -69,7 +69,7 @@ function insertTags (tagOpen, tagClose, sampleText) {
   <div class="modal-dialog modal-xl role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="init_gallery_label">Initialise une image map</h5>
+        <h5 class="modal-title" id="init_gallery_label">[*initialise an imagemap]</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -81,7 +81,7 @@ function insertTags (tagOpen, tagClose, sampleText) {
         </div>
         <fieldset class="form-group mb-0 mt-2">
           <div class="form-row">
-            <legend class="col-form-label col-sm-2 pt-2">Chemin</legend>
+            <legend class="col-form-label col-sm-2 pt-2">[*path]</legend>
             <div class="form-check form-check-inline col-sm-9 pl-2 pr-0">
               <div class="custom-control custom-radio custom-control-inline">
                 <input id="doc" class="custom-control-input" type="radio" name="path" value="doc" checked>
@@ -99,9 +99,9 @@ function insertTags (tagOpen, tagClose, sampleText) {
               </div>
               <div class="custom-control custom-radio custom-control-inline">
                 <input id="other" class="custom-control-input" type="radio" name="path" value="other">
-                <label for="other" class="custom-control-label">Autre</label>
+                <label for="other" class="custom-control-label">[*other]</label>
               </div>
-              <input id="path" type="text" class="form-control col-auto flex-fill" placeholder="Autre chemin" disabled>
+              <input id="path" type="text" class="form-control col-auto flex-fill" placeholder="[*other path]" disabled>
             </div>
           </div>
         </fieldset>
@@ -139,5 +139,5 @@ function init_gallery() {
  $('#init_gallery').modal('hide')
 }
 </script>
-<a class="fa fa-images ml-2" data-toggle="modal" data-target="#init_gallery" href="javascript:;" onclick="init_tool();" title="Initialise imagemap"></a>
+<a class="far fa-file-image ml-2" data-toggle="modal" data-target="#init_gallery" href="javascript:;" onclick="init_tool();" title="[*initialise an imagemap]"></a>
 %end;

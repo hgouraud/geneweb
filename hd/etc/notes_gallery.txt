@@ -22,7 +22,7 @@
   (<a href="%url;ref=on">[linked pages]</a>)
 </div>
 %include;home
-<h1 id="h1">Chargement en cours…</h1>
+<h1 id="h1">[*loading]</h1>
 %if(wizard)
   <div class="small float-right mr-4">
     (<a href="%prefix;m=MOD_NOTES&f=%evar.f;">[modify]</a>)

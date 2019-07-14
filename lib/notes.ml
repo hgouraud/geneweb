@@ -286,19 +286,17 @@ let json_extract_img conf s =
   | _ -> ""
 
 let print_linked_list_gallery conf base pgl =
-  Wserver.printf "<div class=\"flex_gallery\">\n";
+  Wserver.printf "<div class=\"d-flex flex-column flex-wrap\">\n";
   List.iter
     (fun pg ->
        match pg with
        | NotesLinks.PgMisc fnotes ->
           let (nenv, s) = read_notes base fnotes in
           if (try List.assoc "TYPE" nenv with Not_found -> "") = "gallery" then
-            Wserver.printf "<div class=\"item_gallery\">\
-                            <a href=\"%sm=NOTES&f=%s&\">\
-                            <img src=\"%s\">\
-                            </a>\
-                            </div>\n"
-              (commd conf) fnotes (json_extract_img conf s)
+            Wserver.printf "<a href=\"%sm=NOTES&f=%s\" title=\"%s\">\
+                            <img class=\"img-fluid mt-2\" src=\"%s\">\
+                            </a>\n"
+              (commd conf) fnotes fnotes (json_extract_img conf s)
        | _ -> ()
     ) pgl;
   Wserver.printf "</div>\n"

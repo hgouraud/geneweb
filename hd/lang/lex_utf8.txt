@@ -1,6 +1,54 @@
+    imagemap editor
+en: imagemap editor
+fr: éditeur d’image réactive
+
     on this image
 en: on this image
 fr: sur cette image
+
+    other
+en: other
+fr: autre
+
+    path
+en: path
+fr: chemin
+
+    other path
+en: other path
+fr: autre chemin
+
+    group
+en: group
+fr: groupe
+
+    detect faces
+en: detect faces
+fr: détection visages
+
+    list linked pages
+en: list linked pages
+fr: lister les pages liées
+
+    list linked imagemaps
+en: list linked imagemaps
+fr: lister les images réactives liées
+
+    initialise an imagemap
+en: initialise an imagemap
+fr: initialiser une image réactive
+
+    description
+en: description
+fr: description
+
+    occurrence number
+en: occurrence number
+fr: numéro d’occurrence
+
+    loading
+en: loading…
+fr: chargement en cours…
 
     reset to
 co: risturà

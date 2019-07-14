@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Éditeur d’image cliquable</title>
+  <title>[*imagemap editor]</title>
   <meta name="robots" content="none">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -31,7 +31,7 @@
 <body%body_prop;>
 <div class="container-fluid">
 %include;home
-<h1 class="mt-1">Éditeur d’image réactives</h1>
+<h1 class="mt-1">[*imagemap editor]</h1>
 
 <div id="fd_error"></div>
 
@@ -42,12 +42,12 @@
       <input type="text" class="form-control col-sm-9" id="page_title">
     </div>
     <div class="form-row mt-2">
-      <label for="page_desc" class="col-form-label col-sm-2">Description</label>
+      <label for="page_desc" class="col-form-label col-sm-2">[*description]</label>
       <textarea class="form-control col-sm-9" id="page_desc" rows="1"></textarea>
     </div>
-    <fieldset class="form-group mb-0  mt-2">
+    <fieldset class="form-group mb-0 mt-2">
       <div class="form-row">
-        <legend class="col-form-label col-sm-2 pt-2">Chemin</legend>
+        <legend class="col-form-label col-sm-2 pt-2">[*path]</legend>
         <div class="form-check form-check-inline col-sm-9 pl-2 pr-0">
           <div class="custom-control custom-radio custom-control-inline">
             <input id="doc" class="custom-control-input" type="radio" name="path" value="doc" checked>
@@ -65,9 +65,9 @@
           </div>
           <div class="custom-control custom-radio custom-control-inline">
             <input id="other" class="custom-control-input" type="radio" name="path" value="other">
-            <label for="other" class="custom-control-label">Autre</label>
+            <label for="other" class="custom-control-label">[*other]</label>
           </div>
-          <input id="path" type="text" class="form-control flex-fill" placeholder="Autre chemin" disabled>
+          <input id="path" type="text" class="form-control flex-fill" placeholder="[*other path]" disabled>
         </div>
       </div>
     </fieldset>
@@ -75,8 +75,8 @@
       <label for="fname" class="col-form-label col-sm-2">[*file]</label>
       <div class="d-flex col-sm-9 px-0">
         <input id="fname" type="text" class="form-control flex-fill">
-        %if(bvar.face_detection = "on")
-        <button id="face_detection" class="btn btn-primary ml-2 text-nowrap " disabled>Détection visages</button>
+        %if(bvar.face_detection="on")
+        <button id="face_detection" class="btn btn-primary ml-2 text-nowrap" disabled>[*detect faces]</button>
         %end;
       </div>
     </div>
@@ -94,8 +94,8 @@
           <th id="type">Type</th>
           <th>[*first name/first names]0</th>
           <th>[*surname/surnames]0</th>
-          <th>#</th>
-          <th>[group]</th>
+          <th title="[*occurrence number]">#</th>
+          <th>[*group]</th>
           <th>[*note/notes]0</th>
           <th>URL</th>
           <th>[*comment]</th>
@@ -232,8 +232,8 @@ $(document).ready(function() {
            return( "<select class='form-control update type' row='" + meta.row + "'>" +
                    "<option value='p'" + s1 + ">[*person/persons]0</option>" +
                    "<option value='m'" + s2 + ">[*note/notes]0</option>" +
-                   "<option value='g'" + s3 + " title='%prefix; + href'>GeneWeb</option>" +
-                   "<option value='e'" + s4 + " title='href'>Autre</option>" +
+                   "<option value='g'" + s3 + " title='URL ?%prefix;m=…'>GeneWeb</option>" +
+                   "<option value='e'" + s4 + " title='URL https://…'>[*other]</option>" +
                    "</select>");
          }
        },
@@ -261,7 +261,7 @@ $(document).ready(function() {
          "render": function ( data, type, row, meta ) {
            var disabled = "";
            if( get(row.t) != "" && row.t != "p" ) { disabled = " disabled"; }
-           return "<input class='form-control update' type='number' value='" + get(data) + "' min='0' max='200' step='1'" + disabled + ">";
+           return "<input class='form-control update' type='number' value='" + get(data) + "' min='0' step='1'" + disabled + ">";
          }
        },
        {
@@ -270,7 +270,7 @@ $(document).ready(function() {
          "render": function ( data, type, row, meta ) {
            var disabled = "";
            if( get(row.t) != "" && row.t != "p" ) { disabled = " disabled"; }
-           return "<input class='form-control update' type='number' value='" + get(data) + "' min='0' max='200' step='1'" + disabled + ">";
+           return "<input class='form-control update' type='number' value='" + get(data) + "' min='0' step='1'" + disabled + ">";
          }
        },
        {
@@ -583,7 +583,7 @@ zh: Chinese
       "img": $("#fname").val(),
       "map": table.rows().data().toArray()
     };
-    // Cleanup data before to save
+    // Cleanup data before saving
     for( i=0, ien=res.map.length ; i < ien ; i++ ) {
       if( res.map[i].t == "p" ) { delete res.map[i].misc ; delete res.map[i].href ; }
       if( res.map[i].t == "m" ) { delete res.map[i].fn ; delete res.map[i].sn ; delete res.map[i].oc ; delete res.map[i].href ; }
