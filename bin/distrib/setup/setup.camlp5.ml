@@ -255,11 +255,11 @@ let parameters_2 =
     FIXME fails when the function is not executed by a binary but by gwsetup
     to be verified for rename, delete, and similar functions
 *)
-let comm_log conf which_bin =
-  let which_url =
+let comm_log conf =
+  let which =
     match p_getenv conf.env "which" with
       Some f -> strip_spaces f
-    | None -> ""
+    | None -> conf.comm
   in
   let bname =
     match p_getenv conf.env "anon" with
@@ -288,9 +288,6 @@ let comm_log conf which_bin =
     then
       Filename.remove_extension oname
     else oname
-  in
-  let which = if which_bin = "gwsetup" && which_url <> ""
-    then which_url else which_bin
   in
   let comm_log =
     if bname = "" || bname = "." then which ^ ".log"
@@ -427,9 +424,7 @@ let macro conf =
   | 'P' -> string_of_int !gwd_port
   | 'Q' -> parameters conf.env
   | 'R' -> parameters_2 conf.env
-  | 'S' ->
-    let which = Filename.basename conf.comm in
-    comm_log conf which
+  | 'S' -> comm_log conf
   | c -> "BAD MACRO " ^ String.make 1 c
 
 let get_variable strm =
@@ -586,9 +581,7 @@ let rec copy_from_stream conf print strm =
                 (* conf will know bvars from basename.gwf and evars from url *)
                 copy_from_stream conf print (Stream.of_string s)
                   (* FIXME %g do we know basename at this point?? *)
-          | 'g' ->
-              let which = Filename.basename conf.comm in
-              print_specific_file conf print (comm_log conf which) strm
+          | 'g' -> print_specific_file conf print (comm_log conf) strm
           | 'h' ->
               print "<input type=hidden name=lang value=";
               print conf.lang;
@@ -642,7 +635,7 @@ let rec copy_from_stream conf print strm =
                   let outfile = strip_spaces (s_getenv conf.env "o") in
                   let bname = strip_spaces (s_getenv conf.env "anon") in
                   let outfile = if bname <> ""
-                    then slashify_linux_dos bname ^ ".gwb" ^ outfile
+                    then Filename.concat (bname ^ ".gwb") outfile
                     else outfile
                   in
                   print_specific_file conf print outfile strm;
@@ -667,9 +660,7 @@ let rec copy_from_stream conf print strm =
               | 'P' -> print (string_of_int !gwd_port)
               | 'Q' -> print (parameters conf.env) (* same as p *)
               | 'R' -> print (parameters_2 conf.env) (* same as p *)
-              | 'S' ->
-                  let which = Filename.basename conf.comm in
-                  print (comm_log conf which)
+              | 'S' -> print (comm_log conf) (* g prints content *)
               | _ ->
                   match p_getenv conf.env (String.make 1 c) with
                   | Some v ->
@@ -707,6 +698,7 @@ and print_specific_file conf print fname strm =
       else copy_from_stream conf print (Stream.of_string s)
   | _ -> ()
 and print_specific_file_tail conf print fname strm =
+  (* TODO implement tail *)
   match Stream.next strm with
     '{' ->
       let s = parse_upto '}' strm in
@@ -881,8 +873,8 @@ let error conf str =
   Wserver.printf "<em>%s</em>\n" (String.capitalize_ascii str);
   trailer conf
 
-let exec_f conf comm which =
-  let s = comm ^ " > " ^ (comm_log conf which) in
+let exec_f conf comm =
+  let s = comm ^ " > " ^ (comm_log conf) in
   Printf.eprintf "$ cd \"%s\"\n" (Sys.getcwd ());
   flush stderr;
   Printf.eprintf "$ %s\n" s;
@@ -976,11 +968,13 @@ let simple conf =
   in
   let env = ("f", "on") :: conf.env in
   let env = list_replace "anon" ged env in
+  let which = if ged = "" then "gwc" else "ged2gwb" in
   let conf =
-    {comm = if ged = "" then "gwc" else "ged2gwb";
+    {comm = which;
      env = list_replace "o" out_file env; lang = conf.lang;
      request = conf.request; lexicon = conf.lexicon}
   in
+  let conf = {conf with comm = "gwc"} in
   if ged <> "" && not (Sys.file_exists ged) then
     print_file conf "err_unkn.htm"
   else if out_file = "" then print_file conf "err_miss.htm"
@@ -1000,7 +994,7 @@ let gwc_or_ged2gwb out_name_of_in_name conf =
   in
   let in_file =
     if fname = "" then in_file
-    else in_file ^ ( if Sys.unix then "/" else "\\" ) ^ fname
+    else Filename.concat in_file fname
   in
   let conf = conf_with_env conf "anon" in_file in
   let out_file =
@@ -1015,6 +1009,7 @@ let gwc_or_ged2gwb out_name_of_in_name conf =
   let conf = conf_with_env conf "body_prop" "" in
   let conf = conf_with_env conf "fname" "" in
   let conf = conf_with_env conf "o" out_file in
+  let conf = {conf with comm = "gwc"} in
   if in_file = "" || out_file = "" then print_file conf "err_miss.htm"
   else if not (Sys.file_exists in_file) && not (String.contains fname '*')
   then print_file conf "err_unkn.htm"
@@ -1056,12 +1051,13 @@ let gwc conf =
     print_file conf "err_gwc.htm"
   else
     begin
+      let conf = {conf with comm = "gwc"} in
       let rc =
         let comm = stringify (Filename.concat !bin_dir "gwc") in
         let comm = comm ^ parameters conf.env in
-        exec_f conf comm "gwc"
+        exec_f conf comm
       in
-      Printf.eprintf "Return code(gwc) %d\n" rc ;
+      if !Mutil.verbose then Printf.eprintf "Return code(gwc) %d\n" rc ;
       let rc = if Sys.unix then rc else infer_rc conf rc in
       let gwo = strip_spaces (s_getenv conf.env "anon") ^ "o" in
       (try Sys.remove gwo with Sys_error _ -> ());
@@ -1072,6 +1068,7 @@ let gwc conf =
       else begin
         flush stderr;
         if not (Sys.file_exists file_conf) then print_default_gwf_file conf ;
+        let _ = Printf.eprintf "Comm: %s\n" conf.comm in
         print_file conf "ok_gwc.htm"
       end
     end
@@ -1080,10 +1077,12 @@ let gwdiff_check conf =
   print_file conf "bsi_diff.htm"
 
 let gwdiff conf =
+  let conf = {conf with comm = "gwdiff"} in
+  let conf = conf_with_env conf "which" "gwdiff" in
   let rc =
     let comm = stringify (Filename.concat !bin_dir conf.comm) in
     (* FIXME exec_f expects -anon to be set *)
-    exec_f conf (comm ^ parameters_2 conf.env) "gwdiff"
+    exec_f conf (comm ^ parameters_2 conf.env)
   in
   Printf.eprintf "\n";
   flush stderr;
@@ -1101,8 +1100,10 @@ let connex_check conf =
 let connex conf =
   let comm =
     (stringify (Filename.concat !bin_dir "connex")) ^ " " ^
-    (parameters conf.env) ^ " > " ^ (comm_log conf "connex")
+    (parameters conf.env) 
   in
+  let conf = {conf with comm = "connex"} in
+  let conf = conf_with_env conf "which" "connex" in
   let rc =
     match p_getenv conf.env "del" with
     | Some _ ->
@@ -1110,7 +1111,8 @@ let connex conf =
         let uname = input_line ic in
         let () = close_in ic in
         let commnd =
-          "cd " ^ (Sys.getcwd ()) ^ "; tput bel;" ^ comm
+          "cd " ^ (Sys.getcwd ()) ^ "; tput bel;" ^ comm ^
+            " > " ^ (comm_log conf)
         in
         if uname = "Darwin" then
           let launch = "tell application \"Terminal\" to do script " in
@@ -1126,7 +1128,8 @@ let connex conf =
             "Unknown Os_type" Sys.os_type "or wrong uname response" uname;
           exit 2
         end
-    | None -> exec_f conf comm "connex"
+    | None ->
+        exec_f conf comm
   in
   flush stderr;
   if rc > 1 then print_file conf "err_bsi.htm"
@@ -1175,9 +1178,11 @@ let gwu = gwu_or_gwb2ged_check ".gw"
 let gwb2ged = gwu_or_gwb2ged_check ".ged"
 
 let gwb2ged_or_gwu_1 ok_file conf =
+  let conf = {conf with comm = "gwu"} in
+  let conf = conf_with_env conf "which" "gwu" in
   let rc =
     let comm = stringify (Filename.concat !bin_dir conf.comm) in
-    exec_f conf (comm ^ parameters conf.env) "gwu_or_2ged"
+    exec_f conf (comm ^ parameters conf.env)
   in
   Printf.eprintf "\n";
   flush stderr;
@@ -1342,6 +1347,8 @@ let recover_2 conf =
       Printf.eprintf "$ %s\n" c; flush stderr; Sys.command c
     with e -> Sys.chdir dir; raise e
   in
+  let conf = {conf with comm = "gwc"} in
+  let conf = conf_with_env conf "which" "gwc" in
   let rc =
     if rc = 0 then
       begin
@@ -1353,7 +1360,7 @@ let recover_2 conf =
           out_file
         in
         let rc =
-          exec_f conf comm "gwc"
+          exec_f conf comm
         in
         flush stderr;
         let rc = if Sys.unix then rc else infer_rc conf rc in
@@ -1374,6 +1381,7 @@ let cleanup conf =
     | None -> ""
   in
   let conf = {conf with comm = "gwc"} in
+  let conf = conf_with_env conf "which" "gwc" in
   if in_base = "" then print_file conf "err_miss.htm"
   else print_file conf "cleanup1.htm"
 
@@ -1392,8 +1400,10 @@ let cleanup_1 conf =
   let comm =
     Filename.concat !bin_dir ("gwc" ^ " tmp.gw -nofail -f -c -o " ^ in_base)
   in
+  let conf = {conf with comm = "gwc"} in
+  let conf = conf_with_env conf "which" "gwc" in
   let rc =
-    exec_f conf comm "gwc"
+    exec_f conf comm
   in
   flush stderr;
   let rc = if Sys.unix then rc else infer_rc conf rc in
@@ -1473,8 +1483,8 @@ let merge conf =
     | _ -> ""
   in
   let conf = {conf with comm = "gwc"} in
-  let conf = {conf with env = ("anon", out_file) :: 
-    ("which", "gwc") :: conf.env} in
+  let conf = conf_with_env conf "anon" out_file in
+  let conf = conf_with_env conf "which" "gwc" in
   let bases = selected conf.env in
   if out_file = "" || List.length bases < 2 then
     print_file conf "err_miss.htm"
@@ -1506,6 +1516,8 @@ let merge_1 conf =
     in
     loop bases
   in
+  let conf = {conf with comm = "gwc"} in
+  let conf = conf_with_env conf "which" "gwc" in
   let rc =
     if rc <> 0 then rc
     else
@@ -1516,9 +1528,8 @@ let merge_1 conf =
              if s = "" then " " ^ b ^ ".gw" else s ^ " -sep " ^ b ^ ".gw")
           "" bases ^ " -f -o " ^ out_file
       in
-      exec_f conf comm "gwc"
+      exec_f conf comm
   in
-  let conf = {conf with comm = "gwc"} in
   if rc > 1 then
     if rc = 21 then print_file conf "err_gwc_1.htm"
     else if rc = 22 then print_file conf "err_gwc_2.htm"
@@ -1657,9 +1668,11 @@ let gwd_1 conf =
   print_file conf "ok_gwd.htm"
 
 let ged2gwb conf =
+  let conf = {conf with comm = "ged2gwb"} in
+  let conf = conf_with_env conf "which" "gwc" in
   let rc =
     let comm = stringify (Filename.concat !bin_dir conf.comm) in
-    exec_f conf (comm ^ " -fne '\"\"'" ^ parameters conf.env) "ged2gwb"
+    exec_f conf (comm ^ " -fne '\"\"'" ^ parameters conf.env)
   in
   let rc = if Sys.unix then rc else infer_rc conf rc in
   Printf.eprintf "\n";
@@ -1670,9 +1683,11 @@ let ged2gwb conf =
   end
 
 let consang conf =
+  let conf = {conf with comm = "consang"} in
+  let conf = conf_with_env conf "which" "consang" in
   let rc =
     let comm = stringify (Filename.concat !bin_dir conf.comm) in
-    exec_f conf (comm ^ parameters conf.env) "consang"
+    exec_f conf (comm ^ parameters conf.env)
   in
   Printf.eprintf "\n";
   flush stderr;
@@ -1680,9 +1695,11 @@ let consang conf =
   else print_file conf "ok_consang.htm"
 
 let update_nldb conf =
+  let conf = {conf with comm = "upd_nldb"} in
+  let conf = conf_with_env conf "which" "upd_nldb" in
   let rc =
     let comm = stringify (Filename.concat !bin_dir conf.comm) in
-    exec_f conf (comm ^ parameters conf.env) "upd_nldb"
+    exec_f conf (comm ^ parameters conf.env)
   in
   Printf.eprintf "\n";
   flush stderr;
