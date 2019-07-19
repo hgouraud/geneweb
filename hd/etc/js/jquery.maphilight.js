@@ -323,7 +323,7 @@
 						areas.each(function() {
 							if(this != first) {
 								var subarea_options = options_from_area(this, options);
-								if(!subarea_options.neverOn && !subarea_options.alwaysOn) {
+								if(!subarea_options.neverOn && !subarea_options.alwaysOn && mouseIsNotOverLegend ) {
 									var shape = shape_from_area(this);
 									add_shape_to(canvas, shape[0], shape[1], subarea_options, "highlighted");
 								}

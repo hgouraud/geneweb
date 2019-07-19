@@ -58,6 +58,7 @@ function get( v ) {
   }
 }
 
+var mouseIsNotOverLegend = true;
 var doc_path="%prefix;m=DOC&s=";
 var public_path="%bvar.gallery_path;";
 var private_path="%bvar.gallery_path_private;";
@@ -126,8 +127,10 @@ $(document).ready(function() {
     $("#image").maphilight();
 
     $(".legend").mouseover( function(e) {
+      mouseIsNotOverLegend = false ;
       $( "#area" + $(this).attr("id").replace(/[a-z]/g, "") ).mouseover();
     }).mouseout( function(e) {
+      mouseIsNotOverLegend = true ;
       $( "#area" + $(this).attr("id").replace(/[a-z]/g, "") ).mouseout();
     });
 
