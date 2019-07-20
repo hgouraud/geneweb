@@ -63,7 +63,7 @@ var doc_path="%prefix;m=DOC&s=";
 var public_path="%bvar.gallery_path;";
 var private_path="%bvar.gallery_path_private;";
 $(document).ready(function() {
-  $.ajax( "%url;ajax=on" )
+  $.ajax( "%url;output=json" )
   .done( function( json ) {
     $("#h1").html( json.title );
     $("#description").html( json.desc );

@@ -107,6 +107,7 @@
   %hidden;
   <input type="hidden" name="m" value="MOD_NOTES_OK">
   <input type="hidden" name="f" value="%evar.f;">
+  <input type="hidden" name="skip_ok" value="on">
   <input id="digest" type="hidden" name="digest">
   <input id="notes" type="hidden" name="notes">
   <div class="ml-4">
@@ -210,7 +211,7 @@ $(document).ready(function() {
 
   table = $('#map_table').DataTable( {
      "ajax": {
-       "url": "%url;ajax=on",
+       "url": "%url;output=json",
        "dataSrc": "r.map"
      },
      "deferRender": true,

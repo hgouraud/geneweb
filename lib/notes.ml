@@ -504,8 +504,8 @@ let print conf base =
       in
       match templ with
       | Some ic ->
-         begin match p_getenv conf.env "ajax" with
-         | Some "on" ->
+         begin match p_getenv conf.env "output" with
+         | Some "json" ->
             let charset = if conf.charset = "" then "utf-8" else conf.charset in
             Wserver.header "Content-type: application/json; charset=%s" charset ;
             Wserver.printf "%s" (match typ with
@@ -541,8 +541,8 @@ let print_mod conf base =
   | Some _, Some "on" ->
      Wiki.print_mod_view_page conf true "NOTES" fnotes title env s
   | Some ic, _ ->
-      begin match p_getenv conf.env "ajax" with
-      | Some "on" ->
+      begin match p_getenv conf.env "output" with
+      | Some "json" ->
          let s_digest =
            List.fold_left (fun s (k, v) -> s ^ k ^ "=" ^ v ^ "\n") "" env ^ s
          in
@@ -618,7 +618,45 @@ let print_mod_ok conf base =
      Wiki.wi_person_exists = person_exists conf base;
      Wiki.wi_always_show_link = conf.wizard || conf.friend}
   in
-  Wiki.print_mod_ok conf wi edit_mode fname read_string commit string_filter
+  let skip_ok =
+    match p_getenv conf.env "skip_ok" with
+      Some "on" -> true
+    | _ -> false
+  in
+  if skip_ok then
+    begin
+      let fname = fname (Util.p_getenv conf.env "f") in
+      match edit_mode fname with
+      Some _edit_mode ->
+        begin
+        let old_string =
+          let (e, s) = read_string fname in
+          List.fold_left (fun s (k, v) -> s ^ k ^ "=" ^ v ^ "\n") "" e ^ s
+        in
+        let sub_part =
+          match Util.p_getenv conf.env "notes" with
+            Some v -> Mutil.strip_all_trailing_spaces v
+          | None -> failwith "notes unbound"
+        in
+        let _digest =
+          match Util.p_getenv conf.env "digest" with
+            Some s -> s
+          | None -> ""
+        in
+        (* FIXME false was digest <> Iovalue.digest old_string *)
+        if false then Update.error_digest conf  
+        else
+          begin
+            let s = sub_part in
+            if s <> old_string then 
+              commit fname s else () ;
+            print conf base
+          end
+        end
+      | None -> Hutil.incorrect_request conf ;
+    end
+  else
+    Wiki.print_mod_ok conf wi edit_mode fname read_string commit string_filter
     true
 
 let begin_text_without_html_tags lim s =
