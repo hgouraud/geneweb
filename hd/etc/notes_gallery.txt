@@ -38,6 +38,10 @@
   <a id="rlm" href="%prefix;m=RLM" title="[*relations tree]"><img src="%image_prefix;/gui_create.png" height="18" alt="Tree"></a>
   <ul id="legend" class="d-inline list_comma list-unstyled p-0"></ul>
 </div>
+<div class="d-none" id="div_legend_grp">%nn;
+  [*groups][:]
+  <ul id="legend_grp" class="d-inline list_comma list-unstyled p-0"></ul>
+</div>
 <div class="d-none" id="div_unknown">%nn;
   [*unknown person][:]%nn; <ul id="unknown" class="d-inline list_comma list-unstyled pl-0"></ul>
 </div>
@@ -63,6 +67,8 @@ var doc_path="%prefix;m=DOC&s=";
 var public_path="%bvar.gallery_path;";
 var private_path="%bvar.gallery_path_private;";
 var legend_list = [];
+var group_list = [];
+var legend_groups = [];
 
 $(document).ready(function() {
   $.ajax( "%url;output=json" )
@@ -96,7 +102,7 @@ $(document).ready(function() {
           if( get(r.alt) != "" ) { txt += " (" + r.alt + ")"; }
         }
         if( get(r.fn) != "" && get(r.sn) != "") {
-          if (legend_list.includes(key) === false) {
+          if( legend_list.includes(key) === false) {
             legend_list.push(key);
             $("#legend").append( "<li class='legend' id='a" + cnt + "'><span><a href='" + href + "'>" + txt + "</a></span></li>" );
             $("#div_legend").removeClass( "d-none" );
@@ -120,13 +126,22 @@ $(document).ready(function() {
         $("#div_legend").removeClass( "d-none" )
       }
       if( href != "" ) { href = " href='"+ href + "'"; }
-      if(get(r.group) != 0)
-        { group = " class='group" + get(r.group) + "' data-maphilight='{\"groupBy\":\".group" + get(r.group) + "\"}'"; }
-      else { group = ""; }
+      var grp = get(r.group);
+      if(grp != 0 ) {
+        group = " class='group" + grp + " g" + grp + "' data-maphilight='{\"groupBy\":\".group" + grp + "\"}'";
+      } else { group = ""; }
 
       $("#map").append( "<area id='area" + cnt + "' shape='" + get(r.shape) + "' coords='" + get(r.coords) + "' alt='" + txt + "' title='" + txt + "'" + href + group + ">" );
 
       cnt++;
+    });
+
+    json.groups.forEach( function( r ) {
+      var grp = get(r.name);
+      var label = get(r.label);
+      $("#legend_grp").append( "<li class='legend_grp' id='g" + grp + "'><span>" + grp +
+        " : " + label + "</span></li>" );
+      $("#div_legend_grp").removeClass( "d-none" );
     });
 
     $("#image").maphilight();
@@ -137,6 +152,12 @@ $(document).ready(function() {
     }).mouseout( function(e) {
       mouseIsNotOverLegend = true ;
       $( "#area" + $(this).attr("id").replace(/[a-z]/g, "") ).mouseout();
+    });
+
+    $(".legend_grp").mouseover( function() {
+        $( "." + $(this).attr("id")).mouseover();
+    }).mouseout( function() {
+        $( "." + $(this).attr("id")).mouseout();
     });
 
     $("area").mouseover( function(e) {

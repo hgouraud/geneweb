@@ -6,6 +6,10 @@ fr: éditeur d’image réactive
 en: on this image
 fr: sur cette image
 
+    groups
+en: groups
+fr: groupes
+
     other
 en: other
 fr: autre
