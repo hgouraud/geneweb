@@ -62,6 +62,8 @@ var mouseIsNotOverLegend = true;
 var doc_path="%prefix;m=DOC&s=";
 var public_path="%bvar.gallery_path;";
 var private_path="%bvar.gallery_path_private;";
+var legend_list = [];
+
 $(document).ready(function() {
   $.ajax( "%url;output=json" )
   .done( function( json ) {
@@ -86,17 +88,20 @@ $(document).ready(function() {
 
       if( get(r.t) == "" || r.t == "p" ) {
         var oc = get(r.oc);
+        var key = get(r.fn) + get(r.oc) + get(r.sn);
         if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
         if( get(r.fn) != "" && get(r.sn) != "" ) {
           href = "%prefix;&p=" + r.fn + "&n=" + r.sn + oc;
           txt = r.fn + " " + r.sn;
           if( get(r.alt) != "" ) { txt += " (" + r.alt + ")"; }
         }
-        if( get(r.fn) != "" && get(r.sn) != "" ) {
-          $("#legend").append( "<li class='legend' id='a" + cnt + "'><span><a href='" + href + "'>" + txt + "</a></span></li>" );
-          $("#div_legend").removeClass( "d-none" );
-          $("#rlm").attr( "href", $("#rlm").attr("href") + "&p" + cnt_rlm + "=" + r.fn + "&n" + cnt_rlm + "=" + r.sn + (get(r.oc) == "" ? "" : "&oc" + cnt_rlm + "=" + r.oc ) );
-          cnt_rlm++;
+        if( get(r.fn) != "" && get(r.sn) != "") {
+          if (legend_list.includes(key) === false) {
+            legend_list.push(key);
+            $("#legend").append( "<li class='legend' id='a" + cnt + "'><span><a href='" + href + "'>" + txt + "</a></span></li>" );
+            $("#div_legend").removeClass( "d-none" );
+            $("#rlm").attr( "href", $("#rlm").attr("href") + "&p" + cnt_rlm + "=" + r.fn + "&n" + cnt_rlm + "=" + r.sn + (get(r.oc) == "" ? "" : "&oc" + cnt_rlm + "=" + r.oc ) );
+            cnt_rlm++; }
         } else {
           $("#unknown").append( "<li class='legend' id='a" + cnt + "'><span>" + txt + "</span></li>" );
           $("#div_unknown").removeClass( "d-none" );
