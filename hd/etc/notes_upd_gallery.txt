@@ -96,7 +96,7 @@
           <th>[*first name/first names]0</th>
           <th>[*surname/surnames]0</th>
           <th title="[*occurrence number]">#</th>
-          <th>[*group]</th>
+          <th>[*group/groups]0</th>
           <th>[*note/notes]0</th>
           <th>URL</th>
           <th>[*comment]</th>
@@ -105,9 +105,16 @@
       </table>
     </div>
   </div>
-  <div>
-    <textarea class="form-control" name="group_labels" id="group_labels" rows="5"></textarea>
+  <div class="table-responsive-md">
+    <table id="grp_table" class="table table-sm">
+      <thead><tr>
+        <th>[*group/groups]0</th>
+        <th>[*group label]</th>
+        <th><i class="fa fa-trash-alt"></i></th>
+        </tr></thead>
+      </table>
   </div>
+
   %hidden;
   <input type="hidden" name="m" value="MOD_NOTES_OK">
   <input type="hidden" name="f" value="%evar.f;">
@@ -117,6 +124,7 @@
   <div class="ml-4">
     <button type="submit" form="form" class="btn btn-primary" title="[*validate/delete]0">OK</button>
     <a class="btn btn-outline-primary" href="%url;notmpl=on">[*modify] [note/notes]0</a>
+    <a class="btn btn-outline-primary" onClick="add_new_group()">[*add new group]</a>
   </div>
 </form>
 
@@ -175,10 +183,11 @@ $(document).mousedown( function() {
 });
 
 var global_cnt = 0;
+var global_grp = 0;
+
 function add_new_row( x1, y1, x2, y2 ) {
   if( x2-x1 > 5 && y2-y1 > 5 ) {
     var cnt = ++global_cnt;
-
     var coords = "" + x1 + "," + y1 + "," + x2 + "," + y2;
     var new_row = table.row.add( {
       "shape": "rect",
@@ -188,6 +197,25 @@ function add_new_row( x1, y1, x2, y2 ) {
     $("#div_legend").append( "<li class='legend' id='a" + cnt + "'><span>" + cnt + "</span></li>" );
     new_row.node().id = "row" + cnt;
   }
+}
+
+function g_row ( name, label) {
+  var str = "<tr><td>" + 
+    "<input class='form-control update' type='number' value='" + name + 
+    "' min='0' step='1'></td><td>" +
+    "<input class='form-control update' type='text' value='" + label +
+    "'</td><td><i class=\"fa fa-trash-alt\"></i></td></tr>";
+  return str;
+}
+
+function add_new_group() {
+    var grp = ++global_grp;
+    var new_row = table_grp.row.add( {
+      "name": "",
+      "label": ""
+    }).draw(false);
+    //$("#grp_table").append(g_row( "", ""));
+    new_row.node().id = "g_row" + grp;
 }
 
 $(document).ready(function() {
@@ -213,6 +241,57 @@ $(document).ready(function() {
    }
    $("#image").maphilight();
   });
+
+  table_grp = $('#grp_table').DataTable( {
+    "ajax": {
+      "url": "%url;output=json",
+      "dataSrc": "r.groups"
+    },
+    "deferRender": true,
+    "columns": %[
+      {
+        "data": "name",
+        "defaultContent": "",
+        "render": function ( data, type, row, meta ) {
+          var disabled = "";
+          return "<input class='form-control update' type='number' value='" + get(data) + "' min='0' step='1'" + disabled + ">";
+        }
+      },
+      {
+        "data": "label",
+        "defaultContent": "",
+        "render": function ( data, type, row, meta ) {
+          var disabled = "";
+          return "<input class='form-control update' type='text' value='" + get(data) + "'" + disabled + ">";
+        }
+      },
+      { "data": null, "defaultContent": '<a class="fa fa-trash-alt text-danger remove" title="[*delete]"></a>' }
+      %],
+      "rowCallback": function( row, r ) {
+        var grp = row.id.replace(/[a-z]/g, "");
+        var group = get(r.name);
+        var label = get(r.label);
+        $("#g"+grp).html( "<span>" + grp + " : " + label + "</span>" );
+      },
+      "paging": false,
+      "ordering": false,
+      "searching": false,
+      "info": false,
+      "scrollY": "25vh",
+      "scrollCollapse": true,
+      "initComplete": function( settings, json) {
+        json = json.r;
+
+        // Init group legend from JSON
+        json.groups.forEach( function( r ) {
+          var grp = ++global_grp;
+          var name = get(r.name);
+          var labl = get(r.label);
+          //$("#grp_table").append(g_row(name, labl));
+          table_grp.row(grp-1).node().id = "g" + grp;
+        } );
+        }
+  } );
 
   table = $('#map_table').DataTable( {
      "ajax": {
@@ -444,6 +523,16 @@ zh: Chinese
     }
   } );
 
+  $(document).on( "mouseover", "grp_table", function(e) {
+    var n = $(this).attr("id").replace(/[a-z]/g, "");
+    $( "#g" + n ).mouseover();
+    $( "#g" + n ).addClass( "in" );
+  });
+  $(document).on( "mouseout", "grp_table", function(e) {
+    var n = $(this).attr("id").replace(/[a-z]/g, "");
+    $( "#g" + n ).mouseout();
+    $( "#g" + n ).removeClass( "in" );
+  });
   $(document).on( "mouseover", ".legend", function(e) {
     var n = $(this).attr("id").replace(/[a-z]/g, "");
     $( "#area" + n ).mouseover();

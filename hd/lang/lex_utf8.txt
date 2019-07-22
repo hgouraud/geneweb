@@ -6,9 +6,17 @@ fr: éditeur d’image réactive
 en: on this image
 fr: sur cette image
 
-    groups
-en: groups
-fr: groupes
+    group/groups
+en: group/groups
+fr: groupe/groupes
+
+    group label
+en: group label
+fr: définition du groupe
+
+    add new group
+en: add new group
+fr: ajouter un groupe
 
     other
 en: other
@@ -21,10 +29,6 @@ fr: chemin
     other path
 en: other path
 fr: autre chemin
-
-    group
-en: group
-fr: groupe
 
     detect faces
 en: detect faces
