@@ -435,9 +435,9 @@ let move_file_to_old conf fname bfname mode keydir =
   if Sys.file_exists saved_file then 1 else 0
 
 let print_confirm_c conf base save_m report =
-  match p_getint conf.env "i" with
+  match p_getenv conf.env "i" with
   | Some ip ->
-      let p = poi base (Adef.iper_of_int ip) in
+      let p = poi base (Gwdb.iper_of_string ip) in
       let sp = UpdateInd.string_person_of base p in
       let digest = default_image_name base p in
       let new_env =
@@ -694,9 +694,9 @@ let print_c conf base =
     begin match p_getenv conf.env "m" with
     | Some m ->
       let save_m = m in
-      begin match p_getint conf.env "i" with
+      begin match p_getenv conf.env "i" with
       | Some ip ->
-          let p = poi base (Adef.iper_of_int ip) in
+          let p = poi base (Gwdb.iper_of_string ip) in
           let digest = default_image_name base p in
           let (conf, report) =
             begin match m with

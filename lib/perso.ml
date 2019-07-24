@@ -1855,7 +1855,7 @@ let get_note_source conf base env auth no_note note_source =
     in
     let wi =
       {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
-       Wiki.wi_file_path = Notes.file_path conf base;
+       Wiki.wi_file_path = Notes.file_path conf ;
        Wiki.wi_person_exists = person_exists conf base;
        Wiki.wi_always_show_link = conf.wizard || conf.friend}
     in
@@ -4405,8 +4405,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
       begin match get_env "src" env with
         Vstring s ->
           let env = ['i', (fun () -> Util.default_image_name base p)] in
-          let env = ('k', (fun () ->
-            string_of_int (Adef.int_of_iper (get_key_index p)))) :: env
+          let env = ('k', (fun () -> Gwdb.string_of_iper (get_iper p))) :: env
           in
           let s = string_with_macros conf env s in
           let s =

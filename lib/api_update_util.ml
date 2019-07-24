@@ -801,17 +801,10 @@ let pers_to_piqi_person_search_info conf base p =
           let s = string_with_macros conf env s in
           let lines = Wiki.html_of_tlsw conf s in
           let wi =
-<<<<<<< HEAD
-            {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
-             Wiki.wi_file_path = Notes.file_path conf base;
-             Wiki.wi_person_exists = person_exists conf base;
-             Wiki.wi_always_show_link = conf.wizard || conf.friend}
-=======
             {Api_wiki.wi_mode = "NOTES"; Api_wiki.wi_cancel_links = conf.cancel_links;
              Api_wiki.wi_file_path = Notes.file_path conf;
              Api_wiki.wi_person_exists = person_exists conf base;
              Api_wiki.wi_always_show_link = conf.wizard || conf.friend}
->>>>>>> Porting Fabien's reorg work to current master. Allow sub-folders
           in
           let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
           if conf.pure_xhtml then Util.check_xhtml s else s
@@ -871,17 +864,10 @@ let pers_to_piqi_person_search_info conf base p =
     let s = string_with_macros conf env s in
     let lines = Wiki.html_of_tlsw conf s in
     let wi =
-<<<<<<< HEAD
-      {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
-       Wiki.wi_file_path = Notes.file_path conf base;
-       Wiki.wi_person_exists = person_exists conf base;
-       Wiki.wi_always_show_link = conf.wizard || conf.friend}
-=======
       {Api_wiki.wi_mode = "NOTES"; Api_wiki.wi_cancel_links = conf.cancel_links;
        Api_wiki.wi_file_path = Notes.file_path conf;
        Api_wiki.wi_person_exists = person_exists conf base;
        Api_wiki.wi_always_show_link = conf.wizard || conf.friend}
->>>>>>> Porting Fabien's reorg work to current master. Allow sub-folders
     in
     let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
     if conf.pure_xhtml then Util.check_xhtml s else s

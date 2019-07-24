@@ -61,11 +61,6 @@ let strip_br str =
   if len > 4 && (String.sub str (len - 4) 4) = "<br>" then
     (String.sub str 0 (len - 4)) else str
 
-let include_hed_trl conf name =
-  match Util.open_template conf name with
-    Some ic -> Templ.copy_from_templ conf [] ic
-  | None -> ()
-
 let rec eval_var conf base env p _loc sl =
   try eval_special_var conf base sl with
     Not_found -> eval_simple_var conf base env p sl
@@ -817,7 +812,7 @@ and eval_special_var conf base =
     ["include"; "perso_header"] ->
       (* TODO merge with mainstream includes ?? *)
       (* for perso_header, we need a person! *)
-      begin match p_getint conf.env "i" with
+      begin match p_getenv conf.env "i" with
         Some i ->
           let has_base_loop =
             try let _ = Util.create_topological_sort conf base in false with
@@ -825,7 +820,7 @@ and eval_special_var conf base =
           in
           if has_base_loop then str_val (Printf.sprintf "has base loop")
           else
-            let p = poi base (iper_of_string i) in
+            let p = poi base (Gwdb.iper_of_string i) in
             Perso.interp_templ_with_menu (fun _ -> ()) "perso_header" conf
               base p;
             str_val ""

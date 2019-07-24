@@ -10,7 +10,4 @@ val print_start : config -> base -> unit
 val incr_welcome_counter : config -> (int * int * string) option
 val incr_request_counter : config -> (int * int * string) option
 
-val adm_file : string -> string
-val print_lexicon : config -> base -> unit
-
 val source_file_name : config -> string -> string

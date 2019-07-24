@@ -641,7 +641,7 @@ let authorized_age conf base p =
       let check_date none = function
         | Some (Dgreg (d, _)) ->
           strictly_after_private_years conf
-            (CheckItem.time_elapsed d conf.today)
+            (Date.time_elapsed d conf.today)
         | _ -> none ()
       in
       check_date

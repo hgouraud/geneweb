@@ -15,5 +15,5 @@
             geneweb.util
             geneweb.wserver.mli
             markup)
- (modules_without_implementation dbdisk def templAst)
+ (modules_without_implementation templAst)
 )

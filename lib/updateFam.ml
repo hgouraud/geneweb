@@ -587,7 +587,7 @@ and eval_special_var conf base =
     ["include"; "perso_header"] ->
       (* TODO merge with mainstream includes ?? *)
       (* for perso_header, we need a person! *)
-      begin match p_getint conf.env "i" with
+      begin match p_getenv conf.env "i" with
         Some i ->
           let has_base_loop =
             try let _ = Util.create_topological_sort conf base in false with
@@ -595,7 +595,7 @@ and eval_special_var conf base =
           in
           if has_base_loop then str_val (Printf.sprintf "has base loop")
           else
-            let p = poi base (iper_of_string i) in
+            let p = poi base (Gwdb.iper_of_string i) in
             Perso.interp_templ_with_menu (fun _ -> ()) "perso_header" conf
               base p;
             str_val ""
