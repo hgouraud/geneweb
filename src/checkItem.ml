@@ -481,18 +481,6 @@ value check_normal_marriage_date_for_parent base error warning (ifam, fam) =
   }
 ;
 
-value designation base p =
-  let first_name = p_first_name base p in
-  let surname = p_surname base p in
-  let s =
-    Mutil.iso_8859_1_of_utf_8
-      (first_name ^ "." ^ string_of_int (get_occ p) ^ " " ^ surname)
-  in
-  if first_name = "?" || surname = "?" then
-    s ^ " (i=" ^ string_of_int (Adef.int_of_iper (get_key_index p)) ^ ")"
-  else s
-;
-
 value check_person_dates_as_witness base warning p =
   let list = do {
     let list = ref [] in
