@@ -481,6 +481,62 @@ value check_normal_marriage_date_for_parent base error warning (ifam, fam) =
   }
 ;
 
+value designation base p =
+  let first_name = p_first_name base p in
+  let surname = p_surname base p in
+  let s =
+    Mutil.iso_8859_1_of_utf_8
+      (first_name ^ "." ^ string_of_int (get_occ p) ^ " " ^ surname)
+  in
+  if first_name = "?" || surname = "?" then
+    s ^ " (i=" ^ string_of_int (Adef.int_of_iper (get_key_index p)) ^ ")"
+  else s
+;
+
+value check_person_dates_as_witness base warning p =
+  let list = do {
+    let list = ref [] in
+    let related = Mutil.list_uniq (List.sort compare (get_related p)) in
+    make_list related where rec make_list =
+      fun
+      [ [ic :: icl] -> do {
+          let c = poi base ic in
+          if get_sex c = Male then
+            Array.iter
+              (fun ifam ->
+                 let fam = foi base ifam in
+                 if Mutil.array_mem (get_key_index p) (get_witnesses fam)
+                 then
+                   list.val := [(ifam, fam) :: list.val]
+                 else ())
+              (get_family (poi base ic))
+          else ();
+          make_list icl
+        }
+      | [] -> () ];
+    list.val
+  }
+  in
+  let list =
+    List.sort
+      (fun (_, fam1) (_, fam2) ->
+         match
+           (Adef.od_of_codate (get_marriage fam1),
+            Adef.od_of_codate (get_marriage fam2))
+         with
+         [ (Some d1, Some d2) ->
+             if strictly_before d1 d2 then -1
+             else if strictly_before d2 d1 then 1
+             else 0
+         | _ -> 0 ])
+      list
+  in
+  let ip = get_key_index p in
+  List.iter
+    (fun (ifam, fam) ->
+      check_normal_marriage_date_for_someone base (fun () -> ()) warning True fam ip)
+    list
+;
 
 (*
  * Semi sort children by birth dates.
@@ -878,6 +934,7 @@ value person base warning p = do {
   birth_before_death base warning p;
   birth_before_baptism base warning p;
   check_person_age base warning p;
+  check_person_dates_as_witness base warning p;
   List.iter (titles_after_birth base warning p) (get_titles p);
   related_sex_is_coherent base warning p;
 };
