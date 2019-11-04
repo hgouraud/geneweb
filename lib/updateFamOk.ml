@@ -494,6 +494,7 @@ let reconstitute_family conf base =
           Male, Male | Female, Female ->
             begin match relation with
               Married -> NoSexesCheckMarried
+            | Pacs -> Pacs
             | _ -> NoSexesCheckNotMarried
             end
         | _ -> relation
@@ -950,7 +951,8 @@ let effective_mod conf base sfam scpl sdes =
 #endif
   let sfam = {sfam with relation = nfam.relation} in
   if sfam.relation <> NoSexesCheckNotMarried &&
-     sfam.relation <> NoSexesCheckMarried
+     sfam.relation <> NoSexesCheckMarried &&
+     sfam.relation <> Pacs
   then
     begin
       begin match get_sex nfath with
@@ -1084,7 +1086,8 @@ let effective_add conf base sfam scpl sdes =
 #endif
   let sfam = {sfam with relation = nfam.relation} in
   if sfam.relation <> NoSexesCheckNotMarried &&
-     sfam.relation <> NoSexesCheckMarried
+     sfam.relation <> NoSexesCheckMarried &&
+     sfam.relation <> Pacs
   then
     begin
       begin match get_sex nfath_p with

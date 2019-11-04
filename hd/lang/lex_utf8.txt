@@ -10009,7 +10009,7 @@ eo: sen kontrolo pri seksoj
 es: pareja homosexual (sin comprobación de sexo)
 et: ära kontrolli sugude sobivust
 fi: samaa sukupuolta oleva pariskunta (sukupuolta ei vahvistettu)
-fr: relation homosexuelle (pas de vérification des sexes)
+fr: relation homosexuelle ou Pacs (pas de vérification des sexes)
 he:  בלי לוודא מין
 is: ekki athuga kyn
 it: coppia omosessuale (senza verifica del sesso)
