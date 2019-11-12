@@ -408,3 +408,5 @@ val is_empty_name : person -> bool
 
 (**/**)
 val init_cache_info : string -> Gwdb.base -> unit
+
+val test_mfp : string -> string -> string

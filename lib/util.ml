@@ -249,6 +249,37 @@ let gen_decline wt s1 s2 s2_raw =
   in
   loop 0
 
+(* [pluriel_fr:aux |voyelle_fr:à l’|masculin_fr:au |féminin_fr:à la |au ] *)
+
+let meta = Hashtbl.create 1
+
+
+let test_mfp w s =
+  let () =
+    Hashtbl.add meta "pluriel_fr" ["obsèques"]
+  in
+  let () =
+    Hashtbl.add meta "masculin_fr" ["décès"; "divorce"; "baptème"]
+  in
+  let () =
+    Hashtbl.add meta "féminin_fr" ["confirmation"; "inhumation"]
+  in
+  let () =
+    Hashtbl.add meta "voyelles_fr" ["a"; "e"; "i"; "o"; "u"; "y"; "h"]
+  in
+  let alternatives = String.split_on_char '|' w in
+  let rec loop alt =
+    if List.length alt = 1 then
+      List.hd alt (* default *)
+    else
+      let key_val = String.split_on_char ':' (List.hd alt) in
+      let w_list = Hashtbl.find meta (List.hd key_val) in
+      if List.mem s w_list || List.mem (String.make 1 s.[0]) w_list then
+        (List.hd (List.tl key_val))
+      else loop (List.tl alt)
+  in
+  loop alternatives
+
 let transl_a_of_b conf x y1 y2 =
   gen_decline (transl_nth conf "%1 of %2" 0) x y1 y2
 let transl_a_of_gr_eq_gen_lev conf x y1 y2 =
