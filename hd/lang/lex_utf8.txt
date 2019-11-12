@@ -592,12 +592,12 @@ pt: %t foi testemunha antes do seu nascimento
 ru: %t был(а) свидетелем до своего рождения
 sv: %t var vittne innan hennes/hans död
 
-    %t witnessed the %s after his/her death
+    %s witnessed the %s after his/her death
 co: %t hè statu testimone d[i']%s dopu a so morta
 de: %t war Zeuge bei der %s nach seinem Tod
 en: %t was a witness at a %s after their own death
 es: %t ha sido testigo de %s después de su muerte
-fr: %t a été témoin de %s après sa mort
+fr: %s a été témoin [pluriel_fr:des |voyelles_fr:de l'|masculin_fr:du |féminin_fr:de la |son ]%s après sa mort
 it: %t è stato testimone del %s dopo la sua morte
 pt: %t foi testemunha de %s depois da sua morte
 ru: %t был(а) свидетелем %s после его/её смерти

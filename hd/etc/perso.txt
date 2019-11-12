@@ -79,6 +79,52 @@
   %init_cache.nb_asc.from_gen_desc.nb_desc;
 %end;
 
+%define;msg1(xxx,zzz)
+  [%s witnessed the %s after his/her death:::xxx:zzz]
+%end;
+
+%define;msg2(xxx)
+  [%t was witness before his/her birth:::xxx]
+%end;
+
+%let;str1;%apply;msg1(self,"mariage")%in;
+%let;str2;%apply;msg1(self,"décès")%in;
+%let;str3;%apply;msg1(self,"confirmation")%in;
+%let;str4;%apply;msg1(self,"obsèques")%in;
+
+%define;mfp_1(sss)
+  %mfp.sss;
+%end;
+
+test : <br>
+lex_utf8 :
+<pre>
+    %s witnessed the %%s after his/her death
+fr: %%s a été témoin %[pluriel_fr:des |voyelles_fr:de l'|masculin_fr:du |féminin_fr:de la |son ]%%s après sa mort
+
+perso.txt :
+
+%%define;msg1(xxx,zzz)
+  %[%%s witnessed the %%s after his/her death:::xxx:zzz]
+%%end;
+
+%%let;str1;%%apply;msg1(self,"mariage")%%in;
+%%let;str2;%%apply;msg1(self,"décès")%%in;
+%%let;str3;%%apply;msg1(self,"confirmation")%%in;
+%%let;str4;%%apply;msg1(self,"obsèques")%%in;
+
+%%define;mfp_1(sss)
+  %%mfp.sss;
+%%end;
+</pre>
+
+donne :<br>
+%apply;mfp_1%with;%str1;%end;<br>
+%apply;mfp_1%with;%str2;%end;<br>
+%apply;mfp_1%with;%str3;%end;<br>
+%apply;mfp_1%with;%str4;%end;<br>
+
+
 %(note that p_mod= (b)%bvar.p_mod; or (e)%evar.p_mod;%)
 %if;(evar.p_mod="zz" or (bvar.p_mod="zz" and evar.p_mod="") or
     (bvar.p_mod="" and evar.p_mod=""))
