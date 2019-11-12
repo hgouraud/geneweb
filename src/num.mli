@@ -14,6 +14,7 @@ value half : t -> t;
 value even : t -> bool;
 value inc : t -> int -> t;
 value mul : t -> int -> t;
+value exp : t -> int -> t;
 value div : t -> int -> t;
 value modl : t -> int -> int;
 value print : (string -> unit) -> string -> t -> unit;

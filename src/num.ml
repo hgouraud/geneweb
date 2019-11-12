@@ -122,6 +122,20 @@ value mul x n =
         loop (add r (mul0 x (n mod max_mul_base)))
           (mul0 x max_mul_base) (n / max_mul_base)
 ;
+value to_int = fun
+  [ [||] -> 0
+  | [| i |] -> i
+  | [| m ; d |] -> d * base + m
+  | _ -> assert False ]
+;
+value rec exp_gen x1 x2 n =
+  if n = 0 || x1 = zero then one
+  else if n = 1 then x1
+  else exp_gen (mul x1 (to_int x2)) x2 (n-1)
+;
+value exp x n =
+  exp_gen x x n
+;
 value div x n =
   if n > max_mul_base then invalid_arg "Num.div"
   else
