@@ -249,7 +249,7 @@ let gen_decline wt s1 s2 s2_raw =
   in
   loop 0
 
-(* [pluriel_fr:aux |voyelle_fr:à l’|masculin_fr:au |féminin_fr:à la |au ] *)
+(* [pluriel_fr:aux |voyelles_fr:à l’|masculin_fr:au |féminin_fr:à la |au ] *)
 
 let meta = Hashtbl.create 1
 

@@ -3121,12 +3121,17 @@ and eval_person_field_var conf base env (p, p_auth as ep) loc =
     let j = try String.index s ']' with Not_found -> -1 in
     if i = -1 || j = -1 then VVstring s
     else
-      let w = String.sub s (i + 1) (j - i) in
-      let _ = Printf.eprintf "%d, %d, %s\n" i j s in
-      let s1 = String.sub s (j+1) ((String.length s) - j) in
-      let k = try String.index s1 ' ' with Not_found -> String.length s1 in
-      let s1 = String.sub s1 0 k in
-      VVstring (Util.test_mfp w s1)
+      let s0 = String.sub s 0 i in
+      let s2 = String.sub s (j + 1) ((String.length s) - j -2 ) in
+      let w = String.sub s (i + 1) (j - i - 1) in
+      let _ = Printf.eprintf "%d, %d, %d, %s\n" i j (String.length s) s in
+      let _ = Printf.eprintf "%d, %d\n" (j+1) ((String.length s) - j -2 ) in
+      if j+1 < String.length s then
+        let s1 = String.sub s (j+1) ((String.length s) - j - 2 ) in
+        let k = try String.index s1 ' ' with Not_found -> String.length s1 in
+        let s1 = String.sub s1 0 k in
+        VVstring (s0 ^ (Util.test_mfp w s1) ^ s2)
+      else VVstring s
   | ["linked_page"; s] ->
       begin match get_env "nldb" env with
         Vnldb db ->
