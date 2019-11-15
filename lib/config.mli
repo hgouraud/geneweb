@@ -71,6 +71,7 @@ type config =
     xhs : string;
     request : string list;
     lexicon : (string, string) Hashtbl.t;
+    meta_mfp : (string, string list) Hashtbl.t;
     mutable charset : string;
     is_rtl : bool;
     left : string;

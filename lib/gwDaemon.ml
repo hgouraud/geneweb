@@ -198,14 +198,20 @@ let rec extract_assoc key =
 
 let input_lexicon lang =
   let ht = Hashtbl.create 501 in
+  let mt = Hashtbl.create 51 in
   let fname = Filename.concat "lang" "lex_utf8.txt" in
-  Mutil.input_lexicon lang ht
+  Mutil.input_lexicon lang ht mt
     (fun () -> Secure.open_in (Util.search_in_lang_path fname));
-  ht
+(*  Hashtbl.iter (fun k l -> 
+  	Printf.eprintf "Key: %s " k;
+  	List.iter (fun w -> Printf.eprintf "%s, " w) l;
+  	Printf.eprintf "\n") mt;
+*)
+  (ht, mt)
 
-let add_lexicon fname lang ht =
+let add_lexicon fname lang ht mt =
   let fname = Filename.concat "lang" fname in
-  Mutil.input_lexicon lang ht
+  Mutil.input_lexicon lang ht mt
     (fun () -> Secure.open_in (Util.search_in_lang_path fname))
 
 let alias_lang lang =
@@ -1129,10 +1135,10 @@ let make_conf from_addr request script_name env =
       if x = "" then !default_lang else x
     with Not_found -> !default_lang
   in
-  let lexicon = input_lexicon (if lang = "" then default_lang else lang) in
+  let (lexicon, meta_mfp) = input_lexicon (if lang = "" then default_lang else lang) in
   List.iter
     (fun fname ->
-       add_lexicon fname (if lang = "" then default_lang else lang) lexicon)
+       add_lexicon fname (if lang = "" then default_lang else lang) lexicon meta_mfp)
     !lexicon_list;
   (* A l'initialisation de la config, il n'y a pas de sosa_ref. *)
   (* Il sera mis à jour par effet de bord dans request.ml       *)
@@ -1256,7 +1262,7 @@ let make_conf from_addr request script_name env =
      base_env = base_env;
      allowed_titles = Lazy.from_fun (allowed_titles env base_env);
      denied_titles = Lazy.from_fun (denied_titles env base_env);
-     request = request; lexicon = lexicon;
+     request = request; lexicon = lexicon; meta_mfp = meta_mfp;
      xhs =
        begin match p_getenv base_env "doctype" with
          Some "html-4.01" -> ""
