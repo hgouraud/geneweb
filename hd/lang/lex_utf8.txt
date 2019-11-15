@@ -1,3 +1,10 @@
+:voyl:fr:a;e;i;o;u;y;h
+:masc:fr:baptème;mariage;divorce
+:masc:en:baptism;marriage;divorce
+:fem:fr:confirmation;inhumation
+:fem:en:confirmation;
+:test:aaa
+
      !dates order
 af: yyyymmdd
 ar: ddmmyyyy

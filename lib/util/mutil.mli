@@ -31,7 +31,8 @@ val arabian_of_roman : string -> int
 val compare_after_particle : string list -> string -> string -> int
 
 val input_lexicon :
-  string -> (string, string) Hashtbl.t -> (unit -> in_channel) -> unit
+  string -> (string, string) Hashtbl.t -> (string, string list) Hashtbl.t ->
+  (unit -> in_channel) -> unit
 
 module StrSet : Set.S with type elt = string
 

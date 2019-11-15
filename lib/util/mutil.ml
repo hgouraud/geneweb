@@ -346,7 +346,23 @@ let compare_after_particle particles s1 s2 =
   in
   loop (String.length p1) (String.length p2)
 
-let input_lexicon lang ht open_fname =
+(*
+:keyword:lg: word;word;... (no spaces)
+*)
+let scan_meta lang d_lang mt line =
+  let line = String.sub line 1 (String.length line - 1 ) in
+  let parts = String.split_on_char ':' line in
+  if List.length parts < 3 then
+    Printf.eprintf "Bad meta data format: %s\n" line
+  else
+    let lg = List.hd (List.tl parts) in
+    if lg = lang || lg = d_lang then
+      let key = List.hd parts in
+      let values = List.hd (List.tl (List.tl parts)) in
+      let words = String.split_on_char ';' values in
+      Hashtbl.add mt key words    
+
+let input_lexicon lang ht mt open_fname =
   try
     let ic = open_fname () in
     let lang =
@@ -367,7 +383,12 @@ let input_lexicon lang ht open_fname =
         while true do
           let k =
             let rec find_key line =
-              if String.length line < 4 then find_key (input_line ic)
+              if String.length line > 0 && line.[0] = ':' then 
+              	begin
+              		scan_meta lang derived_lang mt line;
+              		find_key (input_line ic)
+              	end
+              else if String.length line < 4 then find_key (input_line ic)
               else if String.sub line 0 4 <> "    " then
                 find_key (input_line ic)
               else line

@@ -106,7 +106,8 @@ let lindex s c =
 
 let input_lexicon lang =
   let ht = Hashtbl.create 501 in
-  Mutil.input_lexicon lang ht
+  let mt = Hashtbl.create 51 in
+  Mutil.input_lexicon lang ht mt
     (fun () ->
        open_in
          (List.fold_right Filename.concat [!gwtp_etc; "lang"] "lexicon.txt"));
