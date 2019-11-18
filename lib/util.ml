@@ -249,24 +249,9 @@ let gen_decline wt s1 s2 s2_raw =
   in
   loop 0
 
-(* [pluriel_fr:aux |voyelles_fr:à l’|masculin_fr:au |féminin_fr:à la |au ] *)
+(* [plur:aux |voyl:à l’|masc:au |fem:à la |au ] *)
 
-let meta = Hashtbl.create 1
-
-
-let test_mfp w s =
-  let () =
-    Hashtbl.add meta "pluriel_fr" ["obsèques"]
-  in
-  let () =
-    Hashtbl.add meta "masculin_fr" ["décès"; "divorce"; "baptème"]
-  in
-  let () =
-    Hashtbl.add meta "féminin_fr" ["confirmation"; "inhumation"]
-  in
-  let () =
-    Hashtbl.add meta "voyelles_fr" ["a"; "e"; "i"; "o"; "u"; "y"; "h"]
-  in
+let test_mfp meta w s =
   let alternatives = String.split_on_char '|' w in
   let rec loop alt =
     if List.length alt = 1 then

@@ -3130,7 +3130,7 @@ and eval_person_field_var conf base env (p, p_auth as ep) loc =
         let s1 = String.sub s (j+1) ((String.length s) - j - 2 ) in
         let k = try String.index s1 ' ' with Not_found -> String.length s1 in
         let s1 = String.sub s1 0 k in
-        VVstring (s0 ^ (Util.test_mfp w s1) ^ s2)
+        VVstring (s0 ^ (Util.test_mfp conf.meta_mfp w s1) ^ s2)
       else VVstring s
   | ["linked_page"; s] ->
       begin match get_env "nldb" env with

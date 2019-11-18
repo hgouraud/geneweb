@@ -99,8 +99,14 @@
 test : <br>
 lex_utf8 :
 <pre>
+:voyl:fr:a;e;i;o;u;y;h
+:masc:fr:baptème;mariage;divorce;décès
+:fem:fr:confirmation;inhumation
+:plur:fr:obsèques:
+:test:aaa
+
     %s witnessed the %%s after his/her death
-fr: %%s a été témoin %[pluriel_fr:des |voyelles_fr:de l'|masculin_fr:du |féminin_fr:de la |son ]%%s après sa mort
+fr: %%s a été témoin %[plur:fr:des |voyl:fr:de l'|masc:fr:du |fem:fr:de la |son ]%%s après sa mort
 
 perso.txt :
 
