@@ -80,7 +80,7 @@
 %end;
 
 %define;msg1(xxx,zzz)
-  [%s witnessed the %s after his/her death:::xxx:zzz]
+  [%t witnessed the %s after his/her death:::xxx:zzz]
 %end;
 
 %define;msg2(xxx)
@@ -105,13 +105,13 @@ lex_utf8 :
 :plur:fr:obsèques:
 :test:aaa
 
-    %s witnessed the %%s after his/her death
-fr: %%s a été témoin %[plur:fr:des |voyl:fr:de l'|masc:fr:du |fem:fr:de la |son ]%%s après sa mort
+    %%t witnessed the %%s after his/her death
+fr: %%t a été témoin %[plur:fr:des |voyl:fr:de l'|masc:fr:du |fem:fr:de la |son ]%%s après sa mort
 
 perso.txt :
 
 %%define;msg1(xxx,zzz)
-  %[%%s witnessed the %%s after his/her death:::xxx:zzz]
+  %[%%t witnessed the %%s after his/her death:::xxx:zzz]
 %%end;
 
 %%let;str1;%%apply;msg1(self,"mariage")%%in;
