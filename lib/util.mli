@@ -409,4 +409,4 @@ val is_empty_name : person -> bool
 (**/**)
 val init_cache_info : string -> Gwdb.base -> unit
 
-val test_mfp : (string, string list) Hashtbl.t ->string -> string -> string
+val process_mfp : config -> string -> string

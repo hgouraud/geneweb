@@ -265,6 +265,23 @@ let test_mfp meta w s =
   in
   loop alternatives
 
+let process_mfp conf s =
+  let i = try String.index s '[' with Not_found -> -1 in
+  let j = try String.index s ']' with Not_found -> -1 in
+  if i = -1 || j = -1 then s
+  else
+    let s0 = String.sub s 0 i in
+    let s2 = String.sub s (j + 1) ((String.length s) - j -2 ) in
+    let w = String.sub s (i + 1) (j - i - 1) in
+    let _ = Printf.eprintf "%d, %d, %d, %s\n" i j (String.length s) s in
+    let _ = Printf.eprintf "%d, %d\n" (j+1) ((String.length s) - j -2 ) in
+    if j+1 < String.length s then
+      let s1 = String.sub s (j+1) ((String.length s) - j - 2 ) in
+      let k = try String.index s1 ' ' with Not_found -> String.length s1 in
+      let s1 = String.sub s1 0 k in
+      s0 ^ (Util.test_mfp conf.meta_mfp w s1) ^ s2
+    else s
+
 let transl_a_of_b conf x y1 y2 =
   gen_decline (transl_nth conf "%1 of %2" 0) x y1 y2
 let transl_a_of_gr_eq_gen_lev conf x y1 y2 =
