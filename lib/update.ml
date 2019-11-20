@@ -511,19 +511,21 @@ let print_warning conf base =
         (Util.string_of_fevent_name conf base e1.efam_name)
         (Util.string_of_fevent_name conf base e2.efam_name)
   | FWitnessEventAfterDeath (p, e) ->
-      Wserver.printf
-        (fcapitale (ftransl conf "%t witnessed the %s after his/her death"))
+      Wserver.printf "%s"
+        (Util.process_mfp conf
+        (Printf.sprintf (fcapitale (ftransl conf "%t witnessed the %s after his/her death"))
         (fun _ ->
            Printf.sprintf "%s%s" (print_someone_strong conf base p)
              (DateDisplay.short_dates_text conf base p))
-        (Util.string_of_fevent_name conf base e.efam_name)
+        (Util.string_of_fevent_name conf base e.efam_name)))
   | FWitnessEventBeforeBirth (p, e) ->
-      Wserver.printf
-        (fcapitale (ftransl conf "%t witnessed the %s before his/her birth"))
+      Wserver.printf "%s"
+        (Util.process_mfp conf
+        (Printf.sprintf (fcapitale (ftransl conf "%t witnessed the %s before his/her birth"))
         (fun _ ->
            Printf.sprintf "%s%s" (print_someone_strong conf base p)
              (DateDisplay.short_dates_text conf base p))
-        (Util.string_of_fevent_name conf base e.efam_name)
+        (Util.string_of_fevent_name conf base e.efam_name)))
   | IncoherentSex (p, _, _) ->
       Wserver.printf
         (fcapitale
@@ -580,19 +582,21 @@ let print_warning conf base =
         (Util.string_of_pevent_name conf base e1.epers_name)
         (Util.string_of_pevent_name conf base e2.epers_name)
   | PWitnessEventAfterDeath (p, e) ->
-      Wserver.printf
-        (fcapitale (ftransl conf "%t witnessed the %s after his/her death"))
+      Wserver.printf "%s"
+        (Util.process_mfp conf
+        (Printf.sprintf (fcapitale (ftransl conf "%t witnessed the %s after his/her death"))
         (fun _ ->
            Printf.sprintf "%s%s" (print_someone_strong conf base p)
              (DateDisplay.short_dates_text conf base p))
-        (Util.string_of_pevent_name conf base e.epers_name)
+        (Util.string_of_pevent_name conf base e.epers_name)))
   | PWitnessEventBeforeBirth (p, e) ->
-      Wserver.printf
-        (fcapitale (ftransl conf "%t witnessed the %s before his/her birth"))
+      Wserver.printf "%s"
+        (Util.process_mfp conf
+        (Printf.sprintf (fcapitale (ftransl conf "%t witnessed the %s before his/her birth"))
         (fun _ ->
            Printf.sprintf "%s%s" (print_someone_strong conf base p)
              (DateDisplay.short_dates_text conf base p))
-        (Util.string_of_pevent_name conf base e.epers_name)
+        (Util.string_of_pevent_name conf base e.epers_name)))
   | TitleDatesError (p, t) ->
       Wserver.printf
         (fcapitale (ftransl conf "%t has incorrect title dates: %t"))
@@ -811,7 +815,7 @@ let get var key env =
 
 let get_number var key env =
   match p_getint env (var ^ "_" ^ key) with
-  | Some x when x <> 0 -> Some x
+  | Some x when x > 0 -> Some x
   | _ -> None
 
 let bad_date conf d =
@@ -841,7 +845,7 @@ let bad_date conf d =
 let int_of_field s =
   match int_of_string (String.trim s) with
   | exception Failure _ -> None
-  | x -> if x <> 0 then Some x else None
+  | x -> if x > 0 then Some x else None
 
 let reconstitute_date_dmy2 conf var =
   let m =
