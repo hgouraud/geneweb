@@ -24,6 +24,8 @@ value etc_file_name : config -> string -> string;
 value escache_value : base -> string;
 value commit_patches : config -> base -> unit;
 value update_wf_trace : config -> string -> unit;
+value last_connexion : config -> string -> string;
+value get_ident : config -> string -> string;
 
 value get_referer : config -> string;
 

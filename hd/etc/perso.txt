@@ -27,10 +27,23 @@
 %( Added a div with an 'empty event' to handle the modify menu.              %)
 <div onclick="void(0);">
 
-
 %import;perso_utils
 
 %include.perso_header;
+
+%define;l_conn(xxx)
+  %last_conn.xxx;
+%end;
+
+%define;get_id(xxx)
+  %get_ident.xxx;
+%end;
+
+%let;user_key;%first_name;/%surname;/%occ;%in;
+%let;user_ident;%apply;get_id(user_key)%in;
+%if;(user_ident!="")
+  Last connexion: %user.ident;, %user_key;, %user_ident;, %apply;l_conn(user_ident)<br>
+%end;
 
 %if;(bvar.perso_module_tplnb="" or bvar.perso_module_tplnb=0)
   %apply;show_templ("perso_module/etat_civil")

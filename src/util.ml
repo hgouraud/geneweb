@@ -3106,6 +3106,95 @@ value read_wf_trace fname =
   | None -> [] ]
 ;
 
+value read_passwd_file fname =
+  match try Some (Secure.open_in fname) with [ Sys_error _ -> None ] with
+  [ Some ic ->
+      let r = ref [] in
+      do {
+        try while True do { r.val := [input_line ic :: r.val] } with
+        [ End_of_file -> close_in ic ];
+        List.rev r.val
+      }
+  | None -> [] ]
+;
+
+value scan_pwd_file fname user =
+  let user = Name.lower user in
+  let _ = Printf.eprintf "User: %s\n" user in
+  if fname <> "" then 
+    let fname = Filename.concat cnt_dir.val fname in
+    let pwd = read_passwd_file fname in
+    let rec loop =
+      fun
+      [ [x :: l] ->
+          (* hg:45:HG:henri/gouraud/0:texte *)
+          let parts = String.split_on_char ':' x in
+          if List.length parts >= 4 then
+            let part_3 = Name.lower (List.nth parts 3) in
+            if part_3 = user then List.hd parts else loop l
+          else loop l
+      | [] -> "" ]
+    in
+    loop pwd
+  else ""
+;
+
+value scan_trace_file conf fname user =
+  let file = read_wf_trace fname in
+  let dt = std_date conf in
+  let dtlen = String.length dt in
+  let rec loop =
+    fun
+    [ [x :: l] ->
+        if String.length x > dtlen + 2 then
+          let u =
+            String.sub x (dtlen + 1) (String.length x - dtlen - 1)
+          in
+          if u = user then (String.sub x 0 dtlen) else loop l
+        else loop l
+    | [] -> "" ]
+  in
+  loop file
+;
+
+value get_ident conf user =
+  let w_pwd_f =
+    try List.assoc "wizard_passwd_file" conf.base_env with [ Not_found -> "" ]
+  in
+  let w_id = scan_pwd_file w_pwd_f user in
+  let f_pwd_f =
+    try List.assoc "friend_passwd_file" conf.base_env with [ Not_found -> "" ]
+  in
+  let f_id = scan_pwd_file f_pwd_f user in
+  if w_id <> "" then w_id else if f_id <> "" then f_id else ""
+;
+
+value try_once conf prefx user =
+  let fname_u =
+    List.fold_right Filename.concat [cnt_dir.val; "cnt"]
+    (conf.bname ^ prefx ^ "_u.txt")
+  in
+  let fname_w =
+    List.fold_right Filename.concat [cnt_dir.val; "cnt"]
+    (conf.bname ^ prefx ^ "_w.txt")
+  in
+  let fname_f =
+    List.fold_right Filename.concat [cnt_dir.val; "cnt"]
+    (conf.bname ^ prefx ^ "_f.txt")
+  in
+    let r_u = scan_trace_file conf fname_u user in
+    let r_w = scan_trace_file conf fname_w user in
+    let r_f = scan_trace_file conf fname_f user in
+    if r_u <> "" || r_w <> "" then "u: " ^ r_u ^ ", r: " ^ r_w
+    else if r_f <> "" then "f: " ^ r_f
+    else ""
+;
+
+value last_connexion conf user =
+  let res = try_once conf "" user in
+  if res = "" then try_once conf "_old" user else res
+;
+
 value write_wf_trace fname wt =
   let oc = Secure.open_out fname in
   do {
