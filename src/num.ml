@@ -146,6 +146,24 @@ value of_int i =
   else if i < base then [| i |]
   else [| i mod base; i / base |]
 ;
+
+value to_int = fun
+  [ [||] -> 0
+  | [| i |] -> i
+  | [| m ; d |] -> d * base + m
+  | _ -> assert False ]
+;
+
+value rec exp_gen x1 x2 n =
+  if n = 0 || x1 = zero then one
+  else if n = 1 then x1
+  else exp_gen (mul x1 (to_int x2)) x2 (n-1)
+;
+
+value exp x n =
+  exp_gen x x n
+;
+
 value print f sep x =
   if eq x zero then f "0"
   else

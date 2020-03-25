@@ -130,9 +130,19 @@
   %end;
 %end;
 
+%define;power2(n, v)
+  %for;i;1;v;%if(n=expr(2^i))1%else;0%end;%end;
+%end;
+
 %define;male_line(xx, nn)
   %if;(nn > 0)
     %if;(xx.has_parents)%apply;male_line("xx.father", nn - 1)%end;
+    %if;xx.has_sosa;
+      %let;p2;%apply;power2(xx.sosa, evar.v)%in;
+      %if;(p2!=0)
+        <img src="%image_prefix/sosa.png" alt="sosa" title="sosa"/>%sp;
+      %end;
+    %end;
     <a href="%prefix;%xx.access">%xx;</a>%xx.title;%xx.dates;
     %if;(evar.image = "on" and xx.has_image)
       <br%/>
