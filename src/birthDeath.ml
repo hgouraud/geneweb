@@ -233,6 +233,15 @@ value print_death conf base =
                  | _ -> (None, ages_sum, ages_nb) ]
                in
                stagn "li" begin
+                 let consent = ( get_access p ) = Friend in
+                 let img = 
+                   if consent then
+                    Printf.sprintf "<img src=\"%s/%s\" %s alt=\"(f) \"%s>"
+                    (Util.image_prefix conf) 
+                    "friend.gif" "width=\"16\" height=\"16\"" conf.xhs
+                   else  "  "
+                 in
+                 Wserver.wprint "%s" img;
                  Wserver.wprint "<b>";
                  Wserver.wprint "%s" (referenced_person_text conf base p);
                  Wserver.wprint "</b>";
