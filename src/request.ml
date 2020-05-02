@@ -666,11 +666,16 @@ value family_m conf base =
 value print_no_index conf base =
   let title _ = Wserver.wprint "%s" (Util.capitale (transl conf "link to use")) in
   let link = url_no_index conf base in
+  let http =
+    match p_getenv conf.base_env "http_mode" with
+    [ Some "https" -> "https://"
+    | _ -> "http://" ]
+  in
   do {
     header conf title;
     tag "ul" begin
       html_li conf;
-      tag "a" "href=\"http://%s\"" link begin Wserver.wprint "%s" link; end;
+      tag "a" "href=\"%s%s\"" http link begin Wserver.wprint "%s%s" http link; end;
     end;
     print_link_to_welcome conf False;
     trailer conf;
