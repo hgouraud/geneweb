@@ -1683,7 +1683,15 @@ value url_no_index conf base =
       [("lang", conf.lang) :: env] ""
   in
   let suff = if conf.cgi then "b=" ^ conf.bname ^ ";" ^ suff else suff in
-  addr ^ "?" ^ suff
+  let host =
+    (* HACK to provide https info for opt=no_index *)
+    if conf.cgi then
+      match p_getenv conf.base_env "http_host" with
+      [ Some s -> s
+      | None -> "" ]
+    else ""
+  in
+  host ^ addr ^ "?" ^ suff
 ;
 
 value message_to_wizard conf =
