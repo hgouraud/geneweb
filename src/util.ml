@@ -1641,7 +1641,7 @@ value url_no_index conf base =
       fun
       [ [] -> []
       | [("opt", "no_index") :: l] -> loop l
-      | [("dsrc" | "escache" | "oc" | "templ", _) :: l] -> loop l
+      | [("dsrc" | "escache" | "templ", _) :: l] -> loop l
       | [("i", v) :: l] -> new_env "i" v (fun x -> x) l
       | [("ei", v) :: l] -> new_env "ei" v (fun x -> "e" ^ x) l
       | [(k, v) :: l] when String.length k = 2 && k.[0] = 'i' ->
@@ -1679,7 +1679,9 @@ value url_no_index conf base =
   let suff =
     List.fold_right
       (fun (x, v) s ->
-         let sep = if s = "" then "" else ";" in x ^ "=" ^ v ^ sep ^ s)
+        if not (v = "") then
+          let sep = if s = "" then "" else "&" in x ^ "=" ^ v ^ sep ^ s
+        else s )
       [("lang", conf.lang) :: env] ""
   in
   let suff = if conf.cgi then "b=" ^ conf.bname ^ ";" ^ suff else suff in
@@ -2704,7 +2706,7 @@ value update_gwf_sosa conf base (ip, (fn, sn, occ)) =
     | None -> "" ]
   in
   let new_key = fn ^ "." ^ string_of_int occ ^ " " ^ sn in
-  if ip = fst conf.default_sosa_ref && new_key != sosa_ref_key then
+  if ip = fst conf.default_sosa_ref && not (new_key = sosa_ref_key) then
     (* On met à jour le fichier gwf, la config *)
     (* se mettera à jour par treat_request.    *)
     write_default_sosa conf base new_key
