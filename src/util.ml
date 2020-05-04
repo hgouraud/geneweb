@@ -1667,7 +1667,7 @@ value url_no_index conf base =
     in
     loop conf.env
   in
-  let addr =
+  let addr = 
     let pref =
       let s = get_request_string conf in
       match rindex s '?' with
@@ -1684,7 +1684,8 @@ value url_no_index conf base =
         else s )
       [("lang", conf.lang) :: env] ""
   in
-  let suff = if conf.cgi then "b=" ^ conf.bname ^ ";" ^ suff else suff in
+  let cgipwd = if not (conf.cgi_passwd = "") then "_" ^ conf.cgi_passwd else "" in
+  let suff = if conf.cgi then "b=" ^ conf.bname ^ cgipwd ^ ";" ^ suff else suff in
   addr ^ "?" ^ suff
 ;
 

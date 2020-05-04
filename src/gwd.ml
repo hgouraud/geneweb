@@ -1378,6 +1378,7 @@ value make_conf cgi from_addr (addr, request) script_name contents env = do {
         try List.assoc "modify_dict" base_env = "yes" with
         [ Not_found -> False ];
      bname = base_file; env = env; senv = [];
+     cgi_passwd = ar.ar_passwd;
      henv =
        (if not cgi then []
         else if ar.ar_passwd = "" then [("b", base_file)]

@@ -60,6 +60,7 @@ type config =
     no_note : bool;
     modify_dict : bool;
     bname : string;
+    cgi_passwd : string;
     env : list (string * string);
     senv : mutable list (string * string);
     henv : mutable list (string * string);
