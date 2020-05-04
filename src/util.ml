@@ -1636,12 +1636,12 @@ value url_no_index conf base =
         else None
     | None -> None ]
   in
-  let env =
+  let nenv =
     let rec loop =
       fun
       [ [] -> []
       | [("opt", "no_index") :: l] -> loop l
-      | [("dsrc" | "escache" | "templ", _) :: l] -> loop l
+      | [("dsrc" | "escache" | "oc" | "templ", _) :: l] -> loop l
       | [("i", v) :: l] -> new_env "i" v (fun x -> x) l
       | [("ei", v) :: l] -> new_env "ei" v (fun x -> "e" ^ x) l
       | [(k, v) :: l] when String.length k = 2 && k.[0] = 'i' ->
@@ -1676,13 +1676,27 @@ value url_no_index conf base =
     in
     get_server_string conf ^ pref
   in
+  (* scan env to see if oc= was there. if yes make sure there is one in nenv *)
+  let (oc, ocv) = 
+    match List.find_opt (fun s -> fst s = "oc") conf.env with
+    [ Some (oc, ocv) -> (oc, ocv)
+    | None -> ("oc", "0") ]
+  in
+  let (noc, nocv) = 
+    match List.find_opt (fun s -> fst s = "oc") nenv with
+    [ Some (oc, ocv) -> (oc, ocv)
+    | None -> ("oc", "0") ]
+  in
+  let nenv = List.rev nenv in
+  let nenv = if not (ocv = "0") && nocv = "0" then [("oc", ocv) :: nenv] else nenv in
+  let nenv = List.rev nenv in
   let suff =
     List.fold_right
       (fun (x, v) s ->
         if not (v = "") then
           let sep = if s = "" then "" else "&" in x ^ "=" ^ v ^ sep ^ s
         else s )
-      [("lang", conf.lang) :: env] ""
+      [("lang", conf.lang) :: nenv] ""
   in
   let cgipwd = if not (conf.cgi_passwd = "") then "_" ^ conf.cgi_passwd else "" in
   let suff = if conf.cgi then "b=" ^ conf.bname ^ cgipwd ^ ";" ^ suff else suff in
