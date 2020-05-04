@@ -752,7 +752,8 @@ and eval_simple_variable conf =
   | "nn" -> ""
   | "prefix" -> Util.commd conf
   | "prefix_base" ->
-      conf.command ^ "?" ^ (if conf.cgi then "b=" ^ conf.bname ^ ";" else "")
+      let cgipwd = if not (conf.cgi_passwd = "") then "_" ^ conf.cgi_passwd else "" in
+      conf.command ^ "?" ^ (if conf.cgi then "b=" ^ conf.bname ^ cgipwd ^ ";" else "")
   | "prefix_no_iz" ->
       let henv =
         List.fold_left
