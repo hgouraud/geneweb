@@ -1641,7 +1641,7 @@ value url_no_index conf base =
       fun
       [ [] -> []
       | [("opt", "no_index") :: l] -> loop l
-      | [("dsrc" | "escache" | "oc" | "templ", _) :: l] -> loop l
+      | [("dsrc" | "escache" | "oc", _) :: l] -> loop l
       | [("i", v) :: l] -> new_env "i" v (fun x -> x) l
       | [("ei", v) :: l] -> new_env "ei" v (fun x -> "e" ^ x) l
       | [(k, v) :: l] when String.length k = 2 && k.[0] = 'i' ->
