@@ -751,6 +751,7 @@ and eval_simple_variable conf =
   | "nl" -> "\n"
   | "nn" -> ""
   | "prefix" -> Util.commd conf
+  | "session_id" -> if not (conf.cgi_passwd = "") then "_" ^ conf.cgi_passwd else ""
   | "prefix_base" ->
       let cgipwd = if not (conf.cgi_passwd = "") then "_" ^ conf.cgi_passwd else "" in
       conf.command ^ "?" ^ (if conf.cgi then "b=" ^ conf.bname ^ cgipwd ^ ";" else "")
