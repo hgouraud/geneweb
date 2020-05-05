@@ -553,7 +553,7 @@ value family_m conf base =
             match p_getenv conf.env "t" with
             [ Some "P" -> [("fn", n) :: conf.env]
             | Some "N" -> [("sn", n) :: conf.env]
-            | _ -> [("n", n) :: conf.env] ]
+            | _ -> conf.env ]
         | None -> conf.env ]
       in
       let conf = {(conf) with env = env} in
