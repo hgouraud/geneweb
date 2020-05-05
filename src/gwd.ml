@@ -126,7 +126,7 @@ value log oc tm conf from gauth request script_name contents =
 type auth_report =
   { ar_ok : bool; ar_command : string; ar_passwd : string;
     ar_scheme : auth_scheme_kind; ar_user : string; ar_name : string; ar_key : string;
-    ar_wizard : bool; ar_friend : bool; ar_uauth : string;
+    ar_wizard : bool; ar_friend : bool; ar_uauth : string; ar_pwd : string;
     ar_can_stale : bool }
 ;
 
@@ -546,7 +546,7 @@ value rec strip_heading_and_trailing_spaces s =
 ;
 
 value gen_match_auth_file test_user_and_password auth_file =
-  if auth_file = "" then (None, None)
+  if auth_file = "" then (None, None, None)
   else
     let aul = read_gen_auth_file auth_file in
     loop aul where rec loop =
@@ -595,9 +595,9 @@ value gen_match_auth_file test_user_and_password auth_file =
               with
               [ Not_found -> "" ]
             in
-            (Some username, Some userkey)
+            (Some username, Some userkey, Some au.au_passwd)
           else loop aul
-      | [] -> (None, None) ]
+      | [] -> (None, None, None) ]
 ;
 
 value basic_match_auth_file uauth =
@@ -620,7 +620,7 @@ value match_simple_passwd sauth uauth =
 ;
 
 value basic_match_auth passwd auth_file uauth =
-  if passwd <> "" && match_simple_passwd passwd uauth then (Some "", Some "")
+  if passwd <> "" && match_simple_passwd passwd uauth then (Some "", Some "", Some "")
   else basic_match_auth_file uauth auth_file
 ;
 
@@ -957,41 +957,41 @@ value basic_authorization cgi from_addr request base_env passwd access_type
       else ""
   in
   let uauth = if passwd = "w" || passwd = "f" then passwd1 else passwd in
-  let (ok, wizard, friend, (username, userkey)) =
+  let (ok, wizard, friend, (username, userkey, userpwd)) =
     if not cgi && (passwd = "w" || passwd = "f") then
       if passwd = "w" then
         if wizard_passwd = "" && wizard_passwd_file = "" then
-          (True, True, friend_passwd = "", ("", ""))
+          (True, True, friend_passwd = "", ("", "", ""))
         else
           match basic_match_auth wizard_passwd wizard_passwd_file uauth with
-          [ (Some username, Some userkey) -> (True, True, False, (username, userkey))
-          | (Some _, _) -> (False, False, False, ("", ""))
-          | (None, _) -> (False, False, False, ("", "")) ]
+          [ (Some username, Some userkey, Some userpwd) -> (True, True, False, (username, userkey, userpwd))
+          | (Some _, _, _) -> (False, False, False, ("", "", ""))
+          | (None, _, _) -> (False, False, False, ("", "", "")) ]
       else if passwd = "f" then
         if friend_passwd = "" && friend_passwd_file = "" then
-          (True, False, True, ("", ""))
+          (True, False, True, ("", "", ""))
         else
           match basic_match_auth friend_passwd friend_passwd_file uauth with
-          [ (Some username, Some userkey) -> (True, False, True, (username, userkey))
-          | (Some _, _) -> (False, False, False, ("", ""))
-          | (None, _) -> (False, False, False, ("", "")) ]
+          [ (Some username, Some userkey, Some userpwd) -> (True, False, True, (username, userkey, userpwd))
+          | (Some _, _, _) -> (False, False, False, ("", "", ""))
+          | (None, _, _) -> (False, False, False, ("", "", "")) ]
       else assert False
     else if wizard_passwd = "" && wizard_passwd_file = "" then
-      (True, True, friend_passwd = "", ("", ""))
+      (True, True, friend_passwd = "", ("", "", ""))
     else
        match basic_match_auth wizard_passwd wizard_passwd_file uauth with
-       [ (Some username, Some userkey) -> (True, True, False, (username, userkey))
-       | (Some _, _) -> (False, False, False, ("", ""))
+       [ (Some username, Some userkey, Some userpwd) -> (True, True, False, (username, userkey, userpwd))
+       | (Some _, _, _) -> (False, False, False, ("", "", ""))
        | _ ->
             if friend_passwd = "" && friend_passwd_file = "" then
-              (True, False, True, ("", ""))
+              (True, False, True, ("", "", ""))
             else
               match
                 basic_match_auth friend_passwd friend_passwd_file uauth
               with
-              [ (Some username, Some userkey) -> (True, False, True, (username, userkey))
-              | (Some _, _) -> (True, False, False, ("", ""))
-              | (None, _) -> (True, False, False, ("", "")) ] ]
+              [ (Some username, Some userkey, Some userpwd) -> (True, False, True, (username, userkey, userpwd))
+              | (Some _, _, _) -> (True, False, False, ("", "", ""))
+              | (None, _, _) -> (True, False, False, ("", "", "")) ] ]
   in
   let user =
     match lindex uauth ':' with
@@ -1037,14 +1037,14 @@ value basic_authorization cgi from_addr request base_env passwd access_type
   in
   {ar_ok = ok; ar_command = command; ar_passwd = passwd;
    ar_scheme = auth_scheme; ar_user = user; ar_name = username; ar_key = userkey;
-   ar_wizard = wizard; ar_friend = friend; ar_uauth = uauth;
+   ar_wizard = wizard; ar_friend = friend; ar_uauth = uauth; ar_pwd = userpwd;
    ar_can_stale = False}
 ;
 
 value bad_nonce_report command passwd_char =
   {ar_ok = False; ar_command = command; ar_passwd = passwd_char;
    ar_scheme = NoAuth; ar_user = ""; ar_name = ""; ar_key = "";
-   ar_wizard = False; ar_friend = False; ar_uauth = "";
+   ar_wizard = False; ar_friend = False; ar_uauth = ""; ar_pwd = "";
    ar_can_stale = True}
 ;
 
@@ -1057,22 +1057,22 @@ value test_passwd ds nonce command wf_passwd wf_passwd_file passwd_char wiz =
     else
       {ar_ok = True; ar_command = command ^ "_" ^ passwd_char;
        ar_passwd = passwd_char; ar_scheme = asch; ar_user = ds.ds_username;
-       ar_name = ""; ar_key = ""; ar_wizard = wiz; ar_friend = not wiz; ar_uauth = "";
+       ar_name = ""; ar_key = ""; ar_wizard = wiz; ar_friend = not wiz; ar_uauth = ""; ar_pwd = "";
        ar_can_stale = False}
   else
     match digest_match_auth_file asch wf_passwd_file with
-    [ (Some username, Some userkey) ->
+    [ (Some username, Some userkey, Some userpwd) ->
         if ds.ds_nonce <> nonce then bad_nonce_report command passwd_char
         else
           {ar_ok = True; ar_command = command ^ "_" ^ passwd_char;
            ar_passwd = passwd_char; ar_scheme = asch;
            ar_user = ds.ds_username; ar_name = username; ar_key = userkey;
-           ar_wizard = wiz; ar_friend = not wiz; ar_uauth = "";
+           ar_wizard = wiz; ar_friend = not wiz; ar_uauth = ""; ar_pwd = userpwd;
            ar_can_stale = False}
-    | (Some _, None) | (None, Some _) | (None, None) ->
+    | (_, _, _) ->
         {ar_ok = False; ar_command = command; ar_passwd = passwd_char;
          ar_scheme = asch; ar_user = ds.ds_username; ar_name = ""; ar_key = "";
-         ar_wizard = False; ar_friend = False; ar_uauth = "";
+         ar_wizard = False; ar_friend = False; ar_uauth = ""; ar_pwd = "";
          ar_can_stale = False} ]
 ;
 
@@ -1095,7 +1095,7 @@ value digest_authorization cgi request base_env passwd utm base_file command =
   if wizard_passwd = "" && wizard_passwd_file = "" then
     {ar_ok = True; ar_command = command; ar_passwd = "";
      ar_scheme = NoAuth; ar_user = ""; ar_name = ""; ar_key = "";
-     ar_wizard = True; ar_friend = friend_passwd = ""; ar_uauth = "";
+     ar_wizard = True; ar_friend = friend_passwd = ""; ar_uauth = ""; ar_pwd = "";
      ar_can_stale = False}
   else if passwd = "w" || passwd = "f" then
     let auth = Wserver.extract_param "authorization: " '\r' request in
@@ -1129,12 +1129,12 @@ let _ = trace_auth base_env (fun oc -> fprintf oc "\nanswer\n- date: %a\n- reque
     else
       {ar_ok = False; ar_command = command; ar_passwd = passwd;
        ar_scheme = NoAuth; ar_user = ""; ar_name = ""; ar_key = ""; ar_wizard = False;
-       ar_friend = False; ar_uauth = ""; ar_can_stale = False}
+       ar_friend = False; ar_uauth = ""; ar_pwd = ""; ar_can_stale = False}
   else
     let friend = friend_passwd = "" && friend_passwd_file = "" in
     {ar_ok = True; ar_command = command; ar_passwd = "";
      ar_scheme = NoAuth; ar_user = ""; ar_name = ""; ar_key = ""; ar_wizard = False;
-     ar_friend = friend; ar_uauth = ""; ar_can_stale = False}
+     ar_friend = friend; ar_uauth = ""; ar_pwd = ""; ar_can_stale = False}
 ;
 
 value authorization cgi from_addr request base_env passwd access_type utm
@@ -1149,7 +1149,7 @@ value authorization cgi from_addr request base_env passwd access_type utm
       let auth_scheme = TokenAuth {ts_user = user; ts_pass = passwd} in
       {ar_ok = True; ar_command = command; ar_passwd = passwd;
        ar_scheme = auth_scheme; ar_user = user; ar_name = ""; ar_key = "";
-       ar_wizard = True; ar_friend = False; ar_uauth = "";
+       ar_wizard = True; ar_friend = False; ar_uauth = ""; ar_pwd = "";
        ar_can_stale = False}
   | ATfriend user ->
       let (command, passwd) =
@@ -1160,7 +1160,7 @@ value authorization cgi from_addr request base_env passwd access_type utm
       let auth_scheme = TokenAuth {ts_user = user; ts_pass = passwd} in
       {ar_ok = True; ar_command = command; ar_passwd = passwd;
        ar_scheme = auth_scheme; ar_user = user; ar_name = ""; ar_key = "";
-       ar_wizard = False; ar_friend = True; ar_uauth = "";
+       ar_wizard = False; ar_friend = True; ar_uauth = ""; ar_pwd = "";
        ar_can_stale = False}
   | ATnormal ->
       let (command, passwd) =
@@ -1168,7 +1168,7 @@ value authorization cgi from_addr request base_env passwd access_type utm
       in
       {ar_ok = True; ar_command = command; ar_passwd = passwd;
        ar_scheme = NoAuth; ar_user = ""; ar_name = ""; ar_key = ""; ar_wizard = False;
-       ar_friend = False; ar_uauth = ""; ar_can_stale = False}
+       ar_friend = False; ar_uauth = ""; ar_pwd = ""; ar_can_stale = False}
   | ATnone | ATset ->
       if use_auth_digest_scheme.val then
         digest_authorization cgi request base_env passwd utm base_file command
@@ -1305,6 +1305,7 @@ value make_conf cgi from_addr (addr, request) script_name contents env = do {
      friend = ar.ar_friend || wizard_just_friend && ar.ar_wizard;
      just_friend_wizard = ar.ar_wizard && wizard_just_friend;
      user = ar.ar_user; username = ar.ar_name; userkey = ar.ar_key;
+     passwd = ar.ar_pwd;
      auth_scheme = ar.ar_scheme; cgi = cgi; command = ar.ar_command;
      indep_command = (if cgi then ar.ar_command else "geneweb") ^ "?";
      pure_xhtml =

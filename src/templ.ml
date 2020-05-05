@@ -688,6 +688,7 @@ value rec eval_variable conf =
   | ["user"; "ident"] -> conf.user
   | ["user"; "name"] -> conf.username
   | ["user"; "key"] -> conf.userkey
+  | ["user"; "passwd"] -> conf.passwd
   | [s] -> eval_simple_variable conf s
   | _ -> raise Not_found ]
 and eval_time_var conf =
