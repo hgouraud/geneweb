@@ -1341,7 +1341,7 @@ value old_include_hed_trl conf base_opt suff =
   [ Some ic ->
       let url () =
         match base_opt with
-        [ Some base -> Util.url_no_index conf base
+        [ Some base -> Util.url_no_index conf base True
         | None -> Util.get_server_string conf ^ Util.get_request_string conf ]
       in
       let pref () =
@@ -1586,6 +1586,14 @@ and print_simple_variable conf base_opt =
   | "copyright_nologo" -> print_copyright conf
   | "hidden" -> Util.hidden_env conf
   | "message_to_wizard" -> Util.message_to_wizard conf
+  | "url_no_index" -> 
+      match base_opt with
+      [ Some base -> Wserver.wprint "%s" (Util.url_no_index conf base False)
+      | _ -> Wserver.wprint "%s" "bad_base_for_url?" ]
+  | "url_no_index_pwd" -> 
+      match base_opt with
+      [ Some base -> Wserver.wprint "%s" (Util.url_no_index conf base True)
+      | _ -> Wserver.wprint "%s" "bad_base_for_url?" ]
   | _ -> raise Not_found ]
 and print_variable conf base_opt sl =
   try Wserver.wprint "%s" (eval_variable conf sl) with

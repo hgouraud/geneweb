@@ -127,7 +127,7 @@ value string_of_place : config -> string -> string;
 value filter_html_tags : string -> string;
 value allowed_tags_file : ref string;
 value body_prop : config -> string;
-value url_no_index : config -> base -> string;
+value url_no_index : config -> base -> bool ->string;
 value message_to_wizard : config -> unit;
 value check_xhtml : string -> string;
 

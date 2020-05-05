@@ -1595,7 +1595,7 @@ value get_request_string_aux cgi request =
 value get_server_string conf = get_server_string_aux conf.cgi conf.request;
 value get_request_string conf = get_request_string_aux conf.cgi conf.request;
 
-value url_no_index conf base =
+value url_no_index conf base pwd =
   let scratch s = code_varenv (Name.lower (sou base s)) in
   let get_a_person v =
     match try Some (int_of_string v) with [ Failure _ -> None ] with
@@ -1676,6 +1676,14 @@ value url_no_index conf base =
     in
     get_server_string conf ^ pref
   in
+  (* remove _w or _f from base name *)
+  let len = String.length addr in
+  let addr =
+    if len >= 2 && not pwd then
+      let pwd = String.sub addr (len - 2) 2 in
+      if pwd = "_w" || pwd = "_f" then String.sub addr 0 (len - 2) else addr
+    else addr
+  in
   (* scan env to see if oc= was there. if yes make sure there is one in nenv *)
   let (oc, ocv) = 
     match List.find_opt (fun s -> fst s = "oc") conf.env with
@@ -1698,7 +1706,7 @@ value url_no_index conf base =
         else s )
       [("lang", conf.lang) :: nenv] ""
   in
-  let cgipwd = if not (conf.cgi_passwd = "") then "_" ^ conf.cgi_passwd else "" in
+  let cgipwd = if pwd && not (conf.cgi_passwd = "") then "_" ^ conf.cgi_passwd else "" in
   let suff = if conf.cgi then "b=" ^ conf.bname ^ cgipwd ^ ";" ^ suff else suff in
   addr ^ "?" ^ suff
 ;
