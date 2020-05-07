@@ -30,8 +30,9 @@ type config =
     friend : bool;
     just_friend_wizard : bool;
     user : string;
-    username : string;
+    usernam : string;
     userkey : string;
+    userpwd : string;
     passwd : string;
     auth_scheme : auth_scheme_kind;
     cgi : bool;

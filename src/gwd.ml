@@ -545,6 +545,7 @@ value rec strip_heading_and_trailing_spaces s =
   else s
 ;
 
+(* ph:1045:PH:Philippe/Gouraud/0:pour essai *)
 value gen_match_auth_file test_user_and_password auth_file =
   if auth_file = "" then (None, None, None)
   else
@@ -553,6 +554,7 @@ value gen_match_auth_file test_user_and_password auth_file =
       fun
       [ [au :: aul] ->
           if test_user_and_password au then
+            let userpwd = au.au_user ^ ":" ^ au.au_passwd in
             let s1 =
               try
                 let i = String.index au.au_info ':' in
@@ -569,7 +571,7 @@ value gen_match_auth_file test_user_and_password auth_file =
               with
               [ Not_found -> "" ]
             in
-            let username =
+            let usernam =
               try
                 let i = String.index s1 '/' in
                 let len = String.length s1 in
@@ -595,7 +597,7 @@ value gen_match_auth_file test_user_and_password auth_file =
               with
               [ Not_found -> "" ]
             in
-            (Some username, Some userkey, Some au.au_passwd)
+            (Some usernam, Some userkey, Some userpwd)
           else loop aul
       | [] -> (None, None, None) ]
 ;
@@ -620,7 +622,7 @@ value match_simple_passwd sauth uauth =
 ;
 
 value basic_match_auth passwd auth_file uauth =
-  if passwd <> "" && match_simple_passwd passwd uauth then (Some "", Some "", Some "")
+  if passwd <> "" && match_simple_passwd passwd uauth then (Some "", Some "", Some "aaa")
   else basic_match_auth_file uauth auth_file
 ;
 
@@ -632,12 +634,13 @@ value compatible_tokens check_from (addr1, base1_pw1) (addr2, base2_pw2) =
   (not check_from || addr1 = addr2) && base1_pw1 = base2_pw2
 ;
 
-value get_actlog check_from utm from_addr base_password =
+(* 1588697129 90.119.35.26/wizard_zxbvyhpte w Ident/Name/Key/pwd *)
+value get_actlog check_from utm from_addr base_password user_password=
   let fname = Srcfile.adm_file "actlog" in
   match try Some (Secure.open_in fname) with [ Sys_error _ -> None ] with
   [ Some ic ->
       let tmout = float_of_int login_timeout.val in
-      let rec loop changed r list =
+      let rec loop changed r list nam key pwd =
         match try Some (input_line ic) with [ End_of_file -> None ] with
         [ Some line ->
             let i = index ' ' line in
@@ -652,30 +655,36 @@ value get_actlog check_from utm from_addr base_password =
               if k >= String.length line then ""
               else String.sub line k (String.length line - k)
             in
-            let (list, r, changed) =
-              if utm -. tm >= tmout then (list, r, True)
-              else if
-                compatible_tokens check_from (addr, db_pwd)
-                  (from_addr, base_password)
-              then
-                let r = if c = 'w' then ATwizard user else ATfriend user in
-                ([((from_addr, db_pwd), (utm, c, user)) :: list], r, True)
-              else ([((addr, db_pwd), (tm, c, user)) :: list], r, changed)
-            in
-            loop changed r list
+            let userl = String.split_on_char '/' user in
+            let user = List.hd userl in
+            let usernam = if (List.length userl > 1) then List.nth userl 1 else "" in
+            let userkey = if (List.length userl > 2) then List.nth userl 2 else "" in
+            let userpwd = if (List.length userl > 3) then List.nth userl 3 else "" in
+            let new_pwd = if userpwd = "" then user_password else userpwd in
+            if utm -. tm >= tmout then (list, r, True, nam, key, pwd)
+            else if
+              compatible_tokens check_from (addr, db_pwd)
+                (from_addr, base_password)
+            then
+              let r = if c = 'w' then ATwizard user else ATfriend user in
+              ([((from_addr, db_pwd),
+                (utm, c, user, usernam, userkey, new_pwd)) :: list], r, True, usernam, userkey, new_pwd)
+            else
+              ([((addr, db_pwd),
+                (tm, c, user, usernam, userkey, userpwd)) :: list], r, changed, nam, key, pwd)
         | None ->
             do {
               close_in ic;
               let list =
                 List.sort
-                  (fun (_, (t1, _, _)) (_, (t2, _, _)) -> compare t2 t1)
+                  (fun (_, (t1, _, _, _, _, _)) (_, (t2, _, _, _, _, _)) -> compare t2 t1)
                   list
               in
-              (list, r, changed)
+              (list, r, changed, "", "", "")
             } ]
       in
-      loop False ATnormal []
-  | None -> ([], ATnormal, False) ]
+      loop False ATnormal [] "" "" ""
+  | None -> ([], ATnormal, False, "", "", "") ]
 ;
 
 value set_actlog list =
@@ -684,23 +693,23 @@ value set_actlog list =
   [ Some oc ->
       do {
         List.iter
-          (fun ((from, base_pw), (a, c, d)) ->
-             fprintf oc "%.0f %s/%s %c%s\n" a from base_pw c
-               (if d = "" then "" else " " ^ d))
+          (fun ((from, base_pw), (a, c, d, e, f, g)) ->
+             fprintf oc "%.0f %s/%s %c%s/%s/%s/%s\n" a from base_pw c
+               (if d = "" then "" else " " ^ d) e f g)
           list;
         close_out oc;
       }
   | None -> () ]
 ;
 
-value get_token check_from utm from_addr base_password =
+value get_token check_from utm from_addr base_password user_password =
   lock_wait Srcfile.adm_file "gwd.lck" with
   [ Accept ->
-      let (list, r, changed) =
-        get_actlog check_from utm from_addr base_password
+      let (list, r, changed, usernam, userkey, userpwd) =
+        get_actlog check_from utm from_addr base_password user_password
       in
-      do { if changed then set_actlog list else (); r }
-  | Refuse -> ATnormal ]
+      do { if changed then set_actlog list else (); (r, usernam, userkey, userpwd) }
+  | Refuse -> (ATnormal, "", "", "") ]
 ;
 
 value mkpasswd () =
@@ -716,12 +725,12 @@ value random_self_init () =
   Random.init seed
 ;
 
-value set_token utm from_addr base_file acc user =
+value set_token utm from_addr base_file acc user usernam userkey userpwd =
   lock_wait Srcfile.adm_file "gwd.lck" with
   [ Accept ->
       do {
         random_self_init ();
-        let (list, _, _) = get_actlog False utm "" "" in
+        let (list, _, _, _, _, _) = get_actlog False utm "" "" "" in
         let (x, xx) =
           let base = base_file ^ "_" in
           let rec loop ntimes =
@@ -739,7 +748,9 @@ value set_token utm from_addr base_file acc user =
           in
           loop 50
         in
-        let list = [((from_addr, xx), (utm, acc, user)) :: list] in
+        let list = [((from_addr, xx),
+          (utm, acc, user, usernam, userkey, userpwd)) :: list]
+        in
         set_actlog list;
         x
       }
@@ -957,57 +968,57 @@ value basic_authorization cgi from_addr request base_env passwd access_type
       else ""
   in
   let uauth = if passwd = "w" || passwd = "f" then passwd1 else passwd in
-  let (ok, wizard, friend, (username, userkey, userpwd)) =
+  let (ok, wizard, friend, (usernam, userkey, userpwd)) =
     if not cgi && (passwd = "w" || passwd = "f") then
       if passwd = "w" then
         if wizard_passwd = "" && wizard_passwd_file = "" then
-          (True, True, friend_passwd = "", ("", "", ""))
+          (True, True, friend_passwd = "", ("", "", "aa"))
         else
           match basic_match_auth wizard_passwd wizard_passwd_file uauth with
-          [ (Some username, Some userkey, Some userpwd) -> (True, True, False, (username, userkey, userpwd))
-          | (Some _, _, _) -> (False, False, False, ("", "", ""))
-          | (None, _, _) -> (False, False, False, ("", "", "")) ]
+          [ (Some usernam, Some userkey, Some userpwd) -> (True, True, False, (usernam, userkey, userpwd))
+          | (Some _, _, _) -> (False, False, False, ("", "", "bb"))
+          | (None, _, _) -> (False, False, False, ("", "", "cc")) ]
       else if passwd = "f" then
         if friend_passwd = "" && friend_passwd_file = "" then
           (True, False, True, ("", "", ""))
         else
           match basic_match_auth friend_passwd friend_passwd_file uauth with
-          [ (Some username, Some userkey, Some userpwd) -> (True, False, True, (username, userkey, userpwd))
-          | (Some _, _, _) -> (False, False, False, ("", "", ""))
-          | (None, _, _) -> (False, False, False, ("", "", "")) ]
+          [ (Some usernam, Some userkey, Some userpwd) -> (True, False, True, (usernam, userkey, userpwd))
+          | (Some _, _, _) -> (False, False, False, ("", "", "dd"))
+          | (None, _, _) -> (False, False, False, ("", "", "ee")) ]
       else assert False
     else if wizard_passwd = "" && wizard_passwd_file = "" then
-      (True, True, friend_passwd = "", ("", "", ""))
+      (True, True, friend_passwd = "", ("", "", "ff"))
     else
        match basic_match_auth wizard_passwd wizard_passwd_file uauth with
-       [ (Some username, Some userkey, Some userpwd) -> (True, True, False, (username, userkey, userpwd))
-       | (Some _, _, _) -> (False, False, False, ("", "", ""))
+       [ (Some usernam, Some userkey, Some userpwd) -> (True, True, False, (usernam, userkey, userpwd))
+       | (Some _, _, _) -> (False, False, False, ("", "", "gg"))
        | _ ->
             if friend_passwd = "" && friend_passwd_file = "" then
-              (True, False, True, ("", "", ""))
+              (True, False, True, ("", "", "hh"))
             else
               match
                 basic_match_auth friend_passwd friend_passwd_file uauth
               with
-              [ (Some username, Some userkey, Some userpwd) -> (True, False, True, (username, userkey, userpwd))
-              | (Some _, _, _) -> (True, False, False, ("", "", ""))
-              | (None, _, _) -> (True, False, False, ("", "", "")) ] ]
+              [ (Some usernam, Some userkey, Some userpwd) -> (True, False, True, (usernam, userkey, userpwd))
+              | (Some _, _, _) -> (True, False, False, ("", "", "ii"))
+              | (None, _, _) -> (True, False, False, ("", "", "jj")) ] ]
   in
   let user =
     match lindex uauth ':' with
     [ Some i ->
         let s = String.sub uauth 0 i in
-        if s = wizard_passwd || s = friend_passwd then "" else s
-    | None -> "" ]
+        if s = wizard_passwd || s = friend_passwd then "xx" else s
+    | None -> "yy" ]
   in
   let (command, passwd) =
     if access_type = ATset then
       if wizard then
-        let pwd_id = set_token utm from_addr base_file 'w' user in
+        let pwd_id = set_token utm from_addr base_file 'w' user usernam userkey userpwd in
         if cgi then (command, pwd_id)
         else (base_file ^ "_" ^ pwd_id, "")
       else if friend then
-        let pwd_id = set_token utm from_addr base_file 'f' user in
+        let pwd_id = set_token utm from_addr base_file 'f' user usernam userkey userpwd in
         if cgi then (command, pwd_id)
         else (base_file ^ "_" ^ pwd_id, "")
       else if cgi then (command, "")
@@ -1036,7 +1047,7 @@ value basic_authorization cgi from_addr request base_env passwd access_type
         HttpAuth (Basic {bs_realm = realm; bs_user = u; bs_pass = p})
   in
   {ar_ok = ok; ar_command = command; ar_passwd = passwd;
-   ar_scheme = auth_scheme; ar_user = user; ar_name = username; ar_key = userkey;
+   ar_scheme = auth_scheme; ar_user = user; ar_name = usernam; ar_key = userkey;
    ar_wizard = wizard; ar_friend = friend; ar_uauth = uauth; ar_pwd = userpwd;
    ar_can_stale = False}
 ;
@@ -1057,22 +1068,22 @@ value test_passwd ds nonce command wf_passwd wf_passwd_file passwd_char wiz =
     else
       {ar_ok = True; ar_command = command ^ "_" ^ passwd_char;
        ar_passwd = passwd_char; ar_scheme = asch; ar_user = ds.ds_username;
-       ar_name = ""; ar_key = ""; ar_wizard = wiz; ar_friend = not wiz; ar_uauth = ""; ar_pwd = "";
-       ar_can_stale = False}
+       ar_name = ""; ar_key = ""; ar_wizard = wiz; ar_friend = not wiz; ar_uauth = "";
+       ar_pwd = "az"; ar_can_stale = False}
   else
     match digest_match_auth_file asch wf_passwd_file with
-    [ (Some username, Some userkey, Some userpwd) ->
+    [ (Some usernam, Some userkey, Some userpwd) ->
         if ds.ds_nonce <> nonce then bad_nonce_report command passwd_char
         else
           {ar_ok = True; ar_command = command ^ "_" ^ passwd_char;
            ar_passwd = passwd_char; ar_scheme = asch;
-           ar_user = ds.ds_username; ar_name = username; ar_key = userkey;
+           ar_user = ds.ds_username; ar_name = usernam; ar_key = userkey;
            ar_wizard = wiz; ar_friend = not wiz; ar_uauth = ""; ar_pwd = userpwd;
            ar_can_stale = False}
     | (_, _, _) ->
         {ar_ok = False; ar_command = command; ar_passwd = passwd_char;
          ar_scheme = asch; ar_user = ds.ds_username; ar_name = ""; ar_key = "";
-         ar_wizard = False; ar_friend = False; ar_uauth = ""; ar_pwd = "";
+         ar_wizard = False; ar_friend = False; ar_uauth = ""; ar_pwd = "bz";
          ar_can_stale = False} ]
 ;
 
@@ -1095,7 +1106,7 @@ value digest_authorization cgi request base_env passwd utm base_file command =
   if wizard_passwd = "" && wizard_passwd_file = "" then
     {ar_ok = True; ar_command = command; ar_passwd = "";
      ar_scheme = NoAuth; ar_user = ""; ar_name = ""; ar_key = "";
-     ar_wizard = True; ar_friend = friend_passwd = ""; ar_uauth = ""; ar_pwd = "";
+     ar_wizard = True; ar_friend = friend_passwd = ""; ar_uauth = ""; ar_pwd = "cz";
      ar_can_stale = False}
   else if passwd = "w" || passwd = "f" then
     let auth = Wserver.extract_param "authorization: " '\r' request in
@@ -1110,7 +1121,7 @@ let _ = trace_auth base_env (fun oc -> fprintf oc "\nauth = \"%s\"\n" auth) in
       let digenv = parse_digest auth in
       let get_digenv s = try List.assoc s digenv with [ Not_found -> "" ] in
       let ds =
-        {ds_username = get_digenv "username"; ds_realm = get_digenv "realm";
+        {ds_username = get_digenv "usernam"; ds_realm = get_digenv "realm";
          ds_nonce = get_digenv "nonce"; ds_meth = meth;
          ds_uri = get_digenv "uri"; ds_qop = get_digenv "qop";
          ds_nc = get_digenv "nc"; ds_cnonce = get_digenv "cnonce";
@@ -1129,12 +1140,12 @@ let _ = trace_auth base_env (fun oc -> fprintf oc "\nanswer\n- date: %a\n- reque
     else
       {ar_ok = False; ar_command = command; ar_passwd = passwd;
        ar_scheme = NoAuth; ar_user = ""; ar_name = ""; ar_key = ""; ar_wizard = False;
-       ar_friend = False; ar_uauth = ""; ar_pwd = ""; ar_can_stale = False}
+       ar_friend = False; ar_uauth = ""; ar_pwd = "dz"; ar_can_stale = False}
   else
     let friend = friend_passwd = "" && friend_passwd_file = "" in
     {ar_ok = True; ar_command = command; ar_passwd = "";
      ar_scheme = NoAuth; ar_user = ""; ar_name = ""; ar_key = ""; ar_wizard = False;
-     ar_friend = friend; ar_uauth = ""; ar_pwd = ""; ar_can_stale = False}
+     ar_friend = friend; ar_uauth = ""; ar_pwd = "ez"; ar_can_stale = False}
 ;
 
 value authorization cgi from_addr request base_env passwd access_type utm
@@ -1149,7 +1160,7 @@ value authorization cgi from_addr request base_env passwd access_type utm
       let auth_scheme = TokenAuth {ts_user = user; ts_pass = passwd} in
       {ar_ok = True; ar_command = command; ar_passwd = passwd;
        ar_scheme = auth_scheme; ar_user = user; ar_name = ""; ar_key = "";
-       ar_wizard = True; ar_friend = False; ar_uauth = ""; ar_pwd = "";
+       ar_wizard = True; ar_friend = False; ar_uauth = ""; ar_pwd = passwd;
        ar_can_stale = False}
   | ATfriend user ->
       let (command, passwd) =
@@ -1160,7 +1171,7 @@ value authorization cgi from_addr request base_env passwd access_type utm
       let auth_scheme = TokenAuth {ts_user = user; ts_pass = passwd} in
       {ar_ok = True; ar_command = command; ar_passwd = passwd;
        ar_scheme = auth_scheme; ar_user = user; ar_name = ""; ar_key = "";
-       ar_wizard = False; ar_friend = True; ar_uauth = ""; ar_pwd = "";
+       ar_wizard = False; ar_friend = True; ar_uauth = ""; ar_pwd = passwd;
        ar_can_stale = False}
   | ATnormal ->
       let (command, passwd) =
@@ -1168,7 +1179,7 @@ value authorization cgi from_addr request base_env passwd access_type utm
       in
       {ar_ok = True; ar_command = command; ar_passwd = passwd;
        ar_scheme = NoAuth; ar_user = ""; ar_name = ""; ar_key = ""; ar_wizard = False;
-       ar_friend = False; ar_uauth = ""; ar_pwd = ""; ar_can_stale = False}
+       ar_friend = False; ar_uauth = ""; ar_pwd = passwd; ar_can_stale = False}
   | ATnone | ATset ->
       if use_auth_digest_scheme.val then
         digest_authorization cgi request base_env passwd utm base_file command
@@ -1180,7 +1191,7 @@ value authorization cgi from_addr request base_env passwd access_type utm
 value make_conf cgi from_addr (addr, request) script_name contents env = do {
   let utm = Unix.time () in
   let tm = Unix.localtime utm in
-  let (command, base_file, passwd, env, access_type) =
+  let (command, base_file, passwd, env, access_type, usernam, userkey, userpwd) =
     let (base_passwd, env) =
       let (x, env) = extract_assoc "b" env in
       if x <> "" || cgi then (x, env) else (script_name, env)
@@ -1196,11 +1207,11 @@ value make_conf cgi from_addr (addr, request) script_name contents env = do {
       if i = String.length s then s
       else refresh_url cgi request s i
     in
-    let (passwd, env, access_type) =
+    let (passwd, env, access_type, usernam, userkey, userpwd) =
       let has_passwd = List.mem_assoc "w" env in
       let (x, env) = extract_assoc "w" env in
       if has_passwd then
-        (x, env, if x = "w" || x = "f" || x = "" then ATnone else ATset)
+        (x, env, if x = "w" || x = "f" || x = "" then ATnone else ATset, "", "", "")
       else
         let passwd =
           if ip = String.length base_passwd then ""
@@ -1208,16 +1219,16 @@ value make_conf cgi from_addr (addr, request) script_name contents env = do {
             String.sub base_passwd (ip + 1)
               (String.length base_passwd - ip - 1)
         in
-        let access_type =
+        let (access_type, usernam, userkey, userpwd) =
           match passwd with
-          [ "" | "w" | "f" -> ATnone
-          | _ -> get_token True utm from_addr base_passwd ]
+          [ "" | "w" | "f" -> (ATnone, "", "", "")
+          | _ -> get_token True utm from_addr base_passwd passwd ]
         in
-        (passwd, env, access_type)
+        (passwd, env, access_type, usernam, userkey, userpwd)
     in
     let passwd = Util.decode_varenv passwd in
     let command = script_name in
-    (command, base_file, passwd, env, access_type)
+    (command, base_file, passwd, env, access_type, usernam, userkey, userpwd)
   in
   let (lang, env) = extract_assoc "lang" env in
   let lang =
@@ -1256,6 +1267,7 @@ value make_conf cgi from_addr (addr, request) script_name contents env = do {
   (* A l'initialisation de la config, il n'y a pas de sosa_ref. *)
   (* Il sera mis à jour par effet de bord dans request.ml       *)
   let default_sosa_ref = (Adef.iper_of_int (-1), None) in
+  (* first time, passwd = user:passwd, then session_id *)
   let ar =
     authorization cgi from_addr request base_env passwd access_type utm
       base_file command
@@ -1304,7 +1316,10 @@ value make_conf cgi from_addr (addr, request) script_name contents env = do {
      half_rgpd = half_rgpd;
      friend = ar.ar_friend || wizard_just_friend && ar.ar_wizard;
      just_friend_wizard = ar.ar_wizard && wizard_just_friend;
-     user = ar.ar_user; username = ar.ar_name; userkey = ar.ar_key;
+     user = ar.ar_user;
+     usernam = if cgi then usernam else ar.ar_name; 
+     userkey = if cgi then userkey else ar.ar_key; 
+     userpwd = if cgi then userpwd else ar.ar_pwd;
      passwd = ar.ar_pwd;
      auth_scheme = ar.ar_scheme; cgi = cgi; command = ar.ar_command;
      indep_command = (if cgi then ar.ar_command else "geneweb") ^ "?";

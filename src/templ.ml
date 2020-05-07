@@ -686,9 +686,9 @@ value rec eval_variable conf =
       | None -> "" ]
   | ["time" :: sl] -> eval_time_var conf sl
   | ["user"; "ident"] -> conf.user
-  | ["user"; "name"] -> conf.username
+  | ["user"; "name"] -> conf.usernam
   | ["user"; "key"] -> conf.userkey
-  | ["user"; "passwd"] -> conf.passwd
+  | ["user"; "passwd"] -> conf.userpwd
   | [s] -> eval_simple_variable conf s
   | _ -> raise Not_found ]
 and eval_time_var conf =
