@@ -688,7 +688,14 @@ value rec eval_variable conf =
   | ["user"; "ident"] -> conf.user
   | ["user"; "name"] -> conf.usernam
   | ["user"; "key"] -> conf.userkey
-  | ["user"; "passwd"] -> conf.userpwd
+  | ["user"; "passwd"] ->
+      let str = conf.userpwd in
+      match String.index_opt str ' ' with
+      [ Some j ->
+        let str = Util.unscramble str in
+        (String.sub str 0 j) ^ ":" ^
+        String.sub str (j+1) ((String.length str)-j-1)
+      | None -> str ]
   | [s] -> eval_simple_variable conf s
   | _ -> raise Not_found ]
 and eval_time_var conf =

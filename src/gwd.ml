@@ -694,6 +694,12 @@ value set_actlog list =
       do {
         List.iter
           (fun ((from, base_pw), (a, c, d, e, f, g)) ->
+            let first_time =
+              match String.index_opt g ':' with
+              [ Some j -> True
+              | None -> False ]
+            in
+            let g = if first_time then Util.scramble g else g in
              fprintf oc "%.0f %s/%s %c%s/%s/%s/%s\n" a from base_pw c
                (if d = "" then "" else " " ^ d) e f g)
           list;
@@ -1211,7 +1217,7 @@ value make_conf cgi from_addr (addr, request) script_name contents env = do {
       let has_passwd = List.mem_assoc "w" env in
       let (x, env) = extract_assoc "w" env in
       if has_passwd then
-        (x, env, if x = "w" || x = "f" || x = "" then ATnone else ATset, "", "", "")
+        (x, env, if x = "w" || x = "f" || x = "" then ATnone else ATset, "", "", x)
       else
         let passwd =
           if ip = String.length base_passwd then ""

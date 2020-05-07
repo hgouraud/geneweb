@@ -44,6 +44,8 @@ value commd : config -> string;
 value code_varenv : string -> string;
 value decode_varenv : string -> string;
 value hidden_env : config -> unit;
+value scramble : string -> string;
+value unscramble : string -> string;
 
 value nobtit : config -> base -> person -> list title;
 

@@ -2248,6 +2248,30 @@ value hexa_string s =
   }
 ;
 
+value source = "abcdefghijklmnopqrstuvwxyz_.:ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+value target = ".ABlCaDmEnFbGoHIpJcKLqMNdrOP seQtRSfT_UzVuWgXvYZwh01i234j56yk78x9";
+
+value transcode s source target =
+  let rec copy_code_in s1 i =
+    if i < String.length s then
+      let c = match String.index_opt source s.[i] with
+        [ Some j -> target.[j]
+        | None -> s.[i] ]
+      in
+      do {Bytes.set s1 i c ; copy_code_in s1 (succ i)}
+    else Bytes.unsafe_to_string s1
+  in copy_code_in (Bytes.create (String.length s)) 0
+;
+
+
+value scramble pwd =
+  transcode pwd source target
+;
+
+value unscramble pwd =
+  transcode pwd target source
+;
+
 value print_alphab_list conf crit print_elem liste = do {
   let len = List.length liste in
   if len > menu_threshold then
