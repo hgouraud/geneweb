@@ -35,6 +35,7 @@ value max_father_age = 83;      (* âge dépassé par de nombreux pères sur Rog
 value max_mother_age = 58;
 value lim_date_marriage = 1749; (* L'âge au mariage n'est contrôlé que pour les mariages postérieurs à 1749 *)
 value min_age_marriage = 13;
+value max_age_marriage = 100;
 value average_marriage_age = 20;
 
 value common_prec p1 p2 =
@@ -393,7 +394,8 @@ value check_difference_age_between_cpl base warning ifath imoth =
   match (find_date fath, find_date moth) with
   [ (Some d1, Some d2) ->
       let a = time_elapsed d1 d2 in
-      if a.year > max_age_btw_cpl then
+      let y = if a.year < 0 then -a.year else a.year in
+      if y > max_age_btw_cpl then
         warning (BigAgeBetweenSpouses fath moth a)
       else ()
   | _ -> () ]
@@ -415,6 +417,10 @@ value check_normal_marriage_date_for_someone base error warning witn fam ip =
                     year_of (time_elapsed g1 g2) < min_age_marriage
             then
                warning (YoungForMarriage p (time_elapsed g1 g2))
+            else if not witn && year_of g2 > lim_date_marriage &&
+                    year_of (time_elapsed g1 g2) > max_age_marriage
+            then
+               warning (OldForMarriage p (time_elapsed g1 g2))
             else ()
         | _ -> () ];
         match get_death p with

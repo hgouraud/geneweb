@@ -159,6 +159,7 @@ type warning 'person 'descend 'title =
   | MarriageDateAfterDeath of 'person
   | MarriageDateBeforeBirth of 'person
   | MotherDeadAfterChildBirth of 'person and 'person
+  | OldForMarriage of 'person and dmy
   | ParentBornAfterChild of 'person and 'person
   | ParentTooOld of 'person and dmy
   | ParentTooYoung of 'person and dmy

@@ -510,7 +510,7 @@ value print_warning conf base =
         (fun _ ->
            Printf.sprintf "%s%s" (print_someone_strong conf base p)
              (Date.short_dates_text conf base p))
-  | YoungForMarriage p a ->
+  | YoungForMarriage p a | OldForMarriage p a ->
      do {
         Wserver.wprint "%s\n" (print_someone_strong conf base p);
         Wserver.wprint (ftransl conf "married at age %t")

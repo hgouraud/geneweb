@@ -124,7 +124,7 @@ value print_base_warning oc base =
       fprintf oc "%s\n" (designation base p);
       fprintf oc "was witness before his/her birth\n"
     }
-  | YoungForMarriage p a ->
+  | YoungForMarriage p a | OldForMarriage p a ->
       fprintf oc "%s married at age %d\n" (designation base p) a.year ]
 ;
 
