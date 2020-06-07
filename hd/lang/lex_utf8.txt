@@ -3641,6 +3641,12 @@ oc: comparar las revisions seleccionadas
 pt: comparar as revisões selecionadas
 sv: Jämför utvalda revisioner
 
+
+    compiled on %s from commit %s
+en: compiled on %s from commit %s
+fr: compilé le %s avec le commit %s
+
+
     compute all marriages
 de: Lebenspartner mit einschließen
 en: Include spouses

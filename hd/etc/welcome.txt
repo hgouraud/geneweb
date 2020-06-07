@@ -592,10 +592,12 @@ sl: Če vaš brskalnik ne more obnavljati strani avtomatično (morate
 sv: Om din webbläsare inte automatiskt uppdaterar de modifierade sidorna
     (vilket tvingar dig att uppdatera sidan hela tiden), försök då att
     navigera <a href="%prefix;escache=0">härifrån</a>.
-])%nl;
+])%nl;<br>
+%include.version;
 </div>
 <br/>
 </div> 
+
 
 %base_trailer;
 

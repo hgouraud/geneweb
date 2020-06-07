@@ -8,7 +8,7 @@ MANPAGES=ged2gwb.1 gwb2ged.1 gwc.1 gwc2.1 gwu.1 gwd.1 consang.1 gwsetup.1
 
 include tools/Makefile.inc
 
-all:: opt
+all:: opt hd/etc/version.txt
 
 out::
 	cd wserver; $(MAKE) all
@@ -96,6 +96,14 @@ wrappers:
 	  cp etc/MacOSX/GeneWeb.command $(DESTDIR); \
 	fi
 
+hd/etc/version.txt:
+	@echo "Generating $@..."
+	@echo "GeneWeb[:] [compiled on %s from commit %s:::" > $@
+	@echo "$$(date '+%Y-%m-%d'):" >> $@
+	@echo "$$(git show -s --date=short --pretty=format:'<a href="https://github.com/hgouraud/geneweb/commit/%h">%h (%cd)</a>')]" >> $@
+	@echo " Done!"
+#.PHONY:hd/etc/version.txt
+
 new_distrib: classical_distrib
 	mkdir t
 	mv $(DESTDIR) t/gw
@@ -145,6 +153,7 @@ classical_distrib:
 	cp hd/images/*.jpg hd/images/*.png hd/images/*.ico $(DESTDIR)/images/.
 	mkdir $(DESTDIR)/etc
 	cp -R hd/etc/* $(DESTDIR)/etc/.
+	rm -f hd/etc/version.txt
 	find $(DESTDIR)/etc/ -name .svn -type d -prune -exec rm -rf {} \;
 
 windows_files:
