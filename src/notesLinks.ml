@@ -50,7 +50,7 @@ value misc_notes_link s i =
     if s.[i+2] = '[' then
       let j =
         loop (i + 3) where rec loop j =
-          if j = slen then j
+          if j = slen then i
           else if
             j < slen - 3 && s.[j] = ']' && s.[j+1] = ']' && s.[j+2] = ']'
           then j + 3
@@ -74,71 +74,73 @@ value misc_notes_link s i =
     else
       let j =
         loop (i + 2) where rec loop j =
-          if j = slen then j
+          if j = slen then i
           else if j < slen -2 && s.[j] = ']' && s.[j+1] = ']' then j + 2
           else loop (j + 1)
       in
-      let b = String.sub s (i + 2) (j - i - 4) in
-      let (spe, b) =
-        try
-          let i = String.index b ':' in
-          (Some (String.sub b 0 i),
-           String.sub b (i + 1) (String.length b - i - 1))
-        with
-        [ Not_found -> (None, b) ]
-      in
-      let (b, text) =
-        try
-          let i = String.rindex b ';' in
-          (String.sub b 0 i,
-           Some (String.sub b (i + 1) (String.length b - i - 1)))
-        with
-        [ Not_found -> (b, None) ]
-      in
-      if spe = Some "w" then
-        let (wiz, name) =
-          match
-            try (Some (String.index b '/')) with [ Not_found -> None ]
+      if j > i + 4 then
+        let b = String.sub s (i + 2) (j - i - 4) in
+        let (spe, b) =
+          try
+            let i = String.index b ':' in
+            (Some (String.sub b 0 i),
+             String.sub b (i + 1) (String.length b - i - 1))
           with
-          [ Some i ->
-              (String.sub b 0 i,
-               String.sub b (i + 1) (String.length b - i - 1))
-          | None -> (b, "") ]
+          [ Not_found -> (None, b) ]
         in
-        WLwizard j wiz name
-      else
-        try
-          let k = 0 in
-          let l = String.index_from b k '/' in
-          let fn = String.sub b k (l - k) in
-          let k = l + 1 in
-          let (fn, sn, oc, name) =
-            try
-              let l = String.index_from b k '/' in
-              let sn = String.sub b k (l - k) in
-              let (oc, name) =
-                try
-                  let k = l + 1 in
-                  let l = String.index_from b k '/' in
-                  let x = String.sub b k (l - k) in
-                  (x, String.sub b (l + 1) (String.length b - l - 1))
-                with
-                [ Not_found ->
-                    ("", String.sub b (l + 1) (String.length b - l - 1)) ]
-              in
-              let oc = try int_of_string oc with [ Failure _ -> 0 ] in
-              (fn, sn, oc, name)
+        let (b, text) =
+          try
+            let i = String.rindex b ';' in
+            (String.sub b 0 i,
+             Some (String.sub b (i + 1) (String.length b - i - 1)))
+          with
+          [ Not_found -> (b, None) ]
+        in
+        if spe = Some "w" then
+          let (wiz, name) =
+            match
+              try (Some (String.index b '/')) with [ Not_found -> None ]
             with
-            [ Not_found ->
-                let sn = String.sub b k (String.length b - k) in
-                let name = fn ^ " " ^ sn in
-                (fn, sn, 0, name) ]
+            [ Some i ->
+                (String.sub b 0 i,
+                 String.sub b (i + 1) (String.length b - i - 1))
+            | None -> (b, "") ]
           in
-          let fn = Name.lower fn in
-          let sn = Name.lower sn in
-          WLperson j (fn, sn, oc) name text
-        with
-        [ Not_found -> WLnone ]
+          WLwizard j wiz name
+        else
+          try
+            let k = 0 in
+            let l = String.index_from b k '/' in
+            let fn = String.sub b k (l - k) in
+            let k = l + 1 in
+            let (fn, sn, oc, name) =
+              try
+                let l = String.index_from b k '/' in
+                let sn = String.sub b k (l - k) in
+                let (oc, name) =
+                  try
+                    let k = l + 1 in
+                    let l = String.index_from b k '/' in
+                    let x = String.sub b k (l - k) in
+                    (x, String.sub b (l + 1) (String.length b - l - 1))
+                  with
+                  [ Not_found ->
+                      ("", String.sub b (l + 1) (String.length b - l - 1)) ]
+                in
+                let oc = try int_of_string oc with [ Failure _ -> 0 ] in
+                (fn, sn, oc, name)
+              with
+              [ Not_found ->
+                  let sn = String.sub b k (String.length b - k) in
+                  let name = fn ^ " " ^ sn in
+                  (fn, sn, 0, name) ]
+            in
+            let fn = Name.lower fn in
+            let sn = Name.lower sn in
+            WLperson j (fn, sn, oc) name text
+          with
+          [ Not_found -> WLnone ]
+      else WLnone
   else WLnone
 ;
 
