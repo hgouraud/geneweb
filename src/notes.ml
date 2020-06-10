@@ -298,7 +298,7 @@ value print_linked_list conf base pgl =
                end
                }
            | NotesLinks.PgWizard wizname -> do {
-               Wserver.wprint "<a href='%sm=MOD_WIZNOTES;v=%s'>"
+               Wserver.wprint "<a href='%sm=MOD_WIZNOTES;f=%s'>"
                  (commd conf) (code_varenv wizname);
                Wserver.wprint "<img src='%s/picto_molette.png'>" (Util.image_prefix conf);
                Wserver.wprint "</a> ";
