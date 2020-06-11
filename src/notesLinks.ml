@@ -52,7 +52,7 @@ value misc_notes_link s i =
         loop (i + 3) where rec loop j =
           if j = slen then i
           else if
-            j < slen - 3 && s.[j] = ']' && s.[j+1] = ']' && s.[j+2] = ']'
+            j <= slen - 3 && s.[j] = ']' && s.[j+1] = ']' && s.[j+2] = ']'
           then j + 3
           else loop (j + 1)
       in
@@ -75,7 +75,7 @@ value misc_notes_link s i =
       let j =
         loop (i + 2) where rec loop j =
           if j = slen then i
-          else if j < slen -2 && s.[j] = ']' && s.[j+1] = ']' then j + 2
+          else if j <= slen -2 && s.[j] = ']' && s.[j+1] = ']' then j + 2
           else loop (j + 1)
       in
       if j > i + 4 then
