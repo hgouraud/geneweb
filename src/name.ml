@@ -138,6 +138,13 @@ value unaccent_utf_8 lower s i =
           | 0xB9 | 0xBB | 0xBD -> f "Z"
           | 0xBA | 0xBC | 0xBE -> "z"
           | _ -> String.sub s i nbc ]
+      | 0xC6 ->
+          match Char.code s.[i+1] with
+          [ 0xA0 -> f "O"
+          | 0xA1 -> "o"
+          | 0xAF -> f "U"
+          | 0xB0 -> "u"
+          | _ -> String.sub s i nbc ]
       | 0xCE ->
           (* Greek *)
           match Char.code s.[i+1] with
