@@ -439,7 +439,9 @@ let get_access l =
   match l with
     "#apubl" :: l' -> Public, l'
   | "#apriv" :: l' -> Private, l'
-  | _ -> IfTitles, l
+  | "#afriend" :: l' -> Private, l'
+  | "#afriendm" :: l' -> Private, l'
+  | _ -> Private, l
 
 let scan_title t =
   let next_field i =
