@@ -98,6 +98,7 @@ val reference : config -> base -> person -> string -> string
 val no_reference : config -> base -> person -> string -> string
 val referenced_person_title_text : config -> base -> person -> string
 val referenced_person_text : config -> base -> person -> string
+val referenced_person_text_flip : config -> base -> person -> string
 val referenced_person_text_without_surname :
   config -> base -> person -> string
 

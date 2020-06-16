@@ -756,6 +756,18 @@ let gen_person_text (p_first_name, p_surname) conf base p =
     in
     let sn = p_surname base p in if sn = "" then beg else beg ^ " " ^ sn
 
+let gen_person_text_flip (p_first_name, p_surname) conf base p =
+  if is_hidden p then restricted_txt
+  else if is_hide_names conf p && not (authorized_age conf base p) then "x x"
+  else
+    let beg =
+      match sou base (get_public_name p), get_qualifiers p with
+        "", nn :: _ -> p_first_name base p ^ " <em>" ^ sou base nn ^ "</em>"
+      | "", [] -> p_first_name base p
+      | n, nn :: _ -> n ^ " <em>" ^ sou base nn ^ "</em>"
+      | n, [] -> n
+    in
+    let sn = p_surname base p in if sn = "" then beg else sn ^ " " ^ beg
 
 (* ************************************************************************** *)
 (*  [Fonc] gen_person_text_no_html :
@@ -814,6 +826,7 @@ let gen_person_text_without_surname check_acc (p_first_name, _p_surname) conf
     | _, [] -> p_first_name base p
 
 let person_text = gen_person_text std_access
+let person_text_flip = gen_person_text_flip std_access
 let person_text_no_html = gen_person_text_no_html std_access
 let person_text_without_surname =
   gen_person_text_without_surname true std_access
@@ -986,6 +999,9 @@ let person_title_text = gen_person_title_text no_reference std_access
 
 let referenced_person_text conf base p =
   reference conf base p (person_text conf base p)
+
+let referenced_person_text_flip conf base p =
+  reference conf base p (person_text_flip conf base p)
 
 let referenced_person_text_without_surname conf base p =
   reference conf base p (person_text_without_surname conf base p)
