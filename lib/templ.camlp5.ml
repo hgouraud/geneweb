@@ -837,6 +837,7 @@ and eval_simple_variable conf =
       in
       List.fold_left (fun c (k, v) -> c ^ k ^ "=" ^ v ^ "&") c l
   | "version" -> Version.txt
+  | "duration" -> Printf.sprintf "%.3f" ((Sys.time ()) -. !Util.start_time)
   | "/" -> conf.xhs
   | _ -> raise Not_found
 
@@ -1307,10 +1308,11 @@ let print_copyright conf =
   match Util.open_etc_file "copyr" with
     Some ic -> copy_from_templ conf [] ic
   | None ->
+      let duration = (Sys.time ()) -. !Util.start_time in
       Wserver.printf "<hr style=\"margin:0\"%s>\n" conf.xhs;
       Wserver.printf "<div style=\"font-size: 80%%\">\n";
       Wserver.printf "<em>";
-      Wserver.printf "Copyright (c) 1998-2007 INRIA - GeneWeb %s" Version.txt;
+      Wserver.printf "Copyright (c) 1998-2007 INRIA - GeneWeb %s (%.3f sec)" Version.txt duration;
       Wserver.printf "</em>";
       Wserver.printf "</div>\n";
       Wserver.printf "<br%s>\n" conf.xhs
