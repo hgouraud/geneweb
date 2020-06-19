@@ -1,0 +1,11 @@
+<!-- L'autre base roglo 01/07/2018 -->
+    %if;(wizard)
+    	<li><a href="%bvar.Base_Wiz;_w?%nn;
+          %if;(evar.lang!="")lang=%evar.lang;%end;%nn;
+          %if;(evar.templ!="")&templ=%evar.templ;%end;%nn;
+        ">[
+en: Wizard database
+fr: La base des magiciens
+]</a></li>
+    %end;
+

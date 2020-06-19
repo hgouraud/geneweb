@@ -1,0 +1,22 @@
+<!-- VaetVient roglo 01/07/2018 -->
+  <input type=text size=48 value="%[%[%first_name_key_val;/%surname_key_val;/%occ;/%first_name; %surname;%]%]">
+  %sp;
+
+%if;wizard;
+  <a href="%bvar.Base_Wiz;_w
+  ?lang=%evar.lang;%nn;
+%if;(evar.templ!="");templ=%evar.templ;%end;%nn;
+;p=%first_name_key_val;%nn;
+;n=%surname_key_val;%nn;
+%if;(occ!="");oc=%occ;%end;">
+  <span style="font-size:16pt;font-weight:bold;color:#41610c;">W</span></a>
+%sp;
+<a href="http://roglo.eu:2317/roglo_w
+  ?lang=%evar.lang;%nn;
+%if;(evar.templ!="");templ=%evar.templ;%end;%nn;
+;p=%first_name_key_val;%nn;
+;n=%surname_key_val;%nn;
+;oc=%occ;"
+  style="font-size:16pt;font-weight:bold;color:#41610c;">T</a>
+%end;
+

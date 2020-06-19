@@ -1,0 +1,32 @@
+<script type="text/javascript">
+<!--
+var gw_image_prefix = "%image_prefix;";
+var gw_lang = "%evar.lang;";
+var gw_user_name = "%user.name;";
+var gw_geo = %if;(evar.geo="on")1;%else;0;%end;
+
+-->
+</script>
+
+<!-- base: %base.name;, %b, %s, "%prefix_base;", w: %if;(wizard)wizard%end;, f: %if;(friend)friend%end;, -->
+
+%if;(prefix_base="wizard?" and not wizard and not friend)
+  <meta http-equiv="refresh" content="5; URL=http://roglo.eu/roglo?">
+%end;
+
+<link rel="shortcut icon" href="%image_prefix;/gw.png"%/>
+<link href="%image_prefix;/inc/default.css" type="text/css" rel="stylesheet" %/>
+<style type="text/css">
+%if;(prefix_base = "wizard?" or prefix_base = "wizard_w?" or prefix_base = "wizard_f?")
+body {
+ background-image: url("http://img.roglo.net/gw6/gw5/gwback.jpg");
+}
+/* wizard, %prefix_base;  */
+%else;
+body {
+ background-image: url("http://img.roglo.net/gw6/gw5/gwback.jpg");
+}
+/* roglo, %prefix_base; */
+%end;
+img { border:0px; }
+</style>

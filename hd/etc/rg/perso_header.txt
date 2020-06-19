@@ -1,0 +1,135 @@
+<!-- perso_header.txt 2018-07-30 hg -->
+%( On importe perso_utils pour l'inclusion hors template. %)
+%( Normalement, il n'est ajouté qu'une seule fois.        %)
+%include;perso_utils
+
+%include;menubar;
+
+%define;switch_tpl()
+  %if;(evar.templ="" or evar.templ="rg2")
+    <a href="%prefix_no_templ;templ=rg;%suffix;">
+  %else;
+    <a href="%prefix_no_templ;templ=rg2;%suffix;">
+  %end;
+  <img src="%image_prefix;/file.png"%wid_hei;left.png;
+    style="border: 0" alt="Tpl" title="Switch Template"%/></a>
+
+%end;
+
+%if;not cancel_links;
+  <table style="float:%right;">
+    <tr>
+      <td>
+        %if;(referer != "")
+          <a href="%referer;"><img
+           src="%image_prefix;/left.png"%wid_hei;left.png; 
+           style="border: 0" alt="&lt;&lt;" title="&lt;&lt;"%/></a>
+        %end;
+        <a href="%prefix;"><img%sp;
+         src="%image_prefix;/up.png"%wid_hei;up.png; 
+         style="border: 0" alt="^^" title="^^"%/></a>
+      </td>
+    </tr>
+  </table>
+%end;
+
+<h1>
+  %apply;switch_tpl()
+  %apply;image_MF("self", "")
+  %if;has_public_name;
+    %if;has_qualifiers;%public_name; <em>%qualifier;</em>
+    %else;%public_name; %surname;%end;
+  %else;
+    %if;has_qualifiers;%first_name; <em>%qualifier;</em>
+    %else;
+      %if;cancel_links;%first_name; %surname;
+      %else;
+        <a href="%prefix;m=P;v=%first_name_key;">%first_name;</a>
+        <a href="%prefix;m=N;v=%surname_key;">%surname;</a>
+      %end;
+    %end;
+  %end;
+  %if;(wizard or friend)
+    &nbsp;
+    %let;userid;%if;(user.key != "")%user.key;%else;%user.name;%end;%in;
+    <a href="%prefix;;em=R;ei=%index;;m=NG;select=input;n=%user.key;;t=PN;spouse=on;long=on;et=S"
+       title="Chemin le plus court entre moi et cette personne">
+    <img src="%image_prefix;/link.jpg" alt="W"%/>%nn;
+    </a>
+  %end;
+  %if;(bvar.show_invisible = "on")
+    <a href="%if;(bvar.http_mode="https" and cgi)%bvar.commd;?b=roglo;%else;%bvar.Base_Wiz;_f?%end;%nn;
+       lang=%evar.lang;;%if;(evar.templ!="")templ=%evar.templ;;%end;i=%index;;o=%occ;"
+       title="Comment apparaît cette personne pour les %if;(bvar.http_mode="https" and cgi)visiteurs%else;amis%end;?">
+    %if;is_friend;
+      <img src="%image_prefix;/friend.gif"%wid_hei;restricted.png; alt=" (f)"%/>%nn;
+    %elseif;is_invisible;
+      <img src="%image_prefix;/restricted.png"%wid_hei;restricted.png; alt=" (x)"%/>%nn;
+    %else;
+      <img src="%image_prefix;/1pixel.png"%wid_hei;restricted.png; alt=" "%/>%nn; 
+    %end;
+    </a>
+  %end;
+  %if;(wizard)
+    %if;(base.name = "wizard")
+      <a href="%if;(bvar.http_mode="https" and cgi)%bvar.commd;?b=wizard;w=%user.passwd;;%else;%prefix;%end;%nn;
+        m=MOD_IND;i=%index;">
+    %else;
+      <a href="%if;(bvar.http_mode="https" and cgi)%bvar.commd;?b=wizard;w=%user.passwd;;%else;%bvar.Base_Wiz;_w?%end;%nn;
+        lang=%evar.lang;;%if;(evar.templ!="")templ=%evar.templ;%end;;m=MOD_IND;i=%index;;o=%occ;">
+    %end;
+    <img src="%image_prefix;/b_edit.png" alt="edit"></a>%sp;
+  %end;
+%include.vaetvient;
+</h1>
+
+%if;(has_sosa or has_qualifiers or has_aliases or has_nobility_titles or
+     has_public_name or has_surnames_aliases or has_first_names_aliases or
+     has_linked_page.HEAD)
+  <table style="width:100%%" border="%border;"><tr><td align="center">
+  <table border="%border;" cellspacing="0" cellpadding="0">
+  <tr><td>
+  %if;has_sosa;
+    <img src="%image_prefix/sosa.png" alt="sosa" title="sosa"/>
+    <em>[*Sosa]:
+    %if;cancel_links;%sosa;
+    %else;<a href="%prefix;%sosa_link;">%sosa;</a>%end;
+    </em><br%/>
+  %end;
+  %foreach;qualifier;
+    %if;not is_first;
+      %if;has_public_name;%public_name; %qualifier;
+      %else;%first_name; %qualifier;%end;<br%/>
+    %end;
+  %end;
+  %foreach;alias;
+    <em><strong>%alias;</strong></em><br%/>
+  %end;
+  %if;has_nobility_titles;
+    <em>
+    %foreach;nobility_title;
+      %if;not is_first;,
+      %end;
+      %nobility_title;
+    %end;
+    </em><br%/>
+  %end;
+  %if;has_linked_page.HEAD;%linked_page.HEAD;<br%/>%end;
+  %if;(has_public_name or has_qualifiers)
+    <em>(%if;cancel_links;%first_name; %surname;
+         %else;
+           <a href="%prefix;m=P;v=%first_name_key;">%first_name;</a>
+           <a href="%prefix;m=N;v=%surname_key;">%surname;</a>%nn;
+         %end;)</em><br%/>
+  %end;
+  %foreach;surname_alias;
+    <em>(%first_name; %surname_alias;)</em><br%/>
+  %end;
+  %foreach;first_name_alias;
+    <em>(%first_name_alias; %surname;)</em><br%/>
+  %end;
+  </td></tr>
+  </table>
+  </td></tr></table>
+  <p></p>
+%end;
