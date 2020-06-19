@@ -3,7 +3,7 @@
 %let;basecap;%apply;capitalize(base.name)%in;
 %let;basetitle;<span class="basetitle">%basecap;</span>%in;
 <head>
-  <!-- $Id: welcome.txt,v 1.40 2018-07-08 07:22:41 hg Exp $ -->
+  <!-- $Id: rg/welcome.txt,v 7.00 2020-06-20 14:22:41 hg Exp $ -->
   <!-- Copyright (c) 2006-2012 -->
   <title>[
 af: Genealogie/Familiekunde
@@ -107,7 +107,6 @@ var zgw_sosa_ref = "%bvar.supervisor;";
 %end;
 %end;
 
-
 %define;language_link(xx,yy)%sq;
   %let;zz;%if;("yy" = "")xx%else;xx-yy%end;%in;%sq;
   %let;tt;%if;("yy" = "")xx%else;xx_yy%end;%in;%sq;
@@ -202,7 +201,6 @@ sv: Genealogisk databas
 zh: 网络家谱
 ]</h1>
 </div>
-
 
 <div id="lang">
   <div class="title">
@@ -335,7 +333,7 @@ sv: Databasen %basetitle;
 zh: 现有 %base.nb_persons; 人在数据库中。
 ])
 <br>
-<!-- 	
+<!--
 <a href="https://asso.roglo.eu/page/484842" style="color:red">15 Mars 2019 : SUSPENSION DES ACCÈS AMIS N’AYANT PAS ENREGISTRÉ LEUR CONSENTEMENT.</a><br/>
 <a href="%bvar.Base_Amis;?m=FORUM;p=2114021" style="font-variant:small-caps;font-style:italic;font-weight:bold;font-size:1.2em;color:red">Problèmes de connexion à Roglo et de visibilité des données.</a>
  -->
@@ -605,16 +603,16 @@ sv: ändra noteringar
       </li>
     %end;
     %if;(bvar.menu05 != "")
-    	<li>%apply;msg_lang_link%with;%evar.lang;%and;menu05%end;</li>
+      <li>%apply;msg_lang_link%with;%evar.lang;%and;menu05%end;</li>
     %end;
     %if;(bvar.menu06 != "")
-    	<li>%apply;msg_lang_link%with;%evar.lang;%and;menu06%end;</li>
+      <li>%apply;msg_lang_link%with;%evar.lang;%and;menu06%end;</li>
     %end;
   </ul>
   </div>
   <div id="list_right">
   <ul style="text-align:right; margin-top:1.6em; margin-right:2em;">
-%include.lautrebase;
+%(include.lautrebase;%)
 
 %(  <li><em><a href="%prefix;m=LEX">[
 bg: лексикон
@@ -652,7 +650,7 @@ zh: 本站使用的术语
     <li><a href="%prefix;m=STAT">[statistics] [and] [anniversaries]</a></li>
     %if;base.has_notes;
     %if;(bvar.menu13 != "")
-    	<li>%apply;msg_lang_link%with;%evar.lang;%and;menu13%end;</li>
+      <li>%apply;msg_lang_link%with;%evar.lang;%and;menu13%end;</li>
     %end;
     %if;(bvar.menu14 != "")
       <li>%apply;msg_lang_link%with;%evar.lang;%and;menu14%end;</li>
@@ -661,11 +659,11 @@ zh: 本站使用的术语
     %end;
     %end;
     %if;has_misc_notes;
-	<li><a href="%prefix;m=MISC_NOTES">[miscellaneous notes]...</a></li>
+      <li><a href="%prefix;m=MISC_NOTES">[miscellaneous notes]...</a></li>
     %end;
     %if;(bvar.menu16 != "")
-        <li>%apply;msg_lang_link%with;%evar.lang;%and;menu16%end;</li>
-        %(<li><a href="https://www.roglo.fr/index.php/Accueil">RogloPedia</a></li>%)
+      <li>%apply;msg_lang_link%with;%evar.lang;%and;menu16%end;</li>
+      %(<li><a href="https://www.roglo.fr/index.php/Accueil">RogloPedia</a></li>%)
     %end;
   </ul>
   </div>
@@ -678,19 +676,19 @@ zh: 本站使用的术语
     %if;(evar.templ!="")&templ=%evar.templ;%end;%nn;
     &m=FORUM;">[database forum]</a></li>
     %if;has_history;
-    <li><a href="%prefix;m=HIST&k=20">[history of updates]</a></li>
+      <li><a href="%prefix;m=HIST&k=20">[history of updates]</a></li>
     %end;
     %if;(bvar.menu21 != "")
-    	<li>%apply;msg_lang_link%with;%evar.lang;%and;menu21%end;</li>
+      <li>%apply;msg_lang_link%with;%evar.lang;%and;menu21%end;</li>
     %end;
     %if;(bvar.menu22 != "")
-    	<li>%apply;msg_lang_link%with;%evar.lang;%and;menu22%end;</li>
+      <li>%apply;msg_lang_link%with;%evar.lang;%and;menu22%end;</li>
     %end;
     %if;(bvar.menu23 != "")
-    	<li>%apply;msg_lang_link%with;%evar.lang;%and;menu23%end;</li>
+      <li>%apply;msg_lang_link%with;%evar.lang;%and;menu23%end;</li>
     %end;
     %if;(bvar.menu24 != "")
-    	<li>%apply;msg_lang_link%with;%evar.lang;%and;menu24%end;</li>
+      <li>%apply;msg_lang_link%with;%evar.lang;%and;menu24%end;</li>
     %end;
   </ul>
   </div>
@@ -839,7 +837,7 @@ sv: Om din webbläsare inte automatiskt uppdaterar de modifierade sidorna
     navigera <a href="%prefix;escache=0">härifrån</a>.
 ])%nl;
 <br>
-%include.version;
+%include;version;
 </div>
 
 </div>
