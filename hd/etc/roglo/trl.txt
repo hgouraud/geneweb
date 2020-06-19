@@ -1,0 +1,77 @@
+%(
+<button id="LienP">
+[
+en: Permanent link
+fr: Lien permanent
+]
+</button>
+[
+en: Click on this button to copy the url on the clopboard
+fr: Cliquer sur ce bouton pour "copier" le lien permanent
+]
+<script>
+function copyToClipboard(text) {
+    if (window.clipboardData && window.clipboardData.setData) {
+        // IE specific code path to prevent textarea being shown while dialog is visible.
+        return clipboardData.setData("Text", text);
+
+    } else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var textarea = document.createElement("textarea");
+        textarea.textContent = text;
+        textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+        } catch (ex) {
+            console.warn("Copy to clipboard failed.", ex);
+            return false;
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
+}
+document.querySelector("#LienP").onclick = function() {
+    var result = copyToClipboard("http://roglo.eu/%url;%opt=no_index;");
+    console.log("copied?", result);
+};
+</script>
+%)
+<div id="template">
+<hr/>
+<table border="0" >
+<tr><td>
+
+<a href="%prefix;"><img src="http://img.roglo.net/gw6/roglo.png" alt="logo Roglo" width="90" style="border:0;float:left" /></a>
+%apply;interp([
+fr: <span style="color: red; font-weight: bold;">Important&nbsp;! Attention&nbsp;!</span><br/> Cette base de données est une 
+    <span style="color: red; font-weight: bold;">copie de la base généalogique Roglo prise
+en: <span style="color: red; font-weight: bold;">VERY IMPORTANT&nbsp;! WARNING&nbsp;!</span><br/>THIS DATA BASE IS
+    <span style="color: red; font-weight: bold;">A COPY OF THE ROGLO BASE CAPTURED
+])
+%sp;%apply;interp([
+en: on 2020 June 19th at  03:44 at  02:55
+fr: le 19 juin 2020 à  03:44 à  02:55
+])
+%apply;interp([
+fr: </span>.<br/><b>Les modifications faites par les magiciens depuis cet instant n’y figurent pas encore.</b><br/>
+    La base Roglo n’est pas une référence absolue et peut contenir des erreurs.
+    Les informations ne sont données qu’à titre indicatif et ne sont pas garanties.
+    Pensez à vérifier d’autres sources. Nous déclinons toute responsabilité pour les
+    informations que vous y auriez prélevées et que vous n’auriez pas vérifiées auprès de sources autorisées.
+    Si vous avez des remarques, vous pouvez écrire dans le <a href="%prefix;m=FORUM"><u>forum de la base de données</u></a>,
+    en précisant vos références, ou <a href="%prefix;m=WIZNOTES;o=A"><u>au magicien</u></a> s’il est indiqué en source.
+en: </span>.<br/><b>MODIFICATIONS MADE BY WIZARDS SINCE THIS INSTANT ARE NOT YET INCLUDED.</b><br/>
+    IT IS NOT AN ABSOLUTE REFERENCE AND MAY CONTAIN ERRORS; THE INFORMATION
+    IS GIVEN HERE WITHOUT GUARANTEE; THINK TO CHECK WITH OTHER SOURCES.
+    WE DECLINE ALL RESPONSABILITY FOR ALL INFORMATION THAT YOU COULD HAVE
+    TAKEN FROM THIS SITE, WITHOUT HAVING CHECKED THEM FROM AUTHORIZED
+    SOURCES.<br/>
+    If you have remarks, you may write in the <a href="%prefix;m=FORUM"><u>data base
+    forum</u></a>, specifying your references, or directly to the "wizard"
+    if he is indicated in the "sources"; see for that the <a
+    href="%prefix;m=WIZNOTES;o=A"><u>wizards list</u></a>.
+])
+</em></td>
+</tr></table>
+</div>

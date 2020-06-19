@@ -1,0 +1,25 @@
+%if;(evar.m="");
+
+%if;wizard;
+<tr align="%left;">
+    <td><tt>&nbsp;#&nbsp;</tt></td>
+    <td><tt>12/12/11</tt></td>
+    <td><a href="http://www.roglo.fr/index.php/Accueil"><b>Magiciens</b></a></td>
+    <td>### Informations pour les magiciens, évolution de GeneWeb ###</td>
+</tr>
+%end;
+%if;(wizard or friend)
+<tr align="%left;">
+    <td><tt>&nbsp;#&nbsp;</tt></td>
+    <td><tt>18/11/18</tt></td>
+%(    <td><a href="https://asso.roglo.eu/page/413587-aide-connexion-et-inscription"><b>ASSOCIATION ROGLO</b></a></td>%)
+%(  le lienpointe vers le emssage de Michel, qui lui même pointe vers Assoconnect %)
+    <td><a href="http://roglo.eu/roglo_w?lang=fr;templ=rg;m=FORUM;p=2-2868428"><b>ASSOCIATION ROGLO</b></a></td>
+    <td>### A TOUS MAGICIENS ET AMIS : INSCRIPTIONS SUR LE SITE DE L’ASSOCIATION (RGPD) ###</td>
+</tr>
+%end;
+<tr align="%left;">
+    <td colspan="4">%sp;<hr /></td>
+</tr>
+
+%end;

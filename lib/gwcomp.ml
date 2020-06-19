@@ -690,7 +690,7 @@ let rgpd_access fn sn occ l =
     in
       (* if Public, stay Public *)
     if access = Public then (Public, l)
-      (* if one of the files exist, set the Friend or Friend_m value *)
+      (* if the files exist, set the Consent value *)
     else if Sys.file_exists rgpd_file then (Consent, l)
       (* if the file does not exist and person was Consent, then it becomes Private *)
     else if access = Consent then (Private, l)

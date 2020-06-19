@@ -1,0 +1,54 @@
+<!-- $Id: accent.txt,v 5.6 2007-04-04 02:17:36 ddr Exp $ -->
+
+<script type="text/javascript"><!--
+var currentElement;
+function write_version_ie(t, v)
+{
+  sel = document.selection.createRange();
+  sel.text = v;
+}
+function write_version_netscape(t, v)
+{
+   var startPos = t.selectionStart;
+   var endPos = t.selectionEnd;
+   t.value = t.value.substring(0, startPos)
+            + v
+            + t.value.substring(endPos, t.value.length);
+   t.selectionStart = startPos + v.length;
+   t.selectionEnd = t.selectionStart;
+}
+function write_ch(v) {
+   var f = document.forms[0].Text;
+   f.focus();
+   if (document.selection) write_version_ie(f, v)
+   else write_version_netscape(f, v);
+   return false;
+}
+--></script>
+<span style="font-size:1.3em;">
+<script type="text/javascript">
+<!--
+ac1 = new Array(
+'deg', 'times', 'dagger', 'Aacute', 'aacute', 'Acirc', 'acirc', 'Agrave', 'agrave', 'AElig', 'aelig', 'Aring', 'aring', 'Auml', 'auml', '#260', '#261', '#262', '#263', 'Ccedil', 'ccedil', 'ETH', 'eth',
+'Eacute', 'eacute', 'Ecirc', 'ecirc', 'Egrave', 'egrave', 'Euml', 'euml', '#280', '#281', 'Iacute', 'iacute', 'Icirc', 'icirc', 'Igrave', 'igrave', 'Iuml', 'iuml',
+'#321', '#322', '#323', '#324', 'Ntilde', 'ntilde', 'frac12', 'frac14', 'frac34', 'euro', 'pound', 'bull', 'middot', 'ndash', 'mdash'
+	) ;
+ac2 = new Array(
+'divide', 'permil', 'Dagger', 'Oacute', 'oacute', 'Ocirc', 'ocirc', 'Ograve', 'ograve', 'OElig', 'oelig', 'Oslash', 'oslash', 'Otilde', 'otilde', 'Ouml', 'ouml',
+'#346', '#347', '#383', 'szlig', 'THORN', 'thorn', 'Uacute', 'uacute', 'Ugrave', 'ugrave', 'Ucirc', 'ucirc', 'Uuml', 'uuml', 'Yacute', 'yacute', '#376', 'yuml', '#377', '#378', '#379', '#380',
+'iexcl', 'iquest', 'micro', 'copy', 'reg', 'laquo', 'raquo', '#8470', 'ordf', 'ordm', 'sup1', 'sup2', 'sup3', 'thinsp', 'para'
+	) ;
+l = new Array(ac1,ac2);
+var w = document.forms%[0].Loupe;
+for (a in l) {
+s = l[a];
+for (c in s) {
+  z='&'+s[c]+';';
+  document.write("<span onclick=\"return write_ch('"+z+"')\" "+
+  "onMouseOver=\"this.style.fontWeight='bold';currentElement=document.activeElement;this.style.color='red';w.value='"+z+"';\" "+
+  "onMouseOut=\"this.style.fontWeight='normal';this.style.color='black';w.value='&nbsp;'\" >"+z+"</span>\n");
+  }
+document.write("<br%/>")
+}
+--></script><br>
+</span>

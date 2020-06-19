@@ -1,5 +1,5 @@
 <!-- $Id: js.txt, v7.00 13/04/2020 09:56:18 $ -->
-%if;(evar.templ="")
+%if;(evar.templ="" or evar.templ="rg")
   %if;(bvar.use_cdn="yes")
     <script src="https://code.jquery.com/jquery-3.5.0.min.js"
       integrity="sha384-LVoNJ6yst/aLxKvxwp6s2GAabqPczfWh6xzm38S/YtjUyZ+3aTKOnD/OJVGYLZDl" crossorigin="anonymous"></script>

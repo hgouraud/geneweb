@@ -1,0 +1,16 @@
+<script type="text/javascript">
+<!--
+var gw_image_prefix = "%image_prefix;";
+var gw_lang = "%evar.lang;";
+var gw_user_name = "%user.name;";
+var gw_geo = %if;(evar.geo="on")1;%else;0;%end;
+
+-->
+</script>
+
+
+<link rel="shortcut icon" href="%image_prefix;/gw.png"%/>
+<link href="%image_prefix;/css/default.css" type="text/css" rel="stylesheet" %/>
+<style type="text/css">
+img { border:0px; }
+</style>
