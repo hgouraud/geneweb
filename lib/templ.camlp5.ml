@@ -698,6 +698,16 @@ let rec eval_variable conf =
   | "time" :: sl -> eval_time_var conf sl
   | ["user"; "ident"] -> conf.user
   | ["user"; "name"] -> conf.username
+  | ["user"; "key"] -> conf.userkey
+  | ["user"; "passwd"] ->
+      let str = conf.userpwd in
+      begin match String.index_opt str ' ' with
+      | Some j ->
+        (* let str = Util.unscramble str in *)
+        (String.sub str 0 j) ^ ":" ^
+        String.sub str (j+1) ((String.length str)-j-1)
+      | None -> str
+      end
   | [s] -> eval_simple_variable conf s
   | _ -> raise Not_found
 and eval_time_var conf =

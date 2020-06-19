@@ -38,6 +38,8 @@ type config =
     friend : bool;
     just_friend_wizard : bool;
     user : string;
+    userkey : string;
+    userpwd : string;
     username : string;
     auth_scheme : auth_scheme_kind;
     pure_xhtml : bool;

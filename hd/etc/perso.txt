@@ -24,7 +24,6 @@
 %message_to_wizard;
 <a href="#content" class="sr-only sr-only-focusable">Skip navigation menu</a>
 <div class="container%if;(evar.wide="on")-fluid%end;">
-%include;perso_utils
 %include;menubar
 <div id="content" tabindex="-1">
 
