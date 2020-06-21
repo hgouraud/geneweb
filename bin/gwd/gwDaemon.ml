@@ -959,14 +959,17 @@ let basic_authorization from_addr request base_env passwd access_type utm
       HttpAuth (Basic {bs_realm = realm; bs_user = u; bs_pass = p})
   in
   {ar_ok = ok; ar_command = command; ar_passwd = passwd;
-   ar_scheme = auth_scheme; ar_user = user; ar_user_key = userkey; ar_user_pwd = userpwd; ar_user_name = username;
+   ar_scheme = auth_scheme; ar_user = user;
+   ar_user_key = userkey; ar_user_pwd = userpwd; ar_user_name = username;
    ar_wizard = wizard; ar_friend = friend; ar_uauth = uauth;
    ar_can_stale = false}
 
 let bad_nonce_report command passwd_char =
   {ar_ok = false; ar_command = command; ar_passwd = passwd_char;
-   ar_scheme = NoAuth; ar_user = ""; ar_user_key = ""; ar_user_pwd = ""; ar_user_name = ""; ar_wizard = false;
-   ar_friend = false; ar_uauth = ""; ar_can_stale = true}
+   ar_scheme = NoAuth; ar_user = "";
+   ar_user_key = ""; ar_user_pwd = ""; ar_user_name = "";
+   ar_wizard = false; ar_friend = false; ar_uauth = "";
+   ar_can_stale = true}
 
 let test_passwd ds nonce command wf_passwd wf_passwd_file passwd_char wiz =
   let asch = HttpAuth (Digest ds) in
@@ -975,8 +978,9 @@ let test_passwd ds nonce command wf_passwd wf_passwd_file passwd_char wiz =
   then
     if ds.ds_nonce <> nonce then bad_nonce_report command passwd_char
     else
-      {ar_ok = true; ar_command = command ^ "_" ^ passwd_char;
-       ar_passwd = passwd_char; ar_scheme = asch; ar_user = ds.ds_username; ar_user_key = ""; ar_user_pwd = "";
+      {ar_ok = true; ar_command = command ^ "_" ^ passwd_char; ar_passwd = passwd_char;
+       ar_scheme = asch; ar_user = ds.ds_username;
+       ar_user_key = ""; ar_user_pwd = "";
        ar_user_name = ""; ar_wizard = wiz; ar_friend = not wiz; ar_uauth = "";
        ar_can_stale = false}
   else
@@ -984,13 +988,15 @@ let test_passwd ds nonce command wf_passwd wf_passwd_file passwd_char wiz =
       Some (username, userkey, userpwd) ->
         if ds.ds_nonce <> nonce then bad_nonce_report command passwd_char
         else
-          {ar_ok = true; ar_command = command ^ "_" ^ passwd_char;
-           ar_passwd = passwd_char; ar_scheme = asch;
-           ar_user = ds.ds_username; ar_user_key = userkey; ar_user_pwd = userpwd; ar_user_name = username; ar_wizard = wiz;
-           ar_friend = not wiz; ar_uauth = ""; ar_can_stale = false}
+          {ar_ok = true; ar_command = command ^ "_" ^ passwd_char; ar_passwd = passwd_char;
+           ar_scheme = asch; ar_user = ds.ds_username;
+           ar_user_key = userkey; ar_user_pwd = userpwd; ar_user_name = username;
+           ar_wizard = wiz; ar_friend = not wiz; ar_uauth = "";
+           ar_can_stale = false}
     | None ->
         {ar_ok = false; ar_command = command; ar_passwd = passwd_char;
-         ar_scheme = asch; ar_user = ds.ds_username; ar_user_key = ""; ar_user_pwd = ""; ar_user_name = "";
+         ar_scheme = asch; ar_user = ds.ds_username;
+         ar_user_key = ""; ar_user_pwd = ""; ar_user_name = "";
          ar_wizard = false; ar_friend = false; ar_uauth = "";
          ar_can_stale = false}
 
@@ -1009,9 +1015,11 @@ let digest_authorization request base_env passwd utm base_file command =
   in
   let command = if !(Wserver.cgi) then command else base_file in
   if wizard_passwd = "" && wizard_passwd_file = "" then
-    {ar_ok = true; ar_command = command; ar_passwd = ""; ar_scheme = NoAuth;
-     ar_user = ""; ar_user_key = ""; ar_user_pwd = ""; ar_user_name = ""; ar_wizard = true;
-     ar_friend = friend_passwd = ""; ar_uauth = ""; ar_can_stale = false}
+    {ar_ok = true; ar_command = command; ar_passwd = "";
+     ar_scheme = NoAuth; ar_user = "";
+     ar_user_key = ""; ar_user_pwd = ""; ar_user_name = "";
+     ar_wizard = true; ar_friend = friend_passwd = ""; ar_uauth = "";
+     ar_can_stale = false}
   else if passwd = "w" || passwd = "f" then
     let auth = Wserver.extract_param "authorization: " '\r' request in
     if Mutil.start_with "Digest " 0 auth then
@@ -1051,13 +1059,17 @@ let digest_authorization request base_env passwd utm base_file command =
       else failwith (Printf.sprintf "not impl (2) %s %s" auth meth)
     else
       {ar_ok = false; ar_command = command; ar_passwd = passwd;
-       ar_scheme = NoAuth; ar_user = ""; ar_user_key = ""; ar_user_pwd = ""; ar_user_name = ""; ar_wizard = false;
-       ar_friend = false; ar_uauth = ""; ar_can_stale = false}
+       ar_scheme = NoAuth; ar_user = "";
+       ar_user_key = ""; ar_user_pwd = ""; ar_user_name = "";
+       ar_wizard = false; ar_friend = false; ar_uauth = "";
+       ar_can_stale = false}
   else
     let friend = friend_passwd = "" && friend_passwd_file = "" in
-    {ar_ok = true; ar_command = command; ar_passwd = ""; ar_scheme = NoAuth;
-     ar_user = ""; ar_user_key = ""; ar_user_pwd = ""; ar_user_name = ""; ar_wizard = false; ar_friend = friend;
-     ar_uauth = ""; ar_can_stale = false}
+    {ar_ok = true; ar_command = command; ar_passwd = "";
+     ar_scheme = NoAuth; ar_user = "";
+     ar_user_key = ""; ar_user_pwd = ""; ar_user_name = "";
+     ar_wizard = false; ar_friend = friend; ar_uauth = "";
+     ar_can_stale = false}
 
 let authorization from_addr request base_env passwd access_type utm base_file
     command =
@@ -1070,7 +1082,8 @@ let authorization from_addr request base_env passwd access_type utm base_file
       in
       let auth_scheme = TokenAuth {ts_user = user; ts_pass = passwd} in
       {ar_ok = true; ar_command = command; ar_passwd = passwd;
-       ar_scheme = auth_scheme; ar_user = user; ar_user_key = ""; ar_user_pwd = "passwd"; ar_user_name = "";
+       ar_scheme = auth_scheme; ar_user = user;
+       ar_user_key = ""; ar_user_pwd = "passwd"; ar_user_name = "";
        ar_wizard = true; ar_friend = false; ar_uauth = "";
        ar_can_stale = false}
   | ATfriend user ->
@@ -1081,7 +1094,8 @@ let authorization from_addr request base_env passwd access_type utm base_file
       in
       let auth_scheme = TokenAuth {ts_user = user; ts_pass = passwd} in
       {ar_ok = true; ar_command = command; ar_passwd = passwd;
-       ar_scheme = auth_scheme; ar_user = user; ar_user_key = ""; ar_user_pwd = "passwd"; ar_user_name = "";
+       ar_scheme = auth_scheme; ar_user = user;
+       ar_user_key = ""; ar_user_pwd = "passwd"; ar_user_name = "";
        ar_wizard = false; ar_friend = true; ar_uauth = "";
        ar_can_stale = false}
   | ATnormal ->
@@ -1089,7 +1103,8 @@ let authorization from_addr request base_env passwd access_type utm base_file
         if !(Wserver.cgi) then command, "" else base_file, ""
       in
       {ar_ok = true; ar_command = command; ar_passwd = passwd;
-       ar_scheme = NoAuth; ar_user = ""; ar_user_key = ""; ar_user_pwd = "passwd"; ar_user_name = ""; 
+       ar_scheme = NoAuth; ar_user = "";
+       ar_user_key = ""; ar_user_pwd = "passwd"; ar_user_name = "";
        ar_wizard = false; ar_friend = false; ar_uauth = "";
        ar_can_stale = false}
   | ATnone | ATset ->
