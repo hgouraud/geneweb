@@ -3937,6 +3937,8 @@ and eval_bool_person_field conf base env (p, p_auth) =
   | "is_male" -> get_sex p = Male
   | "is_private" -> get_access p = Private
   | "is_public" -> get_access p = Public
+  | "is_friend" -> not (get_access p = Private)
+  | "is_friend_m" -> not (get_access p = Private)
   | "is_restricted" -> is_hidden p
   | _ -> raise Not_found
 and eval_str_person_field conf base env (p, p_auth as ep) =
