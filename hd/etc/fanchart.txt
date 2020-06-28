@@ -47,10 +47,10 @@
 <span id="b-gen-del" class="button%if(evar.v <= 1) disabled%end;" title="Supprimer une génération"><strong>&#xff0d;</strong></span>
 <span id="b-places-hl" class="button" title="Activer la mise en évidence des lieux">&#x1f310;</span>
 <span id="b-places-colorise" class="button" title="Activer la colorisation globale des lieux">&#x1f3a8;</span>
-<input type="checkbox" id="bi" title="N">
+<input type="checkbox" id="bi" title="N"><label for="bi">N</label>
 <input type="checkbox" id="ba" title="B">
-<input type="checkbox" id="ma" title="M">
-<input type="checkbox" id="de" title="D">
+<input type="checkbox" id="ma" title="M"><label for="ma">M</label>
+<input type="checkbox" id="de" title="D"><label for="de">D</label>
 <input type="checkbox" id="bu" title="S">
 <span id="b-death-age" class="button" title="Activer la colorisation de l'âge de décès"><strong>&#x271d;</strong></span>
 <span id="b-no-tool" class="button" title="Désactiver les outils">&#x274c;</span>

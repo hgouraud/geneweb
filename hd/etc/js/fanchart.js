@@ -96,10 +96,12 @@ function pie( g, r1, r2, a1, a2, p ) {
 	);
 	path.setAttribute( "class", "link" );
 	g.append(path);
-	path.onclick = function() {
-		var oc = p.oc;
-		if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
-		window.location = link_to_person + "p=" + p.fnk + "&n=" + p.snk + oc
+	path.onclick = function( e ) {
+		if( true == e.shiftKey ) {
+			var oc = p.oc;
+			if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
+			window.location = link_to_person + "p=" + p.fnk + "&n=" + p.snk + oc
+		}
 	};
 	path.onmouseenter = function() {
 		if( p.birth_place !== undefined && p.birth_place != "" ) {
@@ -244,10 +246,12 @@ function circle( g, r, cx, cy, p ) {
 	circle.setAttribute( "r", r );
 	circle.setAttribute( "class", "link" );
 	g.append(circle);
-	circle.onclick = function() {
-		var oc = p.oc;
-		if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
-		window.location = link_to_person + "p=" + p.fnk + "&n=" + p.snk + oc
+	circle.onclick = function( e ) {
+		if( true == e.shiftKey ) {
+			var oc = p.oc;
+			if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
+			window.location = link_to_person + "p=" + p.fnk + "&n=" + p.snk + oc
+		}
 	};
 	circle.onmouseenter = function() {
 		if( p.birth_place !== undefined && p.birth_place != "" ) {
@@ -368,12 +372,14 @@ function link( g, pid, p, l ) {
 	text.setAttribute( "class", "link icon"  );
 	text.innerHTML = '<textPath xlink:href="#' + pid + '" startOffset="50%" style="font-size:'+ts+'%;">&#x25B2;</textPath>';
 	g.append(text);
-	text.onclick = function () {
-		var oc = p.oc;
-		if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
-		window.location = link_to_fanchart + "p=" + p.fnk + "&n=" + p.snk + oc + "&v=" + max_gen + "&tool=" + tool +
-			(has_ba ? "&ba=on" : "") +
-			(has_bu ? "&bu=on" : "");
+	text.onclick = function ( e ) {
+		if( true == e.shiftKey ) {
+			var oc = p.oc;
+			if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
+			window.location = link_to_fanchart + "p=" + p.fnk + "&n=" + p.snk + oc + "&v=" + max_gen + "&tool=" + tool +
+				(has_ba ? "&ba=on" : "") +
+				(has_bu ? "&bu=on" : "");
+		}
 	};
 }
 function no_link( g, pid, p, l ) {
