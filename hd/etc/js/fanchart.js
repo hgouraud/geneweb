@@ -373,13 +373,11 @@ function link( g, pid, p, l ) {
 	text.innerHTML = '<textPath xlink:href="#' + pid + '" startOffset="50%" style="font-size:'+ts+'%;">&#x25B2;</textPath>';
 	g.append(text);
 	text.onclick = function ( e ) {
-		if( true == e.shiftKey ) {
-			var oc = p.oc;
-			if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
-			window.location = link_to_fanchart + "p=" + p.fnk + "&n=" + p.snk + oc + "&v=" + max_gen + "&tool=" + tool +
-				(has_ba ? "&ba=on" : "") +
-				(has_bu ? "&bu=on" : "");
-		}
+		var oc = p.oc;
+		if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
+		window.location = link_to_fanchart + "p=" + p.fnk + "&n=" + p.snk + oc + "&v=" + max_gen + "&tool=" + tool +
+			(has_ba ? "&ba=on" : "") +
+			(has_bu ? "&bu=on" : "");
 	};
 }
 function no_link( g, pid, p, l ) {
