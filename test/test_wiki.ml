@@ -57,6 +57,15 @@ let suite =
             ; WLnone
             ]
             "[[[aaa/bbb]], [[ccc/ddd]], http://site.com/eee#fff"
+        ; test [WLnone] "[[aaa]]"
+        ; test [WLperson (11, ("aaa", "bbb", 0), "aaa bbb", None)] "[[aaa/bbb]]"
+        ; test [WLperson (19, ("aaa", "bbb", 0), "aaa bbb", Some "comment")]
+          "[[aaa/bbb;comment]]"
+        ; test [WLperson (13, ("aaa", "bbb", 1), "aaa bbb", None)] "[[aaa/bbb/1]]"
+        ; test [WLperson (16, ("aaa", "bbb", 0), "text", None)] "[[aaa/bbb/text]]"
+        ; test [WLperson (18, ("aaa", "bbb", 1), "text", None)] "[[aaa/bbb/1/text]]"
+        ; test [WLperson (26, ("aaa", "bbb", 1), "text", Some "comment")]
+          "[[aaa/bbb/1/text;comment]]"
         ; test [ WLnone ] "[[[aaa/"
         ; test [ WLnone ] "[[[]]]"
         ; test [ WLnone ] "[[[w"
