@@ -26,6 +26,7 @@ val links_to_ind
   -> Gwdb.base
   -> ((iper, ifam) Def.NLDB.page * ('a * ((string * string * int) * 'b) list)) list
   -> string * string * int
+  -> string option
   -> (iper, ifam) Def.NLDB.page list
 
 val build_sosa_tree_ht : config -> base -> person -> unit

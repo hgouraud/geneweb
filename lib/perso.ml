@@ -1615,9 +1615,7 @@ let links_to_ind conf base db key typ =
            | Def.NLDB.PgInd ip, None ->
                authorized_age conf base (pget conf base ip)
            | Def.NLDB.PgFam ifam, None ->
-               let fam = foi base ifam in
-               if is_deleted_family fam then false
-               else authorized_age conf base (pget conf base (get_father fam))
+               authorized_age conf base (pget conf base (get_father @@ foi base ifam))
            | Def.NLDB.PgMisc n, typ ->
                begin match typ with
                | None -> true

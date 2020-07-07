@@ -5,6 +5,42 @@ open Gwdb
 open Util
 open Notes
 
+let json_extract_img conf s =
+  let extract l =
+    List.fold_left (fun state e ->
+      match state, e with
+      | (None, img), ("path", `String s) -> (Some s, img)
+      | (path, None), ("img", `String s) -> (path, Some s)
+      | state, _ -> state
+    ) (None, None) l
+  in
+  let json =
+    try Yojson.Basic.from_string s
+    with _ -> `Null
+  in
+  let path, img =
+    match json with
+    | `Assoc l -> extract l
+    | _ -> (None, None)
+  in
+  match path, img with
+  | Some path, Some img ->
+     begin match path with
+     | "doc" -> (Util.commd conf) ^ "m=DOC&s=" ^ img
+     | "private" ->
+        begin match Util.p_getenv conf.base_env "gallery_path_private" with
+        | Some s -> s ^ img
+        | None -> ""
+        end
+     | "public" ->
+        begin match Util.p_getenv conf.base_env "gallery_path" with
+        | Some s -> s ^ img
+        | None -> ""
+        end
+     | path -> path ^ img
+     end
+  | _ -> ""
+
 let print_search_form conf from_note =
   Wserver.printf "<table>\n";
   Wserver.printf "<tr>\n";
@@ -125,8 +161,25 @@ let print_notes_part conf base fnotes title s cnt0 =
   in
   Wiki.print_sub_part conf wi conf.wizard mode fnotes cnt0 lines; Hutil.trailer conf
 
+let print_linked_list_gallery conf base pgl =
+  Wserver.printf "<div class=\"flex_gallery\">\n";
+  List.iter
+    (fun pg ->
+       match pg with
+       | Def.NLDB.PgMisc fnotes ->
+          let (nenv, s) = read_notes base fnotes in
+          if (try List.assoc "TYPE" nenv with Not_found -> "") = "gallery" then
+            Wserver.printf "<div class=\"item_gallery\">\
+                            <a href=\"%sm=NOTES&f=%s&\">\
+                            <img src=\"%s\">\
+                            </a>\
+                            </div>\n"
+              (commd conf) fnotes (json_extract_img conf s)
+       | _ -> ()
+    ) pgl;
+  Wserver.printf "</div>\n"
 
-let print_linked_list conf base pgl =
+let print_linked_list_standard conf base pgl =
   Wserver.printf "<ul>\n";
   List.iter
     (fun pg ->
@@ -229,6 +282,11 @@ let print_linked_list conf base pgl =
     pgl;
   Wserver.printf "</ul>\n"
 
+let print_linked_list conf base pgl =
+  match p_getenv conf.env "type" with
+  | Some "gallery" -> print_linked_list_gallery conf base pgl
+  | _ -> print_linked_list_standard conf base pgl
+
 let print_what_links conf base fnotes =
   let title h =
     Wserver.printf "%s " (Utf8.capitalize (transl conf "linked pages"));
@@ -255,6 +313,39 @@ let print_what_links conf base fnotes =
   end;
   Hutil.trailer conf
 
+let safe_gallery conf s =
+  let html s = safe_html (string_with_macros conf [] s) in
+  let safe_map e =
+    match e with
+    | `Assoc l -> `Assoc (List.map (function
+        | key, `String s when key = "alt"
+          -> key, `String (html s)
+        | e -> e
+      ) l)
+    | _ -> `Assoc []
+  in
+  let safe_json l =
+    List.map (function
+      | key, `String s when key = "title"
+        -> key, `String (html s)
+      | key, `String s when key = "desc"
+        -> key, `String (html s)
+      | "map", `List lmap
+        -> "map", `List (List.map safe_map lmap)
+      | e -> e
+    ) l
+  in
+  let json =
+    try Yojson.Basic.from_string s
+    with _ -> `Assoc []
+  in
+  let json =
+    match json with
+    | `Assoc l -> `Assoc (safe_json l)
+    | _ -> `Assoc []
+  in
+  Yojson.Basic.to_string json
+
 let print conf base =
   let fnotes =
     match p_getenv conf.env "f" with
@@ -265,11 +356,31 @@ let print conf base =
     Some "on" -> print_what_links conf base fnotes
   | _ ->
       let (nenv, s) = read_notes base fnotes in
-      let title = try List.assoc "TITLE" nenv with Not_found -> "" in
-      let title = Util.safe_html title in
-      match p_getint conf.env "v" with
-        Some cnt0 -> print_notes_part conf base fnotes title s cnt0
-      | None -> print_whole_notes conf base fnotes title s None
+      let (templ, typ) =
+        try
+          let typ = List.assoc "TYPE" nenv in
+          let fname = "notes_" ^ typ in
+          Util.open_templ conf fname, typ
+        with Not_found -> None, ""
+      in
+      match templ with
+      | Some ic ->
+         begin match p_getenv conf.env "ajax" with
+         | Some "on" ->
+            let charset = if conf.charset = "" then "utf-8" else conf.charset in
+            Wserver.header "Content-type: application/json; charset=%s" charset ;
+            Wserver.printf "%s" (match typ with
+              | "gallery" -> safe_gallery conf s
+              | _ -> s 
+            )
+         | _ -> Templ.copy_from_templ conf [] ic
+         end
+      | None ->
+         let title = try List.assoc "TITLE" nenv with Not_found -> "" in
+         let title = Util.safe_html title in
+         match p_getint conf.env "v" with
+         | Some cnt0 -> print_notes_part conf base fnotes title s cnt0
+         | None -> print_whole_notes conf base fnotes title s None
 
 let print_mod conf base =
   let fnotes =
@@ -277,12 +388,33 @@ let print_mod conf base =
       Some f -> if NotesLinks.check_file_name f <> None then f else ""
     | None -> ""
   in
+  let (env, s) = read_notes base fnotes in
+  let typ = try List.assoc "TYPE" env with Not_found -> "" in
+  let templ =
+    let fname = "notes_upd_" ^ typ in
+    Util.open_templ conf fname
+  in
   let title _ =
     Wserver.printf "%s - %s%s" (Utf8.capitalize (transl conf "base notes"))
       conf.bname (if fnotes = "" then "" else " (" ^ fnotes ^ ")")
   in
-  let (env, s) = read_notes base fnotes in
-  Wiki.print_mod_view_page conf true "NOTES" fnotes title env s
+  match templ, p_getenv conf.env "notmpl" with
+  | Some _, Some "on" ->
+     Wiki.print_mod_view_page conf true "NOTES" fnotes title env s
+  | Some ic, _ ->
+      begin match p_getenv conf.env "ajax" with
+      | Some "on" ->
+         let s_digest =
+           List.fold_left (fun s (k, v) -> s ^ k ^ "=" ^ v ^ "\n") "" env ^ s
+         in
+         let digest = Iovalue.digest s_digest in
+         let charset = if conf.charset = "" then "utf-8" else conf.charset in
+         Wserver.header "Content-type: application/json; charset=%s" charset ;
+         Wserver.printf "{\"digest\":\"%s\",\"r\":%s}" digest s
+      | _ -> Templ.copy_from_templ conf [] ic
+      end
+  | _ ->
+     Wiki.print_mod_view_page conf true "NOTES" fnotes title env s
 
 let print_mod_ok conf base =
   let fname =
