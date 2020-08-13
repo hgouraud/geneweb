@@ -293,6 +293,7 @@ val wprint_in_columns :
 
 (* Variable that use also private flag of person *)
 val is_hide_names : config -> person -> bool
+val is_hide_names_full : config -> base ->person -> bool
 
 val reduce_list : int -> 'a list -> 'a list
 

@@ -50,7 +50,7 @@ type burial = Def.burial =
   | Buried of cdate
   | Cremated of cdate
 
-type access = Def.access = IfTitles | Public | Private
+type access = Def.access = IfTitles | Public | Private | Consent
 
 type 'string gen_title_name = 'string Def.gen_title_name =
   | Tmain

@@ -355,6 +355,7 @@ module Make (Select : Select) =
         IfTitles -> ()
       | Public -> Printf.fprintf oc " #apubl"
       | Private -> Printf.fprintf oc " #apriv"
+      | Consent -> Printf.fprintf oc " #acons"
       end;
       print_if_no_empty oc base "#occu" (get_occupation p);
       print_if_not_equal_to csrc oc base "#src" (get_psources p);

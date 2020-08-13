@@ -2,6 +2,7 @@
 
 let int_size = 4
 let verbose = ref true
+let c_cnt = ref 0
 
 let rm fname =
   if Sys.file_exists fname then Sys.remove fname

@@ -103,7 +103,15 @@ let print_death conf base =
                  else None, ages_sum, ages_nb
                | _ -> None, ages_sum, ages_nb
              in
+             let img = 
+               if (get_access p) = Consent then
+                Printf.sprintf "<img src=\"%s/%s\" %s alt=\"(f) \"%s>"
+                (Util.image_prefix conf) 
+                "friend.gif" "width=\"16\" height=\"16\"" conf.xhs
+               else  "  "
+             in
              Wserver.printf "<li>";
+             Wserver.printf "%s" img;
              Wserver.printf "<b>";
              Wserver.printf "%s" (referenced_person_text conf base p);
              Wserver.printf "</b>";
@@ -115,6 +123,8 @@ let print_death conf base =
                  Wserver.printf " <em>(%s)</em>" (DateDisplay.string_of_age conf a)
                | None -> ()
              end;
+             if (get_access p) = Consent then
+               Wserver.printf " (%s)" (transl conf "consenting") else ();
              Wserver.printf "</li>\n";
              month_txt, ages_sum, ages_nb)
           ("", (0, 0), (0, 0)) list

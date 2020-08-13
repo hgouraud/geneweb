@@ -87,6 +87,7 @@ let speclist =
      <str> Set the source field for persons and families without source data";
    "-part", Arg.String (fun s -> Db1link.particules_file := s), "\
      <file> Particles file (default = predefined particles)";
+   "-rgpd", Arg.String (fun s -> Gwcomp.rgpd_files := s), "<file> Rgpd files";
    "-mem", Arg.Set Outbase.save_mem, " Save memory, but slower";
    "-nolock", Arg.Set Lock.no_lock_flag, " do not lock database.";
    "-nofail", Arg.Set Gwcomp.no_fail, " no failure in case of error.";
@@ -114,6 +115,13 @@ let main () =
   Mutil.verbose := false;
   Arg.parse speclist anonfun errmsg;
   Secure.set_base_dir (Filename.dirname !out_file);
+  if Sys.file_exists !Gwcomp.rgpd_files && Sys.is_directory !Gwcomp.rgpd_files
+    then Gwcomp.rgpd := true
+    else Gwcomp.rgpd := false;
+  if !Gwcomp.rgpd
+    then Printf.printf "Rgpd status: True, files in: %s\n" !Gwcomp.rgpd_files
+    else Printf.printf "Rgpd status: False\n";
+  flush stdout;
   let gwo = ref [] in
   List.iter
     (fun (x, separate, shift) ->
@@ -129,6 +137,7 @@ let main () =
        else raise (Arg.Bad ("Don't know what to do with \"" ^ x ^ "\"")))
     (List.rev !files);
   if not !just_comp then
+  begin
     let bdir =
       if Filename.check_suffix !out_file ".gwb" then !out_file
       else !out_file ^ ".gwb"
@@ -158,5 +167,8 @@ let main () =
              flush stderr;
              exit 2
            end)
+  end;
+  Printf.printf "Set %d persons to Consent status\n" !Mutil.c_cnt;
+  flush stdout
 
 let _ = main ()

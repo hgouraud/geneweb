@@ -1363,7 +1363,7 @@ let build_surnames_list conf base v p =
     in
     Gwdb.iper_marker (Gwdb.ipers base) n
   in
-  let auth = conf.wizard || conf.friend in
+  let auth = conf.wizard || (conf.friend && get_access p = Consent) in
   let add_surname sosa p surn dp =
     let r =
       try Hashtbl.find ht surn with
@@ -3886,7 +3886,7 @@ and eval_bool_person_field conf base env (p, p_auth) =
 #endif
       end
   | "has_sources" ->
-      p_auth &&
+      (p_auth || conf.half_rgpd) &&
       (sou base (get_psources p) <> "" || sou base (get_birth_src p) <> "" ||
        sou base (get_baptism_src p) <> "" ||
        sou base (get_death_src p) <> "" ||
@@ -3937,6 +3937,7 @@ and eval_bool_person_field conf base env (p, p_auth) =
   | "is_male" -> get_sex p = Male
   | "is_private" -> get_access p = Private
   | "is_public" -> get_access p = Public
+  | "is_consent" -> get_access p = Consent
   | "is_restricted" -> is_hidden p
   | _ -> raise Not_found
 and eval_str_person_field conf base env (p, p_auth as ep) =
@@ -4017,7 +4018,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
             p_surname base (pget conf base (get_father (foi base ifam))) <>
               p_surname base p
       in
-      if not p_auth && is_hide_names conf p then "x x"
+      if not p_auth && is_hide_names_full conf base p then "x x"
       else if force_surname then person_text conf base p
       else person_text_no_surn_no_acc_chk conf base p
   | "consanguinity" ->
@@ -4392,7 +4393,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
                Wiki.wi_cancel_links = conf.cancel_links;
                Wiki.wi_file_path = Notes.file_path conf base;
                Wiki.wi_person_exists = person_exists conf base;
-               Wiki.wi_always_show_link = conf.wizard || conf.friend}
+               Wiki.wi_always_show_link = conf.wizard || (conf.friend && get_access p = Consent)}
             in
             Wiki.syntax_links conf wi s
           in
@@ -4478,7 +4479,7 @@ and simple_person_text conf base p p_auth =
     match main_title conf base p with
       Some t -> titled_person_text conf base p t
     | None -> person_text conf base p
-  else if is_hide_names conf p then "x x"
+  else if is_hide_names_full conf base p then "x x"
   else person_text conf base p
 and string_of_died conf p p_auth =
   if p_auth then
@@ -5573,7 +5574,7 @@ let print_foreach conf base print_ast eval_expr =
       else insert_loop (Util.translate_eval typ) src srcl
     in
     let srcl =
-      if p_auth then
+      if (p_auth || conf.half_rgpd) then
         let srcl = [] in
         let srcl =
           insert (transl_nth conf "person/persons" 0)
@@ -5883,7 +5884,7 @@ let interp_notempl_with_menu title templ_fname conf base p =
 
 let print conf base p =
   let passwd =
-    if conf.wizard || conf.friend then None
+    if conf.wizard || (conf.friend && get_access p = Consent) then None
     else
       let src =
         match get_parents p with

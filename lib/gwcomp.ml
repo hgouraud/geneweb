@@ -5,6 +5,8 @@ open Def
 open Gwdb
 
 let magic_gwo = "GnWo000o"
+let rgpd_files = ref "None"
+let rgpd = ref false
 
 (* Option qui force a créé les clés des individus. De fait, *)
 (* si la clé est incomplète, on l'enregistre tout de même.  *)
@@ -439,6 +441,7 @@ let get_access l =
   match l with
     "#apubl" :: l' -> Public, l'
   | "#apriv" :: l' -> Private, l'
+  | "#acons" :: l' -> Consent, l'
   | _ -> IfTitles, l
 
 let scan_title t =
@@ -675,6 +678,33 @@ let create_person () =
 
 let bogus_def p n = p = "?" || n = "?"
 
+let rgpd_access fn sn occ l =
+  let (access, l) = get_access l in
+  let fns = Wserver.encode (Name.lower (Unidecode.decode_string fn)) in
+  let sns = Wserver.encode (Name.lower (Unidecode.decode_string sn)) in
+  (* FIXME ’ is not handled in Unidecode! Other codes also probably!! *)
+  let ocs = string_of_int occ in
+  let (access, l) =
+    let rgpd_file =
+       !rgpd_files ^ Filename.dir_sep ^ fns ^ "." ^ ocs ^ "." ^ sns ^ ".pdf"
+    in
+      (* if Public, stay Public *)
+    if access = Public then (Public, l)
+      (* if one of the files exist, set the Friend or Friend_m value *)
+    else if Sys.file_exists rgpd_file then (Consent, l)
+      (* if the file does not exist and person was Consent, then it becomes Private *)
+    else if access = Consent then (Private, l)
+      (* otherwise keep thee current value *)
+    else (access, l)
+  in
+  if access=Consent then
+    begin
+      incr Mutil.c_cnt;
+      if !Mutil.verbose then
+        Printf.printf "Set to Consent %s.%s %s\n" fns ocs sns
+    end;
+  (access, l)
+
 let set_infos fn sn occ sex comm_psources comm_birth_place str u l =
   let (first_names_aliases, l) = get_fst_names_aliases str l in
   let (surnames_aliases, l) = get_surnames_aliases str l in
@@ -683,7 +713,7 @@ let set_infos fn sn occ sex comm_psources comm_birth_place str u l =
   let (qualifiers, l) = get_qualifiers str l in
   let (aliases, l) = get_aliases str l in
   let (titles, l) = get_titles str l in
-  let (access, l) = get_access l in
+  let (access, l) = if !rgpd then rgpd_access fn sn occ l else get_access l in
   let (occupation, l) = get_occu l in
   let (psources, l) = get_sources l in
   let (naissance, l) = get_optional_birthdate l in

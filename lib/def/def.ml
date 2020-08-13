@@ -58,7 +58,7 @@ type burial =
   | Buried of cdate
   | Cremated of cdate
 
-type access = IfTitles | Public | Private
+type access = IfTitles | Public | Private | Consent
 
 type 'string gen_title_name =
     Tmain

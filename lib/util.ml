@@ -4,8 +4,43 @@ open Config
 open Def
 open Gwdb
 
+let is_hide_names_full conf base p =
+  let is_access_friend =
+    match get_access p with
+    | Consent -> true
+    | _ ->
+      begin match
+        (Adef.od_of_cdate (get_birth p), Adef.od_of_cdate (get_baptism p),
+         get_death p, Date.date_of_death (get_death p))
+      with
+      | (Some (Dgreg (d, _)), _, _, _) | (_, Some (Dgreg (d, _)), _, _) ->
+          let a = Date.time_elapsed d conf.today in
+          if a.year < conf.minor_age then
+            begin match get_parents p with
+            | Some ifam ->
+              let cpl = foi base ifam in
+              (get_access (poi base (get_father cpl)) = Consent) ||
+              (get_access (poi base (get_mother cpl)) = Consent)
+            | None -> false
+            end
+          else false
+      | _ -> false
+      end
+  in
+  let is_access_friend = if conf.friend && conf.half_rgpd then true else is_access_friend in
+  if conf.wizard || get_access p = Public then false
+  else if
+    conf.friend && get_access p = Private && not conf.half_rgpd then true
+  else if
+    conf.friend && get_access p = Consent ||
+    conf.friend && is_access_friend then false
+  else true
+
 let is_hide_names conf p =
-  if conf.hide_names || get_access p = Private then true else false
+  if conf.wizard || get_access p = Public ||
+    conf.friend && get_access p = Consent ||
+    conf.friend && conf.half_rgpd then false
+  else true
 
 let sharelib =
   List.fold_right Filename.concat [Gwlib.prefix; "share"] "geneweb"
@@ -536,7 +571,7 @@ let is_old_person conf p =
   | _ -> false
 
 let fast_auth_age conf p =
-  if conf.friend || conf.wizard || get_access p = Public then true
+  if (conf.friend && get_access p = Consent) || conf.wizard || get_access p = Public then true
   else if
     conf.public_if_titles && get_access p = IfTitles && get_titles p <> []
   then
@@ -570,8 +605,29 @@ let fast_auth_age conf p =
     [Rem] : Exporté en clair hors de ce module.                           *)
 (* ********************************************************************** *)
 let authorized_age conf base p =
+  let is_access_consent =
+    match get_access p with
+    | Consent -> true
+    | _ ->
+      begin match
+        (Adef.od_of_cdate (get_birth p), Adef.od_of_cdate (get_baptism p))
+      with
+      | (Some (Dgreg (d, _)), _) | (_, Some (Dgreg (d, _))) ->
+          let a = Date.time_elapsed d conf.today in
+          if a.year < conf.minor_age then
+            begin match get_parents p with
+            | Some ifam ->
+              let cpl = foi base ifam in
+              (get_access (poi base (get_father cpl)) = Consent) ||
+              (get_access (poi base (get_mother cpl)) = Consent)
+            | None -> false
+            end
+          else false
+      | _ -> false
+      end
+  in
   conf.wizard
-  || conf.friend
+  || (conf.friend && is_access_consent)
   || get_access p = Public
   || (conf.public_if_titles
       && get_access p = IfTitles
@@ -656,7 +712,7 @@ let is_public conf base p =
 (* ********************************************************************** *)
 let accessible_by_key conf base p fn sn =
   conf.access_by_key && not (fn = "?" || sn = "?") &&
-  (not (is_hide_names conf p) || is_public conf base p || conf.friend ||
+  (not (is_hide_names conf p) || is_public conf base p || (conf.friend && get_access p = Consent) ||
    conf.wizard)
 
 

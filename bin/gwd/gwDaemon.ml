@@ -1221,6 +1221,18 @@ let make_conf from_addr request script_name env =
        begin try int_of_string (List.assoc "private_years" base_env) with
          Not_found | Failure _ -> 150
        end;
+     private_years_death =
+       begin try int_of_string (List.assoc "private_years_death" base_env) with
+         Not_found | Failure _ -> 20
+       end;
+     private_years_marriage =
+       begin try int_of_string (List.assoc "private_years_marriage" base_env) with
+         Not_found | Failure _ -> 130
+       end;
+     minor_age =
+       begin try int_of_string (List.assoc "minor_age" base_env) with
+         Not_found | Failure _ -> 18
+       end;
      hide_names =
        if ar.ar_wizard || ar.ar_friend then false
        else
@@ -1233,6 +1245,16 @@ let make_conf from_addr request script_name env =
          begin try List.assoc "use_restrict" base_env = "yes" with
            Not_found -> false
          end;
+     use_restrict_rgpd =
+       if ar.ar_wizard || ar.ar_friend then false
+       else
+         begin try List.assoc "use_restrict_rgpd" base_env = "yes" with
+           Not_found -> false
+         end;
+     half_rgpd =
+       begin try List.assoc "half_rgpd" base_env = "yes" with
+         Not_found -> false
+       end;
      no_image =
        if ar.ar_wizard || ar.ar_friend then false
        else

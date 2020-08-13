@@ -2,6 +2,7 @@
 
 val int_size : int
 val verbose : bool ref
+val c_cnt : int ref
 
 val list_iter_first : (bool -> 'a -> unit) -> 'a list -> unit
 val strip_all_trailing_spaces : string -> string
