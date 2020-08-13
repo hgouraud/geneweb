@@ -64,6 +64,7 @@ and eval_simple_var conf base env p =
   | ["acc_if_titles"] -> bool_val (p.access = IfTitles)
   | ["acc_private"] -> bool_val (p.access = Private)
   | ["acc_public"] -> bool_val (p.access = Public)
+  | ["acc_consent"] -> bool_val (p.access = Consent)
   | ["bapt_place"] -> str_val (Util.escape_html p.baptism_place)
   | ["bapt_note"] -> str_val (Util.escape_html p.baptism_note)
   | ["bapt_src"] -> str_val (Util.escape_html p.baptism_src)

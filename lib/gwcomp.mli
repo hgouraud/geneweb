@@ -34,5 +34,8 @@ val comp_families : string -> unit
 val no_picture : bool ref
 val create_all_keys : bool ref
 
+val rgpd : bool ref
+val rgpd_files : string ref
+
 (* Ajout pour l'API *)
 val date_of_string : string -> int -> date option
