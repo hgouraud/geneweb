@@ -197,6 +197,7 @@ val relation_txt :
 val string_of_decimal_num : config -> float -> string
 
 val person_exists : config -> base -> string * string * int -> bool
+val mark_if_not_public : config -> base -> string * string * int -> bool
 val husband_wife : config -> base -> person -> bool -> string
 
 val find_person_in_env : config -> base -> string -> person option

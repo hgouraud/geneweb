@@ -2475,6 +2475,15 @@ let person_exists conf base (fn, sn, oc) =
         Some ip -> authorized_age conf base (pget conf base ip)
       | None -> false
 
+let mark_if_not_public conf base (fn, sn, oc) =
+  match p_getenv conf.env "red_if_not_public" with
+  | Some "on" ->
+      begin match person_of_key base fn sn oc with
+      | Some ip -> ((get_access (poi base ip)) <> Public)
+      | None -> false
+      end
+  | _ -> false
+
 let default_sosa_ref conf base =
   match p_getenv conf.base_env "default_sosa_ref" with
     Some n ->

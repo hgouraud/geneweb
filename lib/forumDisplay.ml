@@ -215,6 +215,7 @@ and eval_message_text_var conf base str so =
         {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
          Wiki.wi_file_path = Notes.file_path conf base;
          Wiki.wi_person_exists = person_exists conf base;
+         Wiki.wi_mark_if_not_public = mark_if_not_public conf base;
          Wiki.wi_always_show_link = conf.wizard || conf.friend}
       in
       Wiki.syntax_links conf wi s

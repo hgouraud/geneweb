@@ -8,6 +8,7 @@ type wiki_info =
     wi_file_path : string -> string;
     wi_cancel_links : bool;
     wi_person_exists : string * string * int -> bool;
+    wi_mark_if_not_public : (string * string * int) -> bool;
     wi_always_show_link : bool }
 
 val syntax_links : config -> wiki_info -> string -> string
