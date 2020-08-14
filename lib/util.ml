@@ -546,9 +546,9 @@ let p_getint env label =
 let nobtit conf base p =
   Gwdb.nobtit base conf.allowed_titles conf.denied_titles p
 
-let strictly_after_private_years conf a =
-  if a.year > conf.private_years then true
-  else if a.year < conf.private_years then false
+let strictly_after_private_years years a =
+  if a.year > years then true
+  else if a.year < years then false
   else a.month > 0 || a.day > 0
 
 let is_old_person conf p =
@@ -559,13 +559,13 @@ let is_old_person conf p =
     _, _, NotDead, _ when conf.private_years > 0 -> false
   | Some (Dgreg (d, _)), _, _, _ ->
       let a = Date.time_elapsed d conf.today in
-      strictly_after_private_years conf a
+      strictly_after_private_years conf.private_years a
   | _, Some (Dgreg (d, _)), _, _ ->
       let a = Date.time_elapsed d conf.today in
-      strictly_after_private_years conf a
+      strictly_after_private_years conf.private_years a
   | _, _, _, Some (Dgreg (d, _)) ->
       let a = Date.time_elapsed d conf.today in
-      strictly_after_private_years conf a
+      strictly_after_private_years conf.private_years_death a
   | None, None, DontKnowIfDead, None ->
       p.access <> Private && conf.public_if_no_date
   | _ -> false
@@ -583,7 +583,7 @@ let fast_auth_age conf p =
 (** [Description] : Calcul les droits de visualisation d'une personne en
       fonction de son age.
       Renvoie (dans l'ordre des tests) :
-        - Vrai si : magicien ou ami ou la personne est public
+        - Vrai si : magicien ou ami ou la personne est public ou consentante
         - Vrai si : la personne est en si_titre, si elle a au moins un
                     titre et que public_if_title = yes dans le fichier gwf
         - Faux si : la personne n'est pas décédée et private_years > 0
@@ -591,11 +591,11 @@ let fast_auth_age conf p =
                     naissance ou de la date de baptème) que privates_years
         - Faux si : la personne est plus jeune (en fonction de la date de
                     naissance ou de la date de baptème) que privates_years
-        - Vrai si : la personne est décédée depuis plus de privates_years
-        - Faux si : la personne est décédée depuis moins de privates_years
-        - Vrai si : la personne a entre 80 et 120 ans et qu'elle n'est pas
+        - Vrai si : la personne est décédée depuis plus de privates_years_death
+        - Faux si : la personne est décédée depuis moins de privates_years_death
+        - Vrai si : la personne a entre 80 et 120 ans FIXME ??? et qu'elle n'est pas
                     privée et public_if_no_date = yes
-        - Vrai si : la personne s'est mariée depuis plus de private_years
+        - Vrai si : la personne s'est mariée depuis plus de private_years_marriage
         - Faux dans tous les autres cas
     [Args] :
       - conf : configuration de la base
@@ -636,9 +636,9 @@ let authorized_age conf base p =
     let death = get_death p in
     if death = NotDead then conf.private_years < 1
     else
-      let check_date none = function
+      let check_date none years = function
         | Some (Dgreg (d, _)) ->
-          strictly_after_private_years conf (Date.time_elapsed d conf.today)
+          strictly_after_private_years years (Date.time_elapsed d conf.today)
         | _ -> none ()
       in
       check_date
@@ -654,14 +654,14 @@ let authorized_age conf base p =
                        let rec loop i =
                          i < len
                          && check_date
-                           (fun () -> loop (i + 1))
+                           (fun () -> loop (i + 1)) conf.private_years_marriage
                            (Adef.od_of_cdate (get_marriage @@ foi base (Array.get families i)))
                        in
                        loop 0
                      end)
-                  (Date.date_of_death (get_death p)) )
-             (Adef.od_of_cdate (get_baptism p)) )
-        (Adef.od_of_cdate (get_birth p))
+                  conf.private_years_death (Date.date_of_death (get_death p)))
+             conf.private_years (Adef.od_of_cdate (get_baptism p)) )
+        conf.private_years (Adef.od_of_cdate (get_birth p))
   end
 
 let is_restricted (conf : config) base (ip : iper) =

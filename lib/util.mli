@@ -42,7 +42,7 @@ val hidden_env : config -> unit
 
 val nobtit : config -> base -> person -> title list
 
-val strictly_after_private_years : config -> dmy -> bool
+val strictly_after_private_years : int -> dmy -> bool
 val authorized_age : config -> base -> person -> bool
 val is_old_person : config -> (iper, iper, istr) gen_person -> bool
 val fast_auth_age : config -> person -> bool
