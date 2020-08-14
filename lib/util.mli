@@ -363,6 +363,7 @@ val string_of_witness_kind : config -> sex -> witness_kind -> Adef.safe_string
 val relation_txt : config -> sex -> family -> (('a -> 'b) -> 'b, 'a, 'b) format
 val string_of_decimal_num : config -> float -> string
 val person_exists : config -> base -> string * string * int -> bool
+val mark_if_not_public : config -> base -> string * string * int -> bool
 val husband_wife : config -> base -> person -> bool -> Adef.safe_string
 
 val find_person_in_env : config -> base -> string -> person option

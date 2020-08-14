@@ -73,6 +73,7 @@ let print_whole_notes conf base fnotes (title : Adef.safe_string) s ho =
         Wiki.wi_mode = "NOTES";
         Wiki.wi_file_path = file_path;
         Wiki.wi_person_exists = person_exists conf base;
+        Wiki.wi_mark_if_not_public = mark_if_not_public conf base;
         Wiki.wi_always_show_link = conf.wizard || conf.friend;
       }
     in
@@ -107,6 +108,7 @@ let print_notes_part conf base fnotes (title : Adef.safe_string) s cnt0 =
       Wiki.wi_mode = mode;
       Wiki.wi_file_path = file_path conf base;
       Wiki.wi_person_exists = person_exists conf base;
+      Wiki.wi_mark_if_not_public = mark_if_not_public conf base;
       Wiki.wi_always_show_link = conf.wizard || conf.friend;
     }
   in
@@ -312,6 +314,7 @@ let print_mod_ok conf base =
       Wiki.wi_mode = mode;
       Wiki.wi_file_path = file_path;
       Wiki.wi_person_exists = person_exists conf base;
+      Wiki.wi_mark_if_not_public = mark_if_not_public conf base;
       Wiki.wi_always_show_link = conf.wizard || conf.friend;
     }
   in
