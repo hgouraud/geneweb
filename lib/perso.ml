@@ -1895,6 +1895,7 @@ let get_note_source conf base env auth no_note note_source =
       {Wiki.wi_mode = "NOTES"; Wiki.wi_cancel_links = conf.cancel_links;
        Wiki.wi_file_path = Notes.file_path conf base;
        Wiki.wi_person_exists = person_exists conf base;
+       Wiki.wi_mark_if_not_public = mark_if_not_public conf base;
        Wiki.wi_always_show_link = conf.wizard || conf.friend}
     in
     let s = Wiki.syntax_links conf wi (String.concat "\n" lines) in
@@ -4393,6 +4394,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
                Wiki.wi_cancel_links = conf.cancel_links;
                Wiki.wi_file_path = Notes.file_path conf base;
                Wiki.wi_person_exists = person_exists conf base;
+               Wiki.wi_mark_if_not_public = mark_if_not_public conf base;
                Wiki.wi_always_show_link = conf.wizard || (conf.friend && get_access p = Consent)}
             in
             Wiki.syntax_links conf wi s
