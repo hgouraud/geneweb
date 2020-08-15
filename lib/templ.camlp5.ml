@@ -698,6 +698,7 @@ let rec eval_variable conf =
   | "time" :: sl -> eval_time_var conf sl
   | ["user"; "ident"] -> conf.user
   | ["user"; "name"] -> conf.username
+  | ["user"; "key"] -> conf.userkey
   | [s] -> eval_simple_variable conf s
   | _ -> raise Not_found
 and eval_time_var conf =

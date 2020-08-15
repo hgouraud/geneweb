@@ -79,6 +79,11 @@
   %init_cache.nb_asc.from_gen_desc.nb_desc;
 %end;
 
+%if;(surname_key="gouraud" and first_name_key="henri" and occ=0)
+Tests:<br>
+User.key: %user.key;<br>
+%end;
+
 %(note that p_mod= (b)%bvar.p_mod; or (e)%evar.p_mod;%)
 %if;(evar.p_mod="zz" or (bvar.p_mod="zz" and evar.p_mod="") or
     (bvar.p_mod="" and evar.p_mod=""))
