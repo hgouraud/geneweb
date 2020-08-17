@@ -81,6 +81,8 @@
 
 %if;(surname_key="gouraud" and first_name_key="henri" and occ=0)
 Tests:<br>
+User.ident: %user.ident;<br>
+User.name: %user.name;<br>
 User.key: %user.key;<br>
 %end;
 
