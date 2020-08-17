@@ -3095,6 +3095,7 @@ and eval_person_field_var conf base env (p, p_auth as ep) loc =
 #endif
       end
   | ["has_linked_page"; s] ->
+      if p_auth then
       begin match get_env "nldb" env with
         Vnldb db ->
           let key =
@@ -3117,7 +3118,9 @@ and eval_person_field_var conf base env (p, p_auth as ep) loc =
           VVbool r
       | _ -> raise Not_found
       end
+      else VVbool false
   | ["has_linked_pages"] ->
+      if p_auth then
       begin match get_env "nldb" env with
         Vnldb db ->
           let r =
@@ -3133,6 +3136,7 @@ and eval_person_field_var conf base env (p, p_auth as ep) loc =
           VVbool r
       | _ -> raise Not_found
       end
+      else VVbool false
   | ["has_sosa"] ->
       begin match get_env "p_link" env with
         Vbool _ -> VVbool false
@@ -3159,6 +3163,7 @@ and eval_person_field_var conf base env (p, p_auth as ep) loc =
       VVstring ""
 #endif
   | ["linked_page"; s] ->
+      if p_auth then
       begin match get_env "nldb" env with
         Vnldb db ->
           let key =
@@ -3170,6 +3175,7 @@ and eval_person_field_var conf base env (p, p_auth as ep) loc =
           VVstring s
       | _ -> raise Not_found
       end
+      else VVstring ""
   | "marriage_date" :: sl ->
       begin match get_env "fam" env with
         Vfam (_, fam, _, true) ->
