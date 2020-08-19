@@ -311,6 +311,8 @@ module Family = struct
     if auth then sou base (get_marriage_src fam)
     else ""
 
+  let marriage_kind (_, fam, _, _) = get_marriage_kind fam
+
   let mother (_, _, (_, imoth, _), _) =
     imoth
 

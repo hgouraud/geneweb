@@ -1120,6 +1120,20 @@ let string_of_fevent_name conf base = function
   | Efam_Residence -> transl conf "residence"
   | Efam_Name n -> sou base n
 
+let string_of_relation_kind = function
+  | Married -> "marriage event"
+  | NotMarried -> "no marriage event"
+  | Engaged -> "engage event"
+  | NoSexesCheckNotMarried -> "no marriage event"
+  | NoMention -> "no mention"
+  | NoSexesCheckMarried -> "marriage event"
+  | MarriageBann -> "marriage bann"
+  | MarriageContract -> "marriage contract"
+  | MarriageLicense -> "marriage licence"
+  | Pacs -> "PACS"
+  | Residence -> "residence"
+
+
 let string_of_fevent conf base = function
   | Efam_NoMention -> transl conf "no mention"
   | x -> string_of_fevent_name conf base x

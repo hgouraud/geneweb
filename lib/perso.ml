@@ -2356,6 +2356,11 @@ and eval_simple_str_var conf base env (_, p_auth) =
         Vstring s -> s
       | _ -> raise Not_found
       end
+  | "event_type" ->
+      begin match get_env "evt_typ" env with
+        Vstring s -> s
+      | _ -> raise Not_found
+      end
   | "surname_alias" ->
       begin match get_env "surname_alias" env with
         Vstring s -> s
@@ -3433,9 +3438,20 @@ and eval_str_event_field conf base (p, p_auth)
       | true, Fevent name -> Util.string_of_fevent_name conf base name
       | _ -> ""
       end
+  | "type" ->
+      begin match p_auth, name with
+        true, Pevent _ -> "pevt"
+      | true, Fevent _ -> "fevt"
+      | _ -> ""
+      end
   | "date" ->
       begin match p_auth, Adef.od_of_cdate date with
         true, Some d -> DateDisplay.string_of_date conf d
+      | _ -> ""
+      end
+  | "slash_date" ->
+      begin match p_auth, Adef.od_of_cdate date with
+        true, Some d -> DateDisplay.string_slash_of_date conf d
       | _ -> ""
       end
   | "on_date" ->
@@ -3459,7 +3475,7 @@ and eval_str_event_field conf base (p, p_auth)
 and eval_event_field_var conf base env (p, p_auth)
     (name, date, place, note, src, w, isp) loc =
   function
-    "date" :: sl ->
+  | "date" :: sl ->
       begin match p_auth, Adef.od_of_cdate date with
         true, Some d -> eval_date_field_var conf d sl
       | _ -> VVstring ""
@@ -5561,29 +5577,29 @@ let print_foreach conf base print_ast eval_expr =
     in loop (Vslistlm []) list
 
   and print_foreach_source env al (p, p_auth as ep) =
-    let rec insert_loop typ src =
+    let rec insert_loop typ pf src =
       function
-        (typ1, src1) :: srcl ->
-          if src = src1 then (typ1 ^ ", " ^ typ, src1) :: srcl
-          else (typ1, src1) :: insert_loop typ src srcl
-      | [] -> [typ, src]
+        (typ1, pf1, src1) :: srcl ->
+          if src = src1 && pf = pf1 then (typ1 ^ ", " ^ typ, pf1, src1) :: srcl
+          else (typ1, pf1, src1) :: insert_loop typ pf src srcl
+      | [] -> [typ, pf, src]
     in
-    let insert typ src srcl =
+    let insert typ pf src srcl =
       if src = "" then srcl
-      else insert_loop (Util.translate_eval typ) src srcl
+      else insert_loop (Util.translate_eval typ) pf src srcl
     in
     let srcl =
       if p_auth then
         let srcl = [] in
         let srcl =
-          insert (transl_nth conf "person/persons" 0)
+          insert (transl_nth conf "person/persons" 0) "person"
             (sou base (get_psources p)) srcl
         in
         let srcl =
-          insert (transl_nth conf "birth" 0) (sou base (get_birth_src p)) srcl
+          insert (transl_nth conf "birth" 0) "pevt" (sou base (get_birth_src p)) srcl
         in
         let srcl =
-          insert (transl_nth conf "baptism" 0) (sou base (get_baptism_src p))
+          insert (transl_nth conf "baptism" 0) "pevt" (sou base (get_baptism_src p))
             srcl
         in
         let (srcl, _) =
@@ -5597,37 +5613,41 @@ let print_foreach conf base print_ast eval_expr =
                if m_auth then
                  let lab =
                    if Array.length (get_family p) = 1 then ""
-                   else " " ^ string_of_int i
+                   else " " ^ string_of_int i ^
+                     " (" ^ (transl conf "with") ^ " " ^
+                     (sou base (get_first_name sp)) ^ " " ^
+                     (sou base (get_surname sp)) ^ ")"
                  in
                  let srcl =
-                   let src_typ = transl_nth conf "marriage/marriages" 0 in
-                   insert (src_typ ^ lab) (sou base (get_marriage_src fam))
+                   let src_typ = transl conf (string_of_relation_kind (get_marriage_kind fam)) in
+                   insert (src_typ ^ lab) "fevt" (sou base (get_marriage_src fam))
                      srcl
                  in
                  let src_typ = transl_nth conf "family/families" 0 in
-                 insert (src_typ ^ lab) (sou base (get_fsources fam)) srcl,
+                 insert (src_typ ^ lab) "family" (sou base (get_fsources fam)) srcl,
                  i + 1
                else srcl, i + 1)
             (srcl, 1) (get_family p)
         in
         let srcl =
-          insert (transl_nth conf "death" 0) (sou base (get_death_src p)) srcl
+          insert (transl_nth conf "death" 0) "pevt" (sou base (get_death_src p)) srcl
         in
         let buri_crem_lex =
           match get_burial p with
           Cremated _ -> "cremation"
           | _ -> "burial"
         in
-        insert (transl_nth conf buri_crem_lex 0) (sou base (get_burial_src p))
+        insert (transl_nth conf buri_crem_lex 0) "pevt" (sou base (get_burial_src p))
           srcl
       else []
     in
     (* Affiche les sources et met à jour les variables "first" et "last". *)
     let rec loop first =
       function
-        (src_typ, src) :: srcl ->
+        (src_typ, pf, src) :: srcl ->
           let env =
             ("first", Vbool first) :: ("last", Vbool (srcl = [])) ::
+            ("evt_typ", Vstring pf) ::
             ("src_typ", Vstring src_typ) :: ("src", Vstring src) :: env
           in
           List.iter (print_ast env ep) al; loop false srcl

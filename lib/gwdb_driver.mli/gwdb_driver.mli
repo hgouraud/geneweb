@@ -73,6 +73,7 @@ val get_marriage : family -> Def.cdate
 val get_marriage_note : family -> istr
 val get_marriage_place : family -> istr
 val get_marriage_src : family -> istr
+val get_marriage_kind : family -> Def.relation_kind
 val get_mother : family -> iper
 val get_notes : person -> istr
 val get_occ : person -> int

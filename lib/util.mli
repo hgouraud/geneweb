@@ -181,6 +181,8 @@ val string_of_pevent_name :
 val string_of_fevent_name
   : config -> base -> istr gen_fam_event_name -> string
 
+val string_of_relation_kind : relation_kind -> string
+
 (** [string_of_fevent conf base fevent_name]
 *)
 val string_of_fevent
