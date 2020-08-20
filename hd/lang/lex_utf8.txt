@@ -3310,6 +3310,10 @@ en: brothers/sisters/siblings
 fr: frères/sœurs/frères et sœurs
 pt: irmãos/irmãs/irmãos e irmãs
 
+    brother/sister/sibling
+en: brother/sister/sibling
+fr: frère/sœur/frère ou sœurs
+
     burial
 af: begrawe
 bg: погребение
@@ -10933,6 +10937,10 @@ sk: ďalšie akcie
 sl: druge dejavnosti
 sv: andra åtgärder
 zh: 其他行動
+
+    other sources potentially usefull
+en: other sources potentially usefull
+fr: autres sources (potentiellement) liées
 
     PACS
 co: PACS

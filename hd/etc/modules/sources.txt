@@ -1,6 +1,6 @@
 <!-- $Id: modules/sources.txt v 7.00 02/04/2018 08:52:26 hg -->
 %( op_m=1 Sources  %)
-%( op_m=2 Sources complete (events) %)
+%( op_m=2 Sources complete (sources de membres de la famille) %)
 
 %if;(has_linked_page.BIBLIO and linked_page.BIBLIO!="")
   <h2>[*bibliography]</h2>
@@ -65,3 +65,44 @@
   </ul>
 %end;
 
+%reset_count;
+%if;has_parents;
+  %if;(father.has_sources or mother.has_fsources)%incr_count;%end;
+%end;
+%if;(has_siblings)
+  %foreach;father.child;
+    %if;((not is_self) and child.has_sources)%incr_count;%end;
+  %end;
+%end;
+%if;(count>0 and op_m=2)
+  <h5>[*other sources potentially usefull]</h5>
+  <ul>
+  %if;has_parents;
+    <li>[*source/sources]0 [marriage event] [parents][:] %father.marriage_source;</li>
+    <li>[*source/sources]0 [family/families]0 [parents][:] %father.fsources;</li>
+  %end;
+%(
+  %if;(has_siblings)
+    %foreach;father.child;
+      %if;((not is_self) and child.psources!="")%nn;
+        <li>[*source/sources]0 [brother/sister/sibling]s (%child.first_name;)[:] %child.psources;</li>%end;
+    %end;
+  %end;
+%)
+  %if;has_families;
+    %foreach;family;
+      %if;has_children;
+        %foreach;child;
+          %if;has_families;
+            %foreach;family;
+              %if;(marriage_source!="")<li>[*source/sources]0 [marriage event] [child/children]0 (%first_name;)[:] %marriage_source;</li>%end;
+              %if;has_fsources;<li>[*source/sources]0 [family/families]0 [child/children]0 (%first_name;)[:] %fsources;</li>%end;
+            %end;
+          %end;
+        %end;
+      %end;
+    %end;
+  %end;
+
+  </ul>
+%end;

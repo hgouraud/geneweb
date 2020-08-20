@@ -1995,8 +1995,6 @@ and eval_simple_bool_var conf base env =
             Vfam (_, _, _, _) -> false
           | _ -> raise Not_found
       end
-
-
   | "is_first" ->
       begin match get_env "first" env with
         Vbool x -> x
@@ -2511,6 +2509,9 @@ and eval_compound_var conf base env (a, _ as ep) loc =
       begin match get_parents a with
         Some ifam ->
           let cpl = foi base ifam in
+          let ifath = get_father cpl in
+          let imoth = get_mother cpl in
+          let env = ("fam", Vfam (ifam, foi base ifam, (ifath, imoth, ifath), true)) :: env in
           let ep = make_ep conf base (get_father cpl) in
           eval_person_field_var conf base env ep loc sl
       | None ->
@@ -2536,6 +2537,9 @@ and eval_compound_var conf base env (a, _ as ep) loc =
       begin match get_parents a with
         Some ifam ->
           let cpl = foi base ifam in
+          let ifath = get_father cpl in
+          let imoth = get_mother cpl in
+          let env = ("fam", Vfam (ifam, foi base ifam, (ifath, imoth, imoth), true)) :: env in
           let ep = make_ep conf base (get_mother cpl) in
           eval_person_field_var conf base env ep loc sl
       | None ->
@@ -3098,6 +3102,11 @@ and eval_person_field_var conf base env (p, p_auth as ep) loc =
           warning_use_has_parents_before_parent loc "father" (str_val "")
 #endif
       end
+  | ["fsources"] ->
+    begin match get_env "fam" env with
+       Vfam (_, fam, _, _) -> VVstring (sou base (get_fsources fam))
+    | _ -> raise Not_found
+    end
   | ["has_linked_page"; s] ->
       begin match get_env "nldb" env with
         Vnldb db ->
@@ -3181,6 +3190,13 @@ and eval_person_field_var conf base env (p, p_auth as ep) loc =
             Some d -> eval_date_field_var conf d sl
           | None -> VVstring ""
           end
+      | _ -> raise Not_found
+      end
+  | "marriage_source" :: _sl ->
+      begin match get_env "fam" env with
+        Vfam (_, fam, _, m_auth) ->
+          VVstring (get_note_source conf base [] m_auth false
+            (sou base (get_marriage_src fam)))
       | _ -> raise Not_found
       end
   | "mother" :: sl ->
