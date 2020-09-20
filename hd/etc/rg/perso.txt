@@ -79,7 +79,7 @@ User passwd: %user.passwd;<br>
 %end;
 
 <body>
-%if;(bvar.anybody_can_see = "yes"  or wizard or friend)
+%if;(bvar.visitor_access!="no" or wizard or friend)
 
 %message_to_wizard;
 
@@ -617,11 +617,11 @@ document.querySelector("#LienP").onclick = function() {
     console.log("copied?", result);
 };
 </script>
-
-%base_trailer;
-%copyright;
 %else;
 [*incorrect request]
 %end;
+
+%base_trailer;
+%copyright;
 </body>
 </html>
