@@ -207,22 +207,34 @@ let spouse_text conf base end_sp ip ipl =
   | _ -> "", "", None
 
 let print_someone_and_spouse conf base info in_tab ip n ipl =
+  let image =
+    match Util.p_getenv conf.env "image" with
+      Some "off" -> false
+    | _ -> true
+  in
   let (s, d, spo) = spouse_text conf base n ip ipl in
   if in_tab && (info.bd > 0 || info.td_prop <> "") then
     Wserver.printf
       "<table style=\"border:%dpx solid\"><tr><td align=\"center\"%s>" info.bd
       info.td_prop;
   Wserver.printf "%s\n" (someone_text conf base ip);
-  Wserver.print_string (DagDisplay.image_txt conf base (pget conf base ip));
   if s <> "" then
     begin
       Wserver.printf "<br%s>\n" conf.xhs;
       Wserver.printf "&amp;%s" d;
       Wserver.printf " %s\n" s;
       match spo with
-        Some ip ->
-          Wserver.print_string (DagDisplay.image_txt conf base (pget conf base ip))
+        Some sp_ip ->
+          Wserver.printf "<br%s>\n" conf.xhs;
+          Wserver.print_string (DagDisplay.image_txt conf base (pget conf base ip));
+          if image then Wserver.printf "&nbsp;";
+          Wserver.print_string (DagDisplay.image_txt conf base (pget conf base sp_ip))
       | _ -> ()
+    end
+  else
+    begin
+      Wserver.printf "<br%s>\n" conf.xhs;
+      Wserver.print_string (DagDisplay.image_txt conf base (pget conf base ip))
     end;
   if in_tab && (info.bd > 0 || info.td_prop <> "") then
     Wserver.printf "</td></tr></table>"
@@ -415,18 +427,36 @@ let other_parent_text_if_same conf base info =
   | _ -> None
 
 let print_someone_and_other_parent_if_same conf base info =
+  let couple =
+    match p_getenv conf.env "spouse" with
+      Some "on" -> true
+    | _ -> false
+  in
+  let image =
+    match p_getenv conf.env "image" with
+      Some "off" -> false
+    | _ -> true
+  in
   if info.bd > 0 || info.td_prop <> "" then
     Wserver.printf
       "<table style=\"border:%dpx solid\"><tr><td align=\"center\"%s>" info.bd
       info.td_prop;
   Wserver.printf "%s\n" (someone_text conf base info.ip);
-  Wserver.print_string (DagDisplay.image_txt conf base (pget conf base info.ip));
+  if couple then
   begin match other_parent_text_if_same conf base info with
     Some (s, ip) ->
       Wserver.printf "<br%s>\n" conf.xhs;
       Wserver.print_string s;
+      Wserver.printf "<br%s>\n" conf.xhs;
+      Wserver.print_string (DagDisplay.image_txt conf base (pget conf base info.ip));
+      if image then Wserver.printf "&nbsp;";
       Wserver.print_string (DagDisplay.image_txt conf base (pget conf base ip))
   | None -> ()
+  end
+  else
+  begin
+    Wserver.printf "<br%s>\n" conf.xhs;
+    Wserver.print_string (DagDisplay.image_txt conf base (pget conf base info.ip))
   end;
   if info.bd > 0 || info.td_prop <> "" then
     Wserver.printf "</td></tr></table>"

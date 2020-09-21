@@ -1047,6 +1047,11 @@ let display_descendant_with_table conf base max_lev p =
   Hutil.trailer conf
 
 let make_tree_hts conf base gv p =
+  let image =
+    match Util.p_getenv conf.env "image" with
+      Some "off" -> false
+    | _ -> true
+  in
   let bd =
     match Util.p_getint conf.env "bd" with
       Some x -> x
@@ -1185,7 +1190,7 @@ let make_tree_hts conf base gv p =
           let txt =
             if auth then txt ^ DateDisplay.short_dates_text conf base p else txt
           in
-          let txt = txt ^ DagDisplay.image_txt conf base p in
+          let txt = txt ^ (if image then "<br>" else "") ^ DagDisplay.image_txt conf base p in
           let txt =
             if bd > 0 || td_prop <> "" then
               Printf.sprintf
@@ -1224,7 +1229,7 @@ let make_tree_hts conf base gv p =
                 "&amp;" ^
                 (if auth then DateDisplay.short_marriage_date_text conf base fam p sp
                  else "") ^
-                "&nbsp;" ^ txt ^ DagDisplay.image_txt conf base sp
+                "&nbsp;" ^ txt ^ (if image then "<br>" else "") ^ DagDisplay.image_txt conf base sp
               in
               let s =
                 if bd > 0 || td_prop <> "" then
