@@ -23,77 +23,80 @@
 
 %let;prefix_a;%prefix_base_password;p=%evar.p;;n=%evar.n;%in; %(%access does not work %)
 
+%define;slice_tool()
+  %if;(evar.slices = "on")
+    <h1>%nn;
+      [*display by slices/slice width/overlap/total width]0%nn;
+    </h1>
+    <form method="GET" action="%action;">
+    <p>
+    %hidden;
+    %foreach;env_binding;
+      %if;(env.key != "slices")
+        <input type="hidden" name="%env.key;" value="%env.val.decoded;"%/>
+      %end;
+    %end;
+    </p>
+    <table>
+    <tr align="%left;">
+      <td align="%right;">
+        <label>
+        [*don't group the common branches together]
+        <input type="checkbox" name="nogroup" value="on"%/>
+        </label>
+      </td>
+    </tr>
+    <tr align="%left;">
+      <td align="%right;">
+        <label>
+        [*display by slices/slice width/overlap/total width]1
+        <input name="dpos" size="5" value="78"%/>
+        </label>
+      </td>
+    </tr>
+    <tr align="%left;">
+      <td align="%right;">
+        <label>
+        [*display by slices/slice width/overlap/total width]2
+        <input name="overlap" size="5" value="10"%/>
+        </label>
+      </td>
+    </tr>
+    <tr align="%left;">
+      <td align="%right;">
+        <label>
+        [*display by slices/slice width/overlap/total width]3
+        (%dag.min_wid;-%dag.max_wid;)
+        <input name="width" size="5" value="%nn;
+          %if;(dag.max_wid <= 78)%dag.max_wid;
+          %elseif;(dag.min_wid >= 78)%dag.min_wid;
+          %else;78%end;"%/>
+        </label>
+      </td>
+    </tr>
+    </table>
+    <p><input type="submit" value="Ok"%/></p>
+    </form>
+  %else;
+    %if;(evar.notab != "on")
+      <div class="text-%right">
+        <a href="%prefix_base_password;%foreach;env_binding;%env.key;=%env.val;;%end;%nn;
+              notab=on;slices=on" accesskey="/"
+          title="[*display by slices/slice width/overlap/total width]0">
+          <span>//</span>
+        </a>
+      </div>
+    %end;
+  %end;
+%end;
+
 %if;not cancel_links;
   <div class="d-flex justify-content-center">
     %include;home
   </div>
 
   %if;(evar.m="A")
-    %if;(evar.slices = "on")
-      <h1>%nn;
-        [*display by slices/slice width/overlap/total width]0%nn;
-      </h1>
-      <form method="GET" action="%action;">
-      <p>
-      %hidden;
-      %foreach;env_binding;
-        %if;(env.key != "slices")
-          <input type="hidden" name="%env.key;" value="%env.val.decoded;"%/>
-        %end;
-      %end;
-      </p>
-      <table>
-      <tr align="%left;">
-        <td align="%right;">
-          <label>
-          [*don't group the common branches together]
-          <input type="checkbox" name="nogroup" value="on"%/>
-          </label>
-        </td>
-      </tr>
-      <tr align="%left;">
-        <td align="%right;">
-          <label>
-          [*display by slices/slice width/overlap/total width]1
-          <input name="dpos" size="5" value="78"%/>
-          </label>
-        </td>
-      </tr>
-      <tr align="%left;">
-        <td align="%right;">
-          <label>
-          [*display by slices/slice width/overlap/total width]2
-          <input name="overlap" size="5" value="10"%/>
-          </label>
-        </td>
-      </tr>
-      <tr align="%left;">
-        <td align="%right;">
-          <label>
-          [*display by slices/slice width/overlap/total width]3
-          (%dag.min_wid;-%dag.max_wid;)
-          <input name="width" size="5" value="%nn;
-            %if;(dag.max_wid <= 78)%dag.max_wid;
-            %elseif;(dag.min_wid >= 78)%dag.min_wid;
-            %else;78%end;"%/>
-          </label>
-        </td>
-      </tr>
-      </table>
-      <p><input type="submit" value="Ok"%/></p>
-      </form>
-    %else;
-      %if;(evar.notab != "on")
-        <div class="text-%right">
-          <a href="%prefix_base_password;%foreach;env_binding;%env.key;=%env.val;;%end;%nn;
-                notab=on;slices=on" accesskey="/"
-            title="[*display by slices/slice width/overlap/total width]0">
-            <span>//</span>
-          </a>
-        </div>
-      %end;
-    %end;
-
+    %apply;slice_tool()
     <hr style="clear:both; visibility:hidden;"%/>
     <br> %( to adjust vertical positionning (no menubar %)
     %let;evarv;%if;(evar.v!="")%evar.v;%else;3%end;%in;
@@ -242,11 +245,12 @@
     </div>
   %else;
     <h2>[*tree]</h2>
+    %if;(evar.cgl!="on")%apply;slice_tool()%end;
   %end; %( evar.m="A" %)
 %end; %( if not cancel_links %)
 
 %if;(evar.slices!="on")
-  %if;(evar.cgl!="on")
+  %if;(evar.cgl!="on" and evar.notab!="on")
     <div class="btn-toolbar mt-1 mb-2" role="toolbar" arial-label="config buttons toolbar">
       %if;(evar.m!="D")
       <img src="%image_prefix;/picto_parente.png" alt="&gt;&gt;" %/>
@@ -311,6 +315,13 @@
             pos1=%expr(pos2 - overlap);%nn;
             pos2=%expr(pos2 - overlap + dpos);">&gt;&gt;</a>
         %end;%nl;
+        &nbsp;%nn;
+        <a href="%prefix_base_password;%nn;
+          %foreach;env_binding;%if;(env.key!="notab" and env.key!="dpos" and env.key!="width" and
+            env.key!="overlap" and env.key!="pos1" and env.key!="pos2")%env.key;=%env.val;;%end;%end;"
+          title="[*visualize/show/hide/summary]2 [display by slices/slice width/overlap/total width]0">
+          <span>\\</span>
+        </a>
       </div>
     %end;
     <pre>
