@@ -1185,12 +1185,12 @@ let make_tree_hts conf base gv p =
             if v > 1 then nb_column 0 (v - 1) p
             else Array.length (get_family p)
           in
-          let txt = person_title_text conf base p in
+          let txt = Gwdb.p_first_name base p in
+          let txt = txt ^ "<br>" ^ Gwdb.p_surname base p in
           let txt = reference conf base p txt in
           let txt =
-            if auth then txt ^ DateDisplay.short_dates_text conf base p else txt
+            if auth then txt ^ "<br>" ^ DateDisplay.short_dates_text conf base p else txt
           in
-          let txt = txt ^ (if image then "<br>" else "") ^ DagDisplay.image_txt conf base p in
           let txt =
             if bd > 0 || td_prop <> "" then
               Printf.sprintf
@@ -1220,16 +1220,16 @@ let make_tree_hts conf base gv p =
               let ncol = if v > 1 then fam_nb_column 0 (v - 1) fam else 1 in
               let s =
                 let sp = pget conf base (Gutil.spouse (get_iper p) fam) in
-                let txt = person_title_text conf base sp in
+                let txt = Gwdb.p_first_name base sp in
+                let txt = txt ^ "<br>" ^ Gwdb.p_surname base sp in
                 let txt = reference conf base sp txt in
                 let txt =
-                  if auth then txt ^ DateDisplay.short_dates_text conf base sp
+                  if auth then txt ^ "<br>" ^ DateDisplay.short_dates_text conf base sp
                   else txt
                 in
                 "&amp;" ^
                 (if auth then DateDisplay.short_marriage_date_text conf base fam p sp
-                 else "") ^
-                "&nbsp;" ^ txt ^ (if image then "<br>" else "") ^ DagDisplay.image_txt conf base sp
+                 else "") ^ " " ^ txt
               in
               let s =
                 if bd > 0 || td_prop <> "" then
@@ -1243,6 +1243,58 @@ let make_tree_hts conf base gv p =
             loop (td :: tdl) (i + 1)
         in
         loop tdl 0
+    | _ -> (1, LeftA, TDnothing) :: tdl
+  in
+  let spouses_img v tdl po =
+    let tdl = if tdl = [] || not image then [] else (1, LeftA, TDnothing) :: tdl in
+    match po with
+      Some (p, _) when Array.length (get_family p) > 0 ->
+        let rec loop tdl i =
+          if i = Array.length (get_family p) then tdl
+          else
+            let ifam = (get_family p).(i) in
+            let tdl =
+              if i > 0 then (1, LeftA, TDnothing) :: tdl else tdl
+            in
+            let td =
+              let fam = foi base ifam in
+              let ncol = if v > 1 then fam_nb_column 0 (v - 1) fam else 1 in
+              let s =
+                let sp = pget conf base (Gutil.spouse (get_iper p) fam) in
+                DagDisplay.image_txt conf base p ^
+                "&nbsp;" ^
+                DagDisplay.image_txt conf base sp
+              in
+              let s =
+                if bd > 0 || td_prop <> "" then
+                  Printf.sprintf "<table style=\"border: %dpx solid\"><tr>\
+                     <td align=\"center\"%s>%s</td></tr></table>"
+                    bd td_prop s
+                else s
+              in
+              2 * ncol - 1, CenterA, TDitem s
+            in
+            loop (td :: tdl) (i + 1)
+        in
+        loop tdl 0
+    | Some (p, _) ->
+      let td =
+        let ncol =
+          if v > 1 then nb_column 0 (v - 1) p
+          else Array.length (get_family p)
+        in
+        let txt = if image then DagDisplay.image_txt conf base p else "" in
+        let txt =
+          if bd > 0 || td_prop <> "" then
+            Printf.sprintf
+              "<table style=\"border: %dpx solid\"><tr><td align=\"center\"%s>%s</td>\
+               </tr></table>"
+              bd td_prop txt
+          else txt
+        in
+        2 * ncol - 1, CenterA, TDitem txt
+      in
+      td :: tdl
     | _ -> (1, LeftA, TDnothing) :: tdl
   in
   let next_gen gen =
@@ -1285,6 +1337,10 @@ let make_tree_hts conf base gv p =
       in
       let tdal =
         let tdl = List.fold_left (spouses_txt v) [] gen in
+        Array.of_list (List.rev tdl) :: tdal
+      in
+      let tdal =
+        let tdl = List.fold_left (spouses_img v) [] gen in
         Array.of_list (List.rev tdl) :: tdal
       in
       if v > 1 then loop tdal gen (next_gen gen) (v - 1) else tdal

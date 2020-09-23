@@ -715,7 +715,7 @@ let make_tree_hts conf base elem_txt vbar_txt invert set spl d =
                  | None -> ""
                in
                let img2 = if spouse_on then image_txt conf base ps else "" in
-               txt ^ 
+               "aa" ^ txt ^ 
                (if spouse_on then "<br>\n&amp;" ^ d ^ " " ^
                string_of_item conf base (elem_txt ps) else "") ^
                (if img = "" && img2 = "" then ""
