@@ -665,7 +665,7 @@ value family_m conf base =
 
 value print_no_index conf base =
   let title _ = Wserver.wprint "%s" (Util.capitale (transl conf "link to use")) in
-  let link = url_no_index conf base False in
+  let link = url_no_index conf base True in
   let http =
     match p_getenv conf.base_env "http_mode" with
     [ Some "https" -> "https://"
