@@ -827,7 +827,9 @@ value reconstitute_date_dmy conf var =
 ;
 
 value check_greg_day conf d =
-  if d.day > CheckItem.nb_days_in_month d.month d.year then bad_date conf d
+  if d.day > CheckItem.nb_days_in_month d.month d.year (* ||
+    Date.compare_date (Dgreg d Dgregorian) (Dgreg conf.today Dgregorian) > 0 *)
+  then bad_date conf d
   else ()
 ;
 
@@ -840,7 +842,7 @@ value reconstitute_date conf var =
         | Some "J" -> (Calendar.gregorian_of_julian d, Djulian)
         | Some "F" -> (Calendar.gregorian_of_french d, Dfrench)
         | Some "H" -> (Calendar.gregorian_of_hebrew d, Dhebrew)
-        | _ -> (d, Dgregorian) ]
+        | _ -> do { check_greg_day conf d; (d, Dgregorian) } ]
       in
       Some (Dgreg d cal)
   | (Some d, True) -> Some (Dgreg (Calendar.gregorian_of_french d) Dfrench)
