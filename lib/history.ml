@@ -426,6 +426,7 @@ let rec eval_var conf base env _ _ =
           VVstring s
       | _ -> raise Not_found
       end
+  (* "info", Vinfo (time, action, user, hist_item, key) *)
   | ["note"; "part"] ->
       begin match get_env "info" env with
         Vinfo (_, _, _, HI_notes (_, Some x), _) -> VVstring (string_of_int x)
@@ -575,12 +576,14 @@ let print_foreach conf base print_ast eval_expr =
               Some key ->
                 begin match action with
                   "mn" ->
+                    let _ = Printf.eprintf "Key: %s\n" key in
                     let (i, j) =
                       try let i = String.rindex key '/' in i, i + 1 with
                         Not_found -> 0, 0
                     in
                     let pg = String.sub key 0 i in
                     let s = String.sub key j (String.length key - j) in
+                    let _ = Printf.eprintf "HI_notes: %s, %s\n" pg s in
                     begin try HI_notes (pg, Some (int_of_string s)) with
                       Failure _ -> HI_notes (key, None)
                     end
