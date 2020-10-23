@@ -357,7 +357,7 @@ let line_fields line =
   else None
 
 type hist_item =
-    HI_notes of string * int option
+    HI_notes of string * string option
   | HI_ind of person
   | HI_none
 
@@ -414,6 +414,7 @@ let rec eval_var conf base env _ _ =
         Vinfo (_, _, _, _, s) -> VVstring (possibly_highlight env s)
       | _ -> raise Not_found
       end
+  (* "info", Vinfo (time, action, user, hist_item, key) *)
   | "note" :: "page" :: sl ->
       begin match get_env "info" env with
         Vinfo (_, _, _, HI_notes (s, _), _) ->
@@ -426,10 +427,9 @@ let rec eval_var conf base env _ _ =
           VVstring s
       | _ -> raise Not_found
       end
-  (* "info", Vinfo (time, action, user, hist_item, key) *)
   | ["note"; "part"] ->
       begin match get_env "info" env with
-        Vinfo (_, _, _, HI_notes (_, Some x), _) -> VVstring (string_of_int x)
+        Vinfo (_, _, _, HI_notes (_, Some x), _) -> VVstring x
       | Vinfo (_, _, _, HI_notes (_, None), _) -> VVstring ""
       | _ -> raise Not_found
       end
@@ -584,7 +584,7 @@ let print_foreach conf base print_ast eval_expr =
                     let pg = String.sub key 0 i in
                     let s = String.sub key j (String.length key - j) in
                     let _ = Printf.eprintf "HI_notes: %s, %s\n" pg s in
-                    begin try HI_notes (pg, Some (int_of_string s)) with
+                    begin try HI_notes (pg, Some s) with
                       Failure _ -> HI_notes (key, None)
                     end
                 | _ ->
