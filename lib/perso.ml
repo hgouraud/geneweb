@@ -2524,6 +2524,15 @@ and eval_compound_var conf base env (a, _ as ep) loc =
         Vslistlm ell -> eval_item_field_var ell sl
       | _ -> raise Not_found
       end
+  | "main_title" :: sl ->
+      begin match ep with
+          (p, _) ->
+            begin match main_title conf base p with
+              Some t -> eval_main_title_field_var conf t sl
+            | None -> raise Not_found
+            end
+        | _ -> raise Not_found
+      end
   | "mother" :: sl ->
       begin match get_parents a with
         Some ifam ->
@@ -3021,6 +3030,19 @@ and eval_anc_by_surnl_field_var conf base env ep info =
       | sl ->
           let ep = make_ep conf base (get_iper p) in
           eval_person_field_var conf base env ep loc sl
+and eval_main_title_field_var _conf t sl =
+  function
+    ["nth"] ->
+      begin match t with
+        (nth, _, _, _, _) -> VVstring (string_of_int nth)
+      | _ -> VVstring ""
+      end
+  | ["name"] ->
+      begin match t with
+        (_, name, _, _, _) -> VVstring name
+      | _ -> VVstring ""
+      end
+  | _ -> raise Not_found
 and eval_num conf n =
   function
     ["hexa"] -> Printf.sprintf "0x%X" @@ int_of_string (Sosa.to_string n)
