@@ -4,5 +4,7 @@ let ht
   : (string, (string * (Config.config -> Gwdb.base -> unit))) Hashtbl.t
   = Hashtbl.create 0
 
-let register ~namespace ~mode fn = Hashtbl.add ht mode (namespace, fn)
+let assets = ref ""
+
+let register ~ns m fn = let fn = fn !assets in Hashtbl.add ht m (ns, fn)
 let get = Hashtbl.find_opt ht

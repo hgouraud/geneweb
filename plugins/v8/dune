@@ -1,0 +1,5 @@
+(executable
+  (name plugin)
+  (libraries geneweb-gwd-lib geneweb-wserver jingoo gwxjg)
+  (modes (native plugin))
+)

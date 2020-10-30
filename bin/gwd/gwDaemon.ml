@@ -12,30 +12,31 @@ module Make
   : (sig val run : ?speclist:(string * Arg.spec * string) list -> unit -> unit end)
 = struct
 
-let green_color = "#2f6400"
-let selected_addr = ref None
-let selected_port = ref 2317
-let redirected_addr = ref None
-let wizard_passwd = ref ""
-let friend_passwd = ref ""
-let wizard_just_friend = ref false
-let only_addresses = ref []
-let default_lang = ref "fr"
-let setup_link = ref false
+let auth_file = ref ""
 let choose_browser_lang = ref false
+let conn_timeout = ref 120
+let daemon = ref false
+let default_lang = ref "fr"
+let friend_passwd = ref ""
+let green_color = "#2f6400"
 let images_dir = ref ""
 let images_url = ref ""
-let max_clients = ref None
-let robot_xcl = ref None
-let auth_file = ref ""
-let daemon = ref false
+let lexicon_list = ref []
 let login_timeout = ref 1800
-let conn_timeout = ref 120
+let max_clients = ref None
+let no_host_address = ref false
+let only_addresses = ref []
+let plugins = ref []
+let redirected_addr = ref None
+let robot_xcl = ref None
+let selected_addr = ref None
+let selected_port = ref 2317
+let setup_link = ref false
 let trace_failed_passwd = ref false
 let trace_templates = ref false
 let use_auth_digest_scheme = ref false
-let no_host_address = ref false
-let lexicon_list = ref []
+let wizard_just_friend = ref false
+let wizard_passwd = ref ""
 
 #ifdef API
 let selected_api_host = ref "127.0.0.1"
@@ -1465,6 +1466,7 @@ let image_request script_name env =
       let _ = ImageDisplay.print_image_file fname in true
   | _ ->
       let s = script_name in
+      print_endline @@ Printf.sprintf "%S: %s" __LOC__ s  ;
       if Mutil.start_with "images/" 0 s then
         let i = String.length "images/" in
         let fname = String.sub s i (String.length s - i) in
@@ -1495,7 +1497,7 @@ let content_misc len misc_fname =
   Wserver.http Wserver.OK;
   let (fname, t) =
     match misc_fname with
-      Css fname -> fname, "text/css"
+    | Css fname -> fname, "text/css"
     | Js fname -> fname, "text/javascript"
     | Otf fname -> fname, "application/font-otf"
     | Svg fname -> fname, "application/font-svg"
@@ -1511,6 +1513,18 @@ let content_misc len misc_fname =
     (Filename.basename fname);
   Wserver.header "Cache-control: private, max-age=%d" (60 * 60 * 24 * 365);
   Wserver.wflush ()
+
+let find_misc_file name =
+  if Sys.file_exists name
+  && List.exists (fun p -> Mutil.start_with (Filename.concat p "assets") 0 name) !plugins
+  then name
+  else
+    let name' = Filename.concat (base_path ["etc"] "") name in
+    if Sys.file_exists name' then name'
+    else
+      let name' = Filename.concat (search_in_lang_path "etc") name in
+      if Sys.file_exists name' then name'
+      else ""
 
 let print_misc_file misc_fname =
   match misc_fname with
@@ -1536,7 +1550,7 @@ let print_misc_file misc_fname =
   | Other _ -> false
 
 let misc_request fname =
-  let fname = Util.find_misc_file fname in
+  let fname = find_misc_file fname in
   if fname <> "" then
     let misc_fname =
       if Filename.check_suffix fname ".css" then Css fname
@@ -1794,6 +1808,13 @@ let make_cnt_dir x =
     end;
   Util.cnt_dir := x
 
+let register_plugin dir =
+  let assets = Filename.concat dir "assets" in
+  GwdPlugin.assets := assets ;
+  Secure.add_lang_path assets ;
+  Dynlink.loadfile (Filename.concat dir "plugin.cmxs") ;
+  GwdPlugin.assets := ""
+
 let main ~speclist () =
   if Sys.unix then ()
   else begin Wserver.sock_in := "gwd.sin"; Wserver.sock_out := "gwd.sou" end;
@@ -1802,7 +1823,6 @@ let main ~speclist () =
     " [options] where options are:"
   in
   let force_cgi = ref false in
-  let plugins = ref [] in
   let speclist =
     ("-hd", Arg.String Util.add_lang_path,
      "<dir>\n       Directory where the directory lang is installed.") ::
@@ -1957,7 +1977,7 @@ let main ~speclist () =
   arg_parse_in_file (chop_extension Sys.argv.(0) ^ ".arg") speclist anonfun
     usage;
   Arg.parse speclist anonfun usage;
-  List.iter Dynlink.loadfile !plugins ;
+  List.iter register_plugin !plugins ;
   if !images_dir <> "" then
     begin let abs_dir =
       let f =

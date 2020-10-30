@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="{{ conf.lang }}">
+
+  <head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="{{ asset ('img/geneweb.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset ('img/geneweb.png') }}">
+    <link rel="stylesheet" href="{{ asset ('bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset ('fontawesome/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset ('css/v8.css') }}">
+    <title>{{ base.name }} - {% block title %}GeneWeb{% endblock %}</title>
+  </head>
+
+  <body>
+
+    {%- block navbar -%}
+      {%- include 'navbar.html.jingoo' -%}
+    {%- endblock -%}
+
+    <div class="container pb-5">
+      {%- block body %}{% endblock -%}
+    </div>
+
+    <script src="{{ asset ('jquery/jquery-3.5.1.slim.min.js') }}"></script>
+    <script src="{{ asset ('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script>{% block script %}{% endblock %}</script>
+    <script>
+      $('.dropdown-menu a.dropdown-toggle').on('click', function(e) {
+          if (!$(this).next().hasClass('show')) {
+              $(this).parents('.dropdown-menu').first().find('.show').removeClass("show");
+          }
+          var $subMenu = $(this).next(".dropdown-menu");
+          $subMenu.toggleClass('show');
+          $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function(e) {
+              $('.dropdown-submenu .show').removeClass("show");
+          });
+          return false;
+      });
+    </script>
+
+  </body>
+
+</html>

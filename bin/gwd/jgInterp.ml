@@ -1,8 +1,7 @@
 open Geneweb
 open Jingoo
 
-let render ~conf ~file ~models =
-  let dir = Util.search_in_lang_path "etc" in
+let render ?(dir = Util.search_in_lang_path "etc") ~conf ~file ~models =
   let env =
     { Jg_types.autoescape = false
     ; template_dirs = [ dir ]
