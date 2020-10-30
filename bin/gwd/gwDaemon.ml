@@ -1802,6 +1802,7 @@ let main ~speclist () =
     " [options] where options are:"
   in
   let force_cgi = ref false in
+  let plugins = ref [] in
   let speclist =
     ("-hd", Arg.String Util.add_lang_path,
      "<dir>\n       Directory where the directory lang is installed.") ::
@@ -1873,6 +1874,10 @@ let main ~speclist () =
       Print the full path to template files as html comment ") ::
     ("-nolock", Arg.Set Lock.no_lock_flag,
      "\n       Do not lock files before writing.") ::
+    ( "-plugin"
+    , Arg.String (fun s -> plugins := !plugins @ [s])
+    , " missing doc"
+    ) ::
     (if Sys.unix then
        ( "-max_clients"
        , Arg.Int (fun x -> max_clients := Some x)
@@ -1952,6 +1957,7 @@ let main ~speclist () =
   arg_parse_in_file (chop_extension Sys.argv.(0) ^ ".arg") speclist anonfun
     usage;
   Arg.parse speclist anonfun usage;
+  List.iter Dynlink.loadfile !plugins ;
   if !images_dir <> "" then
     begin let abs_dir =
       let f =

@@ -72,12 +72,16 @@ let make_senv conf base =
 let family_m conf base =
   let open RequestHandler in
   let handler = H.handler in
-  if conf.wizard || conf.friend ||
-      List.assoc_opt "visitor_access" conf.base_env <> Some "no" then
-  let p =
-    match p_getenv conf.env "m" with
-    | None -> handler._no_mode
-    | Some s -> match s with
+  if conf.wizard
+  || conf.friend
+  || List.assoc_opt "visitor_access" conf.base_env <> Some "no"
+  then
+    let m = Opt.default "" @@ p_getenv conf.env "m" in
+    match GwdPlugin.get m with
+    | Some (_ns, fn) -> fn conf base
+    | None ->
+      let p = match m with
+      | "" -> handler._no_mode
       | "A" -> handler.a
       | "ADD_FAM" -> handler.add_fam
       | "ADD_FAM_OK" -> handler.add_fam_ok

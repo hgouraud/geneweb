@@ -102,7 +102,7 @@
   (wrapped true)
   (libraries geneweb geneweb-jingoo jingoo unix str %%%GWDB_PKG%%% %%%SOSA_PKG%%% %%%WSERVER_PKG%%%)
   (preprocess (action (run %{bin:cppo} %%%CPPO_D%%% %{input-file})))
-  (modules gwDaemon jgInterp request requestHandler)
+  (modules gwdPlugin gwDaemon jgInterp request requestHandler)
 )
 
 (executable
