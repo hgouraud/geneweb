@@ -8,6 +8,7 @@ value magic_gwo = "GnWo000o";
 value base_name = ref "";
 value rgpd_files = ref "None";
 value rgpd = ref False;
+value gwc1 = ref False;
 
 type key = { pk_first_name : string; pk_surname : string; pk_occ : int };
 
@@ -504,8 +505,8 @@ value rec get_access str l =
   match l with
   [ ["#apubl" :: l'] -> (Public, l')
   | ["#apriv" :: l'] -> (Private, l')
-  | ["#afriendm" :: l'] -> (Friend, l')
-  | ["#afriend" :: l'] -> (Friend, l')
+  | ["#afriendm" :: l'] -> if gwc1.val then (IfTitles, l) else (Friend, l')
+  | ["#afriend" :: l'] -> if gwc1.val then (IfTitles, l) else (Friend, l')
   | _ -> (IfTitles, l) ]
 ;
 

@@ -87,6 +87,7 @@ value force = ref False;
 value separate = ref False;
 value shift = ref 0;
 value files = ref [];
+Gwcomp.gwc1.val = True;
 
 value speclist =
   [("-c", Arg.Set just_comp, "Only compiling");
