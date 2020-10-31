@@ -357,7 +357,7 @@
   %if;(xx.has_birth_date or xx.has_birth_place or
        xx.has_baptism_date or xx.has_baptism_place or
        xx.is_dead or xx.is_buried or xx.is_cremated or
-       xx.has_event or
+       xx.has_events or
       (xx.has_consanguinity and bvar.show_consang!="no") or
        xx.has_occupation or (xx.has_linked_page.OCCU and xx.linked_page.OCCU !=""))
     <ul>
@@ -394,7 +394,7 @@
       %if;xx.computable_age;
         <li>[*age] : %xx.age;</li>%nl;
       %end;
-      %if;xx.has_event;
+      %if;xx.has_events;
         %foreach;xx.event;
           %if;(event.name!=[birth] and
                event.name!=[baptism] and

@@ -150,7 +150,7 @@
   %end;
   <ul>
   %foreach;relation;
-  %( godparents are displayed in timeline if has_event %)
+  %( godparents are displayed in timeline if has_events %)
     %if;(has_relation_him and has_relation_her)
       <li>%apply;capitalize(relation_type)[:]%nl;
         %apply;very_short_display_person_no_sex("relation_him")

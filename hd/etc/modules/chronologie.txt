@@ -219,7 +219,7 @@
   %end;
 %end;
 
-%if;(has_event)
+%if;(has_events)
   %let;evarmac;%if;(evar.mar_sp_ch!="" and evar.mar_sp_ch="on")1%else;0%end;%in; %(marriage child %)
   %let;evarmas;%if;(evar.ma_s!="" and evar.ma_s="on")1%else;0%end;%in; %(marriage siblings %)
   %let;evarevp;%if;(evar.evt_pr_sib!="" and evar.evt_pr_sib="on")1%else;0%end;%in; %(events parents %)

@@ -234,10 +234,10 @@
   <label><textarea id="comment" name="comment" placeholder="[*comment]" rows="1" %l_on1s;>
     %if;(comment != "" and bvar.move_comment = "yes")
       %foreach;fevent;
-        %if;((fevent.e_name = "#marr" or fevent.e_name = "#nmar" or fevent.e_name = "#nmen" or fevent.e_name ="#enga") and fevent.e_note != "")%comment;%end;
+        %if;((fevent.e_name = "#marr" or fevent.e_name = "#nmar" or fevent.e_name = "#nmen" or fevent.e_name ="#enga") and fevent.e_note != "")%fnotes;%end;
       %end;
     %else;
-      %comment;%sq;
+      %fnotes;%sq;
     %end;
   </textarea></label>
 </fieldset>

@@ -278,20 +278,20 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
     %if;("yyy"="desc")
       <td class="align-middle%if;(evar.nowrap="on") text-nowrap%end; pl-2%nn;
         %if;(evar.ns="on")
-          %if;(has_notes and not has_psources) note%nn;
-          %elseif;(not has_notes and has_psources) source%nn;
-          %elseif;(has_notes and has_psources) notesource%nn;
+          %if;(has_pnotes and not has_psources) note%nn;
+          %elseif;(not has_pnotes and has_psources) source%nn;
+          %elseif;(has_pnotes and has_psources) notesource%nn;
           %end;
         %end;"%nn;
         %rowspan;%nn;
-        %if;(evar.ns="on" and (has_notes or has_psources)) tabindex="0"%sp;
+        %if;(evar.ns="on" and (has_pnotes or has_psources)) tabindex="0"%sp;
           data-trigger="focus" data-toggle="popover" data-placement="right" data-html="true"%sp;
-          data-content='%if;(has_notes)%notes;%end;
-                        %if;(has_notes and has_psources)<hr>%end;
+          data-content='%if;(has_pnotes)%pnotes;%end;
+                        %if;(has_pnotes and has_psources)<hr>%end;
                         %if;(has_psources)%apply;capitalize(psources)%end;'%sp;
-          title="%if;(has_notes and not has_psources)[*note/notes]1%nn;
-                %elseif;(not has_notes and has_psources)[*source/sources]1%nn;
-                %elseif;(has_notes and has_psources)[*note/notes]1 [and] [source/sources]1%nn;
+          title="%if;(has_pnotes and not has_psources)[*note/notes]1%nn;
+                %elseif;(not has_pnotes and has_psources)[*source/sources]1%nn;
+                %elseif;(has_pnotes and has_psources)[*note/notes]1 [and] [source/sources]1%nn;
                 %end;"%nn;
         %end;>
         %apply;add_in_sorted_list(xxx.index)
@@ -311,19 +311,19 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
     %elseif;(evar.t="I")
       <td class="align-middle text-right%if;(evar.nowrap="on") text-nowrap%end;%nn;
         %if;(evar.ns="on")
-          %if;(xxx.has_notes and not xxx.has_psources) notespouse%nn;
-          %elseif;(not xxx.has_notes and xxx.has_psources) sourcespouse%nn;
-          %elseif;(xxx.has_notes and xxx.has_psources) notesourcespouse%nn;
+          %if;(xxx.has_pnotes and not xxx.has_psources) notespouse%nn;
+          %elseif;(not xxx.has_pnotes and xxx.has_psources) sourcespouse%nn;
+          %elseif;(xxx.has_pnotes and xxx.has_psources) notesourcespouse%nn;
           %end;
         %end;"%nn;
-        %if;(evar.ns="on" and (xxx.has_notes or xxx.has_psources)) tabindex="0"%sp;
+        %if;(evar.ns="on" and (xxx.has_pnotes or xxx.has_psources)) tabindex="0"%sp;
           data-trigger="focus" data-toggle="popover" data-placement="right" data-html="true"%sp;
-          data-content='%if;(xxx.has_notes)%xxx.notes;%end;
-                        %if;(xxx.has_notes and xxx.has_psources)<hr>%end;
+          data-content='%if;(xxx.has_pnotes)%xxx.pnotes;%end;
+                        %if;(xxx.has_pnotes and xxx.has_psources)<hr>%end;
                         %if;(xxx.has_psources)%apply;capitalize(xxx.psources)%end;'%sp;
-          title="%if;(xxx.has_notes and not xxx.has_psources)[*note/notes]1%nn;
-                %elseif;(not xxx.has_notes and xxx.has_psources)[*source/sources]1%nn;
-                %elseif;(xxx.has_notes and xxx.has_psources)[*note/notes]1 [and] [source/sources]1%nn;
+          title="%if;(xxx.has_pnotes and not xxx.has_psources)[*note/notes]1%nn;
+                %elseif;(not xxx.has_pnotes and xxx.has_psources)[*source/sources]1%nn;
+                %elseif;(xxx.has_pnotes and xxx.has_psources)[*note/notes]1 [and] [source/sources]1%nn;
                 %end;"%nn;
         %end;>
         %apply;add_in_sorted_list(xxx.index)
@@ -360,19 +360,19 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
         %if;(family_cnt=fam_cnt)
           <td class="align-middle%if;(xxx.nb_families > 1) border-bottom-0%end;%if;(evar.nowrap="on") text-nowrap%end; pl-2%nn;
           %if;(evar.ns="on")
-              %if;(spouse.has_notes and not spouse.has_psources) note%nn;
-              %elseif;(not spouse.has_notes and spouse.has_psources) source%nn;
-              %elseif;(spouse.has_notes and spouse.has_psources) notesource%nn;
+              %if;(spouse.has_pnotes and not spouse.has_psources) note%nn;
+              %elseif;(not spouse.has_pnotes and spouse.has_psources) source%nn;
+              %elseif;(spouse.has_pnotes and spouse.has_psources) notesource%nn;
               %end;
           %end;"%nn;
-          %if;(evar.ns="on" and (spouse.has_notes or spouse.has_psources)) tabindex="0"%sp;
+          %if;(evar.ns="on" and (spouse.has_pnotes or spouse.has_psources)) tabindex="0"%sp;
             data-trigger="focus" data-toggle="popover" data-placement="bottom" data-html="true"%sp;
-            data-content='%if;(spouse.has_notes)%spouse.notes;%end;
-                          %if;(spouse.has_notes and spouse.has_psources)<hr>%end;
+            data-content='%if;(spouse.has_pnotes)%spouse.notes;%end;
+                          %if;(spouse.has_pnotes and spouse.has_psources)<hr>%end;
                           %if;(spouse.has_psources)%apply;capitalize(spouse.psources)%end;'%sp;
-            title="%if;(spouse.has_notes and not spouse.has_psources)[*note/notes]1%nn;
-                  %elseif;(not spouse.has_notes and spouse.has_psources)[*source/sources]1%nn;
-                  %elseif;(spouse.has_notes and spouse.has_psources)[*note/notes]1 [and] [source/sources]1%nn;
+            title="%if;(spouse.has_pnotes and not spouse.has_psources)[*note/notes]1%nn;
+                  %elseif;(not spouse.has_pnotes and spouse.has_psources)[*source/sources]1%nn;
+                  %elseif;(spouse.has_pnotes and spouse.has_psources)[*note/notes]1 [and] [source/sources]1%nn;
                   %end;"%nn;
           %end;>%nn;
             %apply;add_in_sorted_list(spouse.index)

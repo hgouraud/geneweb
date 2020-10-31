@@ -183,11 +183,11 @@
     </table><br/>
   %end;
 
-  %if;(evar.comm = "on" and (has_comment or has_marriage_note))
+  %if;(evar.comm = "on" and (has_fnotes or has_marriage_note))
     <table class="fp_marriage_notes">
       <tr>
         <td>
-          <span class="textcolor">[*marriage notes/marriages notes]0:</span> %comment;
+          <span class="textcolor">[*marriage notes/marriages notes]0:</span> %fnotes;
           %if;has_marriage_note;%marriage_note;%end;
         </td>
       </tr>
@@ -981,13 +981,13 @@
     </div>
   %end;
 
-  %if;(evar.note = "on" and (xx.has_notes or xx.has_event))
+  %if;(evar.note = "on" and (xx.has_pnotes or xx.has_events))
     <div style="page-break-inside:avoid;">
       <table class="fp_table" cellspacing="0">
         <tr><th>[*note/notes]1</th></tr>
         <tr><td class="fp_notes">
-          %xx.notes;
-          %if;xx.has_event;
+          %xx.pnotes;
+          %if;xx.has_events;
             <table>
               %foreach;xx.event;
                 <tr>

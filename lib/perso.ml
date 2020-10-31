@@ -1946,7 +1946,7 @@ and eval_simple_bool_var conf base env =
         Vsosa_ref v -> Lazy.force v <> None
       | _ -> raise Not_found
       end
-  | "has_comment" | "has_fnotes" ->
+  | "has_fnotes" (* | "has_comments" *) ->
       begin match get_env "fam" env with
         Vfam (_, fam, _, m_auth) when mode_local env ->
           m_auth && not conf.no_note && sou base (get_comment fam) <> ""
@@ -3751,7 +3751,7 @@ and eval_bool_person_field conf base env (p, p_auth) =
             else loop events
       in
       p_auth && loop (events_list conf base p)
-  | "has_event" ->
+  | "has_events" ->
       if p_auth then
         let events = events_list conf base p in
         let nb_fam = Array.length (get_family p) in

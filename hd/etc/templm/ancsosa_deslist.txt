@@ -219,10 +219,10 @@
     </p>
   %end;
   %if;(evar.notes = "on")
-    %if;(z1.has_notes or z1.has_linked_page.BNOTE or z1.has_linked_page.NOTE)
+    %if;(z1.has_pnotes or z1.has_linked_page.BNOTE or z1.has_linked_page.NOTE)
       <div class="inot"><table><tbody><tr><td>
         %if;z1.has_linked_page.BNOTE;&gt;&gt; %z1.linked_page.BNOTE;<br%/>%end;
-        %if;z1.has_notes;%z1.notes;%end;
+        %if;z1.has_pnotes;%z1.notes;%end;
         %if;z1.has_linked_page.NOTE;&gt;&gt; %z1.linked_page.NOTE;%end;
       </td></tr></tbody></table></div>
     %end;
@@ -274,7 +274,7 @@
   %else;
     &amp;%if;(marriage_date.prec != "")%marriage_date.prec;%end;%if;(marriage_date.year != "")%marriage_date.year;%end;%sp;
   %end;
-  %if;(evar.notes = "on" and has_comment)
-    <div class="icom">%comment;</div>
+  %if;(evar.notes = "on" and has_fnotes)
+    <div class="icom">%fnotes;</div>
   %end;
 %end;

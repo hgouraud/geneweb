@@ -150,7 +150,7 @@
         <input id="e_placez1" name="e_placez1" class="pl" size="70" placeholder="[*place]" value="%event.e_place;" %l_on5;%/>
     </dt>
     <dd><textarea id="e_notez1" name="e_notez1" placeholder="[*comment]" rows="1" class="enote" %l_on1s;>%nn;
-      %if;(evar.m = "MOD_FAM" and comment != "" and bvar.move_comment = "yes" and event.e_note = "" and (event.e_name = "#marr" or event.e_name= "#nmar" or event.e_name= "#nmen" or event.e_name ="#enga"))%comment;%end;
+      %if;(evar.m = "MOD_FAM" and comment != "" and bvar.move_comment = "yes" and event.e_note = "" and (event.e_name = "#marr" or event.e_name= "#nmar" or event.e_name= "#nmen" or event.e_name ="#enga"))%fnotes;%end;
       %event.e_note;%sq;</textarea></dd>
     <dd>%if;(event.e_src="")
           <input id="e_srcz1" name="e_srcz1" placeholder="[*source/sources]1" class="esrc" %l_on6; %l_on1;/>

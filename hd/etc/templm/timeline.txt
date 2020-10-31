@@ -63,11 +63,11 @@
   %end;
 %end;
 
-%if;(has_event or has_families or has_parents)
+%if;(has_events or has_families or has_parents)
 
   %empty_sorted_list;
   
-  %if;(has_event)
+  %if;(has_events)
     %apply;add("self","","")
   %end;
 

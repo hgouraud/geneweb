@@ -190,7 +190,7 @@
           %end;
         %end;%nn;
         %apply;init_count(prev_count)
-        %if;((wizard or friend or bvar.no_note_for_visitor="" or bvar.no_note_for_visitor="no") and has_comment)
+        %if;((wizard or friend or bvar.no_note_for_visitor="" or bvar.no_note_for_visitor="no") and has_fnotes)
           %if;(not cancel_links)
             <a href="#note-wed-%count;" id="wed-callnote-%count;" title="[*see] [note/notes]0 %count">%nn;
               <sup>%count;</sup>%nn;
@@ -245,7 +245,7 @@
       %else;&#8203;
       %end;
     %end;
-    %if;((wizard or friend or bvar.no_note_for_visitor="" or bvar.no_note_for_visitor="no") and has_comment)
+    %if;((wizard or friend or bvar.no_note_for_visitor="" or bvar.no_note_for_visitor="no") and has_fnotes)
       %if;(not cancel_links)
         <a href="#note-wed-%count;" id="wed-callnote-%count;" title="[see] [note/notes]0 %count">%nn;
           <sup>%count;</sup>%nn;
@@ -438,7 +438,7 @@
             %apply;short_display_person("witness")
           %end;)%nn;
         %end;
-        %if;((wizard or friend or bvar.no_note_for_visitor="" or bvar.no_note_for_visitor="no") and has_comment)
+        %if;((wizard or friend or bvar.no_note_for_visitor="" or bvar.no_note_for_visitor="no") and has_fnotes)
           <a href="#note-wed-%count;" id="wed-callnote-%count;" title="[*see] [note/notes]0 %count"><sup>%count;</sup></a>%nn;
         %end;%nn;
         %if;are_divorced;, [divorced]0%divorce_date;%sp;%end;
@@ -501,7 +501,7 @@
             %apply;short_display_person("witness")
           %end;)%nn;
         %end;%nn;
-        %if;((wizard or friend or bvar.no_note_for_visitor="" or bvar.no_note_for_visitor="no") and has_comment)%nn;
+        %if;((wizard or friend or bvar.no_note_for_visitor="" or bvar.no_note_for_visitor="no") and has_fnotes)%nn;
           <a href="#note-wed-%count;" id="wed-callnote-%count;" title="[*see] [note/notes]0 %count"><sup>%count;</sup></a>%nn;
         %end;
         %if;are_divorced;, [divorced]0%divorce_date;%sp;%end;
@@ -613,7 +613,7 @@
             %apply;short_display_person("witness")
           %end;)%nn;
         %end;%nn;
-        %if;((wizard or friend or bvar.no_note_for_visitor="" or bvar.no_note_for_visitor="no") and has_comment)%nn;
+        %if;((wizard or friend or bvar.no_note_for_visitor="" or bvar.no_note_for_visitor="no") and has_fnotes)%nn;
           <a href="#note-wed-%count;" id="wed-callnote-%count;" title="[*see] [note/notes]0 %count"><sup>%count;</sup></a>%nn;
         %end;
         %if;are_divorced;, [divorced]0%divorce_date;%end;

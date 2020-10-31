@@ -1239,7 +1239,7 @@
     </div>
   %end;
   <div class="notes">
-    %if;(has_notes or has_linked_page.BNOTE or has_linked_page.NOTE)
+    %if;(has_pnotes or has_linked_page.BNOTE or has_linked_page.NOTE)
     <br/>
     <span %if;(not has_linked_pages)class="ch2"%end;>%if;(has_linked_pages and not cancel_links)<a href="%prefix;m=LINKED;%access;" class="ch2"
      title="[*linked pages]">%end;[*note/notes]1%if;(has_linked_pages and not cancel_links)<small>*</small>%end;%if;(has_linked_pages and not cancel_links)</a>%end;</span>
@@ -1254,10 +1254,10 @@
   </div>
   %if;has_families;
     %foreach;family()
-      %if;has_comment;
+      %if;has_fnotes;
         <div class="comment">
           <h2 class="ch2">[*marriage with] %spouse;</h2>
-          %comment;
+          %fnotes;
         </div>
       %end;
     %end;

@@ -192,9 +192,9 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
     <div class="d-flex flex-column justify-items-lg-center mt-3 mt-lg-4">
       <div class="h4 text-lg-center"><i class="fas fa-tools fa-sm fa-fw text-secondary mr-1"></i>[*tools]</div>
       <div class="d-inline-flex justify-content-lg-center">
-        %if;(wizard and not base.has_notes)
+        %if;(wizard and not base.has_note)
           <a role="button" class="btn btn-outline-primary mr-1"
-            href="%prefix;m=MOD_NOTES">[*add base notes]</a>
+            href="%prefix;m=MOD_NOTES">[*add base.note]</a>
         %end;
         %if;base.has_notes;
           <a role="button" class="btn btn-outline-primary mr-1"
