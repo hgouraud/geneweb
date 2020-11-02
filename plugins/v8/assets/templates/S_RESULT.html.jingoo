@@ -1,0 +1,6 @@
+
+<ul>
+  {%- for p in M.result -%}
+  <li>{{ p.first_name }} {{ p.surname }}</li>
+  {%- endfor -%}
+</ul>
