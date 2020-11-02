@@ -14,7 +14,7 @@
   <body>
 
     {%- block navbar -%}
-      {%- include 'navbar.html.jingoo' -%}
+      {%- include 'NAVBAR.html.jingoo' -%}
     {%- endblock -%}
 
     <div class="container pb-5">

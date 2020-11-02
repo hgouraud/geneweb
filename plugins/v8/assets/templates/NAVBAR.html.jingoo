@@ -1,4 +1,4 @@
-{%- include "navbar_utils.jingoo" -%}
+{%- include "UTIL_NAVBAR.jingoo" -%}
 
 <nav class="navbar navbar-expand-md navbar-light bg-light sticky-top border-bottom">
   <ul class="navbar-nav">

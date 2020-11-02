@@ -16,11 +16,11 @@ let w_default_env assets conf base models =
 let interp assets conf file models =
   Gwdlib.JgInterp.render ~dir:(Filename.concat assets "templates") ~conf ~file ~models
 
-let hello assets conf base =
+let asearch assets conf base =
   let models = w_default_env assets conf base Tnull in
-  interp assets conf "welcome.html.jingoo" models
+  interp assets conf "H_ADVANCED.html.jingoo" models
 
 let ns = "v8"
 
 let () =
-  Gwdlib.GwdPlugin.register ~ns "HELLO" (fun s -> hello s)
+Gwdlib.GwdPlugin.register ~ns "H" asearch
