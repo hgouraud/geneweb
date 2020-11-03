@@ -1,3 +1,9 @@
+{%- macro print_hidden_textarea (env) -%}
+  {%- for (k, v) in env -%}
+    <textarea style="display:none;" name="{{ k }}">{{ decode_varenv (v) }}</textarea>
+  {%- endfor -%}
+{%- endmacro -%}
+
 {%- macro columns (s, m, l, xl) -%}
   col-sm-{{ s }} col-md-{{ m }} col-lg-{{ l }}
   {%- if xl != null %} col-xl-{{xl}}{% endif  -%}

@@ -1,0 +1,29 @@
+{%- function approx_birth (p) -%}
+  {%- if p.birth_date && p.birth_date.year -%}
+    {{ p.birth_date }}
+  {%- elif p.baptism_date && p.baptism_date.year -%}
+    {{ { prec: p.baptism_date.prec,
+         year: p.baptism_date.year,
+         month: p.baptism_date.month,
+         day: p.baptism_date.day,
+         d2: p.baptism_date.d2,
+         approx: true } }}
+  {%- endif -%}
+{%- endfunction -%}
+
+{%- function approx_death (p) -%}
+  {%- if p.death && p.death.date && p.death.date.year -%}
+    {{ p.death.date }}
+  {%- elif p.burial && p.burial.date && p.burial.date.year -%}
+    {{ { prec: p.burial.date.prec,
+         year: p.burial.date.year,
+         month: p.burial.date.month,
+         day: p.burial.date.day,
+         d2: p.burial.date.d2,
+         approx: true } }}
+  {%- endif -%}
+{%- endfunction -%}
+
+{%- function get_union (p1, p2) -%}
+  {{ find (compose (eq (p2.iper), attr ('spouse.iper')), p1.families) }}
+{%- endfunction %}
