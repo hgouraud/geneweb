@@ -420,7 +420,9 @@ let treat_request conf base =
             Some "no" -> ()
           | _ -> let r = SrcfileDisplay.incr_welcome_counter conf in log_count r
           end;
-          SrcfileDisplay.print_start conf base
+          match GwdPlugin.get "" with
+          | Some (_ns, fn) -> fn conf base
+          | None -> SrcfileDisplay.print_start conf base
         end
       else
         begin
