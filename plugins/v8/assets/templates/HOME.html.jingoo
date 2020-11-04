@@ -1,8 +1,9 @@
+{%- include 'SEARCH_ADVANCED_FORM.html.jingoo' -%}
 {%- extends 'SKELETON.html.jingoo' -%}
 
 {%- block body %}
 
-<div class="row" style="height:100vh;">
+<div class="row"">
   <form class="my-auto mx-auto w-50" method="get" action="{{ env.prefix }}">
     {{ print_hidden_env () }}
     <input type="hidden" name="m" value="SEARCH_SIMPLE">
@@ -18,5 +19,11 @@
     </div>
   </form>
 </div>
-    
+
+  {{ print_SEARCH_ADVANCED_FORM_form () }}
+
 {% endblock -%}
+
+{% block script %}
+  {{ print_SEARCH_ADVANCED_FORM_script () }}
+{% endblock %}
