@@ -1,3 +1,6 @@
+#sub-topbar { margin: -1rem auto -1rem 0; display: flex; align-items:center; }
+#sub-topbar .nav-link { padding-bottom: 1rem; margin-top: .5rem; }
+
 .dropdown-submenu {
     position: relative;
 }
@@ -9,5 +12,21 @@
     margin-right: .1rem;
 }
 
-#sub-topbar { margin: -1rem auto -1rem 0; display: flex; align-items:center; }
-#sub-topbar .nav-link { padding-bottom: 1rem; margin-top: .5rem; }
+/* Mimic Bootstrap .nav-tabs>li(.active)>a 
+    when using radio buttons instead of links in tab headers */
+.nav-tabs>li>label
+{
+    display: inline-block;
+    padding: 1em;
+    margin: 0;
+    border: 1px solid transparent;
+    cursor: pointer;
+    position: relative;
+    bottom: -1px;
+}
+.nav-tabs>li>label.active
+{
+    cursor: default;
+    border-color: #ddd;
+    border-bottom-color: white;
+}

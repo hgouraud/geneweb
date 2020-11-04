@@ -20,7 +20,7 @@ let interp assets conf file models =
 
 let asearch assets conf base =
   let models = w_default_env assets conf base Tnull in
-  interp assets conf "H_ADVANCED.html.jingoo" models
+  interp assets conf "SEARCH_ADVANCED.html.jingoo" models
 
 let ssearch assets conf base =
   let v = Util.decode_varenv @@ List.assoc "v" conf.env in
@@ -52,10 +52,15 @@ let ssearch assets conf base =
         | _ -> raise Not_found
       end end
   in
-  interp assets conf "S_RESULT.html.jingoo" models
+  interp assets conf "SEARCH_RESULT.html.jingoo" models
+
+let home assets conf base =
+  let models = w_default_env assets conf base Tnull in
+  interp assets conf "HOME.html.jingoo" models  
 
 let ns = "v8"
 
 let () =
-  Gwdlib.GwdPlugin.register ~ns "S_ADVANCED" asearch
-; Gwdlib.GwdPlugin.register ~ns "S_SIMPLE" ssearch
+  Gwdlib.GwdPlugin.register ~ns "" home
+; Gwdlib.GwdPlugin.register ~ns "SEARCH_ADVANCED" asearch
+; Gwdlib.GwdPlugin.register ~ns "SEARCH_SIMPLE" ssearch

@@ -6,27 +6,6 @@
 
 {%- block body -%}
 
-  <style>
-    /* Mimic Bootstrap .nav-tabs>li(.active)>a 
-    when using radio buttons instead of links in tab headers */
-    .nav-tabs>li>label
-    {
-    display: inline-block;
-    padding: 1em;
-    margin: 0;
-    border: 1px solid transparent;
-    cursor: pointer;
-    position: relative;
-    bottom: -1px;
-    }
-    .nav-tabs>li>label.active
-    {
-    cursor: default;
-    border-color: #ddd;
-    border-bottom-color: white;
-    }
-  </style>
-
   <h1 class="my-3">{{ 'advanced request'|trans|capitalize }}</h1>
 
   {%- set row = "row form-group" -%}

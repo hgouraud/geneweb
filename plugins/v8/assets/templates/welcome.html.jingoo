@@ -1,6 +1,0 @@
-{%- extends 'skeleton.html.jingoo' -%}
-
-{% block body %}
-<h1>Hello, {{ env.n }}</h1>
-<p>{{ asset ('test') }}</p>
-{% endblock %}
