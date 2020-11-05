@@ -3,7 +3,9 @@
 
 {%- block body %}
 
-<div class="row"">
+<h2 class="mt-5 mb-3">{{ 'simple search'|trans(0)|capitalize }}</h2>
+
+<div class="mb-5">
   <form class="my-auto mx-auto w-50" method="get" action="{{ env.prefix }}">
     {{ print_hidden_env () }}
     <input type="hidden" name="m" value="SEARCH_SIMPLE">
@@ -20,7 +22,11 @@
   </form>
 </div>
 
+<h2 class="mt-5 mb-3">{{ 'advanced request'|trans|capitalize }}</h2>
+
+<div class="mb-5">
   {{ print_SEARCH_ADVANCED_FORM_form () }}
+</div>
 
 {% endblock -%}
 

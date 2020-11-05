@@ -12,10 +12,7 @@
     margin-right: .1rem;
 }
 
-/* Mimic Bootstrap .nav-tabs>li(.active)>a 
-    when using radio buttons instead of links in tab headers */
-.nav-tabs>li>label
-{
+.nav-tabs > li > label {
     display: inline-block;
     padding: 1em;
     margin: 0;
@@ -24,9 +21,45 @@
     position: relative;
     bottom: -1px;
 }
-.nav-tabs>li>label.active
-{
+
+.nav-tabs > li > label.active {
     cursor: default;
     border-color: #ddd;
     border-bottom-color: white;
+}
+
+.form-edition .delete_button {
+  position: relative !important;
+  right: 0 !important;
+  float: right !important;
+  top: 3px !important;
+  margin-left: 5px !important;
+}
+
+.form-edition .select_p {
+    float:right ;
+    width: auto ;
+}
+
+.form-edition .witness_wrapper + .witness_wrapper { margin-top:1rem; }
+
+.form-edition .children {
+  counter-reset: children ;
+}
+
+.form-edition .child_wrapper {
+  counter-increment: children ;
+}
+
+.form-edition .child_wrapper::before {
+  content: counter(children) ;
+  position: absolute;
+  top: -1rem;
+  left: calc(-1rem + 15px);
+  width: 2rem;
+  line-height: 2rem;
+  z-index: 1;
+  text-align: center;
+  background-color: white;
+  font-weight: bold;
 }

@@ -58,9 +58,34 @@ let home assets conf base =
   let models = w_default_env assets conf base Tnull in
   interp assets conf "HOME.html.jingoo" models  
 
+let mod_fam assets conf base =
+  assert conf.wizard ;
+  match Util.p_getenv conf.env "i" with
+  | Some i ->
+    let root =
+      match Util.find_person_in_env conf base "p" with
+      | Some p -> Gwxjg.Data.unsafe_mk_person conf base p
+      | None -> Tnull
+    in
+    let ifam = Gwdb.ifam_of_string i in
+    let sfam = UpdateFam.string_family_of conf base ifam in
+    let digest = Tstr (Update.digest_family sfam) in
+    let models =
+      w_default_env assets conf base begin Tpat begin function
+          | "digest" -> digest
+          | "family" -> Gwxjg.Data.get_n_mk_family conf base ifam @@ Gwdb.foi base ifam
+          | "root" -> root
+          | _ -> raise Not_found
+        end
+      end
+    in
+    interp assets conf "MOD_FAM.html.jingoo" models
+  | _ -> assert false
+
 let ns = "v8"
 
 let () =
-  Gwdlib.GwdPlugin.register ~ns "" home
-; Gwdlib.GwdPlugin.register ~ns "SEARCH_ADVANCED" asearch
-; Gwdlib.GwdPlugin.register ~ns "SEARCH_SIMPLE" ssearch
+(*   Gwdlib.GwdPlugin.register ~ns "" home
+ * ; *) Gwdlib.GwdPlugin.register ~ns "SEARCH_ADVANCED" asearch
+      ; Gwdlib.GwdPlugin.register ~ns "SEARCH_SIMPLE" ssearch
+      ; Gwdlib.GwdPlugin.register ~ns "MOD_FAM" mod_fam
