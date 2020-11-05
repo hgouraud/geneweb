@@ -338,57 +338,50 @@ let compare_after_particle particles s1 s2 =
   loop (String.length p1) (String.length p2)
 
 let input_lexicon lang ht open_fname =
-  try
-    let ic = open_fname () in
-    let lang =
-      match String.index_opt lang '.' with
+  let ic = open_fname () in
+  let lang =
+    match String.index_opt lang '.' with
+      Some i -> String.sub lang 0 i
+    | None -> lang
+  in
+  let derived_lang =
+    match String.index_opt lang '-' with
+      Some i -> String.sub lang 0 i
+    | None ->
+      match String.index_opt lang '_' with
         Some i -> String.sub lang 0 i
-      | None -> lang
-    in
-    let derived_lang =
-      match String.index_opt lang '-' with
-        Some i -> String.sub lang 0 i
-      | None ->
-          match String.index_opt lang '_' with
-            Some i -> String.sub lang 0 i
-          | None -> ""
-    in
-    try
-      begin try
-        while true do
-          let k =
-            let rec find_key line =
-              if String.length line < 4 then find_key (input_line ic)
-              else if String.sub line 0 4 <> "    " then
-                find_key (input_line ic)
-              else line
+      | None -> ""
+  in
+  try while true do
+      let k =
+        let rec find_key line =
+          if String.length line < 4
+          then find_key (input_line ic)
+          else if String.sub line 0 4 <> "    "
+          then find_key (input_line ic)
+          else line
+        in
+        find_key (input_line ic)
+      in
+      let k = String.sub k 4 (String.length k - 4) in
+      let rec loop line =
+        match String.index_opt line ':' with
+        | Some i ->
+          let line_lang = String.sub line 0 i in
+          if line_lang = lang || line_lang = derived_lang
+          then begin
+            let v =
+              if i + 1 = String.length line then ""
+              else String.sub line (i + 2) (String.length line - i - 2)
             in
-            find_key (input_line ic)
-          in
-          let k = String.sub k 4 (String.length k - 4) in
-          let rec loop line =
-            match String.index_opt line ':' with
-              Some i ->
-                let line_lang = String.sub line 0 i in
-                if line_lang = lang ||
-                   line_lang = derived_lang && not (Hashtbl.mem ht k)
-                then
-                  begin let v =
-                    if i + 1 = String.length line then ""
-                    else String.sub line (i + 2) (String.length line - i - 2)
-                  in
-                    Hashtbl.add ht k v
-                  end;
-                loop (input_line ic)
-            | None -> ()
-          in
+            Hashtbl.replace ht k v
+          end;
           loop (input_line ic)
-        done
-      with End_of_file -> ()
-      end;
-      close_in ic
-    with e -> close_in ic; raise e
-  with Sys_error _ -> ()
+        | None -> ()
+      in
+      loop (input_line ic)
+    done
+  with End_of_file -> close_in ic
 
 let array_to_list_map fn a =
   Array.fold_right (fun x acc -> fn x :: acc) a []

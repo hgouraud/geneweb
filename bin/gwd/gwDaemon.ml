@@ -1127,10 +1127,13 @@ let make_conf from_addr request script_name env =
     with Not_found -> !default_lang
   in
   let lexicon = input_lexicon (if lang = "" then default_lang else lang) in
-  List.iter
-    (fun fname ->
-       add_lexicon fname (if lang = "" then default_lang else lang) lexicon)
-    !lexicon_list;
+  let rec rev_iter fn = function
+    | [] -> ()
+    | hd :: tl -> rev_iter fn tl ; fn hd
+  in
+  rev_iter begin fun fname ->
+    add_lexicon fname (if lang = "" then default_lang else lang) lexicon
+  end !lexicon_list;
   (* A l'initialisation de la config, il n'y a pas de sosa_ref. *)
   (* Il sera mis à jour par effet de bord dans request.ml       *)
   let default_sosa_ref = Gwdb.dummy_iper, None in
