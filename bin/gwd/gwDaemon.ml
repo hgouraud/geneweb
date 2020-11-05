@@ -210,6 +210,13 @@ let add_lexicon fname lang ht =
   Mutil.input_lexicon lang ht
     (fun () -> Secure.open_in (Util.search_in_lang_path fname))
 
+let register_plugin dir =
+  let assets = Filename.concat dir "assets" in
+  GwdPlugin.assets := assets ;
+  Secure.add_lang_path assets ;
+  Dynlink.loadfile (Filename.concat dir "plugin.cmxs") ;
+  GwdPlugin.assets := ""
+
 let alias_lang lang =
   if String.length lang < 2 then lang
   else
@@ -1133,7 +1140,17 @@ let make_conf from_addr request script_name env =
   in
   rev_iter begin fun fname ->
     add_lexicon fname (if lang = "" then default_lang else lang) lexicon
-  end !lexicon_list;
+  end !lexicon_list ;
+  List.iter begin fun dir ->
+    let lex_dir = Filename.concat (Filename.concat dir "assets") "lex" in
+    let lex = Sys.readdir lex_dir in
+    Array.sort compare lex ;
+    Array.iter begin fun f ->
+      let f = Filename.concat lex_dir f in
+      if not (Sys.is_directory f)
+      then Mutil.input_lexicon lang lexicon (fun () -> open_in f)
+    end lex
+  end !plugins ;
   (* A l'initialisation de la config, il n'y a pas de sosa_ref. *)
   (* Il sera mis à jour par effet de bord dans request.ml       *)
   let default_sosa_ref = Gwdb.dummy_iper, None in
@@ -1810,18 +1827,6 @@ let make_cnt_dir x =
       Wserver.sock_out := Filename.concat x "gwd.sou"
     end;
   Util.cnt_dir := x
-
-let register_plugin dir =
-  let assets = Filename.concat dir "assets" in
-  GwdPlugin.assets := assets ;
-  Secure.add_lang_path assets ;
-  let lexicons = Filename.concat assets "lex" |> Sys.readdir in
-  Array.sort compare lexicons ;
-  Array.iter begin fun f ->
-    if not (Sys.is_directory f) then lexicon_list := f :: !lexicon_list
-  end lexicons ;
-  Dynlink.loadfile (Filename.concat dir "plugin.cmxs") ;
-  GwdPlugin.assets := ""
 
 let main ~speclist () =
   if Sys.unix then ()

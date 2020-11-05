@@ -1,0 +1,80 @@
+    advanced_search_sosa_checkbox
+de: Begrenzt auf die direkten Vorfahren der Ausgangsperson (Sosa)
+en: limit to the direct ancestry of the root person (Sosa/Ahnentafel)
+es: limitar a los antepasados directos de la persona tronco (Sosa)
+fi: rajaa suoraan juurihenkilön esivanhempaan (Sosa/Ahnentafel)
+fr: limiter aux ancêtres directs de la souche (sosas)
+it: limitare agli avi diretti della persona stipite (Sosa)
+nl: beperken tot de rechtstreekse voorouders van de bronpersoon (Sosa)
+no: begrens til direkte stamfar til rotpersonen (Sosa/Ahnentafel)
+pt: limitar aos antepassados directos da pessoa raiz da árvore (Sosa/Ahnentafel)
+sv: begränsa till direkta förfäder till rotpersonen (Sosa/Ahnentafel)
+
+    apply modifications
+en: apply modifications
+fr: appliquer les modifications
+
+    h_advanced_or
+de: Einzelpersonen, passend zu mindestens einem der Ereignisse
+en: individuals related to at least one event
+es: Individuos correspondientes a menos de uno de ese eventos
+fi: henkilöt, jotka liittyvät ainakin yhteen tapahtumaan
+fr: individus correspondant à au moins un des événements
+it: individui corrispondenti a almeno uno di questi eventi
+nl: personen die minstens met één van de evenementen overeenkomen
+no: personer relatert til minst en hendelse
+pt: pessoas relacionadas com pelo menos um evento
+sv: individer relaterade till åtminstone en händelse
+
+    h_advanced_and
+de: Einzelpersonen, passend zu allen Ereignissen
+en: individuals related to all the events
+es: individuos correspondientes a todos los eventos
+fi: kaikkiin tapahtumiin liittyvät henkilöt
+fr: individus correspondant à tous les événements
+it: individui corrispondenti a tutti questi eventi
+nl: personen die overeenkomen met alle evenementen
+no: personer relatert til alle hendelsene
+pt: pessoas relacionadas com todos os eventos
+sv: individer relaterade till alla händelser
+
+    indifferent
+de: gleichgültig
+en: all
+es: indiferente
+fi: yhdentekevä
+fr: indifférent
+it: indifferente
+nl: onverschillig
+no: uviktig
+pt: indiferente
+sv: oviktigt
+
+    list
+af: lys
+bg: списък
+br: roll
+ca: llistat
+co: lista
+cs: seznam
+da: liste
+de: Liste
+en: list
+eo: tabelo
+es: lista
+et: nimekiri
+fi: lista
+fr: liste
+he:  רשימה
+is: listi
+it: lista
+lv: saraksts
+nl: lijst
+no: liste
+oc: lista
+pl: lista
+pt: lista
+
+    settings
+en: settings
+fr: réglages
