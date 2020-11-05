@@ -1815,6 +1815,11 @@ let register_plugin dir =
   let assets = Filename.concat dir "assets" in
   GwdPlugin.assets := assets ;
   Secure.add_lang_path assets ;
+  let lexicons = Filename.concat assets "lex" |> Sys.readdir in
+  Array.sort compare lexicons ;
+  Array.iter begin fun f ->
+    if not (Sys.is_directory f) then lexicon_list := f :: !lexicon_list
+  end lexicons ;
   Dynlink.loadfile (Filename.concat dir "plugin.cmxs") ;
   GwdPlugin.assets := ""
 
