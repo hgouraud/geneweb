@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ asset ('bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset ('fontawesome/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset ('css/v8.css') }}">
-    <title>{{ base.name }} - {% block title %}GeneWeb{% endblock %}</title>
+    <title>{{ BASE.name }} - {% block title %}GeneWeb{% endblock %}</title>
   </head>
 
   <body>
