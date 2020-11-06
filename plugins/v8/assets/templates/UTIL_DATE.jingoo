@@ -28,3 +28,26 @@
     {%- default -%}{{ '' }}
   {%- endswitch -%}
 {%- endfunction -%}
+
+{% function string_of_age(dmy) -%}
+  {%- if dmy.day == 0 %}
+    {%- if dmy.year >= 2 %}{{ dmy.year + '&nbsp;' + ('years old'|trans) }}
+    {%- elif dmy.year > 0 or dmy.month > 1 %}{{ (dmy.year * 12 + dmy.month) + '&nbsp;' + ('months old'|trans) }}
+    {%- elif dmy.month == 1 %}{{ 'one month old'|trans }}
+    {%- else %}{{ 'less than one month old'|trans }}
+    {%- endif -%}
+  {%- elif dmy.month == 0 %}
+    {%- if dmy.year > 1 %}{{ dmy.year + '&nbsp;' + ('years old'|trans) }}
+    {%- elif dmy.year == 1 %}{{ 'one year old'|trans }}
+    {%- else %}{{ 'birth'|trans }}
+    {%- endif -%}
+  {%- else -%}
+    {%- if dmy.year >= 2 %}{{ dmy.year + '&nbsp;' + ('years old'|trans) }}
+    {%- elif dmy.year > 0 or dmy.month > 1 %}{{ (dmy.year * 12 + dmy.month) + '&nbsp;' + ('months old'|trans) }}
+    {%- elif dmy.month == 1 %}{{ 'one month old'|trans }}
+    {%- elif dmy.day >= 2 %}{{ dmy.day + '&nbsp;' + ('days old'|trans) }}
+    {%- elif dmy.day == 1 %}{{ 'one day old'|trans }}
+    {%- else %}{{ 0 }}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfunction -%}

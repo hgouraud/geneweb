@@ -56,7 +56,7 @@ let ssearch assets conf base =
 
 let home assets conf base =
   let models = w_default_env assets conf base Tnull in
-  interp assets conf "HOME.html.jingoo" models  
+  interp assets conf "HOME.html.jingoo" models
 
 let mod_fam assets conf base =
   assert conf.wizard ;
@@ -82,6 +82,23 @@ let mod_fam assets conf base =
     interp assets conf "MOD_FAM.html.jingoo" models
   | _ -> assert false
 
+let warning assets conf base =
+  let ht = Hashtbl.create 1024 in
+  Check.check_base base ignore (fun x -> Hashtbl.replace ht x ()) ignore ;
+  let warnings =
+    Hashtbl.fold begin fun w () acc ->
+      Gwxjg.Data.mk_warning conf base w :: acc
+    end ht []
+  in
+  let models =
+    let warnings = Tlist warnings in
+    w_default_env assets conf base begin Tpat begin function
+        | "warnings" -> warnings
+        | _ -> raise Not_found
+      end end
+  in
+  interp assets conf "WARNINGS.html.jingoo" models
+
 let ns = "v8"
 
 let () =
@@ -89,3 +106,4 @@ let () =
  * ; *) Gwdlib.GwdPlugin.register ~ns "SEARCH_ADVANCED" asearch
       ; Gwdlib.GwdPlugin.register ~ns "SEARCH_SIMPLE" ssearch
       ; Gwdlib.GwdPlugin.register ~ns "MOD_FAM" mod_fam
+      ; Gwdlib.GwdPlugin.register ~ns "WARNINGS" warning

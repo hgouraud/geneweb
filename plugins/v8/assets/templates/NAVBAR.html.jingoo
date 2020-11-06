@@ -38,7 +38,6 @@
           </form>
           <div class="dropdown-divider"></div>
           {{ dropdownItem ('fa-search-plus', 'advanced request'|trans(0), env.prefix + 'm=SEARCH_ADVANCED') }}
-          {{ dropdownItem ('fa-users', 'list_ind_title'|trans, env.prefix + 'm=LIST_IND') }}
           {{ dropdownItem ('fa-globe', 'places'|trans + ' ' + 'by'|trans + ' ' + 'surname/surnames'|trans(0), env.prefix + 'm=PS&bi=on&bp=on&de=on&bu=on&ma=on') }}
           <div class="dropdown-divider"></div>
           <div class="dropdown-header">
