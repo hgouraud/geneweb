@@ -99,6 +99,21 @@ let warning assets conf base =
   in
   interp assets conf "WARNINGS.html.jingoo" models
 
+let ind assets conf base =
+  let root =
+    match Util.find_person_in_env conf base "p" with
+    | Some p -> Gwxjg.Data.unsafe_mk_person conf base p
+    | None -> assert false
+  in
+  let models =
+    w_default_env assets conf base begin Tpat begin function
+        | "root" -> root
+        | _ -> raise Not_found
+      end
+    end
+  in
+  interp assets conf "IND.html.jingoo" models
+
 let ns = "v8"
 
 let () =
@@ -107,3 +122,4 @@ let () =
       ; Gwdlib.GwdPlugin.register ~ns "SEARCH_SIMPLE" ssearch
       ; Gwdlib.GwdPlugin.register ~ns "MOD_FAM" mod_fam
       ; Gwdlib.GwdPlugin.register ~ns "WARNINGS" warning
+      ; Gwdlib.GwdPlugin.register ~ns "IND" ind

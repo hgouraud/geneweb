@@ -580,9 +580,7 @@
       if (m == i+1) { option.setAttribute("selected", "selected") } ;
       select.appendChild (option) ;
     }
-    console.log ("1") ;
     var e = document.getElementById (e) ;
-    console.log ("2") ;
     e.parentNode.replaceChild (select, e) ;
 {%- endmacro changeCalendar -%}
 
@@ -630,15 +628,9 @@
   }
 
   function update_fevent_label(xcnt) {
-    console.log ("3") ;
     var selector = document.getElementById('fevent_select' + xcnt);
-    console.log ("4") ;
     var label = document.getElementById('fevent_label' + xcnt);
-    console.log ("5") ;
     var input = document.getElementById('e_name' + xcnt);
-    console.log ("6") ;
-    console.log (selector.value) ;
-    console.log (input.value) ;
     if (selector.value == "") {
       input.style.display = 'inline';
       label.innertText = input.value || "{{ 'event/events'|trans(0)|capitalize }}" ;
@@ -647,23 +639,15 @@
       input.value = selector.value ;
       input.style.display = 'none';
     }
-    console.log (selector.value) ;
-    console.log (input.value) ;
   }
 
   function update_person_label (prefix) {
-    console.log ("7") ;
     var n = document.getElementById(prefix + '_sn').value || "" ;
-    console.log ("8") ;
     var p = document.getElementById(prefix + '_fn').value || "" ;
-    console.log ("9") ;
     var oc = document.getElementById(prefix + '_occ').value || 0 ;
-    console.log ("10") ;
     if (n || p ) {
-    console.log ("11") ;
       document.getElementById(prefix + '_person_label').innerText =
         p + '.' + oc + ' ' + n ;
-    console.log ("12") ;
     }
   }
 
@@ -678,11 +662,8 @@
   }
 
   function aux_API_AUTO_COMPLETE (input, datalist, field) {
-    console.log ("13") ;
     var input = document.getElementById(input) ;
-    console.log ("14") ;
     var dataList = document.getElementById(datalist) ;
-    console.log ("15") ;
     var value = input.value ;
     var data = { "field": field, "limit":10 } ;
     if (field == "place") {
@@ -853,15 +834,10 @@
   }
 
   function show_d2 (d) {
-    console.log ("16") ;
     var d_select = document.getElementById(d+'_select');
-    console.log ("17") ;
     var d_or = document.getElementById(d+'_oryear');
-    console.log ("18") ;
     var d_span_or = document.getElementById(d+'_oryear_sp');
-    console.log ("19") ;
     var d_span_between = document.getElementById(d+'_yearint_sp');
-    console.log ("20") ;
 
     d_or.style.display = 'none';
     d_span_or.style.display = 'none';
@@ -895,4 +871,4 @@
 <div id="ghost_witness" style="display:none">{{ print_witness_form (0, 0, null) }}</div>
 <div id="ghost_child" style="display:none">{{ print_child_form (0, null) }}</div>
 
-{% endblock -%}
+{%- endblock -%}
