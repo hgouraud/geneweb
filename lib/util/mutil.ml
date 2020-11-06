@@ -341,7 +341,7 @@ let input_lexicon lang ht open_fname =
   let ic = open_fname () in
   let lang =
     match String.index_opt lang '.' with
-      Some i -> String.sub lang 0 i
+    | Some i -> String.sub lang 0 i
     | None -> lang
   in
   let derived_lang =

@@ -206,9 +206,7 @@ let input_lexicon lang =
   ht
 
 let add_lexicon fname lang ht =
-  let fname = Filename.concat "lang" fname in
-  Mutil.input_lexicon lang ht
-    (fun () -> Secure.open_in (Util.search_in_lang_path fname))
+  Mutil.input_lexicon lang ht (fun () -> Secure.open_in fname)
 
 let register_plugin dir =
   let assets = Filename.concat dir "assets" in
@@ -1133,24 +1131,22 @@ let make_conf from_addr request script_name env =
       if x = "" then !default_lang else x
     with Not_found -> !default_lang
   in
-  let lexicon = input_lexicon (if lang = "" then default_lang else lang) in
-  let rec rev_iter fn = function
-    | [] -> ()
-    | hd :: tl -> rev_iter fn tl ; fn hd
-  in
-  rev_iter begin fun fname ->
-    add_lexicon fname (if lang = "" then default_lang else lang) lexicon
-  end !lexicon_list ;
+  let lexicon_lang = if lang = "" then default_lang else lang in
+  let lexicon = input_lexicon lexicon_lang in
   List.iter begin fun dir ->
     let lex_dir = Filename.concat (Filename.concat dir "assets") "lex" in
     let lex = Sys.readdir lex_dir in
     Array.sort compare lex ;
     Array.iter begin fun f ->
       let f = Filename.concat lex_dir f in
-      if not (Sys.is_directory f)
-      then Mutil.input_lexicon lang lexicon (fun () -> open_in f)
+      if not (Sys.is_directory f) then lexicon_list := f :: !lexicon_list
     end lex
   end !plugins ;
+  let rec rev_iter fn = function
+    | [] -> ()
+    | hd :: tl -> rev_iter fn tl ; fn hd
+  in
+  rev_iter (fun fname -> add_lexicon fname lexicon_lang lexicon) !lexicon_list ;
   (* A l'initialisation de la config, il n'y a pas de sosa_ref. *)
   (* Il sera mis à jour par effet de bord dans request.ml       *)
   let default_sosa_ref = Gwdb.dummy_iper, None in
@@ -1486,7 +1482,6 @@ let image_request script_name env =
       let _ = ImageDisplay.print_image_file fname in true
   | _ ->
       let s = script_name in
-      print_endline @@ Printf.sprintf "%S: %s" __LOC__ s  ;
       if Mutil.start_with "images/" 0 s then
         let i = String.length "images/" in
         let fname = String.sub s i (String.length s - i) in
