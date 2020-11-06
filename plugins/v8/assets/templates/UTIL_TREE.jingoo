@@ -1,4 +1,4 @@
-{%- 'UTIL_NAVBAR.jingoo' -%}
+{%- include 'UTIL_NAVBAR.jingoo' -%}
 
 {%- macro itree_print_person (p) -%}
 <div class="tree-person">
@@ -112,7 +112,7 @@
     </div>
   </div>
 
-  <script src="js/panzoom.min.js"></script>
+  <script src="{{ asset ('panzoom/panzoom.min.js') }}"></script>
 
   <script>
     const element = document.getElementById('panzoom') ;

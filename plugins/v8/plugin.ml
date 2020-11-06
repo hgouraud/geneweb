@@ -99,9 +99,9 @@ let warning assets conf base =
   in
   interp assets conf "WARNINGS.html.jingoo" models
 
-let ind assets conf base =
+let itree assets conf base =
   let root =
-    match Util.find_person_in_env conf base "p" with
+    match Util.find_person_in_env conf base "" with
     | Some p -> Gwxjg.Data.unsafe_mk_person conf base p
     | None -> assert false
   in
@@ -122,4 +122,4 @@ let () =
       ; Gwdlib.GwdPlugin.register ~ns "SEARCH_SIMPLE" ssearch
       ; Gwdlib.GwdPlugin.register ~ns "MOD_FAM" mod_fam
       ; Gwdlib.GwdPlugin.register ~ns "WARNINGS" warning
-      ; Gwdlib.GwdPlugin.register ~ns "IND" ind
+      ; Gwdlib.GwdPlugin.register ~ns "ITREE" itree

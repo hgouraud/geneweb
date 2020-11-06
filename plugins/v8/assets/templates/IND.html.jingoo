@@ -39,7 +39,7 @@
     <button class="btn" type="button" id="panzoom-controller-zoomout"><i class="fa fa-minus-square"></i></button>
   </div>
 
-  {{ print_itree (root, env.an, env.dn) }}
+  {{ print_itree (M.root, env.an, env.dn) }}
 
   <script>
     document.getElementById('panzoom-controller-reset').addEventListener('click', panzoom.reset)

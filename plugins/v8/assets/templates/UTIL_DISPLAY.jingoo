@@ -41,7 +41,7 @@
 {%- endfunction -%}
 
 {%- function person_href (param=null, p) -%}
-  {{ env.prefix + 'm=IND&i=' + p.iper + (param ? '&' + param|map (join('='))|join ('&') : '') }}
+  {{ env.prefix + 'm=ITREE&i=' + p.iper + (param ? '&' + param|map (join('='))|join ('&') : '') }}
 {%- endfunction -%}
 
 {%- function person_displayed_name (p) -%}
