@@ -1,7 +1,7 @@
 open Geneweb
 
 let ht
-  : (string, (string * (Config.config -> Gwdb.base -> unit))) Hashtbl.t
+  : (string, (string * (Config.config -> Gwdb.base -> bool))) Hashtbl.t
   = Hashtbl.create 0
 
 let assets = ref ""

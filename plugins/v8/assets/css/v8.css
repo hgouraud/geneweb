@@ -225,7 +225,9 @@
 .tree .itm-link::after { display: none ; }
 
 .tree .itm-union > .dropdown-toggle:hover {
-    background: #c8e4f8; color: #000; border: 1px solid #94a0b4;
+    background: #c8e4f8;
+    color: #000;
+    order: 1px solid #94a0b4;
 }
 
 .tree .itm-union >.dropdown-toggle  {
@@ -284,4 +286,24 @@
     top: .5rem ;
     left: .5rem ;
     z-index: 100000 ;
+}
+
+.sosa {
+    background-color: #82af0b;
+    color: white;
+    padding: 1px 5px 1px 18px;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAARCAYAAADUryzEAAABkElEQVQ4ja2UzUsCQRjGuy8IQgRCIAhC4L1Tf0Xdg6CTIFGnQAiWJARDyYsQdLVLrcaqm2ZdBLNCUdJDUUh7Kdh0M9bBXYWng+1sQxoWvTAwzMfvnXnmeWcKE8TR1TJ4gRvZpiYBAIDyfo/Dy6W/A8zIVNfHA1StCbHsRVhygRc4xPLzkGob6PYUBhIvLn4HPLzkEBRn6MTe6RztB1MONJWClYjILKClPdLN5w2eZtQNDeeNLfACh1DGCZXIFJK4WbUAYtn7uXkLANDtKXh+q9HFJkSs+OhYVY5bgIjkBi9w6Bkd5jSx/Dz6AwLd0BBI2hHNehi9KCCQtCMiuQEAhbtdRmW5VYKZZOdkmgL6A2IBolkPthM2EL2Np9cithO24b3Ts+gZHRC9DV7gxp9ArPjACxzO6n4AQ9OUmwdQtSajgVTbGK2BSmSEMk4qpG5oVMyzup8+5ddXMO1NfSC3SgimHCN9EJZcP/vADKK3kbvdxP7FAoWkq2tMZgBMTfxvLfwUKpGZGvgV4Ph6Zex/8AGUF3S83Bn4AgAAAABJRU5ErkJggg==);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    font-style: normal;
+    font-size: 12px;
+    line-height: 15px;
+    display: inline-block;
+}
+
+.sosa-a {
+    color: white !important;
+    font-weight: bold;
 }

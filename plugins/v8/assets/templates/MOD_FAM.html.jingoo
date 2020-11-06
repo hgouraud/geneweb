@@ -223,7 +223,7 @@
         <div class="{{ columns (12, 8, 8) }}">
           <em id="{{ prefix + i }}_person_label">
             {%- if p -%}
-              {{ p.first_name }}.{{ p.occ }} {{ p.surname }}
+              <a href="{{ person_href (p) }}">{{ p.first_name }}.{{ p.occ }} {{ p.surname }}</a>
             {%- endif -%}
           </em>
         </div>

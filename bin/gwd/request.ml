@@ -78,8 +78,8 @@ let family_m conf base =
   then
     let m = Opt.default "" @@ p_getenv conf.env "m" in
     match GwdPlugin.get m with
-    | Some (_ns, fn) -> fn conf base
-    | None ->
+    | Some (_ns, fn) when fn conf base -> ()
+    | _ ->
       let p = match m with
       | "" -> handler._no_mode
       | "A" -> handler.a
@@ -421,8 +421,8 @@ let treat_request conf base =
           | _ -> let r = SrcfileDisplay.incr_welcome_counter conf in log_count r
           end;
           match GwdPlugin.get "" with
-          | Some (_ns, fn) -> fn conf base
-          | None -> SrcfileDisplay.print_start conf base
+          | Some (_ns, fn) when fn conf base -> ()
+          | _ -> SrcfileDisplay.print_start conf base
         end
       else
         begin

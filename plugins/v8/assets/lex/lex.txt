@@ -14,6 +14,10 @@ sv: begränsa till direkta förfäder till rotpersonen (Sosa/Ahnentafel)
 en: apply modifications
 fr: appliquer les modifications
 
+    full-screen
+en: full-screen
+fr: plein écran
+
     h_advanced_or
 de: Einzelpersonen, passend zu mindestens einem der Ereignisse
 en: individuals related to at least one event
