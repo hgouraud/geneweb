@@ -134,6 +134,12 @@
 
 {{ etat_civil (M.root) }}
 
+<!-- FIXME: parent's union FTREE instead -->
+{%- if M.root.parents || M.root.children -%}
+    <h2>{{ 'individule_tree_preview'|trans|capitalize }}</h2>
+    {{ print_itree (M.root, 2, 1) }}
+{%- endif -%}
+
 {%- if M.root.parents -%}
 <div class="card mb-4">
   <div class="card-header">{{ 'parents'|trans|capitalize }}</div>
@@ -204,10 +210,4 @@
       {%- endfor -%}
       </ul>
 {%- endif -%}
-
-{%- if M.root.parents || M.root.children -%}
-    <h2>{{ 'individule_tree_preview'|trans|capitalize }}</h2>
-    {{ print_itree (M.root, 3, 3) }}
-{%- endif -%}
-    
 {%- endblock -%}

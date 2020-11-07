@@ -111,7 +111,7 @@
       <div class="tree"><ul><li>{{ itree_a_descend (root, (dn ? int (dn) : 2), true) }}</li></ul></div>
     </div>
   </div>
-
+</div>
   <script src="{{ asset ('panzoom/panzoom.min.js') }}"></script>
 
   <script>
