@@ -1,4 +1,5 @@
 {%- include 'UTIL_DATE.jingoo' -%}
+{%- include 'UTIL_DATA.jingoo' -%}
 
 {%- function short_dates_text (p, empty = '?') -%}
   {%- set birth = approx_birth (p) -%}
@@ -41,7 +42,7 @@
 {%- endfunction -%}
 
 {%- function person_href (param=null, p) -%}
-  {{ env.prefix + 'm=ITREE&i=' + p.iper + (param ? '&' + param|map (join('='))|join ('&') : '') }}
+  {{ env.prefix + 'i=' + p.iper + (param ? '&' + param|map (join('='))|join ('&') : '') }}
 {%- endfunction -%}
 
 {%- function person_displayed_name (p) -%}
@@ -102,4 +103,8 @@
       </li>
       {%- endfor -%}
   </ul>
+{%- endmacro -%}
+
+{%- macro print_person_short (p) -%}
+  <a href="{{ person_href (p) }}">{{ person_displayed_name (p) }}</a>
 {%- endmacro -%}

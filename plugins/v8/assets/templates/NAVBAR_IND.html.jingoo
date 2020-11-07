@@ -35,6 +35,7 @@
         <div class="dropdown-divider"></div>
         <form class="py-2 px-4" method="get" action="{{ env.prefix }}">
           <input type="hidden" name="m" value="ITREE">
+	  <input type="hidden" name="i" value="{{ M.root.iper }}">
           {%- for (k, v) in (list (conf.env) + list (conf.senv) + list (conf.henv)) | unique -%}
           {%- if k != "an" && k != "dn" && k != "m" %}{{ print_hidden (k, v) }}{% endif -%}
           {%- endfor -%}

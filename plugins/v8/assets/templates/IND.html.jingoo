@@ -1,9 +1,80 @@
+{%- include 'UTIL_HTML.jingoo' -%}
+{%- include 'UTIL_DATA.jingoo' -%}
 {%- include 'UTIL_TREE.jingoo' -%}
 {%- include 'NAVBAR_IND.html.jingoo' -%}
 
 {%- extends "SKELETON.html.jingoo" -%}
 
 {%- block body -%}
+
+{% macro etat_civil (p, place=true) %}
+{%- set bi = find (((x) => (x.kind == 'EPERS_BIRTH')), p.events) -%}
+{%- set ba = find (((x) => (x.kind == 'EPERS_BAPTISM')), p.events) -%}
+{%- set de = find (((x) => (x.kind == 'EPERS_DEATH')), p.events) -%}
+{%- set bu = find (((x) => (x.kind == 'EPERS_BURIAL' || x.kind == 'EPERS_CREMATION')), p.events) -%}
+{%- set t0 = approx_birth (bi, ba) -%}
+<ul>
+  {%- if bi && (bi.date || bi.place) -%}
+  <li>
+    {{ 'born'|trans(p.sex)|capitalize }}
+    {%- if bi.date %} {{ DATE.string_of_ondate (bi.date) }}{%- endif -%}
+    {%- if de == null
+        && bi.date
+        && bi.date.prec == 'sure'
+        && conf.today.day == bi.date.day
+        && conf.today.month == bi.date.month
+        && conf.today.year == bi.date.year
+    %}
+    ({{ 'happy birthday to you!'|trans }})
+    {%- endif -%}
+    {%- if place && bi.place %} - {{ bi.place }}{% endif -%}
+  </li>
+  {%- endif -%}
+  {%- if t0 && t0.day != 0 && t0.month != 0 && t0.prec == 'sure' -%}
+  <li>{{ 'age'|trans|capitalize }}{{ ':'|trans }} {{ DATE.string_of_age (DATE.sub (conf.today, t0)) }}</li>
+  {%- endif -%}
+  {%- if ba -%}
+  <li>
+    {{ 'baptized'|trans(p.sex)|capitalize }}
+    {%- if ba.date %} {{ DATE.string_of_ondate (ba.date) }}{%- endif -%}
+    {%- if place && ba.place %} - {{ ba.place }}{% endif -%}
+  </li>
+  {%- endif -%}
+  {%- if de -%}
+    <li>
+    {{ 'died'|trans(p.sex)|capitalize }}
+    {%- if de.date %} {{ DATE.string_of_ondate (de.date) }}{%- endif -%}
+    {%- if place && de.place %} - {{ de.place }}{% endif -%}
+    {%- if de.date && t0 -%}
+      {%- set da = DATE.sub (t0, de.date) -%}
+      {%- switch (da.prec) -%}
+      {%- case 'sure' -%}
+        {%- if t0.approx -%}{{ 'at the age of (about)'|trans }} {{ DATE.string_of_age (da) }}
+        {%- else -%}{{ 'at the age of (sure)'|trans }} {{ DATE.string_of_age (da) }}
+        {%- endif -%}
+      {%- case 'maybe' -%}{{ 'at the age of (maybe)'|trans }} {{ DATE.string_of_age (da) }}
+      {%- case 'before' -%}{{ 'at the age of (less than)'|trans }} {{ DATE.string_of_age (da) }}
+      {%- case 'after' -%}{{ 'at the age of (more than)'|trans }} {{ DATE.string_of_age (da) }}
+      {%- endswitch -%}
+    {%- endif -%}
+  </li>
+  {%- endif -%}
+  {%- if bu -%}
+  <li>
+    {%- if bu.kind == 'EPERS_BURIAL' -%}
+    {{ 'buried'|trans(p.sex)|capitalize }}
+    {% else %}
+    {{ 'cremated'|trans(p.sex)|capitalize }}
+    {%- endif -%}
+    {%- if bu.date %} {{ DATE.string_of_ondate (bu.date) }}{%- endif -%}
+    {%- if place && bu.place %} - {{ bu.place }}{% endif -%}
+  </li>
+  {%- endif -%}
+  {%- if (conf.friend || conf.wizard) && p.consanguinity >= 0.0001 -%}
+  <li>{{ 'consanguinity'|trans|capitalize }}{{ ':'|trans }} {{ p.consanguinity }}</li>
+  {%- endif -%}
+</ul>
+{%- endmacro -%}
 
 <h1>
   {%- if M.root.sex == 0 -%}
@@ -42,5 +113,36 @@
   <br>
   {%- endif -%}
 </p>
+
+{{ etat_civil (M.root) }}
+
+{%- if M.root.parents -%}
+  <h2>{{ 'parents'|trans|capitalize }}</h2>
+  <div class="row">
+    <div class="{{ columns (12, 6, 6) }}">
+      {{ print_person_short (M.root.father) }}
+      {{ etat_civil (M.root.father, place = false) }}
+    </div>
+    <div class="{{ columns (12, 6, 6) }}">
+      {{ print_person_short (M.root.mother) }}
+      {{ etat_civil (M.root.mother, place = false) }}
+    </div>
+  </div>
+  {%- if length (M.root.parents.children) > 1 -%}
+    <h2>{{ conf.benv['full_fratrie'] == "yes" ? 'fratrie'|trans|capitalize : 'siblings'|trans|capitalize }}</h2>
+    <ul>
+      {%- for c in M.root.parents.children -%}
+        {%- if c.iper == M.root.iper -%}
+          <li><em>{{ fso (M.root) }}</em></li>
+        {%- else -%}
+          <li>
+	    {{ print_person_short (c) }}
+	    {{ etat_civil (c, place = false) }}
+	  </li>
+        {%- endif -%}
+      {%- endfor -%}
+  </ul>
+  {%- endif -%}
+{%- endif -%}
 
 {%- endblock -%}

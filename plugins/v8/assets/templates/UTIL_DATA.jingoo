@@ -1,12 +1,12 @@
-{%- function approx_birth (p) -%}
-  {%- if p.birth_date && p.birth_date.year -%}
-    {{ p.birth_date }}
-  {%- elif p.baptism_date && p.baptism_date.year -%}
-    {{ { prec: p.baptism_date.prec,
-         year: p.baptism_date.year,
-         month: p.baptism_date.month,
-         day: p.baptism_date.day,
-         d2: p.baptism_date.d2,
+{%- function approx_birth (bi, ba) -%}
+  {%- if bi.date && bi.date.year -%}
+    {{ bi.date }}
+  {%- elif ba.date && ba.date.year -%}
+    {{ { prec: ba.date.prec,
+         year: ba.date.year,
+         month: ba.date.month,
+         day: ba.date.day,
+         d2: ba.date.d2,
          approx: true } }}
   {%- endif -%}
 {%- endfunction -%}
@@ -27,3 +27,4 @@
 {%- function get_union (p1, p2) -%}
   {{ find (compose (eq (p2.iper), attr ('spouse.iper')), p1.families) }}
 {%- endfunction %}
+
