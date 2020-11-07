@@ -76,6 +76,24 @@
 </ul>
 {%- endmacro -%}
 
+{%- macro hsiblings (xxx) -%}
+<div class="{{ columns (12, 6, 6) }}">
+  <div>{{ "on %s's side"|trans(s=fso(xxx))|capitalize }}</div>
+  <ul>
+    {%- for f in xxx.families -%}
+      {%- if f.ifam != M.root.parents.ifam -%}
+        {%- for c in f.children -%}
+        <li>
+          {{ print_person_short (c) }}
+          {{ etat_civil (c, place = false) }}
+        </li>
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+</div>
+{%- endmacro -%}
+
 <h1>
   {%- if M.root.sex == 0 -%}
   <i class="fas fa-mars"></i>
@@ -102,11 +120,11 @@
   {%- if M.root.sosa -%}
   <em class="sosa">
     <span title="{{ 'direct ancestor of %s'|trans(s=fso (env.sosa_ref))|capitalize }}, {% -%}
-		 {{ 'Sosa'|trans }} {{ M.root.sosa }}">
+                 {{ 'Sosa'|trans }} {{ M.root.sosa }}">
       {{ 'Sosa'|trans|capitalize }}{{ ':'|trans }}
       <a class="sosa-a"
-	 href="{{ env.prefix }}m=RL&i1={{ M.root.iper }}&i2={{ env.sosa_ref.iper }}&b1=1&b2={{ M.root.sosa }}">
-	{{ M.root.sosa }}
+         href="{{ env.prefix }}m=RL&i1={{ M.root.iper }}&i2={{ env.sosa_ref.iper }}&b1=1&b2={{ M.root.sosa }}">
+        {{ M.root.sosa }}
       </a>
     </span>
   </em>
@@ -136,12 +154,20 @@
           <li><em>{{ fso (M.root) }}</em></li>
         {%- else -%}
           <li>
-	    {{ print_person_short (c) }}
-	    {{ etat_civil (c, place = false) }}
-	  </li>
+            {{ print_person_short (c) }}
+            {{ etat_civil (c, place = false) }}
+          </li>
         {%- endif -%}
       {%- endfor -%}
-  </ul>
+    </ul>
+  {%- endif -%}
+  {%- set hhsiblings = exists ((f) => f.ifam != M.root.parents.ifam && f.children) -%}
+  {%- if hhsiblings (M.root.father.families) || hhsiblings (M.root.mother.families) -%}
+    <h2>{{ 'half siblings'|trans|capitalize }}</h2>
+    <div class="row">
+      {%- if hhsiblings (M.root.father.families) -%}{{ hsiblings (M.root.father) }}{%- endif -%}
+      {%- if hhsiblings (M.root.mother.families) -%}{{ hsiblings (M.root.mother) }}{%- endif -%}
+    </div>
   {%- endif -%}
 {%- endif -%}
 
