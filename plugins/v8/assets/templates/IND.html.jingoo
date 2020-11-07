@@ -76,8 +76,8 @@
 </ul>
 {%- endmacro -%}
 
-{%- macro hsiblings (xxx) -%}
-<div class="{{ columns (12, 6, 6) }}">
+{%- macro hsiblings (xxx, class) -%}
+<div class="{{ columns (12, 6, 6) }}{{ class }}">
   <div>{{ "on %s's side"|trans(s=fso(xxx))|capitalize }}</div>
   <ul>
     {%- for f in xxx.families -%}
@@ -135,20 +135,25 @@
 {{ etat_civil (M.root) }}
 
 {%- if M.root.parents -%}
-  <h2>{{ 'parents'|trans|capitalize }}</h2>
-  <div class="row">
+<div class="card mb-4">
+  <div class="card-header">{{ 'parents'|trans|capitalize }}</div>
+  <div class="card-body row">
     <div class="{{ columns (12, 6, 6) }}">
       {{ print_person_short (M.root.father) }}
       {{ etat_civil (M.root.father, place = false) }}
     </div>
-    <div class="{{ columns (12, 6, 6) }}">
+    <div class="{{ columns (12, 6, 6) }} border-left">
       {{ print_person_short (M.root.mother) }}
       {{ etat_civil (M.root.mother, place = false) }}
     </div>
   </div>
+</div>
   {%- if length (M.root.parents.children) > 1 -%}
-    <h2>{{ conf.benv['full_fratrie'] == "yes" ? 'fratrie'|trans|capitalize : 'siblings'|trans|capitalize }}</h2>
-    <ul>
+    <div class="card mb-4">
+      <div class="card-header">
+	{{ conf.benv['full_fratrie'] == "yes" ? 'fratrie'|trans|capitalize : 'siblings'|trans|capitalize }}
+      </div>
+      <ul class="card-body">
       {%- for c in M.root.parents.children -%}
         {%- if c.iper == M.root.iper -%}
           <li><em>{{ fso (M.root) }}</em></li>
@@ -159,16 +164,50 @@
           </li>
         {%- endif -%}
       {%- endfor -%}
-    </ul>
+      </ul>
+    </div>
   {%- endif -%}
   {%- set hhsiblings = exists ((f) => f.ifam != M.root.parents.ifam && f.children) -%}
   {%- if hhsiblings (M.root.father.families) || hhsiblings (M.root.mother.families) -%}
-    <h2>{{ 'half siblings'|trans|capitalize }}</h2>
-    <div class="row">
-      {%- if hhsiblings (M.root.father.families) -%}{{ hsiblings (M.root.father) }}{%- endif -%}
-      {%- if hhsiblings (M.root.mother.families) -%}{{ hsiblings (M.root.mother) }}{%- endif -%}
+    <div class="card mb-4">
+      <div class="card-header">
+	{{ 'half siblings'|trans|capitalize }}
+      </div>
+      <div class="card-body row">
+	{%- if hhsiblings (M.root.father.families) -%}
+	{{ hsiblings (M.root.father) }}
+	{%- endif -%}
+	{%- if hhsiblings (M.root.mother.families) -%}
+	{{ hsiblings (M.root.mother, hhsiblings (M.root.father.families) ? ' border-left' : '') }}
+	{%- endif -%}
+      </div>
     </div>
   {%- endif -%}
 {%- endif -%}
 
+{%- if M.root.related || M.root.relations -%}
+    <h2>{{ 'relation/relations'|trans|capitalize }}</h2>
+    <ul>
+      {%- for r in M.root.related -%}
+      <li>
+	<strong>{{ lex_related_kind (r)|capitalize }}{{ ':'|trans }}</strong>
+	{{ print_person_short (r) }}
+        {{ etat_civil (r, place = false) }}
+      </li>
+      {%- endfor -%}
+      {%- for r in M.root.relations -%}
+      <li>
+	<strong>{{ lex_witness_kind (M.root, r)|capitalize }}{{ ':'|trans }}</strong>
+	{{ print_person_short (r) }}
+        {{ etat_civil (r, place = false) }}
+      </li>
+      {%- endfor -%}
+      </ul>
+{%- endif -%}
+
+{%- if M.root.parents || M.root.children -%}
+    <h2>{{ 'individule_tree_preview'|trans|capitalize }}</h2>
+    {{ print_itree (M.root, 3, 3) }}
+{%- endif -%}
+    
 {%- endblock -%}

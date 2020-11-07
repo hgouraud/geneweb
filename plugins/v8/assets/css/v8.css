@@ -153,21 +153,8 @@
 }
 
 .ascend .tree li .tree-person:hover,
-.ascend .tree li .tree-person:hover+ul li .tree-person,
-.descend .tree li .tree-person:hover,
-.descend .tree li .tree-person:hover+ul li .tree-person {
+.descend .tree li .tree-person:hover {
     background: #c8e4f8; color: #000; border: 1px solid #94a0b4;
-}
-
-.ascend .tree li .tree-person:hover+ul li::after,
-.ascend .tree li .tree-person:hover+ul li::before,
-.ascend .tree li .tree-person:hover+ul::before,
-.ascend .tree li .tree-person:hover+ul ul::before,
-.descend .tree li .tree-person:hover+ul li::after,
-.descend .tree li .tree-person:hover+ul li::before,
-.descend .tree li .tree-person:hover+ul::before,
-.descend .tree li .tree-person:hover+ul ul::before {
-    border-color:  #94a0b4;
 }
 
 .ascend .tree > ul,

@@ -54,6 +54,18 @@ no: uviktig
 pt: indiferente
 sv: oviktigt
 
+    individule_tree_preview
+de: überblick vom Stammbaum
+en: Family Tree Preview
+es: Ver árbol
+fi: Yleiskatsaus sukutauluun
+fr: aperçu de l'arbre
+it: anteprima dell’albero
+nl: overzicht van de stamboom
+no: oversikt over anetavlen
+pt: ver árvore
+sv: översikt över antavlan
+
     list
 af: lys
 bg: списък

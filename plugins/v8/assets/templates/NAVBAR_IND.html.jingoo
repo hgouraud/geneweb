@@ -4,7 +4,7 @@
 {% macro pagebar () %}
   {% if M.root %}
   <strong>{{ fso (M.root) }}</strong>
-  <i class="fa fa-chevron-right ml-3"></i>
+  <i class="fa fa-chevron-right mx-3"></i>
   <ul class="nav nav-tabs" role="tablist">
     {{ navItem ('fa-user-alt', 'vital record'|trans|capitalize, env.prefix + M.root.access, not env.m) }}
     {%- if conf.wizard -%}

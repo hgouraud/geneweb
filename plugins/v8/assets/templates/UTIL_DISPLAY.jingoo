@@ -108,3 +108,27 @@
 {%- macro print_person_short (p) -%}
   <a href="{{ person_href (p) }}">{{ person_displayed_name (p) }}</a>
 {%- endmacro -%}
+
+{%- function lex_related_kind (r) -%}
+{%- switch (r.kind) -%}
+{%- case "ADOPTION" -%}
+  {{ "adoptive father/adoptive mother/adoptive parents"|trans(r.sex) }}
+{%- case "RECOGNITION" -%}
+  {{ "recognizing father/recognizing mother/recognizing parents"|trans(r.sex) }}
+{%- case "CANDIDATEPARENT" -%}
+  {{ "candidate father/candidate mother/candidate parents"|trans(r.sex) }}
+{%- case "GODPARENT" -%}
+  {{ "godfather/godmother/godparents"|trans(r.sex) }}
+{%- case "FOSTERPARENT" -%}
+  {{ "foster father/foster mother/foster parents"|trans(r.sex) }}
+{%- endswitch -%}
+{%- endfunction -%}
+
+{%- function lex_witness_kind (p, r) -%}
+{%- set res = fold (((acc, e) => fold (((acc, w) => w.iper == p.iper ? [w] + acc : acc), acc, e.witnesses)), [], r.events) -%}
+{%- if exists (w => w.kind == 'WITNESS_GODPARENT', res) -%}{{ "godfather/godmother/godparents"|trans(p.sex) }}
+{%- else if exists (w => w.kind == 'WITNESS_OFFICER', res) -%}{{ 'officer/officer/officers'|trans(p.sex) }}
+{%- else -%}{{ 'witness/witness/witnesses'|trans(p.sex) }}
+{%- endif -%}
+{%- endfunction -%}
+
