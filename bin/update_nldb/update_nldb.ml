@@ -52,12 +52,11 @@ let compute base bdir =
   in
   let nb_ind = nb_of_persons base in
   let nb_fam = nb_of_families base in
-  let db = ref [] in
   Printf.eprintf "--- database notes\n";
   flush stderr;
   let list = notes_links (base_notes_read base "") in
   if list = ([], []) then ()
-  else (let pg = NLDB.PgNotes in db := NotesLinks.add_in_db !db pg list);
+  else (let pg = NLDB.PgNotes in NotesLinks.update_db base pg list);
   Printf.eprintf "--- wizard notes\n";
   flush stderr;
   begin try
@@ -76,7 +75,7 @@ let compute base bdir =
               Printf.eprintf "%s... " wizid;
               flush stderr;
               let pg = NLDB.PgWizard wizid in
-              db := NotesLinks.add_in_db !db pg list
+              NotesLinks.update_db base pg list
             end
       done;
       Printf.eprintf "\n";
