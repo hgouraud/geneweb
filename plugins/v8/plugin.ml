@@ -77,15 +77,28 @@ let ssearch assets conf base =
 let home assets conf base =
   match Util.find_person_in_env conf base "" with
   | Some p ->
-    let root = Gwxjg.Data.unsafe_mk_person conf base p in
-    let models =
-      w_default_env assets conf base begin Tpat begin function
-          | "root" -> root
-          | _ -> raise Not_found
+    if List.assoc_opt "et" conf.env = Some "S"
+    && List.assoc_opt "em" conf.env = Some "R"
+    then
+      let root =
+        match List.assoc_opt "ei" conf.env with
+        | Some i -> Gwdb.iper_of_string i
+        | None -> match Util.find_person_in_env conf base "1" with
+          | Some root -> (Gwdb.get_iper root)
+          | None -> assert false
+      in
+      let _path = Relation.get_shortest_path_relation conf base root (Gwdb.get_iper p) in
+      failwith "FIXME"
+    else
+      let root = Gwxjg.Data.unsafe_mk_person conf base p in
+      let models =
+        w_default_env assets conf base begin Tpat begin function
+            | "root" -> root
+            | _ -> raise Not_found
+          end
         end
-      end
-    in
-    interp assets conf "IND.html.jingoo" models
+      in
+      interp assets conf "IND.html.jingoo" models
   | None ->
     let models = w_default_env assets conf base Tnull in
     interp assets conf "HOME.html.jingoo" models

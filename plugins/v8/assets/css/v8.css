@@ -298,3 +298,162 @@
     color: white !important;
     font-weight: bold;
 }
+
+.PATH_table, .PATH_table td, .PATH_table tr {
+  empty-cells: show ;
+  padding: 0 ;
+  margin: 0;
+  border-collapse: collapse;
+  }
+
+.PATH_table { margin: 30px auto ; }
+
+.PATH_table td { position: relative ; }
+
+.PATH_td-container {
+  display: flex ;
+  align-items: center ;
+  justify-content: center ;
+}
+
+.PATH_td-content {
+  border: 1px solid #999 ;
+  padding: 10px 20px ;
+  margin: 10px 20px ;
+  text-align: center ;
+  background-color: white ;
+  z-index: 2 ;
+}
+
+.PATH_b::before,
+.PATH_b2::before,
+.PATH_t1::before,
+.PATH_t2::before,
+.PATH_tl::before,
+.PATH_tr::before,
+.PATH_tl2::before,
+.PATH_tr2::before,
+.PATH_l::after,
+.PATH_r::after {
+  content: '' ;
+  position: absolute ;
+  z-index: 0 ;
+}
+
+.PATH_t1::before {
+  bottom: 50% ;
+  top: 0 ;
+  left: 50% ;
+  right: 0 ;
+  border-left: 1px solid #999 ;
+}
+
+.PATH_t2::before {
+  bottom: 50% ;
+  top: 0 ;
+  left: 0 ;
+  right: 50% ;
+  border-right: 1px solid #999 ;
+}
+
+.PATH_b::before {
+  bottom: 0 ;
+  left: 0 ;
+  top: 50% ;
+  right: 50% ;
+  border-right: 1px solid #999 ;
+}
+
+.PATH_b2::before {
+  bottom: -1px ;
+  top: 50% ;
+  left: calc(50% - 50px) ;
+  right: calc(50% - 50px) ;
+  border-right: 1px solid #999 ;
+  border-left: 1px solid #999 ;
+  border-bottom: 1px solid white ;
+  z-index: 1 ;
+}
+
+.PATH_b.PATH_t1::before {
+  bottom: 0 ;
+  top: 0 ;
+  left: 50% ;
+  right: 0 ;
+  border-left: 1px solid #999 ;
+  border-right: none ;
+}
+
+.PATH_b.PATH_t2::before {
+  bottom: 0 ;
+  top: 0 ;
+  left: 0 ;
+  right: 50% ;
+  border-right: 1px solid #999 ;
+}
+
+.PATH_tl::before {
+  top: 0 ;
+  left: 0 ;
+  right: 50% ;
+  bottom: 50% ;
+  border-top: 1px solid #999 ;
+  border-right: 1px solid #999 ;
+}
+
+.PATH_tl2::before {
+  top: 0 ;
+  left: 0 ;
+  right: calc(50% - 30px) ;
+  bottom: 50% ;
+  border-top: 1px solid #999 ;
+  border-right: 1px solid #999 ;
+}
+
+.PATH_tl.PATH_b::before, .PATH_tl2.PATH_b::before {
+  bottom: 0;
+}
+
+.PATH_tr::before {
+  top: 0 ;
+  right: 0  ;
+  bottom: 50% ;
+  left: 50% ;
+  border-top: 1px solid #999 ;
+  border-left: 1px solid #999 ;
+}
+
+.PATH_tr2::before {
+  top: 0 ;
+  right: 0  ;
+  bottom: 50% ;
+  left: 50% ;
+  border-top: 1px solid #999 ;
+  border-left: 1px solid #999 ;
+}
+
+.PATH_tr.PATH_b::before, .PATH_tr2.PATH_b::before {
+  bottom: 0;
+  left: 50% ;
+  border-right: 0 ;
+}
+
+.PATH_r::after, .PATH_l::after {
+  top: 50% ;
+  border-top: 1px solid #999 ;
+}
+
+.PATH_l::after {
+  left: 0 ;
+  right: 50% ;
+}
+
+.PATH_r::after {
+  left: 50% ;
+  right: 0 ;
+}
+
+.PATH_l.PATH_r::after {
+  left: 0 ;
+  right: 0 ;
+}
