@@ -64,9 +64,14 @@
   font-weight: bold;
 }
 
-    {{ itree_style_aux ("descend", "top") }}
-    {{ itree_style_aux ("ascend", "bottom") }}
-
+.tree-root,
+.ascend,
+.descend {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+    
 .ascend .tree ul, .descend .tree ul {
     position: relative;
     display: flex;
@@ -240,15 +245,14 @@
     overflow: hidden ;
 }
 
-#panzoom-parent {
+.panzoom-parent {
     width: 100% ;
     max-height: 100vh ;
     overflow: hidden ;
+    padding-top: 3rem ;
 }
 
-#panzoom-parent { padding-top: 3rem ; }
-
-#panzoom-parent.fullscreen {
+.panzoom-parent.fullscreen {
     position:fixed ;
     top: 0 ;
     bottom: 0 ;
@@ -259,7 +263,7 @@
     margin-top: 0 !important ;
 }
 
-#panzoom-controllers {
+.panzoom-controllers {
     display: flex ;
     align-items: center ;
     position: absolute ;
@@ -268,7 +272,7 @@
     z-index: 1 ;
 }
 
-#panzoom-controllers.fullscreen {
+.panzoom-controllers.fullscreen {
     position: fixed ;
     top: .5rem ;
     left: .5rem ;

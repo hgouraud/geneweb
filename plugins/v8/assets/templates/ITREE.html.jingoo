@@ -29,7 +29,9 @@
     </button>
   </form>
 
-  <div id="panzoom-controllers">
+  <script src="{{ asset ('panzoom/panzoom.min.js') }}"></script>
+
+  <div id="panzoom-controllers" class="panzoom-controllers">
     <div class="custom-control custom-switch">
       <input type="checkbox" class="custom-control-input" id="panzoom-fullscreen-controller-input" onclick="toggleFullscreen()">
       <label class="custom-control-label" for="panzoom-fullscreen-controller-input">{{ 'full-screen'|trans|capitalize }}</label>

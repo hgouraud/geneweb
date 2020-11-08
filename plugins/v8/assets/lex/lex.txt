@@ -54,7 +54,7 @@ no: uviktig
 pt: indiferente
 sv: oviktigt
 
-    individule_tree_preview
+    individual_tree_preview
 de: überblick vom Stammbaum
 en: Family Tree Preview
 es: Ver árbol
