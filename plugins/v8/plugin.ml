@@ -87,8 +87,28 @@ let home assets conf base =
           | Some root -> (Gwdb.get_iper root)
           | None -> assert false
       in
-      let _path = Relation.get_shortest_path_relation conf base root (Gwdb.get_iper p) in
-      failwith "FIXME"
+      match Relation.get_shortest_path_relation conf base (Gwdb.get_iper p) root [] with
+      | None -> assert false
+      | Some (path, _) ->
+        let path =
+          Tlist begin List.rev_map begin fun (i, r) ->
+              let p = Data.get_n_mk_person conf base i in
+              let r = match r with
+                | Relation.Self -> Tstr "Self"
+                | Relation.Parent -> Tstr "Parent"
+                | Relation.Sibling -> Tstr "Sibling"
+                | Relation.HalfSibling -> Tstr "HalfSibling"
+                | Relation.Mate -> Tstr "Mate"
+                | Relation.Child -> Tstr "Child"
+              in
+              Tpat begin function "person" -> p | "relation" -> r | _ -> raise Not_found end
+            end path end
+        in
+        let models =
+          w_default_env assets conf base @@
+          Tpat begin function "path" -> path | _ -> raise Not_found end
+        in
+        interp assets conf "PATH.html.jingoo" models
     else
       let root = Gwxjg.Data.unsafe_mk_person conf base p in
       let models =
