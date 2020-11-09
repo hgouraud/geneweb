@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <link rel="shortcut icon" href="{{ asset ('img/geneweb.png') }}">
     <link rel="apple-touch-icon" href="{{ asset ('img/geneweb.png') }}">
-    <link rel="stylesheet" href="{{ asset ('bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet"
+	  href="{{ asset ('bootstrap/css/bootstrap'
+                         + (env.theme ? '_' + env.theme : conf.benv.bootstrap_theme ? '_' + conf.benv.bootstrap_theme : '')
+                         + '.min.css') }}">
     <link rel="stylesheet" href="{{ asset ('fontawesome/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset ('css/v8.css') }}">
     <title>{{ BASE.name }} - {% block title %}GeneWeb{% endblock %}</title>
