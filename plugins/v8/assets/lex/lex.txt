@@ -14,6 +14,10 @@ sv: begränsa till direkta förfäder till rotpersonen (Sosa/Ahnentafel)
 en: apply modifications
 fr: appliquer les modifications
 
+    excluded_from_computation/f/mp/fp
+en: excluded from computation/excluded from computation/excluded from computation/excluded from computation
+fr: exclu du calcul/exclue du calcul/exclus du calcul/exclues du calcul
+
     full-screen
 en: full-screen
 fr: plein écran
@@ -98,6 +102,10 @@ fr: réglages
     simple search
 en: simple search
 fr: recherche simple
+
+    v8_next_relationship_path
+en: try to find another path
+fr: essayer de trouver un autre chemin
 
     v8_warnings_page
 en: check family tree

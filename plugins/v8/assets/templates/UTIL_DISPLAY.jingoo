@@ -109,6 +109,10 @@
   <a href="{{ person_href (p) }}">{{ person_displayed_name (p) }}</a>
 {%- endmacro -%}
 
+{%- macro print_couple (f) -%}
+  {{ print_person_short (f.father) }} &amp; {{ print_person_short (f.mother) }}
+{%- endmacro -%}
+
 {%- function lex_related_kind (r) -%}
 {%- switch (r.kind) -%}
 {%- case "ADOPTION" -%}

@@ -1,3 +1,7 @@
+{%- macro print_env_get_param (env) -%}
+{%- for (k, v) in env %}{% if loop.index0 %}&{% endif %}{{ k }}={{ v }}{% endfor -%}
+{%- endmacro -%}
+
 {%- macro print_hidden_textarea (env) -%}
   {%- for (k, v) in env -%}
     <textarea style="display:none;" name="{{ k }}">{{ decode_varenv (v) }}</textarea>

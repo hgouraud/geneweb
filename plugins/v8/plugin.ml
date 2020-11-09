@@ -4,6 +4,14 @@ open Jingoo
 open Jg_types
 open Gwxjg
 
+let getenv_list fn prefix conf =
+  let rec loop acc i =
+    match Util.p_getenv conf.env (prefix ^ string_of_int i) with
+    | Some k -> loop (fn k :: acc) (i + 1)
+    | None -> acc
+  in
+  loop [] 0
+
 let w_default_env assets conf base models =
   let asset =
     func_arg1_no_kw begin function
@@ -74,41 +82,65 @@ let ssearch assets conf base =
     in
     interp assets conf "SEARCH_RESULT.html.jingoo" models
 
+  
+let shortest_path assets conf base p =
+  let fexcl = getenv_list Gwdb.ifam_of_string "ef" conf in
+  let root =
+    match List.assoc_opt "ei" conf.env with
+    | Some i -> Gwdb.iper_of_string i
+    | None -> match Util.find_person_in_env conf base "1" with
+      | Some root -> (Gwdb.get_iper root)
+      | None -> assert false
+  in
+  match Relation.get_shortest_path_relation conf base (Gwdb.get_iper p) root fexcl with
+  | None ->
+    let models =
+      let target = Data.unsafe_mk_person conf base p in
+      let root = Data.get_n_mk_person conf base root in
+      let ifams = Tlist (List.map (fun i -> Data.get_n_mk_family conf base i @@ Gwdb.foi base i) fexcl) in
+      w_default_env assets conf base @@
+      Tpat begin function
+        | "excluded" -> ifams
+        | "root" -> root
+        | "target" -> target
+        | _ -> raise Not_found
+      end
+    in
+    interp assets conf "PATH_ERROR.html.jingoo" models
+    
+  | Some (path, ifam) ->
+    let path =
+      Tlist begin List.rev_map begin fun (i, r) ->
+          let p = Data.get_n_mk_person conf base i in
+          let r = match r with
+            | Relation.Self -> Tstr "Self"
+            | Relation.Parent -> Tstr "Parent"
+            | Relation.Sibling -> Tstr "Sibling"
+            | Relation.HalfSibling -> Tstr "HalfSibling"
+            | Relation.Mate -> Tstr "Mate"
+            | Relation.Child -> Tstr "Child"
+          in
+          Tpat begin function "person" -> p | "relation" -> r | _ -> raise Not_found end
+        end path end
+    in
+    let models =
+      let ifam = Tstr (Gwdb.string_of_ifam ifam) in
+      w_default_env assets conf base @@
+      Tpat begin function
+        | "path" -> path
+        | "ifam" -> ifam
+        | _ -> raise Not_found
+      end
+    in
+    interp assets conf "PATH.html.jingoo" models
+
+
 let home assets conf base =
   match Util.find_person_in_env conf base "" with
   | Some p ->
     if List.assoc_opt "et" conf.env = Some "S"
     && List.assoc_opt "em" conf.env = Some "R"
-    then
-      let root =
-        match List.assoc_opt "ei" conf.env with
-        | Some i -> Gwdb.iper_of_string i
-        | None -> match Util.find_person_in_env conf base "1" with
-          | Some root -> (Gwdb.get_iper root)
-          | None -> assert false
-      in
-      match Relation.get_shortest_path_relation conf base (Gwdb.get_iper p) root [] with
-      | None -> assert false
-      | Some (path, _) ->
-        let path =
-          Tlist begin List.rev_map begin fun (i, r) ->
-              let p = Data.get_n_mk_person conf base i in
-              let r = match r with
-                | Relation.Self -> Tstr "Self"
-                | Relation.Parent -> Tstr "Parent"
-                | Relation.Sibling -> Tstr "Sibling"
-                | Relation.HalfSibling -> Tstr "HalfSibling"
-                | Relation.Mate -> Tstr "Mate"
-                | Relation.Child -> Tstr "Child"
-              in
-              Tpat begin function "person" -> p | "relation" -> r | _ -> raise Not_found end
-            end path end
-        in
-        let models =
-          w_default_env assets conf base @@
-          Tpat begin function "path" -> path | _ -> raise Not_found end
-        in
-        interp assets conf "PATH.html.jingoo" models
+    then shortest_path assets conf base p
     else
       let root = Gwxjg.Data.unsafe_mk_person conf base p in
       let models =

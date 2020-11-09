@@ -28,3 +28,6 @@
   {{ find (compose (eq (p2.iper), attr ('spouse.iper')), p1.families) }}
 {%- endfunction %}
 
+{%- function next_index_in_env (prefix, i = 0) -%}
+  {{ conf.env [prefix + i] == null ? prefix + i : next_index_in_env (prefix, i = i + 1) }}
+{%- endfunction -%}
