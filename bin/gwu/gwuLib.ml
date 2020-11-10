@@ -1649,10 +1649,10 @@ let gwu opts base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
      ext_files = []; notes_alias = notes_aliases in_dir;
      pevents_pl_p = []}
   in
-  let nb_fam = nb_of_families base in
-  if !(Mutil.verbose) then ProgrBar.start ();
+  let _nb_fam = nb_of_families base in
+  (* if !(Mutil.verbose) then ProgrBar.start (); *)
   Gwdb.Collection.iteri begin fun i ifam ->
-    if !(Mutil.verbose) then ProgrBar.run i nb_fam;
+    (* if !(Mutil.verbose) then ProgrBar.run i nb_fam; *)
     if not (Gwdb.Marker.get gen.fam_done ifam) then
       let fam = foi base ifam in
       let ifaml = connected_families base gen.fam_sel ifam fam in
@@ -1739,7 +1739,7 @@ let gwu opts base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
             Gwdb.Marker.set gen.mark i true;
             print_isolated_relations oc base gen p
     end (Gwdb.ipers base) ;
-  if !(Mutil.verbose) then ProgrBar.finish ();
+  (* if !(Mutil.verbose) then ProgrBar.finish (); *)
   if not !Gwexport.opts.no_notes then
     let s = base_notes_read base "" in
     let (oc, first) = origin_file (base_notes_origin_file base) in
