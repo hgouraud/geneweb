@@ -76,7 +76,7 @@
         {{ subDropdownToggle ('settings'|trans|capitalize, 'fa-cogs') }}
         <ul class="dropdown-menu">
           <li class="dropdown-submenu">
-            {{ subDropdownToggle (conf.lang|upper) }}
+            {{ subDropdownToggle ('language_selector'|trans|capitalize) }}
             <div class="dropdown-menu" style="height:auto;max-height:200px;overflow-x:hidden;">
               {%- for lang in range (0,29)|map((i) => ('!languages'|trans(i)|split('='))) | sort(compare=(a,b)=>compare(a[1],b[1])) -%}
               {{ dropdownItem (null, lang[1], conf.command + '?lang=' + lang[0] + print_env (conf.env)) }}
@@ -84,25 +84,12 @@
             </div>
           </li>
           <li class="dropdown-submenu">
-            {% if conf.wizard %}
-            {{ subDropdownToggle ('<i class="fa fa-lg fa-hat-wizard"></i>') }}
-            <div class="dropdown-menu dropdown-menu-right">
-              {{ dropdownItem ('fa-user-friends', 'wizard/wizards/friend/friends/exterior'|trans(2)|capitalize, conf.command + '?w=f') }}
-              {{ dropdownItem ('fa-sign-out-alt', 'disconnect'|trans|capitalize, conf.command + '?w=' + print_env (conf.env)) }}
-            </div>
-            {% else if conf.friend %}
-            {{ subDropdownToggle ('<i class="fa fa-lg fa-user-friends"></i>') }}
-            <div class="dropdown-menu dropdown-menu-right">
+            {{ subDropdownToggle ('access_rigths_selector'|trans|capitalize) }}
+	    <div class="dropdown-menu" style="height:auto;max-height:200px;overflow-x:hidden;">
               {{ dropdownItem ('fa-hat-wizard', 'wizard/wizards/friend/friends/exterior'|trans(0)|capitalize, conf.command + '?w=w') }}
-              {{ dropdownItem ('fa-sign-out-alt', 'disconnect'|trans|capitalize, conf.command + '?w=' + print_env (conf.env)) }}
-            </div>
-            {% else %}
-            {{ subDropdownToggle ('<i class="fa fa-lg fa-sign-in-alt"></i>') }}
-            <div class="dropdown-menu dropdown-menu-right">
-              {{ dropdownItem ('fa-hat-wizard', 'wizard/wizards/friend/friends/exterior'|trans(0)|capitalize, conf.command + '?w=w' + print_env (conf.env)) }}
-              {{ dropdownItem ('fa-user-friends', 'wizard/wizards/friend/friends/exterior'|trans(2)|capitalize, conf.command + '?w=f' + print_env (conf.env)) }}
-            </div>
-            {% endif %}
+              {{ dropdownItem ('fa-user-friends', 'wizard/wizards/friend/friends/exterior'|trans(2)|capitalize, conf.command + '?w=f') }}
+              {{ dropdownItem ('fa-sign-out-alt', 'wizard/wizards/friend/friends/exterior'|trans(4)|capitalize, conf.command + '?w=' + print_env (conf.env)) }}
+	    </div>
           </li>
         </ul>
       </li>

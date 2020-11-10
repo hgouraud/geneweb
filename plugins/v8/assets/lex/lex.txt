@@ -1,3 +1,15 @@
+    access_rigths_selector
+de: zugang
+en: access rights
+es: acceso
+fi: pääsyoikeudet
+fr: droits d'accès
+it: accesso
+nl: toegangsrechten
+no: tilgangsrettigheter
+pt: direitos de acesso
+sv: Rättigheter
+
     advanced_search_sosa_checkbox
 de: Begrenzt auf die direkten Vorfahren der Ausgangsperson (Sosa)
 en: limit to the direct ancestry of the root person (Sosa/Ahnentafel)
@@ -69,6 +81,18 @@ nl: overzicht van de stamboom
 no: oversikt over anetavlen
 pt: ver árvore
 sv: översikt över antavlan
+
+    language_selector
+de: sprachen
+es: idiomas
+en: language
+fr: langue
+fi: kieli
+li: lingue
+nl: taal
+no: språk
+pt: idioma
+sv: språk
 
     list
 af: lys
