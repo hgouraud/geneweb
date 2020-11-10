@@ -23,8 +23,21 @@ let w_default_env assets conf base models =
   :: ("asset", asset)
   :: Data.default_env conf base
 
-let interp assets conf file models =
-  Gwdlib.JgInterp.render ~dir:(Filename.concat assets "templates") ~conf ~file ~models ;
+let interp assets _conf file models =
+  let env =
+    { Jg_types.autoescape = false
+    ; template_dirs = [ Filename.concat assets "templates" ]
+    ; filters = []
+    ; extensions = []
+    ; strict_mode = true
+    }
+  in
+  let output x = Wserver.print_string @@ Jg_runtime.string_of_tvalue x in
+  let ctx =
+    let models = fun x -> List.assoc x models in
+    Jg_interp.init_context ~env ~models ~output ()
+  in
+  Jg_interp.from_file ~env ~ctx ~models ~output file ;
   true
 
 let asearch assets conf base =
