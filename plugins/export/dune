@@ -1,0 +1,10 @@
+(copy_files %{project_root}/bin/gwu/gwuLib.ml)
+(copy_files %{project_root}/bin/gwexport/gwexport.ml)
+(copy_files %{project_root}/bin/gwb2ged/gwb2gedLib.ml)
+
+(executable
+  (name plugin)
+  (libraries geneweb-lib geneweb-gwd-lib geneweb-wserver)
+  (flags (:standard -w -40-27))
+  (modes (native plugin))
+)
