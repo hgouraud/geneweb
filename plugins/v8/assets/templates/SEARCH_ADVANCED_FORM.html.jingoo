@@ -248,13 +248,9 @@
             </button>
           </form>
         </div>
-
-      </form>
-
       </div>
-
     </div>
-
+  </div>
 {%- endmacro -%}
 
 {%- macro print_SEARCH_ADVANCED_FORM_script () -%}
