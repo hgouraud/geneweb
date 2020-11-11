@@ -100,7 +100,7 @@
   (name gwdlib)
   (public_name geneweb-gwd-lib)
   (wrapped true)
-  (libraries geneweb geneweb-jingoo jingoo unix str %%%GWDB_PKG%%% %%%SOSA_PKG%%% %%%WSERVER_PKG%%%)
+  (libraries findlib.dynload geneweb geneweb-jingoo jingoo unix str %%%GWDB_PKG%%% %%%SOSA_PKG%%% %%%WSERVER_PKG%%%)
   (preprocess (action (run %{bin:cppo} %%%CPPO_D%%% %{input-file})))
   (modules gwdPlugin gwDaemon request requestHandler)
 )

@@ -212,7 +212,8 @@ let mod_fam assets conf base =
 let ns = "v8"
 
 let () =
-  Gwdlib.GwdPlugin.register ~ns "" home
+  Fl_dynload.load_packages ["geneweb-jingoo";"jingoo"]
+; Gwdlib.GwdPlugin.register ~ns "" home
 ; Gwdlib.GwdPlugin.register ~ns "SEARCH_ADVANCED" asearch
 ; Gwdlib.GwdPlugin.register ~ns "SEARCH_SIMPLE" ssearch
 ; Gwdlib.GwdPlugin.register ~ns "MOD_FAM" mod_fam
