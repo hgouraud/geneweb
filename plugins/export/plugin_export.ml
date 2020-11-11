@@ -38,6 +38,7 @@ let () =
                             ; base = Some (Gwdb.bname base, base)
                  }
       in
+      (* no_notes not working *)
       Wserver.http Wserver.OK ;
       Wserver.header "Content-type: text/plain" ;
       Wserver.header "Content-disposition: attachment; filename=\"%s\"" fname ;

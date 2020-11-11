@@ -19,8 +19,15 @@ let w_default_env assets conf base models =
       | x -> failwith_type_error_1 "asset" x
     end
   in
+  let enabled_plugin =
+    func_arg1_no_kw begin function
+      | Tstr s -> Tbool (List.mem s !Gwdlib.GwdPlugin.registered)
+      | x -> failwith_type_error_1 "asset" x
+    end
+  in
   ("M", models)
   :: ("asset", asset)
+  :: ("enabled_plugin", enabled_plugin)
   :: Data.default_env conf base
 
 let interp assets _conf file models =

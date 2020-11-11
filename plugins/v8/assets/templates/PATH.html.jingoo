@@ -219,4 +219,44 @@
   </a>
 </p>
 
+{%- set EXPORT_NS = namespace (cnt = 0) -%}
+{%- macro export_aux (i) -%}
+  <input type="hidden" name="i{{EXPORT_NS.cnt}}" value="{{i}}">
+  {%- set EXPORT_NS.cnt += 1 -%}
+{%- endmacro -%}
+  
+  <form>
+  <input type="hidden" name="m" value="EXPORT">
+  {%- for e in M.path -%}
+    {{ export_aux (e.person.iper) }}
+    {%- if e.relation == "Sibling" -%}
+      {{ export_aux (e.person.father.iper) }}
+      {{ export_aux (e.person.mother.iper) }}
+    {%- else if e.relation == "HalfSibling" -%}
+      {%- if e.person.mother.iper == M.path[ loop.index0 - 1 ].person.mother.iper -%}
+        {{ export_aux (e.person.mother.iper) }}
+        {{ export_aux (M.path[ loop.index0 - 1 ].person.father.iper) }}
+        {{ export_aux (e.person.father.iper) }}
+      {%- else -%}
+        {{ export_aux (e.person.father.iper) }}
+        {{ export_aux (M.path[ loop.index0 - 1 ].mother.father.iper) }}
+        {{ export_aux (e.person.mother.iper) }}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+
+  <p>
+    <label class="btn">
+      <input type="radio" name="output" value="GED" onchange='this.form.submit();'  hidden>
+      GED
+    </label>
+    <label class="btn">
+      <input type="radio" name="output" value="GW" onchange='this.form.submit();' hidden>
+      GM
+    </label>
+  </p>
+  
+</form>
+
 {%- endblock -%}
