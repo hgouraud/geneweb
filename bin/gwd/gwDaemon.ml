@@ -208,11 +208,15 @@ let input_lexicon lang =
 let add_lexicon fname lang ht =
   Mutil.input_lexicon lang ht (fun () -> Secure.open_in fname)
 
-let register_plugin dir =
+let register_plugin plugin =
+  let dir = (Filename.dirname plugin) in
+  print_endline @@ "Loading: " ^ dir ^ "... " ;
   let assets = Filename.concat dir "assets" in
+  print_endline @@ "Assets: " ^ assets ;
   GwdPlugin.assets := assets ;
   Secure.add_lang_path assets ;
-  Dynlink.loadfile (Filename.concat dir "plugin.cmxs") ;
+  Dynlink.loadfile plugin ;
+  print_endline @@ "Done!" ;
   GwdPlugin.assets := ""
 
 let alias_lang lang =
@@ -1133,14 +1137,16 @@ let make_conf from_addr request script_name env =
   in
   let lexicon_lang = if lang = "" then default_lang else lang in
   let lexicon = input_lexicon lexicon_lang in
-  List.iter begin fun dir ->
+  List.iter begin fun plugin ->
+    let dir = (Filename.dirname plugin) in
     let lex_dir = Filename.concat (Filename.concat dir "assets") "lex" in
-    let lex = Sys.readdir lex_dir in
-    Array.sort compare lex ;
-    Array.iter begin fun f ->
-      let f = Filename.concat lex_dir f in
-      if not (Sys.is_directory f) then lexicon_list := f :: !lexicon_list
-    end lex
+    if Sys.file_exists lex_dir then
+      let lex = Sys.readdir lex_dir in
+      Array.sort compare lex ;
+      Array.iter begin fun f ->
+        let f = Filename.concat lex_dir f in
+        if not (Sys.is_directory f) then lexicon_list := f :: !lexicon_list
+      end lex
   end !plugins ;
   let rec rev_iter fn = function
     | [] -> ()

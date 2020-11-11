@@ -1,0 +1,6 @@
+(executable
+  (name plugin_re)
+  (embed_in_plugin_libraries re)
+  (flags -linkall)
+  (modes (native plugin))
+)

@@ -1,0 +1,17 @@
+(ocamllex lexicon_parser)
+
+(library
+  (name gwxjg)
+  (wrapped true)
+  (libraries geneweb jingoo unix %%%GWDB_PKG%%% %%%SOSA_PKG%%% %%%WSERVER_PKG%%%)
+  (flags (:standard -w -42-40))
+  (modules ezgw data trans lexicon_parser)
+)
+
+(executable
+  (name plugin_gwxjg)
+  (embed_in_plugin_libraries gwxjg)
+  (flags -linkall)
+  (modes (native plugin))
+  (modules plugin_gwxjg)
+)
