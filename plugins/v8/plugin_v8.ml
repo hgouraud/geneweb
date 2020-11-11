@@ -212,9 +212,10 @@ let mod_fam assets conf base =
 let ns = "v8"
 
 let () =
-  Gwdlib.GwdPlugin.register ~ns "" home
-; Gwdlib.GwdPlugin.register ~ns "SEARCH_ADVANCED" asearch
-; Gwdlib.GwdPlugin.register ~ns "SEARCH_SIMPLE" ssearch
-; Gwdlib.GwdPlugin.register ~ns "MOD_FAM" mod_fam
-(* ; Gwdlib.GwdPlugin.register ~ns "WARNINGS" warning *)
-; Gwdlib.GwdPlugin.register ~ns "ITREE" itree
+  Gwdlib.GwdPlugin.register ~ns [ "", home
+                                ; "SEARCH_ADVANCED", asearch
+                                ; "SEARCH_SIMPLE", ssearch
+                                ; "MOD_FAM", mod_fam
+                                (* ; "WARNINGS" warning *)
+                                ; "ITREE", itree
+                                ]
