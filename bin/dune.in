@@ -108,7 +108,8 @@
 (executable
   (package geneweb-bin)
   (public_name gwd)
-  (libraries geneweb geneweb-jingoo geneweb-gwb2ged-lib geneweb-gwd-lib geneweb-gwu-lib unix str %%%GWDB_PKG%%% %%%SOSA_PKG%%% %%%WSERVER_PKG%%%)
+  (flags -linkall)
+  (libraries geneweb-lib geneweb-gwb2ged-lib geneweb-gwd-lib geneweb-gwu-lib unix str %%%GWDB_PKG%%% %%%SOSA_PKG%%% %%%WSERVER_PKG%%%)
   (preprocess (action (run %{bin:cppo} %%%CPPO_D%%% %{input-file})))
   (modules gwd)
 )

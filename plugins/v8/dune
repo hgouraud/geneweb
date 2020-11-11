@@ -1,7 +1,7 @@
 (executable
   (name plugin)
   (libraries geneweb-gwd-lib geneweb-wserver)
-  (embed_in_plugin_libraries gwxjg jingoo re)
+  (embed_in_plugin_libraries)
   (flags -linkall)
   (modes (native plugin))
 )
