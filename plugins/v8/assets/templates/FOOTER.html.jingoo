@@ -11,7 +11,7 @@
 	  </label>
 	</div>
 	<select class="custom-select" id="theme-selector">	 
-	  <option value="" selected>{{ 'defautl_theme'|trans|capitalize }}</option>
+	  <option selected>{{ 'defautl_theme'|trans|capitalize }}</option>
 	  {%- for t in ['cerulean','cosmo','cyborg','darkly','flatly','journal','litera','lumen','lux','materia','minty','pulse','sandstone','simplex','sketchy','slate','solar','spacelab','superhero','united','yeti'] -%}
 	  <option value="_{{t}}">{{t|capitalize}}</option>
           {%- endfor -%}

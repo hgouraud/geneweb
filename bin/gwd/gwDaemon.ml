@@ -6,7 +6,7 @@ open Def
 open Util
 
 module StrSet = Mutil.StrSet
-    
+
 module Make
     (Request : Request.MakeOut)
   : (sig val run : ?speclist:(string * Arg.spec * string) list -> unit -> unit end)
@@ -207,8 +207,6 @@ let input_lexicon lang =
 
 let add_lexicon fname lang ht =
   Mutil.input_lexicon lang ht (fun () -> Secure.open_in fname)
-
-let () = Findlib.init ()
 
 let register_plugin dir =
   let assets = Filename.concat dir "assets" in

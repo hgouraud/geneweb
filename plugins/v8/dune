@@ -1,5 +1,7 @@
 (executable
   (name plugin)
-  (libraries findlib.dynload geneweb-gwd-lib geneweb-wserver gwxjg jingoo re)
+  (libraries geneweb-gwd-lib geneweb-wserver)
+  (embed_in_plugin_libraries gwxjg jingoo re)
+  (flags -linkall)
   (modes (native plugin))
 )
