@@ -16,12 +16,11 @@ let w_updated_conf fn =
   fun assets conf base ->
   let conf =
     if List.mem_assoc "theme" conf.env
-    then { conf with
-           env = List.remove_assoc "theme" conf.env
-         ; henv = ("theme", List.assoc "theme" conf.env) :: conf.henv
-         }
+    then { conf with henv = ("theme", List.assoc "theme" conf.env) :: conf.henv }
     else conf
   in
+  let env = List.filter (fun (k, _) -> not (List.mem_assoc k conf.henv || List.mem_assoc k conf.senv)) conf.env in
+  let conf = { conf with env } in
   fn assets conf base
 
 let w_default_env assets conf base models =
