@@ -1528,6 +1528,7 @@ let content_misc len misc_fname =
     | Woff2 fname -> fname, "application/font-woff2"
     | Other fname -> fname, "text/plain"
   in
+  print_endline @@ __LOC__ ^ ": " ^ fname ;
   Wserver.header "Content-type: %s" t;
   Wserver.header "Content-length: %d" len;
   Wserver.header "Content-disposition: inline; filename=%s"
@@ -1538,12 +1539,14 @@ let content_misc len misc_fname =
 let find_misc_file name =
   if Sys.file_exists name
   && List.exists (fun p -> Mutil.start_with (Filename.concat (Filename.dirname p) "assets") 0 name) !plugins
-  then name
+  then (print_endline@@ __LOC__ ^ ": " ^  name ; name)
   else
     let name' = Filename.concat (base_path ["etc"] "") name in
+    print_endline@@ __LOC__ ^ ": " ^  name' ;
     if Sys.file_exists name' then name'
     else
-      let name' = Filename.concat (search_in_lang_path "etc") name in
+      let name' = search_in_lang_path @@ Filename.concat "etc" name in
+      print_endline@@ __LOC__ ^ ": " ^  name' ;
       if Sys.file_exists name' then name'
       else ""
 
@@ -1571,6 +1574,7 @@ let print_misc_file misc_fname =
   | Other _ -> false
 
 let misc_request fname =
+  print_endline @@ __LOC__ ^ fname ;
   let fname = find_misc_file fname in
   if fname <> "" then
     let misc_fname =
