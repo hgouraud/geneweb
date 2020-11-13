@@ -5,6 +5,12 @@
 #sub-topbar { margin: -1rem auto -1rem 0; display: flex; align-items:center; }
 #sub-topbar .nav-link { padding-bottom: 1rem; margin-top: .5rem; }
 
+.dropdown-menu-max-height {
+    height: auto;
+    max-height: 200px;
+    overflow-x: hidden;
+}
+
 .dropdown-submenu {
     position: relative;
 }
@@ -461,4 +467,13 @@
 .PATH_l.PATH_r::after {
   left: 0 ;
   right: 0 ;
+}
+
+.theme-lux .navbar {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.theme-lux .nav-tabs {
+    border-bottom: 0;
 }

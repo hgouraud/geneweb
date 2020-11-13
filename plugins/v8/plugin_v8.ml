@@ -12,6 +12,18 @@ let getenv_list fn prefix conf =
   in
   loop [] 0
 
+let w_updated_conf fn =
+  fun assets conf base ->
+  let conf =
+    if List.mem_assoc "theme" conf.env
+    then { conf with
+           env = List.remove_assoc "theme" conf.env
+         ; henv = ("theme", List.assoc "theme" conf.env) :: conf.henv
+         }
+    else conf
+  in
+  fn assets conf base
+
 let w_default_env assets conf base models =
   let asset =
     func_arg1_no_kw begin function
@@ -156,7 +168,6 @@ let shortest_path assets conf base p =
     in
     interp assets conf "PATH.html.jingoo" models
 
-
 let home assets conf base =
   match Util.find_person_in_env conf base "" with
   | Some p ->
@@ -221,10 +232,11 @@ let mod_fam assets conf base =
 let ns = "v8"
 
 let () =
-  Gwdlib.GwdPlugin.register ~ns [ "", home
-                                ; "SEARCH_ADVANCED", asearch
-                                ; "SEARCH_SIMPLE", ssearch
-                                ; "MOD_FAM", mod_fam
-                                (* ; "WARNINGS" warning *)
-                                ; "ITREE", itree
-                                ]
+  Gwdlib.GwdPlugin.register ~ns
+    [ "", w_updated_conf home
+    ; "SEARCH_ADVANCED", w_updated_conf asearch
+    ; "SEARCH_SIMPLE", w_updated_conf ssearch
+    ; "MOD_FAM", w_updated_conf mod_fam
+    (* ; "WARNINGS" warning *)
+    ; "ITREE", w_updated_conf itree
+    ]

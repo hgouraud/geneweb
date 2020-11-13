@@ -3,29 +3,8 @@
     <li class="nav-item dropdown pr-2 mr-2 border-right">
       {{ 'powered_by'|trans|capitalize }}
     </li>
-    <li class="nav-item dropdown pr-2 mr-2 border-right">
-      <div class="input-group">
-	<div class="input-group-prepend">
-	  <label class="input-group-text" for="theme-selector">
-	    {%--%}{{'theme_selector'|trans|capitalize}}{%--%}
-	  </label>
-	</div>
-	<select class="custom-select" id="theme-selector">	 
-	  <option selected>{{ 'defautl_theme'|trans|capitalize }}</option>
-	  {%- for t in ['cerulean','cosmo','cyborg','darkly','flatly','journal','litera','lumen','lux','materia','minty','pulse','sandstone','simplex','sketchy','slate','solar','spacelab','superhero','united','yeti'] -%}
-	  <option value="_{{t}}">{{t|capitalize}}</option>
-          {%- endfor -%}
-	</select>
-      </div>
-    </li>
+    <li><a href="https://getbootstrap.com/">Bootstrap</a></li>
+    <li><a href="https://bootswatch.com/">Bootswatch</a></li>
+    <li><a href="https://fontawesome.com/">Font Awesome</a></li>
   </ul>
 </div>
-
-<script>
-  window.addEventListener('DOMContentLoaded', function() {
-      $('#theme-selector').on('change', function() {
-	  $('#bootstrap-css').attr('href', '{{ asset ("bootstrap/css/bootstrap") }}' + this.value + '.min.css');
-	  return false;
-      });
-  });
-</script>

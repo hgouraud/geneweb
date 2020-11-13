@@ -1,3 +1,5 @@
+{%- set theme = conf.henv.theme ? conf.henv.theme : conf.benv.theme ? conf.benv.theme : null -%}
+
 <!doctype html>
 <html lang="{{ conf.lang }}">
 
@@ -8,14 +10,14 @@
     <link id="bootstrap-css"
           rel="stylesheet"
           href="{{ asset ('bootstrap/css/bootstrap'
-                         + (env.theme ? '_' + env.theme : conf.benv.bootstrap_theme ? '_' + conf.benv.bootstrap_theme : '')
+                         + (theme ? '_' + theme : '')
                          + '.min.css') }}">
     <link rel="stylesheet" href="{{ asset ('fontawesome/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset ('css/v8.css') }}">
     <title>{{ BASE.name }} - {% block title %}GeneWeb{% endblock %}</title>
   </head>
 
-  <body>
+  <body {% if theme %}class="theme-{{ theme }}"{% endif %}>
 
     {%- block navbar -%}
       {%- include 'NAVBAR.html.jingoo' -%}
@@ -28,7 +30,7 @@
     {%- block footer -%}
       {%- include 'FOOTER.html.jingoo' -%}
     {%- endblock -%}
-    
+
     <script src="{{ asset ('jquery/jquery-3.5.1.slim.min.js') }}"></script>
     <script src="{{ asset ('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script>{% block script %}{% endblock %}</script>
@@ -43,7 +45,7 @@
               $('.dropdown-submenu .show').removeClass("show");
           });
           return false;
-      });      
+      });
     </script>
 
   </body>

@@ -77,7 +77,7 @@
         <ul class="dropdown-menu">
           <li class="dropdown-submenu">
             {{ subDropdownToggle ('language_selector'|trans|capitalize) }}
-            <div class="dropdown-menu" style="height:auto;max-height:200px;overflow-x:hidden;">
+            <div class="dropdown-menu dropdown-menu-max-height">
               {%- for lang in range (0,29)|map((i) => ('!languages'|trans(i)|split('='))) | sort(compare=(a,b)=>compare(a[1],b[1])) -%}
               {{ dropdownItem (null, lang[1], conf.command + '?lang=' + lang[0] + print_env (conf.env)) }}
               {%- endfor -%}
@@ -85,10 +85,22 @@
           </li>
           <li class="dropdown-submenu">
             {{ subDropdownToggle ('access_rigths_selector'|trans|capitalize) }}
-	    <div class="dropdown-menu" style="height:auto;max-height:200px;overflow-x:hidden;">
+	    <div class="dropdown-menu dropdown-menu-max-height">
               {{ dropdownItem ('fa-hat-wizard', 'wizard/wizards/friend/friends/exterior'|trans(0)|capitalize, conf.command + '?w=w') }}
               {{ dropdownItem ('fa-user-friends', 'wizard/wizards/friend/friends/exterior'|trans(2)|capitalize, conf.command + '?w=f') }}
               {{ dropdownItem ('fa-sign-out-alt', 'wizard/wizards/friend/friends/exterior'|trans(4)|capitalize, conf.command + '?w=' + print_env (conf.env)) }}
+	    </div>
+          </li>
+          <li class="dropdown-submenu">
+            {{ subDropdownToggle ('theme_selector'|trans|capitalize) }}
+	    <div class="dropdown-menu dropdown-menu-max-height">
+              {%- set theme = list (conf.env) + list (conf.henv) + list (conf.senv) -%}
+              {%- set theme = reject ((x) => x[0] == "theme", theme) -%}
+              {%- set theme = fold (((acc,x) => (acc+'&'+x[0]+'='+x[1])), '?', theme)  -%}
+              {{ dropdownItem ('', 'default_theme'|trans|capitalize, conf.command + theme) }}
+	      {%- for t in ['cerulean','cosmo','cyborg','darkly','flatly','journal','litera','lumen','lux','materia','minty','pulse','sandstone','simplex','sketchy','slate','solar','spacelab','superhero','united','yeti'] -%}
+              {{ dropdownItem ('', t|capitalize, conf.command + theme + '&theme=' + t) }}
+              {%- endfor -%}
 	    </div>
           </li>
         </ul>

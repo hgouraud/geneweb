@@ -26,6 +26,10 @@ sv: begränsa till direkta förfäder till rotpersonen (Sosa/Ahnentafel)
 en: apply modifications
 fr: appliquer les modifications
 
+    default_theme
+en: default theme
+fr: thème par défaut
+
     excluded_from_computation/f/mp/fp
 en: excluded from computation/excluded from computation/excluded from computation/excluded from computation
 fr: exclu du calcul/exclue du calcul/exclus du calcul/exclues du calcul
@@ -119,6 +123,10 @@ oc: lista
 pl: lista
 pt: lista
 
+    powered_by
+en: powered by
+fr: propulsé par
+
     settings
 en: settings
 fr: réglages
@@ -126,6 +134,10 @@ fr: réglages
     simple search
 en: simple search
 fr: recherche simple
+
+    theme_selector
+en: theme selector
+fr: sélecteur de thème
 
     v8_next_relationship_path
 en: try to find another path
