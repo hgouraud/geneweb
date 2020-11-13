@@ -102,7 +102,6 @@ let ssearch assets conf base =
     in
     interp assets conf "SEARCH_RESULT.html.jingoo" models
 
-  
 let shortest_path assets conf base p =
   let fexcl = getenv_list Gwdb.ifam_of_string "ef" conf in
   let root =
@@ -127,7 +126,7 @@ let shortest_path assets conf base p =
       end
     in
     interp assets conf "PATH_ERROR.html.jingoo" models
-    
+
   | Some (path, ifam) ->
     let path =
       Tlist begin List.rev_map begin fun (i, r) ->

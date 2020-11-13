@@ -188,6 +188,8 @@
 
 {%- include 'EXPORT.html.jingoo' -%}
 
+{%- if enabled_plugin ('export') -%}
+
 {%- call export_form () -%}
   {%- for e in M.path -%}
     {{ export_aux (e.person.iper) }}
@@ -207,5 +209,7 @@
     {%- endif -%}
   {%- endfor -%}
 {%- endcall -%}
+
+{%- endif -%}
 
 {%- endblock -%}
