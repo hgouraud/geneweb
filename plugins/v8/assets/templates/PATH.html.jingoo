@@ -65,6 +65,8 @@
 {%- set PATH_ns = namespace (prevX=-1, prevY=-1, currentX=0, currentY=0, latest=-1) -%}
 
 {%- for y in range (maxY, minY) -%}
+   {{ LOG ('') }}
+   {{ LOG ('    FOR y = ' + y) }}
     <tr data-y="{{ y }}">
       {%- set PATH_ns.prevY = -1 -%}
       {%- set PATH_ns.prevX = -1 -%}
@@ -92,12 +94,17 @@
         {%- set currentY = PATH_ns.currentY -%}
         {%- set currentX = PATH_ns.currentX -%}
         {%- endswitch -%}
-
+        {{ LOG ((PATH_ns.currentY == y || (PATH_ns.currentY == y - 1 && (e.relation == 'Sibling' || e.relation == 'HalfSibling')) ? '--> ' : '')  + 'relation:' + e.relation + ' latest:' + PATH_ns.latest + ' currentX:' + PATH_ns.currentX + ' currentY:' + PATH_ns.currentY) }}
         {%- if PATH_ns.latest == -1 && currentX != 0 -%}
+          {{ LOG ('  PATH_ns.latest == -1 && currentX != 0') }}
           {%- set fill = currentX -%}
+          {{ LOG ('  ' + fill) }}
         {%- else if PATH_ns.latest != -1 && currentX - PATH_ns.latest > 1 -%}
+          {{ LOG ('  PATH_ns.latest == -1 && currentX != 0') }}
           {%- set fill = currentX - PATH_ns.latest -%}
-        {%- else -%}
+          {{ LOG ('  ' + fill) }}
+       {%- else -%}
+           {{ LOG ('  else') }}
           {%- set fill = 0 -%}
         {%- endif -%}
         {%- set class = '' -%}
@@ -118,49 +125,8 @@
         {%- case 'Mate' -%}{% set class += ' PATH_l' -%}
         {%- endswitch -%}
         {%- if currentY == y -%}
+          {{ LOG ('  [PRINT]' + fill) }}
           {%- if fill -%}<td colspan="{{ fill }}"></td>{%- endif -%}
-	  {# {%- set tip = '' -%} #}
-	  {# {%- set tip1 = '' -%} #}
-	  {# {%- set tip2 = '' -%} #}
-	  {# {%- if loop.index0 -%} #}
-	  {#   {%- switch (e.relation) -%} #}
-	  {#   {%- case 'Parent' -%} #}
-	  {#   {%- set tip1 = 'father/mother'|trans(e.person.sex) -%} #}
-	  {#   {%- case 'Sibling' -%} #}
-	  {#   {%- set tip1 = #}
-	  {#   'a brother/a sister/a sibling'|trans(e.person.sex) -%} #}
-	  {#   {%- case 'HalfSibling' -%} #}
-	  {#   {%- set tip1 = #}
-	  {#   'a half-brother/a half-sister/a half-sibling'|trans(e.person.sex) -%} #}
-	  {#   {%- case 'Mate' -%} #}
-	  {#   {%- set tip1 = 'groom/bride'|trans(e.person.sex) -%} #}
-	  {#   {%- case 'Child' -%} #}
-	  {#   {%- set tip1 = 'a son/a daughter/a child'|trans(e.person.sex) -%} #}
-          {#   {%- endswitch -%} #}
-	  {# {%- endif -%} #}
-	  {# {%- if loop.revindex0 -%} #}
-	  {#   {%- switch (M.path[loop.index0 + 1].relation) -%} #}
-	  {#   {%- case 'Parent' -%} #}
-	  {#   {%- set tip2 = 'a son/a daughter/a child'|trans(e.person.sex) -%} #}
-	  {#   {%- case 'Sibling' -%} #}
-	  {#   {%- set tip2 = #}
-	  {#   'a brother/a sister/a sibling'|trans(e.person.sex) -%} #}
-	  {#   {%- case 'HalfSibling' -%} #}
-	  {#   {%- set tip2 = #}
-	  {#   'a half-brother/a half-sister/a half-sibling'|trans(e.person.sex) -%} #}
-	  {#   {%- case 'Mate' -%} #}
-	  {#   {%- set tip2 = 'groom/bride'|trans(e.person.sex) -%} #}
-	  {#   {%- case 'Child' -%} #}
-	  {#   {%- set tip2 = 'father/mother'|trans(e.person.sex) -%} #}
-          {#   {%- endswitch -%} #}
-	  {# {%- endif -%} #}
-	  {# {%- if tip1 -%} #}
-	  {#   {%- set tip += '%1 of %2'|trans(_1=tip1|capitalize, _2=fso(M.path[loop.index0 - 1].person)) + '.' -%} #}
-	  {#   {%- if tip2 -%}{%- set tip += ' ' -%}{% endif -%} #}
-	  {# {% endif -%} #}
-	  {# {%- if tip2 -%} #}
-	  {#   {%- set tip += '%1 of %2'|trans(_1=tip2|capitalize, _2=fso(M.path[loop.index0 + 1].person)) + '.' -%} #}
-	  {# {% endif -%} #}
           <td class="{{ class }}">
             <div class="PATH_td-container" {# title="{{ tip }}" #}>
               <div class="PATH_td-content">
@@ -188,7 +154,8 @@
           </td>
           {%- set PATH_ns.latest = currentX -%}
         {%- else if currentY == y - 1 && (e.relation == "Sibling" || e.relation == "HalfSibling") -%}
-          {%- if fill > 2 -%}<td class="PATH_td" colspan="{{ fill - 1 }}"></td>{%- endif -%}
+          {{ LOG ('  [PRINT]' + fill) }}
+          {%- if fill >= 2 -%}<td class="PATH_td" colspan="{{ fill - 1 }}"></td>{%- endif -%}
           <td class="{{ e.relation == 'Sibling' ? 'PATH_b' : 'PATH_b2' }}" colspan="2">
             <div class="PATH_td-container">
               <div class="PATH_td-content">
@@ -219,14 +186,9 @@
   </a>
 </p>
 
-{%- set EXPORT_NS = namespace (cnt = 0) -%}
-{%- macro export_aux (i) -%}
-  <input type="hidden" name="i{{EXPORT_NS.cnt}}" value="{{i}}">
-  {%- set EXPORT_NS.cnt += 1 -%}
-{%- endmacro -%}
-  
-  <form>
-  <input type="hidden" name="m" value="EXPORT">
+{%- include 'EXPORT.html.jingoo' -%}
+
+{%- call export_form () -%}
   {%- for e in M.path -%}
     {{ export_aux (e.person.iper) }}
     {%- if e.relation == "Sibling" -%}
@@ -244,19 +206,6 @@
       {%- endif -%}
     {%- endif -%}
   {%- endfor -%}
-
-
-  <p>
-    <label class="btn">
-      <input type="radio" name="output" value="GED" onchange='this.form.submit();'  hidden>
-      GED
-    </label>
-    <label class="btn">
-      <input type="radio" name="output" value="GW" onchange='this.form.submit();' hidden>
-      GM
-    </label>
-  </p>
-  
-</form>
+{%- endcall -%}
 
 {%- endblock -%}
