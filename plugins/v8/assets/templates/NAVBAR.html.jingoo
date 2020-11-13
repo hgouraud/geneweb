@@ -94,12 +94,12 @@
           <li class="dropdown-submenu">
             {{ subDropdownToggle ('theme_selector'|trans|capitalize) }}
 	    <div class="dropdown-menu dropdown-menu-max-height">
-              {%- set theme = list (conf.env) + list (conf.henv) + list (conf.senv) -%}
-              {%- set theme = reject ((x) => x[0] == "theme", theme) -%}
-              {%- set theme = fold (((acc,x) => (acc+'&'+x[0]+'='+x[1])), '?', theme)  -%}
-              {{ dropdownItem ('', 'default_theme'|trans|capitalize, conf.command + theme) }}
+              {%- set NAVBAR_theme = list (conf.env) + list (conf.henv) + list (conf.senv) -%}
+              {%- set NAVBAR_theme = reject ((x) => x[0] == "theme", NAVBAR_theme) -%}
+              {%- set NAVBAR_theme = fold (((acc,x) => (acc+'&'+x[0]+'='+x[1])), '?', NAVBAR_theme)  -%}
+              {{ dropdownItem ('', 'default_theme'|trans|capitalize, conf.command + NAVBAR_theme) }}
 	      {%- for t in ['cerulean','cosmo','cyborg','darkly','flatly','journal','litera','lumen','lux','materia','minty','pulse','sandstone','simplex','sketchy','slate','solar','spacelab','superhero','united','yeti'] -%}
-              {{ dropdownItem ('', t|capitalize, conf.command + theme + '&theme=' + t) }}
+              {{ dropdownItem ('', t|capitalize, conf.command + NAVBAR_theme + '&theme=' + t) }}
               {%- endfor -%}
 	    </div>
           </li>

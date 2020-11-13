@@ -212,22 +212,22 @@ let mod_fam assets conf base =
       interp assets conf "MOD_FAM.html.jingoo" models
     | _ -> false
 
-(* let warning assets conf base =
- *   let ht = Hashtbl.create 1024 in
- *   Check.check_base base ignore (fun x -> Hashtbl.replace ht x ()) ignore ;
- *   let warnings =
- *     Hashtbl.fold begin fun w () acc ->
- *       Gwxjg.Data.mk_warning conf base w :: acc
- *     end ht []
- *   in
- *   let models =
- *     let warnings = Tlist warnings in
- *     w_default_env assets conf base begin Tpat begin function
- *         | "warnings" -> warnings
- *         | _ -> raise Not_found
- *       end end
- *   in
- *   interp assets conf "WARNINGS.html.jingoo" models *)
+let warning assets conf base =
+  let ht = Hashtbl.create 1024 in
+  Check.check_base base ignore (fun x -> Hashtbl.replace ht x ()) ignore ;
+  let warnings =
+    Hashtbl.fold begin fun w () acc ->
+      Gwxjg.Data.mk_warning conf base w :: acc
+    end ht []
+  in
+  let models =
+    let warnings = Tlist warnings in
+    w_default_env assets conf base begin Tpat begin function
+        | "warnings" -> warnings
+        | _ -> raise Not_found
+      end end
+  in
+  interp assets conf "WARNINGS.html.jingoo" models
 
 let ns = "v8"
 
@@ -237,6 +237,6 @@ let () =
     ; "SEARCH_ADVANCED", w_updated_conf asearch
     ; "SEARCH_SIMPLE", w_updated_conf ssearch
     ; "MOD_FAM", w_updated_conf mod_fam
-    (* ; "WARNINGS" warning *)
+    ; "WARNINGS", w_updated_conf warning
     ; "ITREE", w_updated_conf itree
     ]
