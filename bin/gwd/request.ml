@@ -68,6 +68,13 @@ let make_senv conf base =
       let vi = string_of_iper ip in set_senv conf vm vi
   | _ -> ()
 
+let try_plugin conf base m =
+  match List.assoc_opt "plugins" conf.Config.base_env with
+  | None -> false
+  | Some list ->
+    let list = String.split_on_char ',' list in
+    List.exists (fun (ns, fn) -> List.mem ns list && fn conf base) (GwdPlugin.get m)
+
 [@@@ocaml.warning "-45"]
 let family_m conf base =
   let open RequestHandler in
@@ -77,9 +84,8 @@ let family_m conf base =
   || List.assoc_opt "visitor_access" conf.base_env <> Some "no"
   then
     let m = Opt.default "" @@ p_getenv conf.env "m" in
-    match GwdPlugin.get m with
-    | Some (_ns, fn) when fn conf base -> ()
-    | _ ->
+    if not @@ try_plugin conf base m
+    then
       let p = match m with
       | "" -> handler._no_mode
       | "A" -> handler.a
@@ -420,9 +426,7 @@ let treat_request conf base =
             Some "no" -> ()
           | _ -> let r = SrcfileDisplay.incr_welcome_counter conf in log_count r
           end;
-          match GwdPlugin.get "" with
-          | Some (_ns, fn) when fn conf base -> ()
-          | _ -> SrcfileDisplay.print_start conf base
+          if not @@ try_plugin conf base "" then SrcfileDisplay.print_start conf base
         end
       else
         begin

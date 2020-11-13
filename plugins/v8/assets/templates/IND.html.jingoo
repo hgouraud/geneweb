@@ -133,10 +133,6 @@
 </p>
 
 {{ etat_civil (M.root) }}
-<script src="{{ asset ('panzoom/panzoom.min.js') }}"></script>
-{%- if M.root.parents || M.root.children -%}
-  {{ print_itree (M.root, 1, 1) }}
-{%- endif -%}
 
 {%- if M.root.parents -%}
 <div class="card mb-4">
@@ -208,4 +204,10 @@
       {%- endfor -%}
       </ul>
 {%- endif -%}
+
+ <script src="{{ asset ('panzoom/panzoom.min.js') }}"></script>
+ {%- if M.root.parents || M.root.children -%}
+   {{ print_itree (M.root, 1, 1) }}
+ {%- endif -%}
+
 {%- endblock -%}

@@ -13,4 +13,4 @@ let register ~ns list =
   registered := ns :: !registered ;
   List.iter (fun (m, fn) -> let fn = fn !assets in Hashtbl.add ht m (ns, fn)) list
 
-let get = Hashtbl.find_opt ht
+let get = Hashtbl.find_all ht

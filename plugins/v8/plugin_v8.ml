@@ -21,7 +21,10 @@ let w_default_env assets conf base models =
   in
   let enabled_plugin =
     func_arg1_no_kw begin function
-      | Tstr s -> Tbool (List.mem s !Gwdlib.GwdPlugin.registered)
+      | Tstr s -> Tbool (List.mem s !Gwdlib.GwdPlugin.registered
+                         && match List.assoc_opt "plugins" conf.Config.base_env with
+                         | Some list -> List.mem s @@ String.split_on_char ',' list
+                         | None -> false)
       | x -> failwith_type_error_1 "asset" x
     end
   in

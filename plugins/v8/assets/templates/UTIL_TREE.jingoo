@@ -111,7 +111,7 @@
 {%- endmacro -%}
 
 {%- macro print_itree (root, an, dn, id = '') -%}
-  <div class="panzoom-parent" id="panzoom-parent{{ id }}" class="border my-3">
+  <div id="panzoom-parent{{ id }}" class="panzoom-parent card my-3">
   <div class="panzoom" id="panzoom{{ id }}">
   {%- if an -%}
     <div class="ascend">
@@ -134,7 +134,7 @@
 {% endmacro print_itree %}
 
 {%- macro print_ftree (family, noroot = false, id = '') -%}
-<div id="panzoom-parent{{ id }}" class="panzoom-parent border my-3">
+<div id="panzoom-parent{{ id }}" class="panzoom-parent card my-3">
     <div class="panzoom" id="panzoom{{ id }}">
       <div class="ascend">
         <div class="tree">
