@@ -174,6 +174,7 @@ distrib: exe
 	cp $(BUILD_DISTRIB_DIR)gwdiff.exe $(DISTRIB_DIR)/gw/gwdiff$(EXT);
 	cp $(BUILD_DISTRIB_DIR)gwu.exe $(DISTRIB_DIR)/gw/gwu$(EXT);
 	cp $(BUILD_DISTRIB_DIR)gwfixbase.exe $(DISTRIB_DIR)/gw/gwfixbase$(EXT);
+	cp $(BUILD_DISTRIB_DIR)cache_files.exe $(DISTRIB_DIR)/gw/cache_files$(EXT);
 	cp $(BUILD_DISTRIB_DIR)setup.exe $(DISTRIB_DIR)/gw/gwsetup$(EXT);
 	cp $(BUILD_DISTRIB_DIR)update_nldb.exe $(DISTRIB_DIR)/gw/update_nldb$(EXT);
 	mkdir $(DISTRIB_DIR)/gw/setup

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="%l">
+<head>
+  <!-- Copyright (c) 1998-2006 INRIA - GeneWeb -->
+  <!-- $Id: bso_ok.htm,v 7.00 2018-01-01 05:35:06 ddr Exp $ -->
+  <meta charset="utf-8">
+  <meta name="robots" content="none">
+  <link rel="shortcut icon" href="images/favicon_gwsetup.png">
+
+  <title>[Cache files creation]</title>
+%fsetup.css;
+</head>
+
+<body %Vbody_prop;>
+
+<div style="background:url('images/gwlogo.png') no-repeat left top; text-align:center; height:95px; line-height:95px; color:#2f6400;">
+<h1 style="margin:0;">[Create cache files]</h1>
+</div>
+<form method=GET action="cache_files">
+<input type=hidden name=opt value="check">
+<input type=hidden name=lang value="%l">
+<ul><li>
+[Select your database by clicking on the associated button][:]
+<p>
+<table class="setup" style="cellspacing=0 cellpadding=1">
+%b{<tr align=left>
+<td><input type=radio name=anon value="%a">   </td>
+<td>%a</td></tr>|
+<tr align=left><td>- [there is no database at present]
+</tr></td>}
+</table>
+<p>
+<table class="setup" style="cellspacing=0 cellpadding=1">
+<p>
+<li>
+[Select the options you want][:]
+<p>
+<table class="setup">
+<tr align=left>
+<td><input type=checkbox name=fn value="on">   </td>
+<td>[Produce cache file for first_names.]
+</td>
+</tr>
+</table>
+<table class="setup">
+<tr align=left>
+<td><input type=checkbox name=sn value="on">   </td>
+<td>[Produce cache file for surnames.]
+</td>
+</tr>
+</table>
+<table class="setup">
+<tr align=left>
+<td><input type=checkbox name=al value="on">   </td>
+<td>[Produce cache file for aliases.]
+</td>
+</tr>
+</table>
+<table class="setup">
+<tr align=left>
+<td><input type=checkbox name=qu value="on">   </td>
+<td>[Produce cache file for qualifiers.]
+</td>
+</tr>
+</table>
+<table class="setup">
+<tr align=left>
+<td><input type=checkbox name=pl value="on">   </td>
+<td>[Produce cache file for places.]
+</td>
+</tr>
+</table>
+<table class="setup">
+<tr align=left>
+<td><input type=checkbox name=all value="on">   </td>
+<td>[Produce cache file for all (fn, sn, al, qu, pl).]
+</td>
+</tr>
+</table>
+<table class="setup">
+<tr align=left>
+<td><input type=checkbox name=fna value="on">   </td>
+<td>[Include in cache file for first_names aliases.]
+</td>
+</tr>
+</table>
+<table class="setup">
+<tr align=left>
+<td><input type=checkbox name=prog value="on">   </td>
+<td>[Show progress bar.]
+</td>
+</tr>
+</table>
+</table>
+<table class="setup">
+<tr align=left>
+<td><input type=checkbox name=help value="on">   </td>
+<td>[Print this list of options.]
+</td>
+</tr>
+</table>
+<p>
+<li>
+[Then click on this button][:]
+<input type=submit value="[Create cache file]">
+</ul>
+</form>
+</body>
+</html>
