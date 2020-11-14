@@ -35,6 +35,15 @@ fr: Accès réservé aux amis et magiciens de la base de donnée !
   %end;
 %end;
 
+%let;ua;%bvar.bad_ua_list;%in;
+%let;ual;%bvar.bad_ua_list_length;%in;
+
+%let;bad_user_agent;
+  %for;i;0;ual;
+    %if;(nth(ua,i)!="" and user_agent is_substr nth(ua,i))%apply;nth(ua,i)%end;
+  %end;
+%in;
+
 <body%body_prop;>
 <div class="container">
   <div class="d-flex flex-column flex-md-row justify-content-lg-center mt-2 mt-lg-4">
@@ -143,6 +152,11 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
           <input type="search" id="surname" class="form-control form-control-lg col-lg-6"
             name="n" placeholder="[*surname/surnames]0, [public name], [alias]%if;browsing_with_sosa_ref;, [n° Sosa]%end;"
             title="[*search/case sensitive]0 [surname/surnames]0, [public name], [alias]%if;browsing_with_sosa_ref;, [n° Sosa]%end;" autofocus tabindex=1>
+          %if;(bvar.show_ok_on_welcome="yes" or bad_user_agent !="")
+            <button type="submit" class=" btn btn-lg btn-outline-primary ml-2"
+              title="[*search/case sensitive]0 [person/persons]0">
+              <i class="fa fa-search fa-fw"></i></button>
+          %end;
         </div>
         <div class="d-flex justify-content-center mt-2">
           <div class="btn-group-vertical  align-self-center mr-2">
@@ -156,10 +170,10 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
             class="form-control form-control-lg col-lg-6 border-top-0"
             name="p" placeholder="[*first name/first names]2"
             title="[*search/case sensitive]0 [first name/first names]2" tabindex=2>
+          %if;(bvar.show_ok_on_welcome="yes" or bad_user_agent !="")
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          %end;
         </div>
-        <button type="submit" style="position:absolute;visibility:hidden">
-          <i class="fa fa-search fa-fw"></i> %(for Safari: make button invisible rather than display:none %)
-        </button>
       </form>
       %if;(bvar.propose_titles != "no")
         <form class="col-12 mt-2 mt-md-3 mt-lg-4" method="get" action="%action;">
@@ -172,6 +186,11 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
             <input type="search" 
               class="form-control col-lg-5 border-top-0 border-right-0 border-left-0"
               name="t" id="titles" placeholder="[*title/titles]0" maxlength="200" tabindex=3>
+            %if;(bvar.show_ok_on_welcome="yes" or bad_user_agent !="")
+              <button type="submit" class=" btn btn-lg btn-outline-primary border-top-0 ml-2"
+                title="[*search/case sensitive]0 [person/persons]0">
+                <i class="fa fa-search fa-fw"></i></button>
+            %end;
           </div>
           <div class="d-flex justify-content-center mt-2">
             <a class="mr-2 align-self-center" role="button"
@@ -181,10 +200,10 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
             <input type="search"
               class="form-control col-lg-5 border-top-0 border-right-0 border-left-0"
               name="p" id="estates" placeholder="[*estate]0" maxlength="200" tabindex=4>
+          %if;(bvar.show_ok_on_welcome="yes" or bad_user_agent !="")
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          %end;
           </div>
-          <button type="submit" style="position:absolute;visibility:hidden">
-            <i class="fa fa-search fa-fw"></i> %(for Safari: make button invisible rather than display:none %)
-          </button>
         </form>
       %end;
     </div>

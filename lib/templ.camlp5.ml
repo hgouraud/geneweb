@@ -834,6 +834,8 @@ and eval_simple_variable conf =
           (List.rev_append conf.henv conf.senv)
       in
       List.fold_left (fun c (k, v) -> c ^ k ^ "=" ^ v ^ "&") c l
+  | "user_agent" -> (Wserver.extract_param "user-agent: " ')' conf.request) ^ ")"
+  | "user_agent_full" -> Wserver.extract_param "user-agent: " '\n' conf.request
   | "version" -> Version.txt
   | "/" -> conf.xhs
   | _ -> raise Not_found
