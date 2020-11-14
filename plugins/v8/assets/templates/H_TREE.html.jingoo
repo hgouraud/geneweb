@@ -1,0 +1,102 @@
+{%- include 'UTIL_HTML.jingoo' -%}
+{%- include 'UTIL_PANZOOM.jingoo' -%}
+{%- include 'UTIL_DATA.jingoo' -%}
+{%- include 'UTIL_TREE.jingoo' -%}
+{%- include 'NAVBAR_IND.html.jingoo' -%}
+
+{%- extends "SKELETON.html.jingoo" -%}
+
+<style>
+  .h-group {
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch ;
+      flex: 1 1 0;
+      min-width: max-content ;
+      min-height: max-content ;
+  }
+  .h-group-odd { flex-direction: row ; }
+  .h-group-even { flex-direction: column ; }
+  .h-group-child {
+      margin: 5px ;
+      border: 2px solid black;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: center;
+      width: 3ex;
+      height: 1em;
+      background-color: white;
+  }
+  .h-group-child.h-ghost {
+      border-color: grey ;
+  }
+  .h-group-father, .h-group-mother {
+      display: flex ;
+      align-items: stretch ;
+      justify-content: stretch ;
+      flex: 1 1 0 ;
+      position: relative ;
+  }
+  .h-group-odd > :not(.h-ghost)::before {
+      content: '' ;
+      position: absolute;
+      top:50%;
+      border-top: 1px solid black ;
+      z-index: -1;
+  }
+  .h-group-odd > .h-group-mother::before {
+      right: 50%;
+      left: -5px;
+  }
+  .h-group-odd > .h-group-father::before {
+      left:50%;
+      right:-5px;
+  }
+  .h-group-even > :not(.h-ghost)::before {
+      content: '' ;
+      position: absolute;
+      left:50%;
+      border-right: 1px solid black ;
+      z-index: -1;
+  }
+  .h-group-even > .h-group-mother::before {
+      bottom: 50%;
+      top: -5px;
+  }
+  .h-group-even > .h-group-father::before {
+      top: 50%;
+      bottom:-5px;
+  }
+  .h-gen-8 {
+      color: green ;
+  }
+</style>
+
+{%- macro H_TREE_ascends (p, n, max) -%}
+{%- if n <= max -%}
+  {%- if p -%}
+     <div class="h-group h-gen-{{ n }} {{ M.jg_mod (n, 2) == 0 ? 'h-group-even' : 'h-group-odd' }}">
+       <div class="h-group-father{{ p.father && n < max ? '' : ' h-ghost' }}">{{ H_TREE_ascends (p.father, n + 1, max) }}</div>
+       <div class="h-group-child">
+	 <span style="color:red;font-family:monospace;" title="{{ fso (p) }}">
+	   {%--%}{{ p.first_name[0] }}{{ p.surname[0] }}{%--%}
+	 </span>
+       </div>
+       <div class="h-group-mother{{ p.mother && n < max ? '' : ' h-ghost' }}">{{ H_TREE_ascends (p.mother, n + 1, max) }}</div>
+     </div>
+  {%- else -%}
+     <div class="h-group h-gen-{{ n }} h-ghost {{ M.jg_mod (n, 2) == 0 ? 'h-group-even' : 'h-group-odd' }}">
+       <div class="h-group-father h-ghost">{{ H_TREE_ascends (null, n + 1, max) }}</div>
+       <div class="h-group-child h-ghost"></div>
+       <div class="h-group-mother h-ghost">{{ H_TREE_ascends (null, n + 1, max) }}</div>
+     </div>  {%- endif -%}     
+{%- endif -%}
+{%- endmacro -%}
+
+{%- block body -%}
+   {%- call PANZOOM (controllers = true) -%}
+     {{ H_TREE_ascends (M.root, 0, 8) }}
+   {%- endcall -%}
+{%- endblock -%}

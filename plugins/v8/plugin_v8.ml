@@ -167,6 +167,28 @@ let shortest_path assets conf base p =
     in
     interp assets conf "PATH.html.jingoo" models
 
+let a assets conf base =
+  let jg_mod left right =
+    match left, right with
+    | _, Tint 0 -> failwith "jg_mod:zero division error"
+    | Tint x1, Tint x2 -> Tint(x1 mod x2)
+    | _, _ -> failwith_type_error_2 "jg_mod" left right
+  in
+  let jg_mod = Jg_types.func_arg2_no_kw jg_mod in
+  match Util.find_person_in_env conf base "" with
+  | None -> assert false
+  | Some p ->
+    let root = Gwxjg.Data.unsafe_mk_person conf base p in
+    let models =
+      w_default_env assets conf base begin Tpat begin function
+          | "root" -> root
+          | "jg_mod" -> jg_mod
+          | _ -> raise Not_found
+        end
+      end
+    in
+    interp assets conf "H_TREE.html.jingoo" models
+
 let home assets conf base =
   match Util.find_person_in_env conf base "" with
   | Some p ->
@@ -233,6 +255,7 @@ let ns = "v8"
 let () =
   Gwdlib.GwdPlugin.register ~ns
     [ "", w_updated_conf home
+    ; "A", w_updated_conf a
     ; "SEARCH_ADVANCED", w_updated_conf asearch
     ; "SEARCH_SIMPLE", w_updated_conf ssearch
     ; "MOD_FAM", w_updated_conf mod_fam

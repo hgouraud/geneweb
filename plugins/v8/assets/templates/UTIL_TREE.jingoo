@@ -96,23 +96,7 @@
   {% endif %}
 {% endmacro %}
 
-{% macro print_panzoom_script (id) %}
-<script>
-  (function () {
-    element = document.getElementById('panzoom{{ id }}') ;
-    parent = document.getElementById('panzoom-parent{{ id }}') ;
-    panzoom = Panzoom(element) ;
-    parent.addEventListener ('wheel', function(event) {
-        if (!event.shiftKey) return
-        panzoom.zoomWithWheel(event)
-    })
-  }) ();
-</script>
-{%- endmacro -%}
-
 {%- macro print_itree (root, an, dn, id = '') -%}
-  <div id="panzoom-parent{{ id }}" class="panzoom-parent card my-3">
-  <div class="panzoom" id="panzoom{{ id }}">
   {%- if an -%}
     <div class="ascend">
       <div class="tree"><ul><li>{{ itree_a_ascend (root, int (an), true) }}</li></ul></div>
@@ -128,47 +112,39 @@
       <div class="tree"><ul><li>{{ itree_a_descend (root, (dn ? int (dn) : 2), true) }}</li></ul></div>
     </div>
   {%- endif -%}
-  </div>
-</div>
-{{ print_panzoom_script (id) }}
 {% endmacro print_itree %}
 
 {%- macro print_ftree (family, noroot = false, id = '') -%}
-<div id="panzoom-parent{{ id }}" class="panzoom-parent card my-3">
-    <div class="panzoom" id="panzoom{{ id }}">
-      <div class="ascend">
-        <div class="tree">
-          <ul>
-            <li class="li-union">
-              <ul>
-                <li>{{ itree_a_ascend (family.father, 1, false) }}</li>
-                <li>{{ itree_a_ascend (family.mother, 1, false) }}</li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </div>
-      {%- if not noroot -%}
-      <div class="tree-root">
-        <div class="p-1 rounded-circle" style="border: 2px solid black;">
-          <i class="fa fa-link"></i>
-        </div>
-      </div>
-      {%- endif -%}
-      <div class="descend">
-        <div class="tree">
-          <ul>
-            <li class="li-union">
-              <ul>
-                {% for x in family.children %}
-                  <li>{{ itree_a_descend (x, 1, false) }}</li>
-                {% endfor %}
-              </ul>
-            </li>
-          </ul>
-        </div>
+    <div class="ascend">
+      <div class="tree">
+        <ul>
+          <li class="li-union">
+            <ul>
+              <li>{{ itree_a_ascend (family.father, 1, false) }}</li>
+              <li>{{ itree_a_ascend (family.mother, 1, false) }}</li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
-  </div>
-{{ print_panzoom_script (id) }}
+    {%- if not noroot -%}
+    <div class="tree-root">
+      <div class="p-1 rounded-circle" style="border: 2px solid black;">
+        <i class="fa fa-link"></i>
+      </div>
+    </div>
+    {%- endif -%}
+    <div class="descend">
+      <div class="tree">
+        <ul>
+          <li class="li-union">
+            <ul>
+              {% for x in family.children %}
+              <li>{{ itree_a_descend (x, 1, false) }}</li>
+              {% endfor %}
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
 {% endmacro print_ftree %}

@@ -1,6 +1,7 @@
 {%- include 'UTIL_HTML.jingoo' -%}
 {%- include 'UTIL_DATA.jingoo' -%}
 {%- include 'UTIL_TREE.jingoo' -%}
+{%- include 'UTIL_PANZOOM.jingoo' -%}
 {%- include 'NAVBAR_IND.html.jingoo' -%}
 
 {%- extends "SKELETON.html.jingoo" -%}
@@ -186,7 +187,9 @@
 {%- endif -%}
 
 {%- if M.root.related || M.root.relations -%}
-    <h2>{{ 'relation/relations'|trans|capitalize }}</h2>
+<div class="card mb-4">
+  <div class="card-header">{{ 'relation/relations'|trans|capitalize }}</div>
+  <div class="card-body">
     <ul>
       {%- for r in M.root.related -%}
       <li>
@@ -202,12 +205,15 @@
         {{ etat_civil (r, place = false) }}
       </li>
       {%- endfor -%}
-      </ul>
+    </ul>
+  </div>
+</div>
 {%- endif -%}
 
- <script src="{{ asset ('panzoom/panzoom.min.js') }}"></script>
- {%- if M.root.parents || M.root.children -%}
-   {{ print_itree (M.root, 1, 1) }}
+{%- if M.root.parents || M.root.children -%}
+  {%- call PANZOOM () -%}
+  {{ print_itree (M.root, 1, 1) }}
+  {%- endcall -%}
  {%- endif -%}
 
 {%- endblock -%}

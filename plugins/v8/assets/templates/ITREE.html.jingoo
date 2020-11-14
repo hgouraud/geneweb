@@ -1,4 +1,5 @@
 {%- include 'UTIL_TREE.jingoo' -%}
+{%- include 'UTIL_PANZOOM.jingoo' -%}
 {%- include 'NAVBAR_IND.html.jingoo' -%}
 
 {%- extends "SKELETON.html.jingoo" -%}
@@ -29,25 +30,8 @@
     </button>
   </form>
 
-  <script src="{{ asset ('panzoom/panzoom.min.js') }}"></script>
-
-  <div id="panzoom-controllers" class="panzoom-controllers">
-    <div class="custom-control custom-switch">
-      <input type="checkbox" class="custom-control-input" id="panzoom-fullscreen-controller-input" onclick="toggleFullscreen()">
-      <label class="custom-control-label" for="panzoom-fullscreen-controller-input">{{ 'full-screen'|trans|capitalize }}</label>
-    </div>
-    <button class="btn" type="button" id="panzoom-controller-reset"><i class="fa fa-history"></i></button>
-    <button class="btn" type="button" id="panzoom-controller-zoomin"><i class="fa fa-plus-square"></i></button>
-    <button class="btn" type="button" id="panzoom-controller-zoomout"><i class="fa fa-minus-square"></i></button>
-  </div>
-
+  {%- call PANZOOM (controllers = true) -%}
   {{ print_itree (M.root, env.an, env.dn) }}
-
-  <script>
-    document.getElementById('panzoom-controller-reset').addEventListener('click', panzoom.reset)
-    document.getElementById('panzoom-controller-zoomin').addEventListener('click', panzoom.zoomIn)
-    document.getElementById('panzoom-controller-zoomout').addEventListener('click', panzoom.zoomOut)
-    function toggleFullscreen () { $('#panzoom-parent, #panzoom-controllers').toggleClass('fullscreen') ; }
-  </script>
+  {%- endcall -%}
 
 {%- endblock -%}
