@@ -17,6 +17,7 @@ DISTRIB_DIR=distribution
 BUILD_DIR=_build/default
 
 EXE = \
+	bin/cache_files.exe \
 	bin/connex.exe \
 	bin/consang.exe \
 	bin/ged2gwb.exe \
