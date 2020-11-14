@@ -147,6 +147,10 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
             <button type="submit" class=" btn btn-lg btn-outline-primary ml-2"
               title="[*search/case sensitive]0 [person/persons]0">
               <i class="fa fa-search fa-fw"></i></button>
+          %else;
+            <button type="submit" style="position:absolute;visibility:hidden">
+              <i class="fa fa-search fa-fw"></i> %(for Safari: make button invisible rather than display:none %)
+              </button>
           %end;
         </div>
         <div class="d-flex justify-content-center mt-2">
@@ -181,6 +185,10 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
               <button type="submit" class=" btn btn-lg btn-outline-primary border-top-0 ml-2"
                 title="[*search/case sensitive]0 [person/persons]0">
                 <i class="fa fa-search fa-fw"></i></button>
+            %else;
+              <button type="submit" style="position:absolute;visibility:hidden">
+                <i class="fa fa-search fa-fw"></i> %(for Safari: make button invisible rather than display:none %)
+                </button>
             %end;
           </div>
           <div class="d-flex justify-content-center mt-2">
