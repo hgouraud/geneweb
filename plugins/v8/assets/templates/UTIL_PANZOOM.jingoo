@@ -22,12 +22,14 @@
         if (!event.shiftKey) { return } ;
         panzoom.zoomWithWheel(event) ;
     });
-    document.getElementById('panzoom-controller-reset{{ id }}').addEventListener('click', panzoom.reset)
-    document.getElementById('panzoom-controller-zoomin{{ id }}').addEventListener('click', panzoom.zoomIn)
-    document.getElementById('panzoom-controller-zoomout{{ id }}').addEventListener('click', panzoom.zoomOut)
-    document.getElementById('panzoom-fullscreen-controller-input{{ id }}').addEventListener('click', function () {
-      $('#panzoom-parent{{ id }}, #panzoom-controllers{{ id }}').toggleClass('fullscreen') ;
-    }) ;
+    {%- if controllers -%}
+      document.getElementById('panzoom-controller-reset{{ id }}').addEventListener('click', panzoom.reset)
+      document.getElementById('panzoom-controller-zoomin{{ id }}').addEventListener('click', panzoom.zoomIn)
+      document.getElementById('panzoom-controller-zoomout{{ id }}').addEventListener('click', panzoom.zoomOut)
+      document.getElementById('panzoom-fullscreen-controller-input{{ id }}').addEventListener('click', function () {
+        $('#panzoom-parent{{ id }}, #panzoom-controllers{{ id }}').toggleClass('fullscreen') ;
+      }) ;
+    {%- endif -%}
   }) ();
 </script>
 {%- endmacro -%}

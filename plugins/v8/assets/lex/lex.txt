@@ -26,6 +26,18 @@ sv: begränsa till direkta förfäder till rotpersonen (Sosa/Ahnentafel)
 en: apply modifications
 fr: appliquer les modifications
 
+    convert_calendar
+de: datum konvertieren
+en: calendar converter
+es: convertidor de fechas
+fi: kalenterimuunnin
+fr: convertir une date
+it: convertitore di date
+nl: datum omrekenen
+no: kalender omformer
+pt: conversor de calendário
+sv: kalenderomvandlare
+
     default_theme
 en: default theme
 fr: thème par défaut

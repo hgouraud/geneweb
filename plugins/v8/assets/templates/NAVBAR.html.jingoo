@@ -67,7 +67,11 @@
           {% endif %}
           {{ dropdownItem ('fa-chart-bar', 'statistics'|trans, env.prefix + 'm=STAT') }}
           {{ dropdownItem ('fa-history', 'history'|trans, env.prefix + "m=HIST&k=20") }}
-          {{ dropdownItem ('fa-calendar-alt', 'calendar/calendars'|trans(1), env.prefix + "m=CAL") }}
+          <a data-toggle="modal" class="dropdown-item" data-target="#calendarsModal" href="#"
+             onclick="loadCalendars()">
+            <i class="fa fa-fw fa-calendar-alt mr-2"></i>
+            {{ 'convert_calendar'|trans|capitalize }}       
+          </a>
           {{ dropdownItem ('fa-birthday-cake', 'anniversaries'|trans, env.prefix + "m=ANM") }}
           {{ dropdownItem ('fa-exclamation-triangle', 'warnings'|trans, env.prefix + 'm=WARNINGS') }}
         </div>
@@ -85,7 +89,7 @@
           </li>
           <li class="dropdown-submenu">
             {{ subDropdownToggle ('access_rigths_selector'|trans|capitalize) }}
-	    <div class="dropdown-menu dropdown-menu-max-height">
+            <div class="dropdown-menu dropdown-menu-max-height">
               {{ dropdownItem ('fa-hat-wizard', 'wizard/wizards/friend/friends/exterior'|trans(0)|capitalize, conf.command + '?w=w') }}
               {{ dropdownItem ('fa-user-friends', 'wizard/wizards/friend/friends/exterior'|trans(2)|capitalize, conf.command + '?w=f') }}
               {{ dropdownItem ('fa-sign-out-alt', 'wizard/wizards/friend/friends/exterior'|trans(4)|capitalize, conf.command + '?w=' + print_env (conf.env)) }}
@@ -94,15 +98,15 @@
 	  {{ LOG (conf.command) }}
           <li class="dropdown-submenu">
             {{ subDropdownToggle ('theme_selector'|trans|capitalize) }}
-	    <div class="dropdown-menu dropdown-menu-max-height">
+            <div class="dropdown-menu dropdown-menu-max-height">
               {%- set NAVBAR_theme = list (conf.env) + list (conf.henv) + list (conf.senv) -%}
               {%- set NAVBAR_theme = reject ((x) => x[0] == "theme", NAVBAR_theme) -%}
               {%- set NAVBAR_theme = fold (((acc,x) => (acc+x[0]+'='+x[1]+'&')), '?', NAVBAR_theme)  -%}
               {{ dropdownItem ('', 'default_theme'|trans|capitalize, conf.command + NAVBAR_theme) }}
-	      {%- for t in ['cerulean','cosmo','cyborg','darkly','flatly','journal','litera','lumen','lux','materia','minty','pulse','sandstone','simplex','sketchy','slate','solar','spacelab','superhero','united','yeti'] -%}
+              {%- for t in ['cerulean','cosmo','cyborg','darkly','flatly','journal','litera','lumen','lux','materia','minty','pulse','sandstone','simplex','sketchy','slate','solar','spacelab','superhero','united','yeti'] -%}
               {{ dropdownItem ('', t|capitalize, conf.command + NAVBAR_theme + 'theme=' + t) }}
               {%- endfor -%}
-	    </div>
+            </div>
           </li>
         </ul>
       </li>
@@ -114,3 +118,35 @@
   </button>
   <div id="sub-topbar" class="collapse navbar-collapse">{{ pagebar () }}</div>
 </nav>
+
+<div class="modal fade" id="calendarsModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ 'convert_calendar'|trans|capitalize }}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        {%- include 'CAL.html.jingoo' -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function loadCalendars () {
+      if (typeof window.Calendars == 'undefined') {
+          $.ajax( { url : '{{ asset ('js/calendars_js.js') }}'
+                    , dataType : 'script'
+                    , success : function () {
+                        var today = new Date() ;
+                        var dmy = Calendars.make ( today.getDate(), today.getMonth() + 1, today.getFullYear() ) ;
+                        sdn = Calendars.sdnOfGregorian (dmy) ;
+                        update_inputs () ;
+                    }
+                  } );
+      } ;
+  } ;
+</script>

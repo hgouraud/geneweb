@@ -19,6 +19,9 @@
 
   <body {% if theme %}class="theme-{{ theme }}"{% endif %}>
 
+    <script src="{{ asset ('jquery/jquery-3.5.1.min.js') }}"></script>
+    <script src="{{ asset ('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  
     {%- block navbar -%}
       {%- include 'NAVBAR.html.jingoo' -%}
     {%- endblock -%}
@@ -31,8 +34,6 @@
       {%- include 'FOOTER.html.jingoo' -%}
     {%- endblock -%}
 
-    <script src="{{ asset ('jquery/jquery-3.5.1.slim.min.js') }}"></script>
-    <script src="{{ asset ('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script>{% block script %}{% endblock %}</script>
     <script>
       $('.dropdown-menu a.dropdown-toggle').on('click', function(e) {
