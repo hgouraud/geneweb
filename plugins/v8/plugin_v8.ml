@@ -189,6 +189,10 @@ let a assets conf base =
     in
     interp assets conf "H_TREE.html.jingoo" models
 
+let cal assets conf base =
+  let models = w_default_env assets conf base Tnull in
+  interp assets conf "CAL.html.jingoo" models
+
 let home assets conf base =
   match Util.find_person_in_env conf base "" with
   | Some p ->
@@ -256,9 +260,10 @@ let () =
   Gwdlib.GwdPlugin.register ~ns
     [ "", w_updated_conf home
     ; "A", w_updated_conf a
+    ; "CAL", w_updated_conf cal
+    ; "MOD_FAM", w_updated_conf mod_fam
     ; "SEARCH_ADVANCED", w_updated_conf asearch
     ; "SEARCH_SIMPLE", w_updated_conf ssearch
-    ; "MOD_FAM", w_updated_conf mod_fam
     ; "WARNINGS", w_updated_conf warning
     ; "ITREE", w_updated_conf itree
     ]

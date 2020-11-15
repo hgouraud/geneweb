@@ -469,6 +469,24 @@
   right: 0 ;
 }
 
+/* CAL page */
+
+.calendars-wrapper {
+    position: relative;
+}
+
+.calendars-spinner {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+}
+
 .theme-lux .navbar {
     padding-top: 0;
     padding-bottom: 0;
