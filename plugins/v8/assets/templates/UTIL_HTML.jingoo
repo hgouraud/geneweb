@@ -1,6 +1,15 @@
-{%- macro print_env_get_param (env) -%}
-{%- for (k, v) in env %}{% if loop.index0 %}&{% endif %}{{ k }}={{ v }}{% endfor -%}
+{%- macro print_GET (env, except=null) -%}
+  {%- for (k, v) in env -%}
+    {%- if k != except -%}{{ k }}={{ v }}&{%- endif -%}
+  {%- endfor -%}
 {%- endmacro -%}
+
+{%- macro GET (except = []) -%}
+  {%- for (k, v) in conf.henv %}{% if not (k in except) %}{{ k }}={{ v }}&{% endif %}{% endfor -%}
+  {%- for (k, v) in conf.senv %}{% if not (k in except) %}{{ k }}={{ v }}&{% endif %}{% endfor -%}
+  {%- for (k, v) in conf.env %}{% if not (k in except) %}{{ k }}={{ v }}&{% endif %}{% endfor -%}
+{%- endmacro -%}
+
 
 {%- macro print_hidden_textarea (env) -%}
   {%- for (k, v) in env -%}

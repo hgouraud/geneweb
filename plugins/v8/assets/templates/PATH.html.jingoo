@@ -181,7 +181,7 @@
 </table>
 
 <p class="text-right">
-  <a href="{{ conf.command }}?{{ print_env_get_param (conf.env) }}&{{next_index_in_env ('ef')}}={{ M.ifam }}">
+  <a href="{{ conf.command }}?{{ print_GET (conf.senv) }}&{{ print_env_GET (conf.env) }}&{{next_index_in_env ('ef')}}={{ M.ifam }}">
     {{'v8_next_relationship_path'|trans|capitalize}}
   </a>
 </p>

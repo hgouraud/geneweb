@@ -1,4 +1,5 @@
 {%- include "UTIL_NAVBAR.jingoo" -%}
+{%- include "UTIL_HTML.jingoo" -%}
 
 <nav class="navbar navbar-expand-md navbar-light bg-light sticky-top border-bottom">
   <ul class="navbar-nav">
@@ -83,7 +84,10 @@
             {{ subDropdownToggle ('language_selector'|trans|capitalize) }}
             <div class="dropdown-menu dropdown-menu-max-height">
               {%- for lang in range (0,29)|map((i) => ('!languages'|trans(i)|split('='))) | sort(compare=(a,b)=>compare(a[1],b[1])) -%}
-              {{ dropdownItem (null, lang[1], conf.command + '?lang=' + lang[0] + print_env (conf.env)) }}
+                <a class="dropdown-item"
+                   href="{{ conf.command }}?{{ GET (except = ['lang']) }}lang={{ lang[0] }}">
+                  {{ lang[1]|capitalize }}
+                </a>
               {%- endfor -%}
             </div>
           </li>
