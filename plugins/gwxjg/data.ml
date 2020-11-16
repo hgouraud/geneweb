@@ -105,7 +105,7 @@ and mk_fam_relation = function
   | Residence -> Tstr "RESIDENCE"
 
 and mk_fam_separation = function
-  | Divorced _ -> Tstr "DIVORCED"
+  | Divorced d -> Tset [ Tstr "DIVORCED" ; mk_opt mk_date (Adef.od_of_cdate d) ]
   | Separated -> Tstr "SEPARATED"
   | NotDivorced -> Tnull
 

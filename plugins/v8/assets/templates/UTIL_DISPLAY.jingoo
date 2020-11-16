@@ -19,9 +19,9 @@
   {{ x.first_name + (x.occ ? '.' + x.occ + ' ' : ' ') + x.surname }}
 {%- endfunction -%}
 
-{% function married_to (sex, ff, date_n_place) -%}
+{% function married_to (sex, f, date_n_place) -%}
   {%- if sex == 0 or sex == 2 %}{% set n = 0 %}{% else %}{% set n = 1 %}{% endif -%}
-  {%- switch ff.relation -%}
+  {%- switch f.relation -%}
     {%- case "MARRIED" || "NO_SEXES_CHECK_MARRIED" || "MARRIAGE_LICENSE" -%}
       {{ 'married%t to'|trans(n, t=date_n_place) }}
     {%- case "NOT_MARRIED" || "NO_SEXES_CHECK_NOT_MARRIED" -%}
@@ -39,6 +39,22 @@
     {%- default -%}
       {{ 'with'|trans }}
   {%- endswitch -%}
+{%- endfunction -%}
+
+{%- function marriage_date_place (f) -%}
+  {%- if not f.marriage_place -%}
+    {%- if f.marriage_date -%}
+      {{ ' <em>' + DATE.string_of_ondate (f.marriage_date) + '</em>' }}
+    {%- else -%}
+      {{ '' }}
+    {%- endif -%}
+  {%- else -%}
+    {%- if not f.marriage_date -%}
+      {{ ' <em>, ' + f.marriage_place + ', </em>' }}
+    {%- else -%}
+      {{ ' <em>' + DATE.string_of_ondate (f.marriage_date) + '), ' + f.marriage_place +', </em>' }}
+    {%- endif -%}
+  {%- endif -%}
 {%- endfunction -%}
 
 {%- function person_href (param=null, p) -%}

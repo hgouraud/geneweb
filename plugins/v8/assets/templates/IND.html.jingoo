@@ -18,21 +18,20 @@
   {%- if bi && (bi.date || bi.place) -%}
   <li>
     {{ 'born'|trans(p.sex)|capitalize }}
-    {%- if bi.date %} {{ DATE.string_of_ondate (bi.date) }}{%- endif -%}
+    {%- if bi.date %}
+      {{ DATE.string_of_ondate (bi.date) }}
+      {%- if de == null %} ({{ DATE.string_of_age (DATE.sub (conf.today, bi.date)) }}){% endif -%}
+    {%- endif -%}
     {%- if de == null
         && bi.date
         && bi.date.prec == 'sure'
         && conf.today.day == bi.date.day
         && conf.today.month == bi.date.month
-        && conf.today.year == bi.date.year
     %}
     ({{ 'happy birthday to you!'|trans }})
     {%- endif -%}
     {%- if place && bi.place %} - {{ bi.place }}{% endif -%}
   </li>
-  {%- endif -%}
-  {%- if t0 && t0.day != 0 && t0.month != 0 && t0.prec == 'sure' -%}
-  <li>{{ 'age'|trans|capitalize }}{{ ':'|trans }} {{ DATE.string_of_age (DATE.sub (conf.today, t0)) }}</li>
   {%- endif -%}
   {%- if ba -%}
   <li>
@@ -149,41 +148,85 @@
     </div>
   </div>
 </div>
-  {%- if length (M.root.parents.children) > 1 -%}
-    <div class="card mb-4">
-      <div class="card-header">
-	{{ conf.benv['full_fratrie'] == "yes" ? 'fratrie'|trans|capitalize : 'siblings'|trans|capitalize }}
-      </div>
-      <ul class="card-body">
-      {%- for c in M.root.parents.children -%}
-        {%- if c.iper == M.root.iper -%}
-          <li><em>{{ fso (M.root) }}</em></li>
-        {%- else -%}
-          <li>
-            {{ print_person_short (c) }}
-            {{ etat_civil (c, place = false) }}
-          </li>
-        {%- endif -%}
-      {%- endfor -%}
-      </ul>
-    </div>
-  {%- endif -%}
-  {%- set hhsiblings = exists ((f) => f.ifam != M.root.parents.ifam && f.children) -%}
-  {%- if hhsiblings (M.root.father.families) || hhsiblings (M.root.mother.families) -%}
-    <div class="card mb-4">
-      <div class="card-header">
-	{{ 'half siblings'|trans|capitalize }}
-      </div>
-      <div class="card-body row">
-	{%- if hhsiblings (M.root.father.families) -%}
-	{{ hsiblings (M.root.father) }}
-	{%- endif -%}
-	{%- if hhsiblings (M.root.mother.families) -%}
-	{{ hsiblings (M.root.mother, hhsiblings (M.root.father.families) ? ' border-left' : '') }}
-	{%- endif -%}
-      </div>
-    </div>
-  {%- endif -%}
+{%- endif -%}
+
+{%- if M.root.families -%}
+<div class="card mb-4">
+  <div class="card-header">
+    {{ 'union(s)'|trans|capitalize }}
+    {%- if exists ((f) => length (f.children) > 0, M.root.families) %}
+      {{ 'and'|trans }} {{ 'child/children'|trans }}
+    {%- endif %}
+  </div>
+  <ul class="card-body">
+    {%- for f in M.root.families -%}
+    <li>
+      {{ married_to (M.root.sex, f, marriage_date_place (f)) }}
+      <a href="{{ person_href (f.spouse) }}">{{ person_displayed_name (f.spouse) }}</a>
+      {%- if f.witnesses %}
+        ({{ 'witness/witnesses'|trans(length(f.witness == 1) ? 0 : 1) }}{{ ':'|trans }}
+        {%- for w in f.witnesses -%}
+          {%- if loop.index0 %}, {% endif -%}
+            <a href="{{ person_href (w) }}">{{ person_displayed_name (w) }}</a>
+	{%- endfor -%})
+      {%- endif -%}
+      {%- if f.separation %}
+        {%- if f.separation == 'SEPARATED' %}
+	  , {{ 'separated'|trans }}
+	{%- else -%}
+	  , {{ 'divorced'|trans }}
+	  {%- if f.separation[1] %} {{ DATE.string_of_ondate (f.separation[1]) }}{%- endif -%}
+	{%- endif %}
+      {%- endif -%}
+      {%- if f.children %}
+        {{ 'having as children'|trans }}
+        <ul>
+          {%- for c in f.children -%}
+          <li><a href="{{ person_href (c) }}">{{ person_displayed_name (c) }}</a></li>
+          {%- endfor -%}
+	</ul>
+      {%- endif -%}
+    </li>
+    {%- endfor -%}
+  </ul>
+</div>
+{%- endif -%}
+
+{%- if M.root.parents && length (M.root.parents.children) > 1 -%}
+<div class="card mb-4">
+  <div class="card-header">
+    {{ conf.benv['full_fratrie'] == "yes" ? 'fratrie'|trans|capitalize : 'siblings'|trans|capitalize }}
+  </div>
+  <ul class="card-body">
+    {%- for c in M.root.parents.children -%}
+    {%- if c.iper == M.root.iper -%}
+    <li><em>{{ fso (M.root) }}</em></li>
+    {%- else -%}
+    <li>
+      {{ print_person_short (c) }}
+      {{ etat_civil (c, place = false) }}
+    </li>
+    {%- endif -%}
+    {%- endfor -%}
+  </ul>
+</div>
+{%- endif -%}
+
+{%- set hhsiblings = exists ((f) => f.ifam != M.root.parents.ifam && f.children) -%}
+{%- if M.root.parents && hhsiblings (M.root.father.families) || hhsiblings (M.root.mother.families) -%}
+<div class="card mb-4">
+  <div class="card-header">
+    {{ 'half siblings'|trans|capitalize }}
+  </div>
+  <div class="card-body row">
+    {%- if hhsiblings (M.root.father.families) -%}
+    {{ hsiblings (M.root.father) }}
+    {%- endif -%}
+    {%- if hhsiblings (M.root.mother.families) -%}
+    {{ hsiblings (M.root.mother, hhsiblings (M.root.father.families) ? ' border-left' : '') }}
+    {%- endif -%}
+  </div>
+</div>
 {%- endif -%}
 
 {%- if M.root.related || M.root.relations -%}

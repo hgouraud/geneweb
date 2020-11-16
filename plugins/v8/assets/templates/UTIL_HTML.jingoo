@@ -10,7 +10,6 @@
   {%- for (k, v) in conf.env %}{% if not (k in except) %}{{ k }}={{ v }}&{% endif %}{% endfor -%}
 {%- endmacro -%}
 
-
 {%- macro print_hidden_textarea (env) -%}
   {%- for (k, v) in env -%}
     <textarea style="display:none;" name="{{ k }}">{{ decode_varenv (v) }}</textarea>

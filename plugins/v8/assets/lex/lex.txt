@@ -151,9 +151,17 @@ fr: recherche simple
 en: theme selector
 fr: sélecteur de thème
 
-    v8_next_relationship_path
-en: try to find another path
-fr: essayer de trouver un autre chemin
+    union(s)
+de: eheschließungen
+en: spouses
+es: casamiento(s)
+fi: aviopuoliso(t)
+fr: union(s)
+it: matrimoni
+nl: relaties
+no: giftermål
+pt: casamento(s)
+sv: vigslar
 
     v8_warnings_page
 en: check family tree
