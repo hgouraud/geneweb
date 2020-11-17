@@ -10,17 +10,20 @@
 %let;laY;title="[*tree] (Y)" accesskey="Y"%in;
 %let;acc;%if;access_by_key;ep=%first_name_key;;en=%surname_key;;%if;(occ!= "0")eoc=%occ;;%end;%else;ei=%index;;%end;%in;
 %let;sexcolor;%if;is_male;male%elseif;is_female;female%else;neuter%end;%in;
-%define;spousesexcolor()
-  %foreach;family;
-    %if;(family_cnt=1)
-      %if;(spouse.sex=0)male%elseif;(spouse.sex=1)female%else;neuter%end;
-     %end;
-  %end;
+%define;spousesexcolor(xxx)
+  %if;(xxx=0)male%elseif;(xxx=1)female%else;neuter%end;
 %end;
 %define;input_hidden(xxx,nnn)
   %if;(xxx!="")
     <input type="hidden" name="nnn" value="%xxx;">
   %end;
+%end;
+%define;show_plugin(plugx)
+  %include.plugx
+%end;
+%define;get_plugin_cmd(plugin_nam)
+  %let;plugx;plugins/cmd_plugin_nam%in
+  %apply;show_plugin(plugx)
 %end;
 %let;p_mod;%if;(bvar.p_mod!="" and evar.p_mod="")%bvar.p_mod;%elseif;(evar.p_mod!="")%evar.p_mod;%end;%in;
 %if;(not cancel_links)
@@ -193,7 +196,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                   <a class="dropdown-item" href="%prefix;m=HIST_DIFF;t=SUM;f=%history_file;"><span class="fa fa-archive fa-fw mr-2"></span>[*revision history]</a>
                   <a class="dropdown-item" href="%prefix;m=HIST_DIFF;t=DIFF;f=%history_file;&new=0;old=1" %laD;><span class="fa fa-history fa-fw mr-2"></span>[*last diff]</a>
                 %end;
-                %if;has_parents;
+%(              %if;has_parents;
                   %foreach;father.child;
                     %if;is_sibling_before;
                       <a href="%prefix;%child.access;" id="previous_sibling" class="d-none"></a>
@@ -202,7 +205,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                       <a href="%prefix;%child.access;" id="next_sibling" class="d-none"></a>
                     %end;
                   %end;
-                %end;
+                %end; %)
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item btn simple-copy" role="button" title="[*copy link]" data-wikilink="%[%[%first_name;/%surname;%if;(occ!="0")/%occ;%end;%]%]"><i class="far fa-clipboard fa-fw"></i> %[%[%first_name;/%surname;%if;(occ!="0")/%occ;%end;%]%]</a>
                 <a class="dropdown-item btn full-copy" role="button" title="[*copy link]" data-wikilink="%[%[%first_name;/%surname;/%occ;/%first_name; %surname;%]%]"><i class="far fa-clipboard fa-fw"></i> %[%[%first_name;/%surname;/%occ;/%first_name; %surname;%]%]</a>
@@ -228,7 +231,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                     </a>
                 %else;
                   <a class="nav-link %if;(evar.m="ADD_FAM")active%end;" id="add_fam" href="%prefix;m=ADD_FAM;ip=%index;" %laA;>%nn;
-                    <span aria-hidden="true"><span class="fa fa-plus %sexcolor;"></span><span class="fa fa-user %apply;spousesexcolor()"></span></span>%nn;
+                    <span aria-hidden="true"><span class="fa fa-plus %sexcolor;"></span><span class="fa fa-user %apply;spousesexcolor(sex)"></span></span>%nn;
                     <span class="sr-only">[*add::family/families]0 (A)</span>%nn;
                   </a>
                 %end;
@@ -240,7 +243,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                   <a class="nav-link %if;((evar.m="MOD_FAM" or evar.m="MOD_FAM_OK") and evar.i=family.index)active%end;" id="mod_fam_%family_cnt;" href="%prefix;m=MOD_FAM;i=%family.index;;ip=%index;"
                     title="[*modify::family/families]0 [with] %spouse.first_name;%if;(spouse.occ!=0).%spouse.occ;%end; %spouse.surname; (%a_k;)"
                     accesskey="%a_k;">%nn;
-                    <span class="fa fa-user-edit %sexcolor;" aria-hidden="true"></span><span class="fa fa-user %apply;spousesexcolor()" aria-hidden="true"></span>%if;(nb_families!=1)<span class="small align-top"><sup>%family_cnt;</sup></span>%end;
+                    <span class="fa fa-user-edit %sexcolor;" aria-hidden="true"></span><span class="fa fa-user %apply;spousesexcolor(spouse.sex)" aria-hidden="true"></span>%if;(nb_families!=1)<span class="small align-top"><sup>%family_cnt;</sup></span>%end;
                     <span class="sr-only">%sp;[*modify::family/families]0 [with] %spouse.first_name;%if;(spouse.occ!=0).%spouse.occ;%end; %spouse.surname; (%a_k;)</span>
                   </a>
                 </li>
@@ -343,6 +346,17 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="%prefix;%access;;m=C;t=AN"><span class="fa fa-birthday-cake fa-fw"></span> [*family birthday]</a>
               %end;
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-secondary"
+              data-toggle="dropdown" role="button" href="#" aria-haspopup="true"
+              aria-expanded="false" title="[*plugins]">
+              <span class="fa fa-cog"></span></a>
+            <div class="dropdown-menu">
+              %if;(bvar.plugin_menu_1!="")%apply;get_plugin_cmd(bvar.plugin_menu_1)%end;
+              %if;(bvar.plugin_menu_2!="")%apply;get_plugin_cmd(bvar.plugin_menu_2)%end;
+              %if;(bvar.plugin_menu_3!="")%apply;get_plugin_cmd(bvar.plugin_menu_3)%end;
             </div>
           </li>
         </ul>

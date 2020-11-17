@@ -579,11 +579,18 @@ let parse_templ conf strm =
   strip_newlines_after_variables astl
 
 let input_templ conf fname =
+  let _ = Printf.eprintf "Input templ: %s\n" fname in
+  let _ = flush stderr in
   match Util.open_templ conf fname with
     Some ic ->
+      let _ = Printf.eprintf "Inpiut templ: some\n" in
+      let _ = flush stderr in
       let astl = parse_templ conf (Stream.of_channel ic) in
       close_in ic; Some astl
-  | None -> None
+  | None ->
+      let _ = Printf.eprintf "Inpiut templ: none\n" in
+      let _ = flush stderr in
+      None
 
 (* Common evaluation functions *)
 

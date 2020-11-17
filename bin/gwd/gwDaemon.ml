@@ -1479,6 +1479,7 @@ let excluded from =
 let image_request script_name env =
   match Util.p_getenv env "m", Util.p_getenv env "v" with
     Some "IM", Some fname ->
+      print_endline @@ "Image_request, IM";
       let fname =
         if fname.[0] = '/' then String.sub fname 1 (String.length fname - 1)
         else fname
@@ -1488,6 +1489,7 @@ let image_request script_name env =
       let _ = ImageDisplay.print_image_file fname in true
   | _ ->
       let s = script_name in
+      print_endline @@ ("Image_request, other: " ^ s);
       if Mutil.start_with "images/" 0 s then
         let i = String.length "images/" in
         let fname = String.sub s i (String.length s - i) in

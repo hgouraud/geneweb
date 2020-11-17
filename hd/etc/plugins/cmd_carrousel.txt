@@ -1,0 +1,1 @@
+<a class="dropdown-item" href="%prefix;m=SND_IMAGE;t=REFRESH;%access;"><span class="fa fa-image fa-fw"></span> [*carrousel]</a>

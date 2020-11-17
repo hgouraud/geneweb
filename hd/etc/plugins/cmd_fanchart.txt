@@ -1,0 +1,1 @@
+<a class="dropdown-item" href="%prefix;m=A;t=FC;%access;;v=5;"><span class="fa fa-pizza-slice fa-fw"></span> [*fanchart]</a>

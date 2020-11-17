@@ -83,6 +83,7 @@ let family_m conf base =
   || conf.friend
   || List.assoc_opt "visitor_access" conf.base_env <> Some "no"
   then
+  begin
     let m = Opt.default "" @@ p_getenv conf.env "m" in
     if not @@ try_plugin conf base m
     then
@@ -261,6 +262,7 @@ let family_m conf base =
       | unknown -> handler.fallback unknown
     in
     p handler conf base
+  end
   else
     begin
       let title _ = Wserver.print_string (Utf8.capitalize (transl conf "error")) in

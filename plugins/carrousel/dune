@@ -1,0 +1,6 @@
+(executable
+  (name plugin_carrousel)
+  (libraries geneweb-lib geneweb-gwd-lib geneweb-wserver)
+  (flags -linkall)
+  (modes (native plugin))
+)

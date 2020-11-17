@@ -1,0 +1,181 @@
+# menubar and welcome page
+    carrousel
+en: carrousel
+fr: carousel
+
+    places
+en: places/surnames
+fr: lieux/patronymes
+
+    fanchart
+en: fanchart
+fr: arbre en éventail
+
+    plugins
+en: plugins
+fr: plugins
+
+
+# carrousel
+
+    warning refresh
+en: refresh the page only after having clicked on the main icon as this would repeat the swap action.
+fr: ne pas rafraichir la page sans avoir au préalable cliqué sur l'icone car cela répéterait l'échange des images.
+
+    select input
+de: wählen
+en: choose file
+fr: sélect. fichier
+
+    portrait
+en: portrait
+fr: portrait
+
+    saved images
+en: saved image/saved images
+fr: image sauvegardée/images sauvegardées
+
+    comment
+en: comment
+fr: comment
+
+    with comment
+en: with a comment
+fr: avec un commentaire
+
+    send image with comment
+en: send selected image with this comment
+fr: envoyer l’image selectionée avec ce commentaire
+
+    uploaded
+en: uploaded
+fr: envoyé/envoyée
+
+    save
+en: save
+fr: sauvegarder
+
+    saved
+en: saved
+fr: sauvegardé/sauvegardée
+
+    deleted
+en: deleted
+fr: supprimé/supprimée
+
+    restore
+en: restore
+fr: restaurer
+
+    restored
+en: restored
+fr: restauré/restaurée
+
+    save portrait
+en: the existing portait will be saved to
+fr: le portrait existant sera sauvegardé dans
+
+    previous portrait
+en: a previous copy of the portait in this subfolder will be deleted.
+fr: une sauvegarde existante du portrait dans ce sous-répertoire sera supprimée.
+
+    store image
+en: the selected image will be copied to
+fr: l'image sélectionnée sera enregistrée dans
+
+    save image
+en: an image with a similar name will moved to
+fr: si une image du même nom existe déjà, elle sera sauvegardée dans
+
+    previous image
+en: if an image with the same name already exists in this subfolder, it will be deleted.
+fr: si une image du même nom existe déjà dans ce sous-répertoire, elle sera supprimée.
+
+    image comment
+en: add a comment for the image.
+fr: ajouter un commentaire à l’image.
+
+    update image comment
+en: update image comment
+fr: mettre à jour le commentaire de l’image
+
+# places
+
+    all
+en: all
+fr: tous
+
+    list too long
+en: the list is too long
+fr: la liste est trop longue
+
+
+    rlm_nbr too large
+en: the number of participants is too large. If necessary, adjust max_rlm_nbr in your parameter file.
+fr: le nombre de personnes concernées est trop grand. Si nécessaire, ajustez max_rlm_nbr dans votre fichier paramètres.
+
+    search results
+en: detailed results of search by place for
+fr: résultats détaillés de la recherche par lieu pour
+
+    matching
+en: matching
+fr: correspondance
+
+    case sensitive title
+en: dont ignore case and accents
+fr: tenir compte des majuscules et accents
+
+    case sensitive
+en: case sensitive
+fr: capitales et accents
+
+    word match title
+en: match full location name
+fr: comparer avec le nom complet d'un lieu
+
+    word match
+en: word match
+fr: mot complet
+
+    any place title
+en: search in the list of sub-places
+fr: rechercher dans la liste des sous-lieux
+
+    any place
+en: sub-places
+fr: sous-lieux
+
+    max nbr title
+en: max number for relation list
+fr: nombre maximum pour les listes de relations
+
+    max nbr
+en: max rel nbr
+fr: max rel nbr
+
+    substring
+en: substring
+fr: partiel
+
+    substring
+en: substring
+fr: partiel
+
+    total/partial display
+en: total/partial display
+fr: affichage total/partiel
+
+    long/short display
+en: long/short display
+fr: affichage long/court
+
+    all the places
+en: all the places
+fr: tous les lieux
+
+    reset to
+co: risturà
+en: reset to
+fr: restaurer
+

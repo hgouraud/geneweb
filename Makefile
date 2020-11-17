@@ -120,8 +120,10 @@ endif
 .PHONY: piqi
 
 %.exe: | piqi $(GENERATED_FILES_DEP)
+	$(RM) -r $(DISTRIB_DIR)/plugins
 	dune build $@
 exe:
+	$(RM) -r $(DISTRIB_DIR)/plugins
 	dune build $(ALL_EXE:=.exe)
 .DEFAULT_GOAL = exe
 
@@ -185,6 +187,7 @@ distrib: exe
 	cp bin/setup/lang/lexicon.txt $(DISTRIB_DIR)/gw/setup/lang/
 	cp bin/setup/lang/intro.txt $(DISTRIB_DIR)/gw/setup/lang/
 	cp -R hd/* $(DISTRIB_DIR)/gw/
+	cp -R $(BUILD_DIR)/plugins $(DISTRIB_DIR)/
 
 .PHONY: install uninstall distrib
 

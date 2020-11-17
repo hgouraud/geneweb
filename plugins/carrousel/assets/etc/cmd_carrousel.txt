@@ -1,0 +1,2 @@
+<a class="dropdown-item" href="%prefix;m=SND_IMAGE;t=SND_IMAGE_C;%access;">
+<span class="fa fa-pie fa-fw"></span>[*carrousel]</a>
