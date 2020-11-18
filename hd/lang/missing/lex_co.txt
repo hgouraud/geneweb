@@ -4,10 +4,10 @@ co:
     a child-in-law/children-in-law
 en: one child-in-law/children-in-law
 fr: un bel-enfant/beaux-enfants
-co:
+co: un ghjeneru o una nora/ghjeneri o nore
 
     pacsed%t to
 en: Civil solidarity pact%t with
 fr: PACS%t avec
-co:
+co: PACS%t cù
 
