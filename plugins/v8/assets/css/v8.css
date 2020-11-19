@@ -5,6 +5,10 @@
 #sub-topbar { margin: -1rem auto -1rem 0; display: flex; align-items:center; }
 #sub-topbar .nav-link { padding-bottom: 1rem; margin-top: .5rem; }
 
+.navbar .nav-tabs {
+    border-bottom: none;
+}
+
 .dropdown-menu-max-height {
     height: auto;
     max-height: 200px;
@@ -487,11 +491,49 @@
     background-color: white;
 }
 
-.theme-lux .navbar {
-    padding-top: 0;
-    padding-bottom: 0;
+.theme-cyborg .navbar-light .navbar-nav .nav-link {
+    color: white;
 }
 
-.theme-lux .nav-tabs {
-    border-bottom: 0;
+.theme-cyborg .navbar .nav-tabs {
+    margin-bottom: -1px;
+}
+
+.theme-darkly .navbar .nav-tabs {
+    margin-bottom: -1rem;
+}
+
+.theme-darkly .navbar-light .navbar-nav .nav-link {
+    color: white;
+}
+
+.theme-flatly .navbar .nav-tabs {
+    margin-bottom: -1rem;
+}
+
+.theme-lux #sub-topbar {
+    margin: 0 auto 0 0;
+}
+
+.theme-lux .navbar.sticky-top {
+    padding: 0 1rem ;
+}
+
+.theme-materia .navbar.sticky-top {
+    padding: 0 1rem;
+}
+
+.theme-materia .card-body .nav-tabs {
+    border-bottom: 1px solid #ddd;
+}
+
+.theme-pulse .navbar.sticky-top {
+    padding: .5rem 1rem;
+}
+
+.theme-yeti .nav-tabs .nav-link,
+.theme-yeti .nav-tabs .nav-link.disabled,
+.theme-yeti .nav-tabs .nav-link.disabled:focus,
+.theme-yeti .nav-tabs .nav-link.disabled:hover {
+    border-bottom: none;
 }
