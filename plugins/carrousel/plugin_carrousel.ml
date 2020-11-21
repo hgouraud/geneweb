@@ -239,6 +239,33 @@ let mode_local env =
   | Vfam _ -> false
   | _ -> true
 
+(*
+  | ["evar_cur"; v; i] ->
+      let n = int_of_string i in
+      let rec loop n =
+        match Util.p_getenv (conf.env @ conf.henv) (v ^ string_of_int n) with
+        | Some vv -> vv
+        | None -> if n > 0 then loop (n - 1) else ""
+      in VVstring (loop n)
+  | ["substr_start"; n; v] ->
+          let n = int_of_string n in
+          (* Attention aux caractères utf-8 !! *)
+          let sub =
+            let len = String.length v in
+            let rec loop i n str =
+              if n = 0 || i >= len then str
+              else
+                let nbc = Utf8.nbc v.[i] in
+                let car = String.sub v i nbc in
+                loop (i+nbc) (n-1) (str ^ car)
+            in
+            loop 0 n ""
+          in VVstring sub
+  | [s] -> eval_simple_var conf s
+  | _ -> raise Not_found
+
+*)
+
 let rec eval_var conf base env ep loc sl =
   try eval_simple_var conf base env ep sl with
     Not_found -> eval_compound_var conf base env ep loc sl
@@ -338,7 +365,28 @@ and eval_simple_str_var conf base env (p, p_auth) =
          (fun v -> try List.assoc v conf.base_env with Not_found -> "")]
 and eval_compound_var conf base env (a, _ as ep) loc =
   function
-  | ["base"; "name"] -> VVstring conf.bname
+  | ["evar_cur"; v; i] ->
+      let n = int_of_string i in
+      let rec loop n =
+        match Util.p_getenv (conf.env @ conf.henv) (v ^ string_of_int n) with
+        | Some vv -> vv
+        | None -> if n > 0 then loop (n - 1) else ""
+      in VVstring (loop n)
+  | ["substr_start"; n; v] ->
+          let n = int_of_string n in
+          (* Attention aux caractères utf-8 !! *)
+          let sub =
+            let len = String.length v in
+            let rec loop i n str =
+              if n = 0 || i >= len then str
+              else
+                let nbc = Utf8.nbc v.[i] in
+                let car = String.sub v i nbc in
+                loop (i+nbc) (n-1) (str ^ car)
+            in
+            loop 0 n ""
+          in VVstring sub
+  | ["base2"; "name"] -> VVstring ("xxx" ^ conf.bname)
   | "family" :: sl ->
       (* TODO ???
       let mode_local =
