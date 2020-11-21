@@ -382,12 +382,12 @@ let print_place_list conf opt long link_to_ind max_rlm_nbr pl_l =
           (if List.length p > 1 then (", " ^ (List.hd (List.tl p))) else "")
         in
         Wserver.printf
-          "<a href=\"%sm=PS%s%s%s\" title=\"%s\">%s</a>"
+          "<a href=\"%sm=PS&t=PS_HG%s%s%s\" title=\"%s\">%s</a>"
             (commd conf) opt ("&k=" ^ (Util.code_varenv p2))
             (if not long then "&display=long" else "&display=short") title (p1) ;
         if link_to_ind && cnt < max_rlm_nbr then
           begin
-          Wserver.printf " (<a href=\"%sm=L%s%s&nb=%d%s" (commd conf)
+          Wserver.printf " (<a href=\"%sm=PS&t=L%s%s&nb=%d%s" (commd conf)
             ("&k=" ^ (Util.code_varenv so)) opt cnt
             (if max_rlm <> "" then "&max_rlm_nbr=" ^ max_rlm else "") ;
           let rec loop3 cnt =
@@ -531,7 +531,7 @@ let print_html_places_surnames conf base max_rlm_nbr link_to_ind
         let rec loop1 prev pl =
           match prev, pl with
           | [], l2 -> List.iter (fun x ->
-              let str = Printf.sprintf "<a href=\"%sm=PS%s%s\">%s</a>\n"
+              let str = Printf.sprintf "<a href=\"%sm=PS&t=PS_HG%s%s\">%s</a>\n"
                 (commd conf) ("&k=" ^ k) opt x in
               Wserver.printf "<li>%s<ul>\n" str) l2
           | x1 :: l1, x2 :: l2 ->
@@ -588,12 +588,12 @@ let print_all_places_surnames_short conf base ~add_birth ~add_baptism ~add_death
   print_aux conf title begin fun () ->
     let opt = print_aux_opt ~add_birth ~add_baptism ~add_death ~add_burial ~add_marriage in
     Wserver.printf
-      "<p><a href=\"%sm=PS%s&display=long\">%s</a></p><p>"
+      "<p><a href=\"%sm=PS&t=PS_HG%s&display=long\">%s</a></p><p>"
       (commd conf) opt (transl conf "long display") ;
     let last = Array.length array - 1 in
     Array.iteri
       (fun i (s, x) ->
-         Wserver.printf "<a href=\"%sm=PS%s&k=%s\">%s</a> (%d)%s"
+         Wserver.printf "<a href=\"%sm=PS&t=PS_HG%s&k=%s\">%s</a> (%d)%s"
            (commd conf) opt (Util.code_varenv s) s x (if i = last then "" else ",\n"))
       array ;
     Wserver.printf "</p>\n"
@@ -670,7 +670,7 @@ let print_all_places_surnames_long conf base _ini ~add_birth ~add_baptism
   let href =
     if short then ""
     else
-      Printf.sprintf "href=\"%sm=PS%s%s%s\" title=\"%s\"" (commd conf) opt
+      Printf.sprintf "href=\"%sm=PS&t=PS_HG%s%s%s\" title=\"%s\"" (commd conf) opt
       (if long then "&display=short" else "&display=long")
       (  match p_getenv conf.env "k" with
         | Some ini -> "&k=" ^ ini
