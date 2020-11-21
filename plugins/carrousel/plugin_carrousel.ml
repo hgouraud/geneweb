@@ -386,7 +386,7 @@ and eval_compound_var conf base env (a, _ as ep) loc =
             in
             loop 0 n ""
           in VVstring sub
-  | ["base2"; "name"] -> VVstring ("xxx" ^ conf.bname)
+  | ["base"; "name"] -> VVstring conf.bname
   | "family" :: sl ->
       (* TODO ???
       let mode_local =

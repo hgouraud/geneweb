@@ -51,22 +51,578 @@ let without_suburb =
 
 (** Transform ["[foo-bar] - boobar (baz)"] into ["foo-bar, boobar (baz)"] *)
 
+let rec compare_ls sl1 sl2 =
+  match sl1, sl2 with
+    s1 :: sl1, s2 :: sl2 ->
+      (* Je ne sais pas s'il y a des effets de bords, mais on  *)
+      (* essaie de convertir s1 s2 en int pour éviter que "10" *)
+      (* soit plus petit que "2". J'espère qu'on ne casse pas  *)
+      (* les performances à cause du try..with.                *)
+      let c =
+        try Stdlib.compare (int_of_string s1) (int_of_string s2) with
+          Failure _ -> Gutil.alphabetic_order s1 s2
+      in
+      if c = 0 then compare_ls sl1 sl2 else c
+  | _ :: _, [] -> 1
+  | [], _ :: _ -> -1
+  | [], [] -> 0
+
+module SortedList =
+  Set.Make (struct type t = string list let compare = compare_ls end)
+
 type 'a env =
     Vlist_data of (string * (string * int) list) list
   | Vlist_ini of string list
   | Vlist_value of (string * (string * int) list) list
   | Venv_keys of (string * int) list
+  | Vslist of SortedList.t ref
+  | Vslistlm of string list list
+  | Vind of person
   | Vint of int
+  | Vcnt of int ref
   | Vstring of string
+  | Vfam of ifam * family * (iper * iper * iper) * bool
   | Vbool of bool
+  | Vlazy of 'a env Lazy.t
+  | Vlazyp of string option ref
   | Vother of 'a
   | Vnone
+
+let get_env v env =
+  try
+    match List.assoc v env with
+      Vlazy l -> Lazy.force l
+    | x -> x
+  with Not_found -> Vnone
 
 let get_vother =
   function
     Vother x -> Some x
   | _ -> None
+
 let set_vother x = Vother x
+
+let extract_var sini s =
+  let len = String.length sini in
+  if String.length s > len && String.sub s 0 (String.length sini) = sini then
+    String.sub s len (String.length s - len)
+  else ""
+
+let bool_val x = VVbool x
+let str_val x = VVstring x
+
+let make_ep conf base ip =
+  let p = pget conf base ip in
+  let p_auth = authorized_age conf base p in p, p_auth
+
+let make_efam conf base ip ifam =
+  let fam = foi base ifam in
+  let ifath = get_father fam in
+  let imoth = get_mother fam in
+  let ispouse = if ip = ifath then imoth else ifath in
+  let cpl = ifath, imoth, ispouse in
+  let m_auth =
+    authorized_age conf base (pget conf base ifath) &&
+    authorized_age conf base (pget conf base imoth)
+  in
+  fam, cpl, m_auth
+
+let mode_local env =
+  match get_env "fam_link" env with
+  | Vfam _ -> false
+  | _ -> true
+
+let make_ep conf base ip =
+  let p = pget conf base ip in
+  let p_auth = authorized_age conf base p in p, p_auth
+
+(*
+  | ["evar_cur"; v; i] ->
+      let n = int_of_string i in
+      let rec loop n =
+        match Util.p_getenv (conf.env @ conf.henv) (v ^ string_of_int n) with
+        | Some vv -> vv
+        | None -> if n > 0 then loop (n - 1) else ""
+      in VVstring (loop n)
+  | ["substr_start"; n; v] ->
+          let n = int_of_string n in
+          (* Attention aux caractères utf-8 !! *)
+          let sub =
+            let len = String.length v in
+            let rec loop i n str =
+              if n = 0 || i >= len then str
+              else
+                let nbc = Utf8.nbc v.[i] in
+                let car = String.sub v i nbc in
+                loop (i+nbc) (n-1) (str ^ car)
+            in
+            loop 0 n ""
+          in VVstring sub
+  | [s] -> eval_simple_var conf s
+  | _ -> raise Not_found
+
+*)
+
+let rec eval_var conf base env ep loc sl =
+  try eval_simple_var conf base env ep sl with
+    Not_found -> eval_compound_var conf base env ep loc sl
+and eval_simple_var conf base env (p, p_auth as ep) =
+  let _ = Printf.eprintf "eval_simple_var\n" in
+  function
+  | [s] ->
+      begin try bool_val (eval_simple_bool_var conf base env s) with
+        Not_found -> str_val (eval_simple_str_var conf base env ep s)
+      end
+  | _ -> raise Not_found
+and eval_simple_bool_var conf base env =
+  let _ = Printf.eprintf "eval_simple_bool_var\n" in
+  function
+  | s ->
+      let v = extract_var "file_exists_" s in
+      if v <> "" then
+        let v = code_varenv v in
+        let s = SrcfileDisplay.source_file_name conf v in Sys.file_exists s
+      else raise Not_found
+and eval_simple_str_var conf base env (p, p_auth) =
+  let _ = Printf.eprintf "eval_simple_str_var\n" in
+  function
+  | "count" ->
+      begin match get_env "count" env with
+        Vcnt c -> string_of_int !c
+      | _ -> ""
+      end
+  | "empty_sorted_list" ->
+      begin match get_env "list" env with
+        | Vslist l ->
+            let _ = Printf.eprintf "env list exists\n" in
+            l := SortedList.empty; ""
+        | _ ->
+            let _ = Printf.eprintf "no list env\n" in
+            raise Not_found
+      end
+  | "incr_count" ->
+      begin match get_env "count" env with
+        Vcnt c -> incr c; ""
+      | _ -> ""
+      end
+  | "reset_count" ->
+      begin match get_env "count" env with
+        Vcnt c -> c := 0; ""
+      | _ -> ""
+      end
+  | s ->
+      let rec loop =
+        function
+          (pfx, f) :: pfx_list ->
+            let v = extract_var pfx s in
+            if v <> "" then f v else loop pfx_list
+        | [] -> raise Not_found
+      in
+      loop
+        ["evar_",
+         (fun v ->
+            match p_getenv (conf.env @ conf.henv) v with
+              Some vv -> Util.escape_html vv
+            | None -> "");
+         (* warning: "cvar_" deprecated since 5.00; use "bvar." *)
+         "cvar_",
+         (fun v -> try List.assoc v conf.base_env with Not_found -> "")]
+and eval_compound_var conf base env (a, _ as ep) loc =
+  let _ = Printf.eprintf "eval_compound_var\n" in
+  function
+  | ["evar_cur"; v; i] ->
+      let n = int_of_string i in
+      let rec loop n =
+        match Util.p_getenv (conf.env @ conf.henv) (v ^ string_of_int n) with
+        | Some vv -> vv
+        | None -> if n > 0 then loop (n - 1) else ""
+      in VVstring (loop n)
+  | ["substr_start"; n; v] ->
+          let n = int_of_string n in
+          (* Attention aux caractères utf-8 !! *)
+          let sub =
+            let len = String.length v in
+            let rec loop i n str =
+              if n = 0 || i >= len then str
+              else
+                let nbc = Utf8.nbc v.[i] in
+                let car = String.sub v i nbc in
+                loop (i+nbc) (n-1) (str ^ car)
+            in
+            loop 0 n ""
+          in VVstring sub
+  | ["base"; "name"] -> VVstring ("xxx" ^ conf.bname)
+  | "item" :: sl ->
+      begin match get_env "item" env with
+        Vslistlm ell -> eval_item_field_var ell sl
+      | _ -> raise Not_found
+      end
+  | "family" :: sl ->
+      (* TODO ???
+      let mode_local =
+        match get_env "fam_link" env with
+        [ Vfam ifam _ (_, _, ip) _ -> False
+        | _ -> True ]
+      in *)
+      begin match get_env "fam" env with
+        Vfam (i, f, c, m) ->
+          eval_family_field_var conf base env (i, f, c, m) loc sl
+      | _ ->
+          match get_env "fam_link" env with
+            Vfam (i, f, c, m) ->
+              eval_family_field_var conf base env (i, f, c, m) loc sl
+          | _ -> raise Not_found
+      end
+  | "pvar" :: v :: sl ->
+      begin match find_person_in_env conf base v with
+      | Some p ->
+          let ep = make_ep conf base (get_iper p) in
+          eval_person_field_var conf base env ep loc sl
+      | None -> raise Not_found
+      end
+  | "next_item" :: sl ->
+      begin match get_env "item" env with
+        Vslistlm (_ :: ell) -> eval_item_field_var ell sl
+      | _ -> raise Not_found
+      end
+  | "prev_item" :: sl ->
+      begin match get_env "prev_item" env with
+        Vslistlm ell -> eval_item_field_var ell sl
+      | _ -> raise Not_found
+      end
+  | "qvar" :: v :: sl ->
+      (* %qvar.index_v.surname;
+         direct access to a person whose index value is v
+      *)
+      let v0 = iper_of_string v in
+      (* if v0 >= 0 && v0 < nb_of_persons base then *)
+        let ep = make_ep conf base v0 in
+        if is_hidden (fst ep) then raise Not_found
+        else eval_person_field_var conf base env ep loc sl
+      (* else raise Not_found *)
+  | "svar" :: i :: sl ->
+      (* http://localhost:2317/HenriT_w?m=DAG&p1=henri&n1=duchmol&s1=243&s2=245
+         access to sosa si=n of a person pi ni
+         find_base_p will scan down starting from i such that multiple sosa of
+         the same person can be listed
+      *)
+      let rec find_base_p j =
+        let s = string_of_int j in
+        let po = Util.find_person_in_env conf base s in
+        begin match po with
+        | Some p -> p
+        | None -> if j = 0 then raise Not_found else find_base_p (j-1)
+        end
+      in
+      let p0 = find_base_p (int_of_string i) in
+      (* find sosa identified by si= of that person *)
+      begin match p_getint conf.env ("s" ^ i) with
+      | Some s ->
+            let s0 = Sosa.of_int s in
+            let ip0 = get_iper p0 in
+            begin match Util.branch_of_sosa conf base s0 (pget conf base ip0) with
+            | Some (p :: _) ->
+                let p_auth = authorized_age conf base p in
+                eval_person_field_var conf base env (p, p_auth) loc sl
+            | _ -> raise Not_found
+            end
+      | None -> raise Not_found
+      end
+  | "spouse" :: sl ->
+      begin match get_env "fam" env with
+        Vfam (_, _, (_, _, ip), _) when mode_local env ->
+          let ep = make_ep conf base ip in
+          eval_person_field_var conf base env ep loc sl
+      | _ ->
+        raise Not_found
+      end
+  | sl -> eval_person_field_var conf base env ep loc sl
+and eval_item_field_var ell =
+  let _ = Printf.eprintf "eval_item_field_var\n" in
+  function
+    [s] ->
+      begin try
+        match ell with
+          el :: _ ->
+            let v = int_of_string s in
+            let r = try List.nth el (v - 1) with Failure _ -> "" in VVstring r
+        | [] -> VVstring ""
+      with Failure _ -> raise Not_found
+      end
+  | _ -> raise Not_found
+and eval_num conf n =
+  let _ = Printf.eprintf "eval_num\n" in
+  function
+    ["hexa"] -> Printf.sprintf "0x%X" @@ int_of_string (Sosa.to_string n)
+  | ["octal"] -> Printf.sprintf "0x%o" @@ int_of_string (Sosa.to_string n)
+  | ["lvl"] -> string_of_int @@ Sosa.gen n
+  | ["v"] -> Sosa.to_string n
+  | [] -> Sosa.to_string_sep (transl conf "(thousand separator)") n
+  | _ -> raise Not_found
+and eval_person_field_var conf base env (p, p_auth as ep) loc =
+  let _ = Printf.eprintf "eval_person_field_var\n" in
+  function
+  | "spouse" :: sl ->
+      begin match get_env "fam" env with
+        Vfam (ifam, _, _, _) ->
+          let cpl = foi base ifam in
+          let ip = Gutil.spouse (get_iper p) cpl in
+          let ep = make_ep conf base ip in
+          eval_person_field_var conf base env ep loc sl
+      | _ -> raise Not_found
+      end
+  | [s] ->
+      begin try bool_val (eval_bool_person_field conf base env ep s) with
+        Not_found ->
+          begin try str_val (eval_str_person_field conf base env ep s) with
+            Not_found -> raise Not_found
+          end
+      end
+  | [] -> str_val (simple_person_text conf base p p_auth)
+  | _ -> raise Not_found
+and eval_bool_person_field conf base env (p, p_auth) =
+  let _ = Printf.eprintf "eval_bool_person_field\n" in
+  function
+  | "is_female" -> get_sex p = Female
+  | "is_male" -> get_sex p = Male
+  | _ -> raise Not_found
+and eval_str_person_field conf base env (p, p_auth as _ep) =
+  let _ = Printf.eprintf "eval_str_person_field\n" in
+  function
+  | "access" -> acces conf base p
+  | "first_name" ->
+      if not p_auth && is_hide_names conf p then "x" else p_first_name base p
+  | "first_name_key" ->
+      if is_hide_names conf p && not p_auth then ""
+      else code_varenv (Name.lower (p_first_name base p))
+  | "first_name_key_val" ->
+      if is_hide_names conf p && not p_auth then ""
+      else Name.lower (p_first_name base p)
+  | "first_name_key_strip" ->
+      if is_hide_names conf p && not p_auth then ""
+      else Name.strip_c (p_first_name base p) '"'
+  | "index" ->
+      begin match get_env "p_link" env with
+        Vbool _ -> ""
+      | _ -> string_of_iper (get_iper p)
+      end
+  | "occ" ->
+      if is_hide_names conf p && not p_auth then ""
+      else string_of_int (get_occ p)
+  | "sex" ->
+      (* Pour éviter les traductions bizarre, on ne teste pas p_auth. *)
+      string_of_int (index_of_sex (get_sex p))
+  | "surname" ->
+      if not p_auth && is_hide_names conf p then "x" else p_surname base p
+  | "surname_begin" ->
+      if not p_auth && is_hide_names conf p then ""
+      else surname_particle base (p_surname base p)
+  | "surname_end" ->
+      if not p_auth && is_hide_names conf p then "x"
+      else surname_without_particle base (p_surname base p)
+  | "surname_key" ->
+      if is_hide_names conf p && not p_auth then ""
+      else code_varenv (Name.lower (p_surname base p))
+  | "surname_key_val" ->
+      if is_hide_names conf p && not p_auth then ""
+      else Name.lower (p_surname base p)
+  | "surname_key_strip" ->
+      if is_hide_names conf p && not p_auth then ""
+      else Name.strip_c (p_surname base p) '"'
+  | _ -> raise Not_found
+and eval_family_field_var conf base env
+    (_, fam, (ifath, imoth, _), m_auth as fcd) loc =
+  let _ = Printf.eprintf "eval_family_field_var\n" in
+  function
+  | [s] -> str_val (eval_str_family_field env fcd s)
+  | _ -> raise Not_found
+and eval_str_family_field env (ifam, _, _, _) =
+  let _ = Printf.eprintf "eval_str_family_field\n" in
+  function
+  | "index" -> string_of_ifam ifam
+  | _ -> raise Not_found
+and simple_person_text conf base p p_auth =
+  let _ = Printf.eprintf "simple_person_text\n" in
+  if p_auth then
+    match main_title conf base p with
+      Some t -> titled_person_text conf base p t
+    | None -> person_text conf base p
+  else if is_hide_names conf p then "x x"
+  else person_text conf base p
+and string_of_int_env var env =
+  let _ = Printf.eprintf "string_of_int_env\n" in
+  match get_env var env with
+    Vint x -> string_of_int x
+  | _ -> raise Not_found
+
+let eval_predefined_apply conf env f vl =
+  let vl =
+    List.map
+      (function
+         VVstring s -> s
+       | _ -> raise Not_found)
+      vl
+  in
+  match f, vl with
+  | "a_of_b", [s1; s2] -> Util.translate_eval (Util.transl_a_of_b conf s1 s2 s2)
+  | "a_of_b2", [s1; s2; s3] -> Util.translate_eval (Util.transl_a_of_b conf s1 s2 s3)
+  | "add_in_sorted_list", sl ->
+      begin match get_env "list" env with
+        Vslist l -> l := SortedList.add sl !l; ""
+      | _ -> raise Not_found
+      end
+  | "lazy_print", [v] ->
+      begin match get_env "lazy_print" env with
+        Vlazyp r -> r := Some v; ""
+      | _ -> raise Not_found
+      end
+  | _ -> raise Not_found
+
+
+let eval_transl conf base env upp s c =
+  match c with
+    "n" | "s" | "w" | "f" | "c" ->
+      let n =
+        match c with
+          "n" ->
+            (* replaced by %apply;nth([...],sex) *)
+            begin match get_env "p" env with
+              Vind p -> 1 - index_of_sex (get_sex p)
+            | _ -> 2
+            end
+        | "s" ->
+            begin match get_env "child" env with
+              Vind p -> index_of_sex (get_sex p)
+            | _ ->
+                match get_env "p" env with
+                  Vind p -> index_of_sex (get_sex p)
+                | _ -> 2
+            end
+        | "w" ->
+            begin match get_env "fam" env with
+              Vfam (_, fam, _, _) ->
+                if Array.length (get_witnesses fam) <= 1 then 0 else 1
+            | _ -> 0
+            end
+        | "f" ->
+            begin match get_env "p" env with
+              Vind p -> if Array.length (get_family p) <= 1 then 0 else 1
+            | _ -> 0
+            end
+        | "c" ->
+            begin match get_env "fam" env with
+              Vfam (_, fam, _, _) ->
+                if Array.length (get_children fam) <= 1 then 0 else 1
+            | _ ->
+                match get_env "p" env with
+                  Vind p ->
+                    let n =
+                      Array.fold_left
+                        (fun n ifam ->
+                           n + Array.length (get_children (foi base ifam)))
+                        0 (get_family p)
+                    in
+                    if n <= 1 then 0 else 1
+                | _ -> 0
+            end
+        | _ -> assert false
+      in
+      let r = Util.translate_eval (Util.transl_nth conf s n) in
+      if upp then Utf8.capitalize r else r
+  | _ -> Templ.eval_transl conf upp s c
+
+let print_foreach conf base print_ast eval_expr =
+  let rec print_foreach env ini_ep loc s sl ell al =
+    let rec loop env (a, _ as ep) efam =
+      function
+        [s] -> print_simple_foreach env ell al ini_ep ep efam loc s
+      | "self" :: sl -> loop env ep efam sl
+      | "spouse" :: sl ->
+          begin match efam with
+            Vfam (_, _, (_, _, ip), _) ->
+              let ep = make_ep conf base ip in loop env ep efam sl
+          | _ ->
+              raise Not_found
+          end
+      | _ -> raise Not_found
+    in
+    let efam =
+      match get_env "is_link" env with
+        Vbool _ -> get_env "fam_link" env
+      | _ -> get_env "fam" env
+    in
+    loop env ini_ep efam (s :: sl)
+  and print_simple_foreach env el al ini_ep ep efam loc =
+    function
+    | "family" -> print_foreach_family env al ini_ep ep
+    | "sorted_list_item" -> print_foreach_sorted_list_item env al ep
+    | _ -> raise Not_found
+  and print_foreach_family env al ini_ep (p, _) =
+    match get_env "p_link" env with
+      Vbool _ ->
+        ()
+    | _ ->
+        if Array.length (get_family p) > 0 then
+          begin let rec loop prev i =
+            if i = Array.length (get_family p) then ()
+            else
+              let ifam = (get_family p).(i) in
+              let fam = foi base ifam in
+              let ifath = get_father fam in
+              let imoth = get_mother fam in
+              let ispouse = Gutil.spouse (get_iper p) fam in
+              let cpl = ifath, imoth, ispouse in
+              let m_auth =
+                authorized_age conf base (pget conf base ifath) &&
+                authorized_age conf base (pget conf base imoth)
+              in
+              let vfam = Vfam (ifam, fam, cpl, m_auth) in
+              let env = ("#loop", Vint 0) :: env in
+              let env = ("fam", vfam) :: env in
+              let env = ("family_cnt", Vint (i + 1)) :: env in
+              let env =
+                match prev with
+                  Some vfam -> ("prev_fam", vfam) :: env
+                | None -> env
+              in
+              List.iter (print_ast env ini_ep) al; loop (Some vfam) (i + 1)
+          in
+            loop None 0
+          end;
+        ()
+  and print_foreach_sorted_list_item env al ep =
+    let list =
+      match get_env "list" env with
+        Vslist l -> SortedList.elements !l
+      | _ -> []
+    in
+    let rec loop prev_item =
+      function
+        _ :: sll as gsll ->
+          let item = Vslistlm gsll in
+          let env = ("item", item) :: ("prev_item", prev_item) :: env in
+          List.iter (print_ast env ep) al; loop item sll
+      | [] -> ()
+    in
+    loop (Vslistlm []) list
+  in
+  print_foreach
+
+let eval_predefined_apply conf env f vl =
+  let vl =
+    List.map
+      (function
+         VVstring s -> s
+       | _ -> raise Not_found)
+      vl
+  in
+  match f, vl with
+  | "add_in_sorted_list", sl ->
+      begin match get_env "list" env with
+        Vslist l -> l := SortedList.add sl !l; ""
+      | _ -> raise Not_found
+      end
+  | _ -> raise Not_found
 
 let normalize =
   suburb_aux
@@ -719,8 +1275,19 @@ let () =
   Gwdlib.GwdPlugin.register ~ns:"places" [ "PS", fun assets conf base ->
     match p_getenv conf.env "t" with
     | Some "L" ->
-          Perso.interp_templ ("plugins" ^ Filename.dir_sep ^ "list") conf base
-          (Gwdb.empty_person base (Gwdb.dummy_iper)); true
+          let ep = make_ep conf base Gwdb.dummy_iper in
+          let env =
+            [("count", Vcnt (ref 0));
+             ("list", Vslist (ref SortedList.empty))
+            ]
+          in
+          Hutil.interp_no_header conf ("plugins" ^ Filename.dir_sep ^ "list")
+            {Templ.eval_var = eval_var conf base;
+             Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
+             Templ.eval_predefined_apply = eval_predefined_apply conf;
+             Templ.get_vother = get_vother; Templ.set_vother = set_vother;
+             Templ.print_foreach = print_foreach conf base}
+             env ep; true
     | Some "PS_HG" ->
           print_all_places_surnames conf base; true
     | _ -> false
