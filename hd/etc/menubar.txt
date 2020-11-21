@@ -10,6 +10,7 @@
 %let;laY;title="[*tree] (Y)" accesskey="Y"%in;
 %let;acc;%if;access_by_key;ep=%first_name_key;;en=%surname_key;;%if;(occ!= "0")eoc=%occ;;%end;%else;ei=%index;;%end;%in;
 %let;sexcolor;%if;is_male;male%elseif;is_female;female%else;neuter%end;%in;
+%let;other_sexcolor;%if;is_male;female%elseif;is_female;male%else;neuter%end;%in;
 %define;spousesexcolor(xxx)
   %if;(xxx=0)male%elseif;(xxx=1)female%else;neuter%end;
 %end;
@@ -218,24 +219,17 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
           %if;(not (bvar.wizard_just_friend="yes") and wizard)
             %if;(nb_families = 0)
               <li class="nav-item">
-                %if;(not is_male and not is_female)
-                    <a class="nav-link" href="%prefix;m=ADD_FAM;ip=%index;;sex=M" title="[*add::relation/relations]0 ([M/F]0)">%nn;
-                      <span aria-hidden="true"><span class="fa fa-plus %sexcolor;"></span><span class="fa fa-user male"></span></span>%nn;
-                      <span class="sr-only">[*add::relation/relations]0 ([M/F]0)</span>%nn;
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="%prefix;m=ADD_FAM;ip=%index;;sex=F" title="[*add::relation/relations]0 ([M/F]1)">%nn;
-                      <span aria-hidden="true"><span class="fa fa-plus %sexcolor;"></span><span class="fa fa-user female"></span></span>%nn;
-                      <span class="sr-only">[*add::relation/relations]0 ([M/F]1)</span>%nn;
-                    </a>
-                %else;
-                  <a class="nav-link %if;(evar.m="ADD_FAM")active%end;" id="add_fam" href="%prefix;m=ADD_FAM;ip=%index;" %laA;>%nn;
-                    <span aria-hidden="true"><span class="fa fa-plus %sexcolor;"></span><span class="fa fa-user %apply;spousesexcolor(sex)"></span></span>%nn;
-                    <span class="sr-only">[*add::family/families]0 (A)</span>%nn;
-                  </a>
-                %end;
-             </li>
+                <a class="nav-link" href="%prefix;m=ADD_FAM;ip=%index;;sex=M" title="[*add::relation/relations]0 ([M/F]0)">%nn;
+                  <span aria-hidden="true"><span class="fa fa-plus %sexcolor;"></span><span class="fa fa-user male"></span></span>%nn;
+                  <span class="sr-only">[*add::relation/relations]0 ([M/F]0)</span>%nn;
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="%prefix;m=ADD_FAM;ip=%index;;sex=F" title="[*add::relation/relations]0 ([M/F]1)">%nn;
+                  <span aria-hidden="true"><span class="fa fa-plus %sexcolor;"></span><span class="fa fa-user female"></span></span>%nn;
+                  <span class="sr-only">[*add::relation/relations]0 ([M/F]1)</span>%nn;
+                </a>
+              </li>
             %else;
               %foreach;family;
                 <li class="nav-item">
@@ -259,13 +253,8 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                    <span class="sr-only">[*tools] %if;(nb_families>1)[family/families]1%else;[family/families]0%end;</span>%nn;
                  </a>
                 <div class="dropdown-menu">
-                  %if;((first_name = "?" or surname = "?") and (nb_families != 0 or has_parents))
-                  %elseif;(not is_male and not is_female)
-                    <a class="dropdown-item" href="%prefix;m=ADD_FAM;ip=%index;;sex=M"><span class="fa fa-plus"></span> [*add::relation/relations]0 ([M/F]0)</a>
-                    <a class="dropdown-item" href="%prefix;m=ADD_FAM;ip=%index;;sex=F"><span class="fa fa-plus"></span> [*add::relation/relations]0 ([M/F]1)</a>
-                  %else;
-                    <a class="dropdown-item" id="add_fam" href="%prefix;m=ADD_FAM;ip=%index;" %laA;><span class="fa fa-plus fa-fw mr-2"></span>[*add::family/families]0</a>
-                  %end;
+                  <a class="dropdown-item" href="%prefix;m=ADD_FAM;ip=%index;;sex=M" %if;(is_female)%laA;%end;><span class="fa fa-plus"></span> [*add::relation/relations]0 ([M/F]0)</a>
+                  <a class="dropdown-item" href="%prefix;m=ADD_FAM;ip=%index;;sex=F" %if;(is_male)%laA;%end;><span class="fa fa-plus"></span> [*add::relation/relations]0 ([M/F]1)</a>
                   %foreach;family;
                     <div class="dropdown-divider"></div>
                     %if;(family_cnt != 1)
