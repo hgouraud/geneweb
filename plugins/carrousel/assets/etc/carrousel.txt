@@ -92,10 +92,7 @@
           type="submit" disabled>[*send]</button>
       </form>
       <div class="small mt-2">%nn;
-        %if;(has_image)[*save portrait][:]<br>
-          &nbsp;&nbsp;&nbsp;<samp>%portraits_store;%X;saved%X;</samp>
-          %if;(has_old_image)<br>[*previous portrait]%end;
-        %end;
+        %if;(has_image and has_old_image)[*previous portrait]%end;
       </div>
       <h1 class="display-4">
       %(<i class="far fa-file-image fa-fw mr-1"></i>%)[*add] [image/images]0</h1>
@@ -121,10 +118,6 @@
         </button>
         %(TODO: print only if old img already exists%)
         <div class="small col-12 mt-1">
-          [*store image][:]<br>
-            &nbsp;&nbsp;&nbsp;<samp>%images_store;%X;%keydir;%X;</samp><br>
-          [*save image][:]<br>
-            &nbsp;&nbsp;&nbsp;<samp>%images_store;%X;%keydir;%X;saved%X;</samp><br>
           [*previous image]
         </div>
         <div class="d-flex col">
@@ -150,16 +143,20 @@
           <div class="d-flex mt-1">
             <a role="button" href="%prefix_base_password;&escache=%evar.escache;&&m=SND_IMAGE&t=IM&i=%index;" target="_blank" rel="noopener"%sp;
             data-toggle="tooltip" data-html="true" data-placement="left"
-            title='<strong>[*see] [portrait]</strong><br><span class="small">%portrait;</span>
-                   <br><img class="rounded my-1" src="%prefix_base_password;&escache=%evar.escache;&&m=SND_IMAGE&t=IM&i=%index;" width="185px">'>
+            title='<strong>[*see] [portrait]</strong><br><span class="small">%portrait_base;</span>
+                   <br><img class="rounded my-1" src="%prefix_base_password;&escache=%evar.escache;&&m=SND_IMAGE&t=IM&i=%index;"
+                   width="185px">'%nn;
+            >
               <i class="far fa-file-image fa-fw text-primary"></i>
             </a>
-            <samp class="ml-4" title="%portraits_store;%X;">%portrait;</samp>
+            <samp class="ml-4" title="%portraits_store;%X;">%portrait_base;</samp>
             <a role="button" class="ml-auto col-1"  href="%prefix_base_password;&m=SND_IMAGE&t=DEL_IMAGE_C_OK&i=%index;&idigest=%idigest;"
                data-toggle="tooltip" data-html="true" data-placement="left"
-               title='<i class="far fa-trash-alt text-warning mr-1"></i><strong>[*delete] [portrait]</strong><br><span class="small">%portrait;</span>
-                      <br><img class="rounded my-1" src="%prefix_base_password;&&m=SND_IMAGE&t=IM&i=%index;" width="185px">'>%nn;
-                <i class="far fa-trash-alt text-warning"></i>%nn;
+               title='<i class="far fa-trash-alt text-warning mr-1"></i><strong>[*delete] [portrait]</strong><br><span class="small">%portrait_base;</span>
+                      <br><img class="rounded my-1" src="%prefix_base_password;&&m=SND_IMAGE&t=IM&i=%index;"
+                      width="185px">'%nn;
+            >
+              <i class="far fa-trash-alt text-warning"></i>%nn;
             </a>
           </div>
         %end;
@@ -173,14 +170,20 @@
             <a role="button" href="%prefix_base_password;&escache=%evar.escache;&m=SND_IMAGE&t=RESET_IMAGE_C_OK&i=%index;&idigest=%idigest;"
                data-toggle="tooltip" data-html="true" data-placement="left"
                title='<i class="fa fa-retweet fa-rotate-90 text-success mr-1"></i><strong>[*restore] [portrait] [saved]0</strong><br><span class="small">saved%X;%portrait_saved;</span>
-                      <br><img class="rounded my-1" src="%prefix_base_password;&escache=%evar.escache;&m=SND_IMAGE&t=IMS&i=%index;" width="185px">'>%nn;
-                      <i class="fas fa-retweet fa-rotate-90 fa-fw text-success"></i></a>
-            <samp class="ml-1" title="%portrait_store;%X;saved%X;%portrait_saved;"><strong>saved%X;</strong>%portrait_saved;</samp>
+                      <br><img class="rounded my-1" src="%prefix_base_password;&escache=%evar.escache;&m=SND_IMAGE&t=IMS&i=%index;"
+                      width="185px">'%nn;
+            >
+                <i class="fas fa-retweet fa-rotate-90 fa-fw text-success"></i>
+            </a>
+            <samp class="ml-1" title="%portraits_store;%X;saved%X;%portrait_saved;"><strong>%portraits_store;%X;saved%X;</strong>%portrait_saved;</samp>
             <a role="button" class="ml-auto col-1" href="%prefix_base_password;&m=SND_IMAGE&t=DEL_IMAGE_C_OK&i=%index;&idigest=%idigest;&delete=on"
               data-toggle="tooltip" data-html="true" data-placement="left"
                title='<i class="far fa-trash-alt text-danger mr-1"></i><strong>[*delete] [portrait] [saved]0</strong><br><span class="small">saved%X;%portrait_saved;</span>
-                      <br><img class="rounded my-1" src="%prefix_base_password;&m=SND_IMAGE&t=IMS&i=%index;" width="185px">'>%nn;
-              <i class="far fa-trash-alt text-danger"></i></a>
+                      <br><img class="rounded my-1" src="%prefix_base_password;&m=SND_IMAGE&t=IMS&i=%index;"
+                      width="185px">'%nn;
+            >
+              <i class="far fa-trash-alt text-danger"></i>
+            </a>
           </div>
           <table style="line-height:0.8;" class="mt-2"><tr>
           <td style="vertical-align:top"><a class="d_flex mt-1" href="%prefix;&&m=SND_IMAGE&t=REFRESH&i=%index;" title="[*add]/[delete] [image/images]0">
@@ -204,8 +207,10 @@
                 target="_blank" rel="noopener" data-toggle="tooltip" data-html="true" data-placement="left"
                 title='<strong><i class="fas fa-images fa-xs mr-1"></i>[*see] [image/images]0</strong>
                        <br><span class="small">%keydir_img;</span>
-                       <br><img class="rounded my-1" src="%prefix_base_password;&&m=SND_IMAGE&t=IM&i=%index;&s=%keydir_img_key;" width="185px">
-                       <br><small>%keydir_img_title;%if;(keydir_img_src!="")<br>(%keydir_img_src;)%end;</small>'>%nn;
+                       <br><img class="rounded my-1" src="%prefix_base_password;&&m=SND_IMAGE&t=IM&i=%index;&s=%keydir_img_key;"
+                       width="185px">
+                       <br><small>%keydir_img_title;%if;(keydir_img_src!="")<br>(%keydir_img_src;)%end;</small>'%nn;
+              >
                 <i class="far fa-file-image fa-fw text-primary"></i>
               </a>
               <a role="button" href="#" id="notes_%cnt;" class="text-%if;(keydir_img_notes="")danger%else;primary%end;"
@@ -217,7 +222,8 @@
                        <br><span class="small" style="text-align: left;">%nn;
                             %(<strong>[*titre][:]</strong> %keydir_img_title;
                             %if;(keydir_img_src!="")<br><strong>[*source][:]</strong>%keydir_img_src;%end;
-                       <br>[*comment][:]%)<br>%keydir_img_notes;</span>'>%nn;
+                       <br>[*comment][:]%)<br>%keydir_img_notes;</span>'
+              >
                 <i class="far fa-file-alt fa-fw"></i>%nn;
               </a>
               <samp class="text-truncate ml-1" title="%images_store;%X;%keydir;%X;%keydir_img;">%keydir_img;</samp>
@@ -226,8 +232,11 @@
                   data-toggle="tooltip" data-html="true" data-placement="left"
                   title='<i class="far fa-trash-alt text-warning mr-1"></i><strong>[*delete] [image/images]0</strong>
                          <br><span class="small">%keydir_img;</span>
-                         <br><img class="rounded my-1" src="%prefix_base_password;&&m=SND_IMAGE&t=IM&i=%index;&s=%keydir_img_key;" width="185px">'>%nn;
-                  <i class="far fa-trash-alt text-warning"></i></a>%nn;
+                         <br><img class="rounded my-1" src="%prefix_base_password;&&m=SND_IMAGE&t=IM&i=%index;&s=%keydir_img_key;"
+                         width="185px">'%nn;
+                >
+                  <i class="far fa-trash-alt text-warning"></i>
+                </a>
               </div>
             </div>
           %end;
@@ -245,15 +254,18 @@
             <a role="button" href="%prefix_base_password;&m=SND_IMAGE&t=IMS&i=%index;&s=%keydir_img_old_key;" target="_blank" rel="noopener"
                data-toggle="tooltip" data-html="true" data-placement="left"
                title='<strong>[*see] [saved images]0</strong><br><span class="small">%keydir_img_old;</span>
-              <br><img class="rounded my-1" src="%prefix_base_password;&m=SND_IMAGE&t=IMS&i=%index;&s=%keydir_img_old_key;" width="185px">'>%nn;
+              <br><img class="rounded my-1" src="%prefix_base_password;&m=SND_IMAGE&t=IMS&i=%index;&s=%keydir_img_old_key;"
+              width="185px">'%nn;
+            >
               <i class="far fa-file-image fa-fw text-primary"></i>%nn;
             </a>%nn;
             <a role="button" href="%prefix_base_password;&m=SND_IMAGE&t=RESET_IMAGE_C_OK&i=%index;&mode=others&file_name=%keydir_img_old_key;&idigest=%idigest;"
                data-toggle="tooltip" data-html="true" data-placement="top"
                title='<i class="fa fa-retweet fa-rotate-90 text-success mr-1"></i><strong>[*restore] [saved images]0</strong><br><span class="small">%keydir_img_old;</span>
-                      <br><img class="rounded my-1" src="%prefix_base_password;&m=SND_IMAGE&t=IMS&i=%index;&s=%keydir_img_old_key;" width="185px">'>%nn;
+                      <br><img class="rounded my-1" src="%prefix_base_password;&m=SND_IMAGE&t=IMS&i=%index;&s=%keydir_img_old_key;" width="185px">'%nn;
+            >
               <i class="fa fa-retweet fa-rotate-90 fa-fw text-success"></i>%nn;
-            </a>%nn;
+            </a>
             <samp class="text-truncate ml-1" title="%images_store;%X;saved%X;%keydir_img_old;">%keydir_img_old;</samp>
             <div class="ml-auto col-1">
               <a role="button" href="%prefix_base_password;&m=SND_IMAGE&t=DEL_IMAGE_C_OK&i=%index%nn;
@@ -262,9 +274,11 @@
                   data-toggle="tooltip" data-html="true" data-placement="left"
                   title='<i class="far fa-trash-alt text-warning mr-1"></i><strong>[*delete] [saved images]0</strong>
                          <br><span class="small">%keydir_img_old;</span>
-                         <br><img class="rounded my-1" src="%prefix_base_password;&m=SND_IMAGE&t=IMS&i=%index;&s=%keydir_img_old_key;" width="185px">'>%nn;
+                         <br><img class="rounded my-1" src="%prefix_base_password;&m=SND_IMAGE&t=IMS&i=%index;&s=%keydir_img_old_key;"
+                         width="185px">'%nn;
+              >
                 <i class="far fa-trash-alt text-danger fa-fw text-primary"></i>%nn;
-              </a>%nn;
+              </a>
             </div>
           </div>
         %end;

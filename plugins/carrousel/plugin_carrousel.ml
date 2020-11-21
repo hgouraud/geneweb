@@ -419,6 +419,11 @@ and eval_str_person_field conf base env (p, p_auth as _ep) =
         Some s when p_auth -> s
       | _ -> ""
       end
+  | "portrait_base" ->
+      begin match auto_image_file conf base p with
+        Some s when p_auth -> Filename.basename s
+      | _ -> ""
+      end
   | "portrait_saved" ->
       begin match auto_image_file ~bak:true conf base p with
         Some s -> Filename.basename s
