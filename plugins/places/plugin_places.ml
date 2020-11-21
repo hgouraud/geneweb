@@ -379,7 +379,20 @@ and eval_bool_person_field conf base env (p, p_auth) =
 and eval_str_person_field conf base env (p, p_auth as _ep) =
   function
   | "access" -> acces conf base p
+  | "birth_place" ->
+      if p_auth then Util.string_of_place conf (sou base (get_birth_place p))
+      else ""
+  | "baptism_place" ->
+      if p_auth then
+        Util.string_of_place conf (sou base (get_baptism_place p))
+      else ""
+  | "burial_place" ->
+      if p_auth then Util.string_of_place conf (sou base (get_burial_place p))
+      else ""
   | "dates" -> if p_auth then DateDisplay.short_dates_text conf base p else ""
+  | "death_place" ->
+      if p_auth then Util.string_of_place conf (sou base (get_death_place p))
+      else ""
   | "first_name" ->
       if not p_auth && is_hide_names conf p then "x" else p_first_name base p
   | "first_name_key" ->
@@ -396,6 +409,10 @@ and eval_str_person_field conf base env (p, p_auth as _ep) =
         Vbool _ -> ""
       | _ -> string_of_iper (get_iper p)
       end
+  | "marriage_places" ->
+    List.fold_left
+      (fun acc ifam -> acc ^ (sou base (get_marriage_place (foi base ifam))) ^ "|")
+    "|" (Array.to_list (get_family p))
   | "occ" ->
       if is_hide_names conf p && not p_auth then ""
       else string_of_int (get_occ p)
