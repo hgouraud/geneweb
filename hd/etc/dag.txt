@@ -212,7 +212,7 @@
     <a href="%prefix_base_password;" accesskey="T"></a>
   %elseif;(evar.m="RLM" or evar.m="DAG")
     <div class="d-flex justify-content-between">
-      <div class="mt-2 mb-4 h2">[*multi relations graph]</div>
+      <div class="mt-2 mb-4 h2">[*multi relations graph]%if;(evar.tt!="") (%evar.tt;)%end;</div>
       <div class="btn-toolbar mt-4 mr-2" role="toolbar"aria-label="Toolbar for dag/images/edit tree buttons" style='%if;(evar.wide="on")transform:translateX(-40px)%end;'>
         <div class="btn-group">
           <a href="%prefix_base_password;%nn;

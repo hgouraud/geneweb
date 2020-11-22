@@ -938,7 +938,8 @@ let print_place_list conf opt long link_to_ind max_rlm_nbr pl_l =
             (if not long then "&display=long" else "&display=short") title (p1) ;
         if link_to_ind && cnt < max_rlm_nbr then
           begin
-          Wserver.printf " (<a href=\"%sm=PS&t=L%s%s&nb=%d%s" (commd conf)
+          Wserver.printf " (<a href=\"%sm=PS&t=L&tt=%s&%s%s&nb=%d%s" (commd conf)
+            p1
             ("&k=" ^ (Util.code_varenv so)) opt cnt
             (if max_rlm <> "" then "&max_rlm_nbr=" ^ max_rlm else "") ;
           let rec loop3 cnt =
@@ -1043,7 +1044,8 @@ let print_html_places_surnames conf base max_rlm_nbr link_to_ind
     Wserver.printf "\">%s</a>" sn;
     if link_to_ind && List.length ips < max_rlm_nbr then
       begin
-        Wserver.printf " (<a href=\"%sm=L%s%s&nb=%d" (commd conf)
+        Wserver.printf " (<a href=\"%sm=PS&t=L&tt=%s&%s%s&nb=%d" (commd conf)
+          so
           ("&k=" ^ (Util.code_varenv so))
           opt len ;
         Wserver.printf "&p0=%s" so ;

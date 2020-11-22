@@ -137,11 +137,11 @@
         %end;%nn;
         %for;i;0;nb;%if;(i!=0)&t%i=%apply;tags%with;%apply;get_ip(i)%and;%and;%apply;get_var("p",i)%end;
                     %else;&t%expr(nb)=%apply;tags%with;%apply;get_ip(0)%and;%and;%apply;get_var("p",i)%end;%end;%end;">%nn;
-      <i class="fa fa-bezier-curve mr-2 mt-3"></i>[*multi relations graph] (%nb;)%nn;
+      <i class="fa fa-bezier-curve mr-2 mt-3"></i>[*multi relations graph] (%if;(evar.tt!="")%evar.tt;%else;%nb;%end;)%nn;
     </a>
   %end;
 %else;
-  <i class="fa fa-bezier-curve mr-2 mt-3"></i>[*multi relations graph] (%nb;)<br>
+  <i class="fa fa-bezier-curve mr-2 mt-3"></i>[*multi relations graph] (%if;(evar.tt!="")%evar.tt;%else;%nb;%end;)<br>
   [*rlm_nbr too large]
 %end;
 
