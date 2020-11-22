@@ -175,7 +175,7 @@
             >
                 <i class="fas fa-retweet fa-rotate-90 fa-fw text-success"></i>
             </a>
-            <samp class="ml-1" title="%portraits_store;%X;saved%X;%portrait_saved;"><strong>%portraits_store;%X;saved%X;</strong>%portrait_saved;</samp>
+            <samp class="ml-1" title="%portraits_store;%X;saved%X;%portrait_saved;">saved%X;%portrait_saved;</samp>
             <a role="button" class="ml-auto col-1" href="%prefix_base_password;&m=SND_IMAGE&t=DEL_IMAGE_C_OK&i=%index;&idigest=%idigest;&delete=on"
               data-toggle="tooltip" data-html="true" data-placement="left"
                title='<i class="far fa-trash-alt text-danger mr-1"></i><strong>[*delete] [portrait] [saved]0</strong><br><span class="small">saved%X;%portrait_saved;</span>

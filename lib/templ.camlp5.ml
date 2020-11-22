@@ -761,13 +761,13 @@ and eval_simple_variable conf =
   | "prefix_no_iz" ->
       let henv =
         List.fold_left (fun accu k -> List.remove_assoc k accu) conf.henv
-          ["iz"; "nz"; "pz"; "ocz"]
+          ["iz"; "nz"; "pz"; "ocz"; "file"]
       in
       Util.commd {conf with henv = henv}
   | "prefix_no_templ" ->
       let henv =
         List.fold_right
-          (fun (k, v) henv -> if k = "templ" then henv else (k, v) :: henv)
+          (fun (k, v) henv -> if k = "templ" || k = "file" then henv else (k, v) :: henv)
           conf.henv []
       in
       let c = conf.command ^ "?" in
@@ -777,7 +777,7 @@ and eval_simple_variable conf =
   | "prefix_no_pmod" ->
       let henv =
         List.fold_right
-          (fun (k, v) henv -> if k = "p_mod" then henv else (k, v) :: henv)
+          (fun (k, v) henv -> if k = "p_mod" || k = "file" then henv else (k, v) :: henv)
           conf.henv []
       in
       let c = conf.command ^ "?" in
@@ -786,7 +786,7 @@ and eval_simple_variable conf =
   | "prefix_no_wide" ->
       let henv =
         List.fold_right
-          (fun (k, v) henv -> if k = "wide" then henv else (k, v) :: henv)
+          (fun (k, v) henv -> if k = "wide" || k = "file" then henv else (k, v) :: henv)
           conf.henv []
       in
       let c = conf.command ^ "?" in
@@ -796,7 +796,7 @@ and eval_simple_variable conf =
   | "prefix_no_lang" ->
       let henv =
         List.fold_right
-          (fun (k, v) henv -> if k = "lang" then henv else (k, v) :: henv)
+          (fun (k, v) henv -> if k = "lang" || k = "file" then henv else (k, v) :: henv)
           conf.henv []
       in
       let c = conf.command ^ "?" in
@@ -806,7 +806,7 @@ and eval_simple_variable conf =
   | "prefix_no_all" ->
       let henv =
         List.fold_right
-          (fun (k, v) henv -> if k = "templ" || k = "p_mod" || k = "wide" then henv else (k, v) :: henv)
+          (fun (k, v) henv -> if k = "templ" || k = "p_mod" || k = "wide" || k = "file" then henv else (k, v) :: henv)
           conf.henv []
       in
       let c = conf.command ^ "?" in
@@ -825,7 +825,7 @@ and eval_simple_variable conf =
       in
       List.fold_left
         (fun c (k, v) ->
-          if ( ( k = "oc" || k = "ocz" ) && v = "0" ) || k = "" then c
+          if (( k = "oc" || k = "ocz" ) && v = "0" ) || k = "" || k = "file" then c
           else c ^ k ^ "=" ^ v ^ "&") "" l
   | "url" ->
       let c = Util.commd conf in
