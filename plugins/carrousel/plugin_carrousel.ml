@@ -292,6 +292,7 @@ and eval_simple_str_var conf base env (p, p_auth) =
         Vcnt c -> string_of_int !c
       | _ -> ""
       end
+  | "family_cnt" -> string_of_int_env "family_cnt" env
   | "idigest" -> default_image_name base p
   | "incr_count" ->
       begin match get_env "count" env with
@@ -350,12 +351,6 @@ and eval_compound_var conf base env (a, _ as ep) loc =
   function
   | ["base"; "name"] -> VVstring conf.bname
   | "family" :: sl ->
-      (* TODO ???
-      let mode_local =
-        match get_env "fam_link" env with
-        [ Vfam ifam _ (_, _, ip) _ -> False
-        | _ -> True ]
-      in *)
       begin match get_env "fam" env with
         Vfam (i, f, c, m) ->
           eval_family_field_var conf base env (i, f, c, m) loc sl
@@ -364,6 +359,37 @@ and eval_compound_var conf base env (a, _ as ep) loc =
             Vfam (i, f, c, m) ->
               eval_family_field_var conf base env (i, f, c, m) loc sl
           | _ -> raise Not_found
+      end
+  | "father" :: sl ->
+      begin match get_parents a with
+        Some ifam ->
+          let cpl = foi base ifam in
+          let ep = make_ep conf base (get_father cpl) in
+          eval_person_field_var conf base env ep loc sl
+      | None -> 
+          begin Printf.eprintf "Must test \"has_parents\" before using father\n";
+            raise Not_found
+          end
+      end
+  | "mother" :: sl ->
+      begin match get_parents a with
+        Some ifam ->
+          let cpl = foi base ifam in
+          let ep = make_ep conf base (get_mother cpl) in
+          eval_person_field_var conf base env ep loc sl
+      | None ->
+          begin Printf.eprintf "Must test \"has_parents\" before using father\n";
+            raise Not_found
+          end
+      end
+  | "prev_family" :: sl ->
+      begin match get_env "prev_fam" env with
+        Vfam (i, f, c, m) ->
+          eval_family_field_var conf base env (i, f, c, m) loc sl
+      | _ ->
+          begin Printf.eprintf "No prev_fam\n"; 
+            raise Not_found
+          end
       end
   | "spouse" :: sl ->
       begin match get_env "fam" env with
@@ -405,6 +431,11 @@ and eval_person_field_var conf base env (p, p_auth as ep) loc =
           eval_person_field_var conf base env ep loc sl
       | _ -> raise Not_found
       end
+  | ["has_sosa"] ->
+      begin
+        Printf.eprintf "\"has_sosa not available in this context\n";
+        VVbool false
+      end
   | [s] ->
       begin try bool_val (eval_bool_person_field conf base env ep s) with
         Not_found ->
@@ -416,11 +447,49 @@ and eval_person_field_var conf base env (p, p_auth as ep) loc =
   | _ -> raise Not_found
 and eval_bool_person_field conf base env (p, p_auth) =
   function
+  | "access_by_key" ->
+      Util.accessible_by_key conf base p (p_first_name base p)
+        (p_surname base p)
+  | "has_children" ->
+      begin match get_env "fam" env with
+        Vfam (_, fam, _, _) ->
+          if Array.length (get_children fam) > 0 then true
+          else false
+      | _ ->
+          let b =
+            Array.exists
+              (fun ifam ->
+                 let des = foi base ifam in
+                 Array.length (get_children des) > 0)
+              (get_family p)
+          in
+          if b then b
+          else false
+      end
+  | "has_history" -> Perso.has_history conf base p p_auth
   | "has_image" -> Util.has_image conf base p
   | "has_keydir" -> has_keydir conf base p
+  | "has_parents" -> get_parents p <> None
+  | "has_possible_duplications" -> Perso.has_possible_duplications conf base p
   | "is_female" -> get_sex p = Female
   | "is_male" -> get_sex p = Male
   | _ -> raise Not_found
+and string_of_died conf p p_auth =
+  if p_auth then
+    let is = index_of_sex (get_sex p) in
+    match get_death p with
+      Death (dr, _) ->
+        begin match dr with
+          Unspecified -> transl_nth conf "died" is
+        | Murdered -> transl_nth conf "murdered" is
+        | Killed -> transl_nth conf "killed (in action)" is
+        | Executed -> transl_nth conf "executed (legally killed)" is
+        | Disappeared -> transl_nth conf "disappeared" is
+        end
+    | DeadYoung -> transl_nth conf "died young" is
+    | DeadDontKnowWhen -> transl_nth conf "died" is
+    | _ -> ""
+  else ""
 and eval_str_person_field conf base env (p, p_auth as _ep) =
   function
   | "access" -> acces conf base p
@@ -429,6 +498,8 @@ and eval_str_person_field conf base env (p, p_auth as _ep) =
         Some s when p_auth -> s
       | _ -> ""
       end
+  | "died" -> string_of_died conf p p_auth
+  | "image" -> if not p_auth then "" else sou base (get_image p)
   | "portrait_base" ->
       begin match auto_image_file conf base p with
         Some s when p_auth -> Filename.basename s
@@ -504,6 +575,23 @@ and eval_str_person_field conf base env (p, p_auth as _ep) =
           end
       | _ -> raise Not_found
       end
+  | "nb_children" ->
+      begin match get_env "fam" env with
+        Vfam (_, fam, _, _) -> string_of_int (Array.length (get_children fam))
+      | _ ->
+          let n =
+            Array.fold_left
+              (fun n ifam ->
+                 n + Array.length (get_children (foi base ifam)))
+              0 (get_family p)
+          in
+          string_of_int n
+      end
+  | "nb_families" ->
+      begin match get_env "p_link" env with
+      | Vbool _ -> "0"
+      | _ -> string_of_int (Array.length (get_family p))
+      end
   | "occ" ->
       if is_hide_names conf p && not p_auth then ""
       else string_of_int (get_occ p)
@@ -531,6 +619,20 @@ and eval_str_person_field conf base env (p, p_auth as _ep) =
 and eval_family_field_var conf base env
     (_, fam, (ifath, imoth, _), m_auth as fcd) loc =
   function
+  | "father" :: sl ->
+      begin match get_env "f_link" env with
+        Vbool _ -> raise Not_found
+      | _ ->
+          let ep = make_ep conf base ifath in
+          eval_person_field_var conf base env ep loc sl
+      end
+  | "mother" :: sl ->
+      begin match get_env "f_link" env with
+        Vbool _ -> raise Not_found
+      | _ ->
+          let ep = make_ep conf base imoth in
+          eval_person_field_var conf base env ep loc sl
+      end
   | [s] -> str_val (eval_str_family_field env fcd s)
   | _ -> raise Not_found
 and eval_str_family_field env (ifam, _, _, _) =
@@ -606,6 +708,26 @@ let print_foreach conf base print_ast eval_expr =
     let rec loop env (a, _ as ep) efam =
       function
         [s] -> print_simple_foreach env ell al ini_ep ep efam loc s
+      | "ancestor" :: sl ->
+          let ip_ifamo =
+            match get_env "ancestor" env with
+              Vanc (GP_person (_, ip, ifamo)) -> Some (ip, ifamo)
+            | Vanc (GP_same (_, _, ip)) -> Some (ip, None)
+            | _ -> None
+          in
+          begin match ip_ifamo with
+            Some (ip, ifamo) ->
+              let ep = make_ep conf base ip in
+              let efam =
+                match ifamo with
+                  Some ifam ->
+                    let (f, c, a) = make_efam conf base ip ifam in
+                    Vfam (ifam, f, c, a)
+                | None -> efam
+              in
+              loop env ep efam sl
+          | _ -> raise Not_found
+          end
       | "self" :: sl -> loop env ep efam sl
       | "spouse" :: sl ->
           begin match efam with
