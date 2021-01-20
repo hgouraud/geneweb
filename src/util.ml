@@ -9,34 +9,41 @@ open Gwdb;
 open Mutil;
 open Printf;
 
+(* ********************************************************* *)
+(* A person is consenting if
+    - it is marked as such (access = Friend)
+    - it is minor and one of its parents is consenting
+*)
+
+value is_access_consent conf base p =
+  match get_access p with
+  [ Friend -> True
+  | _ ->
+    match
+      (Adef.od_of_codate (get_birth p), Adef.od_of_codate (get_baptism p),
+       get_death p, CheckItem.date_of_death (get_death p))
+    with
+    [ (Some (Dgreg d _), _, _, _) | (_, Some (Dgreg d _), _, _) ->
+        let a = CheckItem.time_elapsed d conf.today in
+        if a.year < conf.minor_age then
+          match get_parents p with
+          [ Some ifam ->
+            let cpl = foi base ifam in
+            (get_access (poi base (get_father cpl)) = Friend) ||
+            (get_access (poi base (get_mother cpl)) = Friend)
+          | None -> False ]
+        else False
+    | _ -> False ] ]
+;
+
 value is_hide_names_full conf base p =
-  let is_access_friend =
-    match get_access p with
-    [ Friend -> True
-    | _ ->
-      match
-        (Adef.od_of_codate (get_birth p), Adef.od_of_codate (get_baptism p),
-         get_death p, CheckItem.date_of_death (get_death p))
-      with
-      [ (Some (Dgreg d _), _, _, _) | (_, Some (Dgreg d _), _, _) ->
-          let a = CheckItem.time_elapsed d conf.today in
-          if a.year < conf.minor_age then
-            match get_parents p with
-            [ Some ifam ->
-              let cpl = foi base ifam in
-              (get_access (poi base (get_father cpl)) = Friend) ||
-              (get_access (poi base (get_mother cpl)) = Friend)
-            | None -> False ]
-          else False
-      | _ -> False ] ]
-  in
-  let is_access_friend = if conf.friend && conf.half_rgpd then True else is_access_friend in
+  let is_access_c = if conf.friend && conf.half_rgpd then True else (is_access_consent conf base p) in
   if conf.wizard || get_access p = Public then False
   else if
     conf.friend && get_access p = Private && not conf.half_rgpd then True
   else if
     conf.friend && get_access p = Friend ||
-    conf.friend && is_access_friend then False
+    conf.friend && is_access_c then False
   else True
 ;
 
@@ -717,38 +724,22 @@ value parent_has_title conf base p =
     [Rem] : Exporté en clair hors de ce module.                           *)
 (* ********************************************************************** *)
 value authorized_age conf base p =
-  let is_access_friend =
-    match get_access p with
-    [ Friend -> True
-    | _ ->
-      match
-        (Adef.od_of_codate (get_birth p), Adef.od_of_codate (get_baptism p))
-      with
-      [ (Some (Dgreg d _), _) | (_, Some (Dgreg d _)) ->
-          let a = CheckItem.time_elapsed d conf.today in
-          if a.year < conf.minor_age then
-            match get_parents p with
-            [ Some ifam ->
-              let cpl = foi base ifam in
-              (get_access (poi base (get_father cpl)) = Friend) ||
-              (get_access (poi base (get_mother cpl)) = Friend)
-            | None -> False ]
-          else False
-      | _ -> False ] ]
-  in
   if not conf.wizard && (get_access p = Private) then False
-  else if conf.wizard || (conf.friend && is_access_friend) || get_access p = Public then True
+  else if conf.wizard || (conf.friend && (is_access_consent conf base p)) || get_access p = Public then True
   else if
     conf.public_if_titles && get_access p = IfTitles &&
     (nobtit conf base p <> [] || parent_has_title conf base p) then
     True
   else
     let death = get_death p in
-    if death = NotDead then conf.private_years = 0
+                            (* False if private_years <> 0 *)
+    if death = NotDead then conf.private_years = 0 
+    else if death = OfCourseDead then True
     else do {
       match get_death p
         with
         [ DontKnowIfDead ->
+          (* TO DO chercher des dates pour les parents ou enfants!! *)
           get_access p <> Private && conf.public_if_no_date
         | _ -> False ]
       ||
@@ -785,7 +776,7 @@ value authorized_age conf base p =
       in
       loop 0
     }
-  (*
+  (* old version
     match
       (Adef.od_of_codate (get_birth p), Adef.od_of_codate (get_baptism p),
        get_death p, CheckItem.date_of_death (get_death p))
