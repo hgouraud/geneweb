@@ -902,10 +902,8 @@ let error_too_big_image conf base p len max_len =
   Hutil.rheader conf title;
   Hutil.print_link_to_welcome conf true;
   Wserver.printf "<p><em style=\"font-size:smaller\">";
-  Wserver.printf "Error: this image is too big: %d bytes<br%s>\n" len
-    conf.xhs;
-  Wserver.printf "Maximum authorized in this database: %d bytes<br%s>\n"
-    max_len conf.xhs;
+  Wserver.printf "Error: this image is too big: %d bytes<br>\n" len;
+  Wserver.printf "Maximum authorized in this database: %d bytes<br>\n" max_len;
   Wserver.printf "</em></p>\n<ul>\n<li>\n%s</li>\n</ul>\n"
     (referenced_person_title_text conf base p);
   Hutil.trailer conf;
