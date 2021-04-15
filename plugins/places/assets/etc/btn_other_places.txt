@@ -1,0 +1,2 @@
+<a class="dropdown-item" href="%prefix;m=PS;t=PS_HG;"><span class="fa fa-globe fa-fw"></span> [*places]</a>
+
