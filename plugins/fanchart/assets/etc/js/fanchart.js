@@ -774,6 +774,18 @@ while( true ) {
 	if( p !== undefined ) {
 		var pg = g( "S"+sosa );
 		var same = (p.fn == "=" ? true : false);
+		if( same &&  implex != "" ) {
+			var p2 = ancestor["S"+(2 * p.sn)];
+			if( p2 !== undefined ) {
+				ancestor["S"+(2*sosa)] = { "fn" : "=", "sn": 2*p.sn, "fnk": p2.fnk, "snk": p2.snk, "oc": p2.oc, "dates": "", "has_parents": p2.has_parents };
+			}
+			p2 = ancestor["S"+(2*p.sn+1)];
+			if( p2 !== undefined ) {
+				ancestor["S"+(2*sosa+1)] = { "fn" : "=", "sn": 2*p.sn+1, "fnk": p2.fnk, "snk": p2.snk, "oc": p2.oc, "dates": "", "has_parents": p2.has_parents };
+			}
+			p = ancestor["S"+p.sn];
+			same = false;
+		}
 		pie_bg( pg, r1+10, r2, a1, a2, p );
 		if( p.fn != "?" ) {
 			var c = "";
@@ -853,7 +865,7 @@ document.getElementById("b-gen-add").onclick = function() {
 		var p = ancestor["S1"];
 		var oc = p.oc;
 		if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
-		window.location = link_to_person + "m=A&t=FC&mono=" + mono + "&tool=" + tool + "&p=" + p.fnk + "&n=" + p.snk + oc + "&v=" + (max_gen+1);
+		window.location = link_to_person + "m=A&t=FC&mono=" + mono + "&tool=" + tool + "&implex=" + implex + "&p=" + p.fnk + "&n=" + p.snk + oc + "&v=" + (max_gen+1);
 	}
 };
 document.getElementById("b-gen-del").onclick = function() {
@@ -861,9 +873,20 @@ document.getElementById("b-gen-del").onclick = function() {
 		var p = ancestor["S1"];
 		var oc = p.oc;
 		if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
-		window.location = link_to_person + "m=A&t=FC&mono=" + mono + "&tool=" + tool + "&p=" + p.fnk + "&n=" + p.snk + oc + "&v=" + (max_gen-1);
+		window.location = link_to_person + "m=A&t=FC&mono=" + mono + "&tool=" + tool + "&implex=" + implex + "&p=" + p.fnk + "&n=" + p.snk + oc + "&v=" + (max_gen-1);
 	}
 };
+document.getElementById("b-implex").onclick = function() {
+	if( implex == "" ) {
+		implex = "off";
+	} else {
+		implex = "";
+	}
+	var p = ancestor["S1"];
+	var oc = p.oc;
+	if( oc != "" && oc != 0 ) { oc = "&oc=" + oc } else { oc = "" }
+	window.location = link_to_person + "m=A&t=FC&mono=" + mono + "&tool=" + tool + "&implex=" + implex + "&p=" + p.fnk + "&n=" + p.snk + oc + "&v=" + max_gen;
+}
 document.getElementById("b-places-hl").onclick = function() {
 	document.body.className = "places-list place_hl";
 	tool = "place_hl";
