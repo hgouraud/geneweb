@@ -319,7 +319,10 @@ let print conf base specify unknown =
       	  [Key; ApproxKey; PartialKey] in
       	search conf base (fn ^ " " ^ sn) order specify unknown
   | Some fn, None ->
-      let order = [FirstName] in search conf base fn order specify unknown
+      let order = 
+        [Sosa; Key; FirstName; ApproxKey; PartialKey; DefaultSurname]
+      in
+      search conf base fn order specify unknown
   | None, Some sn ->
       let order =
         [Sosa; Key; Surname; ApproxKey; PartialKey; DefaultSurname]
