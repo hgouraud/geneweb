@@ -205,6 +205,7 @@ type search_type =
   | Key
   | Surname
   | FirstName
+  | FullName
   | ApproxKey
   | PartialKey
   | DefaultSurname
@@ -242,6 +243,34 @@ let search conf base an search_order specify unknown =
         | _ ->
             Some.search_first_name_print conf base an
         end
+    | FullName :: l ->
+				let max_answers =
+					match p_getint conf.env "max" with
+						Some n -> n
+					| None -> 100
+				in
+				let fn = match p_getenv conf.env "p" with
+					| Some fn -> fn
+					| None -> ""
+				in
+				let sn = match p_getenv conf.env "n" with
+					| Some sn -> sn
+					| None -> ""
+				in
+        let conf = { conf with 
+      	  env = ("first_name", fn) :: ("surname", sn) :: 
+      		("exact_first_name", "off") :: conf.env }
+      	in
+				let (list, len) = AdvSearchOk.advanced_search conf base max_answers in
+				let list =
+					if len > max_answers then Util.reduce_list max_answers list else list
+				in
+				begin match list with
+					[] -> loop l
+				| [p] ->
+						record_visited conf (get_iper p); Perso.print conf base p
+				| pl -> specify conf base an pl
+				end				
     | ApproxKey :: l ->
         let pl = search_approx_key conf base an in
         begin match pl with
@@ -283,8 +312,12 @@ let print conf base specify unknown =
   in
   match real_input "p", real_input "n" with
     Some fn, Some sn ->
-      let order = [Key; ApproxKey; PartialKey] in
-      search conf base (fn ^ " " ^ sn) order specify unknown
+      let order = 
+      	if List.assoc "exact_fn" conf.base_env = "no" then
+      	  [FullName]
+			  else
+      	  [Key; ApproxKey; PartialKey] in
+      	search conf base (fn ^ " " ^ sn) order specify unknown
   | Some fn, None ->
       let order = [FirstName] in search conf base fn order specify unknown
   | None, Some sn ->
