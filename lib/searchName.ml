@@ -265,7 +265,25 @@ let search conf base an search_order specify unknown =
 					if len > max_answers then Util.reduce_list max_answers list else list
 				in
 				begin match list with
-					[] -> loop l
+				| [] -> (* try again without sn *)
+				  begin
+   					let list = search_approx_key conf base fn in
+				    if list = [] then loop l
+				    else
+				      begin
+								let list =
+									List.fold_left (fun list p ->
+										if Name.lower sn = Name.lower (p_surname base p) then p :: list
+										else list) [] list
+								in
+								begin match list with
+								| [] -> loop l
+								| [p] ->
+										record_visited conf (get_iper p); Perso.print conf base p
+								| pl -> specify conf base an pl
+								end
+							end
+					end
 				| [p] ->
 						record_visited conf (get_iper p); Perso.print conf base p
 				| pl -> specify conf base an pl
