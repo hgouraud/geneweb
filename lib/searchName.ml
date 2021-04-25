@@ -311,12 +311,8 @@ let print conf base specify unknown =
   in
   match real_input "p", real_input "n" with
     Some fn, Some sn ->
-      let order = 
-      	if List.assoc "new_search" conf.base_env = "yes" then
-      	  [FullName]
-			  else
-      	  [Key; ApproxKey; PartialKey] in
-      	search conf base (fn ^ " " ^ sn) order specify unknown
+      let order = [FullName] in
+      search conf base (fn ^ " " ^ sn) order specify unknown
   | Some fn, None ->
       let order = 
         [Sosa; Key; FirstName; ApproxKey; PartialKey; DefaultSurname]
