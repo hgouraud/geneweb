@@ -258,8 +258,7 @@ let search conf base an search_order specify unknown =
 					| None -> ""
 				in
         let conf = { conf with 
-      	  env = ("first_name", fn) :: ("surname", sn) :: 
-      		("exact_first_name", "off") :: conf.env }
+      	  env = ("first_name", fn) :: ("surname", sn) :: conf.env }
       	in
 				let (list, len) = AdvSearchOk.advanced_search conf base max_answers in
 				let list =
@@ -313,7 +312,7 @@ let print conf base specify unknown =
   match real_input "p", real_input "n" with
     Some fn, Some sn ->
       let order = 
-      	if List.assoc "exact_fn" conf.base_env = "no" then
+      	if List.assoc "new_search" conf.base_env = "yes" then
       	  [FullName]
 			  else
       	  [Key; ApproxKey; PartialKey] in
