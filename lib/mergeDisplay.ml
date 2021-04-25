@@ -22,7 +22,22 @@ let print conf base p =
           (transl conf ":");
       end
   in
-  let list = Gutil.find_same_name base p in
+  let max_answers =
+    match p_getint conf.env "max" with
+      Some n -> n
+    | None -> 20
+  in
+  let conf = { conf with 
+    env = ("first_name", (Name.strip_lower (p_first_name base p))) :: 
+          ("surname", (Name.strip_lower (p_surname base p))) ::
+          ("exact_first_name", "off") ::
+          ("exact_surname", "off") :: conf.env }
+  in
+  let (list, len) = AdvSearchOk.advanced_search conf base max_answers in
+  let list =
+    if len > max_answers then Util.reduce_list max_answers list else list
+  in
+  (* let list = Gutil.find_same_name base p in *)
   let list =
     List.fold_right
       (fun p1 pl ->
