@@ -34,11 +34,19 @@
                 %if;(browsing_with_sosa_ref)
                   <h5>%apply;display_sosa_ref%with;%sosa_ref;%end;</h5>
                 %end;
-                <label class="sr-only" for="n">Search public name</label>
-                <input type="search" id="n" class="form-control form-control-lg" name="n" placeholder="[*surname/surnames]0, [public name], [alias]%if;browsing_with_sosa_ref;, [n° Sosa]%end;"
-                  autofocus>
-                <label class="sr-only" for="p">Search firstname</label>
-                <input type="search" id="p" class="form-control form-control-lg mt-2" name="p" placeholder="[*first name/first names]0">
+                %if;(bvar.search_style="sn_fn")
+                  <label class="sr-only" for="n">Search surname</label>
+                  <input type="search" id="n" class="form-control form-control-lg" name="n" placeholder="[*surname/surnames]0, [public name], [alias]%if;browsing_with_sosa_ref;, [n° Sosa]%end;"
+                    autofocus>
+                  <label class="sr-only" for="p">Search firstname</label>
+                  <input type="search" id="p" class="form-control form-control-lg mt-2" name="p" placeholder="[*first name/first names]0">
+                %else;
+                  <label class="sr-only" for="p">Search firstname</label>
+                  <input type="search" id="p" class="form-control form-control-lg mt-2" name="p" placeholder="[*first name/first names]0, [public name], [alias]%if;browsing_with_sosa_ref;, [n° Sosa]%end;" autofocus>
+                  <label class="sr-only" for="n">Search surname</label>
+                  <input type="search" id="n" class="form-control form-control-lg" name="n" placeholder="[*surname/surnames]0"
+                    >
+                %end;
               </div>
               <button class="btn btn-outline-primary" type="submit" title="[*search/case sensitive]0"><i class="fa fa-search fa-lg mx-2"></i> [*search/case sensitive]0</button>
             </div>
