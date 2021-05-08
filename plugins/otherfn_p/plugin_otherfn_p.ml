@@ -252,7 +252,8 @@ let first_name_print conf base x =
   | _ -> Some.select_first_name conf x list
 
 let () =
-  Gwd_lib.GwdPlugin.register ~ns:"otherfn" [ "P", fun assets conf base ->
+  Gwd_lib.GwdPlugin.register ~ns:"otherfn_p" 
+    [ "P", fun assets conf base ->
       let base = match base with Some b -> b | None -> assert false in
       match p_getenv conf.env "v" with
       | Some v -> first_name_print conf base v; true
