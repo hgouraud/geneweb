@@ -1,0 +1,27 @@
+    hide others
+en: hide other first mames
+fr: cacher les autres prénoms
+
+    show others
+en: show other first names
+fr: afficher les autres prénoms
+
+    exact match
+en: exact match (upper/lower and accents)
+fr: correspondance exacte (majuscules/minuscules et accents)
+
+    approxim match
+en: match with no capitale nor accents
+fr: correspondance sans capitales ni accents
+
+    refresh fnames cache
+en: refresh fnames cache
+fr: reconstruire le cache des prénoms
+
+    word boundaries
+en: match full words
+fr: correspondance de mots entiers
+
+    anywhere
+en: match anywhere
+fr: correspondance sans contrainte

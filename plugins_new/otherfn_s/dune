@@ -1,0 +1,10 @@
+(alias 
+   (name plugin) 
+   (deps (source_tree assets) (file META) plugin_otherfn_s.cmxs)
+)
+(executable
+  (name plugin_otherfn_s)
+  (libraries geneweb geneweb.gwd_lib geneweb.wserver)
+  (flags -linkall)
+  (modes (native plugin))
+)

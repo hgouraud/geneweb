@@ -2,9 +2,11 @@
   (target gwdPluginMD5.ml)
   (deps
     (alias_rec %{project_root}/plugins/plugin)
+    (alias_rec %{project_root}/plugins_new/plugin)
     (:maker mk_gwdPluginMD5.ml)
   )
-  (action (with-stdout-to %{target} (run ocaml %{maker} %{project_root}/plugins)))
+  (action (with-stdout-to %{target}
+    (run ocaml %{maker} %{project_root}/plugins %{project_root}/plugins_new )))
 )
 
 (library

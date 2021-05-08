@@ -1,0 +1,3 @@
+<a role="button" class="btn btn-outline-primary mr-1" 
+   href="%prefix;m=PS;t=PS_HG">
+   <i class="fa fa-search-plus fa-fw mr-1" aria-hidden="true"></i> [*places]</a>
