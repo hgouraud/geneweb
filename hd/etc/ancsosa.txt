@@ -3,6 +3,45 @@
 <head>
   <!-- $Id: ancsosa.txt,v7.00 02/05/2018 09:05:52 $ -->
   <!-- Copyright (c) 1998-2017 INRIA -->
+%define;tothegen(xx)
+  [to the %s generation:::xx]%nn;
+%end;
+%define;thegen(xx)
+  [the %s generation:::xx]%nn;
+%end;
+%define;togena(xx)
+  %if;(xx = 1)[specify::generation/generations]0%nn;
+  %elseif;(xx = 2)[to the parents]%nn;
+  %elseif;(xx = 3)[to the grandparents]%nn;
+  %elseif;(xx = 4)[to the great-grandparents]%nn;
+  %else;
+    %apply;tothegen%with;
+      %apply;nth([nth (generation)], xx)
+    %end;
+  %end;
+%end;
+%define;togen(xx)
+  %if;(xx = 1)[specify::generation/generations]0%nn;
+  %elseif;(xx = 2)[to the parents]%nn;
+  %elseif;(xx = 3)[to the grandparents]%nn;
+  %elseif;(xx = 4)[to the great-grandparents]%nn;
+  %else;
+    %apply;tothegen%with;
+      %apply;nth([nth (generation)], xx)
+    %end;
+  %end;
+%end;
+%define;gen(xx)
+  %if;(evar.xx = 1)[*specify::generation/generations]0%nn;
+  %elseif;(evar.xx = 2)[the parents]%nn;
+  %elseif;(evar.xx = 3)[the grandparents]%nn;
+  %elseif;(evar.xx = 4)[the great-grandparents]%nn;
+  %else;
+    %apply;thegen%with;
+      %apply;nth([nth (generation)], evar.xx)
+    %end;
+  %end;
+%end;
   <title>%nn;
     %if;(evar.t = "D")
       [*ancestors] ... [up to] ...%nn;
@@ -19,7 +58,7 @@
         %if;(qualifier != "") %qualifier;%end;
         %sp;%surname;
       %end;
-      %if;(evar.cgl="on")
+      %if;(evar.cgl="on" and evar.t!="N")
         %let;nb_gen;%apply;min(evar.v, max_anc_level)%in;
         %apply;togen(nb_gen).
       %end;
@@ -47,64 +86,26 @@
 %let;death_symbol;%if;(bvar.death_symbol != "")%bvar.death_symbol;%else;&dagger;%end;%in;
 %let;l_up;%if;(evar.i1 != "" or evar.p1 != "")1%end;%in;
 
-%define;tothegen(xx)
-  [to the %s generation:::xx]%nn;
-%end;
-
-%( recopié de perso_utils.txt %)
-%define;thegen(xx)
-  [the %s generation:::xx]%nn;
-%end;
-
-%define;togena(xx)
-  %if;(xx = 1)[specify::generation/generations]0%nn;
-  %elseif;(xx = 2)[to the parents]%nn;
-  %elseif;(xx = 3)[to the grandparents]%nn;
-  %elseif;(xx = 4)[to the great-grandparents]%nn;
-  %else;
-    %apply;tothegen%with;
-      %apply;nth([nth (generation)], xx)
-    %end;
-  %end;
-%end;
-
-%define;togen(xx)
-  %if;(xx = 1)[specify::generation/generations]0%nn;
-  %elseif;(xx = 2)[to the parents]%nn;
-  %elseif;(xx = 3)[to the grandparents]%nn;
-  %elseif;(xx = 4)[to the great-grandparents]%nn;
-  %else;
-    %apply;tothegen%with;
-      %apply;nth([nth (generation)], xx)
-    %end;
-  %end;
-%end;
-
-%define;gen(xx)
-  %if;(evar.xx = 1)[*specify::generation/generations]0%nn;
-  %elseif;(evar.xx = 2)[the parents]%nn;
-  %elseif;(evar.xx = 3)[the grandparents]%nn;
-  %elseif;(evar.xx = 4)[the great-grandparents]%nn;
-  %else;
-    %apply;thegen%with;
-      %apply;nth([nth (generation)], evar.xx)
-    %end;
-  %end;
-%end;
-
 %define;image_MF(xxx)
-  %if;(wizard and not cancel_links)
-    <a href="%prefix;m=MOD_IND;i=%xxx.index;"%sp;
-      title="[*modify::] %xxx.first_name; %xxx.surname;%if;(xxx.occ!="0") (%xxx.occ;)%end;"%sp;
+  %if;not cancel_links;
+    %if;wizard;
+      <a href="%prefix;m=MOD_IND;i=%xxx.index;"%sp;
+        title="[*modify::] %xxx.first_name; %xxx.surname;%if;(xxx.occ!="0") (%xxx.occ;)%end;"><i%sp;
+    %elseif;friend;
+      <i%sp;
+    %end;
   %end;
   %if;xxx.is_male;
-    %if;cancel_links;♂ %else;class="fa fa-mars male%end;%nn;
+    %if;cancel_links;♂%sp;%elseif;(friend or wizard)class="fa fa-mars male%end;%nn;
   %elseif;xxx.is_female;
-    %if;cancel_links;♀ %else;class="fa fa-venus female%end;%nn;
+    %if;cancel_links;♀%sp;%elseif;(friend or wizard)class="fa fa-venus female%end;%nn;
   %else;
-    %if;cancel_links;⚲ %else;class="fa fa-neuter neuter%end;%nn;
+    %if;cancel_links;⚲%sp;%elseif;(friend or wizard)class="fa fa-neuter neuter%end;%nn;
   %end;%nn;
-  %if;(wizard and not cancel_links) mr-1"></a>%end;
+  %if;not cancel_links; mr-1">%nn;
+    %if;wizard;</i></a>%nn;
+    %elseif;friend;</i>%end;
+  %end;
 %end;
 
 %define;letter(xx)
@@ -1316,7 +1317,7 @@
       %if;(evar.marr = "on" or evar.marr_date = "on" or evar.marr_place = "on")
         %foreach;ancestor.family;
           %if;(family_cnt = 1)
-            <td class="border-top-0 align-middle
+            <td class="border-top-0 align-middle text-center
                   %if;(evar.ns="on")
                     %if;(has_fnotes and not has_fsources) note%nn;
                     %elseif;(not has_fnotes and has_fsources) source%nn;
@@ -1356,7 +1357,7 @@
   %apply;place_popup%with;burial%end;
 %( Âge %)
   %if;(evar.age = "on")
-    <td class="align-middle"%if;(ancestor.nb_families>1 and (evar.marr = "on" or evar.marr_date = "on" or evar.marr_place = "on")) rowspan="%ancestor.nb_families;"%end;>%nn;
+    <td class="align-middle text-center"%if;(ancestor.nb_families>1 and (evar.marr = "on" or evar.marr_date = "on" or evar.marr_place = "on")) rowspan="%ancestor.nb_families;"%end;>%nn;
       %if;ancestor.computable_death_age;%ancestor.death_age;%end;%nn;
       %if;ancestor.computable_age;%ancestor.age;%end;%nn;
     </td>
