@@ -380,7 +380,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                 %end;
               %end;
             </div>
-          </li>
+          </li>   
           %if;(bvar.btn_new!="")
             %for;i;0;bvar.btn_new;
               %apply;get_plugin_cmd("btn_new", i+1)

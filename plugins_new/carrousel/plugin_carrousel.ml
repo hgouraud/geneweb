@@ -279,6 +279,11 @@ and eval_simple_bool_var conf base env =
           end
       | _ -> false
       end
+  | "is_first" -> 
+      begin match get_env "first" env with
+        Vbool s -> s
+      | _ -> raise Not_found
+      end
   | s ->
       let v = extract_var "file_exists_" s in
       if v <> "" then
@@ -292,8 +297,14 @@ and eval_simple_str_var conf base env (p, p_auth) =
         Vcnt c -> string_of_int !c
       | _ -> ""
       end
+  | "nocache" -> Printf.sprintf "%.0f" (Unix.time ())
   | "family_cnt" -> string_of_int_env "family_cnt" env
   | "idigest" -> default_image_name base p
+  | "img_cnt" ->
+      begin match get_env "img_cnt" env with
+        Vint c -> string_of_int c
+      | _ -> ""
+      end
   | "incr_count" ->
       begin match get_env "count" env with
         Vcnt c -> incr c; ""
@@ -795,12 +806,10 @@ let print_foreach conf base print_ast eval_expr =
       let rec loop first cnt =
         function
           a :: l ->
-          let env =
-            ("keydir_img", Vstring a) ::
-            ("first", Vbool first) ::
-            ("last", Vbool (l = [])) ::
-            ("cnt", Vint cnt) :: env
-          in
+            let env = ("keydir_img", Vstring a) :: env in
+            let env = ("first", Vbool first) :: env in
+            let env = ("last", Vbool (l = [])) :: env in
+            let env = ("img_cnt", Vint cnt) ::  env in
             List.iter (print_ast env ep) al; loop false (cnt + 1) l
         | [] -> ()
       in
@@ -809,10 +818,8 @@ let print_foreach conf base print_ast eval_expr =
     let rec loop cnt =
       function
         a :: l ->
-          let env =
-            ("keydir_img_old", Vstring a) ::
-            ("cnt", Vint cnt) :: env
-          in
+          let env = ("keydir_img_old", Vstring a) :: env in
+          let env = ("img_cnt", Vint cnt) :: env in
           List.iter (print_ast env ep) al; loop (cnt + 1) l
       | [] -> ()
     in
@@ -1461,10 +1468,8 @@ let print_source_image conf f =
   let fname =
     if f.[0] = '/' then String.sub f 1 (String.length f - 1) else f
   in
-  if fname = Filename.basename fname then
-    let fname = Util.source_image_file_name conf.bname fname in
-    if ImageDisplay.print_image_file conf fname then () else Hutil.incorrect_request conf
-  else Hutil.incorrect_request conf
+  let fname = Util.source_image_file_name conf.bname fname in
+  if ImageDisplay.print_image_file conf fname then () else Hutil.incorrect_request conf
 
 (* ************************************************************************** *)
 (*  [Fonc] print : Config.config -> Gwdb.base -> unit                         *)
@@ -1518,5 +1523,13 @@ let () =
           | Some "DEL_IMAGE_C_OK" -> print_c conf base; true
           | Some "IMAGE_C" -> print_c conf base; true
           | Some "RESET_IMAGE_C_OK" -> print_c conf base; true
+          | Some "PERSO" ->
+              Hutil.interp conf "perso"
+                  {Templ.eval_var = eval_var conf base;
+                   Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
+                   Templ.eval_predefined_apply = eval_predefined_apply conf;
+                   Templ.get_vother = get_vother; Templ.set_vother = set_vother;
+                   Templ.print_foreach = print_foreach conf base}
+                  env ep; true
           | _ -> false
     ]

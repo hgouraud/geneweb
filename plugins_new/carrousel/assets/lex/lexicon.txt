@@ -1,6 +1,10 @@
     carrousel
 en: carrousel
-fr: carousel
+fr: carrousel
+
+    display carrousel
+en: display carrousel
+fr: afficher le carrousel
 
     plugins
 en: plugins
