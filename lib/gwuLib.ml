@@ -59,7 +59,7 @@ module Make (Select : Select) =
       done;
       Hashtbl.iter
         (fun key l ->
-           Hashtbl.replace ht_orig_occ key (List.sort Pervasives.compare l))
+           Hashtbl.replace ht_orig_occ key (List.sort Stdlib.compare l))
         ht_orig_occ;
       let concat l1 l2 =
         let rec loop l1 l2 =

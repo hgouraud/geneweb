@@ -71,9 +71,9 @@ let open_in fname =
     (*Printf.eprintf "Open_in before %s\n" fname;*)
     check_open fname;
     (*Printf.eprintf "Open_in after %s\n" fname;*)
-    Pervasives.open_in fname
-let open_in_bin fname = check_open fname; Pervasives.open_in_bin fname
-let open_out fname = check_open fname; Pervasives.open_out fname
-let open_out_bin fname = check_open fname; Pervasives.open_out_bin fname
+    Stdlib.open_in fname
+let open_in_bin fname = check_open fname; Stdlib.open_in_bin fname
+let open_out fname = check_open fname; Stdlib.open_out fname
+let open_out_bin fname = check_open fname; Stdlib.open_out_bin fname
 let open_out_gen mode perm fname =
-  check_open fname; Pervasives.open_out_gen mode perm fname
+  check_open fname; Stdlib.open_out_gen mode perm fname
