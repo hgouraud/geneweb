@@ -38,6 +38,10 @@ the places dictionary to perform some dictionary level correction.
 WARNING: this plugin is strongly dependent on the syntax you have used to record places
 and how systematic you have been in this effort.
 
+WARNING: the search function is not as general as should be. It does not find 
+a city if the country or region where the city is not specified: Haguenau, Bas-Rhin.
+This should be improved indeed.
+
 ## Copyright
 
 Plugin written by H Gouraud 
