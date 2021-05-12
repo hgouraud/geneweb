@@ -2,7 +2,10 @@
 <!-- Copyright (c) 1998-2019 INRIA -->
 %( Boutons de configurations et d'options %)
 
-<form class="form-group mx-1" name="evt_url" method="get" action="%action;">
+<form class="form-group mx-1" name="evt_url" method="get" action="%prefix_base_password_2;">
+  %if;(cgi)
+    <input type="hidden" name="b" value="%base_name_pwd;">
+  %end;
   <input type="hidden" name="m" value="PS">
   <input type="hidden" name="t" value="PS_HG">
   <div class="form-inline">

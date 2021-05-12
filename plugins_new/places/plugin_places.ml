@@ -163,6 +163,11 @@ and eval_simple_bool_var conf base env =
       else raise Not_found
 and eval_simple_str_var conf base env (p, p_auth) =
   function
+  | "base_name_pwd" ->
+      if conf.cgi_passwd != "" then conf.bname ^ "_" ^ conf.cgi_passwd
+      else conf.bname
+  | "prefix_base_password" -> Util.prefix_base_password conf
+  | "prefix_base_password_2" -> Util.prefix_base_password_2 conf
   | "count" ->
       begin match get_env "count" env with
         Vcnt c -> string_of_int !c
@@ -1147,14 +1152,15 @@ let print_all_places_surnames_short conf base ~add_birth ~add_baptism ~add_death
     Output.print_string conf "</p>\n"
   end
 
-let print_buttons conf _base =
+let print_buttons conf base =
+  let ep = make_ep conf base Gwdb.dummy_iper in
   Hutil.interp_no_header conf "buttons_places"
-    {Templ.eval_var = (fun _ -> raise Not_found);
+    {Templ.eval_var = eval_var conf base;
      Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
-     Templ.eval_predefined_apply = (fun _ -> raise Not_found);
+     Templ.eval_predefined_apply = eval_predefined_apply conf;
      Templ.get_vother = get_vother; Templ.set_vother = set_vother;
-     Templ.print_foreach = (fun _ -> raise Not_found)}
-    [] ()
+     Templ.print_foreach = print_foreach conf base}
+    [] ep
 
 let print_all_places_surnames_long conf base _ini ~add_birth ~add_baptism
   ~add_death ~add_burial ~add_marriage max_length short filter =
