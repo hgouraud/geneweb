@@ -17,29 +17,34 @@ plugins=cgl,export,forum,no_index,xhtml,carrousel
 ```
 
 ## Operations
+
+Not fully functional in CGI mode yet.
+
 Images are separated in two categories: portraits and others.
-Portraits are display at the portrait location on perso pages.
+Portraits are displayed at the portrait location on perso pages.
 They are kept in ```images/basename```
 Carrousel maintains in ```images/basename/saved``` one saved copy of a
 portrait after a change.
-Carrousel provides a button to swap (green) the two portraits or to delete (red)
+Carrousel provides a button (green) to swap the two portraits or to delete (red)
 it permanently.
 The (yellow) delete button next to the portrait removes it from the images folder
-and places it in the saved folder, permanently deleting any file that may have 
+and places it in the saved folder, permanently deleting any file that may have
 already been there
 
-Other images are kept in ```src/basename/firstname.occ.surname```.
+Other images are kept in ```src/basename/images/firstname.occ.surname```.
 In the same folder, Carrousel keeps a .txt file containing a
 caption for the image with the same name.
-Images deleted (yellow) in this folder are kept in ```src/basename/firstname.occ.surname/saved```
+Images deleted (yellow) in this folder are kept in
+```src/basename/images/firstname.occ.surname/saved```
 Carrousel provides a button to return (green) a deleted image to the other images
 folder, and a button to permanently delete (red) the image from the saved folder.
 
-To display the carrousel, one must click on the image icon at the right of the menubar, 
-and then activate carrousel display. This two step operation is not ideal, but is a 
+To display the carrousel, one must click on the image icon at the right of the menubar,
+and then activate carrousel display. This two step operation is not ideal, but is a
 constraint of the plugin mechanism which prevents carrousel features to be
-readily available in the standard menubar. THis may evolve over time.
+readily available in the standard menubar. This may evolve over time.
 
 ## Copyright
 
 Plugin written by H Gouraud and A2
+
