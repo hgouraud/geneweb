@@ -261,6 +261,7 @@ and eval_simple_var conf base env (p, p_auth as ep) =
   | _ -> raise Not_found
 and eval_simple_bool_var conf base env =
   function
+  | "cgi" -> conf.cgi
   | "has_old_image" ->
       begin match find_person_in_env conf base "" with
       | Some p ->
