@@ -198,22 +198,7 @@ distrib: build
 			fi; \
 		fi; \
 	done
-	
-	if [ -d $(BUILD_DIR)/plugins_new ] ; then \
-    mkdir $(DISTRIB_DIR)/gw/plugins_new; \
-    for P in $(shell ls plugins_new); do \
-      if [ -f $(BUILD_DIR)/plugins_new/$$P/plugin_$$P.cmxs ] ; then \
-        mkdir $(DISTRIB_DIR)/gw/plugins_new/$$P; \
-        cp $(BUILD_DIR)/plugins_new/$$P/plugin_$$P.cmxs $(DISTRIB_DIR)/gw/plugins_new/$$P/; \
-        if [ -d plugins_new/$$P/assets ] ; then \
-          cp -R $(BUILD_DIR)/plugins_new/$$P/assets $(DISTRIB_DIR)/gw/plugins_new/$$P/; \
-        fi; \
-        if [ -f $(BUILD_DIR)/plugins_new/$$P/META ] ; then \
-          cp $(BUILD_DIR)/plugins_new/$$P/META $(DISTRIB_DIR)/gw/plugins_new/$$P/; \
-        fi; \
-      fi; \
-    done; \
-  fi
+
 .PHONY: install uninstall distrib
 
 ###### [END] Installation / Distribution section
