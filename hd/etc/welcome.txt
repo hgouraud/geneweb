@@ -34,6 +34,12 @@ fr: Accès réservé aux amis et magiciens de la base de donnée !
     %end;
   %end;
 %end;
+%define;get_plugin(file)
+  %include.file
+%end;
+%define;get_plugin_cmd(kind, iii)
+  %apply;get_plugin(bvar.kind_iii)
+%end;
 
 <body%body_prop;>
 <div class="container">
@@ -114,19 +120,15 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
     </div>
   %end;
   %if;(bvar.motd != "")
-    <div class="d-flex flex-column flex-md-row justify-content-lg-center mt-2 mt-lg-4">
+    <div class="d-flex flex-column flex-md-row justify-content-lg-center mt-2 mt-lg-3 mt-xl-4">
       <div >
       <h3 class="font-weight-light">%apply;interp(bvar.motd)</h3>
-      %if;(browsing_with_sosa_ref and bvar.visitor_access!="no")<h4>%apply;display_sosa_ref%with;%sosa_ref;%end;</h4>%end;
+      %if;(browsing_with_sosa_ref and bvar.visitor_access!="no")<h4 class="text-center">%apply;display_sosa_ref%with;%sosa_ref;%end;</h4>%end;
       </div>
     </div>
   %end;
-
   %if;(bvar.visitor_access!="no" or wizard or friend)
-    <div class="d-flex flex-column flex-md-row justify-content-lg-center mt-2 mt-lg-4">
-      %if;(browsing_with_sosa_ref)<h4>%apply;display_sosa_ref%with;%sosa_ref;%end;</h4>%end;
-    </div>
-    <div class="row justify-content-center mt-3 mt-md-4 mt-lg-5">
+    <div class="row justify-content-center mt-3 mt-xl-5">
       <div class="col-lg-7 ml-lg-4 ml-xl-5 h4">
         <i class="fa fa-search fa-sm fa-fw mr-1 text-secondary"></i>[*search/case sensitive]0</div>
       <form class="col-12" method="get" action="%prefix;">
@@ -248,6 +250,18 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
           <i class="far fa-calendar-alt fa-fw mr-1" aria-hidden="true"></i>[*calendar/calendars]1</a>
       </div>
     </div>
+    %if;(bvar.btn_welcome!="")
+      <div class="d-flex flex-column justify-items-lg-center mt-3 mt-lg-4">
+        <div class="h4 text-lg-center"><i class="fas fa-plug fa-sm fa-fw text-secondary mr-1"></i>[*plugins]</div>
+          <div class="d-inline-flex justify-content-lg-center">
+              %for;i;0;bvar.btn_welcome;
+                %apply;get_plugin_cmd("btn_welcome", i+1)
+              %end;
+          </div>
+        </div>
+      </div>
+    %end;
+
     %if;wizard;
       <div class="d-flex flex-column flex-lg-row justify-content-lg-center mt-2 mt-lg-4">
         <div class="h4 align-self-lg-center mr-lg-2">
