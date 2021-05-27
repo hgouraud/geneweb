@@ -386,7 +386,7 @@ let print_place_list conf opt long link_to_ind max_rlm_nbr pl_l =
             (if not long then "&display=long" else "&display=short") title (p1) ;
         if link_to_ind && cnt < max_rlm_nbr then
           begin
-          Output.printf conf " (<a href=\"%sm=L%s%s&nb=%d%s" (commd conf)
+          Output.printf conf "&nbsp;(<a href=\"%sm=L%s%s&nb=%d%s" (commd conf)
             ("&k=" ^ (Mutil.encode so)) opt cnt
             (if max_rlm <> "" then "&max_rlm_nbr=" ^ max_rlm else "") ;
           let rec loop3 cnt =
@@ -403,7 +403,7 @@ let print_place_list conf opt long link_to_ind max_rlm_nbr pl_l =
             (Utf8.capitalize (transl conf "summary book ascendants")) cnt
           end
         else
-          Output.printf conf " (%d)" cnt ;
+          Output.printf conf "&nbsp;(%d)" cnt ;
         loop1 false t_pl_l
     | _ -> ()
     in
@@ -660,8 +660,8 @@ let print_all_places_surnames_long conf base _ini ~add_birth ~add_baptism
   in
   let link_to_ind =
     match p_getenv conf.base_env "place_surname_link_to_ind" with
-    | Some "yes" -> true
-    | _ -> false
+    | Some "no" -> false
+    | _ -> true
   in
   let t = if short then (Printf.sprintf "%s" (Utf8.capitalize
     (transl conf "list too long"))) else ""
