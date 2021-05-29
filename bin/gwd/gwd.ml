@@ -1277,6 +1277,14 @@ let log tm conf from gauth request script_name contents =
       Printf.fprintf oc "\n"
     end
 
+let log_im request contents =
+  let referer = Mutil.extract_param "referer: " '\n' request in
+  GwdLog.log @@ fun oc ->
+  Printf.fprintf oc "-- ";
+  print_and_cut_if_too_big oc contents;
+  Printf.eprintf " Referer: %s" referer;
+  output_char oc '\n'
+
 let log_and_robot_check conf auth from request script_name contents =
   if !robot_xcl = None
   then log (Unix.time ()) conf from auth request script_name contents
@@ -1365,7 +1373,10 @@ let conf_and_connection =
           if List.mem_assoc "log_pwd" env then "..." else contents
         in
           log_and_robot_check conf auth from request script_name contents
-        end;
+        end
+      else
+        log_im request contents;
+
       match !(Wserver.cgi), auth_err, passwd_err with
         true, true, _ ->
           if is_robot from then Robot.robot_error conf 0 0
