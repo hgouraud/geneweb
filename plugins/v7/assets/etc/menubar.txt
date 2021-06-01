@@ -370,24 +370,24 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
               %end;
             </div>
           </li>
-          %if;(keydir_img_nbr>0)
+          %if;("carrousel" in bvar.plugins)
+            %if;(keydir_img_nbr>0)
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="modal" data-target="#carousel_modal"
+                  title="[*photos & documents]">
+                  <span class="fa fa-images fa-fw" aria-hidden="true"></span>%nn;
+                  <span class="sr-only">[*image/images]1</span>%nn;
+                </a>
+              </li>
+            %end;
             <li class="nav-item">
-              <a class="nav-link" data-toggle="modal" data-target="#carousel_modal"
-                title="[*photos & documents]">
-                <span class="fa fa-images fa-fw" aria-hidden="true"></span>%nn;
-                <span class="sr-only">[*image/images]1</span>%nn;
+              <a class="nav-link"href="%prefix;&m=SND_IMAGE&t=SND_IMAGE_C&i=%index;"
+                title="[*add]/[remove] [image/images]0">
+                <span class="fa fa-image fa-fw" aria-hidden="true"></span>%nn;
+                <span class="sr-only">[*add]/[remove] [image/images]0</span>%nn;
               </a>
             </li>
-          %else;
-            no keydir
           %end;
-          <li class="nav-item">
-            <a class="nav-link"href="%prefix;&m=SND_IMAGE&i=%index;"
-              title="[*add]/[remove] [image/images]0">
-              <span class="fa fa-image fa-fw" aria-hidden="true"></span>%nn;
-              <span class="sr-only">[*add]/[remove] [image/images]0</span>%nn;
-            </a>
-          </li>
         </ul>
       </div>
     </nav>
@@ -403,7 +403,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="carouselmodal">
-          <a href="?m=IMAGE;i=%index;" title="[*add]/[delete] [image/images]1">
+          <a href="%prefix_base_password;m=SND_IMAGE&t=SND_IMAGE_C&i=%index;" title="[*add]/[delete] [image/images]1">
             <i class="far fa-folder-open fa-fw mr-1" aria-hidden="true"></i>%first_name; %surname;%if;(occ!="0") (%occ;)%end; |
             <i class="far fa-image fa-fw mr-1" aria-hidden="true"></i>%keydir_img_nbr;%nn;
           </a>
@@ -430,7 +430,8 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
             </button>
             %let;keydirmax;%if;(keydir_img_nbr>9)9%else;%keydir_img_nbr;%end;%in;
             %for;i;0;keydirmax;
-               <button class="btn btn-light%if;(keydirmax>5 and (i=3 or i=6)) ml-2%end;" type="button" data-target="#carousel" data-slide-to="%i;"%( title="%expr(i+1)"%)>
+               <button class="btn btn-light%if;(keydirmax>5 and (i=3 or i=6)) ml-2%end;"
+                 type="button" data-target="#carousel" data-slide-to="%i;"%( title="%expr(i+1)"%)>
                 <i class="fas fa-circle" aria-hidden="true"></i>
                 <span class="sr-only">%expr(i+1)</span>
               </button>
@@ -454,7 +455,12 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                 %foreach;img_in_keydir;
                   %incr_count;
                   <div class="carousel-item%if;is_first; active%end;">
-                    <a class="h-75" href="%prefix_base_password;&m=IM&s=others/%keydir;/%keydir_img;" target="_blank" rel="noopener"><img class="d-block w-100" src="?m=IM&s=others/%keydir;/%keydir_img;" alt="%count; slide"></a>
+                    <a class="h-75" href="%prefix_base_password;&m=SND_IMAGE&t=IM&i=%index;&s=%keydir_img;"
+                       target="_blank" rel="noopener">
+                       <img class="d-block w-100"
+                       src="%prefix_base_password;&m=SND_IMAGE&t=IM&i=%index;&s=%keydir_img;"
+                       alt="%count; slide">
+                    </a>
                     <div class="carousel-caption d-none d-md-block%( text-dark%)">
                       <h5>%if;(keydir_img_notes="")%keydir_img;%else;%keydir_img_notes;%end;</h5>
                       <p>%count;/%keydir_img_nbr;</p>

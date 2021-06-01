@@ -68,19 +68,6 @@
   %end;%nn;
 %in;
 
-<div class="row mb-1">
-    <div class="d-flex col-6 border border-bottom-0 border-top-0 border-left-0">
-    <h1 class="display-4">[*display carrousel] </h1>
-    <a href="?m=SND_IMAGE&t=PERSO&i=%index;"
-     class="nav-link" data-toggle="modal" data-target="#carousel_modal"
-     title="[*photos & documents]"
-    >
-      <span class="display-4 fa fa-images fa-fw" aria-hidden="true"></span>%nn;
-      <span class="sr-only">[*image/images]1</span>%nn;
-    </a>
-  </div>
-</div>
-
 %if;(cgi)
 [
 en: Warning: picture management functions are not fully operative in CGI mode!!
