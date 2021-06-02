@@ -98,10 +98,10 @@ let has_keydir conf base p =
     keydir conf base p <> None
   else false
 
-let auto_image_file ?bak:(b=false) conf base p =
+let auto_image_file ?(saved=false) conf base p =
   let s = default_image_name base p in
   let dir =
-      if b then Filename.concat (base_path ["images"] conf.bname) "saved"
+      if saved then Filename.concat (base_path ["images"] conf.bname) "saved"
       else (base_path ["images"] conf.bname)
   in
   let f = Filename.concat dir s in
@@ -1679,7 +1679,7 @@ and eval_simple_bool_var conf base env =
   | "has_old_image" ->
       begin match Util.find_person_in_env conf base "" with
       | Some p ->
-          begin match auto_image_file ~bak:true conf base p with
+          begin match auto_image_file ~saved:true conf base p with
             Some _s -> true
           | _ -> false
           end
@@ -3823,7 +3823,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
       | _ -> ""
       end
   | "portrait_saved" ->
-      begin match auto_image_file ~bak:true conf base p with
+      begin match auto_image_file ~saved:true conf base p with
         Some s -> Filename.basename s
       | _ -> ""
       end
