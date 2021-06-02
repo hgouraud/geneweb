@@ -94,7 +94,7 @@ let get_keydir conf base p =
   | None -> []
 
 let has_keydir conf base p =
-  if not conf.no_image && authorized_age conf base p then
+  if authorized_age conf base p then
     keydir conf base p <> None
   else false
 
@@ -1677,7 +1677,7 @@ and eval_simple_bool_var conf base env =
       | _ -> raise Not_found
       end
   | "has_old_image" ->
-      begin match find_person_in_env conf base "" with
+      begin match Util.find_person_in_env conf base "" with
       | Some p ->
           begin match auto_image_file ~bak:true conf base p with
             Some _s -> true
@@ -1686,12 +1686,11 @@ and eval_simple_bool_var conf base env =
       | _ -> false
       end
   | "has_keydir" ->
-      begin match find_person_in_env conf base "" with
+      begin match Util.find_person_in_env conf base "" with
       | Some p ->
-          begin match auto_image_file ~bak:true conf base p with
-            Some _s -> has_keydir conf base p
-          | _ -> false
-          end
+          if authorized_age conf base p then
+            keydir conf base p <> None
+          else false
       | _ -> false
       end
   | "has_relation_her" ->
@@ -2347,7 +2346,7 @@ and eval_compound_var conf base env (a, _ as ep) loc =
       | _ -> raise Not_found
       end
   | "pvar" :: v :: sl ->
-      begin match find_person_in_env conf base v with
+      begin match Util.find_person_in_env conf base v with
       | Some p ->
           let ep = make_ep conf base (get_iper p) in
           eval_person_field_var conf base env ep loc sl
