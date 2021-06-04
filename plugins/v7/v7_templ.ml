@@ -858,7 +858,7 @@ and eval_simple_variable conf =
       in
       List.fold_left
         (fun c (k, v) ->
-          if ( ( k = "oc" || k = "ocz" ) && v = "0" ) || k = "" then c
+          if ( ( k = "oc" || k = "ocz" ) && v = "0" ) || k = "file" || k = "" then c
           else c ^ k ^ "=" ^ v ^ "&") "" l
   | "url" ->
       let c = Util.commd conf in

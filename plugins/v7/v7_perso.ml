@@ -1595,16 +1595,6 @@ let rec eval_var conf base env ep loc sl =
     Not_found -> eval_compound_var conf base env ep loc sl
 and eval_simple_var conf base env ep =
   function
-  | ["suffix"] ->
-      (* On supprime de env toutes les paires qui sont dans (henv @ senv) *)
-      let l =
-        List.fold_left (fun accu (k, _) -> List.remove_assoc k accu) conf.env
-          (List.rev_append conf.henv conf.senv)
-      in
-      str_val (List.fold_left
-        (fun c (k, v) ->
-          if ( ( k = "oc" || k = "ocz" ) && v = "0" ) || k = "" || k = "file" then c
-          else c ^ k ^ "=" ^ v ^ "&") "" l)
   | [s] ->
       begin try bool_val (eval_simple_bool_var conf base env s) with
         Not_found -> str_val (eval_simple_str_var conf base env ep s)
