@@ -20,6 +20,8 @@
   mode="comment" then only the comment file is updated
   keydir is “on” if we are dealing with “others” images %)
 
+%random.init;
+
 %define;alert_header()
   %if;(evar.mode="others")
     %if;(evar.em="SND_IMAGE_C_OK")[*image received]%if;(evar.notes!="") [with comment]%end;
@@ -40,12 +42,12 @@
     %if;(evar.notes!="")%evar.file_name_2;.txt%else;%evar.file_name;%end;</samp>
   %else;
     %if;(evar.em="SND_IMAGE_C_OK" or evar.em="RESET_IMAGE_C_OK")
-      <samp>%evar.file_name;</samp> %if;(evar.em="RESET_IMAGE_C_OK")portraits%X;saved%X;%portrait_saved;
-      <strong> <</strong>%end;<strong>> </strong><samp>portraits%X;%portrait;%nn;
+      <samp>%evar.file_name;</samp> %if;(evar.em="RESET_IMAGE_C_OK")<samp>%portraits_store;%X;saved%X;%portrait_saved;</samp>
+      <strong> <</strong>%end;<strong>> </strong><samp>%portraits_store;%X;%portrait;</samp>%nn;
       %(%if;(evar.em="DEL IMAGE_C_OK" or evar.em="RESET_IMAGE_C_OK")%portrait;%else;%evar.file_name;%end;</samp>%)
     %elseif;(evar.em="DEL_IMAGE_C_OK")
-      <samp>%if;(evar.delete!="on")portrait%X;%portrait_saved;</samp> <strong>></strong> <samp>portraits%X;saved%X;%portrait_saved;
-            %else;portraits%X;saved%X;%keydir;(.gif/jpg/png)%end;</samp>
+      %if;(evar.delete!="on")<samp>portrait%X;%portrait_saved;</samp> <strong>></strong> <samp>portraits%X;saved%X;%portrait_saved;</samp>
+      %else;<samp>portraits%X;saved%X;%keydir;(.gif/jpg/png)</samp>%end;
     %end;
   %end;
 %end;
@@ -80,7 +82,7 @@ fr: Attention : les fonctions de gestion des images ne fonctionne pas pleinement
     <div class="col-6 border border-bottom-0 border-top-0 border-left-0">
       <h1 class="display-4">
         %(<i class="fa fa-portrait fa-fw mr-1"></i>%)
-        %if;(has_image)[*modify picture]%else;[*add picture]%end;</h1>
+        %if;(has_image)[*v7 modify portrait]%else;[*v7 add portrait]%end;</h1>
       <form class="form-row" method="post" action="%action;" enctype="multipart/form-data">
         <input type="hidden" name="m" value="SND_IMAGE">
         <input type="hidden" name="t" value="SND_IMAGE_C_OK">
@@ -101,7 +103,7 @@ fr: Attention : les fonctions de gestion des images ne fonctionne pas pleinement
         %if;(has_image and has_old_image)[*previous portrait]%end;
       </div>
       <h1 class="display-4">
-      %(<i class="far fa-file-image fa-fw mr-1"></i>%)[*add] [image/images]0</h1>
+      %(<i class="far fa-file-image fa-fw mr-1"></i>%)[*v7 add image]</h1>
       <form class="form-row" method="post" action="%action;" enctype="multipart/form-data">
         <input type="hidden" name="m" value="SND_IMAGE">
         <input type="hidden" name="t" value="SND_IMAGE_C_OK">
@@ -139,7 +141,7 @@ fr: Attention : les fonctions de gestion des images ne fonctionne pas pleinement
           <span id="which_img_show">[*send image with comment]</span></button>
       </form>
     </div>
-    %( *** Col 2 *** image cache disabled with a %nocache; = Unix.time random number %)
+    %( *** Col 2 *** image cache disabled with a kch=%random.bits; %)
     <div class="col-6">
       %if;(has_image or has_old_image)
         <h1 class="display-4">[*portrait]0</h1>
@@ -147,18 +149,18 @@ fr: Attention : les fonctions de gestion des images ne fonctionne pas pleinement
         <strong><samp class="text-truncate" title="%portraits_store;%X;">%portraits_store;%X;</samp></strong>
         %if;has_image;
           <div class="d-flex mt-1">
-            <a role="button" href="%prefix_base_password;kch=%nocache;&m=SND_IMAGE&t=IM&i=%index;" target="_blank" rel="noopener"%sp;
+            <a role="button" href="%prefix_base_password;kch=%random.bits;&m=SND_IMAGE&t=IM&i=%index;" target="_blank" rel="noopener"%sp;
             data-toggle="tooltip" data-html="true" data-placement="left"
-            title='<strong>[*see] [portrait]</strong><br><span class="small">%portrait_base;</span>
-                   <br><img class="rounded my-1" src="%prefix_base_password;kch=%nocache;&m=SND_IMAGE&t=IM&i=%index;"
+            title='<strong>[*see] [portrait]</strong><br><span class="small">%portrait;</span>
+                   <br><img class="rounded my-1" src="%prefix_base_password;kch=%random.bits;&m=SND_IMAGE&t=IM&i=%index;"
                    width="185px">'%nn;
             >
               <i class="far fa-file-image fa-fw text-primary"></i>
             </a>
-            <samp class="ml-4" title="%portraits_store;%X;">%portrait_base;</samp>
+            <samp class="ml-4" title="%portraits_store;%X;">%portrait;</samp>
             <a role="button" class="ml-auto col-1"  href="%prefix_base_password;m=SND_IMAGE&t=DEL_IMAGE_C_OK&i=%index;&idigest=%idigest;"
                data-toggle="tooltip" data-html="true" data-placement="left"
-               title='<i class="far fa-trash-alt text-warning mr-1"></i><strong>[*delete] [portrait]</strong><br><span class="small">%portrait_base;</span>
+               title='<i class="far fa-trash-alt text-warning mr-1"></i><strong>[*delete] [portrait]</strong><br><span class="small">%portrait;</span>
                       <br><img class="rounded my-1" src="%prefix_base_password;m=SND_IMAGE&t=IM&i=%index;"
                       width="185px">'%nn;
             >
@@ -168,20 +170,20 @@ fr: Attention : les fonctions de gestion des images ne fonctionne pas pleinement
         %end;
         %if;has_old_image;
           <div class="d-flex %if;(has_image) mt-1%end;">
-            <a role="button" href="%prefix_base_password;kch=%nocache;&m=SND_IMAGE&t=IMS&i=%index;" target="_blank" rel="noopener"
+            <a role="button" href="%prefix_base_password;kch=%random.bits;&m=SND_IMAGE&t=IMS&i=%index;" target="_blank" rel="noopener"
               data-toggle="tooltip" data-html="true" data-placement="left"
               title='<strong>[*see] [portrait] [saved]0</strong><br><span class="small">saved%X;%portrait_saved;</span>
-                     <br><img class="rounded my-1" src="%prefix_base_password;kch=%nocache;&m=SND_IMAGE&t=IMS&i=%index;" width="185px">'>%nn;
+                     <br><img class="rounded my-1" src="%prefix_base_password;kch=%random.bits;&m=SND_IMAGE&t=IMS&i=%index;" width="185px">'>%nn;
                      <i class="far fa-file-image fa-fw text-primary"></i></a>%nn;
-            <a role="button" href="%prefix_base_password;kch=%nocache;&m=SND_IMAGE&t=RESET_IMAGE_C_OK&i=%index;&idigest=%idigest;"
+            <a role="button" href="%prefix_base_password;kch=%random.bits;&m=SND_IMAGE&t=RESET_IMAGE_C_OK&i=%index;&idigest=%idigest;"
                data-toggle="tooltip" data-html="true" data-placement="left"
                title='<i class="fa fa-retweet fa-rotate-90 text-success mr-1"></i><strong>[*restore] [portrait] [saved]0</strong><br><span class="small">saved%X;%portrait_saved;</span>
-                      <br><img class="rounded my-1" src="%prefix_base_password;kch=%nocache;&m=SND_IMAGE&t=IMS&i=%index;"
+                      <br><img class="rounded my-1" src="%prefix_base_password;kch=%random.bits;&m=SND_IMAGE&t=IMS&i=%index;"
                       width="185px">'%nn;
             >
                 <i class="fas fa-retweet fa-rotate-90 fa-fw text-success"></i>
             </a>
-            <samp class="ml-1" title="%portraits_store;%X;saved%X;%portrait_saved;"><strong>%portraits_store;%X;saved%X;</strong>%portrait_saved;</samp>
+            <samp class="ml-1" title="saved%X;%portrait_saved;"><strong>saved%X;</strong>%portrait_saved;</samp>
             <a role="button" class="ml-auto col-1" href="%prefix_base_password;m=SND_IMAGE&t=DEL_IMAGE_C_OK&i=%index;&idigest=%idigest;&delete=on"
               data-toggle="tooltip" data-html="true" data-placement="left"
                title='<i class="far fa-trash-alt text-danger mr-1"></i><strong>[*delete] [portrait] [saved]0</strong><br><span class="small">saved%X;%portrait_saved;</span>

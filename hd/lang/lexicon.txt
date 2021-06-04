@@ -7616,7 +7616,7 @@ co: fiura/fiure
 cs: obrázek/obrázky
 da: billede/billeder
 de: Bild/Bilder
-en: picture/pictures
+en: image/images
 eo: bildo:a:+n/bildoj
 es: imagen/imágenes
 et: pilt/pildid

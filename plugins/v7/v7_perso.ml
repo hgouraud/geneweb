@@ -2421,6 +2421,15 @@ and eval_compound_var conf base env (a, _ as ep) loc =
         eval_person_field_var conf base env (np, np_auth) loc sl
       | _ -> raise Not_found
       end
+  | ["random"; "init"] -> Random.self_init (); VVstring ""
+  | ["random"; "bits"] ->
+      begin try VVstring (string_of_int (Random.bits ())) with
+        Failure _ | Invalid_argument _ -> raise Not_found
+      end
+  | ["random"; s] ->
+      begin try VVstring (string_of_int (Random.int (int_of_string s))) with
+        Failure _ | Invalid_argument _ -> raise Not_found
+      end
   | "related" :: sl ->
       begin match get_env "rel" env with
         Vrel ({r_type = rt}, Some p) ->
@@ -3531,7 +3540,7 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
         true, place -> place
       | _ -> ""
       end
-  | "auto_image_file_name" | "portrait" ->
+  | "auto_image_file_name" ->
       begin match auto_image_file conf base p with
         Some s when p_auth -> s
       | _ -> ""
@@ -3818,14 +3827,14 @@ and eval_str_person_field conf base env (p, p_auth as ep) =
           end
       | _ -> ""
       end
-  | "portrait_base" ->
-      begin match auto_image_file conf base p with
+  | "portrait" ->
+      begin match auto_image_file ~saved:false conf base p with
         Some s when p_auth -> Filename.basename s
       | _ -> ""
       end
-  | "portrait_saved" ->
+  | "portrait_saved" -> (* mignt have a different extension *)
       begin match auto_image_file ~saved:true conf base p with
-        Some s -> Filename.basename s
+        Some s when p_auth -> Filename.basename s
       | _ -> ""
       end
   | "slash_baptism_date" ->

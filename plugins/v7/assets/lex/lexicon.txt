@@ -73,3 +73,15 @@ fr: mot complet
     v7 word match title
 en: match full location name
 fr: comparer avec le nom complet d'un lieu
+
+    v7 add portrait
+en: add portrait
+fr: ajouter un portrait
+
+    v7 add image
+en: add image
+fr: ajouter une image
+
+    v7 modify portrait
+en: modify portrait
+fr: modifier le portrait
