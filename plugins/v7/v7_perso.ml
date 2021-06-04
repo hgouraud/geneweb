@@ -1995,6 +1995,7 @@ and eval_simple_str_var conf base env (p, p_auth) =
           else ""
       | _ -> raise Not_found
       end
+  | "nocache" -> Printf.sprintf "%.0f" (Unix.time ())
   | "number_of_subitems" ->
       begin match get_env "item" env with
         Vslistlm ((s :: _) :: sll) ->
