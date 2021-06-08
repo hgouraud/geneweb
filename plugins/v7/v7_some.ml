@@ -321,21 +321,7 @@ let first_name_print_list conf base x1 xl liste =
              (if first then "" else ", ") (commd conf) (Mutil.encode x) x)
         (StrSet.elements xl)
   in
-  Hutil.header conf title;
-  Hutil.print_link_to_welcome conf true;
-  buttons_fnames conf;
-  (* Si on est dans un calcul de parenté, on affiche *)
-  (* l'aide sur la sélection d'un individu.          *)
-  Util.print_tips_relationship conf;
   let other = p_getenv conf.env "other" = Some "on" in
-  if other then
-    let listo =
-        List.fold_left (fun l x ->
-            (other_fnames conf base x) :: l) [] (StrSet.elements xl)
-    in
-    let listo = List.flatten listo |> List.sort_uniq compare in
-    if listo <> [] then print_other_list conf base listo else ()
-  else ();
   let list =
     List.map
       (fun (sn, ipl) ->
@@ -344,9 +330,30 @@ let first_name_print_list conf base x1 xl liste =
       liste
   in
   let list = List.sort compare list in
-  print_alphab_list conf (fun (ord, _, _) -> first_char ord)
-    (fun (_, txt, ipl) -> print_elem conf base true (txt, ipl)) list;
-  Hutil.trailer conf
+  let ms = p_getenv conf.env "m" = Some "S" in
+  if List.length list = 1 && ms then
+    let (_, _, ipl) = List.hd list in
+    V7_perso.print conf base (List.hd ipl)
+  else
+  begin
+    Hutil.header conf title;
+    Hutil.print_link_to_welcome conf true;
+    buttons_fnames conf;
+    (* Si on est dans un calcul de parenté, on affiche *)
+    (* l'aide sur la sélection d'un individu.          *)
+    Util.print_tips_relationship conf;
+    if other then
+      let listo =
+          List.fold_left (fun l x ->
+              (other_fnames conf base x) :: l) [] (StrSet.elements xl)
+      in
+      let listo = List.flatten listo |> List.sort_uniq compare in
+      if listo <> [] then print_other_list conf base listo else ()
+    else ();
+    print_alphab_list conf (fun (ord, _, _) -> first_char ord)
+      (fun (_, txt, ipl) -> print_elem conf base true (txt, ipl)) list;
+    Hutil.trailer conf
+  end
 
 let select_first_name conf n list =
   let title _ =
