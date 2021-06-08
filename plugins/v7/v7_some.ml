@@ -155,6 +155,7 @@ let persons_of_fsname conf base base_strings_of_fsname find proj x =
   (* list of strings index corresponding to the crushed lower first name
      or surname "x" *)
   let istrl = base_strings_of_fsname base x in
+  List.iter (fun s -> Printf.eprintf "Istr: %s\n" (sou base s)) istrl;
   (* selecting the persons who have this first name or surname *)
   let l =
     let x = Name.crush_lower x in
@@ -381,6 +382,7 @@ let rec merge_insert (sstr, (strl, iperl) as x) =
 
 let persons_of_absolute base_strings_of persons_of get_field conf base x =
   let istrl = base_strings_of base x in
+  List.iter (fun s -> Printf.eprintf "  Istr: %s\n" (sou base s)) istrl;
   List.fold_right begin fun istr l ->
     let str = sou base istr in
     if str = x then
@@ -1013,9 +1015,18 @@ let search_first_name conf base x =
     else if x = "" then
       [], (fun _ -> raise (Match_failure ("src/some.ml", 1008, 29)))
     else
-      persons_of_fsname conf base base_strings_of_first_name
-        (spi_find (persons_of_first_name base)) get_first_name x
+      let _ = Printf.eprintf "Search first name: %s\n" x in
+      let (l1, _) =
+        persons_of_fsname conf base base_strings_of_first_name
+          (spi_find (persons_of_first_name base)) get_first_name x
+      in
+      let (l2, _) =
+        persons_of_fsname conf base base_strings_of_first_name
+          (spi_find (persons_of_first_name base)) get_public_name x      
+      in
+      (l1 @ l2, fun _ -> ())
   in
+  let _ = Printf.eprintf "Result list: %d\n" (List.length list) in
   let list =
     List.map
       (fun (str, _, iperl) ->

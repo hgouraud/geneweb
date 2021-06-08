@@ -5,10 +5,8 @@ open Geneweb.Gwdb
 open Geneweb.Util
 open Geneweb.Gutil
 open Geneweb.Hutil
-open Geneweb.SearchName
 open Geneweb.AdvSearchOk
 open Geneweb.DateDisplay
-open Geneweb.Some
 open Geneweb.Output
 open Def
 
@@ -16,16 +14,300 @@ module Gwdb = Geneweb.Gwdb
 module Util = Geneweb.Util
 module Gutil = Geneweb.Gutil
 module Hutil = Geneweb.Hutil
-module SearchName = Geneweb.SearchName
 module AdvSearchOk = Geneweb.AdvSearchOk
 module DateDisplay = Geneweb.DateDisplay
-module Some = Geneweb.Some
 module Output = Geneweb.Output
 module Request = Gwd_lib.Request
 
 open Plugin_v7_lib
 
+(* Name.abbrev *)
+
+let abbrev_list =
+  ["a", None; "af", None; "d", None; "de", None; "di", None; "dit", None; "ier", Some "i";
+   "le", None; "of", None; "saint", Some "st"; "sainte", Some "ste"; "van", None;
+   "von", None; "zu", None; "zur", None]
+
+let rec is_word s i p ip =
+  if ip = String.length p then
+    if i = String.length s then true else if s.[i] = ' ' then true else false
+  else if i = String.length s then false
+  else if s.[i] = p.[ip] then is_word s (i + 1) p (ip + 1)
+  else false
+
+let rec search_abbrev s i =
+  function
+    (w, a) :: pl ->
+      if is_word s i w 0 then Some (String.length w, a)
+      else search_abbrev s i pl
+  | [] -> None
+
+let abbrev s =
+  let rec copy can_start_abbrev i len =
+    if i >= String.length s then Buff.get len
+    else
+      match s.[i] with
+        ' ' -> copy true (i + 1) (Buff.store len ' ')
+      | c ->
+          if can_start_abbrev then
+            match search_abbrev s i abbrev_list with
+              None -> copy false (i + 1) (Buff.store len c)
+            | Some (n, Some a) -> copy false (i + n) (Buff.mstore len a)
+            | Some (n, None) -> copy true (i + n + 1) len
+          else copy false (i + 1) (Buff.store len c)
+  in
+  copy true 0 0
+
 (* from SearchName *)
+
+let empty_surname_or_firsntame base p =
+  is_empty_string (get_surname p) || is_quest_string (get_surname p) ||
+  is_empty_string (get_first_name p) || is_quest_string (get_first_name p) ||
+  Name.lower (sou base (get_surname p)) = "" ||
+  Name.lower (sou base (get_first_name p)) = ""
+
+let person_is_misc_name conf base p k =
+  let k = Name.strip_lower k in
+  let _ = Printf.eprintf "K: %s" k in
+  List.iter (fun n -> Printf.eprintf "Misc: %s" n)
+     (person_misc_names base p (nobtit conf base));
+  if List.exists (fun n -> Name.strip n = k)
+       (person_misc_names base p (nobtit conf base))
+  then
+    true
+  else false
+
+let person_is_approx_key base p k =
+  let _ = Printf.eprintf "Person is approx key: %s %s\n" 
+    (Gutil.designation base p) k 
+  in
+  let k = Name.strip_lower k in
+  let fn = Name.strip_lower (p_first_name base p) in
+  let sn = Name.strip_lower (p_surname base p) in
+  if k = fn ^ sn && fn <> "" && sn <> "" then true else false
+
+let select_approx_key conf base pl k =
+  let _ = Printf.eprintf "Select approx key: %s, %d\n" k (List.length pl)in
+  List.fold_right
+    (fun p pl ->
+       if person_is_approx_key base p k then p :: pl
+       else if person_is_misc_name conf base p k then p :: pl
+       else pl)
+    pl []
+
+let cut_words str =
+  let rec loop beg i =
+    if i < String.length str then
+      match str.[i] with
+        ' ' ->
+          if beg = i then loop (succ beg) (succ i)
+          else String.sub str beg (i - beg) :: loop (succ i) (succ i)
+      | _ -> loop beg (succ i)
+    else if beg = i then []
+    else [String.sub str beg (i - beg)]
+  in
+  loop 0 0
+
+let try_find_with_one_first_name conf base n =
+  let _ = Printf.eprintf "Try_find_with_one_first_name: %s\n" n in
+  let n1 = n in
+  match String.index_opt n1 ' ' with
+    Some i ->
+      let fn = abbrev (Name.lower (String.sub n1 0 i)) in
+      let sn = abbrev (Name.lower (String.sub n1 (i + 1) (String.length n1 - i - 1))) in
+      let _ = Printf.eprintf "***1 First_name: %s, Surname: %s\n" fn sn in
+      let (list, _) =
+        V7_some.persons_of_fsname conf base base_strings_of_surname
+          (spi_find (persons_of_surname base)) get_surname sn
+      in
+      let pl =
+      List.fold_left
+        (fun pl (_, _, ipl) ->
+           List.fold_left
+             (fun pl ip ->
+                let p = pget conf base ip in
+                let fn1 =
+                  abbrev (Name.lower (sou base (get_first_name p)))
+                  ^ " " ^
+                  abbrev (Name.lower (sou base (get_public_name p)))
+                in
+      					let _ = Printf.eprintf "First_names: %s\n" fn1 in
+                if List.mem fn (cut_words fn1) then p :: pl else pl
+                )
+             pl ipl)
+        [] list
+      in
+      let _ = Printf.eprintf "Pl: %d\n" (List.length pl) in
+      if pl = [] then
+				begin match String.rindex_opt n1 ' ' with
+				|	Some i ->
+						let fn = abbrev (Name.lower (String.sub n1 0 i)) in
+						let sn = abbrev (Name.lower (String.sub n1 (i + 1) (String.length n1 - i - 1))) in
+						let _ = Printf.eprintf "***2 First_name: %s, Surname: %s\n" fn sn in
+						let (list, _) =
+							V7_some.persons_of_fsname conf base base_strings_of_surname
+								(spi_find (persons_of_surname base)) get_surname sn
+						in
+						List.fold_left
+							(fun pl (_, _, ipl) ->
+								 List.fold_left
+									 (fun pl ip ->
+											let p = pget conf base ip in
+											let fn1 =
+												abbrev (Name.lower (sou base (get_first_name p)))
+												^ " " ^
+												abbrev (Name.lower (sou base (get_public_name p)))
+											in
+											let _ = Printf.eprintf "First_names: %s\n" fn1 in
+											if List.mem fn (cut_words fn1) then p :: pl else pl
+											)
+									 pl ipl)
+							[] list
+					| None -> []
+				end
+			else pl
+  | None -> []
+
+let compact_list base xl =
+  let pl = Gutil.sort_person_list base xl in
+  List.fold_right
+    (fun p pl ->
+       match pl with
+         p1 :: _ when get_iper p = get_iper p1 -> pl
+       | _ -> p :: pl)
+    pl []
+
+let name_with_roman_number str =
+  let rec loop found len i =
+    if i = String.length str then if found then Some (Buff.get len) else None
+    else
+      match str.[i] with
+        '0'..'9' as c ->
+          let (n, i) =
+            let rec loop n i =
+              if i = String.length str then n, i
+              else
+                match str.[i] with
+                  '0'..'9' as c ->
+                    loop (10 * n + Char.code c - Char.code '0') (i + 1)
+                | _ -> n, i
+            in
+            loop (Char.code c - Char.code '0') (i + 1)
+          in
+          loop true (Buff.mstore len (Mutil.roman_of_arabian n)) i
+      | c -> loop found (Buff.store len c) (i + 1)
+  in
+  loop false 0 0
+
+(* search functions *)
+
+let search_by_sosa conf base an =
+  let sosa_ref = Util.find_sosa_ref conf base in
+  let sosa_nb = try Some (Sosa.of_string an) with _ -> None in
+  match sosa_ref, sosa_nb with
+    Some p, Some n ->
+      if n <> Sosa.zero then
+        match Util.branch_of_sosa conf base n (pget conf base @@ get_iper p) with
+          Some (p :: _) -> [p]
+        | _ -> []
+      else []
+  | _ -> []
+
+let search_partial_key conf base an =
+  let _ = Printf.eprintf "Search partial key: %s\n" an in
+  let ipl = Gutil.person_not_a_key_find_all base an in
+  let (an, ipl) =
+    if ipl = [] then
+      match name_with_roman_number an with
+        Some an1 ->
+          let ipl = Gutil.person_ht_find_all base an1 in
+          if ipl = [] then an, [] else an1, ipl
+      | None -> an, ipl
+    else an, ipl
+  in
+  let pl =
+    List.fold_left
+      (fun l ip ->
+         let p = pget conf base ip in if is_hidden p then l else p :: l)
+      [] ipl
+  in
+  (*
+  let pl =
+    if pl = [] then try_find_with_one_first_name conf base an else pl
+  in
+  *)
+  let _ = Printf.eprintf "Pl0: %d\n" (List.length pl) in
+  let pl =
+    let pl1 = try_find_with_one_first_name conf base an in
+    let _ = Printf.eprintf "Pl1: %d\n" (List.length pl1) in
+    if pl1 = [] then pl else pl1 @ pl
+  in
+  let pl =
+    if not conf.wizard && not conf.friend then
+      List.fold_right
+        (fun p pl ->
+           if not (is_hide_names conf p) || Util.authorized_age conf base p
+           then
+             p :: pl
+           else pl)
+        pl []
+    else pl
+  in
+  compact_list base pl
+
+let search_approx_key conf base an =
+  let _ = Printf.eprintf "Search approx key: %s\n" an in
+  let ipl = Gutil.person_not_a_key_find_all base an in
+  let (an, ipl) =
+    if ipl = [] then
+      match name_with_roman_number an with
+        Some an1 ->
+          let ipl = Gutil.person_ht_find_all base an1 in
+          if ipl = [] then an, [] else an1, ipl
+      | None -> an, ipl
+    else an, ipl
+  in
+  let pl =
+    List.fold_left
+      (fun l ip ->
+         let p = pget conf base ip in if is_hidden p then l else p :: l)
+      [] ipl
+  in
+  let pl = select_approx_key conf base pl an in
+  let pl =
+    if not conf.wizard && not conf.friend then
+      List.fold_right
+        (fun p pl ->
+           if not (is_hide_names conf p) || Util.authorized_age conf base p
+           then
+             p :: pl
+           else pl)
+        pl []
+    else pl
+  in
+  let pl =
+    List.fold_right
+      (fun p pl -> if empty_surname_or_firsntame base p then pl else p :: pl)
+      pl []
+  in
+  compact_list base pl
+
+(* recherche par clé, i.e. prenom.occ nom *)
+let search_by_key conf base an =
+  match Gutil.person_of_string_key base an with
+    Some ip ->
+      let pl = let p = pget conf base ip in if is_hidden p then [] else [p] in
+      if not conf.wizard && not conf.friend then
+        List.fold_right
+          (fun p pl ->
+             if not (is_hide_names conf p) || Util.authorized_age conf base p
+             then
+               p :: pl
+             else pl)
+          pl []
+      else pl
+  | None -> []
+
 type search_type =
     Sosa
   | Key
@@ -41,14 +323,16 @@ let search conf base an search_order specify unknown =
     match l with
       [] -> unknown conf an
     | Sosa :: l ->
-        let pl = SearchName.search_by_sosa conf base an in
+        let _ = Printf.eprintf "Sosa\n" in
+        let pl = search_by_sosa conf base an in
         begin match pl with
           [p] ->
             Util.record_visited conf (get_iper p); V7_perso.print conf base p
         | _ -> loop l
         end
     | Key :: l ->
-        let pl = SearchName.search_by_key conf base an in
+        let _ = Printf.eprintf "Key\n" in
+        let pl = search_by_key conf base an in
         begin match pl with
           [] -> loop l
         | [p] ->
@@ -56,20 +340,23 @@ let search conf base an search_order specify unknown =
         | pl -> specify conf base an pl
         end
     | Surname :: l ->
-        let pl = Some.search_surname conf base an in
+        let _ = Printf.eprintf "Surname\n" in
+        let pl = V7_some.search_surname conf base an in
         begin match pl with
           [] -> loop l
         | _ ->
-            Some.search_surname_print conf base unknown an
+            V7_some.search_surname_print conf base unknown an
         end
     | FirstName :: l ->
-        let pl = Some.search_first_name conf base an in
+        let _ = Printf.eprintf "FirstName\n" in
+        let pl = V7_some.search_first_name conf base an in
         begin match pl with
           [] -> loop l
         | _ ->
-            Some.search_first_name_print conf base an
+            V7_some.search_first_name_print conf base an
         end
     | FullName :: l ->
+        let _ = Printf.eprintf "FullName\n" in
         let max_answers =
           match p_getint conf.env "max" with
             Some n -> n
@@ -93,7 +380,7 @@ let search conf base an search_order specify unknown =
         begin match list with
         | [] -> (* try again without sn *)
           begin
-             let list = SearchName.search_approx_key conf base fn in
+             let list = search_approx_key conf base fn in
             if list = [] then loop l
             else
               begin
@@ -115,7 +402,8 @@ let search conf base an search_order specify unknown =
         | pl -> specify conf base an pl
         end        
     | ApproxKey :: l ->
-        let pl = SearchName.search_approx_key conf base an in
+        let _ = Printf.eprintf "ApproxKey\n" in
+        let pl = search_approx_key conf base an in
         begin match pl with
           [] -> loop l
         | [p] ->
@@ -123,7 +411,8 @@ let search conf base an search_order specify unknown =
         | pl -> specify conf base an pl
         end
     | PartialKey :: l ->
-        let pl = SearchName.search_partial_key conf base an in
+        let _ = Printf.eprintf "PartialKey\n" in
+        let pl = search_partial_key conf base an in
         begin match pl with
           [] -> loop l
         | [p] ->
@@ -131,7 +420,8 @@ let search conf base an search_order specify unknown =
         | pl -> specify conf base an pl
         end
     | DefaultSurname :: _ ->
-        Some.search_surname_print conf base unknown an
+        let _ = Printf.eprintf "DefaultSurname\n" in
+        V7_some.search_surname_print conf base unknown an
   in
   loop search_order
 (* end SearchName *)
@@ -279,13 +569,13 @@ let s =
       true
     | Some fn, None ->
       let order =
-      [Sosa; Key; FirstName; ApproxKey; PartialKey; DefaultSurname]
+      [Sosa; Key; FirstName; PartialKey; ApproxKey; DefaultSurname]
       in
       search conf base fn order specify unknown;
       true
     | None, Some sn ->
       let order =
-      [Sosa; Key; Surname; ApproxKey; PartialKey; DefaultSurname]
+      [Sosa; Key; Surname; PartialKey; ApproxKey; DefaultSurname]
       in
       search conf base sn order specify unknown;
       true
