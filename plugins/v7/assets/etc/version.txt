@@ -1,0 +1,3 @@
+GeneWeb[:] [compiled on %s from commit %s:::
+2021-06-24:
+<a href="https://github.com/geneweb/geneweb/commit/1a3fb02">1a3fb02 (2021-06-24)</a>]
