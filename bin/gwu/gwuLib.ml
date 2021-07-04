@@ -716,24 +716,33 @@ let print_pevents opts base gen ml =
          print_pevents_for_person opts base gen p)
     pl
 
-let print_fevent opts base gen in_comment e =
+let print_fevent opts base gen m in_comment e =
+  let c x =
+    match get_sex x with
+    | Male -> 'm'
+    | Female -> 'f'
+    | Neuter -> '?'
+  in
+  let print_sexes s =
+    Printf.ksprintf (oc opts) "%s %c%c" s (c m.m_fath) (c m.m_moth)
+  in
   let print_sep () =
     if not in_comment then Printf.ksprintf (oc opts) "\n" else Printf.ksprintf (oc opts) " "
   in
   begin match e.efam_name with
-      Efam_Marriage -> Printf.ksprintf (oc opts) "#marr"
-    | Efam_NoMarriage -> Printf.ksprintf (oc opts) "#nmar"
-    | Efam_NoMention -> Printf.ksprintf (oc opts) "#nmen"
-    | Efam_Engage -> Printf.ksprintf (oc opts) "#enga"
-    | Efam_Divorce -> Printf.ksprintf (oc opts) "#div"
-    | Efam_Separated -> Printf.ksprintf (oc opts) "#sep"
-    | Efam_Annulation -> Printf.ksprintf (oc opts) "#anul"
-    | Efam_MarriageBann -> Printf.ksprintf (oc opts) "#marb"
-    | Efam_MarriageContract -> Printf.ksprintf (oc opts) "#marc"
-    | Efam_MarriageLicense -> Printf.ksprintf (oc opts) "#marl"
-    | Efam_PACS -> Printf.ksprintf (oc opts) "#pacs"
-    | Efam_Residence -> Printf.ksprintf (oc opts) "#resi"
-    | Efam_Name n -> Printf.ksprintf (oc opts) "#%s" (correct_string base n)
+      Efam_Marriage -> print_sexes "#marr"
+    | Efam_NoMarriage -> print_sexes "#nmar"
+    | Efam_NoMention -> print_sexes "#nmen"
+    | Efam_Engage -> print_sexes "#enga"
+    | Efam_Divorce -> print_sexes "#div"
+    | Efam_Separated -> print_sexes "#sep"
+    | Efam_Annulation -> print_sexes "#anul"
+    | Efam_MarriageBann -> print_sexes "#marb"
+    | Efam_MarriageContract -> print_sexes "#marc"
+    | Efam_MarriageLicense -> print_sexes "#marl"
+    | Efam_PACS -> print_sexes "#pacs"
+    | Efam_Residence -> print_sexes "#resi"
+    | Efam_Name n -> print_sexes (Printf.sprintf "#%s" (correct_string base n))
   end;
   Printf.ksprintf (oc opts) " ";
   let efam_date = Adef.od_of_cdate e.efam_date in
@@ -766,7 +775,8 @@ let print_fevent opts base gen in_comment e =
     List.iter (fun line -> Printf.ksprintf (oc opts) "note %s" line; print_sep ())
       (lines_list_of_string note)
 
-let print_comment_for_family opts base gen fam =
+let print_comment_for_family opts base gen m =
+  let fam = m.m_fam in
   let comm = if opts.no_notes <> `nnn then sou base (get_comment fam) else "" in
   (* Si on est en mode old_gw, on mets tous les évènements dans les notes. *)
   (* On supprime les 2 évènements principaux. *)
@@ -794,7 +804,7 @@ let print_comment_for_family opts base gen fam =
               (no_newlines (sou base (get_marriage_note fam)));
           List.iter
             (fun e -> Printf.ksprintf (oc opts) " ";
-              print_fevent opts base gen true e)
+              print_fevent opts base gen m true e)
             fevents
         end;
       Printf.ksprintf (oc opts) "\n"
@@ -812,20 +822,21 @@ let print_family opts base gen m =
   Printf.ksprintf (oc opts) "fam ";
   print_parent opts base gen m.m_fath;
   Printf.ksprintf (oc opts) " +";
-  print_date_option opts (Adef.od_of_cdate (get_marriage fam));
+  if !old_gw then
+    print_date_option opts (Adef.od_of_cdate (get_marriage fam));
+  let c x =
+    match get_sex x with
+    | Male -> 'm'
+    | Female -> 'f'
+    | Neuter -> '?'
+  in
   let print_sexes s =
-    let c x =
-      match get_sex x with
-      | Male -> 'm'
-      | Female -> 'f'
-      | Neuter -> '?'
-    in
     Printf.ksprintf (oc opts) " %s %c%c" s (c m.m_fath) (c m.m_moth)
   in
   begin match get_relation fam with
     | Married -> ()
-    | NotMarried -> Printf.ksprintf (oc opts) " #nm"
-    | Engaged -> Printf.ksprintf (oc opts) " #eng"
+    | NotMarried -> print_sexes " #nm"
+    | Engaged -> print_sexes " #eng"
     | NoSexesCheckNotMarried -> print_sexes "#nsck" ;
     | NoSexesCheckMarried -> print_sexes "#nsckm" ;
     | NoMention -> print_sexes "#noment"
@@ -835,33 +846,37 @@ let print_family opts base gen m =
     | Pacs -> print_sexes "#pacs"
     | Residence -> print_sexes "#residence"
   end;
-  print_if_no_empty opts base "#mp" (get_marriage_place fam);
-  if opts.source = None then
-    print_if_no_empty opts base "#ms" (get_marriage_src fam);
-  begin match get_divorce fam with
-      NotDivorced -> ()
-    | Separated -> Printf.ksprintf (oc opts) " #sep"
-    | Divorced d ->
-      let d = Adef.od_of_cdate d in
-      Printf.ksprintf (oc opts) " -"; print_date_option opts d
+  if !old_gw then
+  begin
+    print_if_no_empty opts base "#mp" (get_marriage_place fam);
+    if opts.source = None then
+      print_if_no_empty opts base "#ms" (get_marriage_src fam);
+    begin match get_divorce fam with
+        NotDivorced -> ()
+      | Separated -> Printf.ksprintf (oc opts) " #sep"
+      | Divorced d ->
+        let d = Adef.od_of_cdate d in
+        Printf.ksprintf (oc opts) " -"; print_date_option opts d
+    end;
   end;
   Printf.ksprintf (oc opts) " ";
   print_parent opts base gen m.m_moth;
   Printf.ksprintf (oc opts) "\n";
-  Array.iter
-    (fun ip ->
-       if gen.per_sel ip then
-         let p = poi base ip in
-         Printf.ksprintf (oc opts) "wit";
-         begin match get_sex p with
-             Male -> Printf.ksprintf (oc opts) " m"
-           | Female -> Printf.ksprintf (oc opts) " f"
-           | _ -> ()
-         end;
-         Printf.ksprintf (oc opts) ": ";
-         print_witness opts base gen p;
-         Printf.ksprintf (oc opts) "\n")
-    (get_witnesses fam);
+  if !old_gw then
+    Array.iter
+      (fun ip ->
+         if gen.per_sel ip then
+           let p = poi base ip in
+           Printf.ksprintf (oc opts) "wit";
+           begin match get_sex p with
+               Male -> Printf.ksprintf (oc opts) " m"
+             | Female -> Printf.ksprintf (oc opts) " f"
+             | _ -> ()
+           end;
+           Printf.ksprintf (oc opts) ": ";
+           print_witness opts base gen p;
+           Printf.ksprintf (oc opts) "\n")
+      (get_witnesses fam);
   (match opts.source with
    | None ->
      if sou base (get_fsources fam) <> ""
@@ -878,11 +893,11 @@ let print_family opts base gen m =
       Some s -> Printf.ksprintf (oc opts) "cbp %s\n" (s_correct_string s); s
     | _ -> ""
   in
-  print_comment_for_family opts base gen fam;
+  print_comment_for_family opts base gen m;
   if not !old_gw && get_fevents fam <> [] then
     begin
       Printf.ksprintf (oc opts) "fevt\n";
-      List.iter (print_fevent opts base gen false) (get_fevents fam);
+      List.iter (print_fevent opts base gen m false) (get_fevents fam);
       Printf.ksprintf (oc opts) "end fevt\n"
     end;
   begin match Array.length m.m_chil with
@@ -1655,7 +1670,7 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
         let oc = open_out (Filename.concat out_dir fname) in
         let out, _, _ as x = output_string oc, ref true, fun () -> close_out oc in
         if not !raw_output then out "encoding: utf-8\n";
-        if !old_gw then out "\n" else out "gwplus\n\n";
+        if !old_gw then out "\n" else out "gwplus1\n\n";
         Hashtbl.add src_oc_ht fname x;
         x
   in

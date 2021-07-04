@@ -554,7 +554,7 @@ let get_pevent_name str l =
       else failwith str
   | _ -> failwith str
 
-let get_fevent_name str l =
+let get_fevent_name_no_sex str l =
   match l with
   | "#marr" :: l' -> Efam_Marriage, l'
   | "#nmar" :: l' -> Efam_NoMarriage, l'
@@ -570,6 +570,36 @@ let get_fevent_name str l =
   | "#resi" :: l' -> Efam_Residence, l'
   | s :: l' ->
     if s.[0] = '#' then Efam_Name (String.sub s 1 (String.length s - 1)), l'
+    else failwith str
+  | _ -> failwith str
+
+let get_fevent_name str l =
+  let decode_sex v c l =
+    let decode_sex i =
+      match c.[i] with
+      | 'm' -> Male
+      | 'f' -> Female
+      | '?' -> Neuter
+      | _ -> failwith __LOC__
+    in
+    try v, (decode_sex 0, decode_sex 1), l
+    with _ -> v, (Male, Female), c :: l
+  in
+  match l with
+  | "#marr" :: c :: l' when String.length c = 2 -> decode_sex Efam_Marriage c l'
+  | "#nmar" :: c :: l' when String.length c = 2 -> decode_sex Efam_NoMarriage c l'
+  | "#nmen" :: c :: l' when String.length c = 2 -> decode_sex Efam_NoMention c l'
+  | "#enga" :: c :: l' when String.length c = 2 -> decode_sex Efam_Engage c l'
+  | "#div" :: c :: l' when String.length c = 2 -> decode_sex Efam_Divorce c l'
+  | "#sep" :: c :: l' when String.length c = 2 -> decode_sex Efam_Separated c l'
+  | "#anul" :: c :: l' when String.length c = 2 -> decode_sex Efam_Annulation c l'
+  | "#marb" :: c :: l' when String.length c = 2 -> decode_sex Efam_MarriageBann c l'
+  | "#marc" :: c :: l' when String.length c = 2 -> decode_sex Efam_MarriageContract c l'
+  | "#marl" :: c :: l' when String.length c = 2 -> decode_sex Efam_MarriageLicense c l'
+  | "#pacs" :: c :: l' when String.length c = 2 -> decode_sex Efam_PACS c l'
+  | "#resi" :: c :: l' when String.length c = 2 -> decode_sex Efam_Residence c l'
+  | s :: c :: l' when String.length c = 2 ->
+    if s.[0] = '#' then decode_sex (Efam_Name (String.sub s 1 (String.length s - 1))) c l'
     else failwith str
   | _ -> failwith str
 
@@ -617,18 +647,18 @@ let get_mar_date str =
           with _ -> (v, Male, Female), c :: l
         in
         match l with
-        | "#nm" :: l ->
-          (NotMarried, Male, Female), l
-        | "#eng" :: l ->
-          (Engaged, Male, Female), l
+        | "#m" :: c :: l when String.length c = 2 ->
+          decode_sex Married c l
+        | "#nsckm" :: c :: l when String.length c = 2 ->
+          decode_sex Married c l
+        | "#nm" :: c :: l when String.length c = 2 ->
+          decode_sex NotMarried c l
+        | "#nsck" :: c :: l when String.length c = 2 ->
+          decode_sex NotMarried c l
+        | "#eng" :: c :: l when String.length c = 2 ->
+          decode_sex Engaged c l
         | "#noment" :: c :: l when String.length c = 2 ->
           decode_sex NoMention c l
-        | "#noment" :: l ->
-          (NoMention, Male, Female), l
-        | "#nsck" :: c :: l when String.length c = 2 ->
-          decode_sex NoSexesCheckNotMarried c l
-        | "#nsckm" :: c :: l when String.length c = 2 ->
-          decode_sex NoSexesCheckMarried c l
         | "#banns" :: c :: l when String.length c = 2 ->
           decode_sex MarriageBann c l
         | "#contract" :: c :: l when String.length c = 2 ->
@@ -653,6 +683,10 @@ let get_mar_date str =
             else Divorced Adef.cdate_None, l
         | "#sep" :: l -> Separated, l
         | _ -> NotDivorced, l
+      in
+      let _ = match relation with
+      | Pacs, _, _ -> Printf.eprintf ("Pacs\n")
+      | _, _, _ -> ()
       in
       relation, mar, place, note, src, divorce, l
   | [] -> failwith str
@@ -890,10 +924,13 @@ let loop_witn line ic =
   in
   loop_witn [] line
 
+let gw_plus_1 = ref false
+
 let read_family ic fname =
   function
     Some (_, ["encoding:"; "utf-8"]) -> F_enc_utf_8
   | Some (_, ["gwplus"]) -> F_gw_plus
+  | Some (_, ["gwplus1"]) -> gw_plus_1 := true; F_gw_plus
   | Some (str, "fam" :: l) ->
       let (fath_key, surname, l) = parse_parent str l in
       let (relation_ss, marriage, marr_place, marr_note, marr_src, divorce,
@@ -901,7 +938,12 @@ let read_family ic fname =
         get_mar_date str l
       in
       let (relation, fath_sex, moth_sex) = relation_ss in
-      let (moth_key, _, l) = parse_parent str l in
+      let (moth_key, msurname, l) = parse_parent str l in
+      let _ = match relation with
+        | Pacs -> Printf.eprintf "Pacs %s x %s\n" 
+          surname msurname
+        | _ -> ()
+      in
       if l <> [] then failwith str;
       let line = read_line ic in
       let (witn, line) =
@@ -948,17 +990,21 @@ let read_family ic fname =
             comm, read_line ic
         | _ -> "", line
       in
-      let (fevents, line) =
+      let (fevents, (fath_sex, moth_sex), line) =
         match line with
           Some (_, "fevt" :: _) ->
-            let (fevents, line) =
-              let rec loop fevents =
+            let (fevents, (fath_sex, moth_sex), line) =
+              let rec loop fevents (f_s, m_s)=
                 function
-                  "end fevt" -> fevents, read_line ic
+                  "end fevt" -> fevents, (fath_sex, moth_sex), read_line ic
                 | x ->
                     let (str, l) = x, fields x in
                     (* On récupère le nom, date, lieu, source, cause *)
-                    let (name, l) = get_fevent_name str l in
+                    let (name, (fath_sex, moth_sex), l) =
+                      if !gw_plus_1 then get_fevent_name str l
+                      else let (event_name, l) = get_fevent_name_no_sex str l in
+                        event_name, (fath_sex, moth_sex), l
+                    in
                     let (date, l) = get_optional_event_date l in
                     let (place, l) = get_field "#p" l in
                     let (cause, l) = get_field "#c" l in
@@ -975,12 +1021,12 @@ let read_family ic fname =
                     let (notes, line) = loop_note line ic in
                     let notes = Mutil.strip_all_trailing_spaces notes in
                     let evt = name, date, place, cause, src, notes, witn in
-                    loop (evt :: fevents) line
+                    loop (evt :: fevents) (fath_sex, moth_sex) line
               in
-              loop [] (input_a_line ic)
+              loop [] (Neuter, Neuter) (input_a_line ic)
             in
-            List.rev fevents, line
-        | _ -> [], line
+            List.rev fevents, (fath_sex, moth_sex), line
+        | _ -> [], (Neuter, Neuter), line
       in
       begin match line with
         Some (_, ["beg"]) ->
