@@ -725,7 +725,8 @@ let print_fevent opts base gen m in_comment e =
     | Neuter -> '?'
   in
   let print_sexes s =
-    Printf.ksprintf (oc opts) "%s %c%c" s (c m.m_fath) (c m.m_moth)
+    if !gwplus then Printf.ksprintf (oc opts) "%s" s
+    else Printf.ksprintf (oc opts) "%s %c%c" s (c m.m_fath) (c m.m_moth)
   in
   let print_sep () =
     if not in_comment then Printf.ksprintf (oc opts) "\n" else Printf.ksprintf (oc opts) " "
