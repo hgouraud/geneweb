@@ -824,7 +824,7 @@ let print_family opts base gen m =
   Printf.ksprintf (oc opts) "fam ";
   print_parent opts base gen m.m_fath;
   Printf.ksprintf (oc opts) " +";
-  if !old_gw then
+  if !gwplus || !old_gw then
     print_date_option opts (Adef.od_of_cdate (get_marriage fam));
   let print_sexes s =
     let c x =
@@ -835,12 +835,13 @@ let print_family opts base gen m =
     in
     Printf.ksprintf (oc opts) " %s %c%c" s (c m.m_fath) (c m.m_moth)
   in
+  if !gwplus then
   begin match get_relation fam with
     | Married -> ()
-    | NotMarried -> if !old_gw || !gwplus then Printf.ksprintf (oc opts) "#nm"
-         else print_sexes " #nm"
-    | Engaged -> if !old_gw || !gwplus then Printf.ksprintf (oc opts) "#eng"
-         else print_sexes " #eng"
+    | NotMarried -> if !old_gw || !gwplus then Printf.ksprintf (oc opts) " #nm"
+         else print_sexes "#nm"
+    | Engaged -> if !old_gw || !gwplus then Printf.ksprintf (oc opts) " #eng"
+         else print_sexes "#eng"
     | NoSexesCheckNotMarried -> print_sexes "#nsck" ;
     | NoSexesCheckMarried -> print_sexes "#nsckm" ;
     | NoMention -> print_sexes "#noment"
@@ -850,7 +851,7 @@ let print_family opts base gen m =
     | Pacs -> print_sexes "#pacs"
     | Residence -> print_sexes "#residence"
   end;
-  if !old_gw then
+  if !gwplus || !old_gw then
   begin
     print_if_no_empty opts base "#mp" (get_marriage_place fam);
     if opts.source = None then
@@ -866,7 +867,7 @@ let print_family opts base gen m =
   Printf.ksprintf (oc opts) " ";
   print_parent opts base gen m.m_moth;
   Printf.ksprintf (oc opts) "\n";
-  if !old_gw then
+  if !gwplus || !old_gw then
     Array.iter
       (fun ip ->
          if gen.per_sel ip then

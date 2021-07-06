@@ -935,11 +935,6 @@ let read_family ic fname =
       in
       let (relation, fath_sex, moth_sex) = relation_ss in
       let (moth_key, msurname, l) = parse_parent str l in
-      let _ = match relation with
-        | Pacs -> Printf.eprintf "Pacs %s x %s\n" 
-          surname msurname
-        | _ -> ()
-      in
       if l <> [] then failwith str;
       let line = read_line ic in
       let (witn, line) =
@@ -990,12 +985,13 @@ let read_family ic fname =
         match line with
           Some (_, "fevt" :: _) ->
             let (fevents, (fath_sex, moth_sex), line) =
-              let rec loop fevents (f_s, m_s)=
+              let rec loop fevents (fath_sex, moth_sex) =
                 function
                   "end fevt" -> fevents, (fath_sex, moth_sex), read_line ic
                 | x ->
                     let (str, l) = x, fields x in
                     (* On récupère le nom, date, lieu, source, cause *)
+                    (* et le sexe des conjoints pour le dernier événement *)
                     let (name, (fath_sex, moth_sex), l) =
                       if !gw_plus_1 then get_fevent_name str l
                       else let (event_name, l) = get_fevent_name_no_sex str l in
@@ -1019,7 +1015,7 @@ let read_family ic fname =
                     let evt = name, date, place, cause, src, notes, witn in
                     loop (evt :: fevents) (fath_sex, moth_sex) line
               in
-              loop [] (Neuter, Neuter) (input_a_line ic)
+              loop [] (fath_sex, moth_sex) (input_a_line ic)
             in
             List.rev fevents, (fath_sex, moth_sex), line
         | _ -> [], (Neuter, Neuter), line
