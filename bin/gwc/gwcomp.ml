@@ -647,16 +647,16 @@ let get_mar_date str =
           with _ -> (v, Male, Female), c :: l
         in
         match l with
-        | "#m" :: c :: l when String.length c = 2 ->
-          decode_sex Married c l
-        | "#nsckm" :: c :: l when String.length c = 2 ->
-          decode_sex Married c l
         | "#nm" :: c :: l when String.length c = 2 ->
-          decode_sex NotMarried c l
-        | "#nsck" :: c :: l when String.length c = 2 ->
           decode_sex NotMarried c l
         | "#eng" :: c :: l when String.length c = 2 ->
           decode_sex Engaged c l
+        | "#m" :: c :: l when String.length c = 2 ->
+          decode_sex Married c l
+        | "#nsck" :: c :: l when String.length c = 2 ->
+          decode_sex NotMarried c l
+        | "#nsckm" :: c :: l when String.length c = 2 ->
+          decode_sex Married c l
         | "#noment" :: c :: l when String.length c = 2 ->
           decode_sex NoMention c l
         | "#banns" :: c :: l when String.length c = 2 ->

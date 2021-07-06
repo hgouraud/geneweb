@@ -6,6 +6,7 @@ open Gwdb
 open Gwexport
 
 let old_gw = ref false
+let gwplus = ref false
 let only_file = ref ""
 let out_dir = ref ""
 let raw_output = ref false
@@ -824,19 +825,21 @@ let print_family opts base gen m =
   Printf.ksprintf (oc opts) " +";
   if !old_gw then
     print_date_option opts (Adef.od_of_cdate (get_marriage fam));
-  let c x =
-    match get_sex x with
-    | Male -> 'm'
-    | Female -> 'f'
-    | Neuter -> '?'
-  in
   let print_sexes s =
+    let c x =
+      match get_sex x with
+      | Male -> 'm'
+      | Female -> 'f'
+      | Neuter -> '?'
+    in
     Printf.ksprintf (oc opts) " %s %c%c" s (c m.m_fath) (c m.m_moth)
   in
   begin match get_relation fam with
     | Married -> ()
-    | NotMarried -> print_sexes " #nm"
-    | Engaged -> print_sexes " #eng"
+    | NotMarried -> if !old_gw || !gwplus then Printf.ksprintf (oc opts) "#nm"
+         else print_sexes " #nm"
+    | Engaged -> if !old_gw || !gwplus then Printf.ksprintf (oc opts) "#eng"
+         else print_sexes " #eng"
     | NoSexesCheckNotMarried -> print_sexes "#nsck" ;
     | NoSexesCheckMarried -> print_sexes "#nsckm" ;
     | NoMention -> print_sexes "#noment"
@@ -1671,7 +1674,7 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
         let out, _, _ as x = output_string oc, ref true, fun () -> close_out oc in
         if not !raw_output then out "encoding: utf-8\n";
         if !old_gw then out "\n" else
-          if !gsplus then out "gwplus\n\n"
+          if !gwplus then out "gwplus\n\n"
           else out "gwplus1\n\n";
         Hashtbl.add src_oc_ht fname x;
         x
