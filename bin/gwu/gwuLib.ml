@@ -1670,7 +1670,9 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
         let oc = open_out (Filename.concat out_dir fname) in
         let out, _, _ as x = output_string oc, ref true, fun () -> close_out oc in
         if not !raw_output then out "encoding: utf-8\n";
-        if !old_gw then out "\n" else out "gwplus1\n\n";
+        if !old_gw then out "\n" else
+          if !gsplus then out "gwplus\n\n"
+          else out "gwplus1\n\n";
         Hashtbl.add src_oc_ht fname x;
         x
   in

@@ -684,10 +684,6 @@ let get_mar_date str =
         | "#sep" :: l -> Separated, l
         | _ -> NotDivorced, l
       in
-      let _ = match relation with
-      | Pacs, _, _ -> Printf.eprintf ("Pacs\n")
-      | _, _, _ -> ()
-      in
       relation, mar, place, note, src, divorce, l
   | [] -> failwith str
 
