@@ -5,6 +5,7 @@ open Def
 open Gwdb
 
 let magic_gwo = "GnWo000o"
+let gwplus1 = ref false
 
 (* Option qui force a créé les clés des individus. De fait, *)
 (* si la clé est incomplète, on l'enregistre tout de même.  *)
@@ -617,9 +618,13 @@ let get_mar_date str =
           with _ -> (v, Male, Female), c :: l
         in
         match l with
+        | "#nm" :: c :: l when !gwplus1 && String.length c = 2 ->
+          decode_sex NotMarried c l
         | "#nm" :: l ->
           (NotMarried, Male, Female), l
-        | "#eng" :: l ->
+        | "#eng" :: c :: l when !gwplus1 && String.length c = 2 -> 
+          decode_sex Engaged c l
+        | "#eng" :: l -> 
           (Engaged, Male, Female), l
         | "#noment" :: c :: l when String.length c = 2 ->
           decode_sex NoMention c l
@@ -639,6 +644,8 @@ let get_mar_date str =
           decode_sex Pacs c l
         | "#residence" :: c :: l when String.length c = 2 ->
           decode_sex Residence c l
+        | "#m" :: c :: l when !gwplus1 && String.length c = 2 ->
+          decode_sex Married c l
         | _ ->
           (Married, Male, Female), l
       in
@@ -894,6 +901,7 @@ let read_family ic fname =
   function
     Some (_, ["encoding:"; "utf-8"]) -> F_enc_utf_8
   | Some (_, ["gwplus"]) -> F_gw_plus
+  | Some (_, ["gwplus1"]) -> begin gwplus1 := true; F_gw_plus end
   | Some (str, "fam" :: l) ->
       let (fath_key, surname, l) = parse_parent str l in
       let (relation_ss, marriage, marr_place, marr_note, marr_src, divorce,
