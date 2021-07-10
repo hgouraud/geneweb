@@ -357,8 +357,11 @@ let print_infos opts base is_child csrc cbp p =
   print_if_no_empty opts base "#occu" (get_occupation p);
   print_src_if_not_equal_to opts csrc base "#src" (get_psources p);
   begin match Adef.od_of_cdate (get_birth p) with
-      Some d -> Printf.ksprintf (oc opts) " "; print_date opts d
-    | _ when zero_birth_is_required opts base is_child p -> Printf.ksprintf (oc opts) " 0"
+      Some d -> Printf.ksprintf (oc opts) " ";
+      if !gwplus || !old_gw then print_date opts d
+      else  Printf.ksprintf (oc opts) "0(b)"
+    | _ when zero_birth_is_required opts base is_child p ->
+        Printf.ksprintf (oc opts) " 0"
     | _ -> ()
   end;
   if !gwplus || !old_gw then
@@ -368,7 +371,9 @@ let print_infos opts base is_child csrc cbp p =
       print_if_no_empty opts base "#bs" (get_birth_src p);
   end;
   begin match Adef.od_of_cdate (get_baptism p) with
-      Some d -> Printf.ksprintf (oc opts) " !"; print_date opts d
+      Some d ->
+        if !gwplus || !old_gw then begin Printf.ksprintf (oc opts) " !"; print_date opts d end
+        else if get_birth p = Adef.cdate_None then Printf.ksprintf (oc opts) " !0(p)"
     | _ -> ()
   end;
   if !gwplus || !old_gw then
@@ -390,6 +395,8 @@ let print_infos opts base is_child csrc cbp p =
           | Disappeared -> Printf.ksprintf (oc opts) "s"
           | _ -> ()
         end;
+        (* TODO if not (!gwplus || !old_gw) print "0(d)" *)
+        (* to be done when death reason better handled by gwcomp *)
         print_date opts (Adef.date_of_cdate d)
       end
     | DeadYoung -> Printf.ksprintf (oc opts) " mj"
@@ -865,16 +872,16 @@ let print_family opts base gen m =
   end;
   if !gwplus || !old_gw then
   begin
-  print_if_no_empty opts base "#mp" (get_marriage_place fam);
-  if opts.source = None then
-    print_if_no_empty opts base "#ms" (get_marriage_src fam);
-  begin match get_divorce fam with
-      NotDivorced -> ()
-    | Separated -> Printf.ksprintf (oc opts) " #sep"
-    | Divorced d ->
-      let d = Adef.od_of_cdate d in
-      Printf.ksprintf (oc opts) " -"; print_date_option opts d
-  end;
+    print_if_no_empty opts base "#mp" (get_marriage_place fam);
+    if opts.source = None then
+      print_if_no_empty opts base "#ms" (get_marriage_src fam);
+    begin match get_divorce fam with
+        NotDivorced -> ()
+      | Separated -> Printf.ksprintf (oc opts) " #sep"
+      | Divorced d ->
+        let d = Adef.od_of_cdate d in
+        Printf.ksprintf (oc opts) " -"; print_date_option opts d
+    end;
   end;
   Printf.ksprintf (oc opts) " ";
   print_parent opts base gen m.m_moth;
