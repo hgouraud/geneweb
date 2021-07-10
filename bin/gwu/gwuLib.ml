@@ -385,8 +385,6 @@ let print_infos opts base is_child csrc cbp p =
   begin match get_death p with
     | Death (dr, d) ->
       Printf.ksprintf (oc opts) " ";
-      (* TODO must keep death ad reason is not properly handled by gwcomp *)
-      (*if !gwplus || !old_gw then *)
       begin
         begin match dr with
             Killed -> Printf.ksprintf (oc opts) "k"
@@ -397,7 +395,8 @@ let print_infos opts base is_child csrc cbp p =
         end;
         (* TODO if not (!gwplus || !old_gw) print "0(d)" *)
         (* to be done when death reason better handled by gwcomp *)
-        print_date opts (Adef.date_of_cdate d)
+        if !gwplus || !old_gw then print_date opts (Adef.date_of_cdate d)
+        else Printf.ksprintf (oc opts) "0(d)"
       end
     | DeadYoung -> Printf.ksprintf (oc opts) " mj"
     | DeadDontKnowWhen -> Printf.ksprintf (oc opts) " 0"
