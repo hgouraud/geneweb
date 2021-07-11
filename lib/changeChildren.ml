@@ -16,6 +16,8 @@ let digest_children base ipl =
   Iovalue.digest l
 
 let check_digest conf digest =
+  if conf.no_digest then ()
+  else
   match p_getenv conf.env "digest" with
     Some ini_digest -> if digest <> ini_digest then Update.error_digest conf
   | None -> ()

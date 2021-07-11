@@ -45,6 +45,7 @@ type config =
     trace_templ : bool;
     friend : bool;
     just_friend_wizard : bool;
+    no_digest : bool;
     user : string;
     username : string;
     auth_scheme : auth_scheme_kind;
@@ -113,6 +114,7 @@ let empty =
 #endif
   ; is_printed_by_template = false
   ; trace_templ = false
+  ; no_digest = false
   ; friend = false
   ; just_friend_wizard = false
   ; user = ""

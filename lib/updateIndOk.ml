@@ -1226,7 +1226,7 @@ let print_mod_aux conf base callback =
   in
   let ini_ps = UpdateInd.string_person_of base (poi base p.key_index) in
   let digest = Update.digest_person ini_ps in
-  if digest = raw_get conf "digest" then
+  if conf.no_digest || digest = raw_get conf "digest" then
     if ext || redisp then UpdateInd.print_update_ind conf base p digest
     else
       let p = strip_person p in
