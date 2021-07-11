@@ -49,6 +49,7 @@ let trace_templates = ref false
 let use_auth_digest_scheme = ref false
 let wizard_just_friend = ref false
 let wizard_passwd = ref ""
+let no_digest = ref false
 
 #ifdef API
 let selected_api_host = ref "127.0.0.1"
@@ -1146,6 +1147,7 @@ let make_conf from_addr request script_name env =
      trace_templ = !trace_templates;
      friend = ar.ar_friend || wizard_just_friend && ar.ar_wizard;
      just_friend_wizard = ar.ar_wizard && wizard_just_friend;
+     no_digest = !no_digest;
      user = ar.ar_user; username = ar.ar_name; auth_scheme = ar.ar_scheme;
      command = ar.ar_command;
      indep_command =
@@ -1873,6 +1875,7 @@ let main () =
     ; ("-unsafe_plugin", arg_plugin ~check:false, "<PLUGIN>.cmxs DO NOT USE UNLESS YOU TRUST THE ORIGIN OF <PLUGIN>.")
     ; ("-plugins", arg_plugins ~check:true, "<DIR> load all plugins in <DIR>.")
     ; ("-unsafe_plugins", arg_plugins ~check:false, "<DIR> DO NOT USE UNLESS YOU TRUST THE ORIGIN OF EVERY PLUGIN IN <DIR>.")
+    ; ("-no_digest", Arg.Set no_digest, "Do not verify digest before modifying base. FOR TESTING PURPOSES ONLY.")
 #ifdef UNIX
     ; ("-max_clients", Arg.Int (fun x -> max_clients := Some x), "<NUM> Max number of clients treated at the same time (default: no limit) (not cgi).")
     ; ("-conn_tmout", Arg.Int (fun x -> conn_timeout := x), "<SEC> Connection timeout (default " ^ string_of_int !conn_timeout ^ "s; 0 means no limit)." )

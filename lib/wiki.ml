@@ -841,7 +841,7 @@ let print_mod_ok conf wi edit_mode fname read_string commit string_filter
         Some s -> s
       | None -> ""
     in
-    if digest <> Iovalue.digest old_string then Update.error_digest conf
+    if (not conf.no_digest) && (digest <> Iovalue.digest old_string) then Update.error_digest conf
     else
       let s =
         match Util.p_getint conf.env "v" with

@@ -1227,7 +1227,7 @@ let print_add o_conf base =
     | None -> ""
   in
   let sdigest = raw_get conf "digest" in
-  if digest <> "" && sdigest <> "" && digest <> sdigest then
+  if (not conf.no_digest) && (digest <> "" && sdigest <> "" && digest <> sdigest) then
     Update.error_digest conf
   else if ext || redisp then
     UpdateFam.print_update_fam conf base (sfam, scpl, sdes) ""
@@ -1368,7 +1368,7 @@ let print_mod_aux conf base callback =
     let ini_sfam = UpdateFam.string_family_of conf base sfam.fam_index in
     Update.digest_family ini_sfam
   in
-  if digest = raw_get conf "digest" then
+  if conf.no_digest || digest = raw_get conf "digest" then
     if ext || redisp then
       UpdateFam.print_update_fam conf base (sfam, scpl, sdes) digest
     else
