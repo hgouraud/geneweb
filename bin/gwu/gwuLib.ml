@@ -332,7 +332,7 @@ let zero_birth_is_required opts base is_child p =
       | DontKnowIfDead
         when
           not is_child && not (has_infos_not_dates opts base p) &&
-          p_first_name base p <> "?" && p_surname base p <> "?" ->
+          (p_first_name base p <> "?" || p_surname base p <> "?") ->
         true
       | _ -> false
     end
@@ -526,7 +526,7 @@ let print_parent opts base gen p =
      else "." ^ string_of_int (get_new_occ p));
   if pr then
     if has_infos then print_infos opts base false "" "" p
-    else if first_name <> "?" && surname <> "?" then Printf.ksprintf (oc opts) " 0"
+    else if first_name <> "?" || surname <> "?" then Printf.ksprintf (oc opts) " 0"
 
 let print_child opts base fam_surname csrc cbp p =
   Printf.ksprintf (oc opts) "-";
@@ -704,7 +704,7 @@ let print_pevents_for_person opts base gen p =
   let pevents = get_pevents p in
   let surn = s_correct_string (p_surname base p) in
   let fnam = s_correct_string (p_first_name base p) in
-  if pevents <> [] && surn <> "?" && fnam <> "?" then
+  if pevents <> [] && (surn <> "?" || fnam <> "?") then
     begin
       Printf.ksprintf (oc opts) "\n";
       Printf.ksprintf (oc opts) "pevt %s %s%s\n" surn fnam
@@ -1032,8 +1032,7 @@ let print_notes_for_person opts base gen p =
   let fnam = s_correct_string (p_first_name base p) in
   (* Si on n'est en mode old_gw, on mets tous les évènements dans les notes. *)
   if (notes <> "" || put_events_in_notes base p)
-  && surn <> "?"
-  && fnam <> "?"
+  && (surn <> "?" || fnam <> "?")
   then begin
     Printf.ksprintf (oc opts) "\n";
     Printf.ksprintf (oc opts) "notes %s %s%s\n" surn fnam
@@ -1324,7 +1323,7 @@ let print_relations_for_person opts base gen def_p is_definition p =
          | _ -> false)
       (get_rparents p)
   in
-  if surn <> "?" && fnam <> "?" && exist_relation &&
+  if (surn <> "?" || fnam <> "?") && exist_relation &&
      not (Gwdb.Marker.get gen.mark_rel (get_iper p))
   then
     begin
