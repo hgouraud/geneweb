@@ -1,0 +1,232 @@
+encoding: utf-8
+gwplus
+
+fam Test Philippe 1909 1993 +~1944 Durand Janine 1920
+wit m: Test Bienaimé #occu charpentier ~1890 od
+fevt
+#marr ~1944
+wit m: Test Bienaimé
+end fevt
+beg
+- h Henri 1950
+- h Francis 1950 ?
+- Isolé
+end
+
+rel Test Alain.1 {Alain_Jean} #salias Testa (Le_Grand) #nick ALinou2 #alias Alinou1 #occu sans #src moi_même ~1896 #bs moi-même_aussi !1/1/1897 od #ds Henri #crem #rs Henri
+beg
+- cand: Test Francis + Blandin Chantal
+end
+
+pevt Test Alain.1
+#birt ~1896 #s moi-même_aussi
+note Note : certain,<br>
+note deux lignes (avec un &#60; br&#62;)(le code &xx; n'est pas conservé!!)
+#bapt 1/1/1897
+wit m: #godp Camus Albert 1920 ?
+#acco 1900
+#acqu 1901
+#adhe 1902
+#awar 1903
+#bapl 1904
+#barm 1905
+#basm 1906
+#bles 1907
+#cens 1908
+#chgn 1909
+#circ 1910
+#conf 1911
+#conl 1912
+#degr 1913
+#demm 1914
+#dist 1915
+#dotl 1916
+#educ 1917
+#elec 1918
+#emig 1919
+#endl 1920
+#exco 1921
+#fcom 1922
+#flkl 1923
+#fune 1924
+#grad 1925
+#hosp 1926
+#illn 1927
+#immi 1928
+#lpas 1929
+#mdis 1930
+#mobm 1931
+#mpro 1932
+#mser 1933
+#natu 1934
+#occu 1935
+#ordn 1936
+#prop 1937
+#resi 1938
+#reti 1939
+#slgc 1940
+#slgp 1941
+#slgs 1942
+#vteb 1943
+#will 1944
+#custom 1945
+#deat  #s Henri
+#crem  #s Henri
+end pevt
+
+pevt Test Henri
+#birt 1950
+end pevt
+
+pevt Test Francis
+#birt 1950
+end pevt
+
+pevt Durand Janine
+#birt 1920
+end pevt
+
+pevt Test Philippe
+#birt 1909
+#deat 1993
+end pevt
+
+pevt Camus Albert
+#birt 1920
+end pevt
+
+pevt Test Bienaimé
+#birt ~1890
+#deat 
+end pevt
+
+fam ? ? + Test Léa 0
+fevt
+#marr 
+end fevt
+beg
+- f Lucille 2012
+end
+
+pevt ? Lucille
+#birt 2012
+end pevt
+
+fam Test Francis + Blandin Chantal 1954
+fevt
+#marr 
+end fevt
+
+pevt Blandin Chantal
+#birt 1954
+end pevt
+
+fam Test Henri +1970 Test Alice 1/1/1950 ?
+fevt
+#marr 1970
+end fevt
+beg
+- h Julien0 <1972
+- h Julien1 >1973
+- h Jules-killed 1978 k1979
+end
+
+pevt Test Julien0
+#birt <1972
+end pevt
+
+pevt Test Julien1
+#birt >1973
+end pevt
+
+pevt Test Jules-killed
+#birt 1978
+#deat 1979
+end pevt
+
+pevt Test Alice
+#birt 1/1/1950
+end pevt
+
+fam Test Julien00 0 +1960 Test1 David0-married 0
+fevt
+#marr 1960
+end fevt
+
+fam Test Julien01 0 +1960 #nm Test1 David1-not-married 0
+fevt
+#nmar 1960
+end fevt
+
+fam Test Julien02 0 +1960 #noment mf Test1 David2-no-mention 0
+fevt
+#nmen 1960
+end fevt
+
+fam Test Julien021 0 +1960 #noment mm Test1 David21-no-mention-mm 0
+fevt
+#nmen 1960
+end fevt
+
+fam Test Julien03 0 +1960 #eng Test1 David3-engaged 0
+fevt
+#enga 1960
+end fevt
+
+fam Test Julien04 0 +1960 -1961 Test1 David4-divorced 0
+fevt
+#marr 1960
+#div 1961
+end fevt
+
+fam Test Julien05 0 +1960 #sep Test1 David5-separated 0
+fevt
+#marr 1960
+#sep 1961
+end fevt
+
+fam Test Julien06 0 +1960 Test1 David6-annulation 0
+fevt
+#marr 1960
+#anul 1961
+end fevt
+
+fam Test Julien07 0 +1960 #noment mm Test1 David7-banns 0
+fevt
+#marb 1960
+end fevt
+
+fam Test Julien08 0 +~1960 #contract mm Test1 David8-contract 0
+fevt
+#marc 1960
+end fevt
+
+fam Test Julien09 0 +1960 #noment mm Test1 David9-license 0
+fevt
+#marl 1960
+end fevt
+
+fam Test Julien10 0 +1960 #noment mm Test1 David10-pacs 0
+fevt
+#pacs 1960
+end fevt
+
+fam Test Julien11 0 +1962 #residence mm Test1 David11-residence 0
+fevt
+#resi 1962
+end fevt
+
+fam Test Julien12 0 +1963 #nsck mm Test1 David12-nsck 0
+fevt
+#nmar 1963
+end fevt
+
+fam Test Julien13 0 +1964 #nsckm mm Test1 David13-nsckm 0
+fevt
+#marr 1964
+end fevt
+
+fam Test Julien14 0 +1965 ? ? #bp Bretagne
+fevt
+#marr 1965
+end fevt

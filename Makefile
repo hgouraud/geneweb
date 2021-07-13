@@ -186,6 +186,9 @@ test: | piqi $(GENERATED_FILES_DEP)
 	dune build @runtest
 .PHONY: test
 
+test-hg:
+	./test/test.sh
+
 bench: | piqi $(GENERATED_FILES_DEP)
 	dune build @runbench
 .PHONY: bench
