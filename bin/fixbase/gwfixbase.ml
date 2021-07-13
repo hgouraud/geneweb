@@ -56,6 +56,8 @@ let aux txt (fn : ?report:(Fixbase.patch -> unit) -> (int -> int -> unit) -> bas
     | Fix_UpdatedOcc (iper, oocc, nocc) ->
       Printf.sprintf "Uptated occ for %s: %d -> %d"
         (string_of_p iper) oocc nocc
+    | Fix_ChangedSurname (ip) ->
+      Printf.sprintf "Changed surname to Nn for: %s" (string_of_p ip)
   in
   let i' = ref 0 in
   if v1 then begin
@@ -111,6 +113,12 @@ let fix_utf8_sequence =
 
 let fix_key =
   aux "Fix duplicate keys" Fixbase.fix_key
+  
+let check_surnames =
+  aux "Fix empty children surnames" Fixbase.check_children_surname
+
+let check_infos_surnames =
+  aux "Fix empty surnames if infos" Fixbase.check_infos_empty_surname
 
 let check
     ~dry_run
@@ -126,6 +134,8 @@ let check
     ~marriage_divorce
     ~invalid_utf8
     ~key
+    ~check_empty_surn
+    ~check_infos_empty_surn
     bname =
   let v1 = !verbosity >= 1 in
   let v2 = !verbosity >= 2 in
@@ -146,6 +156,8 @@ let check
   if !marriage_divorce then fix_marriage_divorce ~v1 ~v2 base nb_fam fix;
   if !invalid_utf8 then fix_utf8_sequence ~v1 ~v2 base nb_fam fix;
   if !key then fix_key ~v1 ~v2 base nb_ind fix;
+  if !check_empty_surn then check_surnames ~v1 ~v2 base nb_fam fix;
+  if !check_infos_empty_surn then check_infos_surnames ~v1 ~v2 base nb_ind fix;
   if fast then begin clear_strings_array base ; clear_persons_array base end ;
   if not !dry_run then begin
     if !fix <> 0 then begin
@@ -181,6 +193,8 @@ let invalid_utf8 = ref false
 let key = ref false
 let index = ref false
 let dry_run = ref false
+let check_empty_surn = ref false
+let check_infos_empty_surn = ref false
 
 let speclist =
   [ ("-dry-run", Arg.Set dry_run, " do not commit changes (only print)")
@@ -198,6 +212,8 @@ let speclist =
   ; ("-person-key", Arg.Set key, " missing doc")
   ; ("-index", Arg.Set index, " rebuild index. It is automatically enable by any other option.")
   ; ("-invalid-utf8", Arg.Set invalid_utf8, " missing doc")
+  ; ("-check_empty_surn", Arg.Set check_empty_surn, " change empty children surname inherited from father")
+  ; ("-check_infos_empty_surn", Arg.Set check_infos_empty_surn, " change empty surname if infos available")
   ]
 
 let anonfun i = bname := i
@@ -220,6 +236,8 @@ let main () =
   || !invalid_utf8
   || !key
   || !index
+  || !check_empty_surn
+  || !check_infos_empty_surn
   then ()
   else begin
     f_parents := true ;
@@ -232,6 +250,8 @@ let main () =
     p_NBDS := true ;
     invalid_utf8 := true ;
     key := true ;
+    check_empty_surn := true;
+    check_infos_empty_surn := true;
   end ;
   check
     ~dry_run
@@ -247,6 +267,8 @@ let main () =
     ~marriage_divorce
     ~invalid_utf8
     ~key
+    ~check_empty_surn
+    ~check_infos_empty_surn
     !bname
 
 let _ = main ()

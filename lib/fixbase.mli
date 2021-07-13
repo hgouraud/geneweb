@@ -26,6 +26,7 @@ type patch =
   | Fix_MissingSpouse of Gwdb.ifam * Gwdb.iper
   | Fix_WrongUTF8Encoding of Gwdb.ifam option * Gwdb.iper option * (Gwdb.istr * Gwdb.istr) option
   | Fix_UpdatedOcc of Gwdb.iper * int * int
+  | Fix_ChangedSurname of Gwdb.iper
 
 val check_NBDS : ?report:(patch -> unit) -> (int -> int -> unit) -> Gwdb.base -> unit
 
@@ -48,3 +49,7 @@ val fix_missing_spouses : ?report:(patch -> unit) -> (int -> int -> unit) -> Gwd
 val fix_utf8_sequence : ?report:(patch -> unit) -> (int -> int -> unit) -> Gwdb.base -> unit
 
 val fix_key : ?report:(patch -> unit) -> (int -> int -> unit) -> Gwdb.base -> unit
+
+val check_children_surname : ?report:(patch -> unit) -> (int -> int -> unit) -> Gwdb.base -> unit
+
+val check_infos_empty_surname : ?report:(patch -> unit) -> (int -> int -> unit) -> Gwdb.base -> unit

@@ -15,6 +15,7 @@ type patch =
   | Fix_MissingSpouse of ifam * iper
   | Fix_WrongUTF8Encoding of Gwdb.ifam option * Gwdb.iper option * (Gwdb.istr * Gwdb.istr) option
   | Fix_UpdatedOcc of iper * int * int
+  | Fix_ChangedSurname of iper
 
 let mk_pevent name date place note src =
   { epers_name = name
@@ -439,3 +440,128 @@ let fix_key ?report progress base =
       ignore @@ loop [] rev_list
     end
   end ipers
+
+let occ_init = ref 999
+
+let find_first_available_occ base _fn _sn _occ =
+  (*Dummy*)
+  incr occ_init; !occ_init
+
+let check_children_surname ?report progress base =
+  let nb_fam = nb_of_families base in
+  Gwdb.Collection.iteri begin fun i fam ->
+    let father = poi base @@ get_father fam in
+    progress i nb_fam;
+    if (Gwdb.p_surname base father) = "?" then
+      let children = get_children fam in
+      for j = 0 to Array.length children - 1 do
+        let ip = children.(j) in
+        let a = poi base ip in
+        let fnam = Gwdb.p_first_name base a in
+        let snam = Gwdb.p_surname base a in
+        if snam = "?" && fnam <> "?"then begin
+          let occ = find_first_available_occ base fnam "Nn" 0 in
+          Gwdb.patch_person base ip { (gen_person_of_person a)
+            with surname = Gwdb.insert_string base "Nn";
+              occ = occ } ;
+          begin match report with
+            | Some fn -> fn (Fix_ChangedSurname ip)
+            | None -> ()
+          end ;
+        end
+      done
+  end (Gwdb.families base)
+
+(* from GwuLib *)
+type gwexport_charset = Ansel | Ansi | Ascii | Utf8
+
+type gwexport_opts =
+  { asc : int option
+  ; ascdesc : int option
+  ; base : (string * base) option
+  ; censor : int
+  ; charset : gwexport_charset
+  ; desc : int option
+  ; img_base_path : string
+  ; keys : string list
+  ; mem : bool
+  ; no_notes : [ `none | `nn | `nnn ]
+  ; no_picture : bool
+  ; oc : string * (string -> unit) * (unit -> unit)
+  ; parentship : bool
+  ; picture_path : bool
+  ; source : string option
+  ; surnames : string list
+  ; verbose : bool
+  }
+
+let default_opts =
+  { asc = None
+  ; ascdesc = None
+  ; base = None
+  ; censor = 0
+  ; charset = Utf8
+  ; desc = None
+  ; img_base_path = ""
+  ; keys = []
+  ; mem = false
+  ; no_notes = `none
+  ; no_picture = false
+  ; oc = ("", prerr_string, fun () -> close_out stderr)
+  ; parentship = false
+  ; picture_path = false
+  ; source = None
+  ; surnames = []
+  ; verbose = false
+  }
+
+let opts = ref default_opts
+
+let has_infos_not_dates opts base p =
+  let has_picture_to_export =
+    sou base (get_image p) <> "" && not opts.no_picture
+  in
+  get_first_names_aliases p <> []
+  || get_surnames_aliases p <> []
+  || sou base (get_public_name p) <> ""
+  || has_picture_to_export
+  || get_qualifiers p <> []
+  || get_aliases p <> []
+  || get_titles p <> []
+  || get_access p <> IfTitles
+  || sou base (get_occupation p) <> ""
+  || (opts.source <> None || sou base @@ get_psources p <> "")
+  || sou base (get_birth_place p) <> ""
+  || (opts.source = None && sou base (get_birth_src p) <> "")
+  || sou base (get_baptism_place p) <> ""
+  || (opts.source = None && sou base (get_baptism_src p) <> "")
+  || sou base (get_death_place p) <> ""
+  || (opts.source = None && sou base (get_death_src p) <> "")
+  || sou base (get_burial_place p) <> ""
+  || (opts.source = None && sou base (get_burial_src p) <> "")
+
+let has_infos opts base p =
+  has_infos_not_dates opts base p
+  || get_birth p <> Adef.cdate_None
+  || get_baptism p <> Adef.cdate_None
+  || get_death p <> NotDead
+(* end from GwuLib *)
+
+let check_infos_empty_surname ?report progress base =
+  let nb_ind = nb_of_persons base in
+  Gwdb.Collection.iteri begin fun i p ->
+    let ip = get_iper p in
+    progress i nb_ind;
+    if Gwdb.p_surname base p = "?" &&
+       Gwdb.p_first_name base p = "?" && 
+       has_infos !opts base p then
+      (* change surname to Nn *)
+      let occ = find_first_available_occ base "?" "Nn" 0 in
+      Gwdb.patch_person base ip { (gen_person_of_person p)
+        with surname = Gwdb.insert_string base "Nn";
+          occ = occ } ;
+      begin match report with
+        | Some fn -> fn (Fix_ChangedSurname ip)
+        | None -> ()
+      end ;
+  end (Gwdb.persons base)
