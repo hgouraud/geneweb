@@ -607,6 +607,7 @@ value is_old_person conf p =
     with
     [ DontKnowIfDead ->
       p.access <> Private && conf.public_if_no_date
+    | OfCourseDead -> True
     | _ -> False ]
   ||
   match Adef.od_of_codate p.birth
