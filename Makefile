@@ -1,9 +1,9 @@
 ifneq ($(MAKECMDGOALS),ci)
 Makefile.config: configure.ml
-	@if [ -e "$@" ]; then \
-	  echo "configure file has changed. Please rerun ocaml ./configure.ml"; exit 1; \
+	@if [ -e "$@" ] ; then \
+		echo "configure file has changed. Please rerun ocaml ./configure.ml" ; exit 1 ; \
 	else \
-	  echo "Please run ocaml ./configure.ml first"; exit 1; \
+		echo "Please run ocaml ./configure.ml first" ; exit 1 ; \
 	fi
 include Makefile.config
 endif
@@ -21,14 +21,14 @@ BUILD_DIR=_build/default
 lib/gwlib.ml:
 	@echo -n "Generating $@..."
 	@echo "let prefix =" > $@
-	@echo "  try Sys.getenv \"GWPREFIX\"" >> $@
-	@echo "  with Not_found -> \"$(PREFIX)\"" | sed -e 's|\\|/|g' >> $@
+	@echo "	try Sys.getenv \"GWPREFIX\"" >> $@
+	@echo "	with Not_found -> \"$(PREFIX)\"" | sed -e 's|\\|/|g' >> $@
 	@echo " Done!"
 
 CPPO_D=$(GWDB_D) $(OS_D) $(SYSLOG_D)
 
 ifeq ($(DUNE_PROFILE),dev)
-    CPPO_D+= -D DEBUG
+		CPPO_D+= -D DEBUG
 endif
 
 %/dune: %/dune.in Makefile.config
@@ -51,7 +51,7 @@ bin/gwrepl/.depend:
 	@echo " Done!"
 
 dune-workspace: dune-workspace.in Makefile.config
-	cat $< | sed  -e "s/%%%DUNE_PROFILE%%%/$(DUNE_PROFILE)/g" > $@
+	cat $< | sed	-e "s/%%%DUNE_PROFILE%%%/$(DUNE_PROFILE)/g" > $@
 
 hd/etc/version.txt:
 	@echo -n "Generating $@..."
@@ -92,7 +92,20 @@ GENERATED_FILES_DEP = \
 
 generated: $(GENERATED_FILES_DEP)
 
-install uninstall build: $(GENERATED_FILES_DEP)
+
+ifdef API_D
+piqi:
+	$(foreach p, $(wildcard lib/*.proto), \
+		piqi of-proto --normalize $(p) ; \
+		piqic-ocaml -C lib/ --ext $(p).piqi ; \
+		)
+	$(RM) lib/*.piqi
+else
+piqi:
+endif
+.PHONY: piqi
+
+install uninstall build: $(GENERATED_FILES_DEP) piqi
 
 ###### [BEGIN] Installation / Distribution section
 
@@ -109,6 +122,7 @@ uninstall:
 	dune uninstall
 
 BUILD_DISTRIB_DIR=$(BUILD_DIR)/bin/
+DEV_DIR=$(shell pwd)
 
 distrib: build
 	$(RM) -r $(DISTRIB_DIR)
@@ -119,18 +133,18 @@ distrib: build
 	cp etc/README.txt $(DISTRIB_DIR)/.
 	cp etc/LISEZMOI.txt $(DISTRIB_DIR)/.
 	cp etc/START.htm $(DISTRIB_DIR)/.
-	if test $(OS_TYPE) = "Win"; then \
-	  cp etc/Windows/gwd.bat $(DISTRIB_DIR); \
-	  cp etc/Windows/gwsetup.bat $(DISTRIB_DIR); \
-	  cp -f etc/Windows/README.txt $(DISTRIB_DIR)/README.txt; \
-	  cp -f etc/Windows/LISEZMOI.txt $(DISTRIB_DIR)/LISEZMOI.txt; \
-	elif test $(OS_TYPE) = "Darwin"; then \
-	  cp etc/gwd $(DISTRIB_DIR)/gwd.command; \
-	  cp etc/gwsetup $(DISTRIB_DIR)/gwsetup.command; \
-	  cp etc/macOS/geneweb.command $(DISTRIB_DIR); \
+	if test $(OS_TYPE) = "Win" ; then \
+		cp etc/Windows/gwd.bat $(DISTRIB_DIR) ; \
+		cp etc/Windows/gwsetup.bat $(DISTRIB_DIR) ; \
+		cp -f etc/Windows/README.txt $(DISTRIB_DIR)/README.txt ; \
+		cp -f etc/Windows/LISEZMOI.txt $(DISTRIB_DIR)/LISEZMOI.txt ; \
+	elif test $(OS_TYPE) = "Darwin" ; then \
+		cp etc/gwd $(DISTRIB_DIR)/gwd.command ; \
+		cp etc/gwsetup $(DISTRIB_DIR)/gwsetup.command ; \
+		cp etc/macOS/geneweb.command $(DISTRIB_DIR) ; \
 	else \
-	  cp etc/gwd $(DISTRIB_DIR); \
-	  cp etc/gwsetup $(DISTRIB_DIR); \
+		cp etc/gwd $(DISTRIB_DIR) ; \
+		cp etc/gwsetup $(DISTRIB_DIR) ; \
 	fi
 	mkdir $(DISTRIB_DIR)/gw
 	cp etc/a.gwf $(DISTRIB_DIR)/gw/.
@@ -155,19 +169,60 @@ distrib: build
 	cp bin/setup/lang/*.htm $(DISTRIB_DIR)/gw/setup/lang/
 	cp bin/setup/lang/lexicon.txt $(DISTRIB_DIR)/gw/setup/lang/
 	cp bin/setup/lang/intro.txt $(DISTRIB_DIR)/gw/setup/lang/
-	cp -R hd/* $(DISTRIB_DIR)/gw/
+#	cp -R hd/* $(DISTRIB_DIR)/gw/
 	mkdir $(DISTRIB_DIR)/gw/plugins
-	for P in $(shell ls plugins); do \
+	for P in $(shell ls plugins) ; do \
 		if [ -f $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs ] ; then \
-			mkdir $(DISTRIB_DIR)/gw/plugins/$$P; \
-			cp $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs $(DISTRIB_DIR)/gw/plugins/$$P/; \
-			if [ -d plugins/$$P/assets ] ; then \
-				cp -R $(BUILD_DIR)/plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/; \
-			fi; \
+			mkdir $(DISTRIB_DIR)/gw/plugins/$$P ; \
+			cp $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
 			if [ -f $(BUILD_DIR)/plugins/$$P/META ] ; then \
-				cp $(BUILD_DIR)/plugins/$$P/META $(DISTRIB_DIR)/gw/plugins/$$P/; \
-			fi; \
-		fi; \
+				cp $(BUILD_DIR)/plugins/$$P/META $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
+			fi ; \
+			if test "$$P" = "v7" ; then \
+				echo "TPL = $(TPL)" ; \
+				echo "Dev_Dir = $(DEV_DIR)" ; \
+				if test "$(TPL)" = "yes" ; then \
+					echo "Create sym links for v7" ; \
+					if test $(OS_TYPE) = "Win"; then \
+						export CYGWIN="winsymlinks:nativestrict"; \
+					fi
+					ln -s $(DEV_DIR)/hd/etc $(DISTRIB_DIR)/gw/etc ; \
+					ln -s $(DEV_DIR)/hd/lang $(DISTRIB_DIR)/gw/lang ; \
+					ln -s $(DEV_DIR)/hd/images $(DISTRIB_DIR)/gw/images ; \
+					ln -s $(DEV_DIR)/plugins/v7/assets $(DISTRIB_DIR)/gw/plugins/v7/assets ; \
+				else \
+					echo "Copy assets for v7" ; \
+					cp -R plugins/v7/assets $(DISTRIB_DIR)/gw/plugins/v7/ ; \
+					for D in css js modules templm webfonts ; do \
+						echo "dir: $$D" ; \
+						if [ ! -d $(DISTRIB_DIR)/gw/plugins/v7/assets/etc/$$D ] ; then \
+							mkdir $(DISTRIB_DIR)/gw/plugins/v7/assets/etc/$$D ; \
+						fi ; \
+					done ; \
+					for F in $(shell ls hd/etc) ; do \
+						if [ -d hd/etc/$$F ] ; then \
+							echo "Skip dir $$F" ; \
+						elif [ -f $(DISTRIB_DIR)/gw/plugins/v7/assets/etc/$$F ] ; then \
+							echo "Skip file $$F" ; \
+						else \
+							cp hd/etc/$$F $(DISTRIB_DIR)/gw/plugins/v7/assets/etc/ ; \
+						fi ; \
+					done ; \
+					for F in $(shell ls hd/lang) ; do \
+						if [ -f $(DISTRIB_DIR)/gw/plugins/v7/assets/lex/$$F ] ; then \
+							echo "Skip file $$F" ; \
+						else \
+							cp hd/lang/$$F $(DISTRIB_DIR)/gw/plugins/v7/assets/lex/ ; \
+						fi ; \
+					done ; \
+				fi ; \
+			else \
+				echo "Copy assets for $$P" ; \
+				if [ -d plugins/$$P/assets ] ; then \
+					cp -R plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
+				fi ; \
+			fi ; \
+		fi ; \
 	done
 
 .PHONY: install uninstall distrib
