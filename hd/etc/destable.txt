@@ -754,9 +754,15 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
   %end;
 %end;
 
+%define;cousins_l(lll)
+  %cousins.0.lll;
+%end;
+
 %define;desc_count_l(xxx)
   %foreach;descendant_level;
-    %if;(level=xxx)%number_of_descendants_at_level;%end;
+    %if;(level=xxx)%number_of_descendants_at_level;
+      %if;("v7," in bvar.plugins) /%apply;cousins_l(xxx)%end;
+    %end;
   %end;
 %end;
 

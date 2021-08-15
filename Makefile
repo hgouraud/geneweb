@@ -124,6 +124,10 @@ uninstall:
 BUILD_DISTRIB_DIR=$(BUILD_DIR)/bin/
 DEV_DIR=$(shell pwd)
 
+devtpl:
+	export TPL="yes"; \
+	make distrib
+
 distrib: build
 	$(RM) -r $(DISTRIB_DIR)
 	mkdir $(DISTRIB_DIR)
@@ -185,7 +189,7 @@ distrib: build
 					echo "Create sym links for v7" ; \
 					if test $(OS_TYPE) = "Win"; then \
 						export CYGWIN="winsymlinks:nativestrict"; \
-					fi
+					fi ; \
 					ln -s $(DEV_DIR)/hd/etc $(DISTRIB_DIR)/gw/etc ; \
 					ln -s $(DEV_DIR)/hd/lang $(DISTRIB_DIR)/gw/lang ; \
 					ln -s $(DEV_DIR)/hd/images $(DISTRIB_DIR)/gw/images ; \
