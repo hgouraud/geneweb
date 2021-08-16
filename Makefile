@@ -110,6 +110,7 @@ install uninstall build: $(GENERATED_FILES_DEP) piqi
 ###### [BEGIN] Installation / Distribution section
 
 build:
+	$(RM) -r $(DISTRIB_DIR)
 	dune build -p geneweb
 .DEFAULT_GOAL = build
 
@@ -164,16 +165,13 @@ distrib: build
 	cp $(BUILD_DISTRIB_DIR)fixbase/gwfixbase.exe $(DISTRIB_DIR)/gw/gwfixbase$(EXT) ;
 	cp $(BUILD_DISTRIB_DIR)setup/setup.exe $(DISTRIB_DIR)/gw/gwsetup$(EXT) ;
 	cp $(BUILD_DISTRIB_DIR)update_nldb/update_nldb.exe $(DISTRIB_DIR)/gw/update_nldb$(EXT) ;
-	mkdir $(DISTRIB_DIR)/gw/setup ;
 	if test $(OS_TYPE) = "Win"; then \
 		export CYGWIN="winsymlinks:nativestrict"; \
-	fi ; \
+	fi ;
 	if test "$(TPL)" = "yes" ; then \
-		ln -s $(DEV_DIR)/bin/setup/intro.txt $(DISTRIB_DIR)/gw/setup/ ; \
-		ln -s $(DEV_DIR)/bin/setup/setup.gwf $(DISTRIB_DIR)/gw/setup/ ; \
-		ln -s $(DEV_DIR)/bin/setup/setup.css $(DISTRIB_DIR)/gw/setup/ ; \
-		ln -s $(DEV_DIR)/bin/setup/lang $(DISTRIB_DIR)/gw/setup/ ; \
+		ln -s $(DEV_DIR)/bin/setup $(DISTRIB_DIR)/gw/setup ; \
 	else \
+	  mkdir $(DISTRIB_DIR)/gw/setup ; \
 		mkdir $(DISTRIB_DIR)/gw/setup/lang ; \
 		cp bin/setup/intro.txt $(DISTRIB_DIR)/gw/setup/ ; \
 		cp bin/setup/setup.gwf $(DISTRIB_DIR)/gw/setup/ ; \
@@ -181,8 +179,8 @@ distrib: build
 		cp bin/setup/lang/*.htm $(DISTRIB_DIR)/gw/setup/lang/ ; \
 		cp bin/setup/lang/lexicon.txt $(DISTRIB_DIR)/gw/setup/lang/ ; \
 		cp bin/setup/lang/intro.txt $(DISTRIB_DIR)/gw/setup/lang/ ; \
-	fi ; \
-	mkdir $(DISTRIB_DIR)/gw/plugins
+	fi ;
+	mkdir $(DISTRIB_DIR)/gw/plugins ;
 	for P in $(shell ls plugins) ; do \
 		if [ -f $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs ] ; then \
 			mkdir $(DISTRIB_DIR)/gw/plugins/$$P ; \
@@ -205,7 +203,7 @@ distrib: build
 				fi ; \
 			fi ; \
 		fi ; \
-	done
+	done ;
 
 .PHONY: install uninstall distrib
 
