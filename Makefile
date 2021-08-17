@@ -139,17 +139,17 @@ distrib: build
 	cp etc/LISEZMOI.txt $(DISTRIB_DIR)/.
 	cp etc/START.htm $(DISTRIB_DIR)/.
 	if test $(OS_TYPE) = "Win" ; then \
-		cp etc/Windows/gwd.bat $(DISTRIB_DIR) ; \
-		cp etc/Windows/gwsetup.bat $(DISTRIB_DIR) ; \
-		cp -f etc/Windows/README.txt $(DISTRIB_DIR)/README.txt ; \
-		cp -f etc/Windows/LISEZMOI.txt $(DISTRIB_DIR)/LISEZMOI.txt ; \
+	  cp etc/Windows/gwd.bat $(DISTRIB_DIR) ; \
+	  cp etc/Windows/gwsetup.bat $(DISTRIB_DIR) ; \
+	  cp -f etc/Windows/README.txt $(DISTRIB_DIR)/README.txt ; \
+	  cp -f etc/Windows/LISEZMOI.txt $(DISTRIB_DIR)/LISEZMOI.txt ; \
 	elif test $(OS_TYPE) = "Darwin" ; then \
-		cp etc/gwd $(DISTRIB_DIR)/gwd.command ; \
-		cp etc/gwsetup $(DISTRIB_DIR)/gwsetup.command ; \
-		cp etc/macOS/geneweb.command $(DISTRIB_DIR) ; \
+	  cp etc/gwd $(DISTRIB_DIR)/gwd.command ; \
+	  cp etc/gwsetup $(DISTRIB_DIR)/gwsetup.command ; \
+	  cp etc/macOS/geneweb.command $(DISTRIB_DIR) ; \
 	else \
-		cp etc/gwd $(DISTRIB_DIR) ; \
-		cp etc/gwsetup $(DISTRIB_DIR) ; \
+	  cp etc/gwd $(DISTRIB_DIR) ; \
+	  cp etc/gwsetup $(DISTRIB_DIR) ; \
 	fi
 	mkdir $(DISTRIB_DIR)/gw
 	cp etc/a.gwf $(DISTRIB_DIR)/gw/.
@@ -166,43 +166,43 @@ distrib: build
 	cp $(BUILD_DISTRIB_DIR)setup/setup.exe $(DISTRIB_DIR)/gw/gwsetup$(EXT) ;
 	cp $(BUILD_DISTRIB_DIR)update_nldb/update_nldb.exe $(DISTRIB_DIR)/gw/update_nldb$(EXT) ;
 	if test $(OS_TYPE) = "Win"; then \
-		export CYGWIN="winsymlinks:nativestrict"; \
+	  export CYGWIN="winsymlinks:nativestrict"; \
 	fi ;
 	if test "$(TPL)" = "yes" ; then \
-		ln -s $(DEV_DIR)/bin/setup $(DISTRIB_DIR)/gw/setup ; \
+	  ln -s $(DEV_DIR)/bin/setup $(DISTRIB_DIR)/gw/setup ; \
 	else \
 	  mkdir $(DISTRIB_DIR)/gw/setup ; \
-		mkdir $(DISTRIB_DIR)/gw/setup/lang ; \
-		cp bin/setup/intro.txt $(DISTRIB_DIR)/gw/setup/ ; \
-		cp bin/setup/setup.gwf $(DISTRIB_DIR)/gw/setup/ ; \
-		cp bin/setup/setup.css $(DISTRIB_DIR)/gw/setup/ ; \
-		cp bin/setup/lang/*.htm $(DISTRIB_DIR)/gw/setup/lang/ ; \
-		cp bin/setup/lang/lexicon.txt $(DISTRIB_DIR)/gw/setup/lang/ ; \
-		cp bin/setup/lang/intro.txt $(DISTRIB_DIR)/gw/setup/lang/ ; \
+	  mkdir $(DISTRIB_DIR)/gw/setup/lang ; \
+	  cp bin/setup/intro.txt $(DISTRIB_DIR)/gw/setup/ ; \
+	  cp bin/setup/setup.gwf $(DISTRIB_DIR)/gw/setup/ ; \
+	  cp bin/setup/setup.css $(DISTRIB_DIR)/gw/setup/ ; \
+	  cp bin/setup/lang/*.htm $(DISTRIB_DIR)/gw/setup/lang/ ; \
+	  cp bin/setup/lang/lexicon.txt $(DISTRIB_DIR)/gw/setup/lang/ ; \
+	  cp bin/setup/lang/intro.txt $(DISTRIB_DIR)/gw/setup/lang/ ; \
 	fi ;
 	mkdir $(DISTRIB_DIR)/gw/plugins ;
 	for P in $(shell ls plugins) ; do \
-		if [ -f $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs ] ; then \
-			mkdir $(DISTRIB_DIR)/gw/plugins/$$P ; \
-			cp $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
-			if [ -f $(BUILD_DIR)/plugins/$$P/META ] ; then \
-				cp $(BUILD_DIR)/plugins/$$P/META $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
-			fi ; \
-			if [ -d plugins/$$P/assets ] ; then \
-				cp -R plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
-			fi ; \
-			if test "$$P" = "v7" ; then \
-				if test "$(TPL)" = "yes" ; then \
-					echo "Create sym links for v7" ; \
-					ln -s $(DEV_DIR)/hd/etc $(DISTRIB_DIR)/gw/etc ; \
-					ln -s $(DEV_DIR)/hd/lang $(DISTRIB_DIR)/gw/lang ; \
-					ln -s $(DEV_DIR)/hd/images $(DISTRIB_DIR)/gw/images ; \
-					ln -s $(DEV_DIR)/plugins/v7/assets $(DISTRIB_DIR)/gw/plugins/v7/assets ; \
-				else \
-					cp -R hd/* $(DISTRIB_DIR)/gw/ ; \
-				fi ; \
-			fi ; \
-		fi ; \
+	  if [ -f $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs ] ; then \
+	    mkdir $(DISTRIB_DIR)/gw/plugins/$$P ; \
+	    cp $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
+	    if [ -f $(BUILD_DIR)/plugins/$$P/META ] ; then \
+	      cp $(BUILD_DIR)/plugins/$$P/META $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
+	    fi ; \
+	    if [ -d plugins/$$P/assets ] ; then \
+	      cp -R plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
+	    fi ; \
+	    if test "$$P" = "v7" ; then \
+	      if test "$(TPL)" = "yes" ; then \
+	        echo "Create sym links for v7" ; \
+	        ln -s $(DEV_DIR)/hd/etc $(DISTRIB_DIR)/gw/etc ; \
+	        ln -s $(DEV_DIR)/hd/lang $(DISTRIB_DIR)/gw/lang ; \
+	        ln -s $(DEV_DIR)/hd/images $(DISTRIB_DIR)/gw/images ; \
+	        ln -s $(DEV_DIR)/plugins/v7/assets $(DISTRIB_DIR)/gw/plugins/v7/assets ; \
+	      else \
+	        cp -R hd/* $(DISTRIB_DIR)/gw/ ; \
+	      fi ; \
+	    fi ; \
+	  fi ; \
 	done ;
 
 .PHONY: install uninstall distrib
