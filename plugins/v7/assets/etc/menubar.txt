@@ -33,13 +33,8 @@
 
 
 %let;p_mod;%if;(bvar.p_mod!="" and evar.p_mod="")%bvar.p_mod;%elseif;(evar.p_mod!="")%evar.p_mod;%end;%in;
-%if;(not ("v7," in bvar.plugins))
-%include;home
-<h3 class="font-weight-light">[*warning]</h3>
-%let;fname;%apply;file_exists("v7_doc",lang)%in;
-[*minimum template system]<br>
-[*for details, see:] <a href="%prefix;m=H;v=%fname;">%fname;</a>
-%elseif;(not cancel_links)
+%if;(not cancel_links)
+  %if;("v7," in bvar.plugins)
   <div class="d-flex justify-content-between">
     <nav class="navbar navbar-light navbar-expand-md%nn;
       %if;(evar.m="MOD_IND" or evar.m="MOD_IND_OK"
@@ -433,4 +428,13 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
   %if;(evar.m="C" and not cancel_links)
     %include;cousins_tools
   %end;
+  %else;
+    %include;home
+    [*plugins not activated]<br>
+    [*activate plugins]<br>
+    [*documentation]
+    <a href="https://geneweb.tuxfamily.org/wiki/plugins%if;(lang="fr" or lang="de" or lang="nl" or lang="ru" or lang="sv")/%lang;%end;" class="ml-1"
+      target="_blank" rel="noreferrer, noopener" title="Documentation GeneWeb">%nn;
+      <i class="fab fa-wikipedia-w"></i></a>.
+  %end;%(if "v7," in bvar.plugins %)
 %end;

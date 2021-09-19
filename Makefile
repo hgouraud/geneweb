@@ -53,23 +53,19 @@ bin/gwrepl/.depend:
 dune-workspace: dune-workspace.in Makefile.config
 	cat $< | sed	-e "s/%%%DUNE_PROFILE%%%/$(DUNE_PROFILE)/g" > $@
 
-hd/etc/version.txt:
+etc/version.txt:
 	@echo -n "Generating $@	."
 	@echo "GeneWeb[:] [compiled on %s from commit %s:::" > $@
 	@echo "$$(date '+%Y-%m-%d'):" >> $@
 	@echo "$$(git show -s --date=short --pretty=format:'<a href="https://github.com/geneweb/geneweb/commit/%h">%h (%cd)</a>')]" >> $@
 	@echo " Done!"
-.PHONY:hd/etc/version.txt
+.PHONY:etc/version.txt
 
 ###### [End] Generated files section
 
 GENERATED_FILES_DEP = \
 	dune-workspace \
-	hd/etc/version.txt \
-	lib/dune \
-	lib/gwdb/dune \
-	lib/core/dune \
-	lib/gwdb-legacy-x-arangodb/dune \
+	etc/version.txt \
 	lib/gwlib.ml \
 	lib/util/dune \
 	benchmark/dune \
@@ -189,21 +185,20 @@ distrib: build
 	      cp $(BUILD_DIR)/plugins/$$P/META $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
 	    fi ; \
 	    if [ -d plugins/$$P/assets ] ; then \
-	      cp -R plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
-	    fi ; \
-	    if test "$$P" = "v7" ; then \
 	      if test "$(TPL)" = "yes" ; then \
-	        echo "Create sym links for v7" ; \
-	        ln -s $(DEV_DIR)/hd/etc $(DISTRIB_DIR)/gw/etc ; \
-	        ln -s $(DEV_DIR)/hd/lang $(DISTRIB_DIR)/gw/lang ; \
-	        ln -s $(DEV_DIR)/hd/images $(DISTRIB_DIR)/gw/images ; \
-	        ln -s $(DEV_DIR)/plugins/v7/assets $(DISTRIB_DIR)/gw/plugins/v7/assets ; \
+	        ln -s $(DEV_DIR)/plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/assets ; \
 	      else \
-	        cp -R hd/* $(DISTRIB_DIR)/gw/ ; \
+	        cp -R plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
 	      fi ; \
 	    fi ; \
 	  fi ; \
-	done ;
+	done ; \
+	echo "Create sym links to v7 assets" ; \
+	ln -s $(DEV_DIR)/plugins/v7/assets/etc  $(DISTRIB_DIR)/gw/etc ; \
+	ln -s $(DEV_DIR)/plugins/v7/assets/lex  $(DISTRIB_DIR)/gw/lang ; \
+	cp $(DEV_DIR)/etc/version.txt  $(DISTRIB_DIR)/gw/etc/ ; \
+	cp -R $(DEV_DIR)/hd/images $(DISTRIB_DIR)/gw/images ; \
+	echo "Done"
 
 .PHONY: install uninstall distrib
 
