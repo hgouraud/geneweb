@@ -1,9 +1,9 @@
 ifneq ($(MAKECMDGOALS),ci)
 Makefile.config: configure.ml
-	@if [ -e "$@" ] ; then \
-		echo "configure file has changed. Please rerun ocaml ./configure.ml" ; exit 1 ; \
+	@if [ -e "$@" ]; then \
+	  echo "configure file has changed. Please rerun ocaml ./configure.ml"; exit 1; \
 	else \
-		echo "Please run ocaml ./configure.ml first" ; exit 1 ; \
+	  echo "Please run ocaml ./configure.ml first"; exit 1; \
 	fi
 include Makefile.config
 endif
@@ -19,10 +19,10 @@ BUILD_DIR=_build/default
 ###### [BEGIN] Generated files section
 
 lib/gwlib.ml:
-	@echo -n "Generating $@	."
+	@echo -n "Generating $@..."
 	@echo "let prefix =" > $@
-	@echo "	try Sys.getenv \"GWPREFIX\"" >> $@
-	@echo "	with Not_found -> \"$(PREFIX)\"" | sed -e 's|\\|/|g' >> $@
+	@echo "  try Sys.getenv \"GWPREFIX\"" >> $@
+	@echo "  with Not_found -> \"$(PREFIX)\"" | sed -e 's|\\|/|g' >> $@
 	@echo " Done!"
 
 CPPO_D=$(GWDB_D) $(OS_D) $(SYSLOG_D)
@@ -32,7 +32,7 @@ ifeq ($(DUNE_PROFILE),dev)
 endif
 
 %/dune: %/dune.in Makefile.config
-	@echo -n "Generating $@	." \
+	@echo -n "Generating $@..." \
 	&& cat $< \
 	| cppo -n $(CPPO_D) \
 	| sed \
@@ -51,10 +51,10 @@ bin/gwrepl/.depend:
 	@echo " Done!"
 
 dune-workspace: dune-workspace.in Makefile.config
-	cat $< | sed	-e "s/%%%DUNE_PROFILE%%%/$(DUNE_PROFILE)/g" > $@
+	cat $< | sed  -e "s/%%%DUNE_PROFILE%%%/$(DUNE_PROFILE)/g" > $@
 
 etc/version.txt:
-	@echo -n "Generating $@	."
+	@echo -n "Generating $@..."
 	@echo "GeneWeb[:] [compiled on %s from commit %s:::" > $@
 	@echo "$$(date '+%Y-%m-%d'):" >> $@
 	@echo "$$(git show -s --date=short --pretty=format:'<a href="https://github.com/geneweb/geneweb/commit/%h">%h (%cd)</a>')]" >> $@
@@ -66,6 +66,10 @@ etc/version.txt:
 GENERATED_FILES_DEP = \
 	dune-workspace \
 	etc/version.txt \
+	lib/dune \
+	lib/gwdb/dune \
+	lib/core/dune \
+	lib/gwdb-legacy-x-arangodb/dune \
 	lib/gwlib.ml \
 	lib/util/dune \
 	benchmark/dune \
@@ -86,27 +90,14 @@ GENERATED_FILES_DEP = \
 	plugins/api/dune \
 	test/dune \
 
+
 generated: $(GENERATED_FILES_DEP)
 
-
-ifdef API_D
-piqi:
-	$(foreach p, $(wildcard lib/*.proto), \
-		piqi of-proto --normalize $(p) ; \
-		piqic-ocaml -C lib/ --ext $(p).piqi ; \
-		)
-	$(RM) lib/*.piqi
-else
-piqi:
-endif
-.PHONY: piqi
-
-install uninstall build: $(GENERATED_FILES_DEP) piqi
+install uninstall build: $(GENERATED_FILES_DEP)
 
 ###### [BEGIN] Installation / Distribution section
 
 build:
-	$(RM) -r $(DISTRIB_DIR)
 	dune build -p geneweb
 .DEFAULT_GOAL = build
 
@@ -134,70 +125,71 @@ distrib: build
 	cp etc/README.txt $(DISTRIB_DIR)/.
 	cp etc/LISEZMOI.txt $(DISTRIB_DIR)/.
 	cp etc/START.htm $(DISTRIB_DIR)/.
-	if test $(OS_TYPE) = "Win" ; then \
-	  cp etc/Windows/gwd.bat $(DISTRIB_DIR) ; \
-	  cp etc/Windows/gwsetup.bat $(DISTRIB_DIR) ; \
-	  cp -f etc/Windows/README.txt $(DISTRIB_DIR)/README.txt ; \
-	  cp -f etc/Windows/LISEZMOI.txt $(DISTRIB_DIR)/LISEZMOI.txt ; \
-	elif test $(OS_TYPE) = "Darwin" ; then \
-	  cp etc/gwd $(DISTRIB_DIR)/gwd.command ; \
-	  cp etc/gwsetup $(DISTRIB_DIR)/gwsetup.command ; \
-	  cp etc/macOS/geneweb.command $(DISTRIB_DIR) ; \
+	if test $(OS_TYPE) = "Win"; then \
+	  cp etc/Windows/gwd.bat $(DISTRIB_DIR); \
+	  cp etc/Windows/gwsetup.bat $(DISTRIB_DIR); \
+	  cp -f etc/Windows/README.txt $(DISTRIB_DIR)/README.txt; \
+	  cp -f etc/Windows/LISEZMOI.txt $(DISTRIB_DIR)/LISEZMOI.txt; \
+	elif test $(OS_TYPE) = "Darwin"; then \
+	  cp etc/gwd $(DISTRIB_DIR)/gwd.command; \
+	  cp etc/gwsetup $(DISTRIB_DIR)/gwsetup.command; \
+	  cp etc/macOS/geneweb.command $(DISTRIB_DIR); \
 	else \
-	  cp etc/gwd $(DISTRIB_DIR) ; \
-	  cp etc/gwsetup $(DISTRIB_DIR) ; \
+	  cp etc/gwd $(DISTRIB_DIR); \
+	  cp etc/gwsetup $(DISTRIB_DIR); \
 	fi
 	mkdir $(DISTRIB_DIR)/gw
 	cp etc/a.gwf $(DISTRIB_DIR)/gw/.
 	echo "-setup_link" > $(DISTRIB_DIR)/gw/gwd.arg
-	cp $(BUILD_DISTRIB_DIR)connex/connex.exe $(DISTRIB_DIR)/gw/connex$(EXT) ;
-	cp $(BUILD_DISTRIB_DIR)consang/consang.exe $(DISTRIB_DIR)/gw/consang$(EXT) ;
-	cp $(BUILD_DISTRIB_DIR)ged2gwb/ged2gwb.exe $(DISTRIB_DIR)/gw/ged2gwb$(EXT) ;
-	cp $(BUILD_DISTRIB_DIR)gwb2ged/gwb2ged.exe $(DISTRIB_DIR)/gw/gwb2ged$(EXT) ;
-	cp $(BUILD_DISTRIB_DIR)gwc/gwc.exe $(DISTRIB_DIR)/gw/gwc$(EXT) ;
-	cp $(BUILD_DISTRIB_DIR)gwd/gwd.exe $(DISTRIB_DIR)/gw/gwd$(EXT) ;
-	cp $(BUILD_DISTRIB_DIR)gwdiff/gwdiff.exe $(DISTRIB_DIR)/gw/gwdiff$(EXT) ;
-	cp $(BUILD_DISTRIB_DIR)gwu/gwu.exe $(DISTRIB_DIR)/gw/gwu$(EXT) ;
-	cp $(BUILD_DISTRIB_DIR)fixbase/gwfixbase.exe $(DISTRIB_DIR)/gw/gwfixbase$(EXT) ;
-	cp $(BUILD_DISTRIB_DIR)setup/setup.exe $(DISTRIB_DIR)/gw/gwsetup$(EXT) ;
-	cp $(BUILD_DISTRIB_DIR)update_nldb/update_nldb.exe $(DISTRIB_DIR)/gw/update_nldb$(EXT) ;
+	cp $(BUILD_DISTRIB_DIR)connex/connex.exe $(DISTRIB_DIR)/gw/connex$(EXT);
+	cp $(BUILD_DISTRIB_DIR)consang/consang.exe $(DISTRIB_DIR)/gw/consang$(EXT);
+	cp $(BUILD_DISTRIB_DIR)fixbase/gwfixbase.exe $(DISTRIB_DIR)/gw/gwfixbase$(EXT);
+	cp $(BUILD_DISTRIB_DIR)ged2gwb/ged2gwb.exe $(DISTRIB_DIR)/gw/ged2gwb$(EXT);
+	cp $(BUILD_DISTRIB_DIR)gwb2ged/gwb2ged.exe $(DISTRIB_DIR)/gw/gwb2ged$(EXT);
+	cp $(BUILD_DISTRIB_DIR)gwc/gwc.exe $(DISTRIB_DIR)/gw/gwc$(EXT);
+	cp $(BUILD_DISTRIB_DIR)gwd/gwd.exe $(DISTRIB_DIR)/gw/gwd$(EXT);
+	cp $(BUILD_DISTRIB_DIR)gwdiff/gwdiff.exe $(DISTRIB_DIR)/gw/gwdiff$(EXT);
+	if test -f $(BUILD_DISTRIB_DIR)gwrepl/gwrepl.bc ; then cp $(BUILD_DISTRIB_DIR)gwrepl/gwrepl.bc $(DISTRIB_DIR)/gw/gwrepl$(EXT); fi
+	cp $(BUILD_DISTRIB_DIR)gwu/gwu.exe $(DISTRIB_DIR)/gw/gwu$(EXT);
+	cp $(BUILD_DISTRIB_DIR)setup/setup.exe $(DISTRIB_DIR)/gw/gwsetup$(EXT);
+	cp $(BUILD_DISTRIB_DIR)update_nldb/update_nldb.exe $(DISTRIB_DIR)/gw/update_nldb$(EXT);
 	if test $(OS_TYPE) = "Win"; then \
 	  export CYGWIN="winsymlinks:nativestrict"; \
-	fi ;
-	if test "$(TPL)" = "yes" ; then \
-	  ln -s $(DEV_DIR)/bin/setup $(DISTRIB_DIR)/gw/setup ; \
+	fi;
+	if test "$(TPL)" = "yes"; then \
+	  ln -s $(DEV_DIR)/bin/setup $(DISTRIB_DIR)/gw/setup; \
 	else \
-	  mkdir $(DISTRIB_DIR)/gw/setup ; \
-	  mkdir $(DISTRIB_DIR)/gw/setup/lang ; \
-	  cp bin/setup/intro.txt $(DISTRIB_DIR)/gw/setup/ ; \
-	  cp bin/setup/setup.gwf $(DISTRIB_DIR)/gw/setup/ ; \
-	  cp bin/setup/setup.css $(DISTRIB_DIR)/gw/setup/ ; \
-	  cp bin/setup/lang/*.htm $(DISTRIB_DIR)/gw/setup/lang/ ; \
-	  cp bin/setup/lang/lexicon.txt $(DISTRIB_DIR)/gw/setup/lang/ ; \
-	  cp bin/setup/lang/intro.txt $(DISTRIB_DIR)/gw/setup/lang/ ; \
-	fi ;
-	mkdir $(DISTRIB_DIR)/gw/plugins ;
-	for P in $(shell ls plugins) ; do \
-	  if [ -f $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs ] ; then \
-	    mkdir $(DISTRIB_DIR)/gw/plugins/$$P ; \
-	    cp $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
-	    if [ -f $(BUILD_DIR)/plugins/$$P/META ] ; then \
-	      cp $(BUILD_DIR)/plugins/$$P/META $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
-	    fi ; \
-	    if [ -d plugins/$$P/assets ] ; then \
-	      if test "$(TPL)" = "yes" ; then \
-	        ln -s $(DEV_DIR)/plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/assets ; \
+	  mkdir $(DISTRIB_DIR)/gw/setup; \
+	  mkdir $(DISTRIB_DIR)/gw/setup/lang; \
+	  cp bin/setup/intro.txt $(DISTRIB_DIR)/gw/setup/; \
+	  cp bin/setup/setup.gwf $(DISTRIB_DIR)/gw/setup/; \
+	  cp bin/setup/setup.css $(DISTRIB_DIR)/gw/setup/; \
+	  cp bin/setup/lang/*.htm $(DISTRIB_DIR)/gw/setup/lang/; \
+	  cp bin/setup/lang/lexicon.txt $(DISTRIB_DIR)/gw/setup/lang/; \
+	  cp bin/setup/lang/intro.txt $(DISTRIB_DIR)/gw/setup/lang/; \
+	fi;
+	mkdir $(DISTRIB_DIR)/gw/plugins;
+	for P in $(shell ls plugins); do \
+	  if [ -f $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs ]; then \
+	    mkdir $(DISTRIB_DIR)/gw/plugins/$$P; \
+	    cp $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs $(DISTRIB_DIR)/gw/plugins/$$P/; \
+	    if [ -f $(BUILD_DIR)/plugins/$$P/META ]; then \
+	      cp $(BUILD_DIR)/plugins/$$P/META $(DISTRIB_DIR)/gw/plugins/$$P/; \
+	    fi; \
+	    if [ -d plugins/$$P/assets ]; then \
+	      if test "$(TPL)" = "yes"; then \
+	        ln -s $(DEV_DIR)/plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/assets; \
 	      else \
-	        cp -R plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/ ; \
-	      fi ; \
-	    fi ; \
-	  fi ; \
-	done ; \
-	echo "Create sym links to v7 assets" ; \
-	ln -s $(DEV_DIR)/plugins/v7/assets/etc  $(DISTRIB_DIR)/gw/etc ; \
-	ln -s $(DEV_DIR)/plugins/v7/assets/lex  $(DISTRIB_DIR)/gw/lang ; \
-	cp $(DEV_DIR)/etc/version.txt  $(DISTRIB_DIR)/gw/etc/ ; \
-	cp -R $(DEV_DIR)/hd/images $(DISTRIB_DIR)/gw/images ; \
+	        cp -R plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/; \
+	      fi; \
+	    fi; \
+	  fi; \
+	done; \
+	echo "Create sym links to v7 assets"; \
+	ln -s $(DEV_DIR)/plugins/v7/assets/etc  $(DISTRIB_DIR)/gw/etc; \
+	ln -s $(DEV_DIR)/plugins/v7/assets/lex  $(DISTRIB_DIR)/gw/lang; \
+	cp $(DEV_DIR)/etc/version.txt  $(DISTRIB_DIR)/gw/etc/; \
+	cp -R $(DEV_DIR)/hd/images $(DISTRIB_DIR)/gw/images; \
 	echo "Done"
 
 .PHONY: install uninstall distrib
@@ -231,7 +223,7 @@ bench-tabulate: | $(GENERATED_FILES_DEP)
 .PHONY: bench-tabulate
 
 clean:
-	@echo -n "Cleaning	."
+	@echo -n "Cleaning..."
 	@$(RM) $(GENERATED_FILES_DEP) lib/*_piqi*.ml
 	@$(RM) -r $(DISTRIB_DIR)
 	@dune clean
