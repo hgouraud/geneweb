@@ -68,8 +68,8 @@ tr: af=Afrikaans/bg=Bulgarca/br=Bretonca/ca=Katalanca/co=Korsikaca/cs=Çekçe/da
 zh: af=南非語/bg=保加利亚语/br=布列塔尼语/ca=加泰罗尼亚语/co=科西嘉岛/cs=捷克语/da=丹麦语/de=德语/en=英语/eo=世界语/es=西班牙语/et=爱沙尼亚语/fi=芬兰语/fr=法语/he=希伯来语/is=冰岛语/it=意大利语/lv=拉脱维亚语/nl=荷蘭語/no=挪威语/oc=奥克语/pl=波兰语/pt=葡萄牙語/pt-br= 巴西葡萄牙语/ro=羅馬尼亞語/ru=俄语/sk=斯洛伐克语/sl=斯洛文尼亚语/sv= 瑞典語/tr=土耳其/zh=中文
 
     plugins not activated
-en: plugins are not activated. Only a minimal set of functions are available.
-fr: les plugins ne sont pas activés. Ne sont disponibles qu'un jeu minimal de fonctions.
+en: plugin v7 is not activated. Only a minimal set of functions are available.
+fr: le plugin v7 n'est pas activés. Ne sont disponibles qu'un jeu minimal de fonctions.
 
     activate plugins
 en: to activate plugins, you must add <tt>-plugins path_to/plugins</tt> in your gwd launch command, and <tt>plugins=v7</tt> in your .gwf file.

@@ -98,6 +98,7 @@ install uninstall build: $(GENERATED_FILES_DEP)
 ###### [BEGIN] Installation / Distribution section
 
 build:
+	$(RM) -r $(DISTRIB_DIR)
 	dune build -p geneweb
 .DEFAULT_GOAL = build
 
@@ -113,11 +114,11 @@ BUILD_DISTRIB_DIR=$(BUILD_DIR)/bin/
 DEV_DIR=$(shell pwd)
 
 devtpl:
+	$(RM) -r $(DISTRIB_DIR)
 	export TPL="yes"; \
 	make distrib
 
 distrib: build
-	$(RM) -r $(DISTRIB_DIR)
 	mkdir $(DISTRIB_DIR)
 	mkdir -p $(DISTRIB_DIR)/bases
 	cp CHANGES $(DISTRIB_DIR)/CHANGES.txt
@@ -168,6 +169,7 @@ distrib: build
 	  cp bin/setup/lang/lexicon.txt $(DISTRIB_DIR)/gw/setup/lang/; \
 	  cp bin/setup/lang/intro.txt $(DISTRIB_DIR)/gw/setup/lang/; \
 	fi;
+	$(RM) -r $(DISTRIB_DIR)/gw/plugins;
 	mkdir $(DISTRIB_DIR)/gw/plugins;
 	for P in $(shell ls plugins); do \
 	  if [ -f $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs ]; then \
@@ -184,12 +186,23 @@ distrib: build
 	      fi; \
 	    fi; \
 	  fi; \
-	done; \
-	echo "Create sym links to v7 assets"; \
-	ln -s $(DEV_DIR)/plugins/v7/assets/etc  $(DISTRIB_DIR)/gw/etc; \
-	ln -s $(DEV_DIR)/plugins/v7/assets/lex  $(DISTRIB_DIR)/gw/lang; \
+	done;
+	# Create link to v7 assets even if v7 plugin is not activated
+	if test "$(TPL)" = "yes"; then \
+		ln -s $(DEV_DIR)/plugins/v7/assets/etc/  $(DISTRIB_DIR)/gw/etc; \
+		ln -s $(DEV_DIR)/plugins/v7/assets/lex/  $(DISTRIB_DIR)/gw/lang; \
+		ln -s $(DEV_DIR)/hd/images  $(DISTRIB_DIR)/gw/images; \
+	else \
+		if [ -f $(DEV_DIR)/$(DISTRIB_DIR)/gw/plugins/v7 ]; then \
+			ln -s $(DEV_DIR)/$(DISTRIB_DIR)/gw/plugins/v7/assets/etc/  $(DISTRIB_DIR)/gw/etc; \
+			ln -s $(DEV_DIR)/$(DISTRIB_DIR)/gw/plugins/v7/assets/lex/  $(DISTRIB_DIR)/gw/lang; \
+		else \
+			cp -R $(DEV_DIR)/plugins/v7/assets/etc/  $(DISTRIB_DIR)/gw/etc; \
+			cp -R $(DEV_DIR)/plugins/v7/assets/lex/  $(DISTRIB_DIR)/gw/lang; \
+		fi; \
+		cp -R $(DEV_DIR)/hd/images $(DISTRIB_DIR)/gw/images; \
+	fi; \
 	cp $(DEV_DIR)/etc/version.txt  $(DISTRIB_DIR)/gw/etc/; \
-	cp -R $(DEV_DIR)/hd/images $(DISTRIB_DIR)/gw/images; \
 	echo "Done"
 
 .PHONY: install uninstall distrib
