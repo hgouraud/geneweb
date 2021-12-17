@@ -21,6 +21,7 @@ fr:  :
 he: :
 is: :
 it: :
+lt: :
 lv: :
 nl: :
 no: :
