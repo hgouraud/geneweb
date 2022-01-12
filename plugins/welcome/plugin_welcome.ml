@@ -37,15 +37,7 @@ type search_type =
   | PartialKey
   | DefaultSurname
 
-let full_name conf base an fn sn max_answers =
-  let exact_fn = match p_getenv conf.env "exact_first_name" with
-    | Some s -> s
-    | None -> ""
-  in
-  let exact_sn = match p_getenv conf.env "exact_surname" with
-    | Some s -> s
-    | None -> ""
-  in
+let full_name conf base an fn sn exact_fn exact_sn max_answers =
   let conf = { conf with 
     env = ("first_name", fn) :: ("surname", sn) :: 
         ("exact_first_name", exact_fn) ::
@@ -55,12 +47,6 @@ let full_name conf base an fn sn max_answers =
   let list =
     if len > max_answers then Util.reduce_list max_answers list else list
   in
-  (* let list = (* on ne garde que les mêmes sn *)
-    List.fold_left (fun list p ->
-      if Name.lower sn = Name.lower (p_surname base p) then p :: list
-      else list) [] list
-  in
-  *)
   if exact_fn <> "on" && exact_sn <> "on" then
     let pl1 = SearchName.search_approx_key conf base an in
     let pl2 = SearchName.search_partial_key conf base an in
@@ -115,16 +101,36 @@ let search conf base an search_order unknown =
           | Some s -> s
           | None -> ""
         in
-        let pl = full_name conf base an fn sn max_answers in
+        let exact_fn = match p_getenv conf.env "exact_first_name" with
+          | Some s -> s
+          | None -> ""
+        in
+        let exact_sn = match p_getenv conf.env "exact_surname" with
+          | Some s -> s
+          | None -> ""
+        in
+        let pl = full_name conf base an fn sn exact_fn exact_sn max_answers in
         let parts = String.split_on_char ' ' fn in (* FIXME depends on fn/sn order *)
         let (fn1, sn1) =
           if List.length parts = 2 then (List.nth parts 0, List.nth parts 1) else (fn, sn)
         in
         let pl1 = if (fn, sn) <> (fn1, sn1) then
-          full_name conf base an fn1 sn1 max_answers
+          full_name conf base an fn1 sn1 exact_fn exact_sn max_answers
           else []
         in
         let pl = List.sort_uniq compare (List.merge compare pl pl1) in
+        let pl = 
+          if exact_fn = "on" then List.fold_left (fun list p ->
+            if Name.lower fn = Name.lower (p_first_name base p) then p :: list
+            else list) [] pl
+          else pl
+        in
+        let pl =
+          if exact_sn = "on" then List.fold_left (fun list p ->
+            if Name.lower sn = Name.lower (p_surname base p) then p :: list
+            else list) [] pl
+          else pl
+        in
         begin match pl with
         | [] -> loop l
         | [p] ->
