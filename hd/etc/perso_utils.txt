@@ -870,3 +870,11 @@
   %end;
 %end;
 %let;timeline;%if;(count>0)yes%else;no%end;%in;
+
+%let;op_mi;%apply;scan_pmod("i",3)%in;
+%let;op_mu;%apply;scan_pmod("u",2)%in;
+%let;op_mc;%apply;scan_pmod("c",1)%in;
+%let;op_mn;%apply;scan_pmod("n",1)%in;
+%let;op_ms;%apply;scan_pmod("s",2)%in;
+%let;op_mf;%apply;scan_pmod("f",1)%in;
+%let;op_mr;%apply;scan_pmod("r",1)%in;
