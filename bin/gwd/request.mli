@@ -58,3 +58,11 @@ val incorrect_request : Config.config -> unit
 val very_unknown : Config.config -> Gwdb.base -> unit
 val only_special_env : (string * string) list -> bool
 (**/**)
+
+val specify
+  : ?mode:string
+  -> Config.config
+  -> Gwdb.base
+  -> string
+  -> Gwdb.person list
+  -> unit

@@ -63,7 +63,7 @@ let relation_print conf base p =
   in
   RelationDisplay.print conf base p p1
 
-let specify conf base n pl =
+let specify  ?(mode="None") conf base n pl =
   let title _ = Output.printf conf "%s : %s" n (transl conf "specify") in
   let n = Name.crush_lower n in
   let ptll =
@@ -105,6 +105,7 @@ let specify conf base n pl =
       pl
   in
   Hutil.header conf title;
+  if mode <> "None" then Output.print_string conf ("(" ^ mode ^ ")\n");
   Hutil.print_link_to_welcome conf true;
   (* Si on est dans un calcul de parenté, on affiche *)
   (* l'aide sur la sélection d'un individu.          *)
