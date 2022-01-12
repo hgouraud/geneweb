@@ -355,7 +355,7 @@ let select_first_name conf n list =
       (transl conf "specify")
   in
   Hutil.header conf title;
-  Output.print_string conf "(Select first names)";
+  if conf.debug then Output.print_string conf "(Select first names)";
   buttons_fnames conf;
   Output.print_string conf "<ul>";
   List.iter
@@ -598,7 +598,7 @@ let print_one_surname_by_branch conf base x xl (bhl, str) =
   in
   let br = p_getint conf.env "br" in
   Hutil.header conf title;
-  Output.print_string conf "(One surname by branch)";
+  if conf.debug then Output.print_string conf "(One surname by branch)";
   Hutil.print_link_to_welcome conf true;
   (* Si on est dans un calcul de parenté, on affiche *)
   (* l'aide sur la sélection d'un individu.          *)
@@ -656,7 +656,7 @@ let print_several_possible_surnames x conf base (_, homonymes) =
       (transl conf "specify")
   in
   Hutil.header conf title;
-  Output.print_string conf "(Several possible surnames)";
+  if conf.debug then Output.print_string conf "(Several possible surnames)";
   Hutil.print_link_to_welcome conf true;
   let list =
     List.map

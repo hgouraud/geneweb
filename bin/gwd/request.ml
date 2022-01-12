@@ -105,7 +105,7 @@ let specify  ?(mode="None") conf base n pl =
       pl
   in
   Hutil.header conf title;
-  if mode <> "None" then Output.print_string conf ("(" ^ mode ^ ")\n");
+  if conf.debug && mode <> "None" then Output.print_string conf ("(" ^ mode ^ ")\n");
   Hutil.print_link_to_welcome conf true;
   (* Si on est dans un calcul de parenté, on affiche *)
   (* l'aide sur la sélection d'un individu.          *)

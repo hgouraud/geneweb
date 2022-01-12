@@ -37,6 +37,37 @@ type search_type =
   | PartialKey
   | DefaultSurname
 
+let full_name conf base an fn sn max_answers =
+  let exact_fn = match p_getenv conf.env "exact_first_name" with
+    | Some s -> s
+    | None -> ""
+  in
+  let exact_sn = match p_getenv conf.env "exact_surname" with
+    | Some s -> s
+    | None -> ""
+  in
+  let conf = { conf with 
+    env = ("first_name", fn) :: ("surname", sn) :: 
+        ("exact_first_name", exact_fn) ::
+        ("exact_surname", exact_sn) :: conf.env }
+  in
+  let (list, len) = AdvSearchOk.advanced_search conf base max_answers in
+  let list =
+    if len > max_answers then Util.reduce_list max_answers list else list
+  in
+  (* let list = (* on ne garde que les mêmes sn *)
+    List.fold_left (fun list p ->
+      if Name.lower sn = Name.lower (p_surname base p) then p :: list
+      else list) [] list
+  in
+  *)
+  if exact_fn <> "on" && exact_sn <> "on" then
+    let pl1 = SearchName.search_approx_key conf base an in
+    let pl2 = SearchName.search_partial_key conf base an in
+    List.sort_uniq compare (List.merge compare (List.merge compare list pl1) pl2)
+  else list
+
+
 let search conf base an search_order unknown =
   let rec loop l =
     match l with
@@ -54,7 +85,7 @@ let search conf base an search_order unknown =
           [] -> loop l
         | [p] ->
             Util.record_visited conf (get_iper p); V7_perso.print conf base p
-        | pl -> Request.specify  ~mode:"Key" conf base an pl
+        | pl -> Request.specify ~mode:"Key" conf base an pl
         end
     | Surname :: l ->
         let pl = Some.search_surname conf base an in
@@ -77,59 +108,47 @@ let search conf base an search_order unknown =
           | None -> 100
         in
         let fn = match p_getenv conf.env "p" with
-          | Some fn -> fn
+          | Some s -> s
           | None -> ""
         in
         let sn = match p_getenv conf.env "n" with
-          | Some sn -> sn
+          | Some s -> s
           | None -> ""
         in
-        let conf = { conf with 
-          env = ("first_name", fn) :: ("surname", sn) :: conf.env }
+        let pl = full_name conf base an fn sn max_answers in
+        let parts = String.split_on_char ' ' fn in (* FIXME depends on fn/sn order *)
+        let (fn1, sn1) =
+          if List.length parts = 2 then (List.nth parts 0, List.nth parts 1) else (fn, sn)
         in
-        let (list, len) = AdvSearchOk.advanced_search conf base max_answers in
-        let list =
-          if len > max_answers then Util.reduce_list max_answers list else list
+        let pl1 = if (fn, sn) <> (fn1, sn1) then
+          full_name conf base an fn1 sn1 max_answers
+          else []
         in
-        begin match list with
-        | [] -> (* try again without sn *)
-          begin
-             let list = SearchName.search_approx_key conf base fn in
-            if list = [] then loop l
-            else
-              begin
-                let list =
-                  List.fold_left (fun list p ->
-                    if Name.lower sn = Name.lower (p_surname base p) then p :: list
-                    else list) [] list
-                in
-                begin match list with
-                | [] -> loop l
-                | [p] ->
-                    record_visited conf (get_iper p); V7_perso.print conf base p
-                | pl -> Request.specify ~mode:"FullName" conf base an pl
-                end
-              end
-          end
+        let pl = List.sort_uniq compare (List.merge compare pl pl1) in
+        begin match pl with
+        | [] -> loop l
         | [p] ->
-            record_visited conf (get_iper p); V7_perso.print conf base p
+                if conf.debug then Printf.eprintf "FullName\n";
+                record_visited conf (get_iper p); V7_perso.print conf base p
         | pl -> Request.specify ~mode:"FullName" conf base an pl
-        end        
+        end
     | ApproxKey :: l ->
         let pl = SearchName.search_approx_key conf base an in
         begin match pl with
-          [] -> loop l
+        | [] -> loop l
         | [p] ->
+            if conf.debug then Printf.eprintf "ApproxKey\n";
             record_visited conf (get_iper p); V7_perso.print conf base p
-        | pl -> Request.specify  ~mode:"ApproxKey" conf base an pl
+        | pl -> Request.specify ~mode:"ApproxKey" conf base an pl
         end
     | PartialKey :: l ->
         let pl = SearchName.search_partial_key conf base an in
         begin match pl with
-          [] -> loop l
+        | [] -> loop l
         | [p] ->
+            if conf.debug then Printf.eprintf "PartialKey 1\n";
             record_visited conf (get_iper p); V7_perso.print conf base p
-        | pl -> Request.specify ~mode:"PartialKey" conf base an pl
+        | pl -> Request.specify ~mode:"PartialKey 1" conf base an pl
         end
     | DefaultSurname :: _ ->
         Some.search_surname_print conf base unknown an
@@ -178,7 +197,7 @@ let s =
       true
     | Some fn, None ->
       let order =
-      [Sosa; Key; FirstName; ApproxKey; PartialKey; DefaultSurname]
+      [Sosa; Key; FirstName; FullName; ApproxKey; PartialKey; DefaultSurname]
       in
       search conf base fn order unknown;
       true
