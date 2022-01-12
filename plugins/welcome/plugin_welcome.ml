@@ -88,27 +88,20 @@ let search conf base an search_order unknown =
             Some.search_first_name_print conf base an
         end
     | FullName :: l ->
+        let get_env_aux f = 
+          match p_getenv conf.env f with
+          | Some s -> s
+          | None -> ""
+        in
         let max_answers =
           match p_getint conf.env "max" with
             Some n -> n
           | None -> 100
         in
-        let fn = match p_getenv conf.env "p" with
-          | Some s -> s
-          | None -> ""
-        in
-        let sn = match p_getenv conf.env "n" with
-          | Some s -> s
-          | None -> ""
-        in
-        let exact_fn = match p_getenv conf.env "exact_first_name" with
-          | Some s -> s
-          | None -> ""
-        in
-        let exact_sn = match p_getenv conf.env "exact_surname" with
-          | Some s -> s
-          | None -> ""
-        in
+        let fn = get_env_aux "p" in
+        let sn = get_env_aux "n" in
+        let exact_fn = get_env_aux "exact_first_name" in
+        let exact_sn = get_env_aux "exact_surname" in
         let pl = full_name conf base an fn sn exact_fn exact_sn max_answers in
         let parts = String.split_on_char ' ' fn in (* FIXME depends on fn/sn order *)
         let (fn1, sn1) =

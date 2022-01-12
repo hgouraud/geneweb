@@ -116,6 +116,10 @@ let specify  ?(mode="None") conf base n pl =
   List.iter
     (fun (p, tl) ->
        Output.print_string conf "<li>\n";
+       if get_occ p <> 0 then
+         Output.print_string conf ("[" ^ (string_of_int (get_occ p)) ^ "] ")
+       else
+         Output.print_string conf ("<span class=\"invisible\">[0]</span>");
        Perso.print_sosa conf base p true;
        begin match tl with
            [] ->
@@ -141,26 +145,8 @@ let specify  ?(mode="None") conf base n pl =
                fnal;
              Output.print_string conf ")</em>"
          end;
-       begin let spouses =
-               Array.fold_right
-                 (fun ifam spouses ->
-                    let cpl = foi base ifam in
-                    let spouse = pget conf base (Gutil.spouse (get_iper p) cpl) in
-                    if p_surname base spouse <> "?" then spouse :: spouses
-                    else spouses)
-                 (get_family p) []
-         in
-         match spouses with
-           [] -> ()
-         | h :: hl ->
-           let s =
-             List.fold_left
-               (fun s h -> s ^ ",\n" ^ person_title_text conf base h)
-               (person_title_text conf base h) hl
-           in
-           Output.printf conf ", <em>&amp; %s</em>\n" s
-       end;
-       Output.print_string conf "</li>\n")
+      Util.specify_homonymous conf base p true;
+      Output.print_string conf "</li>\n")
     ptll;
   Output.print_string conf "</ul>\n";
   Hutil.trailer conf
