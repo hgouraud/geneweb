@@ -158,7 +158,7 @@ let rec eval_variable conf =
       loop 0 n ""
     in sub
   | "time" :: sl -> eval_time_var conf sl
-  | ["urlv"; evar;]  ->
+  | ["urlv"; evar]  ->
       let url = Util.commd conf in
       let url = (List.hd (String.split_on_char '?' url)) ^ "?" in
       let url = List.fold_left (fun c (k, v) ->

@@ -124,8 +124,9 @@ let () = GWPARAM.wrap_output := begin fun conf title content ->
     trailer conf ;
   end
 
-let incorrect_request conf =
+let incorrect_request ?(reason = "") conf =
   !GWPARAM.output_error conf Def.Bad_Request
+    ~content:(if reason <> "" then Printf.sprintf "Reason: %s\n" reason else "")
 
 let error_cannot_access conf fname =
   !GWPARAM.output_error conf Def.Not_Found

@@ -76,6 +76,7 @@ let print_link_delete_image conf base p =
 (* Send image form *)
 
 let print_send_image conf base p =
+  let _ = Printf.eprintf "Print send image\n" in
   let title h =
     if Util.has_image conf base p then
       Output.print_string conf
@@ -135,9 +136,9 @@ let print conf base =
       let fn = p_first_name base p in
       let sn = p_surname base p in
       if sou base (get_image p) <> "" || fn = "?" || sn = "?" then
-        Hutil.incorrect_request conf
+        Hutil.incorrect_request ~reason:"Bad request (400): bad person name" conf
       else print_send_image conf base p
-  | _ -> Hutil.incorrect_request conf
+  | _ -> Hutil.incorrect_request ~reason:"Bad request (400): bad person index" conf
 
 (* Delete image form *)
 

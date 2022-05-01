@@ -61,7 +61,7 @@ val gen_print_link_to_welcome : (unit -> unit) -> config -> bool -> unit
 val print_link_to_welcome : config -> bool -> unit
 
 (** Sends [Bad Request] HTTP response (same as [GWPARAM.output_error conf Bad_Request]) *)
-val incorrect_request : config -> unit
+val incorrect_request : ?reason:string -> config -> unit
 
 (* TODOOCP *)
 val interp :
