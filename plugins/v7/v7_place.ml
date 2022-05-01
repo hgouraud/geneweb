@@ -6,7 +6,7 @@ open Geneweb.Util
 
 module Hutil = Geneweb.Hutil
 module Output = Geneweb.Output
-module Templ = V7_templ
+module Templ = Geneweb.Templ
 
 let rec alphabetic_order_list l1 l2 =
   if l1 = [] || l2 = [] then

@@ -11,7 +11,7 @@ module Util = Geneweb.Util
 module Output = Geneweb.Output
 module UpdateData = Geneweb.UpdateData
 module TemplAst = Geneweb.TemplAst
-module Templ = V7_templ
+module Templ = Geneweb.Templ
 
 let translate_title conf =
   let title =

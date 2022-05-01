@@ -13,7 +13,7 @@ module Gutil = Gutil
 module Output = Geneweb.Output
 module Perso = V7_perso
 module StrSet = Mutil.StrSet
-module Templ = V7_templ
+module Templ = Geneweb.Templ
 module Util = Geneweb.Util
 
 let not_found conf txt x =

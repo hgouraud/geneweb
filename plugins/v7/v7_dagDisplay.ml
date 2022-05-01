@@ -6,11 +6,10 @@ open Geneweb.Util
 
 open V7_dag
 open V7_dag2html
-open V7_templ
 
 module Dag = V7_dag
 module Dag2html = V7_dag2html
-module Templ = V7_templ
+module Templ = Geneweb.Templ
 
 module DateDisplay = Geneweb.DateDisplay
 module Output = Geneweb.Output

@@ -7,7 +7,7 @@ open Gwdb
 open Geneweb.Util
 
 module DagDisplay = V7_dagDisplay
-module Templ = V7_templ
+module Templ = Geneweb.Templ
 module SrcfileDisplay = V7_srcfile
 module Dag = V7_dag
 
@@ -4103,7 +4103,7 @@ let eval_transl conf base env upp s c =
         | _ -> assert false
       in
       let c = string_of_int n in
-      V7_templ.eval_transl_lexicon conf upp s c
+      Templ.eval_transl_lexicon conf upp s c
   | _ -> Templ.eval_transl conf upp s c
 
 let print_foreach conf base print_ast eval_expr =

@@ -1,7 +1,7 @@
 open Geneweb.Config
 open Gwdb
 
-module Templ = V7_templ
+module Templ = Geneweb.Templ
 module Util = Geneweb.Util
 module Hutil = Geneweb.Hutil
 module Output = Geneweb.Output
