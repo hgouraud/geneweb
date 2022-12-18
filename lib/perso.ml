@@ -2052,8 +2052,8 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
       | Vslistlm (_ :: ell) -> eval_item_field_var ell sl
       | _ -> raise Not_found)
   | "number_of_ancestors" :: sl -> (
-      match get_env "n" env with
-      | Vint n -> VVstring (eval_num conf (Sosa.of_int (n - 1)) sl)
+      match get_env "nbr_a" env with
+      | Vint n -> VVstring (eval_int conf (n - 1) sl)
       | _ -> raise Not_found)
   | "number_of_descendants" :: sl -> (
       (* FIXME: what is the difference with number_of_descendants_at_level??? *)
@@ -2068,7 +2068,7 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
                     if Gwdb.Marker.get m ip <= i then cnt + 1 else cnt)
                   0 (Gwdb.ipers base)
               in
-              VVstring (eval_num conf (Sosa.of_int (cnt - 1)) sl)
+              VVstring (eval_int conf (cnt - 1) sl)
           | _ -> raise Not_found)
       | _ -> raise Not_found)
   | "number_of_descendants_at_level" :: sl -> (
@@ -2083,7 +2083,7 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
                     if Gwdb.Marker.get m ip <= i then cnt + 1 else cnt)
                   0 (Gwdb.ipers base)
               in
-              VVstring (eval_num conf (Sosa.of_int (cnt - 1)) sl)
+              VVstring (eval_int conf (cnt - 1) sl)
           | _ -> raise Not_found)
       | _ -> raise Not_found)
   | "parent" :: sl -> (
@@ -3910,7 +3910,7 @@ let print_foreach conf base print_ast eval_expr =
             n gpl
         in
         let env =
-          ("gpl", Vgpl gpl) :: ("level", Vint i) :: ("n", Vint n) :: env
+          ("gpl", Vgpl gpl) :: ("level", Vint i) :: ("nbr_a", Vint n) :: env
         in
         List.iter (print_ast env ep) al;
         let gpl = next_generation conf base mark gpl in
