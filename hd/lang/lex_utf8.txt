@@ -8271,6 +8271,11 @@ sv: namn %s används redan av %tdenna person%t
 en: The first name, name or occurrence of this person has changed. Please update %s to the old key.
 fr: Le prénom, nom ou occurrence de cette personne a changé. Pensez à mettre à jour les %s à l’ancienne clé.
 
+    name changed for friend
+en: if the person is a Friend, this change may suppress its Friend access! Contact association@roglo.net for details and corrections.
+fr: si cette personne est un Ami, ce changement risque de supprimer son accès Ami. Contacter association@roglo.net pour information et corrections.
+
+
     navigation
 af: stap met
 bg: навигация
@@ -8848,7 +8853,7 @@ oc: nòtas modificadas
 pl: uwagi zmodyfikowane
 pt: notas modificadas
 ro: nota modificata
-ru: заметки изменены
+ru: заметки измененыƒ
 sk: poznámky zmenené
 sl: zaznamek spremenjen
 sv: noteringar modifierade

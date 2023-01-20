@@ -672,15 +672,22 @@ value print_mod_ok conf base wl pgl p ofn osn oocc =
     let nfn = p_first_name base np in
     let nsn = p_surname base np in
     let nocc = get_occ np in
-    if pgl <> [] && (ofn <> nfn || osn <> nsn || oocc <> nocc) then
+    let is_friend = ((get_access np) = Friend) in
+    if (pgl <> [] || is_friend) && (ofn <> nfn || osn <> nsn || oocc <> nocc) then
       do {
         Wserver.wprint "<span style=\"color:red\">%s%s </span>"
           (transl conf "alert") (transl conf ":");
         let link = Printf.sprintf "<span>
           <a href='%sm=LINKED;old_fn=%s;old_sn=%s;old_occ=%d;i=%s;' target='blank'>%s</a>"
-          (Util.commd conf) ofn osn oocc index (transl conf "linked pages") in
+          (Util.commd conf) ofn osn oocc index (transl conf "linked pages")
+        in
         Wserver.wprint (ftransl conf "name changed. update %s to old key") link;
-        Wserver.wprint "</span>\n"
+        Wserver.wprint "</span>\n";
+        if is_friend then
+          do {
+            Wserver.wprint "<span style=\"color:red\">%s</span>\n"
+              (transl conf "name changed friend");
+          } else ();
       } else ();
       Wserver.wprint "<p>\n";
       Update.print_warnings conf base wl;
