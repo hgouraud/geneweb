@@ -1,7 +1,7 @@
 (* Some global path, independant from base used. *)
-let etc = ref "etc"
-let lang = ref "lang"
-let cnt = ref "cnt"
+let etc_dir = ref "etc"
+let lang_dir = ref "lang"
+let cnt_dir = ref "cnt"
 let direct = ref false
 
 (* all three paths are reset by gwDaemon with the -hd parameter
@@ -13,7 +13,7 @@ let sharelib =
     [| "share" ; "geneweb" |]
 
 (* Lazy so that we can set [cnt] before actually accessing the file. *)
-let gwd_lock_file = lazy (Filename.concat !cnt "gwd.lck")
+let gwd_lock_file = lazy (Filename.concat !cnt_dir "gwd.lck")
 
 type t =
   { dir_root : string
@@ -83,8 +83,8 @@ let path_from_bname s =
   let file_cache_info = Filename.concat bdir "cache_info" in
   let file_cache_visited = Filename.concat bdir "cache_visited" in
   let dir_my_base = Filename.concat dir_bases bdir in
-  let dir_icons = Filename.concat dir_bases "images" in
-  let dir_etc_dist = Filename.concat (Secure.gw_path ()) "etc" in
+  let dir_icons = Filename.concat (Secure.gw_dir ()) "images" in
+  let dir_etc_dist = Filename.concat (Secure.gw_dir ()) "etc" in
   let dir_etc_base = String.concat Filename.dir_sep [dir_bases; "etc"; bname] in
   let file_particles = Filename.concat dir_my_base "particles.txt" in
   let dir_cnt = String.concat Filename.dir_sep [dir_bases; "cnt"; bname] in

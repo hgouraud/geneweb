@@ -32,6 +32,8 @@ let friend_passwd = ref ""
 let green_color = "#2f6400"
 let images_dir = ref ""
 let images_url = ref ""
+let icons_dir = ref ""
+let icons_url = ref ""
 let lexicon_list = ref [ Filename.concat "lang" "lexicon.txt" ]
 let login_timeout = ref 1800
 let max_clients = ref None
@@ -334,8 +336,7 @@ let print_redirected conf from request new_addr =
 let nonce_private_key =
   Lazy.from_fun
     (fun () ->
-       let cnt_dir = Filename.concat !(Util.cnt_dir) "cnt" in
-       let fname = Filename.concat cnt_dir "gwd_private.txt" in
+       let fname = Filename.concat !(Path.cnt_dir) "gwd_private.txt" in
        let k =
          try
            let ic = open_in fname in
@@ -1234,6 +1235,16 @@ let make_conf from_addr request script_name env =
         year = tm.Unix.tm_year + 1900; prec = Sure; delta = 0};
      today_wd = tm.Unix.tm_wday;
      time = tm.Unix.tm_hour, tm.Unix.tm_min, tm.Unix.tm_sec; ctime = utm;
+     icon_prefix =
+       if !(Wserver.cgi) then
+          begin match Sys.getenv_opt "GW_STATIC_PATH" with
+          | Some x -> String.concat Filename.dir_sep [x; ".."; ".."; "icons"]
+              (* Assumes that GW_STATIC_PATH is ../distribution/gw/etc  *)
+          | None -> String.concat Filename.dir_sep
+              [".."; Secure.gw_dir (); "icons" ]
+              (* FIXME see comment below for image_prefix *)
+          end
+       else "icons";
      image_prefix =
        if !images_url <> "" then !images_url
        else if !(Wserver.cgi) then
@@ -1241,7 +1252,7 @@ let make_conf from_addr request script_name env =
           | Some x -> String.concat Filename.dir_sep [x; ".."; ".."; "images"]
               (* Assumes that GW_STATIC_PATH is ../distribution/gw/etc  *)
           | None -> String.concat Filename.dir_sep
-              [".."; "distribution"; "gw"; "images" ]
+              [".."; Secure.gw_dir (); "images" ]
               (* FIXME
               assumes that distribution has been installed next to cgi-bin
               this default path may not work if the distribution
@@ -1251,8 +1262,9 @@ let make_conf from_addr request script_name env =
      static_path =
        begin match Sys.getenv_opt "GW_STATIC_PATH" with
        | Some x -> x
-       | None -> String.concat Filename.dir_sep [".."; "distribution"; "gw"; "etc"; "" ]
+       | None -> String.concat Filename.dir_sep [".."; Secure.gw_dir (); "etc"; "" ]
          (* FIXME same comment. / at the end! *)
+         (* wont work if gw_dir is absolute *)
        end;
      cgi;
      output_conf;
@@ -1727,7 +1739,7 @@ let geneweb_server () =
             null_reopen [Unix.O_WRONLY] Unix.stderr
           end
         else exit 0;
-       Mutil.mkdir_p ~perm:0o777 (Filename.concat !Util.cnt_dir "cnt")
+       Mutil.mkdir_p ~perm:0o777 !Path.cnt_dir
     end;
   Wserver.f GwdLog.syslog !selected_addr !selected_port !conn_timeout
     (if Sys.unix then !max_clients else None) connection
@@ -1748,7 +1760,7 @@ let manage_cgi_timeout tmout =
 
 let geneweb_cgi addr script_name contents =
   if Sys.unix then manage_cgi_timeout !conn_timeout;
-  begin try Unix.mkdir (Filename.concat !(Util.cnt_dir) "cnt") 0o755 with
+  begin try Unix.mkdir !Path.cnt_dir 0o755 with
     Unix.Unix_error (_, _, _) -> ()
   end;
   let add k x request =
@@ -1818,10 +1830,11 @@ let make_cnt_dir x =
   if Sys.unix then ()
   else
     begin
-      Wserver.sock_in := Filename.concat x "gwd.sin";
-      Wserver.sock_out := Filename.concat x "gwd.sou"
+      Wserver.sock_in := String.concat Filename.dir_sep [x; "cnt"; "gwd.sin"];
+      Wserver.sock_out := String.concat Filename.dir_sep [x; "cnt"; "gwd.sou"];
     end;
-  Util.cnt_dir := x
+  Path.cnt_dir := Filename.concat x "cnt"
+
 
 let arg_plugin_doc opt doc =
   doc ^ " Combine with -force to enable for every base. \
@@ -1883,6 +1896,11 @@ let arg_plugins opt doc =
     end
   , arg_plugin_doc opt doc
   )
+let init_windows_sockets x =
+  assert (not Sys.unix) ;
+  Wserver.sock_in := Filename.concat x "gwd.sin";
+  Wserver.sock_out := Filename.concat x "gwd.sou"
+
 
 let main () =
 #ifdef WINDOWS
@@ -1895,14 +1913,21 @@ let main () =
   in
   let force_cgi = ref false in
   let speclist =
-    [
-      ("-hd", Arg.String Secure.add_assets, "<DIR> Directory where the directory lang is installed.")
+    [ ("-hd", Arg.String (fun x ->
+        Path.etc_dir := Filename.concat x "etc";
+        Path.lang_dir := Filename.concat x "lang";
+        Path.cnt_dir := Filename.concat x "cnt";
+        Secure.set_gw_dir x; Secure.add_assets x;), "<DIR> Directory where the \
+        static files are installed (templates, icons, lexicon).")
+    ; ("-hd1", Arg.String Secure.add_assets, "<DIR> Additional assets location.")
     ; ("-bd", Arg.String Secure.set_base_dir, "<DIR> Directory where the databases are installed.")
     ; ("-wd", Arg.String make_cnt_dir, "<DIR> Directory for socket communication (Windows) and access count.")
     ; ("-cache_langs", Arg.String (fun s -> List.iter (Mutil.list_ref_append cache_langs) @@ String.split_on_char ',' s), " Lexicon languages to be cached.")
     ; ("-cgi", Arg.Set force_cgi, " Force CGI mode.")
     ; ("-images_url", Arg.String (fun x -> images_url := x), "<URL> URL for GeneWeb images (default: gwd send them).")
+    ; ("-icons_url", Arg.String (fun x -> icons_url := x), "<URL> URL for GeneWeb icons (default: gwd send them).")
     ; ("-images_dir", Arg.String (fun x -> images_dir := x), "<DIR> Same than previous but directory name relative to current.")
+    ; ("-icons_dir", Arg.String (fun x -> icons_dir := x), "<DIR> Same than previous but directory name relative to current.")
     ; ("-a", Arg.String (fun x -> selected_addr := Some x), "<ADDRESS> Select a specific address (default = any address of this computer).")
     ; ("-p", Arg.Int (fun x -> selected_port := x), "<NUMBER> Select a port number (default = " ^ string_of_int !selected_port ^ ").")
     ; ("-setup_link", Arg.Set setup_link, " Display a link to local gwsetup in bottom of pages.")
@@ -1956,20 +1981,22 @@ let main () =
   List.iter register_plugin !plugins ;
   !GWPARAM.init () ;
   cache_lexicon () ;
-  if !images_dir <> "" then
-    begin let abs_dir =
-      let f =
-        Util.search_in_assets (Filename.concat !images_dir "gwback.jpg")
+  (* icons_dir and iicons_url are part of gwd launch arguments *)
+  if !icons_dir <> "" then
+    begin
+      let abs_dir =
+        let f =
+         Util.search_in_assets (Filename.concat !icons_dir "gwback.jpg")
+        in
+        let d = Filename.dirname f in
+        if Filename.is_relative d then Filename.concat (Sys.getcwd ()) d else d
       in
-      let d = Filename.dirname f in
-      if Filename.is_relative d then Filename.concat (Sys.getcwd ()) d else d
-    in
       images_url := "file://" ^ slashify abs_dir
     end;
-  if !(Util.cnt_dir) = Filename.current_dir_name then
-    Util.cnt_dir := Secure.base_dir ();
+  if !(Path.cnt_dir) = Filename.current_dir_name then
+    Path.cnt_dir := Secure.base_dir ();
   Wserver.stop_server :=
-    List.fold_left Filename.concat !(Util.cnt_dir) ["cnt"; "STOP_SERVER"];
+    List.fold_left Filename.concat !(Path.cnt_dir) ["cnt"; "STOP_SERVER"];
   let (query, cgi) =
     try Sys.getenv "QUERY_STRING" |> Adef.encoded, true
     with Not_found -> "" |> Adef.encoded, !force_cgi

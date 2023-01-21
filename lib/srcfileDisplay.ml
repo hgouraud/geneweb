@@ -18,7 +18,7 @@ type counter = {
 let get_date conf =
   Printf.sprintf "%02d/%02d/%d" conf.today.day conf.today.month conf.today.year
 
-let adm_file f = List.fold_right Filename.concat [ !Util.cnt_dir; "cnt" ] f
+let adm_file f = Filename.concat !Path.cnt_dir f
 let cnt conf ext = adm_file (conf.bname ^ ext)
 
 let input_int ic =

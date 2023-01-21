@@ -104,6 +104,7 @@ type config = {
      command ^ "?m=IM&v=" in CGI mode
      "images" otherwise *)
   image_prefix : string;
+  icon_prefix : string;
       (* if true, the base name is in the b argument of the query string: ?b=BASE&...
          if false, the base name is the last element of the uri path: .../base?... *)
   static_path : string;
@@ -111,6 +112,7 @@ type config = {
   cgi : bool;
   forced_plugins : string list;
   plugins : string list;
+  path : Path.t
 }
 (** Geneweb configuration data type *)
 

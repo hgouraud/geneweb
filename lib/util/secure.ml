@@ -6,10 +6,9 @@
    correct open instead of hoping Secure do it for it *)
 
 let ok_r = ref []
-let assets_r = ref []
 let bd_r = ref Filename.current_dir_name
-let lang_path_r = ref []
-let gw_path_r = ref ""
+let assets_r = ref []
+let gw_dir_r = ref ""
 
 (* [decompose: string -> string list] decompose a path into a list of
    directory and a basename. "a/b/c" -> [ "a" ; "b"; "c" ] *)
@@ -26,7 +25,7 @@ let decompose =
   in
   loop []
 
-(* add asset to the list of allowed to acces assets *)
+(* add d to the list of allowed access for assets *)
 let add_assets d =
   assets_r := d :: !assets_r;
   ok_r := decompose d :: !ok_r
@@ -37,9 +36,16 @@ let set_base_dir d =
   bd_r := d;
   ok_r := ok :: (List.filter (( <> ) ok)) !ok_r
 
+(* set gw dir to which acces could be allowed *)
+let set_gw_dir d =
+  let ok = decompose d in
+  gw_dir_r := d;
+  ok_r := ok :: (List.filter (( <> ) ok)) !ok_r
+
 (* get all assets *)
 let assets () = !assets_r
 let base_dir () = !bd_r
+let gw_dir () = !gw_dir_r
 
 (* [list_check_prefix d df] returns either [None] if [d] is not a prefix of
    [df], or [Some suffix], where [df = d @ suffix] *)

@@ -24,6 +24,6 @@ LOGS_DIR="./tmp"
 "$BIN_DIR"/gwd \
   -cgi \
   -bd "$BASES_DIR" \
-  -hd "$BIN_DIR" -hd "$BASES_DIR" \
+  -hd "$BIN_DIR" -hd1 "$BASES_DIR" \
   -plugins -unsafe "$BIN_DIR"/plugins \
   -log_level 7 -log "<stderr>" 2>> "$LOGS_DIR"/gwd.log

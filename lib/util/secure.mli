@@ -6,11 +6,17 @@ val assets : unit -> string list
 val base_dir : unit -> string
 (** Returns directory where databases are installed to which acces is allowed *)
 
+val gw_dir : unit -> string
+(** Returns directory where GeneWeb is installed to which acces is allowed *)
+
 val add_assets : string -> unit
 (** Add new asset to the [assets] list *)
 
 val set_base_dir : string -> unit
 (** Set base directory *)
+
+val set_gw_dir : string -> unit
+(** Set gw directory *)
 
 val check : string -> bool
 (** Check if a filename is safe to read:

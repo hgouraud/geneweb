@@ -306,7 +306,19 @@ and eval_simple_variable conf = function
          if conf.cgi then
            match List.assoc_opt "image_prefix" conf.base_env with
            | Some x -> Adef.escaped x
-           | None -> Image.prefix conf
+           | None -> Adef.escaped conf.icon_prefix
+           (* TODO in templates, replace most %image_prefix; by %icon_prefix; *)
+           (* some image_prefix must stay *)
+         else Image.prefix conf
+       in
+       s
+        :> string)
+  | "icon_prefix" ->
+      (let s =
+         if conf.cgi then
+           match List.assoc_opt "icon_prefix" conf.base_env with
+           | Some x -> Adef.escaped x
+           | None -> Adef.escaped conf.icon_prefix
          else Image.prefix conf
        in
        s
@@ -367,6 +379,8 @@ and eval_simple_variable conf = function
   | "url_no_pwd" -> url_aux ~pwd:false conf
   | "version" -> Version.txt
   | "/" -> ""
+  | "gw_dir" -> Secure.gw_dir ()
+  | "etc_dir" -> List.fold_left (fun acc x -> acc ^ ", " ^ x) "" (Secure.assets ())
   | _ -> raise Not_found
 
 let rec string_of_expr_val = function
