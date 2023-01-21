@@ -107,15 +107,14 @@ type config = {
   cgi : bool;
   forced_plugins : string list;
   plugins : string list;
-}
+  path : Path.t}
 
 (**/**)
 
 (** A dummy {!type:config} value, with uninitialized fields.
     Used for testing purpose *)
 let empty =
-  {
-    from = "";
+  { from = "";
     manitou = false;
     supervisor = false;
     wizard = false;
@@ -173,6 +172,7 @@ let empty =
       { status = ignore; header = ignore; body = ignore; flush = ignore };
     forced_plugins = [];
     plugins = [];
+    path = Path.path_from_bname "";
   }
 
 (**/**)

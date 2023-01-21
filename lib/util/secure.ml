@@ -8,6 +8,8 @@
 let ok_r = ref []
 let assets_r = ref []
 let bd_r = ref Filename.current_dir_name
+let lang_path_r = ref []
+let gw_path_r = ref ""
 
 (* [decompose: string -> string list] decompose a path into a list of
    directory and a basename. "a/b/c" -> [ "a" ; "b"; "c" ] *)

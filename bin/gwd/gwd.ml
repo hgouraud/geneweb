@@ -1129,15 +1129,19 @@ let make_conf from_addr request script_name env =
   let wizard_just_friend = if manitou then false else wizard_just_friend in
   let conf =
     {from = from_addr;
+     path = Path.path_from_bname base_file;
      api_mode = false;
      manitou = manitou;
-     supervisor = supervisor; wizard = ar.ar_wizard && not wizard_just_friend;
+     supervisor = supervisor;
+     wizard = ar.ar_wizard && not wizard_just_friend;
      is_printed_by_template = true;
      debug = !debug;
      query_start = Unix.gettimeofday ();
      friend = ar.ar_friend || wizard_just_friend && ar.ar_wizard;
      just_friend_wizard = ar.ar_wizard && wizard_just_friend;
-     user = ar.ar_user; username = ar.ar_name; auth_scheme = ar.ar_scheme;
+     user = ar.ar_user;
+     username = ar.ar_name;
+     auth_scheme = ar.ar_scheme;
      command = ar.ar_command;
      indep_command =
        (if !(Wserver.cgi) then ar.ar_command else "geneweb") ^ "?";
@@ -1196,7 +1200,9 @@ let make_conf from_addr request script_name env =
          begin try List.assoc "no_note_for_visitor" base_env = "yes" with
            Not_found -> false
          end;
-     bname = base_file; env = env; senv = [];
+     bname = base_file;
+     env = env;
+     senv = [];
      cgi_passwd = ar.ar_passwd;
      henv =
        (if not !(Wserver.cgi) then []

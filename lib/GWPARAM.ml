@@ -164,3 +164,4 @@ let syslog = ref Default.syslog
     may want to wrap their page using [wrap_output].
 *)
 let wrap_output = ref Default.wrap_output
+
