@@ -21,9 +21,9 @@ module Default = struct
     Secure.add_assets Filename.current_dir_name
 
   let base_path pref bname =
-    List.fold_right Filename.concat (Secure.base_dir () :: pref) bname
+    List.fold_right Filename.concat (Secure.bases_dir () :: pref) bname
 
-  let bpath bname = Filename.concat (Secure.base_dir ()) bname
+  let bpath bname = Filename.concat (Secure.bases_dir ()) bname
 
   (** [output_error ?headers ?content conf code]
       Send the http status [code], [headers] and

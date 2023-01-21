@@ -17,7 +17,7 @@ let () =
     | s -> s
   in
   let dry_run = !dry_run in
-  Secure.set_base_dir (Filename.dirname bname);
+  Secure.set_bases_dir (Filename.dirname bname);
   Lock.control (Mutil.lock_file bname) true ~onerror:Lock.print_try_again
   @@ fun () ->
   let base = Database.opendb bname in

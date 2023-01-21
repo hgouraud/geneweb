@@ -3,7 +3,7 @@
 val assets : unit -> string list
 (** Returns list of allowed to acces assets *)
 
-val base_dir : unit -> string
+val bases_dir : unit -> string
 (** Returns directory where databases are installed to which acces is allowed *)
 
 val gw_dir : unit -> string
@@ -12,7 +12,7 @@ val gw_dir : unit -> string
 val add_assets : string -> unit
 (** Add new asset to the [assets] list *)
 
-val set_base_dir : string -> unit
+val set_bases_dir : string -> unit
 (** Set base directory *)
 
 val set_gw_dir : string -> unit

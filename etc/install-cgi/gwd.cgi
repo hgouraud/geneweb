@@ -26,4 +26,5 @@ LOGS_DIR="./tmp"
   -bd "$BASES_DIR" \
   -hd "$BIN_DIR" -hd1 "$BASES_DIR" \
   -plugins -unsafe "$BIN_DIR"/plugins \
+  REORG_OPT \
   -log_level 7 -log "<stderr>" 2>> "$LOGS_DIR"/gwd.log

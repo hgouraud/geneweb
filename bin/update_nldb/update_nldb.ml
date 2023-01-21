@@ -182,7 +182,7 @@ let main () =
     Printf.eprintf "Use option -help for usage\n";
     flush stderr;
     exit 2);
-  Secure.set_base_dir (Filename.dirname !fname);
+  Secure.set_bases_dir (Filename.dirname !fname);
   let base = Gwdb.open_base !fname in
   Sys.catch_break true;
   let () = load_strings_array base in

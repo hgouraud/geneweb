@@ -34,13 +34,13 @@ let source_filename bname src =
       src
   in
   let fname2 =
-    List.fold_right Filename.concat [ Secure.base_dir (); "src"; "images" ] src
+    List.fold_right Filename.concat [ Secure.bases_dir (); "src"; "images" ] src
   in
   if Sys.file_exists fname1 then fname1 else fname2
 
 let path_of_filename src =
   let fname1 =
-    List.fold_right Filename.concat [ Secure.base_dir (); "images" ] src
+    List.fold_right Filename.concat [ Secure.bases_dir (); "images" ] src
   in
   if Sys.file_exists fname1 then `Path fname1
   else `Path (Util.search_in_assets (Filename.concat "images" src))

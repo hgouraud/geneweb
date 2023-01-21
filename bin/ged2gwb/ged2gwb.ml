@@ -3277,7 +3277,7 @@ let errmsg = "Usage: ged2gwb [<ged>] [options] where options are:"
 
 let main () =
   Arg.parse speclist anonfun errmsg;
-  Secure.set_base_dir (Filename.dirname !out_file);
+  Secure.set_bases_dir (Filename.dirname !out_file);
   let arrays = make_arrays !in_file in
   Gc.compact ();
   let arrays = make_subarrays arrays in

@@ -196,7 +196,7 @@ let usage = "Usage: " ^ Sys.argv.(0) ^ " [OPTION] base"
 
 let main () =
   Arg.parse speclist anonfun usage;
-  Secure.set_base_dir (Filename.dirname !bname);
+  Secure.set_bases_dir (Filename.dirname !bname);
   if !bname = "" then (
     Arg.usage speclist usage;
     exit 2);

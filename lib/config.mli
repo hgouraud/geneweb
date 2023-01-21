@@ -46,73 +46,73 @@ type output_conf = {
 type env = (string * Adef.encoded_string) list
 
 type config = {
-  from : string;
+  access_by_key : bool;
+  allowed_titles : string list Lazy.t;
   api_mode : bool;
-  manitou : bool;
-  supervisor : bool;
-  wizard : bool;
-  is_printed_by_template : bool;
-  debug : bool;
-  query_start : float;
-  friend : bool;
-  just_friend_wizard : bool;
-  user : string;
-  username : string;
+  auth_file : string;
   auth_scheme : auth_scheme_kind;
+  authorized_wizards_notes : bool;
+  base_env : (string * string) list (* content of .gwf file *);
+  bname : string;
+  border : int;
+  cgi : bool;
+  cgi_passwd : string;
   command : string;
-  indep_command : string;
-  highlight : string;
-  lang : string;
+  ctime : float; (* TODO verify usefulness *)
+  debug : bool;
   default_lang : string;
   default_sosa_ref : iper * Gwdb.person option;
-  multi_parents : bool;
-  authorized_wizards_notes : bool;
-  public_if_titles : bool;
-  public_if_no_date : bool;
-  mutable setup_link : bool;
-  access_by_key : bool;
-  private_years : int;
-  hide_names : bool;
-  use_restrict : bool;
-  no_image : bool;
-  no_note : bool;
-  bname : string;
-  cgi_passwd : string;
-  env : env;
-  mutable senv : env;
-  mutable henv : env;
-  base_env : (string * string) list (* content of .gwf file *);
-  allowed_titles : string list Lazy.t;
   denied_titles : string list Lazy.t;
-  request : string list;
-  lexicon : (string, string) Hashtbl.t;
-  mutable charset : string;
-  is_rtl : bool;
-  left : string;
-  right : string;
-  auth_file : string;
-  border : int;
-  mutable n_connect : (int * int * int * (string * float) list) option;
-  today : dmy;
-  today_wd : int;
-  time : int * int * int;
-  ctime : float;
-  mutable output_conf : output_conf;
-  (* HTTP printer *)
+  env : env;
+  forced_plugins : string list;
+  friend : bool;
+  from : string;
+  hide_names : bool;
+  highlight : string;
+  icon_prefix : string;
   (* prefix for image urls:
      the value of argument -images_url if specified, otherwise
      command ^ "?m=IM&v=" in CGI mode
      "images" otherwise *)
   image_prefix : string;
-  icon_prefix : string;
-      (* if true, the base name is in the b argument of the query string: ?b=BASE&...
-         if false, the base name is the last element of the uri path: .../base?... *)
-  static_path : string;
-      (* in CGI mode, provides location of etc files to Apache for direct loading *)
-  cgi : bool;
-  forced_plugins : string list;
+  indep_command : string;
+  is_printed_by_template : bool;
+  is_rtl : bool;
+  just_friend_wizard : bool;
+  lang : string;
+  left : string;
+  lexicon : (string, string) Hashtbl.t;
+  manitou : bool;
+  multi_parents : bool;
+  mutable charset : string;
+  mutable henv : env;
+  mutable n_connect : (int * int * int * (string * float) list) option;
+  mutable output_conf : output_conf;
+  (* HTTP printer *)
+  mutable senv : env;
+  mutable setup_link : bool;
+  no_image : bool;
+  no_note : bool;
+  path : Path.t;
   plugins : string list;
-  path : Path.t
+  private_years : int;
+  public_if_no_date : bool;
+  public_if_titles : bool;
+  query_start : float;
+  request : string list;
+  right : string;
+  static_path : string;
+  (* in CGI mode, provides location of etc files to Apache for direct loading *)
+  (* in CGI, the base name is in the b argument of the query string: ?b=BASE&...
+     if not, the base name is the last element of the uri path: .../base?... *)
+  supervisor : bool;
+  time : int * int * int;
+  today : dmy;
+  today_wd : int;
+  use_restrict : bool;
+  user : string;
+  username : string;
+  wizard : bool;
 }
 (** Geneweb configuration data type *)
 

@@ -30,7 +30,7 @@ let main () =
     flush stderr;
     exit 2);
   if !verbosity = 0 then Mutil.verbose := false;
-  Secure.set_base_dir (Filename.dirname !fname);
+  Secure.set_bases_dir (Filename.dirname !fname);
   Lock.control_retry (Mutil.lock_file !fname) ~onerror:Lock.print_error_and_exit
     (fun () ->
       let base = Gwdb.open_base !fname in

@@ -48,7 +48,7 @@ let errmsg = "Usage: " ^ Sys.argv.(0) ^ " <BASE> [OPT]"
 
 let anonfun c s =
   if !c.base = None then (
-    Secure.set_base_dir (Filename.dirname s);
+    Secure.set_bases_dir (Filename.dirname s);
     c := { !c with base = Some (s, Gwdb.open_base s) })
   else raise (Arg.Bad "Cannot treat several databases")
 

@@ -34,33 +34,45 @@ WEB_ROOT=`echo $TMP | sed -e "s/DocumentRoot//g" \
 # The name "distribution" seems to be hard-coded in some places (gwd.ml)
 DISTRIB_NAME="distribution"
 # Provide the location of your bases.
-# If no value is given, the default is $DISTRIB_NAME/bases 
-MY_BASES="/Users/Henri/Genea/GeneWeb-Bases"
+# If no value is given, the default is $DISTRIB_NAME/bases
+REORG="yes"
+if [ $REORG = "yes" ]; then
+  MY_BASES="$HOME/Genea/GeneWeb-Reorg"
+  REORG_OPT="-reorg"
+else
+  MY_BASES="$HOME/Genea/GeneWeb-Bases"
+  REORG_OPT=""
+fi
+
 DIR="$(dirname "$0")"
 cd "$DIR"
 PWD=`pwd`
 
-if ! [ $MY_BASES == "" ]; then
-  echo "Set link to my bases"
-  rm -f -R $WEB_ROOT/$DISTRIB_NAME/bases
-  ln -s $MY_BASES $WEB_ROOT/$DISTRIB_NAME/bases
-fi
-BASES=$WEB_ROOT/$DISTRIB_NAME/bases
-echo "Bases: $BASES"
+rm -f -R $WEB_ROOT/$DISTRIB_NAME
+cp -f -R ../$DISTRIB_NAME $WEB_ROOT
 
 # Apache follows SymLinks
 #if ! [ -d $WEB_ROOT/$DISTRIB_NAME ]; then
 #  ln -s ../$DISTRIB_NAME $WEB_ROOT
 #fi
 # Apache does not follow SymLinks
-rm -f -R $WEB_ROOT/$DISTRIB_NAME
-cp -f -R ../$DISTRIB_NAME $WEB_ROOT
+if ! [ $MY_BASES == "" ]; then
+  echo "Set link to my bases"
+  rm -f -R $WEB_ROOT/$DISTRIB_NAME/bases
+  ln -s $MY_BASES $WEB_ROOT/$DISTRIB_NAME/bases
+fi
+
+BASES=$WEB_ROOT/$DISTRIB_NAME/bases
+echo "Bases: $BASES"
 
 cd ./install-cgi
 
+cat gwd.cgi | sed s:REORG_OPT:$REORG_OPT:g > gwd.cgi-tmp
+
 BIN_DIR=$WEB_ROOT/$DISTRIB_NAME/gw
 if [ -d $WEB_ROOT/cgi-bin ]; then
-  cp gwd.cgi $WEB_ROOT/cgi-bin
+  cp gwd.cgi-tmp $WEB_ROOT/cgi-bin
+  rm gwd.cgi-tmp
   cp test.cgi $WEB_ROOT/cgi-bin
   cp Lenna.jpg $WEB_ROOT
   chmod +x $WEB_ROOT/cgi-bin/gwd.cgi

@@ -312,8 +312,8 @@ let print_renamed conf new_n =
       Output.printf conf "<ul><li><a href=\"%s\">%s</a></li></ul>" link link ;
       Hutil.trailer conf)
 
-let log_redirect from request req =
-  Lock.control (SrcfileDisplay.adm_file "gwd.lck") true
+let log_redirect conf from request req =
+  Lock.control (Path.adm_file_gwd "gwd.lck") true
     ~onerror:(fun () -> ()) begin fun () ->
     let referer = Mutil.extract_param "referer: " '\n' request in
     GwdLog.syslog `LOG_NOTICE @@
@@ -324,7 +324,7 @@ let print_redirected conf from request new_addr =
   let req = Util.get_request_string conf in
   let link = "http://" ^ new_addr ^ req in
   let env = ["link", Mutil.encode link] in
-  log_redirect from request req;
+  log_redirect conf from request req;
   include_template conf env "redirect"
     (fun () ->
       let title _ = Output.print_sstring conf "Address changed" in
@@ -336,7 +336,7 @@ let print_redirected conf from request new_addr =
 let nonce_private_key =
   Lazy.from_fun
     (fun () ->
-       let fname = Filename.concat !(Path.cnt_dir) "gwd_private.txt" in
+       let fname = Filename.concat !Path.dir_cnt_base_r "gwd_private.txt" in
        let k =
          try
            let ic = open_in fname in
@@ -494,7 +494,7 @@ let compatible_tokens check_from (addr1, base1_pw1) (addr2, base2_pw2) =
   (not check_from || addr1 = addr2) && base1_pw1 = base2_pw2
 
 let get_actlog check_from utm from_addr base_password =
-  let fname = SrcfileDisplay.adm_file "actlog" in
+  let fname = Path.adm_file_base "actlog" in
   try
     let ic = Secure.open_in fname in
       let tmout = float_of_int !login_timeout in
@@ -536,7 +536,7 @@ let get_actlog check_from utm from_addr base_password =
   with Sys_error _ -> [], ATnormal, false
 
 let set_actlog list =
-  let fname = SrcfileDisplay.adm_file "actlog" in
+  let fname = Path.adm_file_base "actlog" in
   try
     let oc = Secure.open_out fname in
     List.iter
@@ -548,7 +548,7 @@ let set_actlog list =
   with Sys_error _ -> ()
 
 let get_token check_from utm from_addr base_password =
-  Lock.control (SrcfileDisplay.adm_file "gwd.lck") true
+  Lock.control (Path.adm_file_gwd "gwd.lck") true
     ~onerror:(fun () -> ATnormal)
     (fun () ->
        let (list, r, changed) =
@@ -570,7 +570,7 @@ let random_self_init () =
   Random.init seed
 
 let set_token utm from_addr base_file acc user =
-  Lock.control (SrcfileDisplay.adm_file "gwd.lck") true
+  Lock.control (Path.adm_file_gwd "gwd.lck") true
     ~onerror:(fun () -> "")
     (fun () ->
        random_self_init ();
@@ -664,7 +664,7 @@ let allowed_denied_titles key extra_line env base_env () =
       if fname = "" then []
       else
         let ic =
-          Secure.open_in (Filename.concat (Secure.base_dir ()) fname)
+          Secure.open_in (Filename.concat (Secure.bases_dir ()) fname)
         in
         let rec loop set =
           let (line, eof) =
@@ -1300,7 +1300,7 @@ let log tm conf from gauth request script_name contents =
     end
 
 let is_robot from =
-  Lock.control (SrcfileDisplay.adm_file "gwd.lck") true
+  Lock.control (Path.adm_file_gwd "gwd.lck") true
     ~onerror:(fun () -> false)
     (fun () ->
        let (robxcl, _) = Robot.robot_excl () in
@@ -1347,7 +1347,7 @@ let log_and_robot_check conf auth from request script_name contents =
   if !robot_xcl = None
   then log (Unix.time ()) conf from auth request script_name contents
   else
-    Lock.control (SrcfileDisplay.adm_file "gwd.lck") true ~onerror:ignore
+    Lock.control (Path.adm_file_gwd "gwd.lck") true ~onerror:ignore
       begin fun () ->
         let tm = Unix.time () in
         begin match !robot_xcl with
@@ -1373,6 +1373,8 @@ let conf_and_connection =
   in
   fun from request script_name (contents: Adef.encoded_string) env ->
   let (conf, passwd_err) = make_conf from request script_name env in
+  Path.init_base (Secure.bases_dir ()) conf.bname;
+  Mutil.mkdir_p ~perm:0o777 !Path.dir_cnt_base_r;
   match !redirected_addr with
     Some addr -> print_redirected conf from request addr
   | None ->
@@ -1406,7 +1408,7 @@ let conf_and_connection =
           if is_robot from then Robot.robot_error conf 0 0
           else
             let tm = Unix.time () in
-            Lock.control (SrcfileDisplay.adm_file "gwd.lck") true
+            Lock.control (Path.adm_file_gwd "gwd.lck") true
               ~onerror:(fun () -> ())
               (fun () -> log_passwd_failed ar tm from request conf.bname) ;
             unauth_server conf ar
@@ -1456,6 +1458,7 @@ let match_strings regexp s =
   in
   loop 0 0
 
+(* TODO find where this file should be *)
 let excluded from =
   let efname = chop_extension Sys.argv.(0) ^ ".xcl" in
   try
@@ -1713,11 +1716,12 @@ let geneweb_server () =
     try let _ = Sys.getenv "WSERVER" in true with Not_found -> false
   in
   if not auto_call then
-    begin let hostn =
-      match !selected_addr with
-        Some addr -> addr
-      | None -> try Unix.gethostname () with _ -> "computer"
-    in
+    begin
+      let hostn =
+        match !selected_addr with
+        | Some addr -> addr
+        | None -> try Unix.gethostname () with _ -> "computer"
+      in
       Printf.eprintf "GeneWeb %s - " Version.txt;
       if not !daemon then
         begin
@@ -1739,7 +1743,7 @@ let geneweb_server () =
             null_reopen [Unix.O_WRONLY] Unix.stderr
           end
         else exit 0;
-       Mutil.mkdir_p ~perm:0o777 !Path.cnt_dir
+      Mutil.mkdir_p ~perm:0o777 !Path.dir_cnt_r;
     end;
   Wserver.f GwdLog.syslog !selected_addr !selected_port !conn_timeout
     (if Sys.unix then !max_clients else None) connection
@@ -1760,7 +1764,7 @@ let manage_cgi_timeout tmout =
 
 let geneweb_cgi addr script_name contents =
   if Sys.unix then manage_cgi_timeout !conn_timeout;
-  begin try Unix.mkdir !Path.cnt_dir 0o755 with
+  begin try Unix.mkdir !Path.dir_cnt_r 0o755 with
     Unix.Unix_error (_, _, _) -> ()
   end;
   let add k x request =
@@ -1825,16 +1829,14 @@ let slashify s =
   in
   String.init (String.length s) conv_char
 
-let make_cnt_dir x =
+let make_win_dir x =
   Mutil.mkdir_p x;
   if Sys.unix then ()
   else
     begin
-      Wserver.sock_in := String.concat Filename.dir_sep [x; "cnt"; "gwd.sin"];
-      Wserver.sock_out := String.concat Filename.dir_sep [x; "cnt"; "gwd.sou"];
-    end;
-  Path.cnt_dir := Filename.concat x "cnt"
-
+      Wserver.sock_in := String.concat Filename.dir_sep [x; "gwd.sin"];
+      Wserver.sock_out := String.concat Filename.dir_sep [x; "gwd.sou"];
+    end
 
 let arg_plugin_doc opt doc =
   doc ^ " Combine with -force to enable for every base. \
@@ -1914,16 +1916,16 @@ let main () =
   let force_cgi = ref false in
   let speclist =
     [ ("-hd", Arg.String (fun x ->
-        Path.etc_dir := Filename.concat x "etc";
-        Path.lang_dir := Filename.concat x "lang";
-        Path.cnt_dir := Filename.concat x "cnt";
+        Path.dir_etc_r := Filename.concat x "etc";
+        Path.dir_lang_r := Filename.concat x "lang";
         Secure.set_gw_dir x; Secure.add_assets x;), "<DIR> Directory where the \
         static files are installed (templates, icons, lexicon).")
     ; ("-hd1", Arg.String Secure.add_assets, "<DIR> Additional assets location.")
-    ; ("-bd", Arg.String Secure.set_base_dir, "<DIR> Directory where the databases are installed.")
-    ; ("-wd", Arg.String make_cnt_dir, "<DIR> Directory for socket communication (Windows) and access count.")
+    ; ("-bd", Arg.String Secure.set_bases_dir, "<DIR> Directory where the databases are installed.")
+    ; ("-wd", Arg.String make_win_dir, "<DIR> Directory for socket communication (Windows).")
     ; ("-cache_langs", Arg.String (fun s -> List.iter (Mutil.list_ref_append cache_langs) @@ String.split_on_char ',' s), " Lexicon languages to be cached.")
     ; ("-cgi", Arg.Set force_cgi, " Force CGI mode.")
+    ; ("-reorg", Arg.Set Path.reorg, " Base structure is according to reorg.")
     ; ("-images_url", Arg.String (fun x -> images_url := x), "<URL> URL for GeneWeb images (default: gwd send them).")
     ; ("-icons_url", Arg.String (fun x -> icons_url := x), "<URL> URL for GeneWeb icons (default: gwd send them).")
     ; ("-images_dir", Arg.String (fun x -> images_dir := x), "<DIR> Same than previous but directory name relative to current.")
@@ -1981,7 +1983,7 @@ let main () =
   List.iter register_plugin !plugins ;
   !GWPARAM.init () ;
   cache_lexicon () ;
-  (* icons_dir and iicons_url are part of gwd launch arguments *)
+  (* icons_dir and icons_url are part of gwd launch arguments *)
   if !icons_dir <> "" then
     begin
       let abs_dir =
@@ -1993,10 +1995,10 @@ let main () =
       in
       images_url := "file://" ^ slashify abs_dir
     end;
-  if !(Path.cnt_dir) = Filename.current_dir_name then
-    Path.cnt_dir := Secure.base_dir ();
-  Wserver.stop_server :=
-    List.fold_left Filename.concat !(Path.cnt_dir) ["cnt"; "STOP_SERVER"];
+  (* we need to set up dir_cnt now, before conf can be established *)
+  Path.init (Secure.bases_dir ());
+  if (Secure.bases_dir ()) = "" then Secure.set_bases_dir (Filename.current_dir_name);
+  Wserver.stop_server := Filename.concat !Path.dir_cnt_r "STOP_SERVER";
   let (query, cgi) =
     try Sys.getenv "QUERY_STRING" |> Adef.encoded, true
     with Not_found -> "" |> Adef.encoded, !force_cgi

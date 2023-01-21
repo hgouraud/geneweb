@@ -6,7 +6,7 @@
    correct open instead of hoping Secure do it for it *)
 
 let ok_r = ref []
-let bd_r = ref Filename.current_dir_name
+let bd_r = ref ""
 let assets_r = ref []
 let gw_dir_r = ref ""
 
@@ -31,7 +31,7 @@ let add_assets d =
   ok_r := decompose d :: !ok_r
 
 (* set base dir to which acces could be allowed *)
-let set_base_dir d =
+let set_bases_dir d =
   let ok = decompose d in
   bd_r := d;
   ok_r := ok :: (List.filter (( <> ) ok)) !ok_r
@@ -44,7 +44,7 @@ let set_gw_dir d =
 
 (* get all assets *)
 let assets () = !assets_r
-let base_dir () = !bd_r
+let bases_dir () = !bd_r
 let gw_dir () = !gw_dir_r
 
 (* [list_check_prefix d df] returns either [None] if [d] is not a prefix of
