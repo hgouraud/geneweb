@@ -10,6 +10,8 @@ let dir_lang_r = ref "lang"
 let dir_gwd_k_r = ref "gwd_k"
 let dir_cnt_r = ref "cnt"
 let dir_cnt_base_r = ref "cnt"
+let portraits = ref "images"
+let documents = ref "src"
 
 type syslog_level =
   [ `LOG_ALERT
@@ -30,7 +32,9 @@ module Reorg = struct
     List.fold_right Filename.concat [ Gwlib.prefix; "share" ] "geneweb"
     |> Secure.add_assets;
     Secure.add_assets Filename.current_dir_name;
-    dir_cnt_r := String.concat Filename.dir_sep [ bases_dir; "cnt" ]
+    dir_cnt_r := String.concat Filename.dir_sep [ bases_dir; "cnt" ];
+    documents := "documents";
+    portraits := "portraits"
 
   let init_base bases_dir bname =
     dir_cnt_base_r :=

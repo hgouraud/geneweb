@@ -26,6 +26,8 @@ val dir_cnt_r : string ref
 val dir_cnt_base_r : string ref
 val adm_file_gwd : string -> string
 val adm_file_base : string -> string
+val documents : string ref
+val portraits : string ref
 
 val init : (string -> unit) ref
 (** Function called before gwd starts

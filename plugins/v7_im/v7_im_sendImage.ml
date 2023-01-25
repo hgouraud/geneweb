@@ -297,11 +297,11 @@ let effective_send_ok conf base p file =
   let bfname = Image.default_portrait_filename base p in
   (* TODO rework this part *)
   let bfdir =
-    let bfdir = Util.base_path [ "images" ] conf.bname "" in
+    let bfdir = Util.base_path [ "images" ] conf.bname bfname in
     if Sys.file_exists bfdir then bfdir
     else
-      let d = Filename.concat (Secure.bases_dir ()) "images" in
-      let d1 = Filename.concat d conf.bname in
+      let d = Util.base_path ["images"] conf.bname "" in
+      let d1 = Filename.concat d bfname in
       (try Unix.mkdir d 0o777 with Unix.Unix_error (_, _, _) -> ());
       (try Unix.mkdir d1 0o777 with Unix.Unix_error (_, _, _) -> ());
       d1

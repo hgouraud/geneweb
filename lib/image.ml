@@ -21,22 +21,48 @@ let default_portrait_filename base p =
 let full_portrait_path conf base p =
   (* TODO why is extension not in filename..? *)
   let s = default_portrait_filename base p in
-  let f = Util.base_path [ "images" ] conf.bname s in
+  (*let f = !GWPARAM.base_path [ !GWPARAM.portraits ] conf.bname s in*)
+  (* ne semble pas fonctionner !! je refais l'exercice "à la main"! *)
+  let f =
+    if !GWPARAM.reorg then
+      String.concat Filename.dir_sep [(Secure.bases_dir ()); (conf.bname ^ ".gwb");
+      "portraits"; s]
+    else
+      String.concat Filename.dir_sep [(Secure.bases_dir ());
+      "images"; conf.bname; s]
+  in
   if Sys.file_exists (f ^ ".jpg") then Some (`Path (f ^ ".jpg"))
   else if Sys.file_exists (f ^ ".png") then Some (`Path (f ^ ".png"))
   else if Sys.file_exists (f ^ ".gif") then Some (`Path (f ^ ".gif"))
   else None
 
-let source_filename bname src =
-  let fname1 = Util.base_path [ "src" ] bname (Filename.concat "images" src) in
-  let fname2 =
-    List.fold_right Filename.concat [ Secure.bases_dir (); "src"; "images" ] src
+let source_filename conf src =
+  let fname1 = 
+      if !GWPARAM.reorg then
+      String.concat Filename.dir_sep [(Secure.bases_dir ());
+      (conf.bname ^ ".gwb"); "documents"; "images"; src]
+    else
+      String.concat Filename.dir_sep [(Secure.bases_dir ());
+      "src"; conf.bname; "images"; src]
   in
+  let fname2 =
+    if !GWPARAM.reorg then
+      String.concat Filename.dir_sep [(Secure.bases_dir ()); 
+        "documents"; "images"; src]
+    else
+      String.concat Filename.dir_sep [(Secure.bases_dir ()); "src"; src]
+  in
+  Printf.eprintf "Source for images: \n   %s\n   %s\n" fname1 fname2;
   if Sys.file_exists fname1 then fname1 else fname2
 
-let path_of_filename src =
+let path_of_filename conf src =
   let fname1 =
-    List.fold_right Filename.concat [ Secure.bases_dir (); "images" ] src
+    if !GWPARAM.reorg then
+      String.concat Filename.dir_sep [(Secure.bases_dir ());
+        (conf.bname ^ ".gwb"); "documents"; "images"; src]
+    else
+      String.concat Filename.dir_sep [(Secure.bases_dir ()); 
+        "src"; conf.bname; "images"; src]
   in
   if Sys.file_exists fname1 then `Path fname1
   else `Path (Util.search_in_assets (Filename.concat "images" src))
@@ -139,7 +165,7 @@ let rename_portrait conf base p (nfn, nsn, noc) =
   match full_portrait_path conf base p with
   | Some (`Path old_f) -> (
       let s = default_portrait_filename_of_key nfn nsn noc in
-      let f = Util.base_path [ "images" ] conf.bname s in
+      let f = Util.base_path [ !GWPARAM.portraits ] conf.bname s in
       let new_f = f ^ Filename.extension old_f in
       try Sys.rename old_f new_f
       with Sys_error e ->

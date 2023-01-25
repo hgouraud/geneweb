@@ -122,12 +122,12 @@ let print_portrait conf base p =
     [Rem] : Ne pas utiliser en dehors de ce module.                           *)
 let print_source conf f =
   let fname = if f.[0] = '/' then String.sub f 1 (String.length f - 1) else f in
-  if fname = Filename.basename fname then
-    let fname = Image.source_filename conf.bname fname in
+  (* if fname = Filename.basename fname then allow sub_dir *)
+    let fname = Image.source_filename conf fname in
     Result.fold ~ok:ignore
       ~error:(fun _ -> Hutil.incorrect_request conf)
       (print_image_file conf fname)
-  else Hutil.incorrect_request conf
+  (* else Hutil.incorrect_request conf  allow sub_dir *)
 
 (* ************************************************************************** *)
 (*  [Fonc] print : Config.config -> Gwdb.base -> unit                         *)

@@ -1473,12 +1473,12 @@ let excluded from =
 
 let image_request conf script_name env =
   match Util.p_getenv env "m", Util.p_getenv env "v" with
-    Some "IM", Some fname ->
+  | Some "IM", Some fname ->
       let fname =
         if fname.[0] = '/' then String.sub fname 1 (String.length fname - 1)
         else fname
       in
-      let `Path fname = Image.path_of_filename fname in
+      let `Path fname = Image.path_of_filename conf fname in
       let _ = ImageDisplay.print_image_file conf fname in true
   | _ ->
       let s = script_name in
@@ -1489,7 +1489,7 @@ let image_request conf script_name env =
         (* empeche d'avoir des images qui se trouvent dans le dossier   *)
         (* image. Si on ne fait pas de basename, alors ça marche.       *)
         (* let fname = Filename.basename fname in *)
-        let `Path fname = Image.path_of_filename fname in
+        let `Path fname = Image.path_of_filename conf fname in
         let _ = ImageDisplay.print_image_file conf fname in true
       else false
 
