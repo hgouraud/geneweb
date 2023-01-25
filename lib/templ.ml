@@ -380,7 +380,8 @@ and eval_simple_variable conf = function
   | "version" -> Version.txt
   | "/" -> ""
   | "gw_dir" -> Secure.gw_dir ()
-  | "etc_dir" -> List.fold_left (fun acc x -> acc ^ ", " ^ x) "" (Secure.assets ())
+  | "etc_dir" ->
+      List.fold_left (fun acc x -> acc ^ ", " ^ x) "" (Secure.assets ())
   | _ -> raise Not_found
 
 let rec string_of_expr_val = function

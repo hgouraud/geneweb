@@ -24,7 +24,6 @@ val dir_lang_r : string ref
 val dir_gwd_k_r : string ref
 val dir_cnt_r : string ref
 val dir_cnt_base_r : string ref
-
 val adm_file_gwd : string -> string
 val adm_file_base : string -> string
 
@@ -36,7 +35,7 @@ val init_base : (string -> string -> unit) ref
 (** Function called before gwd starts
     e.g. inititialise assets folders in Secure module. *)
 
-val base_path : (string list -> string -> string) ref
+val base_path : (string list -> string -> string -> string) ref
 (** [!base_path pref fname] function that returns a path to a file identified by [pref] [fname]
     related to bases. [pref] is like a category for file [fname].
 
@@ -80,7 +79,7 @@ module Reorg : sig
   val init_base : string -> string -> unit
   (** Initialises dir_cnt_base r for base counts and admin *)
 
-  val base_path : string list -> string -> string
+  val base_path : string list -> string -> string -> string
   (** Use concatenation of [Secure.base_dir ()], [pref] and [fname] *)
 
   val bpath : string -> string
@@ -98,7 +97,7 @@ module Default : sig
   val init_base : string -> string -> unit
   (** Initialises dir_cnt_base r for base counts and admin *)
 
-  val base_path : string list -> string -> string
+  val base_path : string list -> string -> string -> string
   (** Use concatenation of [Secure.base_dir ()], [pref] and [fname] *)
 
   val bpath : string -> string

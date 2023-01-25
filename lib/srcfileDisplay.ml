@@ -18,7 +18,7 @@ type counter = {
 let get_date conf =
   Printf.sprintf "%02d/%02d/%d" conf.today.day conf.today.month conf.today.year
 
-let cnt conf ext = Path.adm_file_base (conf.bname ^ ext)
+let cnt conf ext = GWPARAM.adm_file_base (conf.bname ^ ext)
 
 let input_int ic =
   try int_of_string (input_line ic) with End_of_file | Failure _ -> 0
@@ -90,7 +90,7 @@ let set_wizard_and_friend_traces conf =
       try List.assoc "wizard_passwd_file" conf.base_env with Not_found -> ""
     in
     if wpf <> "" then
-      let fname = Path.adm_file_base (conf.bname ^ "_w.txt") in
+      let fname = GWPARAM.adm_file_base (conf.bname ^ "_w.txt") in
       update_wf_trace conf fname)
   else if conf.friend && (not conf.just_friend_wizard) && conf.user <> "" then
     let fpf =
@@ -103,13 +103,13 @@ let set_wizard_and_friend_traces conf =
       fpf <> ""
       && is_that_user_and_password conf.auth_scheme conf.user fp = false
     then
-      let fname = Path.adm_file_base (conf.bname ^ "_f.txt") in
+      let fname = GWPARAM.adm_file_base (conf.bname ^ "_f.txt") in
       update_wf_trace conf fname
 
 let incr_counter f conf =
   (* le compteur de visites est incrémenté à chaque requête gwd, *)
   (* c'est à dire aussi les images !! *)
-  let lname = cnt conf ".lck" in
+  let lname = GWPARAM.adm_file_base (conf.bname ^ ".lck") in
   Lock.control lname true
     ~onerror:(fun () -> None)
     (fun () ->
@@ -130,32 +130,30 @@ let incr_request_counter =
 
 let lang_file_name conf fname =
   let fname1 =
-    Util.base_path [ "lang"; conf.lang ] (Filename.basename fname ^ ".txt")
+    Util.base_path [ "lang" ] conf.bname
+      (Filename.concat conf.lang (Filename.basename fname ^ ".txt"))
   in
   if Sys.file_exists fname1 then fname1
   else
     search_in_assets
       (Filename.concat conf.lang (Filename.basename fname ^ ".txt"))
 
-let any_lang_file_name fname =
-  let fname1 = Util.base_path [ "lang" ] (Filename.basename fname ^ ".txt") in
+let any_lang_file_name conf fname =
+  let fname1 =
+    Util.base_path [ "lang" ] conf.bname (Filename.basename fname ^ ".txt")
+  in
   if Sys.file_exists fname1 then fname1
   else
     search_in_assets (Filename.concat "lang" (Filename.basename fname ^ ".txt"))
 
 let source_file_name conf fname =
   let bname = conf.bname in
-  let lang = conf.lang in
   let fname1 =
-    List.fold_right Filename.concat
-      [ Util.base_path [ "src" ] bname; lang ]
-      (Filename.basename fname ^ ".txt")
+    Util.base_path [ "src" ] bname
+      (Filename.concat conf.lang (Filename.basename fname ^ ".txt"))
   in
   if Sys.file_exists fname1 then fname1
-  else
-    Filename.concat
-      (Util.base_path [ "src" ] bname)
-      (Filename.basename fname ^ ".txt")
+  else Util.base_path [ "src" ] bname (Filename.basename fname ^ ".txt")
 
 let extract_date s =
   try Scanf.sscanf s "%d/%d/%d" (fun d m y -> Some (d, m, y)) with _ -> None
@@ -427,7 +425,7 @@ and src_translate conf base nomin strm echo mode =
 and copy_from_file conf base name mode =
   let fname =
     match mode with
-    | Lang -> any_lang_file_name name
+    | Lang -> any_lang_file_name conf name
     | Source -> source_file_name conf name
   in
   match try Some (Secure.open_in fname) with Sys_error _ -> None with
@@ -448,7 +446,7 @@ let gen_print mode conf base fname =
     | Lang -> (
         try Some (Secure.open_in (lang_file_name conf fname))
         with Sys_error _ -> (
-          try Some (Secure.open_in (any_lang_file_name fname))
+          try Some (Secure.open_in (any_lang_file_name conf fname))
           with Sys_error _ -> None))
     | Source -> (
         try Some (Secure.open_in (source_file_name conf fname))

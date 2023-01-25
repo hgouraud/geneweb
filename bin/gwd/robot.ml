@@ -66,7 +66,7 @@ let output_excl oc xcl =
   output_value oc (xcl : excl)
 
 let robot_excl () =
-  let fname = Path.adm_file_base "robots" in
+  let fname = GWPARAM.adm_file_base "robots" in
   let xcl =
     match try Some (Secure.open_in_bin fname) with _ -> None with
     | Some ic ->

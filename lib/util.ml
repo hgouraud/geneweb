@@ -87,7 +87,7 @@ let escape_attribute =
 let is_hide_names conf p =
   if conf.hide_names || get_access p = Private then true else false
 
-let cnt_dir = ref Filename.current_dir_name
+let cnt_dir = GWPARAM.dir_cnt_r
 
 let search_in_path p s =
   let rec loop = function
@@ -1053,8 +1053,8 @@ let string_of_witness_kind conf sex witness_kind =
   in
   Adef.safe @@ transl_nth conf s n
 
-let base_path pref bname = !GWPARAM.base_path pref bname
-let bpath bname = !GWPARAM.bpath bname
+let base_path = !GWPARAM.base_path
+let bpath = !GWPARAM.bpath
 let copy_from_templ_ref = ref (fun _ _ _ -> assert false)
 let copy_from_templ conf env ic = !copy_from_templ_ref conf env ic
 
@@ -1098,25 +1098,24 @@ let etc_file_name conf fname =
     List.fold_left Filename.concat "" (String.split_on_char '/' fname)
   in
   (* On cherche le fichier dans cet ordre :
+     - dans la base (bases/etc/templx/base_name/name.txt) (* not implem ??? *)
      - dans la base (bases/etc/base_name/name.txt)
      - dans la base (bases/etc/templx/name.txt)
      - dans le répertoire des programmes (gw/etc/templx/name.txt) *)
   let file_exist dir =
-    let fn =
-      Filename.concat conf.bname (fname ^ ".txt")
-      |> Filename.concat "etc" |> bpath
-    in
+    let fn = !GWPARAM.base_path [ "etc" ] conf.bname (fname ^ ".txt") in
     if Sys.file_exists fn then fn
     else
       let fn =
-        Filename.concat (Filename.basename dir) (fname ^ ".txt")
-        |> Filename.concat "etc" |> bpath
+        !GWPARAM.base_path
+          [ "etc"; Filename.basename dir ]
+          conf.bname (fname ^ ".txt")
       in
       if Sys.file_exists fn then fn
       else
         let fn =
-          Filename.concat dir (fname ^ ".txt")
-          |> Filename.concat "etc" |> search_in_assets
+          String.concat Filename.dir_sep (* not Reorg dependant *)
+            [ Secure.gw_dir (); "etc"; Filename.basename dir; fname ^ ".txt" ]
         in
         if Sys.file_exists fn then fn else ""
   in
@@ -1194,7 +1193,7 @@ let get_request_string conf =
 let message_to_wizard conf =
   if conf.wizard || conf.just_friend_wizard then (
     let print_file fname =
-      let fname = base_path [ "etc"; conf.bname ] (fname ^ ".txt") in
+      let fname = base_path [ "etc" ] conf.bname (fname ^ ".txt") in
       try
         let ic = Secure.open_in fname in
         try
@@ -2054,8 +2053,6 @@ let escache_value base =
   let v = int_of_float (mod_float t (float_of_int max_int)) in
   Adef.encoded (string_of_int v)
 
-let adm_file f = List.fold_right Filename.concat [ !cnt_dir; "cnt" ] f
-
 let sprintf_today conf =
   let hh, mm, ss = conf.time in
   let tm =
@@ -2121,7 +2118,7 @@ let commit_patches conf base =
       try List.assoc "wizard_passwd_file" conf.base_env with Not_found -> ""
     in
     if wpf <> "" then
-      let fname = adm_file (conf.bname ^ "_u.txt") in
+      let fname = GWPARAM.adm_file_base (conf.bname ^ "_u.txt") in
       update_wf_trace conf fname
 
 let short_f_month m =

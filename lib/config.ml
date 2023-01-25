@@ -108,13 +108,15 @@ type config = {
   user : string;
   username : string;
   wizard : bool;
-  }
+}
+
 (**/**)
 
 (** A dummy {!type:config} value, with uninitialized fields.
     Used for testing purpose *)
 let empty =
-  { from = "";
+  {
+    from = "";
     manitou = false;
     supervisor = false;
     wizard = false;

@@ -10,7 +10,7 @@ val time_debug : config -> float -> unit
 val cnt_dir : string ref
 (** The directory where counters (e.g. number page displayed) are stored. *)
 
-val base_path : string list -> string -> string
+val base_path : string list -> string -> string -> string
 (** Alias for !GWPARAM.base_path *)
 
 val bpath : string -> string

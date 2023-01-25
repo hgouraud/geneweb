@@ -25,40 +25,42 @@ let adm_file_gwd f = Filename.concat !dir_cnt_r f
 let adm_file_base f = Filename.concat !dir_cnt_base_r f
 
 module Reorg = struct
-
   (* executed at start time by gwd *)
   let init bases_dir =
     List.fold_right Filename.concat [ Gwlib.prefix; "share" ] "geneweb"
     |> Secure.add_assets;
     Secure.add_assets Filename.current_dir_name;
-    dir_cnt_r := (String.concat Filename.dir_sep [bases_dir; "cnt"])
+    dir_cnt_r := String.concat Filename.dir_sep [ bases_dir; "cnt" ]
 
   let init_base bases_dir bname =
-    dir_cnt_base_r := (String.concat Filename.dir_sep
-      [bases_dir; bname ^ ".gwb"; "cnt"])
+    dir_cnt_base_r :=
+      String.concat Filename.dir_sep [ bases_dir; bname ^ ".gwb"; "cnt" ]
 
-  (* base_path [A; B] mybase becomes bases/mybase.gwb/A/B *)
-  let base_path pref bname =
+  (* base_path [A; B] mybase file becomes bases/mybase.gwb/A/B/file *)
+  let base_path pref bname fname =
     let a = Filename.concat (Secure.bases_dir ()) (bname ^ ".gwb") in
-    String.concat Filename.dir_sep (a :: pref)
+    List.fold_right Filename.concat (a :: pref) fname
 
   let bpath bname = Filename.concat (Secure.bases_dir ()) bname
-
 end
 
 module Default = struct
+  (* executed at start time by gwd *)
   let init bases_dir =
     List.fold_right Filename.concat [ Gwlib.prefix; "share" ] "geneweb"
     |> Secure.add_assets;
     Secure.add_assets Filename.current_dir_name;
-    dir_cnt_r := String.concat Filename.dir_sep [bases_dir; "cnt"]
+    dir_cnt_r := String.concat Filename.dir_sep [ bases_dir; "cnt" ]
 
   let init_base bases_dir _bname =
-    dir_cnt_base_r := String.concat Filename.dir_sep [bases_dir; "cnt"]
+    dir_cnt_base_r := String.concat Filename.dir_sep [ bases_dir; "cnt" ]
 
-  (* base_path [A; B] mybase becomes bases/A/B/mybase *)
-  let base_path pref bname =
-    List.fold_right Filename.concat (Secure.bases_dir () :: pref) bname
+  (* base_path [A; B] mybase file becomes bases/A/B/mybase/file *)
+  let base_path pref bname fname =
+    let a =
+      List.fold_right Filename.concat (Secure.bases_dir () :: pref) bname
+    in
+    Filename.concat a fname
 
   let bpath bname = Filename.concat (Secure.bases_dir ()) bname
 
@@ -197,10 +199,8 @@ let output_error = ref Default.output_error
 let p_auth = ref Default.p_auth
 let syslog = ref Default.syslog
 
-
 (** [wrap_output conf title content]
     Plugins defining a page content but not a complete UI
     may want to wrap their page using [wrap_output].
 *)
 let wrap_output = ref Default.wrap_output
-
