@@ -89,7 +89,6 @@ type config = {
   mutable setup_link : bool;
   no_image : bool;
   no_note : bool;
-  path : Path.t;
   plugins : string list;
   private_years : int;
   public_if_no_date : bool;
@@ -174,7 +173,6 @@ let empty =
       { status = ignore; header = ignore; body = ignore; flush = ignore };
     forced_plugins = [];
     plugins = [];
-    path = Path.path_from_bname "";
   }
 
 (**/**)

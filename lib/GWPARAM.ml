@@ -4,6 +4,13 @@
     for simple functions if it does not come with a performance cost.
 *)
 
+let reorg = ref false
+let dir_etc_r = ref "etc"
+let dir_lang_r = ref "lang"
+let dir_gwd_k_r = ref "gwd_k"
+let dir_cnt_r = ref "cnt"
+let dir_cnt_base_r = ref "cnt"
+
 type syslog_level =
   [ `LOG_ALERT
   | `LOG_CRIT
@@ -14,12 +21,42 @@ type syslog_level =
   | `LOG_NOTICE
   | `LOG_WARNING ]
 
-module Default = struct
-  let init () =
+let adm_file_gwd f = Filename.concat !dir_cnt_r f
+let adm_file_base f = Filename.concat !dir_cnt_base_r f
+
+module Reorg = struct
+
+  (* executed at start time by gwd *)
+  let init bases_dir =
     List.fold_right Filename.concat [ Gwlib.prefix; "share" ] "geneweb"
     |> Secure.add_assets;
-    Secure.add_assets Filename.current_dir_name
+    Secure.add_assets Filename.current_dir_name;
+    dir_cnt_r := (String.concat Filename.dir_sep [bases_dir; "cnt"])
 
+  let init_base bases_dir bname =
+    dir_cnt_base_r := (String.concat Filename.dir_sep
+      [bases_dir; bname ^ ".gwb"; "cnt"])
+
+  (* base_path [A; B] mybase becomes bases/mybase.gwb/A/B *)
+  let base_path pref bname =
+    let a = Filename.concat (Secure.bases_dir ()) (bname ^ ".gwb") in
+    String.concat Filename.dir_sep (a :: pref)
+
+  let bpath bname = Filename.concat (Secure.bases_dir ()) bname
+
+end
+
+module Default = struct
+  let init bases_dir =
+    List.fold_right Filename.concat [ Gwlib.prefix; "share" ] "geneweb"
+    |> Secure.add_assets;
+    Secure.add_assets Filename.current_dir_name;
+    dir_cnt_r := String.concat Filename.dir_sep [bases_dir; "cnt"]
+
+  let init_base bases_dir _bname =
+    dir_cnt_base_r := String.concat Filename.dir_sep [bases_dir; "cnt"]
+
+  (* base_path [A; B] mybase becomes bases/A/B/mybase *)
   let base_path pref bname =
     List.fold_right Filename.concat (Secure.bases_dir () :: pref) bname
 
@@ -152,12 +189,14 @@ module Default = struct
     Output.print_sstring conf {|</body></html>|}
 end
 
-let init = ref Default.init
-let base_path = ref Default.base_path
-let bpath = ref Default.bpath
+let init = if !reorg then ref Reorg.init else ref Default.init
+let init_base = if !reorg then ref Reorg.init_base else ref Default.init_base
+let base_path = if !reorg then ref Reorg.base_path else ref Default.base_path
+let bpath = if !reorg then ref Reorg.bpath else ref Default.bpath
 let output_error = ref Default.output_error
 let p_auth = ref Default.p_auth
 let syslog = ref Default.syslog
+
 
 (** [wrap_output conf title content]
     Plugins defining a page content but not a complete UI

@@ -18,7 +18,21 @@ type syslog_level =
 
 (* S: Move it to gwd_lib?  *)
 
-val init : (unit -> unit) ref
+val reorg : bool ref
+val dir_etc_r : string ref
+val dir_lang_r : string ref
+val dir_gwd_k_r : string ref
+val dir_cnt_r : string ref
+val dir_cnt_base_r : string ref
+
+val adm_file_gwd : string -> string
+val adm_file_base : string -> string
+
+val init : (string -> unit) ref
+(** Function called before gwd starts
+    e.g. inititialise assets folders in Secure module. *)
+
+val init_base : (string -> string -> unit) ref
 (** Function called before gwd starts
     e.g. inititialise assets folders in Secure module. *)
 
@@ -55,11 +69,34 @@ val wrap_output :
     Wrap the display of [title] and [content] in a defined template.
 *)
 
-module Default : sig
-  val init : unit -> unit
+module Reorg : sig
+  val init : string -> unit
   (** Inititialise assets directoris for gwd server:
       * current directory
-      * /usr/share/geneweb  *)
+      * /usr/share/geneweb  
+      Initialises dir_cnt_r for gwd counts and admin
+      *)
+
+  val init_base : string -> string -> unit
+  (** Initialises dir_cnt_base r for base counts and admin *)
+
+  val base_path : string list -> string -> string
+  (** Use concatenation of [Secure.base_dir ()], [pref] and [fname] *)
+
+  val bpath : string -> string
+  (** [Filename.concat (Secure.base_dir ())] *)
+end
+
+module Default : sig
+  val init : string -> unit
+  (** Inititialise assets directoris for gwd server:
+      * current directory
+      * /usr/share/geneweb  
+      Initialises dir_cnt_r for gwd counts and admin
+      *)
+
+  val init_base : string -> string -> unit
+  (** Initialises dir_cnt_base r for base counts and admin *)
 
   val base_path : string list -> string -> string
   (** Use concatenation of [Secure.base_dir ()], [pref] and [fname] *)
