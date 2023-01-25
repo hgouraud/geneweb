@@ -5,8 +5,11 @@ val print_image_file : config -> string -> (unit, string) result
     MIME type of an image is deducted from [fname] extension. Returns [false] if image
     wasn't found or couldn't be send. *)
 
+val print_source : config -> string -> unit
+(** Print image in the environement [conf.env] *)
+
 val print : config -> Gwdb.base -> unit
-(** Searhes image's filename in the environement [conf.env] and sends HTTP respose with its content on the socket. If filename isn't presented, looks up
+(** Searches image's filename in the environement [conf.env] and sends HTTP respose with its content on the socket. If filename isn't presented, looks up
     personal image for person's mentionned in [conf.env] *)
 
 val print_html : config -> unit

@@ -147,13 +147,23 @@ let any_lang_file_name conf fname =
     search_in_assets (Filename.concat "lang" (Filename.basename fname ^ ".txt"))
 
 let source_file_name conf fname =
-  let bname = conf.bname in
   let fname1 =
-    Util.base_path [ "src" ] bname
-      (Filename.concat conf.lang (Filename.basename fname ^ ".txt"))
+    (* !GWPARAM.base_path [ "documents"] conf.bname (fname ^ ".txt") *)
+    if !GWPARAM.reorg then
+      String.concat Filename.dir_sep [Secure.bases_dir ();
+        conf.bname ^ ".gwb"; "documents"; fname ^ ".txt"]
+    else
+      String.concat Filename.dir_sep [Secure.bases_dir ();
+        "src"; conf.bname; fname ^ ".txt"]
   in
   if Sys.file_exists fname1 then fname1
-  else Util.base_path [ "src" ] bname (Filename.basename fname ^ ".txt")
+  else 
+    if !GWPARAM.reorg then
+      String.concat Filename.dir_sep [Secure.bases_dir ();
+        "documents"; fname ^ ".txt"]
+    else
+      String.concat Filename.dir_sep [Secure.bases_dir ();
+        "src"; fname ^ ".txt"]
 
 let extract_date s =
   try Scanf.sscanf s "%d/%d/%d" (fun d m y -> Some (d, m, y)) with _ -> None
