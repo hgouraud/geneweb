@@ -4,7 +4,9 @@
     for simple functions if it does not come with a performance cost.
 *)
 
-let reorg = ref false
+let reorg =
+  ref (match Sys.getenv_opt "GW_REORG" with Some "yes" -> true | _ -> false)
+
 let dir_etc_r = ref "etc"
 let dir_lang_r = ref "lang"
 let dir_gwd_k_r = ref "gwd_k"
@@ -12,6 +14,9 @@ let dir_cnt_r = ref "cnt"
 let dir_cnt_base_r = ref "cnt"
 let portraits = ref "images"
 let documents = ref "src"
+
+let _ =
+  Printf.eprintf "GWPARAM.reorg = %s\n" (if !reorg then "Reorg" else "Default")
 
 type syslog_level =
   [ `LOG_ALERT
@@ -40,6 +45,10 @@ module Reorg = struct
     dir_cnt_base_r :=
       String.concat Filename.dir_sep [ bases_dir; bname ^ ".gwb"; "cnt" ]
 
+  let config bname =
+    String.concat Filename.dir_sep
+      [ Secure.bases_dir (); bname ^ ".gwb"; "config.txt" ]
+
   (* base_path [A; B] mybase file becomes bases/mybase.gwb/A/B/file *)
   let base_path pref bname fname =
     let a = Filename.concat (Secure.bases_dir ()) (bname ^ ".gwb") in
@@ -58,6 +67,9 @@ module Default = struct
 
   let init_base bases_dir _bname =
     dir_cnt_base_r := String.concat Filename.dir_sep [ bases_dir; "cnt" ]
+
+  let config bname =
+    String.concat Filename.dir_sep [ Secure.bases_dir (); bname ^ ".gwf" ]
 
   (* base_path [A; B] mybase file becomes bases/A/B/mybase/file *)
   let base_path pref bname fname =
@@ -197,6 +209,7 @@ end
 
 let init = if !reorg then ref Reorg.init else ref Default.init
 let init_base = if !reorg then ref Reorg.init_base else ref Default.init_base
+let config = if !reorg then ref Reorg.config else ref Default.config
 let base_path = if !reorg then ref Reorg.base_path else ref Default.base_path
 let bpath = if !reorg then ref Reorg.bpath else ref Default.bpath
 let output_error = ref Default.output_error

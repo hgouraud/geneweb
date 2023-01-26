@@ -1838,7 +1838,7 @@ let find_sosa_ref conf base =
 let write_default_sosa conf key =
   let gwf = List.remove_assoc "default_sosa_ref" conf.base_env in
   let gwf = List.rev (("default_sosa_ref", key) :: gwf) in
-  let fname = bpath (conf.bname ^ ".gwf") in
+  let fname = !GWPARAM.config conf.bname in
   let tmp_fname = fname ^ "2" in
   let oc =
     try Stdlib.open_out tmp_fname
@@ -1871,7 +1871,7 @@ let create_topological_sort conf base =
       Consang.topological_sort base (pget conf)
   | Some "no_tstab" -> Gwdb.iper_marker (Gwdb.ipers base) 0
   | _ ->
-      let bfile = bpath (conf.bname ^ ".gwb") in
+      let bfile = !GWPARAM.bpath (conf.bname ^ ".gwb") in
       let tstab_file =
         if conf.use_restrict && (not conf.wizard) && not conf.friend then
           Filename.concat bfile "tstab_visitor"
@@ -2143,7 +2143,10 @@ let short_f_month m =
 type auth_user = { au_user : string; au_passwd : string; au_info : string }
 
 let read_gen_auth_file fname =
-  let fname = bpath fname in
+  (* on ne connait pas bname!! *)
+  (* dans le fichier config, on peut dire
+     xx_passwd_file=bname.gwb/file.auth *)
+  let fname = Filename.concat (Secure.bases_dir ()) fname in
   try
     let ic = Secure.open_in fname in
     let rec loop data =
@@ -2449,7 +2452,7 @@ let cache_visited conf =
     if Filename.check_suffix conf.bname ".gwb" then conf.bname
     else conf.bname ^ ".gwb"
   in
-  Filename.concat (bpath bname) "cache_visited"
+  Filename.concat (!GWPARAM.bpath bname) "cache_visited"
 
 (* ************************************************************************ *)
 (*  [Fonc] read_visited : string -> cache_visited_t                         *)

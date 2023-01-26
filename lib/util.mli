@@ -35,16 +35,19 @@ val commit_patches : config -> base -> unit
 val update_wf_trace : config -> string -> unit
 
 val get_referer : config -> Adef.escaped_string
-(** Get referer (the page you came from to the current page) page from HTTP request *)
+(** Get referer (the page you came from to the current page) page
+    from HTTP request *)
 
 val clean_html_tags : string -> string list -> string
 val clean_comment_tags : string -> string
 
 val html : ?content_type:string -> config -> unit
-(** Prints HTTP response headers with giving content type (default : {i text/html}) on the socket. *)
+(** Prints HTTP response headers with giving content type
+    (default : {i text/html}) on the socket. *)
 
 val unauthorized : config -> string -> unit
-(** Prints HTTP response with code 401 (Unauthorized) and error page with giving message *)
+(** Prints HTTP response with code 401 (Unauthorized) and error page
+    with giving message *)
 
 val string_of_ctime : config -> string
 
@@ -56,8 +59,9 @@ val commd :
   ?senv:bool ->
   config ->
   Adef.escaped_string
-(** Returns link to the current command (database name after domain name and port in url) with query string
-    that containts bindings from [conf.henv] and [conf.senv]. Doesn't add binding [(k,v)] when:
+(** Returns link to the current command (database name after domain name
+    and port in url) with query string that containts bindings from 
+    [conf.henv] and [conf.senv]. Doesn't add binding [(k,v)] when:
     - k = "oc" or "ocz" and v = "0"
     - v = "" *)
 
@@ -70,7 +74,8 @@ val hidden_env_aux : config -> (string * Adef.encoded_string) list -> unit
 *)
 
 val hidden_env : config -> unit
-(** Creates a hidden HTML input for every key and value in [conf.henv] and [conf.senv].
+(** Creates a hidden HTML input for every key and value in [conf.henv]
+    and [conf.senv].
     Used to include immutable environement bindings in the HTML form. *)
 
 val hidden_textarea : config -> string -> Adef.encoded_string -> unit
@@ -427,10 +432,13 @@ type auth_user = { au_user : string; au_passwd : string; au_info : string }
 (** Authenticated user from from authorization file. *)
 
 val read_gen_auth_file : string -> auth_user list
-(** Read all authenticated users with their passwords from authorization file (associated to {i "wizard_passwd_file"} in [conf.base_env]) *)
+(** For a given base, read all authenticated users with their
+    passwords from authorization file (associated to {i "wizard_passwd_file"}
+    in [conf.base_env]) *)
 
 val is_that_user_and_password : auth_scheme_kind -> string -> string -> bool
-(** [is_that_user_and_password auth_sheme user paswd] verify if given user with his password correspond to the authentication scheme. *)
+(** [is_that_user_and_password auth_sheme user paswd] verify if given
+    user with his password correspond to the authentication scheme. *)
 
 (* Searching *)
 
@@ -443,7 +451,8 @@ val wprint_in_columns :
   config -> ('a -> string) -> ('a -> unit) -> 'a list -> unit
 
 val is_hide_names : config -> person -> bool
-(** Tells if person's names are hiden (if person's access is [Private] or if mode [conf.hide_names] is enabled). *)
+(** Tells if person's names are hiden (if person's access is
+    [Private] or if mode [conf.hide_names] is enabled). *)
 
 val reduce_list : int -> 'a list -> 'a list
 (** [reduce_list n l] takes [n] first elements from the list [l] *)
@@ -454,7 +463,8 @@ val gen_print_tips : config -> Adef.safe_string -> unit
 (** Print a tip with the specified text *)
 
 val print_tips_relationship : config -> unit
-(** Print a tip that tells to {i Click an individual below to calculate the family link.} *)
+(** Print a tip that tells to {i Click an individual below to
+    calculate the family link.} *)
 
 val display_options : config -> Adef.escaped_string
 
@@ -532,7 +542,8 @@ val include_template :
   (unit -> unit) ->
   unit
 (** [include_template conf env fname failure]
-    Search [fname] in templates path and interpret it with global environnement [env] provided.
+    Search [fname] in templates path and interpret it with global
+    environnement [env] provided.
     Interpretation of template write directly its results in the socket.
     If the file can not be found, [failure] is called.
 *)
@@ -543,8 +554,8 @@ val select_masc :
     From [ips], a list matching ipers to a number of maximum generations,
     get maximum ascendants of ipers up to these corresponding generations.
 
-    A person is maximum ascendant if their generation matches the maximum, or
-    if they do not have ancestors.
+    A person is maximum ascendant if their generation matches the maximum,
+    or if they do not have ancestors.
 
     The result is a Hashtbl matching an iper to the corresponding person and
     their generation.

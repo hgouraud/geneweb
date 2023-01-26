@@ -6,7 +6,7 @@ open Util
 module StrSet = Mutil.StrSet
 
 let file_path conf base fname =
-  Util.bpath
+  !GWPARAM.bpath
     (List.fold_left Filename.concat (conf.bname ^ ".gwb")
        [ base_notes_dir base; fname ^ ".txt" ])
 
@@ -156,7 +156,7 @@ let commit_notes conf base fnotes s =
   let fname = path_of_fnotes fnotes in
   let fpath =
     List.fold_left Filename.concat
-      (Util.bpath (conf.bname ^ ".gwb"))
+      (!GWPARAM.bpath (conf.bname ^ ".gwb"))
       [ base_notes_dir base; fname ]
   in
   Mutil.mkdir_p (Filename.dirname fpath);

@@ -268,8 +268,9 @@ let strip_trailing_spaces s =
   in
   String.sub s 0 len
 
+(* REORG *)
 let read_base_env bname =
-  let fname = Util.bpath (bname ^ ".gwf") in
+  let fname = !GWPARAM.config bname in
   try
     let ic = Secure.open_in fname in
     let env =
@@ -281,7 +282,7 @@ let read_base_env bname =
           else loop (cut_at_equal 0 s :: env)
         | exception End_of_file -> env
       in
-      loop []
+      loop ["base_name", bname] (* provide bname in base_env *)
     in
     close_in ic; env
   with Sys_error _ -> []
@@ -370,10 +371,16 @@ let nonce_private_key =
 let digest_nonce _ = Lazy.force nonce_private_key
 
 let trace_auth base_env f =
+  let bname =
+    match List.assoc_opt "base_name" base_env with
+    | Some bname -> bname
+    | None -> ""
+  in
   if List.mem_assoc "trace_auth" base_env then
+    let _ = Printf.eprintf "Open trace_auth.txt\n" in
     let oc =
       open_out_gen [Open_wronly; Open_append; Open_creat] 0o777
-        "trace_auth.txt"
+        (!GWPARAM.base_path [] bname "trace_auth.txt")
     in
     f oc; close_out oc
 
@@ -439,7 +446,7 @@ let unauth_server conf ar =
 let gen_match_auth_file test_user_and_password auth_file =
   if auth_file = "" then None
   else
-    let aul = read_gen_auth_file auth_file in
+    let aul = Util.read_gen_auth_file auth_file in
     let rec loop =
       function
         au :: aul ->
@@ -1217,10 +1224,17 @@ let make_conf from_addr request script_name env =
      charset = "UTF-8"; is_rtl = is_rtl;
      left = if is_rtl then "right" else "left";
      right = if is_rtl then "left" else "right";
+     (* REORG: current setup assumes auth files are in bases_dir *)
      auth_file =
        begin try
+         let dir =
+           if !GWPARAM.reorg then
+             Filename.concat (Secure.bases_dir ()) (base_file ^ ".gwb")
+           else
+             Secure.bases_dir ()
+         in
          let x = List.assoc "auth_file" base_env in
-         if x = "" then !auth_file else Util.bpath x
+         if x = "" then !auth_file else (Filename.concat dir x)
        with Not_found -> !auth_file
        end;
      border =
@@ -1471,6 +1485,7 @@ let excluded from =
     loop ()
   with Sys_error _ -> false
 
+(* conf may be an empty printer_conf without bname! *)
 let image_request conf script_name env =
   match Util.p_getenv env "m", Util.p_getenv env "v" with
   | Some "IM", Some fname ->
@@ -1478,8 +1493,13 @@ let image_request conf script_name env =
         if fname.[0] = '/' then String.sub fname 1 (String.length fname - 1)
         else fname
       in
-      let `Path fname = Image.path_of_filename conf fname in
-      let _ = ImageDisplay.print_image_file conf fname in true
+      begin match Image.path_of_filename conf fname with
+      | `Path fname -> (
+          match ImageDisplay.print_image_file conf fname with
+          | Ok _ -> true
+          | Error _ -> false)
+      | _ -> false
+      end
   | _ ->
       let s = script_name in
       if Mutil.start_with "images/" 0 s then
@@ -1489,8 +1509,13 @@ let image_request conf script_name env =
         (* empeche d'avoir des images qui se trouvent dans le dossier   *)
         (* image. Si on ne fait pas de basename, alors ça marche.       *)
         (* let fname = Filename.basename fname in *)
-        let `Path fname = Image.path_of_filename conf fname in
-        let _ = ImageDisplay.print_image_file conf fname in true
+        begin match Image.path_of_filename conf fname with
+        | `Path fname -> (
+            match ImageDisplay.print_image_file conf fname with
+            | Ok _ -> true
+            | Error _ -> false)
+        | _ -> false
+        end
       else false
 
 
@@ -1539,7 +1564,7 @@ let find_misc_file conf name =
   && List.exists (fun p -> Mutil.start_with (Filename.concat p "assets") 0 name) !plugins
   then name
   else
-    let name' = Util.base_path ["etc"] conf.bname name in
+    let name' = !GWPARAM.base_path ["etc"] conf.bname name in
     if Sys.file_exists name' then name'
     else
       let name' = Util.search_in_assets @@ Filename.concat "etc" name in
@@ -1924,7 +1949,6 @@ let main () =
     ; ("-wd", Arg.String make_win_dir, "<DIR> Directory for socket communication (Windows).")
     ; ("-cache_langs", Arg.String (fun s -> List.iter (Mutil.list_ref_append cache_langs) @@ String.split_on_char ',' s), " Lexicon languages to be cached.")
     ; ("-cgi", Arg.Set force_cgi, " Force CGI mode.")
-    ; ("-reorg", Arg.Set GWPARAM.reorg, " Base structure is according to reorg.")
     ; ("-images_url", Arg.String (fun x -> images_url := x), "<URL> URL for GeneWeb images (default: gwd send them).")
     ; ("-icons_url", Arg.String (fun x -> icons_url := x), "<URL> URL for GeneWeb icons (default: gwd send them).")
     ; ("-images_dir", Arg.String (fun x -> images_dir := x), "<DIR> Same than previous but directory name relative to current.")

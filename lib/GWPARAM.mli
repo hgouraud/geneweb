@@ -34,15 +34,15 @@ val init : (string -> unit) ref
     e.g. inititialise assets folders in Secure module. *)
 
 val init_base : (string -> string -> unit) ref
-(** Function called before gwd starts
-    e.g. inititialise assets folders in Secure module. *)
+(** Function called once base_name is known *)
+
+val config : (string -> string) ref
+(** returns the configuration file path *)
 
 val base_path : (string list -> string -> string -> string) ref
-(** [!base_path pref fname] function that returns a path to a file identified by [pref] [fname]
-    related to bases. [pref] is like a category for file [fname].
-
-    See {!val:GWPARAM.Default.base_path} for a concrete example.
-*)
+(** [!base_path pref bname fname] function that returns a path to
+    a file [fname] in sub_folders [pref] related to base bname.
+    See {!val:GWPARAM.Default.base_path} for a concrete example. *)
 
 val bpath : (string -> string) ref
 (** Same as {!val:base_path}, but without the prefix (avoid unecessary empty list). *)
