@@ -1,7 +1,7 @@
 (* Copyright (c) 1998-2007 INRIA *)
 
 open Geneweb
-open Config
+module Config = Geneweb.Config
 open Def
 open TemplAst
 open Util

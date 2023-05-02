@@ -5,7 +5,7 @@ let () = Sys.enable_runtime_warnings true
 #endif
 
 open Geneweb
-open Config
+module Config = Geneweb.Config
 open Def
 open Util
 
@@ -1539,7 +1539,7 @@ let print_misc_file conf misc_fname =
           let ic = Secure.open_in_bin fname in
           let buf = Bytes.create 1024 in
           let len = in_channel_length ic in
-          content_misc len misc_fname;
+          content_misc conf len misc_fname;
           let rec loop len =
             if len = 0 then ()
             else

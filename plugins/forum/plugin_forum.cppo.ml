@@ -5,7 +5,6 @@ module ForumDisplay = struct
   #include "forumDisplay.ml"
 end
 
-open Geneweb
 open Config
 
 let ns = "forum"

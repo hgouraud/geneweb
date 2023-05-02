@@ -1121,32 +1121,33 @@ let links_to_ind conf base db key typ =
   let list =
     List.fold_left
       (fun pgl (pg, (_, il)) ->
-         let record_it =
-           match pg, typ with
-           | Def.NLDB.PgInd ip, None ->
-               authorized_age conf base (pget conf base ip)
-           | Def.NLDB.PgFam ifam, None ->
-               authorized_age conf base (pget conf base (get_father @@ foi base ifam))
-           | Def.NLDB.PgMisc n, typ ->
-               begin match typ with
-               | None -> true
-               | Some t ->
-                  let (nenv, _) = Notes.read_notes base n in
-                  let n_type = try List.assoc "TYPE" nenv with Not_found -> "" in
-                  t = n_type
-               end
-           | Def.NLDB.PgNotes, None
-           | Def.NLDB.PgWizard _, None ->
-               true
-           | _ -> false
-         in
-         if record_it then
-           List.fold_left
-             (fun pgl (k, _) -> if k = key then pg :: pgl else pgl) pgl il
-         else pgl)
+        let record_it =
+          match (pg, typ) with
+          | Def.NLDB.PgInd ip, None ->
+              authorized_age conf base (pget conf base ip)
+          | Def.NLDB.PgFam ifam, None ->
+              authorized_age conf base
+                (pget conf base (get_father @@ foi base ifam))
+          | Def.NLDB.PgMisc n, typ -> (
+              match typ with
+              | None -> true
+              | Some t ->
+                  let nenv, _ = Notes.read_notes base n in
+                  let n_type =
+                    try List.assoc "TYPE" nenv with Not_found -> ""
+                  in
+                  t = n_type)
+          | Def.NLDB.PgNotes, None | Def.NLDB.PgWizard _, None -> true
+          | _ -> false
+        in
+        if record_it then
+          List.fold_left
+            (fun pgl (k, _) -> if k = key then pg :: pgl else pgl)
+            pgl il
+        else pgl)
       [] db
   in
-  List.sort_uniq compare l
+  List.sort_uniq compare list
 
 (* Interpretation of template file *)
 
@@ -1172,6 +1173,7 @@ module SortedList = Set.Make (struct
   let compare = compare_ls
 end)
 
+module IperSet = Util.IperSet
 (*
    Type pour représenté soit :
      - la liste des branches patronymique
@@ -2828,36 +2830,26 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc = function
             else false
           in
           VVbool r
-<<<<<<< HEAD
       | _ -> raise Not_found)
-  | [ "has_sosa" ] -> (
-      match get_env "p_link" env with
-      | Vbool _ -> VVbool false
-      | _ -> (
-=======
-      | _ -> raise Not_found
-      end
-  | ["nb_linked_pages_type"; s] ->
-      begin match get_env "nldb" env with
-        Vnldb db ->
+  | [ "nb_linked_pages_type"; s ] -> (
+      match get_env "nldb" env with
+      | Vnldb db ->
           let n =
             if p_auth then
               let key =
                 let fn = Name.lower (sou base (get_first_name p)) in
                 let sn = Name.lower (sou base (get_surname p)) in
-                fn, sn, get_occ p
+                (fn, sn, get_occ p)
               in
               List.length (links_to_ind conf base db key (Some s))
             else 0
           in
           VVstring (string_of_int n)
-      | _ -> raise Not_found
-      end
-  | ["has_sosa"] ->
-      begin match get_env "p_link" env with
-        Vbool _ -> VVbool false
-      | _ ->
->>>>>>> Several improvements
+      | _ -> raise Not_found)
+  | [ "has_sosa" ] -> (
+      match get_env "p_link" env with
+      | Vbool _ -> VVbool false
+      | _ -> (
           match get_env "sosa" env with
           | Vsosa r -> VVbool (get_sosa conf base env r p <> None)
           | _ -> VVbool false))

@@ -475,7 +475,7 @@ let safe_html_allowed_tags =
    Replace tags not authorized with empty comments.
 
    Markup.ml automatically return tags names in lowercase.
- *)
+*)
 let safe_html s =
   let open Markup in
   let stack = ref [] in
@@ -512,26 +512,24 @@ let safe_html s =
   string s
   |> parse_html ~context:(`Fragment "body")
   |> signals |> map make_safe
-  |> write_html ~escape_text ~escape_attribute
+  |> write_html ~escape_text:escape_html ~escape_attribute
   |> to_string
 
 let no_html_tags s =
   let rec need_code i =
     if i < String.length s then
-      match s.[i] with
-        '<' | '>' -> true
-      | _ -> need_code (i + 1)
+      match s.[i] with '<' | '>' -> true | _ -> need_code (i + 1)
     else false
   in
   if need_code 0 then
     let rec loop i len =
       if i = String.length s then Buff.get len
       else
-        let (len, next_i) =
+        let len, next_i =
           match s.[i] with
-            '<' -> Buff.mstore len "&lt;", i + 1
-          | '>' -> Buff.mstore len "&gt;", i + 1
-          | c -> Buff.store len c, i + 1
+          | '<' -> (Buff.mstore len "&lt;", i + 1)
+          | '>' -> (Buff.mstore len "&gt;", i + 1)
+          | c -> (Buff.store len c, i + 1)
         in
         loop next_i len
     in

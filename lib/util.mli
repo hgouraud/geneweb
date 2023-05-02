@@ -593,4 +593,5 @@ val get_bases_list : unit -> string list
 val safe_html_no_escape : string -> string
 
 (**/**)
+
 val init_cache_info : string -> Gwdb.base -> unit
