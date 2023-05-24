@@ -65,7 +65,7 @@ uninstall:
 	rm -rf $(PREFIX)/share/geneweb
 	cd $(MANDIR); rm -f $(MANPAGES)
 
-distrib: new_distrib wrappers
+distrib: all hd/etc/version.txt new_distrib wrappers
 
 wrappers:
 	if test "$(CAMLP5F)" = "-DWIN95"; then \
