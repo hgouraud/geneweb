@@ -325,6 +325,14 @@ function changeCalendar(e,v,m,c) {
   %apply;small_date("death","xvard","xx","verbose")
 %end;
 
+%define;w_birth(wcnt,xx,verbose)
+  %apply;small_date("birth","witnwcnt_b","fwitness","verbose")
+%end;
+
+%define;w_death(wcnt,xx,verbose)
+  %apply;small_date("death","witnwcnt_d","fwitness","verbose")
+%end;
+
 %define;parent(xcnt,xx)
   <table border="1" width=700px>
     <tr>
@@ -512,7 +520,11 @@ function changeCalendar(e,v,m,c) {
         <input type="radio" name="witn%cnt;_sex" value="F"%nn;
          %if;(witness.create.sex = "female") checked="checked"%end;%/>[M/F]1
         </label>
+        </label><label>
+        <input type="checkbox" name="witn%cnt;_pub">[*public]
+        </label>
       </td>
+    </div>
     </tr>
   </table>
   <table border="1">

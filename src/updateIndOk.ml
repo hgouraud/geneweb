@@ -11,6 +11,27 @@ open Hutil;
 open Mutil;
 open Util;
 
+type create_info =
+  Update.create_info ==
+    { ci_birth_date : option date;
+      ci_birth_place : string;
+      ci_death : death;
+      ci_death_date : option date;
+      ci_death_place : string;
+      ci_occupation : string;
+      ci_public : bool }
+;
+
+value ci_empty =
+  { ci_birth_date = None;
+    ci_birth_place = "";
+    ci_death = DontKnowIfDead;
+    ci_death_date = None;
+    ci_death_place = "";
+    ci_occupation = "";
+    ci_public = False }
+;
+
 (* Liste des string dont on a supprimé un caractère.       *)
 (* Utilisé pour le message d'erreur lors de la validation. *)
 value removed_string = ref [] ;
@@ -147,9 +168,15 @@ value reconstitute_relation_parent conf var key sex =
         try int_of_string (getn conf var (key ^ "_occ")) with
         [ Failure _ -> 0 ]
       in
+      let public =
+        match p_getenv conf.env (var ^ "_" ^ key ^ "_pub") with
+        [ Some "on" -> True
+        | _ -> False ]
+      in
       let create =
         match getn conf var (key ^ "_p") with
-        [ "create" -> Update.Create sex None
+        [ "create" ->
+            Update.Create sex (Some {(ci_empty) with ci_public = public})
         | _ -> Update.Link ]
       in
       Some (fn, sn, occ, create, var ^ "_" ^ key) ]

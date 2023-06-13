@@ -26,6 +26,16 @@ type create_info =
       ci_public : bool }
 ;
 
+value ci_empty =
+  { ci_birth_date = None;
+    ci_birth_place = "";
+    ci_death = DontKnowIfDead;
+    ci_death_date = None;
+    ci_death_place = "";
+    ci_occupation = "";
+    ci_public = False }
+;
+
 value raw_get conf key =
   match p_getenv conf.env key with
   [ Some v -> v
@@ -197,7 +207,30 @@ value reconstitute_family conf =
           [ Some "on" ->
               let new_witn = ("", "", 0, Update.Create Neuter None, "") in
               ([c; new_witn :: witnesses], True)
-          | _ -> ([c :: witnesses], ext) ]
+          | _ -> 
+              let public =
+                match
+                  p_getenv conf.env
+                    ("witn" ^ string_of_int i ^ "_pub")
+                with
+                [ Some "on" -> True
+                | _ -> False ]
+              in
+              let c =
+                let (fn, sn, occ, update, var) = c in
+                let x =
+                  match update with
+                  [ Update.Create s (Some ci) ->
+                      Some (s, { (ci) with ci_public = public })
+                  | Update.Create s  (None) ->
+                      Some (s, { (ci_empty) with ci_public = public })
+                  | Update.Link -> None ]
+                in
+                match x with
+                [ Some (s, ci) -> (fn, sn, occ, Update.Create s (Some ci), var)
+                | None -> (fn, sn, occ, Update.Link, var) ]
+              in
+              ([c :: witnesses], ext) ]
       | None -> ([], ext) ]
   in
   let (witnesses, ext) =

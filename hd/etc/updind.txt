@@ -626,10 +626,14 @@ function changeCalendar(e,v,m,c) {
     </tr>
     <tr>
       <td><label for="rxcnt_xvar_sn">[*surname/surnames]0</label></td>
-      <td colspan="4">
+      <td colspan="3">
         <input name="rxcnt_xvar_sn" size="40" maxlength="200"%sp;
          value="%relation.xrel.surname;" id="rxcnt_xvar_sn"%/>
          ([sex]0 = xsex)
+      </td>
+      <td>
+      <input name="rxcnt_xvar_pub" type="checkbox" id="rxcnt_xvar_pub"%/>
+         [*public]
       </td>
     </tr>
   </table>
