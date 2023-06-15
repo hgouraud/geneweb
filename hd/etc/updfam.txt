@@ -369,9 +369,9 @@ function changeCalendar(e,v,m,c) {
       %apply;death("paxcnt","xx","true")
     </tr>
     <tr>
-      <td><label for="paxcnt_occupation">[*occupation/occupations]0</label></td>
+      <td><label for="paxcnt_occu">[*occupation/occupations]0</label></td>
       <td colspan="4">
-        <input name="paxcnt_occupation" size="40" maxlength="200" value="%xx.create.occupation" id="paxcnt_occupation"%/>
+        <input name="paxcnt_occu" size="40" maxlength="200" value="%xx.create.occupation" id="paxcnt_occu"%/>
       </td>
     </tr>
   </table>
@@ -487,19 +487,18 @@ function changeCalendar(e,v,m,c) {
       <td><label for="witn%cnt;_fn">[*first name/first names]0</label></td>
       <td>
         <input name="witn%cnt;_fn" size="40" maxlength="200"%sp;
-         value="%witness.first_name;" id="witn%cnt;_fn"%/>
-      </td>
+         id="witn%cnt;_fn" value="%witness.first_name;"%/></td>
       <td align="%right;"><label for="witn%cnt;_occ">[*number]</label></td>
       <td>
         <input name="witn%cnt;_occ" size="5" maxlength="8"%sp;
-         value="%witness.occ;" id="witn%cnt;_occ"%/>
-      </td>
+         id="witn%cnt;_occ" value="%witness.occ;" %/></td>
       <td>
         <select name="witn%cnt;_p">
-          <option value="link"%if;(witness.create = "link")%sp;
-           selected="selected"%end;>[*link]0</option>
-          <option value="create"%if;(witness.create = "create")%sp;
-           selected="selected"%end;>[*create]0</option>
+        %if;((witness.first_name="" and witness.surname="") or witness.create = "create")
+          <option value="create" selected="selected">[*create]0</option>
+        %else;
+          <option value="link" selected="selected">[*link]0</option>
+        %end;
         </select>
       </td>
     </tr>
@@ -507,24 +506,32 @@ function changeCalendar(e,v,m,c) {
       <td><label for="witn%cnt;_sn">[*surname/surnames]0</label></td>
       <td colspan="3">
         <input name="witn%cnt;_sn" size="40" maxlength="200"%sp;
-         value="%witness.surname;" id="witn%cnt;_sn"%/>
-      </td>
+         id="witn%cnt;_sn" value="%witness.surname;" %/></td>
+      %if;(witness.first_name="" and witness.surname="")
       <td>
         <label>
         <input type="radio" name="witn%cnt;_sex" value="N"%nn;
-         %if;(witness.create.sex = "neuter") checked="checked"%end;%/>?
+          %if;(witness.create.sex = "neuter") checked="checked"%end;%/>?
         </label><label>
-        <input type="radio" name="witn%cnt;_sex" value="M"%nn;
-         %if;(witness.create.sex = "male") checked="checked"%end;%/>[M/F]0
+          <input type="radio" name="witn%cnt;_sex" value="M"%nn;
+          %if;(witness.create.sex = "male") checked="checked"%end;%/>[M/F]0
         </label><label>
-        <input type="radio" name="witn%cnt;_sex" value="F"%nn;
-         %if;(witness.create.sex = "female") checked="checked"%end;%/>[M/F]1
-        </label>
-        </label><label>
-        <input type="checkbox" name="witn%cnt;_pub">[*public]
-        </label>
-      </td>
-    </div>
+          <input type="radio" name="witn%cnt;_sex" value="F"%nn;
+          %if;(witness.create.sex = "female") checked="checked"%end;%/>[M/F]1
+        </label>&nbsp;&nbsp;
+        <label for="witn%cnt;_pub"> [*public]
+          <input type="checkbox" name="witn%cnt;_pub"%sp;
+           id="witn%cnt;_pub"></label></td>
+    <tr>
+      <td><label for="witn%cnt;_occu">[*occupation/occupations]0</label></td>
+      <td colspan="3">
+        <input name="witn%cnt;_occu" size="40" maxlength="200"%sp;
+         id="witn%cnt;_occu"></td>
+      <td>
+        <label for="witn%cnt;_od">[*of course dead]
+          <input type="checkbox" name="witn%cnt;_od"%sp;
+           id="witn%cnt;_od"></label></td>
+      %end;
     </tr>
   </table>
   <table border="1">
@@ -582,13 +589,11 @@ function changeCalendar(e,v,m,c) {
       <td><label for="chxcnt_fn">[*first name/first names]0</label></td>
       <td colspan="2">
         <input name="chxcnt_fn" size="40" maxlength="200"%sp;
-         value="%child.first_name;" id="chxcnt_fn"%/>
-      </td>
+         id="chxcnt_fn" value="%child.first_name;"%/></td>
       <td><label for="chxcnt_occ">[*number]</label></td>
       <td>
-        <input name="chxcnt_occ" size="5" maxlength="8" value="%child.occ;"%sp;
-         id="chxcnt_occ"%/>
-      </td>
+        <input name="chxcnt_occ" size="5" maxlength="8"%sp;
+         id="chxcnt_occ" value="%child.occ;"%/></td>
     </tr>
     <tr>
       <td><label for="chxcnt_sn">[*surname/surnames]0</label></td>
@@ -600,8 +605,7 @@ function changeCalendar(e,v,m,c) {
                evar_m = "MOD_FAM" or evar_m = "MOD_FAM_OK" or
                evar_m = "MRG_FAM_OK" or evar_m = "MRG_MOD_FAM_OK") and
               child.surname = father.surname)
-           %else;%child.surname;%end;" id="chxcnt_sn"%/>
-      </td>
+           %else;%child.surname;%end;" id="chxcnt_sn"%/></td>
     </tr>
     <tr>
       <td>
@@ -610,8 +614,7 @@ function changeCalendar(e,v,m,c) {
            selected="selected"%end;>[*link]0</option>
           <option value="create"%if;(child.create = "create")%sp;
            selected="selected"%end;>[*create]0</option>
-        </select>
-      </td>
+        </select></td>
       %apply;birth("chxcnt", "child", "false")
     </tr>
     <tr>
@@ -625,15 +628,14 @@ function changeCalendar(e,v,m,c) {
         </label><label>
         <input type="radio" name="chxcnt_sex" value="F"%nn;
          %if;(child.create.sex = "female") checked="checked"%end;%/>[M/F]1
-        </label>
-      </td>
+        </label></td>
       %apply;death("chxcnt", "child", "false")
     </tr>
     <tr>
-      <td><label for="chxcnt_occupation">[*occupation/occupations]0</label></td>
+      <td><label for="chxcnt_occu">[*occupation/occupations]0</label></td>
       <td colspan="4">
-        <input name="chxcnt_occupation" size="40" maxlength="200" value="%child.create.occupation;" id="chxcnt_occupation"%/>
-      </td>
+        <input name="chxcnt_occu" size="40" maxlength="200"%sp;
+         id="chxcnt_occu" value="%child.create.occupation;" %/></td>
     </tr>
   </table>
 %end;

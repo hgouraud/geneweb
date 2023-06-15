@@ -608,33 +608,39 @@ function changeCalendar(e,v,m,c) {
       <td><label for="rxcnt_xvar_fn">[*first name/first names]0</label></td>
       <td>
         <input name="rxcnt_xvar_fn" size="23" maxlength="200"%sp;
-         value="%relation.xrel.first_name;" id="rxcnt_xvar_fn"%/>
-      </td>
+         value="%relation.xrel.first_name;" id="rxcnt_xvar_fn"%/></td>
       <td align="right"><label for="rxcnt_xvar_occ">[*number]</label></td>
       <td>
         <input name="rxcnt_xvar_occ" size="5" maxlength="8"%sp;
-         value="%relation.xrel.occ;" id="rxcnt_xvar_occ"%/>
-      </td>
+         value="%relation.xrel.occ;" id="rxcnt_xvar_occ"%/></td>
       <td>
         <select name="rxcnt_xvar_p">
-        <option value="link"%if;relation.xrel.link;%sp;
-         selected="selected"%end;>[*link]0</option>
-        <option value="create"%if;relation.xrel.create;%sp;
-         selected="selected"%end;>[*create]0</option>
-        </select>
-      </td>
+        %if;((relation.xrel.first_name="" and relation.xrel.surname="") or relation.xrel.create)
+          <option value="create" selected="selected">[*create]0</option>
+        %else;
+          <option value="link" selected="selected">[*link]0</option>
+        %end;
+        </select></td>
     </tr>
     <tr>
       <td><label for="rxcnt_xvar_sn">[*surname/surnames]0</label></td>
       <td colspan="3">
         <input name="rxcnt_xvar_sn" size="40" maxlength="200"%sp;
          value="%relation.xrel.surname;" id="rxcnt_xvar_sn"%/>
-         ([sex]0 = xsex)
-      </td>
+         ([sex]0 = xsex)</td>
+      %if;(relation.xrel.first_name="" and relation.xrel.surname="")
       <td>
-      <input name="rxcnt_xvar_pub" type="checkbox" id="rxcnt_xvar_pub"%/>
-         [*public]
-      </td>
+        <input name="rxcnt_xvar_pub" type="checkbox" id="rxcnt_xvar_pub"%/>
+         [*public]</td>
+    </tr>
+    <tr>
+      <td>
+        <label for= "rxcnt_xvar_occu" >[*occupation/occupations]0</label></td>
+      <td colspan="2">
+        <input size="30" maxlength="200" name="rxcnt_xvar_occu"></td>
+      <td>
+        <input type="checkbox" name="rxcnt_xvar_od">[*of course dead]</td>
+      %end;
     </tr>
   </table>
 %end;

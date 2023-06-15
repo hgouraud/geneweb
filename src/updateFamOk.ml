@@ -116,7 +116,7 @@ value reconstitute_parent_or_child conf var default_surname =
     in
     let d = Update.reconstitute_date conf (var ^ "d") in
     let dpl = getn conf (var ^ "d") "pl" in
-    let occupation = only_printable (getn conf var "occupation") in
+    let occupation = only_printable (getn conf var "occu") in
     let public = getn conf (var ^ "b") "yyyy" = "p" in
     {ci_birth_date = b; ci_birth_place = bpl; ci_death = death;
      ci_death_date = d; ci_death_place = dpl; ci_occupation = occupation;
@@ -209,21 +209,37 @@ value reconstitute_family conf =
               ([c; new_witn :: witnesses], True)
           | _ -> 
               let public =
-                match
-                  p_getenv conf.env
-                    ("witn" ^ string_of_int i ^ "_pub")
+                match p_getenv conf.env ("witn" ^ string_of_int i ^ "_pub")
                 with
                 [ Some "on" -> True
                 | _ -> False ]
+              in
+              let occupation =
+                match p_getenv conf.env ("witn" ^ string_of_int i ^ "_occu")
+                with
+                [ Some s -> s
+                | _ -> "" ]
+              in
+              let death =
+                match p_getenv conf.env ("witn" ^ string_of_int i ^ "_od")
+                with
+                [ Some "on" -> OfCourseDead
+                | _ -> DontKnowIfDead ]
               in
               let c =
                 let (fn, sn, occ, update, var) = c in
                 let x =
                   match update with
                   [ Update.Create s (Some ci) ->
-                      Some (s, { (ci) with ci_public = public })
+                      Some (s, { (ci) with 
+                        ci_death = death;
+                        ci_occupation = occupation;
+                        ci_public = public })
                   | Update.Create s  (None) ->
-                      Some (s, { (ci_empty) with ci_public = public })
+                      Some (s, { (ci_empty) with
+                        ci_death = death;
+                        ci_occupation = occupation;
+                        ci_public = public })
                   | Update.Link -> None ]
                 in
                 match x with

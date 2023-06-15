@@ -173,10 +173,25 @@ value reconstitute_relation_parent conf var key sex =
         [ Some "on" -> True
         | _ -> False ]
       in
+      let occupation =
+        match p_getenv conf.env (var ^ "_" ^ key ^ "_occu")
+        with
+        [ Some s -> s
+        | _ -> "" ]
+      in
+      let death =
+        match p_getenv conf.env (var ^ "_" ^ key ^ "_od")
+        with
+        [ Some "on" -> OfCourseDead
+        | _ -> DontKnowIfDead ]
+      in
       let create =
         match getn conf var (key ^ "_p") with
         [ "create" ->
-            Update.Create sex (Some {(ci_empty) with ci_public = public})
+            Update.Create sex (Some {(ci_empty) with
+              ci_death = death;
+              ci_occupation = occupation;
+              ci_public = public })
         | _ -> Update.Link ]
       in
       Some (fn, sn, occ, create, var ^ "_" ^ key) ]
