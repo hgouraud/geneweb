@@ -686,7 +686,17 @@ value print_mod_ok conf base wl pgl p ofn osn oocc =
         if is_friend then
           do {
             Wserver.wprint "<span style=\"color:red\">%s</span>\n"
-              (transl conf "name changed friend");
+              (transl conf "name changed for friend");
+            let args = [| nfn; nsn; nocc; ofn; osn; oocc |];
+            let args = Array.append [| "./friend_modified.sh"; conf.bname; conf.user; |] args in
+            match Unix.fork () with
+            [ 0 ->
+                if Unix.fork () <> 0 then exit 0
+                else do {
+                  try Unix.execvp comm args with _ -> ();
+                  exit 0
+                }
+            | id -> ignore (Unix.waitpid [] id) ]
           } else ();
       } else ();
       Wserver.wprint "<p>\n";
