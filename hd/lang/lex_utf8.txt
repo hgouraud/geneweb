@@ -8272,11 +8272,11 @@ en: The first name, name or occurrence of this person has changed. Please update
 fr: Le prénom, nom ou occurrence de cette personne a changé. Pensez à mettre à jour les %s à l’ancienne clé.
 
     name changed for friend
-de: <br>this person is a consenting Friend.<br>This change will suppress its Friend access until next Assoconnect update! Contact association@roglo.net for details and corrections.
-en: <br>this person is a consenting Friend.<br>This change will suppress its Friend access until next Assoconnect update! Contact association@roglo.net for details and corrections.
-es: <br>this person is a consenting Friend.<br>This change will suppress its Friend access until next Assoconnect update! Contact association@roglo.net for details and corrections.
-it: <br>this person is a consenting Friend.<br>This change will suppress its Friend access until next Assoconnect update! Contact association@roglo.net for details and corrections.
-fr: <br>cette personne est un Ami consentant.<br>Ce changement supprimera son accès Ami jusqu'à mise à jour dans Assoconnect. Contacter association@roglo.net pour information et corrections.
+de: <br>this person is a consenting Friend.<br>This change will suppress its Friend access until next Assoconnect update! <br>Revert this correction or contact association@roglo.net for details and corrections.
+en: <br>this person is a consenting Friend.<br>This change will suppress its Friend access until next Assoconnect update! <br>Revert this correction or contact association@roglo.net for details and corrections.
+es: <br>this person is a consenting Friend.<br>This change will suppress its Friend access until next Assoconnect update! <br>Revert this correction or contact association@roglo.net for details and corrections.
+it: <br>this person is a consenting Friend.<br>This change will suppress its Friend access until next Assoconnect update! <br>Revert this correction or contact association@roglo.net for details and corrections.
+fr: <br>cette personne est un Ami consentant.<br>Ce changement supprimera son accès Ami jusqu'à mise à jour dans Assoconnect. <br>Annulez cette correction ou contactez association@roglo.net pour information et corrections.
 
 
     navigation
