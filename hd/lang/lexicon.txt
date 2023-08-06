@@ -1738,7 +1738,7 @@ eo: praonklo/praonklino
 es: un tio abuelo/una tia abuela
 et: vanaonu/vanatädi
 fi: isosetä:g:---dän/isotäti:g:--din
-fr: un grand-oncle/une grand-tante
+fr: un %sgrand-oncle/une %sgrand-tante
 he:   דוד-סב/ דודה-סבה
 is: afa(ömmu)bróðir/afa(ömmu)systir
 it: un prozio/una prozia
@@ -7707,7 +7707,7 @@ tr: üvey kardeşler
     half-relationship
 co: mezu/meza/mezi
 en: half-/half-/half-/ 
-fr: demi-/demie-/demi-/ 
+fr: demi-/demi-/demi-/ 
 
     happy birthday to them!
 co: felice nataliziu !
