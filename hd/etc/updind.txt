@@ -823,8 +823,8 @@
   </div>
 <div class="card">
 <h2 class="card-header%if;(mrg=1) mt-5%end;">%nn;
-  %if;(mrg=1)[*merge::person/persons]1
-  %elseif;(mod=1)[*modify::person/persons]0
+  %if;(mrg=1)[*merge::person/persons]1%nn;
+  %elseif;(mod=1)[*modify::person/persons]0%nn;
   %else;[*add:person/persons]0%end;[:] %first_name; %surname; %if;(occ!="")(%occ)%end;
 </h2>
 <div class="card-body">
