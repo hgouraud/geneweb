@@ -40,6 +40,7 @@
 %end;
 %let;nb;%evar.nb;%in;
 
+%if;(e.data="places")
 <div class="d-flex justify-content-between">
   <h1>[*list/list (ancestors)] [of] [person/persons]1%if;(evar.surn!="") [by] [surname/surnames]0%end; [by] [place]</h1>
   <div class="btn-toolbar mt-2" role="toolbar" aria-label="Toolbar for list of individuals">
@@ -101,6 +102,12 @@
 %apply;evt("de",[death],"D")
 %apply;evt("bu",[burial],"S").
 </div>
+
+%elseif;(e.data="sn")
+  <h1>[*list of persons of a given surname]</h1>
+%elseif;(e.data="fn")
+  <h1>[*list of persons of a given first name]</h1>
+%end;
 
 %define;nbmds(xx,yy,tt,kk)
   %if;(xx!="" and xx="kk")yy%nn;
@@ -178,47 +185,63 @@
 %end;
 
 <div class="mt-2">
-  %foreach;sorted_list_item;
-  %let;sub;%apply;get_sub(5,item.1)%in; %( was item.2 %)
-  %if;(item.1!=prev_item.1 or prev_item.1="")<li>
-    %if;(k!="")<a href="%prefix;m=PPS&k=%item.1;%opt;">%item.1;</a>%end;
-    %if;wizard;
-      <a href="%prefix;m=MOD_DATA&%nbs;&data=place&s=%sub;#%item.1;" 
-        title="%apply;book_of([places]) [modify] #%item.1;…">
-        <i class="fa fa-magic fa-xs ml-1"></i>
-      </a>
-    %end;
-  %end;
-    <div class="ml-3">
-      %let;myindex;%item.3;%in;
-      %let;so;%item.1;%in;
-      %let;access;%apply;get_value(myindex, "access")%in;
-      %let;sex;%apply;get_value(myindex, "sex")%in;
-      <span class="text-monospace mr-2">%apply;tags(myindex,"1",item.1)</span>%nn;
-      <a href="%prefix;%access;">%nn;
-      %apply;get_value(myindex, "first_name")%sp;
-      %apply;get_value(myindex, "surname")%nn;
-      %( Occurence number is hidden of those lists for the moment
-      %let;occ;%apply;get_value(myindex, "occ")%in;%nn;
-      %if;(occ!="0")%sp;%[%occ;%]%end;%)</a>%nn;
-      %if;(evar.dates="on")
-        <a href="%prefix;m=MOD_IND&i=%myindex;">%apply;get_value(myindex, "dates")</a>%nn;
+  %if;(e.data="places")
+    %foreach;sorted_list_item;
+    %let;sub;%apply;get_sub(5,item.1)%in; %( was item.2 %)
+    %if;(item.1!=prev_item.1 or prev_item.1="")<li>
+      %if;(k!="")<a href="%prefix;m=PPS&k=%item.1;%opt;">%item.1;</a>%end;
+      %if;wizard;
+        <a href="%prefix;m=MOD_DATA&%nbs;&data=place&s=%sub;#%item.1;" 
+          title="%apply;book_of([places]) [modify] #%item.1;…">
+          <i class="fa fa-magic fa-xs ml-1"></i>
+        </a>
       %end;
-      %if;(evar.parents="on")
-        %let;fa;%apply;get_value(myindex, "father")%in;
-        %let;mo;%apply;get_value(myindex, "mother")%in;
-        %if;(fa!="" or mo!=""), %sp;
-          %let;fa;%if;(fa="")?%else;%fa;%end;%in;
-          %let;mo;%if;(mo="")?%else;%mo;%end;%in;
-          %apply;a_of_b%with;
-            %if;(sex=0)[son/daughter/child]0
-            %elseif;(sex=1)[son/daughter/child]1
-            %else;[son/daughter/child]2%end;
-          %and;%fa; [and] %mo;
+    %end;
+      <div class="ml-3">
+        %let;myindex;%item.3;%in;
+        %let;so;%item.1;%in;
+        %let;access;%apply;get_value(myindex, "access")%in;
+        %let;sex;%apply;get_value(myindex, "sex")%in;
+        <span class="text-monospace mr-2">%apply;tags(myindex,"1",item.1)</span>%nn;
+        <a href="%prefix;%access;">%nn;
+        %apply;get_value(myindex, "first_name")%sp;
+        %apply;get_value(myindex, "surname")%nn;
+        %( Occurence number is hidden of those lists for the moment
+        %let;occ;%apply;get_value(myindex, "occ")%in;%nn;
+        %if;(occ!="0")%sp;%[%occ;%]%end;%)</a>%nn;
+        %if;(evar.dates="on")
+          <a href="%prefix;m=MOD_IND&i=%myindex;">%apply;get_value(myindex, "dates")</a>%nn;
+        %end;
+        %if;(evar.parents="on")
+          %let;fa;%apply;get_value(myindex, "father")%in;
+          %let;mo;%apply;get_value(myindex, "mother")%in;
+          %if;(fa!="" or mo!=""), %sp;
+            %let;fa;%if;(fa="")?%else;%fa;%end;%in;
+            %let;mo;%if;(mo="")?%else;%mo;%end;%in;
+            %apply;a_of_b%with;
+              %if;(sex=0)[son/daughter/child]0
+              %elseif;(sex=1)[son/daughter/child]1
+              %else;[son/daughter/child]2%end;
+            %and;%fa; [and] %mo;
+            %end;
           %end;
         %end;
+      </div>
+    %end;
+  %elseif;(e.data="sn" or e.data="fn")
+    %foreach;sorted_list_item;
+      %let;myindex;%item.3;%in;
+      %if;wizard;
+        <a href="%prefix;m=MOD_IND&i=%item.3;" 
+          title="[modify]">
+          <i class="fa fa-magic fa-xs ml-1"></i>
+        </a>
+        <a href="%prefix;i=%item.3;">
+        %apply;get_value(myindex, "first_name")%sp;
+        %apply;get_value(myindex, "surname")</a>
+        <br>
       %end;
-    </div>
+    %end;
   %end;
 </div>
 

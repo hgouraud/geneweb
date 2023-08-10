@@ -131,6 +131,7 @@ type 'a env =
   | Vint of int
   | Vlist_data of (istr * string) list
   | Vlist_value of (istr * string) list
+  | Vlist_person of iper list
   | Vnone
   | Vother of 'a
   | Vstring of string
@@ -183,6 +184,32 @@ and eval_simple_str_var conf _base env _xx = function
   | "entry_value" -> eval_string_env "entry_value" env
   | "entry_value_rev" -> eval_string_env "entry_value_rev" env
   | "entry_key" -> eval_string_env "entry_key" env
+  | "person_list" -> (
+      match get_env "person_list" env with
+      | Vlist_person l ->
+          let len = List.length l in
+          let url =
+            if len < 20 then
+              let rec loop acc i l =
+                match l with
+                | [] -> acc
+                | ip :: l ->
+                    loop
+                      (acc ^ Printf.sprintf "&i%d=%s" i (string_of_iper ip))
+                      (i + 1) l
+              in
+              loop "" 0 l
+            else ""
+          in
+          let data =
+            match p_getenv conf.env "data" with Some d -> d | _ -> ""
+          in
+          if url = "" then string_of_int len
+          else
+            Printf.sprintf {|<a href="%sm=L&data=%s&nb=%d%s">%d</a>|}
+              (commd conf :> string)
+              data len url len
+      | _ -> "")
   | "ini" -> eval_string_env "ini" env
   | "incr_count" -> (
       match get_env "count" env with
@@ -264,6 +291,7 @@ and eval_int_env s env =
   match get_env s env with Vint i -> string_of_int i | _ -> raise Not_found
 
 let print_foreach conf print_ast _eval_expr =
+  let base = Gwdb.open_base conf.bname in
   let rec print_foreach env xx _loc s sl el al =
     match s :: sl with
     | [ "initial" ] -> print_foreach_initial env xx al
@@ -334,8 +362,25 @@ let print_foreach conf print_ast _eval_expr =
       match l with
       | [] -> ()
       | (k, s) :: l ->
+          let person_l =
+            match p_getenv conf.env "data" with
+            | Some "occu" -> []
+            | Some "place" -> []
+            | Some "src" -> []
+            | Some "fn" -> (
+                match Some.search_first_name conf base s with
+                | [] -> []
+                | [ (_, (_strl, iperl)) ] -> List.sort_uniq compare iperl
+                | _ ->
+                    Printf.eprintf "WARNING: Multiple first names!!\n";
+                    [])
+            | Some "sn" -> Some.search_surname conf base s
+            | _ -> []
+          in
+
           let env =
             ("cnt", Vint i) :: ("max", Vint max) :: ("entry_value", Vstring s)
+            :: ("person_list", Vlist_person person_l)
             :: ("entry_value_rev", Vstring (unfold_place_long false s))
             :: ("entry_key", Vstring (string_of_istr k))
             :: ("first", Vbool (Place.without_suburb s <> prev))
