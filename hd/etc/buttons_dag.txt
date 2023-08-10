@@ -158,6 +158,7 @@
             <i class="fa fa-image fa-sm mr-1"></i>[*image/images]1
           </a>
         </div>
+        %if;(not (e.m="D" and e.t="T"))
         <div class="border rounded mr-1">
           <a role="button" class="btn btn-sm btn-outline-%if;(e.dag=1 or e.t="C" or e.t="A")dark disabled border-0%else;primary%end; border-%if;(e.ma="")2%else;0%end; w-100 h-100"
             href="%if;(e.ma="" or e.ma=0)%url_set.ma.1;%else;%url_set.ma;%end;"
@@ -172,6 +173,7 @@
             <i class="fa fa-user-plus fa-sm mr-1"></i>[*spouse/spouses]1
           </a>
         </div>
+        %end;
         <div class="border rounded mr-1">
           <a role="button" class="btn btn-sm btn-outline-primary mr-2 border-0 w-100 h-100"
             href="%url_set.cgl.on;" target="_blank">
