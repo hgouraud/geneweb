@@ -709,7 +709,7 @@ let make_tree_hts conf base elem_txt vbar_txt invert set spl d =
   let no_group = p_getenv conf.env "nogroup" = Some "on" in
   let spouse_on =
     match (Util.p_getenv conf.env "sp", Util.p_getenv conf.env "spouse") with
-    | Some "on", _ | _, Some "on" -> true
+    | Some "on", _ | Some "1", _ | _, Some "on" -> true
     | _, _ -> false
   in
   let bd = match Util.p_getint conf.env "bd" with Some x -> x | None -> 0 in
