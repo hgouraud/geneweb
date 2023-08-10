@@ -248,7 +248,7 @@ Person:            Child1     Child2          Child3
 %let;evarv;%if;(e.v!="")%e.v;%else;3%end;%in;
 %let;evarborder;%if;(e.border="" or e.border="0")0%else;1%end;%in;
 %let;baseindex;%index;%in;
-<h2 id="a">[*descendants tree]</h2>
+<h1 id="a">[*descendants tree]</h1>
 %include;buttons_dag
 %reset_count;
 %apply;nb_column(0,evarv+1)
