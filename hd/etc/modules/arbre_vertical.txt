@@ -112,7 +112,7 @@
                       %if;(cell.family.mother.death_date.year>cell.family.father.death_date.year)0%else;3%end;
                     %elseif;cell.family.mother.is_dead;2%else;5%end;
                   %elseif;(cell.family.mother.death_date.year!="" and cell.family.mother.death_date.prec="")
-                    %if;(cell.family.father.death_date.year!="" and (cell.father.father.death_date.prec="&#62;" or cell.family.father.death_date.prec="?"))
+                    %if;(cell.family.father.death_date.year!="" and (cell.family.father.death_date.prec="&#62;" or cell.family.father.death_date.prec="?"))
                       %if;(cell.family.father.death_date.year>cell.family.mother.death_date.year)3%else;0%end;
                     %elseif;cell.family.father.is_dead;4%else;6%end;
                   %end;
