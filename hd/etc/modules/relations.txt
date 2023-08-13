@@ -1,12 +1,12 @@
-<!-- $Id: modules/relations.txt v7.1 04/30/2023 09:51:04 $ -->
-%( op_m=1 Relations  %)
+<!-- $Id: modules/relations.txt v7.1 14/08/2023 01:04:13 $ -->
+%( op_m=1 Relations %)
 %( op_m=2 Relations complete (events) %)
 %let;op_m;%if;(op_m!="")%op_m;%else;1%end;%in;
 
 %define;relations_tree(z1)
   %( relations, related, witness at his event %)
   %reset_count;
-  href="%prefix;spouse=on;m=RLM;image=%evar.image;;%nn;
+  href="%prefix;m=RLM;%nn;
     %foreach;relation;
       %if;(has_relation_him)
         %incr_count;i%count;=%relation_him.index;;%nn;
@@ -41,8 +41,7 @@
     %if;browsing_with_sosa_ref;
       %incr_count;i%count;=%sosa_ref.index;;%nn;
       t%count;=sosa_1;%nn;
-    %end;
-  " title="[*relations tree] ([and] [witnesses at his events])"
+    %end;" title="[*relations tree] ([and] [witnesses at his events])"
   %reset_count;
 %end;
 
