@@ -363,10 +363,7 @@ fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
                   title="[*relationship link/relationship links]0 [with] [close family]"><span class="fa fa-elevator fa-fw mr-2"></span>[*relationship]</a>
               <div class="dropdown-divider"></div>
               <a class="dropdown-item" %nn;
-                href="%prefix;%access;&m=F%nn;
-                  %if;(b.default_fnav_images="off")&im=off;%end;%nn;
-                  %if;(b.default_fnav_semi="on")&semi=on;%end;%nn;
-                  %if;(b.default_fnav_spouse="on")&sp=on;%end;" title="[*family/families]0">
+                href="%prefix;%access;&m=F%if;(e.im=0)&im=0%end;&sp=1&half=1" title="[*family/families]0">
                 <span class="fa fa-users fa-fw mr-2"></span>[*family/families]0
               </a>
               %if;(died = "" and (wizard or friend))
