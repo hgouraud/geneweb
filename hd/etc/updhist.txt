@@ -115,7 +115,6 @@
   %elseif;(uu = "so")[send::image/images]0 [to carrousel]%nn;
   %elseif;(uu = "sc")[send::note/notes]0 [to carrousel]%nn;
   %elseif;(uu = "ss")[send::source/sources]0 [to carrousel]%nn;
-  %elseif;(uu = "sn")to be specified%nn;
   %elseif;(uu = "di")[delete::portrait]0%nn;
   %elseif;(uu = "do")[delete::image/images]0 [from carrousel]%nn;
   %elseif;(uu = "af")[add::family/families]0%nn;
