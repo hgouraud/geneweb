@@ -15929,6 +15929,30 @@ sl: iskanje/razlikovanje VELIKIH-malih črk
 sv: sök/skiftlägeskänslig
 tr: arama/büyük küçük harfe duyarlı
 
+    case
+en: case
+fr: majuscules
+
+    case-hlp
+en: match upper/lower case
+fr: conserver les majuscules/minuscules
+    
+    exact-hlp
+en: exact match (word level)
+fr: comparaison exacte mot par mot
+
+    order
+en: order
+fr: ordre
+
+    order-hlp
+en: test firstnames in the same order
+fr: tester les prénoms dans le même ordre
+  
+    all-hlp
+en: all firstnames must be present
+fr: tous les prénoms doivent être présents
+
     search_exact_fn
 co: ricerca esatta
 de: genaue Suche
