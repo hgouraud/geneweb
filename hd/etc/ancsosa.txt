@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="%lang;">
 <head>
-  <!-- $Id: ancsosa.txt v7.1 10/05/2023 04:58:54 $ -->
+  <!-- $Id: ancsosa.txt v7.1 19/08/2023 19:51:53 $ -->
   <!-- Copyright (c) 1998-2007 INRIA -->
 %define;tothegen(xx)
   [to the %s generation:::xx]%nn;
@@ -32,8 +32,8 @@
   %end;
 %end;
   <title>%nn;
-    %if;(e.t = "D")
-      [*ancestor/ancestors]1 ... [up to] ...%nn;
+    %if;(e.t="D" or e.t="X")
+      %apply;a_of_b%with;[*ancestor/ancestors]1%and;%self;%end; [up to] %pvar.1;
     %elseif;(e.t = "N" and e.only = "on")
       [*generation/generations]0 %e.v;
     %else;
@@ -1486,7 +1486,7 @@
 %end;
 
 %define;table_ancestor_to_somebody()
-  %p_of_index.1.mark_descendants;
+  %pvar.1.mark_descendants;
   %foreach;ancestor_level;
     %apply;lazy_print%with;
       <tr><th colspan="7" >%nl;[*generation/generations]0 %level;%nl;</th></tr>
@@ -1574,7 +1574,7 @@ TODO: obtenir les secondes valeurs valeurs jj/mm/aaaa pour les cas « ou | » 
     %sp;%surname;
     %if;(alias != "") <em>(%alias;)</em>%end;
   %end;
-  %if;(e.t = "D") [up to] %p_of_index.1;
+  %if;(e.t="X" or e.t="D") [up to] %pvar.1;
   %else;
      %if;(cancel_links and e.v > 4) %apply;togena(e.v)%end;
   %end;
@@ -1989,9 +1989,9 @@ TODO: obtenir les secondes valeurs valeurs jj/mm/aaaa pour les cas « ou | » 
     <p>%apply;long_display_notes()</p>
   %end;
 
-%elseif;(e.t = "D")
+%elseif;(e.t="D")
   %( ancestors up to somebody %)
-  %p_of_index.1.mark_descendants;
+  %pvar.1.mark_descendants;
   <ul>
     %foreach;ancestor_level;
       %apply;lazy_print%with;
@@ -2015,13 +2015,12 @@ TODO: obtenir les secondes valeurs valeurs jj/mm/aaaa pour les cas « ou | » 
 
 %elseif;(e.t = "X" or e.t = "Y")
   %if;(e.t = "X")
-    <p>[*only] [up to] %p_of_index.1; %p_of_index.1.dates; </p>
-     %(%if;(not cancel_links)
+     %if;(not cancel_links)
        <div class="menu">
          %if;(has_sosa)<span><a href="%prefix;m=X&t=X&t1=1&i=%e.i1;&i1=%index;&siblings=on&alias=on&spouse=on&parents=on&rel=on&notes=on&src=on&hide=on&witn=on&v=%e.l;&maxv=%e.l;&l=%e.l;">[*descendants]0</a></span>%end;
          <span><a href="%prefix;m=A&t=G&i=%index;&i1=%e.i1;&siblings=on&alias=on&spouse=on&parents=on&rel=on&witn=on&notes=on&src=on&hide=on&l=%e.l;">[*ancestor/ancestors]1</a></span>
        </div>
-     %end;%)
+     %end;
   %end;
   %reset_count;
   <table class="table table-sm table-hover table-bordered text-center short_display_table">
