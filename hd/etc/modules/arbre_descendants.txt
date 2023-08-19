@@ -46,8 +46,8 @@
         <a href="%xxx.image_url;" class="normal_anchor" %nn;
           target="_blank" title="[*image/images]0 %xxx;">%nn;
       %end;
-        <img class="small_image %if;not cancel_links;fade_image%end; align-self-center rounded ml-0 pr-0" %nn;
-          src="%xxx.image_url;" alt="[image/images]0">%nn;
+      <img class="small_image %if;not cancel_links;fade_image%end; align-self-center rounded ml-0 pr-0" %nn;
+        src="%xxx.image_url;" alt="[image/images]0">%nn;
       %if;not cancel_links;</a>%end;
     %elseif;(bvar.default_image="yes")
       %if;(wizard and not cancel_links)
@@ -108,7 +108,7 @@ Person:            Child1     Child2          Child3
 %)
 %( xxx=descendant, lll=current level (recursion), nnn=target level, sss="skip" or not %)
 %( ttt=text, fff=position (left/right/cenetr/none), www= colspan %)
-%define;descendants_at_level(xxx,lll,nnn,ttt,fff,www)
+%define;descendants_at_level(xxx,lll,nnn,ttt,fff,www,zzz)
   %(one level of descendants (%xxx.first_name;,lll,nnn,ttt,fff,www)<br>%)
   %(compute family position %)
   %if;(lll>evarv)
@@ -119,7 +119,7 @@ Person:            Child1     Child2          Child3
       %if;("ttt"="hbarc" and lll>0 and "xxx"!="self")
         %( Horizontal bar linking childrens%)
         %if;("fff"="none")
-          <td colspan="www" class="text-center"></td><td></td>
+          <td colspan="zzz" class="text-center"></td><td></td>
         %else;
           <td colspan="www" class="text-fff"><hr class="fff"></td>
           <td>%if;("fff"="full" or "fff"="right")<hr class="full">%end;</td>
@@ -170,13 +170,13 @@ Person:            Child1     Child2          Child3
             %end;%nn;
           %in;
           %if;("ttt"="hbars")
-            <td colspan="%fcount;" class="text-center">
+            <td colspan="www" class="text-center">
               %if;(fmpos="right")<hr class="%fmpos;" style="valign:top;border-top: 2px dashed">
               %elseif;(fmpos="center")<hr class="%fmpos;" style="valign:top;border-top: 2px dashed">
               %elseif;(fmpos="left")<hr class="%fmpos;" style="valign:top;border-top: 2px dashed">
               %elseif;(fmpos="none")
               %end;
-              <span class="text-nowrap">
+              <span class="text-nowrap text-center">
                 %(count1=has children%)
                 %if;(count1>0 or e.sp="on" or e.sp=1)
                   %if;(not cancel_links)
@@ -193,8 +193,8 @@ Person:            Child1     Child2          Child3
               </span>
             </td>
             <td>&nbsp;</td>
-          %elseif;("ttt"="spouse")
-            <td colspan="%fcount;" class="text-center" style="vertical-align:top">
+          %elseif;("ttt"="spouse" and e.sp=1)
+            <td colspan="www" class="text-center" style="vertical-align:top">
               %apply;display_person("spouse")
               %if;(has_children)│%end;
             </td><td>&nbsp;</td>
@@ -227,12 +227,12 @@ Person:            Child1     Child2          Child3
                 %end;%nn;
               %in;
               %reset_count;
-              %apply;nb_column(0,evarv)
+              %apply;nb_column(0,evarv+1)
               %let;pcount;%expr(2*count-1)%in;
-              %apply;descendants_at_level("child",lll+1,nnn,"ttt",chpos,pcount)
+              %apply;descendants_at_level("child",lll+1,nnn,"ttt",chpos,pcount,www)
             %end;
           %else;
-            %apply;descendants_at_level("none",lll+1,nnn,"skip","",0)
+            %apply;descendants_at_level("none",lll+1,nnn,"skip","",0,www)
           %end;
         %end;
       %else;
@@ -241,7 +241,7 @@ Person:            Child1     Child2          Child3
       %end;
     %elseif;("ttt"="skip")
       %( Continue recursion to level nnn even if no child or no family %)
-      %apply;descendants_at_level("none",lll+1,nnn,"skip","",0)
+      %apply;descendants_at_level("none",lll+1,nnn,"skip","",0,www)
     %end;
   %end;
 %end;
@@ -251,31 +251,31 @@ Person:            Child1     Child2          Child3
 <h1 id="a">[*descendants tree]</h1>
 %include;buttons_dag
 %reset_count;
-%apply;nb_column(0,evarv+1)
+%apply;nb_column(0,evarv+2)
 %let;icount;%expr(2*count-1)%in;
 <table class="destree_table mt-3 mx-auto">
 %for;v;0;evarv;
   %( For each level, display all 6 kinds of data (except hbarc and vbar at level 0) %)
   %if;(v!=0)
     <tr>
-    %apply;descendants_at_level("self",0,v,"hbarc","center",icount)
+    %apply;descendants_at_level("self",0,v,"hbarc","center",icount,icount)
     </tr>
   %end;
   <tr>
-    %apply;descendants_at_level("self",0,v,"person","center",icount)
+    %apply;descendants_at_level("self",0,v,"person","center",icount,icount)
   </tr>
   %if;(v=evarv-1)
     <tr>
-      %apply;descendants_at_level("self",0,v,"spouse","center",icount)
+      %apply;descendants_at_level("self",0,v,"spouse","center",icount,icount)
     </tr>
   %end;
   %if;(v<evarv-1)
     <tr>
-      %apply;descendants_at_level("self",0,v,"hbars","center",icount)
+      %apply;descendants_at_level("self",0,v,"hbars","center",icount,icount)
     </tr>
     %if;(e.sp="on" or e.sp=1)
       <tr>
-        %apply;descendants_at_level("self",0,v,"spouse","center",icount)
+        %apply;descendants_at_level("self",0,v,"spouse","center",icount,icount)
       </tr>
     %end;
   %end;
