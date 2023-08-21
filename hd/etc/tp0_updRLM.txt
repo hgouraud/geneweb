@@ -46,9 +46,8 @@
 %define;my_hidden(xx)
   %if(e.xx!="")<input type="hidden" name="xx" value="%e.xx;">%end;
 %end;
-%include;hed
 <body%body_prop;>
-
+%include;hed
 <div class="container-fluid">
 <form id="upd" method="post" action="%action;">
   <div class="d-flex justify-content-end m-2">
@@ -86,7 +85,6 @@
     </tbody>
   </table>
 </form>
-
 %if(not cancel_links)
   %base_trailer;
   %include;copyr
