@@ -152,7 +152,7 @@
           <i class="fa fa-random fa-fw fa-lg"></i>Dag</a>
         </div>
         <div class="border rounded mr-1">
-          <a role="button" class="btn btn-sm btn-outline-primary border-%if;(e.im="")2%else;0%end; h-100"
+          <a role="button" class="btn btn-sm btn-outline-primary border-%if;(e.im="" or e.im=1)2%else;0%end; h-100"
             href="%if;(e.im="" or e.im=1)%url_set.im.0;%else;%url_set.im;%end;"
             title="%if;(e.im="" or e.im=1)[*visualize/show/hide/summary]2%else;[*visualize/show/hide/summary]1%end; [image/images]1">
             <i class="fa fa-image fa-sm mr-1"></i>[*image/images]1
@@ -168,9 +168,9 @@
         </div>
         %end;
         <div class="border rounded mr-1">
-          <a role="button" class="btn btn-sm btn-outline-%if;(e.m="A")dark disabled border-0%else;primary %end; border-%if;(e.sp="")2%else;0%end; w-100 h-100"
+          <a role="button" class="btn btn-sm btn-outline-%if;(e.m="A")dark disabled border-0%else;primary %end; border-%if;(e.sp=1)2%else;0%end; w-100 h-100"
             href="%if;(e.sp="" or e.sp=0)%url_set.sp.1;%else;%url_set.sp;%end;"
-            title="%if;(e.sp="" or e.sp=0)[*visualize/show/hide/summary]2%else;[*visualize/show/hide/summary]1%end; [spouse/spouses]1">
+            title="%if;(e.sp="" or e.sp=0)[*visualize/show/hide/summary]1%else;[*visualize/show/hide/summary]2%end; [spouse/spouses]1">
             <i class="fa fa-user-plus fa-sm mr-1"></i>[*spouse/spouses]1
           </a>
         </div>
