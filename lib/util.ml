@@ -105,7 +105,7 @@ let start_with_vowel conf s =
   if String.length s > 0 then
     let s, _ = Name.unaccent_utf_8 true s 0 in
     List.mem s.[0] conf.vowels
-	else false
+  else false
 
 type ('a, 'b) format2 = ('a, unit, string, 'b) format4
 
@@ -190,12 +190,14 @@ let simple_decline conf wt =
               let j = String.index_from wt i ']' in
               let k = String.index_from wt i '|' in
               if k < j && j + 2 < len then
-                let s2 = String.sub wt (j+1) 1 in
+                let s2 = String.sub wt (j + 1) 1 in
                 let s =
-									if start_with_vowel conf s2 then
-										String.sub wt (i + 1) (k - i - 1)
-									else String.sub wt (k + 1) (j - k - 1) (*    [aa|bb]  *)
-								in (s, j)
+                  if start_with_vowel conf s2 then
+                    String.sub wt (i + 1) (k - i - 1)
+                  else String.sub wt (k + 1) (j - k - 1)
+                  (*    [aa|bb]  *)
+                in
+                (s, j)
               else raise Not_found
             with Not_found -> (String.sub wt i (len - i), len))
         | c -> (String.make 1 c, i)
