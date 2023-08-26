@@ -123,9 +123,6 @@
       <div class="btn-group border rounded" role="group" aria-label="generation pickup buttons group">
         <span class="btn btn-primary disabled border border-info rounded-left py-0 w-100 h-100">[*generation/generations]0</span>
         %if;(maxlev>9 and evarv>5)
-          %(<a role="button" href="%apply;urlv%with;v%and;%expr(evarv-5)%end;"
-            class="btn btn-outline-primary font-weight-bold border-0 px-2 py-0"
-            title="(-5) [visualize/show/hide/summary]1 %expr(evarv-5) [generation/generations]1 (max %maxlev;)">−5</a>%)
           <a role="button" href="%apply;urlv%with;v%and;%expr(evarv-1)%end;"
             class="btn btn-outline-primary font-weight-bold border-0 px-2 py-0"
             title="(-1) [visualize/show/hide/summary]1 %expr(evarv-1) [generation/generations]1 (max %maxlev;)">−</a>
@@ -139,9 +136,6 @@
           <a role="button" href="%apply;urlv%with;v%and;%expr(evarv+1)%end;"
             class="btn btn-outline-primary font-weight-bold border-0 px-2 py-0"
             title="(+1) [visualize/show/hide/summary]1 %expr(evarv+1) [generation/generations]1 (max %maxlev;)">+</a>
-          %(<a role="button" href="%apply;urlv%with;v%and;%expr(evarv+5)%end;"
-            class="btn btn-outline-primary font-weight-bold border-0 px-1"
-            title="(+5) [visualize/show/hide/summary]1 %expr(evarv+5) [generation/generations]1 (max %maxlev;)">+5</a>%)
         %end;
       </div>
       <div class="d-flex align-self-center mt-1">
