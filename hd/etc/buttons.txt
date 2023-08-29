@@ -84,11 +84,10 @@
       %apply;size_btn(120,"fa-lg")
       %if;(evar.templ="")
       <span class="sr-only">—</span>
-      <a role="button" class="btn btn-link px-0%if;(e.ns=1) text-danger%end;%if;(e.t="Y" or e.csv="on") disabled%end;"
-        title="%if;(e.ns=1)[*visualize/show/hide/summary]2%else;[*visualize/show/hide/summary]1%end; [note/notes]1 [and] [source/sources]1%if;(e.ns=""). [*colored corner]%end;"
+      <a role="button" class="btn btn-link px-0%if;(e.ns="" or e.ns=0) text-danger%end;%if;(e.t="Y" or e.csv="on") disabled%end;"
+        title="%if;(e.ns=1)[*visualize/show/hide/summary]2%else;[*visualize/show/hide/summary]1%end; [note/notes]1 [and] [source/sources]1. [*colored corner]"
         href="%if;(e.ns=1)%url_set.ns;%else;%url_set.ns.1;%end;">
-        <i class="far fa-sticky-note fa-flip-vertical fa-lg fa-fw mb-1 mr-1" aria-hidden="true"></i>%nn;
-        <span class="notecolor">[*note/notes]1</span> <span class="notesourcecolor">[and]</span> <span class="sourcecolor">[source/sources]1</span>%nn;
+        <i class="fa fa-file-alt fa-fw" aria-hidden="true"></i>%nn;
       </a>
       %end;
       %if;(evar.m="D" and (evar.marr="on" or evar.marr_place="on" or evar.marr_date="on"))
