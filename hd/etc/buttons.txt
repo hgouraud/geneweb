@@ -102,7 +102,7 @@
           <i class="fas fa-info fa-lg mr-1" aria-hidden="true"></i><i class="fa fa-male" aria-hidden="true"></i><i class="fa fa-female" aria-hidden="true"></i>
         </a>
       %end;
-      <a role="button" class="btn btn-link px-0 %if;(evar.csv="on" or evar.t="Y") disabled%else;%if;(evar.hl="on") text-warning%end;%end;"
+      <a role="button" class="btn btn-link px-0 %if;(evar.csv="on" or evar.t="Y") disabled%else;%if;(evar.hl="" or evar.hl=0) text-warning%end;%end;"
         href="%prefix_base_password;%nn;
               %foreach;env_binding;
                 %if;(env.key!="hl" and env.key!="")&%env.key=%env.val;%end;
