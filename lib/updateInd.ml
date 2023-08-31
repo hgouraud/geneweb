@@ -464,6 +464,16 @@ and eval_relation_var base r = function
         | _ -> ("", "", 0, Update.Create (Neuter, None), "")
       in
       eval_person_var base x sl
+  | [ "r_index" ] -> (
+      let (fn, sn, oc, _, _) =
+        match r with
+        | Some { r_moth = Some x } -> x
+        | Some { r_fath = Some x } -> x
+        | _ -> "", "", 0, Update.Create (Neuter, None), ""
+      in
+      match person_of_key base fn sn oc with
+      | Some ip -> str_val (string_of_iper ip)
+      | _ -> str_val (string_of_iper Gwdb.dummy_iper))
   | [ "rt_adoption" ] -> eval_is_relation_type Adoption r
   | [ "rt_candidate_parent" ] -> eval_is_relation_type CandidateParent r
   | [ "rt_empty" ] -> (
