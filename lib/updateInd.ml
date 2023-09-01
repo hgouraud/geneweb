@@ -235,7 +235,7 @@ and eval_simple_var conf base env p = function
           incr c;
           str_val ""
       | _ -> str_val "")
-  | [ "occ" ] -> str_val (if p.occ <> 0 then string_of_int p.occ else "")
+  | [ "occ" ] -> str_val (string_of_int p.occ)
   | [ "occupation" ] ->
       safe_val (Util.escape_html p.occupation :> Adef.safe_string)
   | [ "of_course_dead" ] -> bool_val (p.death = OfCourseDead)
@@ -493,7 +493,7 @@ and eval_person_var base (fn, sn, oc, create, _) = function
   | [ "create"; s ] -> Update_util.eval_create create s
   | [ "first_name" ] -> safe_val (Util.escape_html fn :> Adef.safe_string)
   | [ "link" ] -> bool_val (create = Update.Link)
-  | [ "occ" ] -> str_val (if oc = 0 then "" else string_of_int oc)
+  | [ "occ" ] -> str_val (string_of_int oc)
   | [ "surname" ] -> safe_val (Util.escape_html sn :> Adef.safe_string)
   | [ "index" ] -> (match person_of_key base fn sn oc with
       | Some ip -> str_val (string_of_iper ip)
