@@ -78,7 +78,7 @@
       %if;(not is_first)
         <td class="text-center py-0">%nn;
         %if;cell.is_right;
-          %if;(e.ma!="0")
+          %if;(e.ma!=0)
             %if;(wizard and not cancel_links)
               <a href="%prefix_base_password;m=MOD_FAM&i=%cell.family.index;&ip=%index;"
             %else;
