@@ -10,7 +10,7 @@
 <table class="table-bordered" border="1">
 <tr><th></th>%for;k;0;11;<th>%k</th>%end;</tr>
 %for;j;0;11;<tr><td>%j</td>
-  %for;i;0;5;
+  %for;i;0;11;
     <td>%apply;cous%with;%i%and;%j%end;</td>
   %end;</tr>
 %end;
