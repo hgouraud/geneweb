@@ -146,7 +146,13 @@ let util_transl_a_of_b _ =
     assert_equal aaa bbb
   in
   test "naissance de <b>Jean</b>" ("naissance", "<b>Jean</b>", "Jean");
-  test "naissance d'<b>André</b>" ("naissance", "<b>André</b>", "André")
+  test "naissance d'<b>André</b>" ("naissance", "<b>André</b>", "André");
+  let conf = { conf with vowels = [ 'a'; 'e'; 'i'; 'o'; 'u'; 'y'; 'h' ] } in
+  let test aaa (s1, s2, s2_raw) =
+    let bbb = Util.transl_a_of_b conf s1 s2 s2_raw in
+    assert_equal aaa bbb
+  in
+  test "naissance d'<b>Henri</b>" ("naissance", "<b>Henri</b>", "Henri")
 
 let util_string_with_macros _ =
   let conf = Config.empty in
@@ -188,11 +194,11 @@ let datedisplay_string_of_date _ =
   test (Adef.safe "in u 1974") Dgregorian (0, 0, 1974);
   let _ =
     Hashtbl.add conf.lexicon "(date)"
-      "1<sup>u</sup> d[i']%m %y/%d d[i %m %y/d[i |'%m %y/in u %y"
+      "1<sup>u</sup> d[i |']%m %y/%d d[i |']%m %y/d[i |']%m %y/in u %y"
   in
-  test (Adef.safe "1<sup>u</sup> d[i']ferraghju 1974") Dgregorian (1, 2, 1974);
-  test (Adef.safe "d[i |'marzu 1975") Dgregorian (0, 3, 1975);
-  test (Adef.safe "4 d[i sittembre 1974") Dgregorian (4, 9, 1974)
+  test (Adef.safe "1<sup>u</sup> di ferraghju 1974") Dgregorian (1, 2, 1974);
+  test (Adef.safe "di marzu 1975") Dgregorian (0, 3, 1975);
+  test (Adef.safe "4 di sittembre 1974") Dgregorian (4, 9, 1974)
 
 let suite =
   [
