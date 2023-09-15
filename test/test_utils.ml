@@ -137,6 +137,46 @@ let util_safe_html _ =
     (Adef.safe {|<a href="localhost:2318/foo_w?lang=fr&#38;image=on">foo</a>|})
     (Util.safe_html {|<a href="localhost:2318/foo_w?lang=fr&image=on">foo</a>|})
 
+let util_eval_translate _ =
+  let conf = Config.empty in
+  let conf = { conf with env = ("lang", Adef.encoded "fr") :: conf.env } in
+  let _ = Hashtbl.add conf.lexicon "of%s" "d[e |']%s" in
+  let _ = Hashtbl.add conf.lexicon "of%s %s" "d[e |']%s %s" in
+  let _ = Hashtbl.add conf.lexicon "male/female/neuter" "homme/femme/neutre" in
+  let _ = Hashtbl.add conf.lexicon "half/half" "demi/demie" in
+  let _ = Hashtbl.add conf.lexicon "jhon/johann" "jean/jeanne" in
+  let _ =
+    Hashtbl.add conf.lexicon "%sbrother/%ssister/%sneuter"
+      "%sfrère/%ssoeur/%sfrère ou soeur"
+  in
+  let test aaa sup s c =
+    let bbb = Templ.eval_transl_lexicon conf sup s c in
+    assert_equal aaa bbb
+  in
+  let test1 aaa s =
+    let bbb = Util.simple_decline conf s in
+    assert_equal aaa bbb
+  in
+  let test_start aaa s =
+    let bbb = if Util.start_with_vowel conf s then "1" else "0" in
+    assert_equal aaa bbb
+  in
+  test_start "1" "Amélie";
+  test_start "0" "Gaston";
+  test1 "d'Amélie" "d[e |']Amélie";
+  test1 "de Gaston" "d[e |']Gaston";
+  test "homme" false "male/female/neuter" "0";
+  test "Homme" true "male/female/neuter" "0";
+  test "frère" false "%sbrother/%ssister/%sneuter" "0";
+  test "demi" false "half/half" "0";
+  test "demi frère" false "%sbrother/%ssister/%sneuter:::demi " "0";
+  test "demi frère" false "%sbrother/%ssister/%sneuter::|[half/half]| " "0";
+  test "demie soeur" false "%sbrother/%ssister/%sneuter::|[half/half]| " "1";
+  (*test "demi frère" false "%sbrother/%ssister/%sneuter::|%if;true;demi%else;half%end;| " "0";*)
+  test "de Jean Durand" false "of%s %s::|[*jhon/johann]|:Durand" "0";
+  test "de Jeanne Durand" false "of%s %s::|[*jhon/johann]|:Durand" "1";
+  test "de Jean Jean" false "of%s %s::|[*jhon/johann]0:[*jhon/johann]|" "0"
+
 let util_transl_a_of_b _ =
   let conf = Config.empty in
   let conf = { conf with env = ("lang", Adef.encoded "fr") :: conf.env } in
@@ -220,5 +260,6 @@ let suite =
            "util_safe_html" >:: util_safe_html;
            "util_string_with_macros" >:: util_string_with_macros;
            "util_transl_a_of_b" >:: util_transl_a_of_b;
+           "util_eval_translate" >:: util_eval_translate;
          ];
   ]
