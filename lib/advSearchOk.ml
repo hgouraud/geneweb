@@ -108,6 +108,27 @@ end = struct
   end
 end
 
+let gets env x =
+  match p_getenv env x with
+  | Some v when v <> "" -> v
+  | _ ->
+      let rec loop acc i =
+        let k = x ^ "_" ^ string_of_int i in
+        match p_getenv env k with
+        | Some v ->
+            loop
+              (if acc = "" then v else if v = "" then acc else acc ^ " / " ^ v)
+              (i + 1)
+        | None -> acc
+      in
+      loop "" 1
+
+(* Get the field name of an event criteria depending of the search type. *)
+let get_event_field_name env event_criteria event_name search_type =
+  match search_type with
+  | Fields.And -> event_name ^ "_" ^ event_criteria
+  | Or -> if "on" = gets env ("event_" ^ event_name) then event_criteria else ""
+
 module AdvancedSearchMatch : sig
   val match_name :
     search_list:string list list -> exact:bool -> string list -> bool
@@ -403,6 +424,13 @@ end = struct
   end
 end
 
+(* Search type can be AND or OR. *)
+let get_search_type gets =
+  match gets "search_type" with
+  | "AND" -> Fields.And
+  | "OR" -> Fields.Or
+  | s -> failwith @@ "unsupported advanced search mode : " ^ s
+
 (*
   Search for other persons in the base matching with the provided infos.
 
@@ -623,23 +651,7 @@ let searching_fields conf base =
     reconstitute_date_dmy conf (x ^ "1") <> None
     || reconstitute_date_dmy conf (x ^ "2") <> None
   in
-  let gets x =
-    match p_getenv conf.env x with
-    | Some v when v <> "" -> v
-    | _ ->
-        let rec loop acc i =
-          let k = x ^ "_" ^ string_of_int i in
-          match p_getenv conf.env k with
-          | Some v ->
-              loop
-                (if acc = "" then v
-                else if v = "" then acc
-                else acc ^ " / " ^ v)
-                (i + 1)
-          | None -> acc
-        in
-        loop "" 1
-  in
+  let gets = gets conf.env in
   let test_string x = gets x <> "" in
   let getd x =
     (reconstitute_date_dmy conf (x ^ "1"), reconstitute_date_dmy conf (x ^ "2"))
@@ -714,37 +726,7 @@ let searching_fields conf base =
     else search
   in
   (* Search type can be AND or OR. *)
-  let search_type = gets "search_type" in
-  let bapt_date_field_name =
-    get_event_field_name gets "date" "bapt" search_type
-  in
-  let birth_date_field_name =
-    get_event_field_name gets "date" "birth" search_type
-  in
-  let death_date_field_name =
-    get_event_field_name gets "date" "death" search_type
-  in
-  let burial_date_field_name =
-    get_event_field_name gets "date" "burial" search_type
-  in
-  let marriage_date_field_name =
-    get_event_field_name gets "date" "marriage" search_type
-  in
-  let bapt_place_field_name =
-    get_event_field_name gets "place" "bapt" search_type
-  in
-  let birth_place_field_name =
-    get_event_field_name gets "place" "birth" search_type
-  in
-  let death_place_field_name =
-    get_event_field_name gets "place" "death" search_type
-  in
-  let burial_place_field_name =
-    get_event_field_name gets "place" "burial" search_type
-  in
-  let marriage_place_field_name =
-    get_event_field_name gets "place" "marriage" search_type
-  in
+  let search_type = get_search_type gets in
   let search = "" in
   let search = string_field "first_name" search in
   let search = string_field "surname" search in
@@ -759,11 +741,11 @@ let searching_fields conf base =
   in
   let events =
     [|
-      ("birth", "born");
-      ("bapt", "baptized");
-      ("marriage", "married");
-      ("death", "died");
       ("burial", "buried");
+      ("death", "died");
+      ("marriage", "married");
+      ("bapt", "baptized");
+      ("birth", "born");
     |]
   in
   let event_search = Array.fold_left build_event_search "" events in
@@ -785,6 +767,9 @@ let searching_fields conf base =
         else search
   in
   let search =
+    let marriage_place_field_name =
+      get_event_field_name conf.env "place" "marriage" search_type
+    in
     if not (test_string marriage_place_field_name || test_date "marriage") then
       let sep = if search <> "" then ", " else "" in
       if gets "married" = "Y" then search ^ sep ^ transl conf "having a family"
