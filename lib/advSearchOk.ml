@@ -179,17 +179,17 @@ end = struct
   let match_date ~p ~df ~default ~dates =
     let d1, d2 = dates in
     match (d1, d2) with
-    | Some d1, Some d2 -> (
+    | Some (Date.Dgreg (d1, _)), Some (Date.Dgreg (d2, _)) -> (
         match df p with
         | Some d -> Date.compare_dmy d d1 >= 0 && Date.compare_dmy d d2 <= 0
         | None -> false)
-    | Some d1, None -> (
+    | Some (Dgreg (d1, _)), _ -> (
         match df p with Some d -> Date.compare_dmy d d1 >= 0 | None -> false)
-    | None, Some d2 -> (
+    | _, Some (Dgreg (d2, _)) -> (
         match df p with Some d -> Date.compare_dmy d d2 <= 0 | None -> false)
-    | None, None -> default
+    | _ -> default
 
-  let do_compare p y get cmp =
+  let do_compare ~p ~places ~get ~cmp =
     let s = abbrev_lower @@ get p in
     List.exists (fun s' -> cmp (abbrev_lower s') s) y
 
@@ -273,27 +273,22 @@ end = struct
       string_incl (abbrev_lower occupation)
         (abbrev_lower @@ sou base @@ get_occupation p)
 
-  let date_wrapper get_date =
-    match_date ~df:(fun p -> Date.od_of_cdate (get_date p))
+  let match_baptism_date =
+    match_date ~df:(fun p -> Date.cdate_to_dmy_opt (get_baptism p))
 
-  let match_baptism_date = date_wrapper get_baptism
-  let match_birth_date = date_wrapper get_birth
+  let match_birth_date =
+    match_date ~df:(fun p -> Date.cdate_to_dmy_opt (get_birth p))
 
   let match_burial_date =
     let get_burial p =
       match get_burial p with
-      | Buried cod | Cremated cod -> Date.od_of_cdate cod
+      | Buried cod | Cremated cod -> Date.cdate_to_dmy_opt cod
       | _ -> None
     in
     match_date ~df:get_burial
 
   let match_death_date =
-    let get_death p =
-      match get_death p with
-      | Death (_, cd) -> Some (Date.date_of_cdate cd)
-      | _ -> None
-    in
-    match_date ~df:get_death
+    match_date ~df:(fun p -> Date.dmy_of_death (get_death p))
 
   let match_name ~search_list ~exact : string list -> bool =
     let eq : string list -> string list -> bool =
