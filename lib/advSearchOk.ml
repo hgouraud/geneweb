@@ -134,7 +134,7 @@ module AdvancedSearchMatch : sig
     conf:Config.config ->
     base:Gwdb.base ->
     p:Gwdb.person ->
-    values:string list ->
+    places:string list ->
     default:bool ->
     dates:Date.dmy option * Date.dmy option ->
     bool
@@ -194,10 +194,10 @@ end = struct
     List.exists (fun s' -> cmp (abbrev_lower s') s) places
 
   let apply_to_field_places_raw ~cmp ~p ~places ~get ~default =
-    if places = [] then default else do_compare ~p ~places ~get ~cmp
+    if places = [] then default else do_compare p places get cmp
 
-  let apply_to_field_values ~get ~cmp ~base =
-    apply_to_field_values_raw ~get:(fun p -> sou base @@ get p) ~cmp
+  let apply_to_field_places ~get ~cmp ~base =
+    apply_to_field_places_raw ~get:(fun p -> sou base @@ get p) ~cmp
 
   let match_sex ~p ~sex = if sex = Def.Neuter then true else get_sex p = sex
 
@@ -214,18 +214,18 @@ end = struct
     f ~cmp
 
   let match_baptism_place =
-    exact_place_wrapper @@ apply_to_field_values ~get:get_baptism_place
+    exact_place_wrapper @@ apply_to_field_places ~get:get_baptism_place
 
   let match_birth_place =
-    exact_place_wrapper @@ apply_to_field_values ~get:get_birth_place
+    exact_place_wrapper @@ apply_to_field_places ~get:get_birth_place
 
   let match_death_place =
-    exact_place_wrapper @@ apply_to_field_values ~get:get_death_place
+    exact_place_wrapper @@ apply_to_field_places ~get:get_death_place
 
   let match_burial_place =
-    exact_place_wrapper @@ apply_to_field_values ~get:get_burial_place
+    exact_place_wrapper @@ apply_to_field_places ~get:get_burial_place
 
-  let match_marriage ~cmp ~conf ~base ~p ~values ~default ~dates =
+  let match_marriage ~cmp ~conf ~base ~p ~places ~default ~dates =
     let d1, d2 = dates in
     let test_date_place df =
       Array.exists
@@ -235,9 +235,9 @@ end = struct
           if authorized_age conf base sp then
             df fam
             && (places = []
-               || do_compare ~p:fam ~places
-                    ~get:(fun f -> sou base @@ get_marriage_place f)
-                    ~cmp)
+               || do_compare fam places
+                    (fun f -> sou base @@ get_marriage_place f)
+                    cmp)
           else false)
         (get_family p)
     in
@@ -258,12 +258,11 @@ end = struct
             | Some _ | None -> false)
     | None, Some d2 ->
         test_date_place (fun fam ->
-            match Date.cdate_to_dmy_opt (get_marriage fam) with
-            | Some d when authorized_age conf base p ->
-                if Date.compare_dmy d d2 > 0 then false else true
-            | Some _ | None -> false)
-    | None, None ->
-        if places = [] then default else test_date_place (fun _ -> true)
+            match Date.od_of_cdate (get_marriage fam) with
+            | Some (Dgreg (_, _) as d) when authorized_age conf base p ->
+                if Date.compare_date d d2 > 0 then false else true
+            | _ -> false)
+    | _ -> if places = [] then default else test_date_place (fun _ -> true)
 
   let match_marriage = exact_place_wrapper match_marriage
 
@@ -383,7 +382,7 @@ end = struct
     let match_and date_f place_f ~(base : Gwdb.base) ~p ~dates
         ~(places : string list) ~(exact_place : bool) =
       date_f ~p ~default:true ~dates
-      && place_f ~exact_place ~base ~p ~values:places ~default:true
+      && place_f ~exact_place ~base ~p ~places ~default:true
 
     let match_baptism = match_and match_baptism_date match_baptism_place
     let match_birth = match_and match_birth_date match_birth_place
@@ -395,7 +394,7 @@ end = struct
     let match_or date_f place_f ~(base : Gwdb.base) ~p ~dates
         ~(places : string list) ~(exact_place : bool) =
       date_f ~p ~default:false ~dates
-      || place_f ~exact_place ~base ~p ~values:places ~default:false
+      || place_f ~exact_place ~base ~p ~places ~default:false
 
     let match_baptism = match_or match_baptism_date match_baptism_place
     let match_birth = match_or match_birth_date match_birth_place
@@ -515,7 +514,7 @@ let advanced_search conf base max_answers =
                ~dates:(getd Fields.AND.death_date)
                ~places:(getss Fields.AND.death_place)
           && match_marriage ~conf ~base ~p ~exact_place ~default:true
-               ~values:(getss Fields.AND.marriage_place)
+               ~places:(getss Fields.AND.marriage_place)
                ~dates:(getd Fields.AND.marriage_date)
       | Fields.Or ->
           let match_f or_f and_f =
@@ -533,7 +532,7 @@ let advanced_search conf base max_answers =
              || match_f Or.match_burial And.match_burial
              || match_f Or.match_death And.match_death
              || match_marriage ~conf ~base ~p ~exact_place ~default:false
-                  ~values:(getss Fields.OR.place) ~dates:(getd Fields.OR.date))
+                  ~places:(getss Fields.OR.place) ~dates:(getd Fields.OR.date))
     in
 
     if pmatch then (p :: list, len + 1) else acc
