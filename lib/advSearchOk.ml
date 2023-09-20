@@ -58,6 +58,7 @@ let string_incl x y =
   loop 0
 
 let abbrev_lower x = Name.abbrev (Name.lower x)
+let sex_of_string = function "M" -> Def.Male | "F" -> Female | _ -> Neuter
 
 (* Get the field name of an event criteria depending of the search type. *)
 let get_event_field_name gets event_criteria event_name search_type =
@@ -119,7 +120,7 @@ module AdvancedSearchMatch : sig
   val match_civil_status :
     base:Gwdb.base ->
     p:Gwdb.person ->
-    sex:string ->
+    sex:Def.sex ->
     married:string ->
     occupation:string ->
     first_name_list:string list list ->
@@ -208,12 +209,7 @@ end = struct
   let apply_to_field_values ~get ~cmp ~base =
     apply_to_field_values_raw ~get:(fun p -> sou base @@ get p) ~cmp
 
-  let sex_cmp p = function
-    | "M" -> get_sex p = Male
-    | "F" -> get_sex p = Female
-    | _ -> true
-
-  let match_sex ~p ~sex = if sex = "" then true else sex_cmp p sex
+  let match_sex ~p ~sex = if sex = Def.Neuter then true else get_sex p = sex
 
   let married_cmp p = function
     | "Y" -> get_family p <> [||]
@@ -508,8 +504,7 @@ let advanced_search conf base max_answers =
         (match_civil_status ~base ~p
            ~sex:(gets "sex" |> sex_of_string)
            ~married:(gets "married") ~occupation:(gets "occu") ~skip_fname
-           ~skip_sname ~skip_alias ~first_name_list:fn_list
-           ~surname_list:sn_list ~alias_list
+           ~skip_sname ~first_name_list:fn_list ~surname_list:sn_list
            ~exact_first_name:(gets "exact_first_name" = "on")
            ~exact_surname:(gets "exact_surname" = "on")
            ~exact_alias:(gets "exact_alias" = "on"))
@@ -699,15 +694,11 @@ let searching_fields conf base =
       event_name search search_type =
     (* Separator character depends on search type operator, a comma for AND search, a slash for OR search. *)
     let sep =
-<<<<<<< HEAD
-      if search <> "" then if search_type <> "OR" then ", " else " / " else ""
-=======
       if search = "" then ""
       else
         match search_type with
         | Fields.And -> ", "
         | Or -> " / " (* TODO should be "|" ... *)
->>>>>>> 78cea3d3e... reorder events in searching_fields
     in
     let search =
       if test_string place_prefix_field_name || test_date date_prefix_field_name
@@ -715,18 +706,11 @@ let searching_fields conf base =
       else search
     in
     (* The place and date have to be shown after each event only for the AND request. *)
-<<<<<<< HEAD
-    if search_type <> "OR" then
-      get_place_date_request place_prefix_field_name date_prefix_field_name
-        search
-    else search
-=======
     match search_type with
     | Fields.And ->
         get_place_date_request place_prefix_field_name date_prefix_field_name
           search
     | Or -> search
->>>>>>> 78cea3d3e... reorder events in searching_fields
   in
   let sosa_field search =
     if gets "sosa_filter" <> "" then
@@ -779,29 +763,6 @@ let searching_fields conf base =
   let search = string_field "first_name" search in
   let search = string_field "surname" search in
   let search = sosa_field search in
-<<<<<<< HEAD
-  let event_search = "" in
-  let event_search =
-    get_event_field_request birth_place_field_name birth_date_field_name "born"
-      event_search search_type
-  in
-  let event_search =
-    get_event_field_request bapt_place_field_name bapt_date_field_name
-      "baptized" event_search search_type
-  in
-  let event_search =
-    get_event_field_request marriage_place_field_name marriage_date_field_name
-      "married" event_search search_type
-  in
-  let event_search =
-    get_event_field_request death_place_field_name death_date_field_name "died"
-      event_search search_type
-  in
-  let event_search =
-    get_event_field_request burial_place_field_name burial_date_field_name
-      "buried" event_search search_type
-  in
-=======
   let build_event_search event_search (s1, s2) =
     let date_field_name = get_event_field_name conf.env "date" s1 search_type in
     let place_field_name =
@@ -820,7 +781,6 @@ let searching_fields conf base =
     |]
   in
   let event_search = Array.fold_left build_event_search "" events in
->>>>>>> 78cea3d3e... reorder events in searching_fields
   let search =
     if search = "" then event_search
     else if event_search = "" then search
@@ -828,24 +788,6 @@ let searching_fields conf base =
   in
   (* Adding the place and date at the end for the OR request. *)
   let search =
-<<<<<<< HEAD
-    if
-      search_type = "OR"
-      && (gets "place" != ""
-         || gets "date2_yyyy" != ""
-         || gets "date1_yyyy" != "")
-    then get_place_date_request "place" "date" search
-    else search
-  in
-  let search =
-    let sep = if (search :> string) <> "" then ", " else "" in
-    if gets "death" = "Dead" then search ^>^ sep ^ transl_nth conf "died" 2
-    else if gets "death" = "NotDead" then
-      search ^>^ sep ^ transl_nth conf "alive" 0
-    else if gets "death" = "DontKnowIfDead" then
-      search ^>^ sep ^ transl conf "maybe alive"
-    else search
-=======
     match search_type with
     | And -> search
     | Fields.Or ->
@@ -855,7 +797,6 @@ let searching_fields conf base =
           || gets "date1_yyyy" != ""
         then get_place_date_request "place" "date" search
         else search
->>>>>>> 78cea3d3e... reorder events in searching_fields
   in
   let search =
     if not (test_string marriage_place_field_name || test_date "marriage") then
