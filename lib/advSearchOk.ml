@@ -191,10 +191,10 @@ end = struct
 
   let do_compare ~p ~places ~get ~cmp =
     let s = abbrev_lower @@ get p in
-    List.exists (fun s' -> cmp (abbrev_lower s') s) y
+    List.exists (fun s' -> cmp (abbrev_lower s') s) places
 
-  let apply_to_field_values_raw ~cmp ~p ~values ~get ~default =
-    if values = [] then default else do_compare p values get cmp
+  let apply_to_field_places_raw ~cmp ~p ~places ~get ~default =
+    if places = [] then default else do_compare ~p ~places ~get ~cmp
 
   let apply_to_field_values ~get ~cmp ~base =
     apply_to_field_values_raw ~get:(fun p -> sou base @@ get p) ~cmp
@@ -234,10 +234,10 @@ end = struct
           let sp = poi base @@ Gutil.spouse (get_iper p) fam in
           if authorized_age conf base sp then
             df fam
-            && (values = []
-               || do_compare fam values
-                    (fun f -> sou base @@ get_marriage_place f)
-                    cmp)
+            && (places = []
+               || do_compare ~p:fam ~places
+                    ~get:(fun f -> sou base @@ get_marriage_place f)
+                    ~cmp)
           else false)
         (get_family p)
     in
