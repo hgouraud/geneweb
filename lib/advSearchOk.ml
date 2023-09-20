@@ -274,10 +274,10 @@ end = struct
         (abbrev_lower @@ sou base @@ get_occupation p)
 
   let match_baptism_date =
-    match_date ~df:(fun p -> Date.cdate_to_dmy_opt (get_baptism p))
+    match_date ~df:(fun p -> Date.od_of_cdate (get_baptism p))
 
   let match_birth_date =
-    match_date ~df:(fun p -> Date.cdate_to_dmy_opt (get_birth p))
+    match_date ~df:(fun p -> Date.od_of_cdate (get_birth p))
 
   let match_burial_date =
     let get_burial p =
