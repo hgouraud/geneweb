@@ -313,29 +313,61 @@ end = struct
     in
     fun x -> List.exists (eq x) search_list
 
-  let match_first_name ~base ~first_name_list ~exact =
-    if first_name_list = [] then fun _ -> true
-    else
-      let eq = match_name ~search_list:first_name_list ~exact in
-      fun p ->
-        eq
-          (List.map Name.lower @@ Name.split_fname @@ sou base
-         @@ get_first_name p)
+  let wrap_match_name ~base ~search_list ~get ~exact ~split =
+    match_name ~search_list ~exact
+      (List.map Name.lower @@ split @@ sou base @@ get ())
 
-  let match_surname ~base ~surname_list ~exact =
-    if surname_list = [] then fun _ -> true
-    else
-      let eq = match_name ~search_list:surname_list ~exact in
-      fun p ->
-        eq (List.map Name.lower @@ Name.split_sname @@ sou base @@ get_surname p)
+  let match_first_name ~base ~first_name_list ~exact ~p =
+    wrap_match_name ~base ~search_list:first_name_list
+      ~get:(fun () -> get_first_name p)
+      ~exact ~split:Name.split_fname
+
+  (* we use [first_name_list] as the list of aliases to search for.
+     so searching for a first name will also look at first name aliases *)
+  let match_first_names_aliases ~base ~first_name_list ~exact ~p =
+    let gets =
+      List.map (fun alias () -> alias) (Gwdb.get_first_names_aliases p)
+    in
+    List.exists
+      (fun get ->
+        wrap_match_name ~base ~search_list:first_name_list ~get ~exact
+          ~split:Name.split_fname)
+      gets
+
+  let match_surname ~base ~surname_list ~exact ~p =
+    wrap_match_name ~base ~search_list:surname_list
+      ~get:(fun () -> get_surname p)
+      ~exact ~split:Name.split_sname
+
+  let match_surnames_aliases ~base ~surname_list ~exact ~p =
+    let gets = List.map (fun alias () -> alias) (Gwdb.get_surnames_aliases p) in
+    List.exists
+      (fun get ->
+        wrap_match_name ~base ~search_list:surname_list ~get ~exact
+          ~split:Name.split_sname)
+      gets
+
+  let match_alias ~base ~alias_list ~exact ~p =
+    let gets = List.map (fun alias () -> alias) (Gwdb.get_aliases p) in
+    List.exists
+      (fun get ->
+        wrap_match_name ~base ~search_list:alias_list ~get ~exact
+          ~split:(*TODO which split to use?? *) Name.split_sname)
+      gets
 
   (* Check the civil status. The test is the same for an AND or a OR search request. *)
   let match_civil_status ~base ~p ~sex ~married ~occupation ~first_name_list
       ~surname_list ~skip_fname ~skip_sname ~exact_first_name ~exact_surname =
     match_sex ~p ~sex
-    && (skip_fname
-       || match_first_name ~base ~first_name_list ~exact:exact_first_name p)
-    && (skip_sname || match_surname ~base ~surname_list ~exact:exact_surname p)
+    && (skip_fname || first_name_list = []
+       || match_first_name ~base ~first_name_list ~exact:exact_first_name ~p
+       || match_first_names_aliases ~base ~first_name_list
+            ~exact:exact_first_name ~p)
+    && (skip_sname || surname_list = []
+       || match_surname ~base ~surname_list ~exact:exact_surname ~p
+       || match_surnames_aliases ~base ~surname_list ~exact:exact_surname ~p)
+    && (skip_alias || alias_list = []
+       || match_alias ~base ~alias_list ~exact:exact_alias ~p)
     && match_married ~p ~married
     && match_occupation ~base ~p ~occupation
 
