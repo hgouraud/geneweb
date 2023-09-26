@@ -32,7 +32,6 @@
     %self;%end;%else;%self; ([no descendants])%end;
    %if;(cancel_links and e.v!=0) %apply;togend(e.v)%end;
 </h1>
-%include;table_tools
 %if;not cancel_links;
     %include;buttons
 %end;
@@ -655,7 +654,6 @@
     %end;
   %end;
 %end;
-%include;table_header
 %( Main %)
 <table class="table table-hover table-sm descends_table mt-1">
   %if;(e.t="A")
