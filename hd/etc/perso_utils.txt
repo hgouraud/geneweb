@@ -894,8 +894,6 @@
 %end;
 %let;timeline;%if;(count>0)yes%else;no%end;%in;
 
-
-
 %define;rm(ccc,ttt)
   %if;(e.ccc="on")<a role="button" class="stretched-link" href="%url_set.ccc;"
     title="ttt&#010;&#010; [*remove %s column:::ccc]"></a>%end;
@@ -909,7 +907,7 @@
     %reset_count;
     %if;(e.num="on")
       <th scope="col" class="text-center align-middle position-relative" rowspan="2">№%nn;
-        %apply;rm%with;num%and;%if;(e.m="D")[*d'Aboville]%elseif;(e.m="A")[Sosa number]%end;</th>
+        %apply;rm%with;num%and;%if;(e.m="D")[*d'Aboville]%elseif;(e.m="A")[Sosa number]%end;%end;</th>
       %incr_count;
     %end;
     <th scope="col" class="pl-2 align-middle" rowspan="2">[*person/persons]0</th>
