@@ -140,7 +140,9 @@ let print_shortest_path conf base p1 p2 =
         Hutil.header_no_page_title conf title;
         (match p_getenv conf.env "cgl" with
         | Some "on" -> ()
-        | _ -> Hutil.interp_no_env conf "buttons_rel");
+        | _ ->
+            let conf = { conf with is_printed_by_template = false } in
+            Hutil.interp_no_env conf "buttons_rel");
         if excl_faml = [] then (
           Output.print_sstring conf "<h1>";
           title false;
