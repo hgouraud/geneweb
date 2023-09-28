@@ -25,10 +25,6 @@
   [of%s:::xxx]
 %end;
 <h3 class="mt-2 ml-3 text-no-wrap">%nn;
-%define;of_c(xxx)
-  %let;sss;%apply;capitalize%with;xxx%end;%in;
-  %apply;of%with;%sss;%end;
-%end;
   %if;(e.slices="on")
     [*display by slices/slice width/overlap/total width]0
   %elseif;(e.m="D")
