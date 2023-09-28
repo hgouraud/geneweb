@@ -14417,7 +14417,7 @@ tr: kardeşler
 ->: siblings
 
     cousins.1.1 tt
-fr: adelphe·s<br>sibling·s<hr>germains 50 &#37;<br>consanguins ou utérins 25 &#37;
+fr: adelphe·s<br>personne issue de même parents<hr>germains 50 &#37;<br>consanguins ou utérins 25 &#37;
 
     siblings of the grandparents
 co: arcizii
