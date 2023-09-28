@@ -1896,7 +1896,7 @@ en: nephew and nieces
 fr: neveux et nièces
 
     cousins.1.2 tt
-fr: enfants des frères et sœurs<br>« petits-frères et petites-sœurs »<hr>← cousins germains des enfants
+fr: enfants des frères et sœurs<br>« petits-frères et petites-sœurs »<hr>cousins germains des enfants
 
     a sibling-in-law/siblings-in-law
 co: un cugnatu o una cugnata/cugnati è cugnate
@@ -14445,7 +14445,7 @@ fr: un %soncle à la mode de Bretagne/une %stante à la mode de Bretagne
 fr: grands-cousins
 
     cousins.3.2 tt
-fr: oncles et tantes à la mode de Bourgogne ou Bretagne<br>petits-oncles et petites-tantes (désuets)<hr><- cousins germains des parents, oncles et tantes
+fr: oncles et tantes à la mode de Bourgogne ou Bretagne<br>petits-oncles et petites-tantes (désuets)<hr>cousins germains des parents, oncles et tantes
 
     cousin.3.3
 ->: a 2nd cousin
@@ -14463,7 +14463,7 @@ fr: un petit-cousin au 2<sup>e</sup> degré/une petite-cousine au 2<sup>e</sup>
 fr: petits-cousins 2<sup>e</sup>
 
     cousins.3.4 tt
-fr: petits-cousins au 2<sup>e</sup> degré<br>petits-cousins issus de germains<hr><- cousins issus d’issus de germains des enfants
+fr: petits-cousins au 2<sup>e</sup> degré<br>petits-cousins issus de germains<hr>cousins issus d’issus de germains des enfants
 
     cousins.3.5
 fr: arrière-petits-cousins 2<sup>e</sup>
@@ -14516,7 +14516,7 @@ fr: un %sarrière-grand-cousin/une %sarrière-grande-cousine
 fr: arrière-grands-cousins
 
     cousins.4.2 tt
-fr: grands-oncles et grandes-tantes à la mode de Bourgogne ou Bretagne<hr><- cousins germains des grands-parents, grands oncles et grandes-tantes
+fr: grands-oncles et grandes-tantes à la mode de Bourgogne ou Bretagne<hr>cousins germains des grands-parents, grands oncles et grandes-tantes
 
     cousin.4.3
 fr: un %sgrand-cousin au 2<sup>e</sup> degré/une %sgrande-cousine au 2<sup>e</sup> degré
@@ -14525,7 +14525,7 @@ fr: un %sgrand-cousin au 2<sup>e</sup> degré/une %sgrande-cousine au 2<sup>e</s
 fr: grands-cousins 2<sup>e</sup>
 
     cousins.4.3 tt
-fr: grands-cousins au 2<sup>e</sup> degré<hr><- cousins issus de germains des parents et oncles
+fr: grands-cousins au 2<sup>e</sup> degré<hr>cousins issus de germains des parents et oncles
 
     cousin.4.4
 ->: a 3rd cousin
@@ -14588,7 +14588,7 @@ fr: une %sarrière-arrière-grand-cousin/une %sarrière-arrière-grande-cousine
 fr: arrière-arrière-grands-cousins
 
     cousins.5.2 tt
-fr: arrière-grand-oncles et arrière-grandes-tantes à la mode de Bourgogne ou Bretagne<hr><- cousins des arrière-grands-parents et arrière-grands-oncles
+fr: arrière-grand-oncles et arrière-grandes-tantes à la mode de Bourgogne ou Bretagne<hr>cousins des arrière-grands-parents et arrière-grands-oncles
 
     cousin.5.3
 fr: une %sarrière-grand-cousin 2<sup>e</sup>/une %sarrière-grande-cousine 2<sup>e</sup>
@@ -14597,7 +14597,7 @@ fr: une %sarrière-grand-cousin 2<sup>e</sup>/une %sarrière-grande-cousine 2<su
 fr: arrière-grands-cousins 2<sup>e</sup>
 
     cousins.5.3 tt
-fr: arrière-grands-cousins au deuxième degré<hr><- cousins issus de germains des grands-parents et grands-oncles
+fr: arrière-grands-cousins au deuxième degré<hr>cousins issus de germains des grands-parents et grands-oncles
 
     cousin.5.4
 fr: un %sgrand-cousin au 3<sup>e</sup> degré/une %sgrande-cousine au 3<sup>e</sup> degré
@@ -14606,7 +14606,7 @@ fr: un %sgrand-cousin au 3<sup>e</sup> degré/une %sgrande-cousine au 3<sup>e</s
 fr: grands-cousins 3<sup>e</sup>
 
     cousins.5.4 tt
-fr: grands-cousins au troisième degré<hr><- cousins issus d’issus de germains des parents
+fr: grands-cousins au troisième degré<hr>cousins issus d’issus de germains des parents
 
     cousin.5.5
 en: a 4th -cousin/
@@ -14676,7 +14676,7 @@ fr: un %sarrière-arrière-grand-cousin au 2<sup>e</sup> degré/une %sarrière-
 fr: arrière-arrière-grands-cousins 2<sup>e</sup>
 
     cousins.6.3 tt
-fr: arrière-arrière-grands-cousins au deuxième degré<br><- cousins issus de germains des arrière-grands-parents et arrière-grands-oncles
+fr: arrière-arrière-grands-cousins au deuxième degré<br>cousins issus de germains des arrière-grands-parents et arrière-grands-oncles
 
     cousin.6.4
 fr: un %sarrière-grand-cousin au 3<sup>e</sup> degré/une %sarrière-grande-cousine au 3<sup>e</sup> degré
@@ -14685,7 +14685,7 @@ fr: un %sarrière-grand-cousin au 3<sup>e</sup> degré/une %sarrière-grande-cou
 fr: arrière-grands-cousins 3<sup>e</sup>
 
     cousins.6.4 tt
-fr: arrière-grands-cousins au troisième degré<br><- cousins issus d’issus de germains des grands-parents et grands-oncles
+fr: arrière-grands-cousins au troisième degré<br>cousins issus d’issus de germains des grands-parents et grands-oncles
 
     cousins.6.5
 fr: grands-cousins 4<sup>e</sup>
