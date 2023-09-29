@@ -534,6 +534,7 @@ let new_strings_of_fsname_aux offset_acc offset_inx split get bname strings
   let t = ref None in
   fun s ->
     let i = Dutil.name_index s in
+    (* look in index files *)
     let r =
       let ic_inx = Secure.open_in_bin (Filename.concat bname "names.inx") in
       let ai =
@@ -563,25 +564,19 @@ let new_strings_of_fsname_aux offset_acc offset_inx split get bname strings
       close_in ic_inx;
       ai
     in
+    (* and look in the patch too *)
     Hashtbl.fold
       (fun _key p acc ->
-        let istr_list = get p in
-        let acc =
-          List.fold_left
-            (fun acc istr ->
-              if
-                (not (List.mem istr acc))
-                &&
-                let str = strings.get istr in
-                match split str with
-                | [ s ] -> i = Dutil.name_index s
-                | list ->
-                    List.exists (fun s -> i = Dutil.name_index s) (str :: list)
-              then istr :: acc
-              else acc)
-            acc istr_list
-        in
-        acc)
+        let istr = get p in
+        if
+          (not (List.mem istr acc))
+          &&
+          let str = strings.get istr in
+          match split str with
+          | [ s ] -> i = Dutil.name_index s
+          | list -> List.exists (fun s -> i = Dutil.name_index s) (str :: list)
+        then istr :: acc
+        else acc)
       person_patches (Array.to_list r)
 
 let new_strings_of_sname =
