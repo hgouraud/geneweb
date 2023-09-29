@@ -29,7 +29,7 @@
 %(<!-- Begin define --> %)
 %let;birth_symbol;%if;(bvar.birth_symbol != "")%bvar.birth_symbol;%else;&deg;%end;%in;
 %let;death_symbol;%if;(bvar.death_symbol != "")%bvar.death_symbol;%else;&dagger;%end;%in;
-%let;l_v;%apply;min%with;%b.max_anc_level;%and;%static_max_anc_level;%and;%e.v;%and;3%end;%in;
+%let;l_v;%apply;min%with;%b.max_anc_level;%and;%static_max_anc_level;%and;%if;(e.v!="")%e.v;%else;3%end;%end;%in;
 %let;l_max_dates;%if;(bvar.max_dates != "")%bvar.max_dates;%else;200%end;%in;
 %define;tothegen(xxx)
   [*to the %s generation:::xxx]%nn;
