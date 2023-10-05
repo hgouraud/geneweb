@@ -400,6 +400,8 @@ let persons_of_surname = function
         Dutil.compare_snames_i
   | GnWb0020 -> old_persons_of_first_name_or_surname
 
+let persons_of_alias = persons_of_surname
+
 (* Search index for a given name in file names.inx *)
 
 let persons_of_name bname patches =
@@ -489,7 +491,7 @@ let old_strings_of_fsname bname strings (_, person_patches) =
       person_patches (Array.to_list r)
 (**)
 
-(** offset: 1 pour sname 2 pour fname *)
+(** offset: 1 pour sname 2 pour fname 3 pour aname *)
 let new_strings_of_fsname_aux offset_acc offset_inx split get bname strings
     (_, person_patches) =
   let t = ref None in
@@ -544,12 +546,19 @@ let new_strings_of_sname =
 let new_strings_of_fname =
   new_strings_of_fsname_aux 2 1 Name.split_fname (fun p -> p.first_name)
 
+let new_strings_of_aname =
+  new_strings_of_fsname_aux 3 2 Name.split_sname (fun p -> p.Dbdisk.aliases)
+
 let strings_of_sname = function
   | GnWb0024 | GnWb0023 -> new_strings_of_sname
   | _ -> old_strings_of_fsname
 
 let strings_of_fname = function
   | GnWb0024 | GnWb0023 -> new_strings_of_fname
+  | _ -> old_strings_of_fsname
+
+let strings_of_aname = function
+  | GnWb0024 | GnWb0023 -> new_strings_of_aname
   | _ -> old_strings_of_fsname
 
 (* Restrict file *)
@@ -1272,6 +1281,7 @@ let opendb ?(read_only = false) bname =
       persons_of_name;
       strings_of_sname = strings_of_sname version bname strings patches.h_person;
       strings_of_fname = strings_of_fname version bname strings patches.h_person;
+      strings_of_aname = strings_of_aname version bname strings patches.h_person;
       persons_of_surname =
         persons_of_surname version base_data
           ( (fun p -> p.surname),
@@ -1285,6 +1295,13 @@ let opendb ?(read_only = false) bname =
             snd patches.h_person,
             "fnames.inx",
             "fnames.dat",
+            bname );
+      persons_of_alias =
+        persons_of_alias version base_data
+          ( (fun p -> p.aliases),
+            snd patches.h_person,
+            "anames.inx",
+            "anames.dat",
             bname );
       patch_person;
       patch_ascend;
@@ -1347,6 +1364,7 @@ let make bname particles ((persons, families, strings, bnotes) as _arrays) :
       persons_of_name = (fun _ -> assert false);
       strings_of_sname = (fun _ -> assert false);
       strings_of_fname = (fun _ -> assert false);
+      strings_of_aname = (fun _ -> assert false);
       persons_of_surname =
         {
           find = (fun _ -> assert false);
@@ -1354,6 +1372,12 @@ let make bname particles ((persons, families, strings, bnotes) as _arrays) :
           next = (fun _ -> assert false);
         };
       persons_of_first_name =
+        {
+          find = (fun _ -> assert false);
+          cursor = (fun _ -> assert false);
+          next = (fun _ -> assert false);
+        };
+      persons_of_alias =
         {
           find = (fun _ -> assert false);
           cursor = (fun _ -> assert false);
