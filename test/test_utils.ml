@@ -151,6 +151,7 @@ let util_eval_translate _ =
   in
   let test aaa sup s c =
     let bbb = Templ.eval_transl_lexicon conf sup s c in
+    if aaa <> bbb then Printf.eprintf "Res: %s <> %s\n" aaa bbb;
     assert_equal aaa bbb
   in
   let test1 aaa s =
@@ -175,7 +176,10 @@ let util_eval_translate _ =
   (*test "demi frère" false "%sbrother/%ssister/%sneuter::|%if;true;demi%else;half%end;| " "0";*)
   test "de Jean Durand" false "of%s %s::|[*jhon/johann]|:Durand" "0";
   test "de Jeanne Durand" false "of%s %s::|[*jhon/johann]|:Durand" "1";
-  test "de Jean Jean" false "of%s %s::|[*jhon/johann]0:[*jhon/johann]|" "0"
+  test "de Jean Jean" false "of%s %s::|[*jhon/johann]:[*jhon/johann]|" "0";
+  test "de Jean Jean" false "of%s %s::|[*jhon/johann]0:[*jhon/johann]0|" "0";
+  test "de Jeanne Jeanne" false "of%s %s::|[*jhon/johann]:[*jhon/johann]|" "1";
+  test "de Jean Jeanne" false "of%s %s::|[*jhon/johann]:[*jhon/johann]1|" "0"
 
 let util_transl_a_of_b _ =
   let conf = Config.empty in
