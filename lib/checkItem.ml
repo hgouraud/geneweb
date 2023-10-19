@@ -215,7 +215,7 @@ let check_difference_age_between_cpl warning fath moth =
       | None -> ()
       | Some d2 ->
           (if d1.year < d2.year then Date.time_elapsed_opt d1 d2
-          else Date.time_elapsed_opt d2 d1)
+           else Date.time_elapsed_opt d2 d1)
           |> Option.iter @@ fun a ->
              if strictly_older a max_age_btw_cpl then
                warning (BigAgeBetweenSpouses (fath, moth, a)))

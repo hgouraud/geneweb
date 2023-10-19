@@ -217,8 +217,8 @@ let relationship_and_links base ri b ip1 ip2 =
       let v = Gwdb.Marker.get tstab u in
       reset u;
       (if v >= Array.length ri.queue then
-       let len = Array.length ri.queue in
-       ri.queue <- Array.append ri.queue (Array.make (v + 1 - len) []));
+         let len = Array.length ri.queue in
+         ri.queue <- Array.append ri.queue (Array.make (v + 1 - len) []));
       if !qmax < 0 then (
         for i = !qi to v - 1 do
           ri.queue.(i) <- []

@@ -135,13 +135,13 @@ let dmy_to_sdn_range_l dmy =
           {
             year =
               (if dmy.month = 0 || (dmy.month = 12 && dmy.day = 0) then
-               dmy.year + 1
-              else dmy.year);
+                 dmy.year + 1
+               else dmy.year);
             month =
               (if dmy.month = 0 then 1
-              else if dmy.day = 0 then
-                if dmy.month = 12 then 1 else dmy.month + 1
-              else dmy.month);
+               else if dmy.day = 0 then
+                 if dmy.month = 12 then 1 else dmy.month + 1
+               else dmy.month);
             day = (if dmy.day = 0 then 1 else dmy.day);
             prec = (if dmy.month = 0 || dmy.day = 0 then Before else Sure);
             delta = dmy.delta;

@@ -189,8 +189,8 @@ let move base basename =
           if !detail == nb then List.iter (print_family base basename) ifaml
           else print_family base basename ifam;
           (if !statistics then
-           try Hashtbl.replace hts nb (Hashtbl.find hts nb + 1)
-           with Not_found -> Hashtbl.add hts nb 1);
+             try Hashtbl.replace hts nb (Hashtbl.find hts nb + 1)
+             with Not_found -> Hashtbl.add hts nb 1);
           flush stdout;
           let check_ask =
             if !exact then nb = !ask_for_delete else nb <= !ask_for_delete

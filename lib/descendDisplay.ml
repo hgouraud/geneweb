@@ -399,9 +399,9 @@ let display_descendants_with_numbers conf base max_level ancestor =
   Output.print_string conf (DateDisplay.short_dates_text conf base ancestor);
   let p = ancestor in
   (if authorized_age conf base p then
-   match (Date.od_of_cdate (get_birth p), get_death p) with
-   | Some _, _ | _, Death (_, _) -> Output.print_sstring conf "<br>"
-   | _ -> ());
+     match (Date.od_of_cdate (get_birth p), get_death p) with
+     | Some _, _ | _, Death (_, _) -> Output.print_sstring conf "<br>"
+     | _ -> ());
   (text_to conf max_level : Adef.safe_string :> string)
   |> Utf8.capitalize_fst |> Output.print_sstring conf;
   Output.print_sstring conf ".<p>";
@@ -783,19 +783,19 @@ let print_person_table conf base p lab =
   if p_getenv conf.env "death_age" = Some "on" then
     td (fun () ->
         (if p_auth then
-         match Gutil.get_birth_death_date p with
-         | ( Some (Dgreg (({ prec = Sure | About | Maybe } as d1), _)),
-             Some (Dgreg (({ prec = Sure | About | Maybe } as d2), _)),
-             approx )
-           when d1 <> d2 ->
-             if not ((not approx) && d1.prec = Sure && d2.prec = Sure) then (
-               transl_decline conf "possibly (date)" ""
-               |> Output.print_sstring conf;
-               Output.print_sstring conf " ");
-             Date.time_elapsed d1 d2
-             |> DateDisplay.string_of_age conf
-             |> Output.print_string conf
-         | _ -> ());
+           match Gutil.get_birth_death_date p with
+           | ( Some (Dgreg (({ prec = Sure | About | Maybe } as d1), _)),
+               Some (Dgreg (({ prec = Sure | About | Maybe } as d2), _)),
+               approx )
+             when d1 <> d2 ->
+               if not ((not approx) && d1.prec = Sure && d2.prec = Sure) then (
+                 transl_decline conf "possibly (date)" ""
+                 |> Output.print_sstring conf;
+                 Output.print_sstring conf " ");
+               Date.time_elapsed d1 d2
+               |> DateDisplay.string_of_age conf
+               |> Output.print_string conf
+           | _ -> ());
         Output.print_sstring conf " &nbsp;");
   if p_getenv conf.env "occu" = Some "on" then
     td (fun () ->
@@ -1152,8 +1152,8 @@ let make_tree_hts conf base gv p =
                 in
                 "&amp;"
                 ^<^ (if auth then
-                     DateDisplay.short_marriage_date_text conf base fam p sp
-                    else Adef.safe "")
+                       DateDisplay.short_marriage_date_text conf base fam p sp
+                     else Adef.safe "")
                 ^^^ "&nbsp;" ^<^ txt
                 ^^^ DagDisplay.image_txt conf base sp
               in
@@ -1285,8 +1285,9 @@ let print_aboville conf base max_level p =
             else (
               loop_ind (lev + 1)
                 (if num_aboville then lab ^>^ string_of_int cnt_chil ^ "."
-                else
-                  lab ^>^ {|<span class="descends_aboville_pipe">&nbsp;</span>|})
+                 else
+                   lab
+                   ^>^ {|<span class="descends_aboville_pipe">&nbsp;</span>|})
                 (pget conf base (get_children des).(j));
               loop_chil (cnt_chil + 1) (j + 1))
           in

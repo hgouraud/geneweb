@@ -295,17 +295,17 @@ let print_sosa conf base p link =
     match Util.find_sosa_ref conf base with
     | Some r ->
         (if not link then ()
-        else
-          let sosa_link =
-            let i1 = string_of_iper (get_iper p) in
-            let i2 = string_of_iper (get_iper r) in
-            let b2 = Sosa.to_string sosa_num in
-            "m=RL&i1=" ^ i1 ^ "&i2=" ^ i2 ^ "&b1=1&b2=" ^ b2
-          in
-          Output.print_sstring conf {|<a href="|};
-          Output.print_string conf (Util.commd conf);
-          Output.print_string conf (sosa_link |> Adef.safe);
-          Output.print_sstring conf {|"> |});
+         else
+           let sosa_link =
+             let i1 = string_of_iper (get_iper p) in
+             let i2 = string_of_iper (get_iper r) in
+             let b2 = Sosa.to_string sosa_num in
+             "m=RL&i1=" ^ i1 ^ "&i2=" ^ i2 ^ "&b1=1&b2=" ^ b2
+           in
+           Output.print_sstring conf {|<a href="|};
+           Output.print_string conf (Util.commd conf);
+           Output.print_string conf (sosa_link |> Adef.safe);
+           Output.print_sstring conf {|"> |});
         let title =
           if Util.is_hide_names conf r && not (Util.authorized_age conf base r)
           then ""

@@ -380,7 +380,7 @@ let someone_strong base p =
   "<strong>"
   ^<^ escape_html (p_first_name base p)
   ^^^ (if get_occ p = 0 then Adef.escaped ""
-      else Adef.escaped @@ "." ^ string_of_int (get_occ p))
+       else Adef.escaped @@ "." ^ string_of_int (get_occ p))
   ^^^ " "
   ^<^ escape_html (p_surname base p)
   ^>^ "</strong>"

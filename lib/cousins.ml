@@ -371,7 +371,7 @@ let cousins_fold l =
     | (ip, ifaml, ianc, lev) :: l ->
         loop false
           (if first || cnt0 = 0 then acc
-          else (ip0, (ifaml0, iancl0, cnt0), lev0) :: acc)
+           else (ip0, (ifaml0, iancl0, cnt0), lev0) :: acc)
           (ip, ([ ifaml ], [ ianc ], 1), lev)
           l
     | [] ->

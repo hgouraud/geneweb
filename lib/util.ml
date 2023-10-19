@@ -499,23 +499,23 @@ let default_safe_html_allowed_tags =
 let safe_html_allowed_tags =
   lazy
     (if !allowed_tags_file = "" then default_safe_html_allowed_tags
-    else
-      let ic = open_in !allowed_tags_file in
-      let rec loop tags =
-        match input_line ic with
-        | tag ->
-            let ns, tag =
-              match String.split_on_char ' ' tag with
-              | [ ns; tag ] -> (ns, tag)
-              | [ tag ] -> ("http://www.w3.org/1999/xhtml", tag)
-              | _ -> assert false
-            in
-            loop ((ns, String.lowercase_ascii tag) :: tags)
-        | exception End_of_file ->
-            close_in ic;
-            tags
-      in
-      loop [])
+     else
+       let ic = open_in !allowed_tags_file in
+       let rec loop tags =
+         match input_line ic with
+         | tag ->
+             let ns, tag =
+               match String.split_on_char ' ' tag with
+               | [ ns; tag ] -> (ns, tag)
+               | [ tag ] -> ("http://www.w3.org/1999/xhtml", tag)
+               | _ -> assert false
+             in
+             loop ((ns, String.lowercase_ascii tag) :: tags)
+         | exception End_of_file ->
+             close_in ic;
+             tags
+       in
+       loop [])
 
 (* Few notes:
 
@@ -2349,7 +2349,7 @@ let print_in_columns conf ncols len_list list wprint_elem =
                    Output.printf conf "<h3 class=\"subtitle mx-3\">%s%s</h3>\n"
                      (if ord = "" then "..." else String.make 1 ord.[0])
                      (if !kind = HeadElem then ""
-                     else " (" ^ transl conf "continued" ^ ")");
+                      else " (" ^ transl conf "continued" ^ ")");
                    Output.print_sstring conf "<ul>\n");
                  Output.print_sstring conf "<li>";
                  wprint_elem elem;

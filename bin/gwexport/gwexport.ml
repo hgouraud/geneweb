@@ -370,10 +370,10 @@ let select opts ips =
           let pmark = iper_marker (ipers base) 0 in
           let fmark = ifam_marker (ifams base) 0 in
           (if opts.censor = -1 then restrict_base base pmark fmark 1
-          else
-            let tm = Unix.localtime (Unix.time ()) in
-            let threshold = 1900 + tm.Unix.tm_year - opts.censor in
-            censor_base base pmark fmark 1 threshold);
+           else
+             let tm = Unix.localtime (Unix.time ()) in
+             let threshold = 1900 + tm.Unix.tm_year - opts.censor in
+             censor_base base pmark fmark 1 threshold);
           ((fun i -> Marker.get pmark i = 0), fun i -> Marker.get fmark i = 0))
         else ((fun _ -> true), fun _ -> true)
       in

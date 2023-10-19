@@ -899,8 +899,8 @@ let build_surnames_list conf base v p =
           then add_surname sosa p surn dp;
           let sosa = Sosa.twice sosa in
           (if not (is_hidden fath) then
-           let dp1 = merge_date_place conf base surn dp fath in
-           loop (lev + 1) sosa fath (get_surname fath) dp1);
+             let dp1 = merge_date_place conf base surn dp fath in
+             loop (lev + 1) sosa fath (get_surname fath) dp1);
           let sosa = Sosa.inc sosa 1 in
           if not (is_hidden moth) then
             let dp2 = merge_date_place conf base surn dp moth in
@@ -4653,32 +4653,32 @@ let print_foreach conf base print_ast eval_expr =
         |> ignore
     | _ ->
         (if Array.length (get_family p) > 0 then
-         let rec loop prev i =
-           if i = Array.length (get_family p) then ()
-           else
-             let ifam = (get_family p).(i) in
-             let fam = foi base ifam in
-             let ifath = get_father fam in
-             let imoth = get_mother fam in
-             let ispouse = Gutil.spouse (get_iper p) fam in
-             let cpl = (ifath, imoth, ispouse) in
-             let m_auth =
-               authorized_age conf base (pget conf base ifath)
-               && authorized_age conf base (pget conf base imoth)
-             in
-             let vfam = Vfam (ifam, fam, cpl, m_auth) in
-             let env = ("#loop", Vint 0) :: env in
-             let env = ("fam", vfam) :: env in
-             let env = ("family_cnt", Vint (i + 1)) :: env in
-             let env =
-               match prev with
-               | Some vfam -> ("prev_fam", vfam) :: env
-               | None -> env
-             in
-             List.iter (print_ast env ini_ep) al;
-             loop (Some vfam) (i + 1)
-         in
-         loop None 0);
+           let rec loop prev i =
+             if i = Array.length (get_family p) then ()
+             else
+               let ifam = (get_family p).(i) in
+               let fam = foi base ifam in
+               let ifath = get_father fam in
+               let imoth = get_mother fam in
+               let ispouse = Gutil.spouse (get_iper p) fam in
+               let cpl = (ifath, imoth, ispouse) in
+               let m_auth =
+                 authorized_age conf base (pget conf base ifath)
+                 && authorized_age conf base (pget conf base imoth)
+               in
+               let vfam = Vfam (ifam, fam, cpl, m_auth) in
+               let env = ("#loop", Vint 0) :: env in
+               let env = ("fam", vfam) :: env in
+               let env = ("family_cnt", Vint (i + 1)) :: env in
+               let env =
+                 match prev with
+                 | Some vfam -> ("prev_fam", vfam) :: env
+                 | None -> env
+               in
+               List.iter (print_ast env ini_ep) al;
+               loop (Some vfam) (i + 1)
+           in
+           loop None 0);
         List.fold_left
           (fun (prev, i) (ifam, fam, (ifath, imoth, sp), baseprefix, can_merge) ->
             if can_merge then (None, i)

@@ -53,10 +53,10 @@ let main () =
       let () = Gwdb.load_ascends_array base in
       let () = Gwdb.load_strings_array base in
       (if not opts.Gwexport.mem then
-       let () = Gwdb.load_couples_array base in
-       let () = Gwdb.load_unions_array base in
-       let () = Gwdb.load_descends_array base in
-       ());
+         let () = Gwdb.load_couples_array base in
+         let () = Gwdb.load_unions_array base in
+         let () = Gwdb.load_descends_array base in
+         ());
       let _ofile, oc, close = opts.Gwexport.oc in
       if not !GwuLib.raw_output then oc "encoding: utf-8\n";
       if !GwuLib.old_gw then oc "\n" else oc "gwplus\n\n";

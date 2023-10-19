@@ -697,7 +697,7 @@ let get_mar_date str = function
         match x.[0] with
         | '+' ->
             ( (if String.length x > 1 then Date.cdate_of_od (date_of_string x 1)
-              else Date.cdate_None),
+               else Date.cdate_None),
               l )
         | _ -> failwith str
       in

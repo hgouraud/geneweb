@@ -59,8 +59,8 @@ let insert_saved fname =
   let l = String.split_on_char Filename.dir_sep.[0] fname |> List.rev in
   let l =
     (if List.length l >= 2 then List.hd l :: "old" :: List.tl l
-    else if List.length l = 1 then List.hd l :: [ "old" ]
-    else l)
+     else if List.length l = 1 then List.hd l :: [ "old" ]
+     else l)
     |> List.rev
   in
   String.concat Filename.dir_sep l
@@ -484,12 +484,12 @@ let effective_send_c_ok conf base p file file_name =
   in
   History.record conf base changed
     (if mode = "portraits" then "si"
-    else if file_name <> "" && note <> Adef.safe "" && source <> Adef.safe ""
-   then "sb"
-    else if file_name <> "" then "so"
-    else if note <> Adef.safe "" then "sc"
-    else if source <> Adef.safe "" then "ss"
-    else "sn");
+     else if file_name <> "" && note <> Adef.safe "" && source <> Adef.safe ""
+     then "sb"
+     else if file_name <> "" then "so"
+     else if note <> Adef.safe "" then "sc"
+     else if source <> Adef.safe "" then "ss"
+     else "sn");
   file_name
 
 (* Delete *)
@@ -628,14 +628,14 @@ let effective_reset_c_ok conf base p =
         [ Util.base_path [ "src" ] conf.bname; "images"; carrousel; file_name ]
   in
   (if Sys.file_exists file_in_new then ()
-  else
-    match Image.get_portrait conf base p with
-    | Some (`Url url) -> (
-        try write_file file_in_new url
-        with _ ->
-          incorrect conf
-            (Printf.sprintf "reset portrait (swap file %s)" file_in_new))
-    | _ -> ());
+   else
+     match Image.get_portrait conf base p with
+     | Some (`Url url) -> (
+         try write_file file_in_new url
+         with _ ->
+           incorrect conf
+             (Printf.sprintf "reset portrait (swap file %s)" file_in_new))
+     | _ -> ());
   swap_files file_in_new ext old_ext;
   file_name
 

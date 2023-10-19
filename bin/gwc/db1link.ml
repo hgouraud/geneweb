@@ -461,8 +461,8 @@ let insert_undefined gen key =
       gen.g_pcnt <- gen.g_pcnt + 1;
       (* strore names locally *)
       (if key.pk_first_name <> "?" && key.pk_surname <> "?" then
-       let h = person_hash key.pk_first_name key.pk_surname in
-       Hashtbl.add gen.g_file_info.f_local_names (h, occ) i);
+         let h = person_hash key.pk_first_name key.pk_surname in
+         Hashtbl.add gen.g_file_info.f_local_names (h, occ) i);
       (* write start position of person in [g_per] *)
       seek_out gen.g_per_index (sizeof_long * i);
       output_binary_int gen.g_per_index (pos_out gen.g_per);
@@ -555,8 +555,8 @@ let insert_person gen so =
       gen.g_pcnt <- gen.g_pcnt + 1;
       (* strore names locally *)
       (if so.first_name <> "?" && so.surname <> "?" then
-       let h = person_hash so.first_name so.surname in
-       Hashtbl.add gen.g_file_info.f_local_names (h, occ) i);
+         let h = person_hash so.first_name so.surname in
+         Hashtbl.add gen.g_file_info.f_local_names (h, occ) i);
       (x, i)
   in
   (* if person wad defined before (not just referenced) *)
@@ -1112,9 +1112,9 @@ let insert_bnotes fname gen nfname str =
         norigin_file = fname;
         efiles =
           (if nfname <> "" then
-           let efiles = gen.g_base.c_bnotes.efiles () in
-           fun () -> nfname :: efiles
-          else gen.g_base.c_bnotes.efiles);
+             let efiles = gen.g_base.c_bnotes.efiles () in
+             fun () -> nfname :: efiles
+           else gen.g_base.c_bnotes.efiles);
       }
     in
     gen.g_base.c_bnotes <- bnotes

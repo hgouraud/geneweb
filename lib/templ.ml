@@ -439,15 +439,15 @@ and eval_simple_variable conf = function
             " - "
             ^ Printf.sprintf "%s %d" (Util.transl conf "connections") c
             ^ (if cw > 0 then
-               Printf.sprintf ", %s %s"
-                 (Util.transl_nth conf "wizard/wizards/friend/friends/exterior"
-                    1)
-                 (if conf.wizard then
-                  Printf.sprintf "<a href=\"%sm=CONN_WIZ\">%d</a>"
-                    (Util.commd conf :> string)
-                    cw
-                 else string_of_int cw)
-              else "")
+                 Printf.sprintf ", %s %s"
+                   (Util.transl_nth conf
+                      "wizard/wizards/friend/friends/exterior" 1)
+                   (if conf.wizard then
+                      Printf.sprintf "<a href=\"%sm=CONN_WIZ\">%d</a>"
+                        (Util.commd conf :> string)
+                        cw
+                    else string_of_int cw)
+               else "")
             ^
             if cf > 0 then
               Printf.sprintf ", %s %d"
@@ -542,10 +542,11 @@ let eval_string_var conf eval_var sl =
 
 let eval_var_handled conf sl =
   try eval_variable conf sl
-  with Not_found -> (
+  with Not_found ->
     incr nb_errors;
-    errors_undef := (Printf.sprintf "%%%s?" (String.concat "." sl)) :: !errors_undef;
-    Printf.sprintf " %%%s?" (String.concat "." sl))
+    errors_undef :=
+      Printf.sprintf "%%%s?" (String.concat "." sl) :: !errors_undef;
+    Printf.sprintf " %%%s?" (String.concat "." sl)
 
 let apply_format conf nth s1 s2 =
   let s1 =
@@ -1109,10 +1110,9 @@ let print_copyright conf =
       Output.print_sstring conf "<br>\n")
 
 let include_hed_trl conf name =
-  if name = "trl" then (
-    Util.include_template conf [] name (fun () -> ()));
-    let query_time = Unix.gettimeofday () -. conf.query_start in
-    Util.time_debug conf query_time !nb_errors !errors_undef
+  if name = "trl" then Util.include_template conf [] name (fun () -> ());
+  let query_time = Unix.gettimeofday () -. conf.query_start in
+  Util.time_debug conf query_time !nb_errors !errors_undef
 
 let rec interp_ast :
     config -> ('a, 'b) interp_fun -> 'a env -> 'b -> ast list -> unit =

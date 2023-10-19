@@ -359,7 +359,7 @@ let summary_of_tlsw_lines conf short lines =
 let string_of_modify_link conf cnt empty = function
   | Some (can_edit, mode, sfn) when conf.wizard ->
       (if empty then "<p>"
-      else {|<div class="small float-|} ^ conf.right ^ {|">|})
+       else {|<div class="small float-|} ^ conf.right ^ {|">|})
       ^ {|(<a href="|}
       ^ (commd conf :> string)
       ^ "m="
@@ -370,7 +370,7 @@ let string_of_modify_link conf cnt empty = function
       ^ (if sfn = "" then "" else "&f=" ^ (Mutil.encode sfn :> string))
       ^ {|">|}
       ^ (if can_edit then transl_decline conf "modify" ""
-        else transl conf "view source")
+         else transl conf "view source")
       ^ "</a>)"
       ^ if empty then "</p>" else "</div>"
   | _ -> ""

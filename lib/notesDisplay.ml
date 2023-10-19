@@ -42,17 +42,17 @@ let print_whole_notes conf base fnotes (title : Adef.safe_string) s ho =
       if (title :> string) = "" then
         Output.print_string conf (Util.escape_html fnotes)
       else Output.print_string conf title);
-  (* TODO: DO WE NEED ME?
-  let what_links_page () =
-    if fnotes <> "" then (
-      Output.print_sstring conf {|<a href="|};
-      Output.print_string conf (commd conf);
-      Output.print_sstring conf {|m=NOTES&f=|};
-      Output.print_string conf (Mutil.encode fnotes);
-      Output.print_sstring conf {|&ref=on" class="mx-2">(|};
-      Output.print_sstring conf (transl conf "linked pages");
-      Output.print_sstring conf ")</a>\n")
-  in*)
+  (*TODO: DO WE NEED ME?
+    let what_links_page () =
+      if fnotes <> "" then (
+        Output.print_sstring conf {|<a href="|};
+        Output.print_string conf (commd conf);
+        Output.print_sstring conf {|m=NOTES&f=|};
+        Output.print_string conf (Mutil.encode fnotes);
+        Output.print_sstring conf {|&ref=on" class="mx-2">(|};
+        Output.print_sstring conf (transl conf "linked pages");
+        Output.print_sstring conf ")</a>\n")
+    in*)
   Output.print_sstring conf {|<div class="d-flex justify-content-between">|};
   if (title :> string) <> "" then (
     let title =
@@ -322,10 +322,10 @@ let print_misc_notes conf base =
   let title h =
     Output.print_string conf
       (if d = "" then
-       transl conf "miscellaneous notes"
-       |> Util.translate_eval |> Utf8.capitalize_fst |> Adef.escaped
-      else if h then "- " ^<^ Util.escape_html d ^>^ " -"
-      else "<tt>- " ^<^ Util.escape_html d ^>^ " -</tt>")
+         transl conf "miscellaneous notes"
+         |> Util.translate_eval |> Utf8.capitalize_fst |> Adef.escaped
+       else if h then "- " ^<^ Util.escape_html d ^>^ " -"
+       else "<tt>- " ^<^ Util.escape_html d ^>^ " -</tt>")
   in
   let db = notes_links_db conf base true in
   let db =
@@ -357,7 +357,6 @@ let print_misc_notes conf base =
     Output.print_sstring conf "<ul>";
     if d <> "" then (
       Output.print_sstring conf {|<li class="parent">|};
-      (* Output.printf conf "<a href=\"%sm=MISC_NOTES%s\">" (commd conf) ; *)
       Output.print_sstring conf {|<a href="|};
       Output.print_string conf (commd conf);
       Output.print_sstring conf "m=MISC_NOTES";

@@ -341,7 +341,7 @@ let simplify_path base path =
       :: tl ->
         x
         :: (if father i1 = father i2 then (mother i2, Mate)
-           else (father i2, Mate))
+            else (father i2, Mate))
         :: simplify tl
     | ((i1, _r1) as x1) :: (i2, HalfSibling) :: (i3, Parent) :: tl ->
         if father i1 = father i2 then

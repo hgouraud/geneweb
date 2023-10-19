@@ -441,10 +441,10 @@ let print_branch conf base psn name =
       Output.print_string conf
         (render p
            (if is_hide_names conf p && not (authorized_age conf base p) then
-            Adef.safe "x"
-           else if (not psn) && (not with_sn) && p_surname base p = name then
-             gen_person_text ~sn:false conf base p
-           else gen_person_text conf base p));
+              Adef.safe "x"
+            else if (not psn) && (not with_sn) && p_surname base p = name then
+              gen_person_text ~sn:false conf base p
+            else gen_person_text conf base p));
       Output.print_sstring conf @@ if with_link then "</strong>" else "</em>";
       Output.print_string conf (DateDisplay.short_dates_text conf base p);
       Output.print_sstring conf "\n"

@@ -882,7 +882,7 @@ let effective_mod conf base nsck sfam scpl sdes =
           parents = None;
           consang =
             (if not (Array.mem ip ndes.children) then Adef.fix (-1)
-            else a.consang);
+             else a.consang);
         }
       in
       Hashtbl.replace cache ip a)
@@ -898,8 +898,8 @@ let effective_mod conf base nsck sfam scpl sdes =
               parents = Some fi;
               consang =
                 (if (not (Array.mem ip ochildren)) || not same_parents then
-                 Adef.fix (-1)
-                else a.consang);
+                   Adef.fix (-1)
+                 else a.consang);
             }
           in
           Hashtbl.replace cache ip a)

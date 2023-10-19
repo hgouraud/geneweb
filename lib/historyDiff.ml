@@ -155,10 +155,10 @@ let record_diff conf base changed =
         let fname = history_path conf person_file in
         (* La clé a changé, on reprend l'ancien historique. *)
         (if o_person_file <> person_file && Sys.file_exists ofname then
-         try
-           let () = create_history_dirs conf person_file in
-           Sys.rename ofname fname
-         with Sys_error _ -> ());
+           try
+             let () = create_history_dirs conf person_file in
+             Sys.rename ofname fname
+           with Sys_error _ -> ());
         let gr = make_gen_record conf base false p in
         if Sys.file_exists fname then
           write_history_file conf person_file fname gr

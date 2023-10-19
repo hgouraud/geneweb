@@ -26,11 +26,11 @@ let image_normal_txt conf base p fname width height =
       (if height = 0 then "" else "max-height:" ^ string_of_int height ^ "px;")
   in
   (if p_getenv conf.env "cgl" = Some "on" then r
-  else
-    Format.sprintf {|<a href="%sm=IM&%s&k=%s">%s</a>|}
-      (commd conf : Adef.escaped_string :> string)
-      (acces conf base p : Adef.escaped_string :> string)
-      k r)
+   else
+     Format.sprintf {|<a href="%sm=IM&%s&k=%s">%s</a>|}
+       (commd conf : Adef.escaped_string :> string)
+       (acces conf base p : Adef.escaped_string :> string)
+       k r)
   |> Adef.safe
 
 let image_url_txt conf url_p url ~width ~height =
@@ -1175,9 +1175,9 @@ and print_foreach_dag_cell_pre conf hts print_ast env al =
           else displayed_sub outs (pos1 - pos) (pos2 - pos1)
       in
       (if clipped_outs <> "" then
-       let v = Vdcellp clipped_outs in
-       let print_ast = print_ast (("dag_cell_pre", v) :: env) () in
-       List.iter print_ast al);
+         let v = Vdcellp clipped_outs in
+         let print_ast = print_ast (("dag_cell_pre", v) :: env) () in
+         List.iter print_ast al);
       loop (pos + sz) (col + colspan) (j + 1)
   in
   loop 0 0 0
