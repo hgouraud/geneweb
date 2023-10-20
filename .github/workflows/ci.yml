@@ -16,7 +16,7 @@ jobs:
           - ubuntu-latest
           - windows-latest
         ocaml-version:
-          - 4.14.0
+          - 4.14.1
         include:
           - os: ubuntu-latest
             ocaml-version: 4.08.0
@@ -30,7 +30,7 @@ jobs:
           ocaml-compiler: ${{ matrix.ocaml-version }}
       - name: setup
         run: |
-          opam install dune ocamlformat.0.24.1
+          opam install dune ocamlformat
           opam exec -- dune build @fmt
           opam pin add . -y --no-action
           opam depext -y geneweb

@@ -12,7 +12,7 @@ jobs:
       - name: setup-ocaml
         uses: ocaml/setup-ocaml@v2
         with:
-          ocaml-compiler: 4.14.0
+          ocaml-compiler: 4.14.1
       - name: setup
         run: |
              opam pin add . -y --no-action
