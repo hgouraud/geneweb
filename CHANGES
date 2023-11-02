@@ -71,6 +71,7 @@ children of both ascendants.
   - The total number of individuals and implexes up to this generation.
   - The percent of completion of the generation is available in tooltip.
   This can be heavy to load if the number of ancestors and implexes is high.
+  This feature is available thanks to select2.min.js jQuery scripts.
 
 - Individual and family forms (m=MOD_IND/MOD_FAM)
   - Three new components for witnesses: an "occupation" input + two checkboxes
@@ -107,6 +108,10 @@ in this base. It allows a quick link to that individual after login.
 
 - New inputs in the population pyramid form: interval and limit that were
 only available modifying the URL.
+
+- A minimised monospace font based on DejaVu Sans Mono is loaded for a good
+rendering of descending tree view It contains about 50 ASCII box-drawings
+caracters needed. The files are /webfonts/dejavusansmono-genewebfont.woff/2.
 
 GeneWeb version 7.0.0
 ---------------------
