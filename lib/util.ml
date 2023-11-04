@@ -499,7 +499,7 @@ let default_safe_html_allowed_tags =
 let safe_html_allowed_tags =
   lazy
     (if !allowed_tags_file = "" then default_safe_html_allowed_tags
-     else
+     else if Sys.file_exists !allowed_tags_file then
        let ic = open_in !allowed_tags_file in
        let rec loop tags =
          match input_line ic with
@@ -515,7 +515,14 @@ let safe_html_allowed_tags =
              close_in ic;
              tags
        in
-       loop [])
+       loop []
+     else
+       let str =
+         Printf.sprintf "Requested allowed_tags file (%s) absent"
+           !allowed_tags_file
+       in
+       !GWPARAM.syslog `LOG_WARNING str;
+       default_safe_html_allowed_tags)
 
 (* Few notes:
 
