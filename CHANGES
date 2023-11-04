@@ -110,8 +110,8 @@ in this base. It allows a quick link to that individual after login.
 only available modifying the URL.
 
 - A minimised monospace font based on DejaVu Sans Mono is loaded for a good
-rendering of descending tree view It contains about 50 ASCII box-drawings
-caracters needed. The files are /webfonts/dejavusansmono-genewebfont.woff/2.
+rendering of descending tree view. It contains about 50 ASCII box-drawings
+characters needed. The files are /webfonts/dejavusansmono-genewebfont.woff/2.
 
 GeneWeb version 7.0.0
 ---------------------
