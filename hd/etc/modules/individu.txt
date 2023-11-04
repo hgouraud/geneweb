@@ -329,7 +329,7 @@
         %end;
         = %if;(l_nbd > 999)%expr(l_nbd/1000)[(thousand separator)]%apply;remainder(l_nbd) [days old]%nn;
         %elseif;(l_nbd > 31)%l_nbd; [days old]%nn;
-        %end;%if;(lang="en") old%end">
+        %end;%if;(lang="en") old%end;">
         <span class="fa-li"><i class="far fa-id-card"></i></span>
         %if;(is_dead and computable_death_age)
           %if;(death_date.month!="" and death_date.day!=""
