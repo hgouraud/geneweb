@@ -438,7 +438,7 @@ perso_module_l=ligne
 # (default is to not update)
 #origin_file=on
 
-# by default pages have a small hourglass icon on top left corner
-# that reports the delta time of last query action;
-# if required this icon may be hidden.
-#hide_compilation_time=yes
+# by default pages have small hourglass and bug icons on top left corner
+# that reports the delta time of last query action and potential bugs;
+# if required those icons may be hidden.
+#hide_qtime_bugs=yes
