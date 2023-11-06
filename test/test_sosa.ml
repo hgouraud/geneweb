@@ -16,7 +16,18 @@ let suite =
              assert_equal ~cmp:Sosa.eq Sosa.zero (Sosa.of_string "0");
              assert_equal ~cmp:Sosa.eq Sosa.one (Sosa.of_string "1");
              assert_equal "0" (Sosa.to_string Sosa.zero);
-             assert_equal "1" (Sosa.to_string Sosa.one) );
+             assert_equal "1" (Sosa.to_string Sosa.one);
+             assert_equal "1"
+               (Sosa.to_string (Sosa.div (Sosa.of_int 1000) 1000));
+             assert_equal "2"
+               (Sosa.to_string (Sosa.div (Sosa.of_int 2000) 1000));
+             assert_equal "234"
+               (Sosa.to_string (Sosa.div (Sosa.of_int 234000) 1000));
+             (*   %let;tmp;%expr(xxx-((xxx/1000)*1000))%in;  *)
+             assert_equal "234"
+               (Sosa.to_string
+                  (Sosa.sub (Sosa.of_int 1234)
+                     (Sosa.mul (Sosa.div (Sosa.of_int 1234) 1000) 1000))) );
            ( "pretty print" >:: fun _ ->
              let test a b =
                assert_equal
