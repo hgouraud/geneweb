@@ -524,7 +524,7 @@ let get_actlog check_from utm from_addr base_password =
               | None -> user, ""
             in
             let (list, r, changed) =
-              if utm -. tm >= tmout then list, r, true
+              if utm -. tm >= tmout && tmout <> 0. then list, r, true
               else if
                 compatible_tokens check_from (addr, db_pwd)
                   (from_addr, base_password)
