@@ -1255,10 +1255,9 @@ let extract_var sini s =
 
 let template_file = ref "perso.txt"
 
-let warning_use_has_parents_before_parent (fname, bp, ep) var r =
-  Printf.sprintf
-    "%s %d-%d: since v5.00, must test \"has_parents\" before using \"%s\"\n"
-    fname bp ep var
+let warning_use_has_parents_before_parent base (fname, bp, ep) var p r =
+  Printf.sprintf "%s %d-%d: No %s found for \"%s\"\n" fname bp ep var
+    (designation base p :> string)
   |> !GWPARAM.syslog `LOG_WARNING;
   r
 
@@ -2012,8 +2011,9 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
               let conf = { conf with command = base_prefix } in
               let env = ("p_link", Vbool true) :: env in
               eval_person_field_var conf base env ep loc sl
-          | None -> warning_use_has_parents_before_parent loc "father" null_val)
-      )
+          | None ->
+              warning_use_has_parents_before_parent base loc "father" a null_val
+          ))
   | "item" :: sl -> (
       match get_env "item" env with
       | Vslistlm ell -> eval_item_field_var ell sl
@@ -2030,8 +2030,9 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
               let conf = { conf with command = base_prefix } in
               let env = ("p_link", Vbool true) :: env in
               eval_person_field_var conf base env ep loc sl
-          | None -> warning_use_has_parents_before_parent loc "mother" null_val)
-      )
+          | None ->
+              warning_use_has_parents_before_parent base loc "mother" a null_val
+          ))
   | "next_item" :: sl -> (
       match get_env "item" env with
       | Vslistlm (_ :: ell) -> eval_item_field_var ell sl
@@ -2779,8 +2780,9 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc = function
               let conf = { conf with command = baseprefix } in
               let env = ("p_link", Vbool true) :: env in
               eval_person_field_var conf base env ep loc sl
-          | None -> warning_use_has_parents_before_parent loc "father" null_val)
-      )
+          | None ->
+              warning_use_has_parents_before_parent base loc "father" p null_val
+          ))
   | [ "has_linked_page"; s ] -> (
       match get_env "nldb" env with
       | Vnldb db ->
@@ -2870,8 +2872,9 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc = function
               let conf = { conf with command = baseprefix } in
               let env = ("p_link", Vbool true) :: env in
               eval_person_field_var conf base env ep loc sl
-          | None -> warning_use_has_parents_before_parent loc "mother" null_val)
-      )
+          | None ->
+              warning_use_has_parents_before_parent base loc "mother" p null_val
+          ))
   | [ "nbr" ] -> (
       match get_env "nbr" env with
       | Vint nbr -> VVstring (string_of_int nbr)
@@ -5139,7 +5142,8 @@ let print_foreach conf base print_ast eval_expr =
                   let env = ("f_link", Vbool true) :: env in
                   let env = ("baseprefix", Vstring baseprefix) :: env in
                   loop env ep efam sl
-              | None -> warning_use_has_parents_before_parent loc "father" ()))
+              | None ->
+                  warning_use_has_parents_before_parent base loc "father" a ()))
       | "mother" :: sl -> (
           match get_parents a with
           | Some ifam ->
@@ -5160,7 +5164,8 @@ let print_foreach conf base print_ast eval_expr =
                   let env = ("f_link", Vbool true) :: env in
                   let env = ("baseprefix", Vstring baseprefix) :: env in
                   loop env ep efam sl
-              | None -> warning_use_has_parents_before_parent loc "mother" ()))
+              | None ->
+                  warning_use_has_parents_before_parent base loc "mother" a ()))
       | "self" :: sl -> loop env ep efam sl
       | "spouse" :: sl -> (
           match efam with
