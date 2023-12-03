@@ -6259,7 +6259,7 @@ tr: adına göre liste
 
     descendants tree
 co: arburu di discendenza
-de: Nachfahren-Baum
+de: Nachkommen-Baum
 en: descendants tree
 fr: arbre de descendance
 pt: árvore de descendentes
@@ -11349,7 +11349,7 @@ tr: yukarı taşı/aşağı taşı/imleci yukarı taşı/imleci aşağı taşı
 
     msg error disconnected
 co: per disgrazia, pudete aghjunghje solu famiglie chì sò cunnesse à l’altre.<br />Sta ristrizzione hè stata aghjunta da u pruprietariu di a basa di dati.
-de: sorry, Sie können nur Familien hinzufügen, die mit dem Rest in Verbindung stehen. <br> Diese Einschränkung wurde durch den Eigentümer der Datenbank hinzugefügt.
+de: sorry, Sie können nur Familien hinzufügen, die mit dem Rest in Verbindung stehen. <br /> Diese Einschränkung wurde durch den Eigentümer der Datenbank hinzugefügt.
 en: sorry, you can add only families connected to the rest.<br>This restriction has been added by this database owner.
 fr: désolé, vous ne pouvez ajouter que des familles connectées au reste.<br>Cette restriction a été ajoutée par le propriétaire de cette base de données.
 it: spiacenti, puoi aggiungere solo delle famiglie collegate al resto.<br>Questa restrizione è stata aggiunta dal proprietario del data base
