@@ -4,117 +4,117 @@ de:
     add filter
 en: add a filter
 fr: ajouter un filtre
-de:
+de: Filter hinzufügen
 
     add image
 en: add an image
 fr: ajouter une image
-de:
+de: Bild hinzufügen
 
     add note
 en: add a note
 fr: ajouter une note
-de:
+de: Notiz hinzufügen
 
     add portrait
 en: add a portrait
 fr: ajouter un portrait
-de:
+de: Porträt hinzufügen
 
     add source
 en: add a source
 fr: ajouter une source
-de:
+de: Quelle hinzufügen
 
     alert module
 en: Invalid module <strong id="alert-module-2"></strong>. Please enter a valid module initial.
 fr: Module invalide <strong id="alert-module-2"></strong>. Veuillez saisir une initiale de module valide.
-de:
+de: Modul ungültig <strong id="alert-module-2"></strong>. Bitte geben Sie einen gültigen Modulanfang an.
 
     alert option
 en: Invalid option <strong id="alert-option"></strong> for module <strong id="alert-module"></strong>. Please enter a valid option number.
 fr: Option invalide <strong id="alert-option"></strong> pour le module <strong id="alert-module"></strong>. Veuillez saisir un numéro d’option valide.
-de:
+de: Ungültige Option <strong id="alert-option"></strong> für Modul <strong id="alert-module"></strong>. Bitte eine gültige Optionsnummer eingeben.
 
     all
 en: all
 fr: tous
-de:
+de: alle
 
     all the places
 en: all the places
 fr: tous les lieux
-de:
+de: alle Orte
 
     allowed characters
 en: allowed characters
 fr: caractères autorisés
-de:
+de: erlaubte Zeichen
 
     ancestors tree of
 en: %s-tree of the ancestors of %s
 fr: %s-arbre des ancêtres d[e |’]%s
-de:
+de: %s-Baum der Vorfahren von %s
 
     any place
 en: sub-places
 fr: sous-lieux
-de:
+de: Teilort
 
     any place title
 en: search in the list of sub-places
 fr: rechercher dans la liste des sous-lieux
-de:
+de: suche in der Liste der Teilorte
 
     at new location
 en: at new location
 fr: au nouvel emplacement
-de:
+de: am neuen Ort
 
     at old location
 en: at old location
 fr: à l'ancien emplacement
-de:
+de: am alten Ort
 
     back to index/books
 en: back to alphabetic index/back to the list of books
 fr: retourner à l’index alphabétique/retourner à la liste des dictionnaires
-de:
+de: zurück zum alphabetischen Index/zurück zur Liste der Wörterbücher
 
     carrousel
 en: carrousel
 fr: carrousel
-de:
+de: Karussell
 
     case sensitive
 en: case sensitive
 fr: capitales et accents
-de:
+de: Groß-/Kleinschreibung
 
     case sensitive title
 en: dont ignore case and accents
 fr: tenir compte des majuscules et accents
-de:
+de: Beim Titel muss auf Groß- und Kleinschreibung geachtet werden
 
     choose an ancestor
 en: choose an ancestor
 fr: choisir un ancêtre
-de:
+de: einen Vorfahren auswählen
 
     clear filters
 en: clear every filters
 fr: effacer tous les filtres
-de:
+de: alle Filter löschen
 
     close
 en: close
 fr: fermer
-de:
+de: schließen
 
     coefficient of relationship
 en: The <a href="https://en.wikipedia.org/wiki/Coefficient_of_relationship">coefficient of relationship</a> gives the minimum average percentage of shared DNA between two individuals.
 fr: Le <a href="https://en.wikipedia.org/wiki/Coefficient_of_relationship">coefficient de parenté</a> indique le pourcentage moyen minimum de gènes partagés entre deux individus.
-de:
+de: Der <a href="https://de.wikipedia.org/wiki/Verwandtschaftskoeffizient">Verwandtschaftskoeffizient</a> berechnet den minimalen Prozentsatz der Übereinstimmung der DNA zwischen zwei Personen.
 
     colored corner
 en: a colored corner shows the existence of notes (blue), sources (yellow) or both (green) for an event. The data are then displayable in a pop-up by clicking on the background of cells.
@@ -132,6 +132,7 @@ fr: continuer
 de:
 
     copy link %s
+de: Link in die Zwischenablage kopieren
 en: copy the link %s to the clipboard
 fr: copier le lien %s dans le presse-papier
 de:
@@ -139,83 +140,83 @@ de:
     copy permalink
 en: copy the permalink
 fr: copier le permalien
-de:
+de: Permalink kopieren
 
     cousin.0.1
-de:
+de: Sohn/Tochter/Kind
 
     cousin.0.10
 en: a eight-times-great-grandson/a eight-times-great-granddaughter/a eight-times-great-grandchild
 fr: un huit-fois-arrière-petit-fils/une huit-fois-arrière-petite-fille/un huit-fois-arrière-petit-enfant
-de:
+de: 
 
     cousin.0.2
-de:
+de: ein Enkel/eine Enkelin/Enkel
 
     cousin.0.3
-de:
+de: ein Urenkel/eine Urenkelin/Urenkel
 
     cousin.0.4
 en: a great-great-grandson/a great-great-granddaughter/a great-great-grandchild
 fr: un arrière-arrière-petit-fils/une arrière-arrière-petite-fille/un arrière-arrière-petit-enfant
-de:
+de: ein Ur-Ur-Enkel/eine Ur-Ur-Enkelin/Ur-Ur-Enkel
 
     cousin.0.5
 en: a three-times-great-grandson/a three-times-great-granddaughter/a three-times-great-grandchild
 fr: un trois-fois-arrière-petit-fils/une trois-fois-arrière-petite-fille/un trois-fois-arrière-petit-enfant
-de:
+de: ein Ur-Ur-Ur-Enkel/eine Ur-Ur-Ur-Enkelin/Ur-Ur-Ur-Enkel
 
     cousin.0.6
 en: a four-times-great-grandson/a four-times-great-granddaughter/a four-times-great-grandchild
 fr: un quatre-fois-arrière-petit-fils/une quatre-fois-arrière-petite-fille/un quatre-fois-arrière-petit-enfant
-de:
+de: ein vierfacher Ur-Enkel/eine vierfache Ur-Enkelin/vierfacher Ur-Enkel
 
     cousin.0.7
 en: a five-times-great-grandson/a five-times-great-granddaughter/a five-times-great-grandchild
 fr: un cinq-fois-arrière-petit-fils/une cinq-fois-arrière-petite-fille/un cinq-fois-arrière-petit-enfant
-de:
+de: ein fünffacher Ur-Enkel/eine fünffache Ur-Enkelin/fünffacher Ur-Enkel
 
     cousin.0.8
 en: a six-times-great-grandson/a six-times-great-granddaughter/a six-times-great-grandchild
 fr: un six-fois-arrière-petit-fils/une six-fois-arrière-petite-fille/un six-fois-arrière-petit-enfant
-de:
+de: ein sechsfacher Ur-Enkel/eine sechsfache Ur-Enkelin/sechsfacher Ur-Enkel
 
     cousin.0.9
 en: a seven-times-great-grandson/a seven-times-great-granddaughter/a seven-times-great-grandchild
 fr: un sept-fois-arrière-petit-fils/une sept-fois-arrière-petite-fille/un sept-fois-arrière-petit-enfant
-de:
+de: ein siebenfacher Ur-Enkel/eine siebenfache Ur-Enkelin/siebenfacher Ur-Enkel
 
     cousin.1.0
-de:
+de: der Vater/die Mutter/ein Elternteil
 
     cousin.1.1
-de:
+de: ein Bruder/eine Schwester/ein Geschwisterteil
 
     cousin.1.10
 en: a %sseven-times-great-grandnephew/a %sseven-times-great-grandniece/a %sseven-times-great-grandnephew
 fr: un %ssept-fois-arrière-petit-neveu/une %ssept-fois-arrière-petite-nièce/un %ssept-fois-arrière-petit-neveu
-de:
+de: ein siebenfacher Ur-Großneffe/eine siebenfache Ur-Großnichte/siebenfacher Ur-Großneffe
 
     cousin.1.2
-de:
+de: ein Neffe/eine Nichte
 
     cousin.1.3
-de:
+de: ein Großneffe/eine Großnichte
 
     cousin.1.4
 en: a %sgreat-grandnephew/a %sgreat-grandniece/a %sgreat-grandnephew
 fr: un %sarrière-petit-neveu/une %sarrière-petite-nièce/un %sarrière-petit-neveu
-de:
+de: ein Ur-Großneffe/eine Ur-Großnichte/Ur-Großneffe
 
     cousin.1.5
 en: a %sgreat-great-grandnephew/a %sgreat-great-grandniece/a %sgreat-great-grandnephew
 fr: un %sarrière-arrière-petit-neveu/une %sarrière-arrière-petite-nièce/un %sarrière-arrière-petit-neveu
-de:
+de: ein Ur-Ur-Großneffe/eine Ur-Ur-Großnichte/Ur-Ur-Großneffe
 
     cousin.1.6
 en: a %sthree-times-great-grandnephew/a %sthree-times-great-grandniece/a %sthree-times-great-grandnephew
 fr: un %strois-fois-arrière-petit-neveu/une %strois-fois-arrière-petite-nièce/un %strois-fois-arrière-petit-neveu
-de:
+de: ein Ur-Ur-Ur-Großneffe/eine Ur-Ur-Ur-Großnichte/Ur-Ur-Ur-Großneffe
 
     cousin.1.7
 en: a %sfour-times-great-grandnephew/a %sfour-times-great-grandniece/a %sfour-times-great-grandnephew
@@ -584,7 +585,7 @@ de:
     cousins.2.2
 en: cousins 1rd
 fr: cousins
-de:
+de: Cousins
 
     cousins.2.2 tt
 fr: cousins au 1<sup>er</sup> degré<hr>(germains ou non)
@@ -1339,187 +1340,187 @@ de:
     delete image
 en: delete image
 fr: supprimer une image
-de:
+de: Bild löschen
 
     delete image saved
 en: delete saved image
 fr: supprimer une image sauvegardée
-de:
+de: das gespeicherte Bild löschen
 
     delete portrait
 en: delete portrait
 fr: supprimer le portrait
-de:
+de: Porträt löschen
 
     delete portrait saved
 en: delete saved portrait
 fr: supprimer le portrait sauvegardé
-de:
+de: das gespeicherte Porträt löschen
 
     deleted
 en: deleted
 fr: supprimé/supprimée
-de:
+de: gelöscht
 
     display carrousel
 en: display the carrousel of images
 fr: afficher le carrousel d’images
-de:
+de: Bilderkaroussel anzeigen
 
     edit family on spouse
 en: edit the families by clicking on the date of marriage of the row of one spouses
 fr: modifier les familles en cliquant sur la date de mariage sur la ligne d’un conjoint
-de:
+de: die Familie bearbeiten durch Klick auf das Hochzeitsdatum einer der beiden Personen
 
     extend
 en: extend to a near ancestor
 fr: étendre à un ancêtre proche
-de:
+de: auf einen nahen Vorfahren erweitern
 
     fanchart
 en: fanchart
 fr: arbre en éventail
-de:
+de: Fächerbaum
 
     filter
 en: filter
 fr: filtrer
-de:
+de: filtern
 
     filter by
 en: filter by
 fr: filtrer par
-de:
+de: filtern durch
 
     for/since
 en: for/since
 fr: pendant/depuis
-de:
+de: während/seit
 
     from carrousel
 en: from carrousel
 fr: du carrousel
-de:
+de: vom Karussell
 
     half-relationship
 en: half-/half-/half-/ 
 fr: demi-/demi-/demi-/ 
-de:
+de: halb-/halb-/halb-/
 
     highlight incomplete data
 en: highlight incomplete data
 fr: surligner les données incomplètes
-de:
+de: hebe die unvollständigen Daten hervor
 
     htree
 en: H-Tree
 fr: arbre en H
-de:
+de: H-Baum
 
     image note
 en: add a note for the image.
 fr: ajouter une note pour l’image.
-de:
+de: Bildnotiz hinzufügen
 
     image source
 en: add a source for the image.
 fr: ajouter une source pour l’image.
-de:
+de: Bildquelle hinzufügen
 
     inline chronology
 en: simple chronology/detailed chronology
 fr: chronologie simple/chronologie détaillée
-de:
+de: einfache Chronologie/detaillierte Chronologie
 
     input database
 en: Please, enter the name of the database you want to use:
 fr: Tapez à l’identique le nom de la généalogie que vous voulez utiliser :
-de:
+de: Bitte den Namen der Datenbank eintragen, die verwendet werden soll:
 
     intermediate revisions not shown
 en: intermediate revisions not shown
 fr: révisions intermédiaires masquées
-de:
+de: Zwischenrevisionen versteckt
 
     interval
 en: time interval
 fr: intervalle de temps
-de:
+de: Zeitintervall
 
     itree
 en: I-Tree
 fr: arbre en I
-de:
+de: I-Baum
 
     last diff
 en: last revision
 fr: dernière révision
-de:
+de: letzte Revision
 
     last sosa level not navigable
 en: last Sosa level not navigable. Use ancestors list.
 fr: le dernier niveau des Sosa n’est pas navigable. Utilisez la liste des ancêtres.
-de:
+de: letzte Sosa-Ebene nicht navigierbar. Vorfahren-Liste benutzen.
 
     limit
 en: limit
 fr: limite
-de:
+de: Limit
 
     link back to parents
 en: link back to parents
 fr: lien retour vers les parents
-de:
+de: Link zurück zu den Eltern
 
     link to children
 en: link to children
 fr: lien vers les enfants
-de:
+de: Link zu den Kindern
 
     marriage of %t after his/her death
 en: marriage of %t after his/her death
 fr: mariage de %t après son décès
-de:
+de: Heirat von %t nach seinem/ihrem Tod
 
     marriage of %t before his/her birth
 en: marriage of %t before his/her birth
 fr: mariage de %t avant sa naissance
-de:
+de: Heirat von %t vor seiner/ihrer Geburt
 
     marriages with
 en: relations or marriages with
 fr: relations ou mariages avec
-de:
+de: Beziehungen oder Hochzeiten mit
 
     matching
 en: matching
 fr: correspondance
-de:
+de: passend
 
     max nbr
 en: max rel nbr
 fr: max rel nbr
-de:
+de: max rel Nr.
 
     max nbr title
 en: max number for relation list
 fr: nombre maximum pour les listes de relations
-de:
+de: maximale Anahl für die der Verwandtschaftslisten
 
     missing %s
 en: missing %s
 fr: %s manquant
-de:
+de: %s fehlt
 
     missing date
 en: no date
 fr: sans date
-de:
+de: fehlendes Datum
 
     missing image
 en: missing image
 fr: image manquante
-de:
+de: fehlendes Bild
 
     modify family %s event order
 en: permute the events of family %s
@@ -1529,281 +1530,281 @@ de:
     modify note
 en: modify the note
 fr: modifier la note
-de:
+de: Notiz bearbeiten
 
     modify person event order
 en: permute personnal events
 fr: permuter les événéments individuels
-de:
+de: Ereignisreihenfolge der Person ändern
 
     modify portrait
 en: modify the portrait
 fr: modifier le portrait
-de:
+de: Porträt ändern
 
     modify source
 en: modify the source
 fr: modifier la source
-de:
+de: Quelle ändern
 
     modify the size of images to
 en: modify the size of images to
 fr: modifier la taille des images à
-de:
+de: Bildgröße ändern auf
 
     module
 en: module/modules
 fr: module/modules
-de:
+de: Modul
 
     move up/down
 en: move up/move down/move up cursor/move down cursor
 fr: remonter/descendre/remonter le curseur/descendre le curseur
-de:
+de: nach oben/nach unten/Cursor nach oben/Cursor nach unten
 
     mtree
 en: 9 generations H tree
 fr: arbre en H 9 générations
-de:
+de: H-Baum 9 Generationen
 
     multi relations graph
 en: multi relations graph
 fr: graphe de relations multiples
-de:
+de: Multi-Verwandtschafts-Graph
 
     multiple relations
 fr: En cas d’implexes, certains individus auront de multiples liens de parenté (chemins) avec l’individu racine. La parenté entre deux individus dépendra de tous les coefficients de leurs liens de parenté (chemins).
-de:
+de: Im Falle von Implexen haben einige Individuen mehrere Beziehungen (Pfade) mit dem Stammindividuum. Die Beziehung zwischen zwei Individuen hängt von allen Koeffizienten ihrer Beziehungen (Pfade) ab.
 
     name changed. update linked pages
 en: The first name, name or occurrence of this person has changed. Please update the pages linked to the old key listed below.
 fr: Le prénom, nom ou occurrence de cette personne a changé. Pensez à mettre à jour les pages liées à l’ancienne clé ci-dessous.
-de:
+de: Vorname, Name oder Vorkommen dieser Person hat sich geändert. Bitte aktualisieren Sie die unten aufgeführten Seiten, die mit dem alten Schlüssel verknüpft sind.
 
     navigate on tree
 en: navigate on the tree
 fr: naviguer sur l’arbre
-de:
+de: Baum navigieren
 
     navigation with this individual
 en: navigation in tree with this individual
 fr: naviguer dans l'arbre avec cet individu
-de:
+de: im Baum mit dieser Person navigieren
 
     new name
 en: new name
 fr: nouveau nom
-de:
+de: neuer Name
 
     new tree with this individual
 en: new tree with this individual
 fr: nouvel arbre à partir de cet individu
-de:
+de: Neuer Baum mit dieser Person
 
     next
 en: next
 fr: suivant
-de:
+de: nächster
 
     no line break in names
 en: no line break in names
 fr: afficher les noms sans saut de ligne
-de:
+de: kein Zeilenumbruch in Namen
 
     no more
 en: no more
 fr: pas d’autres
-de:
+de: nicht mehr
 
     number of rows
 en: number of rows
 fr: nombre de lignes
-de:
+de: Zeilennummer
 
     of
 en: of
 fr: de
-de:
+de: von
 
     of (du)
 en: of
 fr: du
-de:
+de: von
 
     of%s
 en: of %s
 fr: d[e |’]%s
-de:
+de: von %s
 
     officer/officer/officers
 en: officer/officer/officers
 fr: officiant/officiante/officiants
-de:
+de: Amtsträger/Amtsträgerin/Amtsträger
 
     on %s's siblings side
 en: on %s's siblings side
 fr: du côté des frères et soeurs de %s
-de:
+de: vonseiten der Geschwister von %s
 
     one ancestor counted
 en: One common ancestor: consanguine and uterine half relationships are included, but their coefficient of parente is half the full equivalent relation.
 fr: Les relations de parenté consanguines et utérines par un seul ancêtre pivot commun sont incluses. Leur coefficient de parenté vaut la moitié de celui de la relation complète équivalente.
-de:
+de: Ein gemeinsamer Vorfahre: Blutsverwandte und uterine Halbbeziehungen sind enthalten, aber ihr Elternkoeffizient beträgt die Hälfte der vollständigen äquivalenten Beziehung.
 
     open individual page
 en: open individual page
 fr: ouvrir la page individuelle
-de:
+de: individuelle Seite öffnen
 
     open this individual page
 en: open this individual page
 fr: ouvrir la page individuelle
-de:
+de: diese individuelle Seite öffnen
 
     ou
 en: or
 fr: ou
-de:
+de: oder
 
     partial
 en: limited to ancestors and siblings
 fr: limité aux ascendants et leurs frères et soeurs
-de:
+de: begrenzt auf Vorfahren und Geschwister
 
     passing by
 en: passing by
 fr: en passant par
-de:
+de: im Vorbeigehen
 
     path between
 en: path between
 fr: chemin entre
-de:
+de: Weg zwischen
 
     path/paths
 en: path/paths
 fr: chemin/chemins
-de:
+de: Weg/Wege
 
     place filter
 en: number of elements kept in places list
 fr: nombre d'éléments à conserver dans la liste des places
-de:
+de: Anzahl der Elemente in der Ortsliste
 
     plugins
 en: plugins
 fr: plugins
-de:
+de: Plugins
 
     previous
 en: previous
 fr: précédent
-de:
+de: vorher
 
     previous image
 en: if an image with the same name already exists in the saved, it will be deleted.
 fr: si une image du même nom existe déjà dans le sous-répertoire de sauvegarde, elle sera supprimée.
-de:
+de: wenn schon ein gespeichertes Bild mit dem gleichen Namen existiert, wird es gelöscht.
 
     previous portrait
 en: a possible previous version of the saved portrait will be deleted.
 fr: une sauvegarde pré-existante du portrait sera supprimée.
-de:
+de: wenn schon ein gespeichertes Porträt mit dem gleichen Namen existiert, wird es gelöscht.
 
     remove %s column
 en: click on this header to remove the column(s) “%s”
 fr: cliquer sur cette en-tête pour supprimer la ou les colonne(s) « %s »
-de:
+de: klicke auf diesen Header um die Zeile "%s" zu entfernen
 
     restore
 en: restore
 fr: restaurer
-de:
+de: wiederherstellen
 
     restore image saved
 en: restore saved image
 fr: restaurer une image sauvegardée
-de:
+de: das gespeicherte Bild wiederherstellen
 
     restore portrait
 en: restore portrait
 fr: restaurer le portrait
-de:
+de: das Porträt wiederherstellen
 
     restore portrait saved
 en: restore saved portrait
 fr: restaurer le portrait sauvegardé
-de:
+de: das gespeicherte Porträt wiederherstellen
 
     restored
 en: restored
 fr: restauré/restaurée
-de:
+de: wiederhergestellt
 
     restricted access
 en: Access restricted to friends and wizards of the database!
 fr: Accès réservé aux amis et magiciens de la base de donnée !
-de:
+de: Der Zugriff ist auf Freunde und Meister der Datenbank beschränkt!
 
     save
 en: save
 fr: sauvegarder
-de:
+de: speichern
 
     save image
 en: an image with a similar name will moved to
 fr: si une image du même nom existe déjà, elle sera sauvegardée dans
-de:
+de: wenn ein Bild mit demselben Namen existiert, wird es gespeichert nach
 
     save portrait
 en: the existing portrait will be saved to
 fr: le portrait existant sera sauvegardé dans
-de:
+de: das existierende Porträt wird gespeichert nach
 
     saved
 en: saved
 fr: sauvegardé/sauvegardée
-de:
+de: gespeichert
 
     saved images
 en: saved image/saved images
 fr: image sauvegardée/images sauvegardées
-de:
+de: gespeichertes Bild/gespeicherte Bilder
 
     search %s on Geneanet
 en: search %s on Geneanet
 fr: rechercher %s sur Geneanet
-de:
+de: suche %s auf Geneanet
 
     see portrait
 en: see portrait
 fr: voir le portrait
-de:
+de: siehe Porträt
 
     see portrait saved
 en: see saved portrait
 fr: voir le portrait sauvegardé
-de:
+de: siehe gespeichertes Porträt
 
     select module
 en: Select each module by clicking on the corresponding button (max 15).
 fr: Sélectionnez les modules en cliquant sur le bouton correspondant (max 15).
-de:
+de: Wähle die Module durch Klick auf das zugehörige Feld aus (max. 15).
 
     send image with note and source
 en: send selected image with note and source
 fr: envoyer l’image selectionée avec note et source
-de:
+de: sende das gewählte Bild mit Notizen und Quellen
 
     show first names
 en: show all first names
 fr: afficher tous les prénoms
-de:
+de: alle Vornamen anzeigen
 
     store image
 en: the selected image will be copied to
 fr: l’image sélectionnée sera enregistrée dans
-de:
+de: das ausgewählte Bild wird kopiert nach
 
     the database name %s contains a forbidden character.
 en: the database name "%s" contains a forbidden character.
@@ -1813,121 +1814,121 @@ de:
     to carrousel
 en: to carrousel
 fr: au carrousel
-de:
+de: zum Karussell
 
     too much results
 en: too much results
 fr: trop de résultats
-de:
+de: zu viele Ergebnisse
 
     unfiltered total
 en: unfiltered total
 fr: total non filtré
-de:
+de: Summe ungefiltert
 
     update image note
 en: update image note
 fr: mettre à jour la note de l’image
-de:
+de: Bildnotiz aktualisieren
 
     update image source
 en: update image source
 fr: mettre à jour la source de l’image
-de:
+de: Bildquelle aktualisieren
 
     uploaded
 en: uploaded
 fr: envoyé/envoyée
-de:
+de: hochgeladen
 
     url
 en: url
 fr: url
-de:
+de: Url
 
     v7 anywhere
 en: match anywhere
 fr: correspondance sans contrainte
-de:
+de: ohne Einschränkung
 
     v7 approxim match
 en: match with no capitale nor accents
 fr: correspondance sans capitales ni accents
-de:
+de: Match ohne Großbuchstaben oder Akzente
 
     v7 exact match
 en: exact match (upper/lower and accents)
 fr: correspondance exacte (majuscules/minuscules et accents)
-de:
+de: exakte Übereinstimmung (groß/klein und Akzente)
 
     v7 hide others
 en: hide other first mames
 fr: cacher les autres prénoms
-de:
+de: andere Vornamen ausblenden
 
     v7 list too long
 en: list too long (try increasing filter value)
 fr: liste trop longue (augmentez la valeur du filtre)
-de:
+de: Liste zu lang (versuche einen genaueren Filter)
 
     v7 plugins
 en: plugins
 fr: plugins
-de:
+de: Plugins
 
     v7 refresh fnames cache
 en: refresh fnames cache
 fr: reconstruire le cache des prénoms
-de:
+de: Vornamen-Cache aktualisieren
 
     v7 show others
 en: show other first names
 fr: afficher les autres prénoms
-de:
+de: zeige die anderen Vornamen
 
     v7 word boundaries
 en: match full words
 fr: correspondance de mots entiers
-de:
+de: ganze Worte vergleichen
 
     very short display
 en: very short display
 fr: affichage très court
-de:
+de: sehr kurze Anzeige
 
     warning refresh
 en: refresh the page only after having clicked on the main icon as this would repeat the swap action.
 fr: ne pas rafraichir la page sans avoir au préalable cliqué sur l’icone car cela répéterait l’échange des images.
-de:
+de: Aktualisieren Sie die Seite nicht, ohne vorher auf das Symbol zu klicken, da dies den Bildaustausch wiederholen würde.
 
     widower/widow
 en: widower/widow
 fr: veuf/veuve
-de:
+de: Witwer/Witwe
 
     with note
 en: with a note
 fr: avec une note
-de:
+de: mit einer Notiz
 
     without implex display
 en: without implex display
 fr: sans afficher les implexes
-de:
+de: ohne Implex-Anzeige
 
     witness/witnesses
 en: witness/witnesses
 fr: témoin/témoins
-de:
+de: Zeuge/Zeugen
 
     word match
 en: word match
 fr: mot complet
-de:
+de: ganzes Wort
 
     word match title
 en: match full location name
 fr: comparer avec le nom complet d'un lieu
-de:
+de: den ganzen Ortsnamen vergleichen
 
 

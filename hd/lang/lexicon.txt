@@ -2393,7 +2393,7 @@ ca: ascendent/ascendents
 co: antenatu/antenati
 cs: /předkové
 da: /forfædre
-de: Vorfahre/orfahren
+de: Vorfahre/Vorfahren
 en: ancestor/ancestors
 eo: /prapatro
 es: /ascendientes
