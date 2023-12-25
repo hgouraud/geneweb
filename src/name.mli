@@ -1,20 +1,20 @@
 (* $Id: name.mli,v 5.2 2007-01-19 01:53:16 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-value lower : string -> string;
+val lower : string -> string
   (* Name.lower:
      - uppercase -> lowercase
      - no accents
      - chars no letters and no numbers (except '.') => spaces (stripped)
      Key comparison (first name, surname, number) applies "lower" equality
      on first names and surnames *)
-value abbrev : string -> string;
+val abbrev : string -> string
   (* Name.abbrev: suppress lowercase particles, shorten "saint" into "st" *)
-value strip : string -> string;
+val strip : string -> string
   (* Name.strip = name without spaces *)
-value strip_c : string -> char -> string;
+val strip_c : string -> char -> string
   (* Name.strip_c = name without the charater c given as parameter *)
-value crush : string -> string;
+val crush : string -> string
   (* Name.crush:
      - no spaces
      - roman numbers are keeped
@@ -28,24 +28,22 @@ value crush : string -> string;
      - s at end of words are deleted
      - no double lowercase consons *)
 
-value strip_lower : string -> string;
+val strip_lower : string -> string
   (* strip_lower = strip o lower, as first comparison of names.
      First names and Surnames comparison is strip_lower equality. *)
 
-value purge : string -> string ;
+val purge : string -> string
   (* String without any forbidden caracters defined in forbidden_char *)
 
-value crush_lower : string -> string;
+val crush_lower : string -> string
   (* crush_lower = crush o abbrev o lower, as second comparison of names.
      In index by names, the "names" are crush_lowers *)
 
-value next_chars_if_equiv :
-  string -> int -> string -> int -> option (int * int)
-;
+val next_chars_if_equiv : string -> int -> string -> int -> (int * int) option
 
-value unaccent_utf_8 : bool -> string -> int -> (string * int);
-value nbc : char -> int;
+val unaccent_utf_8 : bool -> string -> int -> string * int
+val nbc : char -> int
 
-value utf_8_db : ref bool;
+val utf_8_db : bool ref
 
-value forbidden_char : list char ;
+val forbidden_char : char list

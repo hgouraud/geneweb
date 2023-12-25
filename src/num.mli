@@ -1,25 +1,25 @@
 (* $Id: num.mli,v 5.2 2007-01-19 01:53:16 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-type t = 'a;
+type t
 
-value zero : t;
-value one : t;
-value eq : t -> t -> bool;
-value gt : t -> t -> bool;
-value add : t -> t -> t;
-value sub : t -> t -> t;
-value twice : t -> t;
-value half : t -> t;
-value even : t -> bool;
-value inc : t -> int -> t;
-value mul : t -> int -> t;
-value exp : t -> int -> t;
-value div : t -> int -> t;
-value modl : t -> int -> int;
-value print : (string -> unit) -> string -> t -> unit;
-value of_int : int -> t;
-value of_string : string -> t;
-value to_string : t -> string;
-value to_string_sep : string -> t -> string;
-value to_string_sep_base : string -> int -> t -> string;
+val zero : t
+val one : t
+val eq : t -> t -> bool
+val gt : t -> t -> bool
+val add : t -> t -> t
+val sub : t -> t -> t
+val twice : t -> t
+val half : t -> t
+val even : t -> bool
+val inc : t -> int -> t
+val mul : t -> int -> t
+val exp : t -> int -> t
+val div : t -> int -> t
+val modl : t -> int -> int
+val print : (string -> unit) -> string -> t -> unit
+val of_int : int -> t
+val of_string : string -> t
+val to_string : t -> string
+val to_string_sep : string -> t -> string
+val to_string_sep_base : string -> int -> t -> string

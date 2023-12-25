@@ -1,0 +1,29 @@
+
+(library
+  (name geneweb_ged2gwb)
+  (wrapped false)
+  (libraries geneweb_src)
+  (modules
+  utf8
+  )
+  (modules_without_implementation
+  )
+  (flags (-w -3-52-14 -warn-error +a-52 -safe-string))
+  )
+
+
+(executable
+  (name ged2gwb)
+  (public_name ged2gwb)
+  (libraries geneweb_ged2gwb )
+  (modules ged2gwb)
+  (flags (-w -3-52 -warn-error +a-52 -safe-string))
+  )
+
+(executable
+  (name ged2gwb2)
+  (public_name ged2gwb2)
+  (libraries geneweb_ged2gwb )
+  (modules ged2gwb2)
+  (flags (-w -3-52 -warn-error +a-52 -safe-string))
+  )

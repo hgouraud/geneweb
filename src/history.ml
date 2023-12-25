@@ -2,26 +2,24 @@
 (* $Id: history.ml,v 5.14 2007-09-12 09:58:44 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-open Config;
-open Def;
-open Gutil;
-open Gwdb;
-open TemplAst;
-open Util;
+open Config
+open Def
+open Gutil
+open Gwdb
+open TemplAst
+open Util
 
-value file_name conf =
+let file_name conf =
   let bname =
     if Filename.check_suffix conf.bname ".gwb" then conf.bname
     else conf.bname ^ ".gwb"
   in
   Filename.concat (Util.base_path [] bname) "history"
-;
 
 (* Record history when committing updates *)
 
-value ext_flags =
+let ext_flags =
   [Open_wronly; Open_append; Open_creat; Open_text; Open_nonblock]
-;
 
 
 (* ********************************************************************** *)
@@ -34,12 +32,11 @@ value ext_flags =
     [Retour] : string
     [Rem] : Non exporté en clair hors de ce module.                       *)
 (* ********************************************************************** *)
-value slash_name_of_key fn sn occ =
+let slash_name_of_key fn sn occ =
   let space_to_unders = Mutil.tr ' ' '_' in
   let fn = space_to_unders (Name.lower fn) in
   let sn = space_to_unders (Name.lower sn) in
   sn ^ "/" ^ fn ^ "/" ^ string_of_int occ
-;
 
 
 (* ********************************************************************** *)
@@ -56,7 +53,7 @@ value slash_name_of_key fn sn occ =
     [Retour] : string array
     [Rem] : Non exporté en clair hors de ce module.                       *)
 (* ********************************************************************** *)
-value diff_visibility conf base op np =
+let diff_visibility conf base op np =
   let k = slash_name_of_key np.first_name np.surname np.occ in
   let empty_union = {family = [| |]} in
   let empty_ascend = {parents = None; consang = Adef.fix (-1)} in
@@ -64,19 +61,17 @@ value diff_visibility conf base op np =
   let np = Futil.map_person_ps (fun p -> p) (Gwdb.insert_string base) np in
   let o_p = Gwdb.person_of_gen_person base (op, empty_ascend, empty_union) in
   let n_p = Gwdb.person_of_gen_person base (np, empty_ascend, empty_union) in
-  let tmp_conf = {(conf) with wizard = False; friend = False} in
+  let tmp_conf = {conf with wizard = false; friend = false} in
   let old_visibility = Util.authorized_age tmp_conf base o_p in
   let new_visibility = Util.authorized_age tmp_conf base n_p in
   if old_visibility <> new_visibility then
     [| "VISIBLE"; k; string_of_bool new_visibility |]
   else [| |]
-;
 
 
 type kind_diff =
-  [ Diff_person of gen_person iper string and gen_person iper string
-  | Diff_string of (string * string * int) and (string * string * int) ]
-;
+    Diff_person of (iper, string) gen_person * (iper, string) gen_person
+  | Diff_string of (string * string * int) * (string * string * int)
 
 (* ********************************************************************** *)
 (*  [Fonc] diff_key : gen_person -> gen_person -> string array            *)
@@ -88,19 +83,16 @@ type kind_diff =
     [Retour] : string array
     [Rem] : Non exporté en clair hors de ce module.                       *)
 (* ********************************************************************** *)
-value diff_key d =
+let diff_key d =
   match d with
-  [ Diff_person op np ->
+    Diff_person (op, np) ->
       let o_key = slash_name_of_key op.first_name op.surname op.occ in
       let n_key = slash_name_of_key np.first_name np.surname np.occ in
-      if o_key <> n_key then [| "KEY"; o_key; n_key |]
-      else [| |]
-  | Diff_string (ofn, osn, oocc) (fn, sn, occ) ->
+      if o_key <> n_key then [| "KEY"; o_key; n_key |] else [| |]
+  | Diff_string ((ofn, osn, oocc), (fn, sn, occ)) ->
       let o_key = slash_name_of_key ofn osn oocc in
       let n_key = slash_name_of_key fn sn occ in
-      if o_key <> n_key then [| "KEY"; o_key; n_key |]
-      else [| |] ]
-;
+      if o_key <> n_key then [| "KEY"; o_key; n_key |] else [| |]
 
 
 (* ********************************************************************** *)
@@ -117,33 +109,34 @@ value diff_key d =
     [Retour] : string array
     [Rem] : Non exporté en clair hors de ce module.                       *)
 (* ********************************************************************** *)
-value diff_person conf base changed =
+let diff_person conf base changed =
   match changed with
-  [ U_Add_person p | U_Delete_person p -> [| |]
-  | U_Modify_person o n ->
-      Array.append (diff_key (Diff_person o n)) (diff_visibility conf base o n)
-  | U_Merge_person p1 p2 p ->
+    U_Add_person p | U_Delete_person p -> [| |]
+  | U_Modify_person (o, n) ->
+      Array.append (diff_key (Diff_person (o, n)))
+        (diff_visibility conf base o n)
+  | U_Merge_person (p1, p2, p) ->
       let args_p1 =
-        Array.append
-          (diff_key (Diff_person p1 p)) (diff_visibility conf base p1 p)
+        Array.append (diff_key (Diff_person (p1, p)))
+          (diff_visibility conf base p1 p)
       in
       let args_p2 =
-        Array.append
-          (diff_key (Diff_person p2 p)) (diff_visibility conf base p2 p)
+        Array.append (diff_key (Diff_person (p2, p)))
+          (diff_visibility conf base p2 p)
       in
       Array.append args_p1 args_p2
-  | U_Send_image _ | U_Delete_image _
-  | U_Add_family _ _ | U_Modify_family _ _ _ | U_Delete_family _ _
-  | U_Invert_family _ _ | U_Merge_family _ _ _ _ | U_Add_parent _ _ -> [| |]
-  | U_Change_children_name _ l ->
+  | U_Send_image _ | U_Delete_image _ | U_Add_family (_, _) |
+    U_Modify_family (_, _, _) | U_Delete_family (_, _) |
+    U_Invert_family (_, _) | U_Merge_family (_, _, _, _) |
+    U_Add_parent (_, _) ->
+      [| |]
+  | U_Change_children_name (_, l) ->
       List.fold_left
         (fun accu ((ofn, osn, oocc, _), (fn, sn, occ, _)) ->
-          Array.append
-            accu (diff_key (Diff_string (ofn, osn, oocc) (fn, sn, occ))))
+           Array.append accu
+             (diff_key (Diff_string ((ofn, osn, oocc), (fn, sn, occ)))))
         [| |] l
-  | U_Multi _
-  | U_Notes _ _ | U_Kill_ancestors _ -> [| |] ]
-;
+  | U_Multi _ | U_Notes (_, _) | U_Kill_ancestors _ -> [| |]
 
 
 (* ************************************************************************ *)
@@ -158,36 +151,34 @@ value diff_person conf base changed =
     [Retour] : Néant
     [Rem] : Non exporté en clair hors de ce module.                         *)
 (* ************************************************************************ *)
-value notify_change conf base changed action =
-  IFDEF UNIX THEN
-    match p_getenv conf.base_env "notify_change" with
-    [ Some comm ->
-        let base_args =
-          match changed with
-          [ U_Add_person p | U_Modify_person _ p | U_Delete_person p
-          | U_Merge_person _ _ p | U_Send_image p | U_Delete_image p
-          | U_Add_family p _ | U_Modify_family p _ _ | U_Delete_family p _
-          | U_Invert_family p _ | U_Merge_family p _ _ _ | U_Add_parent p _
-          | U_Kill_ancestors p | U_Change_children_name p _ | U_Multi p ->
-              let key = slash_name_of_key p.first_name p.surname p.occ in
-              [| key; string_of_int (Adef.int_of_iper (p.key_index)) |]
-          | U_Notes (Some num) file -> [| file; string_of_int num |]
-          | U_Notes None file -> [| file |] ]
-        in
-        let optional_args = diff_person conf base changed in
-        let args = Array.append base_args optional_args in
-        let args = Array.append [| comm; conf.bname; conf.user; action |] args in
-        match Unix.fork () with
-        [ 0 ->
-            if Unix.fork () <> 0 then exit 0
-            else do {
-              try Unix.execvp comm args with _ -> ();
-              exit 0
-            }
-        | id -> ignore (Unix.waitpid [] id) ]
-    | None -> () ]
-  ELSE () END
-;
+let notify_change conf base changed action =
+  match p_getenv conf.base_env "notify_change" with
+    Some comm ->
+      let base_args =
+        match changed with
+          U_Add_person p | U_Modify_person (_, p) | U_Delete_person p |
+          U_Merge_person (_, _, p) | U_Send_image p | U_Delete_image p |
+          U_Add_family (p, _) | U_Modify_family (p, _, _) |
+          U_Delete_family (p, _) | U_Invert_family (p, _) |
+          U_Merge_family (p, _, _, _) | U_Add_parent (p, _) |
+          U_Kill_ancestors p | U_Change_children_name (p, _) | U_Multi p ->
+            let key = slash_name_of_key p.first_name p.surname p.occ in
+            [| key; string_of_int (Adef.int_of_iper p.key_index) |]
+        | U_Notes (Some num, file) -> [| file; string_of_int num |]
+        | U_Notes (None, file) -> [| file |]
+      in
+      let optional_args = diff_person conf base changed in
+      let args = Array.append base_args optional_args in
+      let args =
+        Array.append [| comm; conf.bname; conf.user; action |] args
+      in
+      begin match Unix.fork () with
+        0 ->
+          if Unix.fork () <> 0 then exit 0
+          else begin (try Unix.execvp comm args with _ -> ()); exit 0 end
+      | id -> ignore (Unix.waitpid [] id)
+      end
+  | None -> ()
 
 
 (* ************************************************************************ *)
@@ -204,48 +195,47 @@ value notify_change conf base changed action =
     [Retour] : Néant
     [Rem] : Non exporté en clair hors de ce module.                         *)
 (* ************************************************************************ *)
-value gen_record conf base changed action =
-  do {
-    match p_getenv conf.base_env "history" with
-    [ Some "yes" when not conf.manitou ->
-        let item =
-          match changed with
-          [ U_Add_person p | U_Modify_person _ p | U_Delete_person p
-          | U_Merge_person _ _ p | U_Send_image p | U_Delete_image p
-          | U_Add_family p _ | U_Modify_family p _ _ | U_Delete_family p _
-          | U_Invert_family p _ | U_Merge_family p _ _ _ | U_Add_parent p _
-          | U_Kill_ancestors p | U_Change_children_name p _ | U_Multi p ->
-              p.first_name ^ "." ^ string_of_int p.occ ^ " " ^ p.surname
-          | U_Notes (Some num) file ->
-              let s = string_of_int num in
-              if file = "" then s else file ^ "/" ^ s
-          | U_Notes None file -> file ]
-        in
-        let fname = file_name conf in
-        match
-          try Some (Secure.open_out_gen ext_flags 0o644 fname) with
-          [ Sys_error _ -> None ]
-        with
-        [ Some oc ->
-            let (hh, mm, ss) = conf.time in
-            do {
-              Printf.fprintf oc "%04d-%02d-%02d %02d:%02d:%02d [%s] %s %s\n"
-                conf.today.year conf.today.month conf.today.day hh mm ss
-                conf.user action item;
-              close_out oc;
-            }
-        | None -> () ]
-    | _ -> () ];
-    History_diff.record_diff conf base changed;
-    (* Effet de bord des modifications en masse : on peut facilement  *)
-    (* créer 5000 nouveaux processus à chaque mise à jour.            *)
-    (* Pour éviter cela, on n'appelle jamais notify_change lors de la *)
-    (* mise à jour de l'historique.                                   *)
-    match changed with
-    [ U_Multi _ -> ()
-    | _ -> notify_change conf base changed action ]
-  }
-;
+let gen_record conf base changed action =
+  begin match p_getenv conf.base_env "history" with
+    Some "yes" when not conf.manitou ->
+      let item =
+        match changed with
+          U_Add_person p | U_Modify_person (_, p) | U_Delete_person p |
+          U_Merge_person (_, _, p) | U_Send_image p | U_Delete_image p |
+          U_Add_family (p, _) | U_Modify_family (p, _, _) |
+          U_Delete_family (p, _) | U_Invert_family (p, _) |
+          U_Merge_family (p, _, _, _) | U_Add_parent (p, _) |
+          U_Kill_ancestors p | U_Change_children_name (p, _) | U_Multi p ->
+            p.first_name ^ "." ^ string_of_int p.occ ^ " " ^ p.surname
+        | U_Notes (Some num, file) ->
+            let s = string_of_int num in
+            if file = "" then s else file ^ "/" ^ s
+        | U_Notes (None, file) -> file
+      in
+      let fname = file_name conf in
+      begin match
+        begin try Some (Secure.open_out_gen ext_flags 0o644 fname) with
+          Sys_error _ -> None
+        end
+      with
+        Some oc ->
+          let (hh, mm, ss) = conf.time in
+          Printf.fprintf oc "%04d-%02d-%02d %02d:%02d:%02d [%s] %s %s\n"
+            conf.today.year conf.today.month conf.today.day hh mm ss conf.user
+            action item;
+          close_out oc
+      | None -> ()
+      end
+  | _ -> ()
+  end;
+  History_diff.record_diff conf base changed;
+  (* Effet de bord des modifications en masse : on peut facilement  *)
+  (* créer 5000 nouveaux processus à chaque mise à jour.            *)
+  (* Pour éviter cela, on n'appelle jamais notify_change lors de la *)
+  (* mise à jour de l'historique.                                   *)
+  match changed with
+    U_Multi _ -> ()
+  | _ -> notify_change conf base changed action
 
 
 (* ************************************************************************ *)
@@ -263,32 +253,30 @@ value gen_record conf base changed action =
     [Retour] : Néant
     [Rem] : Non exporté en clair hors de ce module.                         *)
 (* ************************************************************************ *)
-value record conf base changed action =
-  do {
-    (* Mise à jour du fichier gwf si le sosa_ref a changé. *)
-    match changed with
-    [ U_Modify_person _ p ->
-        let (fn, sn, occ, ip) = (p.first_name, p.surname, p.occ, p.key_index) in
-        update_gwf_sosa conf base (ip, (fn, sn, occ))
-    | U_Merge_person p1 _ p -> do {
-        let (fn, sn, occ, ip) =
-          (p1.first_name, p1.surname, p1.occ, p1.key_index)
-        in
-        update_gwf_sosa conf base (ip, (fn, sn, occ));
-        (* On n'a pas besoin de faire un update sur "p2" *)
-        (* parce qu'on le fait sur p dans tous les cas.  *)
-        let (fn, sn, occ, ip) = (p.first_name, p.surname, p.occ, p.key_index) in
-        update_gwf_sosa conf base (ip, (fn, sn, occ)); }
-    | U_Change_children_name _ l ->
-        List.iter
-          (fun (_, (fn, sn, occ, ip)) ->
-            update_gwf_sosa conf base (ip, (fn, sn, occ)))
-          l
-    | _ -> () ];
-    (* Mise à jour du fichier historique et appel de notify_change. *)
-    gen_record conf base changed action
-  }
-;
+let record conf base changed action =
+  (* Mise à jour du fichier gwf si le sosa_ref a changé. *)
+  begin match changed with
+    U_Modify_person (_, p) ->
+      let (fn, sn, occ, ip) = p.first_name, p.surname, p.occ, p.key_index in
+      update_gwf_sosa conf base (ip, (fn, sn, occ))
+  | U_Merge_person (p1, _, p) ->
+      let (fn, sn, occ, ip) =
+        p1.first_name, p1.surname, p1.occ, p1.key_index
+      in
+      update_gwf_sosa conf base (ip, (fn, sn, occ));
+      (* On n'a pas besoin de faire un update sur "p2" *)
+      (* parce qu'on le fait sur p dans tous les cas.  *)
+      let (fn, sn, occ, ip) = p.first_name, p.surname, p.occ, p.key_index in
+      update_gwf_sosa conf base (ip, (fn, sn, occ))
+  | U_Change_children_name (_, l) ->
+      List.iter
+        (fun (_, (fn, sn, occ, ip)) ->
+           update_gwf_sosa conf base (ip, (fn, sn, occ)))
+        l
+  | _ -> ()
+  end;
+  (* Mise à jour du fichier historique et appel de notify_change. *)
+  gen_record conf base changed action
 
 
 (* ************************************************************************ *)
@@ -303,67 +291,59 @@ value record conf base changed action =
     [Retour] : Néant
     [Rem] : Non exporté en clair hors de ce module.                         *)
 (* ************************************************************************ *)
-value notify conf base action =
+let notify conf base action =
   let empty_person = Gwdb.empty_person base (Adef.iper_of_int (-1)) in
   let empty_person =
     Util.string_gen_person base (gen_person_of_person empty_person)
   in
   notify_change conf base (U_Multi empty_person) action
-;
 
 
 (* Request for history printing *)
 
-exception Begin_of_file;
+exception Begin_of_file
 
-value buff_get_rev len =
-  String.init len get
-    where get i = Bytes.get Buff.buff.val (len - 1 - i)
-;
+let buff_get_rev len =
+  let get i = Bytes.get !(Buff.buff) (len - 1 - i) in String.init len get
 
-value rev_input_char ic (rbuff, rpos) pos =
-  do {
-    if rpos.val = 0 then do {
-      if Bytes.length rbuff.val < 65536 then
-        let len =
-          if Bytes.length rbuff.val = 0 then 1024 else 2 * Bytes.length rbuff.val
+let rev_input_char ic (rbuff, rpos) pos =
+  if !rpos = 0 then
+    begin
+      if Bytes.length !rbuff < 65536 then
+        begin let len =
+          if Bytes.length !rbuff = 0 then 1024 else 2 * Bytes.length !rbuff
         in
-        rbuff.val := Bytes.create len
-      else ();
-      let ppos = max (pos - Bytes.length rbuff.val) 0 in
+          rbuff := Bytes.create len
+        end;
+      let ppos = max (pos - Bytes.length !rbuff) 0 in
       seek_in ic ppos;
-      really_input ic rbuff.val 0 (pos - ppos);
-      rpos.val := pos - ppos;
-    }
-    else ();
-    decr rpos;
-    Bytes.get rbuff.val rpos.val
-  }
-;
+      really_input ic !rbuff 0 (pos - ppos);
+      rpos := pos - ppos
+    end;
+  decr rpos;
+  Bytes.get !rbuff !rpos
 
-value rev_input_line ic pos (rbuff, rpos) =
+let rev_input_line ic pos (rbuff, rpos) =
   if pos <= 0 then raise Begin_of_file
   else
     let rec loop len pos =
-      if pos <= 0 then (buff_get_rev len, pos)
+      if pos <= 0 then buff_get_rev len, pos
       else
         match rev_input_char ic (rbuff, rpos) pos with
-        [ '\n' -> (buff_get_rev len, pos)
-        | c -> loop (Buff.store len c) (pos - 1) ]
+          '\n' -> buff_get_rev len, pos
+        | c -> loop (Buff.store len c) (pos - 1)
     in
     loop 0 (pos - 1)
-;
 
-value line_tpl = "0000-00-00 00:00:00 xx .";
+let line_tpl = "0000-00-00 00:00:00 xx ."
 
-value line_fields line =
+let line_fields line =
   if String.length line > String.length line_tpl then
     let time = String.sub line 0 19 in
     let (user, i) =
-      match (line.[20], Mutil.lindex line ']') with
-      [ ('[', Some i) ->
-          let user = String.sub line 21 (i - 21) in (user, i + 2)
-      | _ -> ("", 20) ]
+      match line.[20], Mutil.lindex line ']' with
+        '[', Some i -> let user = String.sub line 21 (i - 21) in user, i + 2
+      | _ -> "", 20
     in
     let action = String.sub line i 2 in
     let key =
@@ -373,125 +353,140 @@ value line_fields line =
     in
     Some (time, user, action, key)
   else None
-;
 
 type hist_item =
-  [ HI_notes of string and option int
+    HI_notes of string * int option
   | HI_ind of person
-  | HI_none ]
-;
+  | HI_none
 
-type env 'a =
-  [ Vcnt of ref int
-  | Vinfo of string and string and string and hist_item and string
-  | Vpos of ref int
-  | Vsearch of option (bool * string * int)
+type 'a env =
+    Vcnt of int ref
+  | Vinfo of string * string * string * hist_item * string
+  | Vpos of int ref
+  | Vsearch of (bool * string * int) option
   | Vother of 'a
-  | Vnone ]
-;
+  | Vnone
 
-value get_env v env = try List.assoc v env with [ Not_found -> Vnone ];
-value get_vother = fun [ Vother x -> Some x | _ -> None ];
-value set_vother x = Vother x;
+let get_env v env = try List.assoc v env with Not_found -> Vnone
+let get_vother =
+  function
+    Vother x -> Some x
+  | _ -> None
+let set_vother x = Vother x
 
-value possibly_highlight env s =
+let possibly_highlight env s =
   match get_env "search" env with
-  [ Vsearch (Some (case_sens, h, _)) ->
-      if in_text case_sens h s then html_highlight case_sens h s
-      else s
-  | _ -> s ]
-;
+    Vsearch (Some (case_sens, h, _)) ->
+      if in_text case_sens h s then html_highlight case_sens h s else s
+  | _ -> s
 
-value rec eval_var conf base env xx loc =
-  fun
-  [ ["count"] ->
-      match get_env "count" env with
-      [ Vcnt c -> VVstring (string_of_int c.val)
-      | _ -> VVstring "" ]
-  |  ["first_name"] ->
-      match get_env "info" env with
-      [ Vinfo _ _ _ (HI_ind p) _ -> VVstring (p_first_name base p)
-      | _ -> VVstring "" ]
+let rec eval_var conf base env xx loc =
+  function
+    ["count"] ->
+      begin match get_env "count" env with
+        Vcnt c -> VVstring (string_of_int !c)
+      | _ -> VVstring ""
+      end
+  | ["first_name"] ->
+      begin match get_env "info" env with
+        Vinfo (_, _, _, HI_ind p, _) -> VVstring (p_first_name base p)
+      | _ -> VVstring ""
+      end
   | ["found"] ->
-      match get_env "search" env with
-      [ Vsearch (Some _) -> VVbool True
-      | _ -> VVbool False ]
+      begin match get_env "search" env with
+        Vsearch (Some _) -> VVbool true
+      | _ -> VVbool false
+      end
   | ["incr_count"] ->
-      match get_env "count" env with
-      [ Vcnt c -> do { incr c; VVstring "" }
-      | _ -> VVstring "" ]
+      begin match get_env "count" env with
+        Vcnt c -> incr c; VVstring ""
+      | _ -> VVstring ""
+      end
   | ["is_note"] ->
-      match get_env "info" env with
-      [ Vinfo _ _ _ (HI_notes _ _) _ -> VVbool True
-      | _ -> VVbool False ]
+      begin match get_env "info" env with
+        Vinfo (_, _, _, HI_notes (_, _), _) -> VVbool true
+      | _ -> VVbool false
+      end
   | ["key"] ->
-      match get_env "info" env with
-      [ Vinfo _ _ _ _ s -> VVstring (possibly_highlight env s)
-      | _ -> raise Not_found ]
-  | ["note"; "page" :: sl] ->
-      match get_env "info" env with
-      [ Vinfo _ _ _ (HI_notes s _) _ ->
+      begin match get_env "info" env with
+        Vinfo (_, _, _, _, s) -> VVstring (possibly_highlight env s)
+      | _ -> raise Not_found
+      end
+  | "note" :: "page" :: sl ->
+      begin match get_env "info" env with
+        Vinfo (_, _, _, HI_notes (s, _), _) ->
           let s =
             match sl with
-            [ ["v"] -> s
+              ["v"] -> s
             | [] -> possibly_highlight env s
-            | _ -> raise Not_found ]
+            | _ -> raise Not_found
           in
           VVstring s
-      | _ -> raise Not_found ]
+      | _ -> raise Not_found
+      end
   | ["note"; "part"] ->
-      match get_env "info" env with
-      [ Vinfo _ _ _ (HI_notes _ (Some x)) _ -> VVstring (string_of_int x)
-      | Vinfo _ _ _ (HI_notes _ None) _ -> VVstring ""
-      | _ -> raise Not_found ]
+      begin match get_env "info" env with
+        Vinfo (_, _, _, HI_notes (_, Some x), _) -> VVstring (string_of_int x)
+      | Vinfo (_, _, _, HI_notes (_, None), _) -> VVstring ""
+      | _ -> raise Not_found
+      end
   | ["occ"] ->
-      match get_env "info" env with
-      [ Vinfo _ _ _ (HI_ind p) _ -> VVstring (string_of_int (get_occ p))
-      | _ -> VVstring "" ]
-  | ["person" :: sl] ->
-      match get_env "info" env with
-      [ Vinfo _ _ _ (HI_ind p) _ -> eval_person_field_var conf base env p sl
-      | _ -> raise Not_found ]
+      begin match get_env "info" env with
+        Vinfo (_, _, _, HI_ind p, _) -> VVstring (string_of_int (get_occ p))
+      | _ -> VVstring ""
+      end
+  | "person" :: sl ->
+      begin match get_env "info" env with
+        Vinfo (_, _, _, HI_ind p, _) ->
+          eval_person_field_var conf base env p sl
+      | _ -> raise Not_found
+      end
   | ["pos"] ->
-      match get_env "pos" env with
-      [ Vpos r -> VVstring (string_of_int r.val)
-      | _ -> raise Not_found ]
+      begin match get_env "pos" env with
+        Vpos r -> VVstring (string_of_int !r)
+      | _ -> raise Not_found
+      end
   | ["reset_count"] ->
-      match get_env "count" env with
-      [ Vcnt c -> do { c.val := 0; VVstring  "" }
-      | _ -> VVstring "" ]
+      begin match get_env "count" env with
+        Vcnt c -> c := 0; VVstring ""
+      | _ -> VVstring ""
+      end
   | ["surname"] ->
-      match get_env "info" env with
-      [ Vinfo _ _ _ (HI_ind p) _ -> VVstring (p_surname base p)
-      | _ -> VVstring "" ]
+      begin match get_env "info" env with
+        Vinfo (_, _, _, HI_ind p, _) -> VVstring (p_surname base p)
+      | _ -> VVstring ""
+      end
   | ["time"] ->
-      match get_env "info" env with
-      [ Vinfo s _ _ _ _ -> VVstring (possibly_highlight env s)
-      | _ -> raise Not_found ]
-  | ["update" :: sl] ->
-      match get_env "info" env with
-      [ Vinfo _ u _ _ _ -> eval_string u sl
-      | _ -> raise Not_found ]
-  | ["user" :: sl] ->
-      match get_env "info" env with
-      [ Vinfo _ _ s _ _ ->
+      begin match get_env "info" env with
+        Vinfo (s, _, _, _, _) -> VVstring (possibly_highlight env s)
+      | _ -> raise Not_found
+      end
+  | "update" :: sl ->
+      begin match get_env "info" env with
+        Vinfo (_, u, _, _, _) -> eval_string u sl
+      | _ -> raise Not_found
+      end
+  | "user" :: sl ->
+      begin match get_env "info" env with
+        Vinfo (_, _, s, _, _) ->
           let s =
             match sl with
-            [ ["v"] -> s
+              ["v"] -> s
             | [] -> possibly_highlight env s
-            | _ -> raise Not_found ]
+            | _ -> raise Not_found
           in
           VVstring s
-      | _ -> raise Not_found ]
-  | _ -> raise Not_found ]
+      | _ -> raise Not_found
+      end
+  | _ -> raise Not_found
 and eval_string s =
-  fun
-  [ ["var"] -> VVother (eval_string s)
+  function
+    ["var"] -> VVother (eval_string s)
   | [] -> VVstring s
-  | _ -> raise Not_found ]
+  | _ -> raise Not_found
 and eval_person_field_var conf base env p =
-  fun
-  [ ["access"] -> VVstring (Util.acces conf base p)
+  function
+    ["access"] -> VVstring (Util.acces conf base p)
   | ["dates"] -> VVstring (Date.short_dates_text conf base p)
   | ["has_history"] ->
       let fn = sou base (get_first_name p) in
@@ -502,192 +497,190 @@ and eval_person_field_var conf base env p =
   | ["history_file"] ->
       let fn = sou base (get_first_name p) in
       let sn = sou base (get_surname p) in
-      let occ = get_occ p in
-      VVstring (History_diff.history_file fn sn occ)
+      let occ = get_occ p in VVstring (History_diff.history_file fn sn occ)
   | ["is_invisible"] ->
-      let conf = {(conf) with wizard = False; friend = False} in
+      let conf = {conf with wizard = false; friend = false} in
       VVbool (not (Util.authorized_age conf base p))
-  | ["is_friend"] ->
-      VVbool ((get_access p) = Friend)
-  | ["is_friend_m"] ->
-      VVbool ((get_access p) = Friend_m)
+  | ["is_friend"] -> VVbool (get_access p = Friend)
+  | ["is_friend_m"] -> VVbool (get_access p = Friend_m)
   | ["title"] -> VVstring (person_title conf base p)
   | [] -> VVstring (possibly_highlight env (simple_person_text conf base p))
-  | _ -> VVstring "person..." ]
+  | _ -> VVstring "person..."
 and simple_person_text conf base p =
   match main_title conf base p with
-  [ Some t -> titled_person_text conf base p t
-  | None -> person_text conf base p ]
-;
+    Some t -> titled_person_text conf base p t
+  | None -> person_text conf base p
 
-value print_foreach conf base print_ast eval_expr =
+let print_foreach conf base print_ast eval_expr =
   let eval_int_expr env ep e =
     let s = eval_expr env ep e in
-    try int_of_string s with [ Failure _ -> raise Not_found ]
+    try int_of_string s with Failure _ -> raise Not_found
   in
   let rec print_foreach env xx loc s sl el al =
-    match (s, sl) with
-    [ ("history_line", []) -> print_foreach_history_line env xx el al
-    | (s, _) -> raise Not_found ]
+    match s, sl with
+      "history_line", [] -> print_foreach_history_line env xx el al
+    | s, _ -> raise Not_found
   and print_foreach_history_line env xx el al =
     match
-      try Some (Secure.open_in_bin (file_name conf))
-      with [ Sys_error _ -> None ]
+      try Some (Secure.open_in_bin (file_name conf)) with Sys_error _ -> None
     with
-    [ Some ic ->
-        try
+      Some ic ->
+        begin try
           let (k, pos, wiz) =
             match el with
-            [ [[e1]; [e2]; [e3]] ->
+              [[e1]; [e2]; [e3]] ->
                 let k = eval_int_expr env xx e1 in
                 let pos =
                   match get_env "search" env with
-                  [ Vsearch (Some (_, _, pos)) -> pos
+                    Vsearch (Some (_, _, pos)) -> pos
                   | Vsearch None -> in_channel_length ic
                   | _ ->
                       try eval_int_expr env xx e2 with
-                      [ Not_found -> in_channel_length ic ] ]
+                        Not_found -> in_channel_length ic
                 in
-                let wiz = eval_expr env xx e3 in
-                (k, pos, wiz)
-            | [] -> (3, in_channel_length ic, "")
-            | _ -> raise Not_found ]
+                let wiz = eval_expr env xx e3 in k, pos, wiz
+            | [] -> 3, in_channel_length ic, ""
+            | _ -> raise Not_found
           in
           let (pos, n) =
-            let vv = (ref (Bytes.create 0), ref 0) in
+            let vv = ref (Bytes.create 0), ref 0 in
             let rec loop pos i =
-              if i >= k then (pos, i)
+              if i >= k then pos, i
               else
                 match
                   try Some (rev_input_line ic pos vv) with
-                  [ Begin_of_file -> None ]
+                    Begin_of_file -> None
                 with
-                [ Some (line, pos) ->
+                  Some (line, pos) ->
                     let i = print_history_line2 env xx line wiz i al in
                     loop pos i
-                | None -> (pos, i) ]
+                | None -> pos, i
             in
             loop pos 0
           in
-          do {
-            match get_env "pos" env with
-            [ Vpos r -> r.val := pos
-            | _ -> () ];
-            close_in ic;
-          }
-        with e -> do { close_in ic; raise e }
-    | None -> () ]
+          begin match get_env "pos" env with
+            Vpos r -> r := pos
+          | _ -> ()
+          end;
+          close_in ic
+        with e -> close_in ic; raise e
+        end
+    | None -> ()
   and print_history_line2 env xx line wiz i al =
     match line_fields line with
-    [ Some (time, user, action, keyo) ->
-        if wiz = "" || user = wiz then do {
+      Some (time, user, action, keyo) ->
+        if wiz = "" || user = wiz then
           let hist_item =
             match keyo with
-            [ Some key ->
-                match action with
-                [ "mn" ->
+              Some key ->
+                begin match action with
+                  "mn" ->
                     let (i, j) =
-                      try let i = String.rindex key '/' in (i, i + 1) with
-                      [ Not_found -> (0, 0) ]
+                      try let i = String.rindex key '/' in i, i + 1 with
+                        Not_found -> 0, 0
                     in
                     let pg = String.sub key 0 i in
                     let s = String.sub key j (String.length key - j) in
-                    try HI_notes pg (Some (int_of_string s)) with
-                    [ Failure _ -> HI_notes key None ]
+                    begin try HI_notes (pg, Some (int_of_string s)) with
+                      Failure _ -> HI_notes (key, None)
+                    end
                 | _ ->
                     match person_ht_find_all base key with
-                    [ [ip] -> HI_ind (pget conf base ip)
-                    | _ -> HI_none ] ]
-            | None -> HI_none ]
+                      [ip] -> HI_ind (pget conf base ip)
+                    | _ -> HI_none
+                end
+            | None -> HI_none
           in
           let not_displayed =
             match hist_item with
-            [ HI_ind p ->
-                is_hidden p || ((is_hide_names conf p) && not (fast_auth_age conf p))
-            | _ -> False ]
+              HI_ind p ->
+                is_hidden p ||
+                is_hide_names conf p && not (fast_auth_age conf p)
+            | _ -> false
           in
           if not_displayed then i
-          else do {
-            let key = match keyo with [ Some s -> s | None -> "" ] in
-            let env = [("info", Vinfo time action user hist_item key) :: env] in
-            List.iter (print_ast env xx) al;
-            i + 1
-          }
-        }
+          else
+            let key =
+              match keyo with
+                Some s -> s
+              | None -> ""
+            in
+            let env =
+              ("info", Vinfo (time, action, user, hist_item, key)) :: env
+            in
+            List.iter (print_ast env xx) al; i + 1
         else i
-    | None -> i ]
+    | None -> i
   in
   print_foreach
-;
 
-value gen_print conf base hoo =
+let gen_print conf base hoo =
   let env =
-    let env = [("pos", Vpos (ref 0)); ("count", Vcnt (ref 0))] in
+    let env = ["pos", Vpos (ref 0); "count", Vcnt (ref 0)] in
     match hoo with
-    [ Some ho -> [("search", Vsearch ho) :: env]
-    | None -> env ]
+      Some ho -> ("search", Vsearch ho) :: env
+    | None -> env
   in
   Hutil.interp conf base "updhist"
     {Templ.eval_var = eval_var conf base;
-     Templ.eval_transl _ = Templ.eval_transl conf;
-     Templ.eval_predefined_apply _ = raise Not_found;
+     Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
+     Templ.eval_predefined_apply = (fun _ -> raise Not_found);
      Templ.get_vother = get_vother; Templ.set_vother = set_vother;
      Templ.print_foreach = print_foreach conf base}
     env ()
-;
 
-value print conf base = gen_print conf base None;
+let print conf base = gen_print conf base None
 
 (* searching *)
 
-value search_text conf base s =
+let search_text conf base s =
   let s = if s = "" then " " else s in
   let case_sens = p_getenv conf.env "c" = Some "on" in
   let found =
     match
-      try Some (Secure.open_in_bin (file_name conf))
-      with [ Sys_error _ -> None ]
+      try Some (Secure.open_in_bin (file_name conf)) with Sys_error _ -> None
     with
-    [ Some ic ->
+      Some ic ->
         let pos =
           match p_getint conf.env "pos" with
-          [ Some pos -> pos
-          | None -> in_channel_length ic ]
+            Some pos -> pos
+          | None -> in_channel_length ic
         in
-        let vv = (ref (Bytes.create 0), ref 0) in
-        loop pos where rec loop pos =
+        let vv = ref (Bytes.create 0), ref 0 in
+        let rec loop pos =
           match
-            try Some (rev_input_line ic pos vv) with
-            [ Begin_of_file -> None ]
+            try Some (rev_input_line ic pos vv) with Begin_of_file -> None
           with
-          [ Some (line, pos2) ->
-              match line_fields line with
-              [ Some (time, user, action, keyo) ->
+            Some (line, pos2) ->
+              begin match line_fields line with
+                Some (time, user, action, keyo) ->
                   let key =
                     match keyo with
-                    [ Some key -> key
-                    | None -> "" ]
+                      Some key -> key
+                    | None -> ""
                   in
                   if in_text case_sens s time || in_text case_sens s user ||
                      in_text case_sens s key
-                  then Some pos
+                  then
+                    Some pos
                   else loop pos2
-              | None -> None ]
-          | None -> None ]
-    | None -> None ]
+              | None -> None
+              end
+          | None -> None
+        in
+        loop pos
+    | None -> None
   in
   let h =
     match found with
-    [ Some pos -> Some (case_sens, s, pos)
-    | None -> None ]
+      Some pos -> Some (case_sens, s, pos)
+    | None -> None
   in
   gen_print conf base (Some h)
-;
 
-value print_search conf base =
+let print_search conf base =
   if conf.wizard || conf.friend then
-    match try Some (List.assoc "s" conf.env) with [ Not_found -> None ] with
-    [ Some s -> search_text conf base (Wserver.gen_decode False s)
-    | None -> print conf base ]
+    match try Some (List.assoc "s" conf.env) with Not_found -> None with
+      Some s -> search_text conf base (Wserver.gen_decode false s)
+    | None -> print conf base
   else print conf base
-;

@@ -2,232 +2,214 @@
 (* $Id: changeChildren.ml,v 5.22 2007-09-12 09:58:44 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-open Config;
-open Def;
-open Gutil;
-open Gwdb;
-open Hutil;
-open Util;
+open Config
+open Def
+open Gutil
+open Gwdb
+open Hutil
+open Util
 
-value print_child_person conf base p =
+let print_child_person conf base p =
   let var = "c" ^ string_of_int (Adef.int_of_iper (get_key_index p)) in
   let first_name =
     match p_getenv conf.env (var ^ "_first_name") with
-    [ Some v -> v
-    | None -> p_first_name base p ]
+      Some v -> v
+    | None -> p_first_name base p
   in
   let surname =
     match p_getenv conf.env (var ^ "_surname") with
-    [ Some v -> v
-    | None -> p_surname base p ]
+      Some v -> v
+    | None -> p_surname base p
   in
   let occ =
     match p_getint conf.env (var ^ "_occ") with
-    [ Some i -> i
-    | None -> get_occ p ]
+      Some i -> i
+    | None -> get_occ p
   in
-  tag "table" "border=\"1\"" begin
-    tag "tr" "align=\"%s\"" conf.left begin
-      tag "td" begin
-        Wserver.wprint "%s"
-          (capitale (transl_nth conf "first name/first names" 0));
-      end;
-      tag "td" "colspan=\"3\"" begin
-        xtag "input"
-          "name=\"%s_first_name\" size=\"23\" maxlength=\"200\" value=\"%s\""
-          var (quote_escaped first_name);
-      end;
-      tag "td" "align=\"%s\"" conf.right begin
-        let s = capitale (transl conf "number") in Wserver.wprint "%s" s;
-      end;
-      tag "td" begin
-        xtag "input" "name=\"%s_occ\" size=\"5\" maxlength=\"8\"%s" var
-          (if occ = 0 then "" else " value=\"" ^ string_of_int occ ^ "\"");
-      end;
-    end;
-    tag "tr" "align=\"%s\"" conf.left begin
-      tag "td" begin
-        Wserver.wprint "%s" (capitale (transl_nth conf "surname/surnames" 0));
-      end;
-      tag "td" "colspan=\"5\"" begin
-        xtag "input"
-          "name=\"%s_surname\" size=\"40\" maxlength=\"200\" value=\"%s\"" var
-          surname;
-      end;
-    end;
-  end
-;
+  Wserver.wprint "<table border=\"1\">\n";
+  Wserver.wprint "<tr align=\"%s\">\n" conf.left;
+  Wserver.wprint "<td>\n";
+  Wserver.wprint "%s" (capitale (transl_nth conf "first name/first names" 0));
+  Wserver.wprint "</td>\n";
+  Wserver.wprint "<td colspan=\"3\">\n";
+  Wserver.wprint
+    "<input name=\"%s_first_name\" size=\"23\" maxlength=\"200\" value=\"%s\"%s>\n"
+    var (quote_escaped first_name) conf.xhs;
+  Wserver.wprint "</td>\n";
+  Wserver.wprint "<td align=\"%s\">\n" conf.right;
+  (let s = capitale (transl conf "number") in Wserver.wprint "%s" s);
+  Wserver.wprint "</td>\n";
+  Wserver.wprint "<td>\n";
+  Wserver.wprint "<input name=\"%s_occ\" size=\"5\" maxlength=\"8\"%s%s>\n"
+    var (if occ = 0 then "" else " value=\"" ^ string_of_int occ ^ "\"")
+    conf.xhs;
+  Wserver.wprint "</td>\n";
+  Wserver.wprint "</tr>\n";
+  Wserver.wprint "<tr align=\"%s\">\n" conf.left;
+  Wserver.wprint "<td>\n";
+  Wserver.wprint "%s" (capitale (transl_nth conf "surname/surnames" 0));
+  Wserver.wprint "</td>\n";
+  Wserver.wprint "<td colspan=\"5\">\n";
+  Wserver.wprint
+    "<input name=\"%s_surname\" size=\"40\" maxlength=\"200\" value=\"%s\"%s>\n"
+    var surname conf.xhs;
+  Wserver.wprint "</td>\n";
+  Wserver.wprint "</tr>\n";
+  Wserver.wprint "</table>\n"
 
-value select_children_of base u =
+let select_children_of base u =
   List.fold_right
     (fun ifam ipl ->
        let des = foi base ifam in
-       List.fold_right (fun ip ipl -> [ip :: ipl])
+       List.fold_right (fun ip ipl -> ip :: ipl)
          (Array.to_list (get_children des)) ipl)
     (Array.to_list (get_family u)) []
-;
 
-value digest_children base ipl =
+let digest_children base ipl =
   let l =
     List.map
       (fun ip ->
          let p = poi base ip in
-         (sou base (get_first_name p), sou base (get_surname p), get_occ p))
+         sou base (get_first_name p), sou base (get_surname p), get_occ p)
       ipl
   in
   Iovalue.digest l
-;
 
-value check_digest conf base digest =
+let check_digest conf base digest =
   match p_getenv conf.env "digest" with
-  [ Some ini_digest ->
-      if digest <> ini_digest then Update.error_digest conf else ()
-  | None -> () ]
-;
+    Some ini_digest -> if digest <> ini_digest then Update.error_digest conf
+  | None -> ()
 
-value print_children conf base ipl =
-  do {
-    stagn "h4" begin
-      Wserver.wprint "%s" (capitale (transl_nth conf "child/children" 1));
-    end;
-    tag "ul" begin
-      List.iter
-        (fun ip ->
-           let p = poi base ip in
-           tag "li" begin
-             Wserver.wprint "%s"
-               (reference conf base p (person_text conf base p));
-             Wserver.wprint "%s\n" (Date.short_dates_text conf base p);
-             print_child_person conf base p;
-           end)
-        ipl;
-    end;
-  }
-;
+let print_children conf base ipl =
+  Wserver.wprint "<h4>";
+  Wserver.wprint "%s" (capitale (transl_nth conf "child/children" 1));
+  Wserver.wprint "</h4>\n";
+  Wserver.wprint "<ul>\n";
+  List.iter
+    (fun ip ->
+       let p = poi base ip in
+       Wserver.wprint "<li>\n";
+       Wserver.wprint "%s" (reference conf base p (person_text conf base p));
+       Wserver.wprint "%s\n" (Date.short_dates_text conf base p);
+       print_child_person conf base p;
+       Wserver.wprint "</li>\n")
+    ipl;
+  Wserver.wprint "</ul>\n"
 
-value print_change conf base p =
+let print_change conf base p =
   let title _ =
     let s = transl conf "change children's names" in
     Wserver.wprint "%s" (capitale s)
   in
   let children = select_children_of base p in
   let digest = digest_children base children in
-  do {
-    Perso.interp_notempl_with_menu title "perso_header" conf base p;
-    tag "h2" begin title False; end;
-    tag "p" begin
-      Wserver.wprint "%s" (reference conf base p (person_text conf base p));
-      Wserver.wprint "%s\n" (Date.short_dates_text conf base p);
-    end;
-    tag "form" "method=\"post\" action=\"%s\"" conf.command begin
-      tag "p" begin
-        Util.hidden_env conf;
-        xtag "input" "type=\"hidden\" name=\"ip\" value=\"%d\""
-          (Adef.int_of_iper (get_key_index p));
-        xtag "input" "type=\"hidden\" name=\"digest\" value=\"%s\"" digest;
-        xtag "input" "type=\"hidden\" name=\"m\" value=\"CHG_CHN_OK\"";
-      end;
-      print_children conf base children;
-      Wserver.wprint "\n";
-      tag "p" begin
-        xtag "input" "type=\"submit\" value=\"Ok\"";
-      end;
-    end;
-    Wserver.wprint "\n";
-    trailer conf;
-  }
-;
+  Perso.interp_notempl_with_menu title "perso_header" conf base p;
+  Wserver.wprint "<h2>\n";
+  title false;
+  Wserver.wprint "</h2>\n";
+  Wserver.wprint "<p>\n";
+  Wserver.wprint "%s" (reference conf base p (person_text conf base p));
+  Wserver.wprint "%s\n" (Date.short_dates_text conf base p);
+  Wserver.wprint "</p>\n";
+  Wserver.wprint "<form method=\"post\" action=\"%s\">\n" conf.command;
+  Wserver.wprint "<p>\n";
+  Util.hidden_env conf;
+  Wserver.wprint "<input type=\"hidden\" name=\"ip\" value=\"%d\"%s>\n"
+    (Adef.int_of_iper (get_key_index p)) conf.xhs;
+  Wserver.wprint "<input type=\"hidden\" name=\"digest\" value=\"%s\"%s>\n"
+    digest conf.xhs;
+  Wserver.wprint "<input type=\"hidden\" name=\"m\" value=\"CHG_CHN_OK\"%s>\n"
+    conf.xhs;
+  Wserver.wprint "</p>\n";
+  print_children conf base children;
+  Wserver.wprint "\n";
+  Wserver.wprint "<p>\n";
+  Wserver.wprint "<input type=\"submit\" value=\"Ok\"%s>\n" conf.xhs;
+  Wserver.wprint "</p>\n";
+  Wserver.wprint "</form>\n";
+  Wserver.wprint "\n";
+  trailer conf
 
-value print conf base =
+let print conf base =
   match p_getint conf.env "ip" with
-  [ Some i ->
-      let p = poi base (Adef.iper_of_int i) in
-      print_change conf base p
-  | _ -> incorrect_request conf ]
-;
+    Some i ->
+      let p = poi base (Adef.iper_of_int i) in print_change conf base p
+  | _ -> incorrect_request conf
 
-value print_children_list conf base u =
-  do {
-    stag "h4" begin
-      Wserver.wprint "%s" (capitale (transl_nth conf "child/children" 1));
-    end;
-    Wserver.wprint "\n<p>\n";
-    tag "ul" begin
-      Array.iter
-        (fun ifam ->
-           let des = foi base ifam in
-           Array.iter
-             (fun ip ->
-                let p = poi base ip in
-                do {
-                  html_li conf;
-                  Wserver.wprint "\n%s"
-                    (reference conf base p (person_text conf base p));
-                  Wserver.wprint "%s\n" (Date.short_dates_text conf base p);
-                })
-             (get_children des))
-        (get_family u);
-    end;
-  }
-;
+let print_children_list conf base u =
+  Wserver.wprint "<h4>";
+  Wserver.wprint "%s" (capitale (transl_nth conf "child/children" 1));
+  Wserver.wprint "</h4>";
+  Wserver.wprint "\n<p>\n";
+  Wserver.wprint "<ul>\n";
+  Array.iter
+    (fun ifam ->
+       let des = foi base ifam in
+       Array.iter
+         (fun ip ->
+            let p = poi base ip in
+            html_li conf;
+            Wserver.wprint "\n%s"
+              (reference conf base p (person_text conf base p));
+            Wserver.wprint "%s\n" (Date.short_dates_text conf base p))
+         (get_children des))
+    (get_family u);
+  Wserver.wprint "</ul>\n"
 
-value print_change_done conf base p =
+let print_change_done conf base p =
   let title _ =
     let s = transl conf "children's names changed" in
     Wserver.wprint "%s" (capitale s)
   in
-  do {
-    header conf title;
-    Wserver.wprint "\n%s" (reference conf base p (person_text conf base p));
-    Wserver.wprint "%s\n" (Date.short_dates_text conf base p);
-    print_children_list conf base p;
-    trailer conf;
-  }
-;
+  header conf title;
+  Wserver.wprint "\n%s" (reference conf base p (person_text conf base p));
+  Wserver.wprint "%s\n" (Date.short_dates_text conf base p);
+  print_children_list conf base p;
+  trailer conf
 
-value print_conflict conf base ip_var p =
+let print_conflict conf base ip_var p =
   let title _ = Wserver.wprint "%s" (capitale (transl conf "error")) in
-  do {
-    rheader conf title;
-    Update.print_error conf base (AlreadyDefined p);
-    let free_n =
-      Gutil.find_free_occ base (p_first_name base p) (p_surname base p) 0
-    in
-    tag "ul" begin
-      stag "li" begin
-        Wserver.wprint "%s: %d.\n" (capitale (transl conf "first free number"))
-          free_n;
-        Wserver.wprint (fcapitale (ftransl conf "click on \"%s\""))
-          (transl conf "create");
-        Wserver.wprint "%s.\n" (transl conf " to try again with this number");
-      end;
-      stag "li" begin
-        Wserver.wprint "%s " (capitale (transl conf "or"));
-        Wserver.wprint (ftransl conf "click on \"%s\"") (transl conf "back");
-        Wserver.wprint " %s %s." (transl_nth conf "and" 0)
-          (transl conf "change it (the number) yourself");
-      end;
-    end;
-    tag "form" "method=\"post\" action=\"%s\"" conf.command begin
-      List.iter
-        (fun (x, v) ->
-          xtag "input" "type=\"hidden\" name=\"%s\" value=\"%s\"" x
-            (quote_escaped (decode_varenv v)))
-        (conf.henv @ conf.env);
-      let var = "c" ^ string_of_int (Adef.int_of_iper ip_var) in
-      xtag "input" "type=\"hidden\" name=\"field\" value=\"%s\"" var;
-      xtag "input" "type=\"hidden\" name=\"free_occ\" value=\"%d\"" free_n;
-      xtag "input" "type=\"submit\" name=\"create\" value=\"%s\""
-        (capitale (transl conf "create"));
-      xtag "input" "type=\"submit\" name=\"return\" value=\"%s\""
-        (capitale (transl conf "back"));
-    end;
-    Update.print_same_name conf base p;
-    trailer conf;
-  }
-;
+  rheader conf title;
+  Update.print_error conf base (AlreadyDefined p);
+  let free_n =
+    Gutil.find_free_occ base (p_first_name base p) (p_surname base p) 0
+  in
+  Wserver.wprint "<ul>\n";
+  Wserver.wprint "<li>";
+  Wserver.wprint "%s: %d.\n" (capitale (transl conf "first free number"))
+    free_n;
+  Wserver.wprint (fcapitale (ftransl conf "click on \"%s\""))
+    (transl conf "create");
+  Wserver.wprint "%s.\n" (transl conf " to try again with this number");
+  Wserver.wprint "</li>";
+  Wserver.wprint "<li>";
+  Wserver.wprint "%s " (capitale (transl conf "or"));
+  Wserver.wprint (ftransl conf "click on \"%s\"") (transl conf "back");
+  Wserver.wprint " %s %s." (transl_nth conf "and" 0)
+    (transl conf "change it (the number) yourself");
+  Wserver.wprint "</li>";
+  Wserver.wprint "</ul>\n";
+  Wserver.wprint "<form method=\"post\" action=\"%s\">\n" conf.command;
+  List.iter
+    (fun (x, v) ->
+       Wserver.wprint "<input type=\"hidden\" name=\"%s\" value=\"%s\"%s>\n" x
+         (quote_escaped (decode_varenv v)) conf.xhs)
+    (conf.henv @ conf.env);
+  begin let var = "c" ^ string_of_int (Adef.int_of_iper ip_var) in
+    Wserver.wprint "<input type=\"hidden\" name=\"field\" value=\"%s\"%s>\n"
+      var conf.xhs
+  end;
+  Wserver.wprint "<input type=\"hidden\" name=\"free_occ\" value=\"%d\"%s>\n"
+    free_n conf.xhs;
+  Wserver.wprint "<input type=\"submit\" name=\"create\" value=\"%s\"%s>\n"
+    (capitale (transl conf "create")) conf.xhs;
+  Wserver.wprint "<input type=\"submit\" name=\"return\" value=\"%s\"%s>\n"
+    (capitale (transl conf "back")) conf.xhs;
+  Wserver.wprint "</form>\n";
+  Update.print_same_name conf base p;
+  trailer conf
 
-value check_conflict conf base p key new_occ ipl =
+let check_conflict conf base p key new_occ ipl =
   let name = Name.lower key in
   List.iter
     (fun ip ->
@@ -235,124 +217,110 @@ value check_conflict conf base p key new_occ ipl =
        if get_key_index p1 <> get_key_index p &&
           Name.lower (p_first_name base p1 ^ " " ^ p_surname base p1) =
             name &&
-          get_occ p1 = new_occ then
-          do {
-         print_conflict conf base (get_key_index p) p1; raise Update.ModErr
-       }
-       else ())
+          get_occ p1 = new_occ
+       then
+         begin
+           print_conflict conf base (get_key_index p) p1;
+           raise Update.ModErr
+         end)
     ipl
-;
 
-value error_person conf base p err =
+let error_person conf base p err =
   let title _ = Wserver.wprint "%s" (capitale (transl conf "error")) in
-  do {
-    rheader conf title;
-    Wserver.wprint "%s\n" (capitale err);
-    trailer conf;
-    raise Update.ModErr
-  }
-;
+  rheader conf title;
+  Wserver.wprint "%s\n" (capitale err);
+  trailer conf;
+  raise Update.ModErr
 
-value rename_image_file conf base p (nfn, nsn, noc) =
+let rename_image_file conf base p (nfn, nsn, noc) =
   match auto_image_file conf base p with
-  [ Some old_f ->
+    Some old_f ->
       let s = default_image_name_of_key nfn nsn noc in
       let f = Filename.concat (base_path ["images"] conf.bname) s in
       let new_f =
         if Filename.check_suffix old_f ".gif" then f ^ ".gif" else f ^ ".jpg"
       in
-      try Sys.rename old_f new_f with [ Sys_error _ -> () ]
-  | _ -> () ]
-;
+      (try Sys.rename old_f new_f with Sys_error _ -> ())
+  | _ -> ()
 
-value change_child conf base parent_surname changed ip =
+let change_child conf base parent_surname changed ip =
   let p = poi base ip in
   let var = "c" ^ string_of_int (Adef.int_of_iper (get_key_index p)) in
   let new_first_name =
     match p_getenv conf.env (var ^ "_first_name") with
-    [ Some x -> only_printable x
-    | _ -> p_first_name base p ]
+      Some x -> only_printable x
+    | _ -> p_first_name base p
   in
   let new_surname =
     match p_getenv conf.env (var ^ "_surname") with
-    [ Some x ->
+      Some x ->
         let x = only_printable x in if x = "" then parent_surname else x
-    | _ -> p_surname base p ]
+    | _ -> p_surname base p
   in
   let new_occ =
     match p_getint conf.env (var ^ "_occ") with
-    [ Some x -> x
-    | _ -> 0 ]
+      Some x -> x
+    | _ -> 0
   in
   if new_first_name = "" then
     error_person conf base p (transl conf "first name missing")
   else if
     new_first_name <> p_first_name base p ||
     new_surname <> p_surname base p || new_occ <> get_occ p
-  then do {
+  then
     let key = new_first_name ^ " " ^ new_surname in
     let ipl = person_ht_find_all base key in
     check_conflict conf base p key new_occ ipl;
     rename_image_file conf base p (new_first_name, new_surname, new_occ);
     (* On ajoute les enfants dans le type Change_children_name       *)
     (* pour la future mise à jour de l'historique et du fichier gwf. *)
-    changed.val :=
-      [((p_first_name base p, p_surname base p, get_occ p, ip),
-        (new_first_name, new_surname, new_occ, ip)) :: changed.val];
+    changed :=
+      ((p_first_name base p, p_surname base p, get_occ p, ip),
+       (new_first_name, new_surname, new_occ, ip)) ::
+      !changed;
     let p =
-      {(gen_person_of_person p) with
-       first_name = Gwdb.insert_string base new_first_name;
-       surname = Gwdb.insert_string base new_surname;
-       occ = new_occ}
+      {(gen_person_of_person p) with first_name =
+        Gwdb.insert_string base new_first_name;
+       surname = Gwdb.insert_string base new_surname; occ = new_occ}
     in
     patch_person base ip p;
     patch_key base ip new_first_name new_surname new_occ;
     person_ht_add base key ip;
     let np_misc_names = gen_person_misc_names base p (fun p -> p.titles) in
-    List.iter (fun key -> person_ht_add base key p.key_index)
-      np_misc_names;
-  }
-  else ()
-;
+    List.iter (fun key -> person_ht_add base key p.key_index) np_misc_names
 
-value print_update_child conf base p digest =
+let print_update_child conf base p digest =
   match p_getenv conf.env "m" with
-  [ Some "CHG_CHN_OK" -> print conf base
-  | _ -> incorrect_request conf ]
-;
+    Some "CHG_CHN_OK" -> print conf base
+  | _ -> incorrect_request conf
 
-value print_change_ok conf base p =
+let print_change_ok conf base p =
   try
     let ipl = select_children_of base p in
     let parent_surname = p_surname base p in
     let changed = ref [] in
     let redisp =
       match p_getenv conf.env "return" with
-      [ Some _ -> True
-      | _ -> False ]
+        Some _ -> true
+      | _ -> false
     in
     if redisp then print_update_child conf base p ""
-    else do {
-      check_digest conf base (digest_children base ipl);
-      List.iter (change_child conf base parent_surname changed) ipl;
-      Util.commit_patches conf base;
-      let changed =
-        U_Change_children_name
-          (Util.string_gen_person base (gen_person_of_person p))
-          changed.val
-      in
-      History.record conf base changed "cn";
-      print_change_done conf base p;
-    }
-  with
-  [ Update.ModErr -> () ]
-;
+    else
+      begin
+        check_digest conf base (digest_children base ipl);
+        List.iter (change_child conf base parent_surname changed) ipl;
+        Util.commit_patches conf base;
+        let changed =
+          U_Change_children_name
+            (Util.string_gen_person base (gen_person_of_person p), !changed)
+        in
+        History.record conf base changed "cn"; print_change_done conf base p
+      end
+  with Update.ModErr -> ()
 
-value print_ok o_conf base =
+let print_ok o_conf base =
   let conf = Update.update_conf o_conf in
   match p_getint conf.env "ip" with
-  [ Some i ->
-      let p = poi base (Adef.iper_of_int i) in
-      print_change_ok conf base p
-  | _ -> incorrect_request conf ]
-;
+    Some i ->
+      let p = poi base (Adef.iper_of_int i) in print_change_ok conf base p
+  | _ -> incorrect_request conf

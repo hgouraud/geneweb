@@ -1,0 +1,9 @@
+; BEWARE: src/gwlib.ml is generated
+
+(library
+  (name geneweb_dag2html)
+  (wrapped false)
+  (libraries )
+  (modules dag2html)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )

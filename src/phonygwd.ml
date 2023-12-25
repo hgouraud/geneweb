@@ -1,73 +1,57 @@
 (* $Id: phonygwd.ml,v 5.2 2007-01-19 01:53:16 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-value port_selected = ref 2317;
-value fname = ref "";
+let port_selected = ref 2317
+let fname = ref ""
 
-value log addr request s =
+let log addr request s =
   let referer = Wserver.extract_param "referer: " '\n' request in
   let user_agent = Wserver.extract_param "user-agent: " '\n' request in
-  do {
-    let tm = Unix.localtime (Unix.time ()) in
-    Printf.eprintf "%02d/%02d/%02d %02d:%02d" tm.Unix.tm_mday
-      (succ tm.Unix.tm_mon) tm.Unix.tm_year tm.Unix.tm_hour tm.Unix.tm_min;
-    Printf.eprintf " %s\n" s;
-    match addr with
-    [ Unix.ADDR_UNIX x -> ()
-    | Unix.ADDR_INET iaddr port ->
-        Printf.eprintf "  From: %s\n"
-          (try (Unix.gethostbyaddr iaddr).Unix.h_name with _ ->
-             Unix.string_of_inet_addr iaddr) ];
-    Printf.eprintf "  Agent: %s\n" user_agent;
-    if referer <> "" then Printf.eprintf "  Referer: %s\n" referer else ();
-    flush stderr;
-  }
-;
+  let tm = Unix.localtime (Unix.time ()) in
+  Printf.eprintf "%02d/%02d/%02d %02d:%02d" tm.Unix.tm_mday
+    (succ tm.Unix.tm_mon) tm.Unix.tm_year tm.Unix.tm_hour tm.Unix.tm_min;
+  Printf.eprintf " %s\n" s;
+  begin match addr with
+    Unix.ADDR_UNIX x -> ()
+  | Unix.ADDR_INET (iaddr, port) ->
+      Printf.eprintf "  From: %s\n"
+        (try (Unix.gethostbyaddr iaddr).Unix.h_name with
+           _ -> Unix.string_of_inet_addr iaddr)
+  end;
+  Printf.eprintf "  Agent: %s\n" user_agent;
+  if referer <> "" then Printf.eprintf "  Referer: %s\n" referer;
+  flush stderr
 
-value print_text fname =
+let print_text fname =
   let ic = Secure.open_in fname in
-  do {
-    try while True do { print_char (input_char ic) } with
-    [ End_of_file -> () ];
-    close_in ic;
-    Wserver.wflush ();
-  }
-;
+  (try while true do print_char (input_char ic) done with End_of_file -> ());
+  close_in ic;
+  Wserver.wflush ()
 
-value connection (addr, request) script_name contents =
+let connection (addr, request) script_name contents =
   let str = script_name ^ "?" ^ contents in
-  do {
-    log addr request str;
-    Wserver.html "";
-    print_text fname.val;
-    Wserver.wflush ();
-  }
-;
+  log addr request str; Wserver.html ""; print_text !fname; Wserver.wflush ()
 
-value main () =
+let main () =
   let usage = "Usage: " ^ Sys.argv.(0) ^ " [-p #] <file>" in
   let speclist =
-    [("-p", Arg.Int (fun x -> port_selected.val := x), "#: port number")]
+    ["-p", Arg.Int (fun x -> port_selected := x), "#: port number"]
   in
-  do {
-    Argl.parse speclist (fun s -> fname.val := s) usage;
-    if fname.val = "" then do {
+  Argl.parse speclist (fun s -> fname := s) usage;
+  if !fname = "" then
+    begin
       Printf.eprintf "Missing file\n";
       Printf.eprintf "Use option -help for usage\n";
       flush stderr;
       exit 1
-    }
-    else ();
-    close_in (Secure.open_in fname.val);
-    Wserver.f None port_selected.val 0 (Some 4) connection;
-  }
-;
+    end;
+  close_in (Secure.open_in !fname);
+  Wserver.f None !port_selected 0 (Some 4) connection
 
-try main () with
-[ Unix.Unix_error err fun_name arg ->
-    do {
+let _ =
+  try main () with
+    Unix.Unix_error (err, fun_name, arg) ->
       Printf.eprintf "Error: \"%s\", %s\n" fun_name (Unix.error_message err);
       flush stderr;
       exit 1
-    }
-| exc -> Printexc.catch raise exc ];
+  | exc -> Printexc.catch raise exc

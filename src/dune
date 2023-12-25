@@ -1,0 +1,79 @@
+; BEWARE: src/gwlib.ml is generated
+
+(library
+  (name geneweb_src)
+  (wrapped false)
+  (libraries geneweb_wserver geneweb_dag2html camlp5 camlp5.gramlib unix str)
+  (modules
+  def dbdisk config templAst
+   argl lock adef iovalue buff name mutil secure btree futil dutil database db2 db2disk diff gwdb pqueue notesLinks consang checkItem calendar gutil num version translate gwlib util templDate templ hutil date update wiki history_diff history notes wiznotes srcfile dag perso updateInd updateIndOk updateFam updateFamOk place updateData
+
+ merge mergeFamOk mergeFam mergeInd mergeIndOk mergeDup changeChildren sendImage relationLink relation descend birthday cousins alln some searchName advSearchOk birthDeath title doc forum image request base64 robot
+
+ outbase progrBar consangAll check gwcomp
+ db2out iochan db2link
+ select
+ ansel
+)
+  (modules_without_implementation
+  def dbdisk config templAst)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+
+(executable
+  (name gwc)
+  (public_name gwc)
+  (libraries geneweb_src )
+  (modules db1link gwc)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name gwc2)
+  (public_name gwc2)
+  (libraries geneweb_src )
+  (modules gwc2)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name gwd)
+  (public_name gwd)
+  (libraries geneweb_src )
+  (modules gwd)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+
+(executable
+  (name mk_consang)
+  (public_name mk_consang)
+  (libraries geneweb_src )
+  (modules mk_consang)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name gwu)
+  (public_name gwu)
+  (libraries geneweb_src )
+  (modules gwu)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name update_nldb)
+  (public_name update_nldb)
+  (libraries geneweb_src )
+  (modules update_nldb)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name check_base)
+  (public_name check_base)
+  (libraries geneweb_src )
+  (modules check_base)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )

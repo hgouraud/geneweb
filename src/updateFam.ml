@@ -2,34 +2,32 @@
 (* $Id: updateFam.ml,v 5.24 2008-01-09 03:34:36 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-open Config;
-open Def;
-open Gutil;
-open Gwdb;
-open Hutil;
-open TemplAst;
-open Util;
+open Config
+open Def
+open Gutil
+open Gwdb
+open Hutil
+open TemplAst
+open Util
 
 type create_info =
-  Update.create_info ==
-    { ci_birth_date : option date;
+  Update.create_info =
+    { ci_birth_date : date option;
       ci_birth_place : string;
       ci_death : death;
-      ci_death_date : option date;
+      ci_death_date : date option;
       ci_death_place : string;
       ci_occupation : string;
       ci_public : bool }
-;
 
-value bogus_family_index = Adef.ifam_of_int (-1);
+let bogus_family_index = Adef.ifam_of_int (-1)
 
-value default_source conf =
+let default_source conf =
   match p_getenv conf.env "dsrc" with
-  [ Some s -> s
-  | None -> "" ]
-;
+    Some s -> s
+  | None -> ""
 
-value person_key base ip =
+let person_key base ip =
   let p = poi base ip in
   let first_name = sou base (get_first_name p) in
   let surname = sou base (get_surname p) in
@@ -37,10 +35,9 @@ value person_key base ip =
     if first_name = "?" || surname = "?" then Adef.int_of_iper ip
     else get_occ p
   in
-  (first_name, surname, occ, Update.Link, "")
-;
+  first_name, surname, occ, Update.Link, ""
 
-value string_family_of conf base ifam =
+let string_family_of conf base ifam =
   let fam = foi base ifam in
   let sfam =
     Futil.map_family_ps (person_key base) (sou base)
@@ -51,501 +48,519 @@ value string_family_of conf base ifam =
       (gen_couple_of_couple fam)
   in
   let sdes =
-    Futil.map_descend_p (person_key base)
-      (gen_descend_of_descend fam)
+    Futil.map_descend_p (person_key base) (gen_descend_of_descend fam)
   in
-  (sfam, scpl, sdes)
-;
+  sfam, scpl, sdes
 
 (* Interpretation of template file 'updfam.txt' *)
 
-type env 'a =
-  [ Vstring of string
+type 'a env =
+    Vstring of string
   | Vint of int
   | Vother of 'a
-  | Vnone ]
-;
+  | Vnone
 
-value get_env v env = try List.assoc v env with [ Not_found -> Vnone ];
-value get_vother = fun [ Vother x -> Some x | _ -> None ];
-value set_vother x = Vother x;
+let get_env v env = try List.assoc v env with Not_found -> Vnone
+let get_vother =
+  function
+    Vother x -> Some x
+  | _ -> None
+let set_vother x = Vother x
 
-value extract_var sini s =
+let extract_var sini s =
   let len = String.length sini in
   if String.length s > len && String.sub s 0 (String.length sini) = sini then
     String.sub s len (String.length s - len)
   else ""
-;
 
-value not_impl func x =
+let not_impl func x =
   let desc =
     if Obj.is_block (Obj.repr x) then
-      "tag = " ^ string_of_int (Obj.\tag (Obj.repr x))
+      "tag = " ^ string_of_int (Obj.tag (Obj.repr x))
     else "int_val = " ^ string_of_int (Obj.magic x)
   in
   Wserver.wprint ">%s<p>\n" ("UpdateFam." ^ func ^ ": not impl " ^ desc)
-;
 
-value obsolete_list = ref [];
+let obsolete_list = ref []
 
-value obsolete version var new_var r =
-  if List.mem var obsolete_list.val then r
-  else IFDEF UNIX THEN do {
-    Printf.eprintf "*** <W> updfam.txt: \"%s\" obsolete since v%s%s\n"
-      var version
-      (if new_var = "" then "" else "; rather use \"" ^ new_var ^ "\"");
-    flush stderr;
-    obsolete_list.val := [var :: obsolete_list.val];
-    r
-  }
-  ELSE r END
-;
+let obsolete version var new_var r =
+  if List.mem var !obsolete_list then r
+  else
+    begin
+      Printf.eprintf "*** <W> updfam.txt: \"%s\" obsolete since v%s%s\n" var
+        version
+        (if new_var = "" then "" else "; rather use \"" ^ new_var ^ "\"");
+      flush stderr;
+      obsolete_list := var :: !obsolete_list;
+      r
+    end
 
-value bool_val x = VVbool x;
-value str_val x = VVstring x;
+let bool_val x = VVbool x
+let str_val x = VVstring x
 
-value rec eval_var conf base env (fam, cpl, des) loc sl =
+let rec eval_var conf base env (fam, cpl, des) loc sl =
   try eval_special_var conf base (fam, cpl, des) sl with
-  [ Not_found -> eval_simple_var conf base env (fam, cpl, des) loc sl ]
+    Not_found -> eval_simple_var conf base env (fam, cpl, des) loc sl
 and eval_simple_var conf base env (fam, cpl, des) loc =
-  fun
-  [ ["bvar"; v] ->
-      try VVstring (List.assoc v conf.base_env) with
-      [ Not_found -> VVstring "" ]
-  | ["child" :: sl] ->
-        let k =
-          match get_env "cnt" env with
-          [ Vint i ->
-              let i = i - 1 in
-              if i >= 0 && i < Array.length des.children then des.children.(i)
-              else if i >= 0 && i < 1 && Array.length des.children = 0 then
-                ("", "", 0, Update.Create Neuter None, "")
-              else raise Not_found
-          | _ -> raise Not_found ]
-        in
-        eval_key k sl
+  function
+    ["bvar"; v] ->
+      begin try VVstring (List.assoc v conf.base_env) with
+        Not_found -> VVstring ""
+      end
+  | "child" :: sl ->
+      let k =
+        match get_env "cnt" env with
+          Vint i ->
+            let i = i - 1 in
+            if i >= 0 && i < Array.length des.children then des.children.(i)
+            else if i >= 0 && i < 1 && Array.length des.children = 0 then
+              "", "", 0, Update.Create (Neuter, None), ""
+            else raise Not_found
+        | _ -> raise Not_found
+      in
+      eval_key k sl
   | ["cnt"] -> eval_int_env "cnt" env
   | ["comment"] -> str_val (quote_escaped fam.comment)
   | ["digest"] -> eval_string_env "digest" env
   | ["divorce"] ->
       let s =
         match fam.divorce with
-        [ Divorced _ -> "divorced"
+          Divorced _ -> "divorced"
         | NotDivorced -> "not_divorced"
-        | Separated -> "separated" ]
+        | Separated -> "separated"
       in
       str_val s
   | ["divorce"; s] ->
       let d =
         match fam.divorce with
-        [ Divorced d -> Adef.od_of_codate d
-        | _ -> None ]
+          Divorced d -> Adef.od_of_codate d
+        | _ -> None
       in
       eval_date_var d s
-  | ["father" :: sl] -> eval_key (father cpl) sl
+  | "father" :: sl -> eval_key (father cpl) sl
   | ["fsources"] -> str_val (quote_escaped fam.fsources)
   | ["marriage"; s] -> eval_date_var (Adef.od_of_codate fam.marriage) s
   | ["marriage_place"] -> str_val (quote_escaped fam.marriage_place)
   | ["marriage_src"] -> str_val (quote_escaped fam.marriage_src)
   | ["mrel"] -> str_val (eval_relation_kind fam.relation)
   | ["origin_file"] -> str_val (quote_escaped fam.origin_file)
-  | ["parent" :: sl] ->
-        let k =
-          match get_env "cnt" env with
-          [ Vint i ->
-              let arr = parent_array cpl in
-              let i = i - 1 in
-              if i >= 0 && i < Array.length arr  then arr.(i)
-              else if i >= 0 && i < 1 && Array.length arr = 0 then
-                ("", "", 0, Update.Create Neuter None, "")
-              else raise Not_found
-          | _ -> raise Not_found ]
-        in
-        eval_parent conf base env k sl
-  | ["witness" :: sl] ->
-        let k =
-          match get_env "cnt" env with
-          [ Vint i ->
-              let i = i - 1 in
-              if i >= 0 && i < Array.length fam.witnesses then
-                fam.witnesses.(i)
-              else if i >= 0 && i < 2 && Array.length fam.witnesses < 2 then
-                ("", "", 0, Update.Create Neuter None, "")
-              else raise Not_found
-          | _ -> raise Not_found ]
-        in
-        eval_key k sl
+  | "parent" :: sl ->
+      let k =
+        match get_env "cnt" env with
+          Vint i ->
+            let arr = parent_array cpl in
+            let i = i - 1 in
+            if i >= 0 && i < Array.length arr then arr.(i)
+            else if i >= 0 && i < 1 && Array.length arr = 0 then
+              "", "", 0, Update.Create (Neuter, None), ""
+            else raise Not_found
+        | _ -> raise Not_found
+      in
+      eval_parent conf base env k sl
+  | "witness" :: sl ->
+      let k =
+        match get_env "cnt" env with
+          Vint i ->
+            let i = i - 1 in
+            if i >= 0 && i < Array.length fam.witnesses then fam.witnesses.(i)
+            else if i >= 0 && i < 2 && Array.length fam.witnesses < 2 then
+              "", "", 0, Update.Create (Neuter, None), ""
+            else raise Not_found
+        | _ -> raise Not_found
+      in
+      eval_key k sl
   | [s] ->
       let v = extract_var "evar_" s in
       if v <> "" then
         match p_getenv (conf.env @ conf.henv) v with
-        [ Some vv -> str_val (quote_escaped vv)
-        | None -> str_val "" ]
+          Some vv -> str_val (quote_escaped vv)
+        | None -> str_val ""
       else
         let v = extract_var "bvar_" s in
-        let v =
-          if v = "" then extract_var "cvar_" s (* deprecated since 5.00 *)
-          else v
-        in
+        let v = if v = "" then extract_var "cvar_" s else v in
         if v <> "" then
-          str_val (try List.assoc v conf.base_env with [ Not_found -> "" ])
+          str_val (try List.assoc v conf.base_env with Not_found -> "")
         else raise Not_found
-  | _ -> raise Not_found ]
+  | _ -> raise Not_found
 and eval_date_var od s = str_val (eval_date_var_aux od s)
 and eval_date_var_aux od =
-  fun
-  [ "calendar" ->
-      match od with
-      [ Some (Dgreg _ Dgregorian) -> "gregorian"
-      | Some (Dgreg _ Djulian) -> "julian"
-      | Some (Dgreg _ Dfrench) -> "french"
-      | Some (Dgreg _ Dhebrew) -> "hebrew"
-      | _ -> "" ]
+  function
+    "calendar" ->
+      begin match od with
+        Some (Dgreg (_, Dgregorian)) -> "gregorian"
+      | Some (Dgreg (_, Djulian)) -> "julian"
+      | Some (Dgreg (_, Dfrench)) -> "french"
+      | Some (Dgreg (_, Dhebrew)) -> "hebrew"
+      | _ -> ""
+      end
   | "day" ->
-      match eval_date_field od with
-      [ Some d -> if d.day = 0 then "" else string_of_int d.day
-      | None -> "" ]
+      begin match eval_date_field od with
+        Some d -> if d.day = 0 then "" else string_of_int d.day
+      | None -> ""
+      end
   | "month" ->
-      match eval_date_field od with
-      [ Some d ->
+      begin match eval_date_field od with
+        Some d ->
           if d.month = 0 then ""
           else
-            match od with
-            [ Some (Dgreg _ Dfrench) -> short_f_month d.month
-            | _ -> string_of_int d.month ]
-      | None -> "" ]
+            begin match od with
+              Some (Dgreg (_, Dfrench)) -> short_f_month d.month
+            | _ -> string_of_int d.month
+            end
+      | None -> ""
+      end
   | "oryear" ->
-      match od with
-      [ Some (Dgreg {prec = OrYear y} _) -> string_of_int y
-      | Some (Dgreg {prec = YearInt y} _) -> string_of_int y
-      | _ -> "" ]
+      begin match od with
+        Some (Dgreg ({prec = OrYear y}, _)) -> string_of_int y
+      | Some (Dgreg ({prec = YearInt y}, _)) -> string_of_int y
+      | _ -> ""
+      end
   | "prec" ->
-      match od with
-      [ Some (Dgreg {prec = Sure} _) -> "sure"
-      | Some (Dgreg {prec = About} _) -> "about"
-      | Some (Dgreg {prec = Maybe} _) -> "maybe"
-      | Some (Dgreg {prec = Before} _) -> "before"
-      | Some (Dgreg {prec = After} _) -> "after"
-      | Some (Dgreg {prec = OrYear _} _) -> "oryear"
-      | Some (Dgreg {prec = YearInt _} _) -> "yearint"
-      | _ -> "" ]
+      begin match od with
+        Some (Dgreg ({prec = Sure}, _)) -> "sure"
+      | Some (Dgreg ({prec = About}, _)) -> "about"
+      | Some (Dgreg ({prec = Maybe}, _)) -> "maybe"
+      | Some (Dgreg ({prec = Before}, _)) -> "before"
+      | Some (Dgreg ({prec = After}, _)) -> "after"
+      | Some (Dgreg ({prec = OrYear _}, _)) -> "oryear"
+      | Some (Dgreg ({prec = YearInt _}, _)) -> "yearint"
+      | _ -> ""
+      end
   | "text" ->
-      match od with
-      [ Some (Dtext s) -> s
-      | _ -> "" ]
+      begin match od with
+        Some (Dtext s) -> s
+      | _ -> ""
+      end
   | "year" ->
-      match eval_date_field od with
-      [ Some d -> string_of_int d.year
-      | None -> "" ]
-  | _ -> raise Not_found ]
+      begin match eval_date_field od with
+        Some d -> string_of_int d.year
+      | None -> ""
+      end
+  | _ -> raise Not_found
 and eval_date_field =
-  fun
-  [ Some d ->
-      match d with
-      [ Dgreg d Dgregorian -> Some d
-      | Dgreg d Djulian -> Some (Calendar.julian_of_gregorian d)
-      | Dgreg d Dfrench -> Some (Calendar.french_of_gregorian d)
-      | Dgreg d Dhebrew -> Some (Calendar.hebrew_of_gregorian d)
-      | _ -> None ]
-  | None -> None ]
+  function
+    Some d ->
+      begin match d with
+        Dgreg (d, Dgregorian) -> Some d
+      | Dgreg (d, Djulian) -> Some (Calendar.julian_of_gregorian d)
+      | Dgreg (d, Dfrench) -> Some (Calendar.french_of_gregorian d)
+      | Dgreg (d, Dhebrew) -> Some (Calendar.hebrew_of_gregorian d)
+      | _ -> None
+      end
+  | None -> None
 and eval_parent conf base env k =
-  fun
-  [ ["himher"] ->
+  function
+    ["himher"] ->
       let s =
         match get_env "cnt" env with
-        [ Vint 1 -> capitale (transl_nth conf "him/her" 0)
+          Vint 1 -> capitale (transl_nth conf "him/her" 0)
         | Vint 2 -> capitale (transl_nth conf "him/her" 1)
         | Vint n -> transl conf "him/her"
-        | _ -> "???" ]
+        | _ -> "???"
       in
       str_val s
-  | sl -> eval_key k sl ]
+  | sl -> eval_key k sl
 and eval_key (fn, sn, oc, create, var) =
-  fun
-  [ ["create"] -> str_val (if create <> Update.Link then "create" else "link")
+  function
+    ["create"] -> str_val (if create <> Update.Link then "create" else "link")
   | ["create"; s] -> str_val (eval_create create s)
   | ["first_name"] -> str_val (quote_escaped fn)
   | ["occ"] -> str_val (if oc = 0 then "" else string_of_int oc)
   | ["surname"] -> str_val (quote_escaped sn)
   | x ->
       match x with
-      [ ["sex"] ->
+        ["sex"] ->
           obsolete "5.00" "sex" "create.sex"
             (str_val (eval_create create "sex"))
-      | _ -> raise Not_found ] ]
+      | _ -> raise Not_found
 and eval_create c =
-  fun
-  [ "birth_day" ->
-      match c with
-      [ Update.Create _ (Some {ci_birth_date = Some (Dgreg dmy Dfrench)}) ->
+  function
+    "birth_day" ->
+      begin match c with
+        Update.Create
+          (_, Some {ci_birth_date = Some (Dgreg (dmy, Dfrench))}) ->
           let dmy = Calendar.french_of_gregorian dmy in
           if dmy.day <> 0 then string_of_int dmy.day else ""
-      | Update.Create _ (Some {ci_birth_date = Some (Dgreg {day = d} _)})
+      | Update.Create (_, Some {ci_birth_date = Some (Dgreg ({day = d}, _))})
         when d <> 0 ->
           string_of_int d
-      | _ -> "" ]
+      | _ -> ""
+      end
   | "birth_month" ->
-      match c with
-      [ Update.Create _ (Some {ci_birth_date = Some (Dgreg dmy Dfrench)}) ->
+      begin match c with
+        Update.Create
+          (_, Some {ci_birth_date = Some (Dgreg (dmy, Dfrench))}) ->
           let dmy = Calendar.french_of_gregorian dmy in
           if dmy.month <> 0 then short_f_month dmy.month else ""
-      | Update.Create _ (Some {ci_birth_date = Some (Dgreg {month = m} _)})
+      | Update.Create
+          (_, Some {ci_birth_date = Some (Dgreg ({month = m}, _))})
         when m <> 0 ->
           string_of_int m
-      | _ -> "" ]
+      | _ -> ""
+      end
   | "birth_place" ->
-      match c with
-      [ Update.Create _ (Some {ci_birth_place = pl}) -> quote_escaped pl
-      | _ -> "" ]
+      begin match c with
+        Update.Create (_, Some {ci_birth_place = pl}) -> quote_escaped pl
+      | _ -> ""
+      end
   | "birth_year" ->
-      match c with
-      [ Update.Create _ (Some ci) ->
-          match ci.ci_birth_date with
-          [ Some (Dgreg dmy Dfrench) ->
+      begin match c with
+        Update.Create (_, Some ci) ->
+          begin match ci.ci_birth_date with
+            Some (Dgreg (dmy, Dfrench)) ->
               let dmy = Calendar.french_of_gregorian dmy in
               add_precision (string_of_int dmy.year) dmy.prec
-          | Some (Dgreg {year = y; prec = p} _) ->
+          | Some (Dgreg ({year = y; prec = p}, _)) ->
               add_precision (string_of_int y) p
           | Some _ -> ""
-          | None -> if ci.ci_public then "p" else "" ]
-      | _ -> "" ]
+          | None -> if ci.ci_public then "p" else ""
+          end
+      | _ -> ""
+      end
   | "death_day" ->
-      match c with
-      [ Update.Create _
-          (Some {ci_death_date = Some (Dgreg dmy Dfrench)})
-        ->
+      begin match c with
+        Update.Create
+          (_, Some {ci_death_date = Some (Dgreg (dmy, Dfrench))}) ->
           let dmy = Calendar.french_of_gregorian dmy in
           if dmy.day <> 0 then string_of_int dmy.day else ""
-      | Update.Create _ (Some {ci_death_date = Some (Dgreg {day = d} _)})
+      | Update.Create (_, Some {ci_death_date = Some (Dgreg ({day = d}, _))})
         when d <> 0 ->
           string_of_int d
-      | _ -> "" ]
+      | _ -> ""
+      end
   | "death_month" ->
-      match c with
-      [ Update.Create _ (Some {ci_death_date = Some (Dgreg dmy Dfrench)}) ->
+      begin match c with
+        Update.Create
+          (_, Some {ci_death_date = Some (Dgreg (dmy, Dfrench))}) ->
           let dmy = Calendar.french_of_gregorian dmy in
           short_f_month dmy.month
-      | Update.Create _ (Some {ci_death_date = Some (Dgreg {month = m} _)})
+      | Update.Create
+          (_, Some {ci_death_date = Some (Dgreg ({month = m}, _))})
         when m <> 0 ->
           string_of_int m
-      | _ -> "" ]
+      | _ -> ""
+      end
   | "death_place" ->
-      match c with
-      [ Update.Create _ (Some {ci_death_place = pl}) -> quote_escaped pl
-      | _ -> "" ]
+      begin match c with
+        Update.Create (_, Some {ci_death_place = pl}) -> quote_escaped pl
+      | _ -> ""
+      end
   | "death_year" ->
-      match c with
-      [ Update.Create _ (Some {ci_death_date = Some (Dgreg dmy Dfrench)}) ->
+      begin match c with
+        Update.Create
+          (_, Some {ci_death_date = Some (Dgreg (dmy, Dfrench))}) ->
           let dmy = Calendar.french_of_gregorian dmy in
           add_precision (string_of_int dmy.year) dmy.prec
-      | Update.Create _
-          (Some {ci_death_date = Some (Dgreg {year = y; prec = p} _)})
-        ->
+      | Update.Create
+          (_,
+           Some {ci_death_date = Some (Dgreg ({year = y; prec = p}, _))}) ->
           add_precision (string_of_int y) p
-      | Update.Create _ (Some {ci_death = death; ci_death_date = None}) ->
-          match death with
-          [ DeadDontKnowWhen -> "+"
+      | Update.Create (_, Some {ci_death = death; ci_death_date = None}) ->
+          begin match death with
+            DeadDontKnowWhen -> "+"
           | NotDead -> "-"
-          | _ -> "" ]
-      | _ -> "" ]
+          | _ -> ""
+          end
+      | _ -> ""
+      end
   | "occupation" ->
-      match c with
-      [ Update.Create _ (Some {ci_occupation = occupation}) ->
+      begin match c with
+        Update.Create (_, Some {ci_occupation = occupation}) ->
           quote_escaped occupation
-      | _ -> "" ]
+      | _ -> ""
+      end
   | "sex" ->
-      match c with
-      [ Update.Create Male _ -> "male"
-      | Update.Create Female _ -> "female"
-      | Update.Create Neuter _ -> "neuter"
-      | _ -> "" ]
-  | _ -> raise Not_found ]
+      begin match c with
+        Update.Create (Male, _) -> "male"
+      | Update.Create (Female, _) -> "female"
+      | Update.Create (Neuter, _) -> "neuter"
+      | _ -> ""
+      end
+  | _ -> raise Not_found
 and add_precision s p =
   match p with
-  [ Maybe -> "?" ^ s
+    Maybe -> "?" ^ s
   | Before -> "&lt;" ^ s
   | After -> "&gt;" ^ s
   | About -> "/" ^ s ^ "/"
-  | _ -> s ]
+  | _ -> s
 and eval_relation_kind =
-  fun
-  [ Married -> "marr"
+  function
+    Married -> "marr"
   | NotMarried -> "not_marr"
   | Engaged -> "engaged"
   | NoSexesCheckNotMarried -> "nsck"
   | NoSexesCheckMarried -> "nsckm"
-  | NoMention -> "no_ment" ]
+  | NoMention -> "no_ment"
 and eval_special_var conf base p =
-  fun
-  [ ["include_perso_header"] ->
-      match p_getint conf.env "ip" with
-      [ Some i ->
+  function
+    ["include_perso_header"] ->
+      begin match p_getint conf.env "ip" with
+        Some i ->
           let has_base_loop =
-            try do {
-              let _ = Util.create_topological_sort conf base in
-              False
-            } with [ Consang.TopologicalSortError p -> True ]
+            try let _ = Util.create_topological_sort conf base in false with
+              Consang.TopologicalSortError p -> true
           in
           if has_base_loop then VVstring ""
-          else do {
+          else
             let p = poi base (Adef.iper_of_int i) in
-            Perso.interp_templ_with_menu
-              (fun _ -> ()) "perso_header" conf base p;
+            Perso.interp_templ_with_menu (fun _ -> ()) "perso_header" conf
+              base p;
             VVstring ""
-          }
-      | None -> VVstring "" ]
-  | _ -> raise Not_found ]
+      | None -> VVstring ""
+      end
+  | _ -> raise Not_found
 and eval_int_env var env =
   match get_env var env with
-  [ Vint x -> str_val (string_of_int x)
-  | _ -> raise Not_found ]
+    Vint x -> str_val (string_of_int x)
+  | _ -> raise Not_found
 and eval_string_env var env =
   match get_env var env with
-  [ Vstring x -> str_val (quote_escaped x)
-  | _ -> str_val "" ]
-;
+    Vstring x -> str_val (quote_escaped x)
+  | _ -> str_val ""
 
 (* print *)
 
-value print_foreach print_ast eval_expr =
-  let rec print_foreach env ((fam, cpl, des) as fcd) _ s sl _ al =
-    match [s :: sl] with
-    [ ["child"] -> print_foreach_child env fcd al des.children s
+let print_foreach print_ast eval_expr =
+  let rec print_foreach env (fam, cpl, des as fcd) _ s sl _ al =
+    match s :: sl with
+      ["child"] -> print_foreach_child env fcd al des.children s
     | ["witness"] -> print_foreach_witness env fcd al fam.witnesses s
     | ["parent"] -> print_foreach_parent env fcd al (parent_array cpl) s
-    | _ -> raise Not_found ]
+    | _ -> raise Not_found
   and print_foreach_child env fcd al arr lab =
-    for i = 0 to max 1 (Array.length arr) - 1 do {
-      let env = [("cnt", Vint (i + 1)) :: env] in
+    for i = 0 to max 1 (Array.length arr) - 1 do
+      let env = ("cnt", Vint (i + 1)) :: env in
       List.iter (print_ast env fcd) al
-    }
+    done
   and print_foreach_witness env fcd al arr lab =
-    for i = 0 to max 2 (Array.length arr) - 1 do {
-      let env = [("cnt", Vint (i + 1)) :: env] in
+    for i = 0 to max 2 (Array.length arr) - 1 do
+      let env = ("cnt", Vint (i + 1)) :: env in
       List.iter (print_ast env fcd) al
-    }
+    done
   and print_foreach_parent env fcd al arr lab =
-    for i = 0 to Array.length arr - 1 do {
-      let env = [("cnt", Vint (i + 1)) :: env] in
+    for i = 0 to Array.length arr - 1 do
+      let env = ("cnt", Vint (i + 1)) :: env in
       List.iter (print_ast env fcd) al
-    }
+    done
   in
   print_foreach
-;
 
-value print_update_fam conf base fcd digest =
+let print_update_fam conf base fcd digest =
   match p_getenv conf.env "m" with
-  [ Some
+    Some
       ("ADD_FAM" | "ADD_FAM_OK" | "ADD_PAR" | "MOD_FAM" | "MOD_FAM_OK" |
        "MRG_DUP_FAM_Y_N" | "MRG_FAM" | "MRG_FAM_OK" | "MRG_MOD_FAM_OK") ->
-      let env = [("digest", Vstring digest)] in
+      let env = ["digest", Vstring digest] in
       Hutil.interp conf base "updfam"
         {Templ.eval_var = eval_var conf base;
-         Templ.eval_transl _ = Templ.eval_transl conf;
-         Templ.eval_predefined_apply _ = raise Not_found;
+         Templ.eval_transl = (fun _ -> Templ.eval_transl conf);
+         Templ.eval_predefined_apply = (fun _ -> raise Not_found);
          Templ.get_vother = get_vother; Templ.set_vother = set_vother;
          Templ.print_foreach = print_foreach}
         env fcd
-  | _ -> incorrect_request conf ]
-;
+  | _ -> incorrect_request conf
 
-value print_del1 conf base ifam =
+let print_del1 conf base ifam =
   let title _ =
     let s = transl_nth conf "family/families" 0 in
     Wserver.wprint "%s" (capitale (transl_decline conf "delete" s))
   in
-  do {
-    let p =
-      match p_getint conf.env "ip" with
-      [ Some ip -> poi base (Adef.iper_of_int ip)
-      | None -> Gwdb.empty_person base (Adef.iper_of_int (-1)) ]
-    in
-    Perso.interp_notempl_with_menu title "perso_header" conf base p;
-    tag "h2" begin title False; end;
-    print_link_to_welcome conf True;
-    Wserver.wprint "\n";
-    tag "form" "method=\"post\" action=\"%s\"" conf.command begin
-      tag "p" begin
-        Util.hidden_env conf;
-        xtag "input" "type=\"hidden\" name=\"i\" value=\"%d\""
-          (Adef.int_of_ifam ifam);
-        match p_getenv conf.env "ip" with
-        [ Some ip -> xtag "input" "type=\"hidden\" name=\"ip\" value=\"%s\"" ip
-        | None -> () ];
-        xtag "input" "type=\"hidden\" name=\"m\" value=\"DEL_FAM_OK\"";
-      end;
-      tag "p" begin
-        xtag "input" "type=\"submit\" value=\"Ok\"";
-      end;
-    end;
-    Wserver.wprint "\n";
-    trailer conf
-  }
-;
+  let p =
+    match p_getint conf.env "ip" with
+      Some ip -> poi base (Adef.iper_of_int ip)
+    | None -> Gwdb.empty_person base (Adef.iper_of_int (-1))
+  in
+  Perso.interp_notempl_with_menu title "perso_header" conf base p;
+  Wserver.wprint "<h2>\n";
+  title false;
+  Wserver.wprint "</h2>\n";
+  print_link_to_welcome conf true;
+  Wserver.wprint "\n";
+  Wserver.wprint "<form method=\"post\" action=\"%s\">\n" conf.command;
+  Wserver.wprint "<p>\n";
+  Util.hidden_env conf;
+  Wserver.wprint "<input type=\"hidden\" name=\"i\" value=\"%d\"%s>\n"
+    (Adef.int_of_ifam ifam) conf.xhs;
+  begin match p_getenv conf.env "ip" with
+    Some ip ->
+      Wserver.wprint "<input type=\"hidden\" name=\"ip\" value=\"%s\"%s>\n" ip
+        conf.xhs
+  | None -> ()
+  end;
+  Wserver.wprint "<input type=\"hidden\" name=\"m\" value=\"DEL_FAM_OK\"%s>\n"
+    conf.xhs;
+  Wserver.wprint "</p>\n";
+  Wserver.wprint "<p>\n";
+  Wserver.wprint "<input type=\"submit\" value=\"Ok\"%s>\n" conf.xhs;
+  Wserver.wprint "</p>\n";
+  Wserver.wprint "</form>\n";
+  Wserver.wprint "\n";
+  trailer conf
 
-value print_inv1 conf base p ifam1 ifam2 =
+let print_inv1 conf base p ifam1 ifam2 =
   let title _ =
     Wserver.wprint "%s" (capitale (transl_decline conf "invert" ""))
   in
   let cpl1 = foi base ifam1 in
   let cpl2 = foi base ifam2 in
-  do {
-    Perso.interp_notempl_with_menu title "perso_header" conf base p;
-    Wserver.wprint "%s:"
-      (capitale (transl conf "invert the order of the following families"));
-    tag "ul" begin
-      tag "li" begin
-        Update.print_someone conf base (poi base (get_father cpl1));
-        Wserver.wprint " %s " (transl_nth conf "and" 0);
-        Update.print_someone conf base (poi base (get_mother cpl1));
-      end;
-      tag "li" begin
-        Update.print_someone conf base (poi base (get_father cpl2));
-        Wserver.wprint " %s " (transl_nth conf "and" 0);
-        Update.print_someone conf base (poi base (get_mother cpl2));
-      end;
-    end;
-    Wserver.wprint "\n";
-    tag "form" "method=\"post\" action=\"%s\"" conf.command begin
-      tag "p" begin
-        Util.hidden_env conf;
-        xtag "input" "type=\"hidden\" name=\"i\" value=\"%d\""
-          (Adef.int_of_iper (get_key_index p));
-        xtag "input" "type=\"hidden\" name=\"f\" value=\"%d\""
-          (Adef.int_of_ifam ifam2);
-        xtag "input" "type=\"hidden\" name=\"m\" value=\"INV_FAM_OK\"";
-      end;
-      tag "p" begin
-        xtag "input" "type=\"submit\" value=\"Ok\"";
-      end;
-    end;
-    Wserver.wprint "\n";
-    trailer conf
-  }
-;
+  Perso.interp_notempl_with_menu title "perso_header" conf base p;
+  Wserver.wprint "%s:"
+    (capitale (transl conf "invert the order of the following families"));
+  Wserver.wprint "<ul>\n";
+  Wserver.wprint "<li>\n";
+  Update.print_someone conf base (poi base (get_father cpl1));
+  Wserver.wprint " %s " (transl_nth conf "and" 0);
+  Update.print_someone conf base (poi base (get_mother cpl1));
+  Wserver.wprint "</li>\n";
+  Wserver.wprint "<li>\n";
+  Update.print_someone conf base (poi base (get_father cpl2));
+  Wserver.wprint " %s " (transl_nth conf "and" 0);
+  Update.print_someone conf base (poi base (get_mother cpl2));
+  Wserver.wprint "</li>\n";
+  Wserver.wprint "</ul>\n";
+  Wserver.wprint "\n";
+  Wserver.wprint "<form method=\"post\" action=\"%s\">\n" conf.command;
+  Wserver.wprint "<p>\n";
+  Util.hidden_env conf;
+  Wserver.wprint "<input type=\"hidden\" name=\"i\" value=\"%d\"%s>\n"
+    (Adef.int_of_iper (get_key_index p)) conf.xhs;
+  Wserver.wprint "<input type=\"hidden\" name=\"f\" value=\"%d\"%s>\n"
+    (Adef.int_of_ifam ifam2) conf.xhs;
+  Wserver.wprint "<input type=\"hidden\" name=\"m\" value=\"INV_FAM_OK\"%s>\n"
+    conf.xhs;
+  Wserver.wprint "</p>\n";
+  Wserver.wprint "<p>\n";
+  Wserver.wprint "<input type=\"submit\" value=\"Ok\"%s>\n" conf.xhs;
+  Wserver.wprint "</p>\n";
+  Wserver.wprint "</form>\n";
+  Wserver.wprint "\n";
+  trailer conf
 
-value print_add conf base =
+let print_add conf base =
   let (fath, moth, digest) =
     match p_getint conf.env "ip" with
-    [ Some i ->
+      Some i ->
         let p = poi base (Adef.iper_of_int i) in
         let fath =
           if get_sex p = Male ||
-             get_sex p = Neuter && p_getenv conf.env "sex" = Some "M" then
+             get_sex p = Neuter && p_getenv conf.env "sex" = Some "M"
+          then
             person_key base (get_key_index p)
-          else ("", "", 0, Update.Create Male None, "")
+          else "", "", 0, Update.Create (Male, None), ""
         in
         let moth =
           if get_sex p = Female ||
-             get_sex p = Neuter && p_getenv conf.env "sex" = Some "F" then
+             get_sex p = Neuter && p_getenv conf.env "sex" = Some "F"
+          then
             person_key base (get_key_index p)
-          else ("", "", 0, Update.Create Female None, "")
+          else "", "", 0, Update.Create (Female, None), ""
         in
         let digest = string_of_int (Array.length (get_family p)) in
-        (fath, moth, digest)
+        fath, moth, digest
     | None ->
-        (("", "", 0, Update.Create Male None, ""),
-         ("", "", 0, Update.Create Female None, ""), "") ]
+        ("", "", 0, Update.Create (Male, None), ""),
+        ("", "", 0, Update.Create (Female, None), ""), ""
   in
   let fam =
     {marriage = Adef.codate_None; marriage_place = ""; marriage_src = "";
@@ -555,11 +570,10 @@ value print_add conf base =
   and cpl = couple conf.multi_parents fath moth
   and des = {children = [| |]} in
   print_update_fam conf base (fam, cpl, des) digest
-;
 
-value print_add_parents conf base =
+let print_add_parents conf base =
   match p_getint conf.env "ip" with
-  [ Some i ->
+    Some i ->
       let p = poi base (Adef.iper_of_int i) in
       let fam =
         {marriage = Adef.codate_None; marriage_place = ""; marriage_src = "";
@@ -568,74 +582,67 @@ value print_add_parents conf base =
          fam_index = bogus_family_index}
       and cpl =
         couple conf.multi_parents
-          ("", sou base (get_surname p), 0, Update.Create Neuter None, "")
-          ("", "", 0, Update.Create Neuter None, "")
+          ("", sou base (get_surname p), 0, Update.Create (Neuter, None), "")
+          ("", "", 0, Update.Create (Neuter, None), "")
       and des =
         {children =
-           [| (sou base (get_first_name p), sou base (get_surname p),
-               get_occ p, Update.Link, "") |]}
+          [| sou base (get_first_name p), sou base (get_surname p), get_occ p,
+             Update.Link, "" |]}
       in
       print_update_fam conf base (fam, cpl, des) ""
-  | _ -> incorrect_request conf ]
-;
+  | _ -> incorrect_request conf
 
-value print_mod conf base =
+let print_mod conf base =
   match p_getint conf.env "i" with
-  [ Some i ->
+    Some i ->
       let sfam = string_family_of conf base (Adef.ifam_of_int i) in
       let digest = Update.digest_family sfam in
       print_update_fam conf base sfam digest
-  | _ -> incorrect_request conf ]
-;
+  | _ -> incorrect_request conf
 
-value print_del conf base =
+let print_del conf base =
   match p_getint conf.env "i" with
-  [ Some i -> print_del1 conf base (Adef.ifam_of_int i)
-  | _ -> incorrect_request conf ]
-;
+    Some i -> print_del1 conf base (Adef.ifam_of_int i)
+  | _ -> incorrect_request conf
 
-value rec find_families ifam =
-  fun
-  [ [ifam1; ifam2 :: ifaml] ->
+let rec find_families ifam =
+  function
+    ifam1 :: ifam2 :: ifaml ->
       if ifam2 = ifam then Some (ifam1, ifam2)
-      else find_families ifam [ifam2 :: ifaml]
-  | _ -> None ]
-;
+      else find_families ifam (ifam2 :: ifaml)
+  | _ -> None
 
-value print_inv conf base =
-  match (p_getint conf.env "i", p_getint conf.env "f") with
-  [ (Some ip, Some ifam) ->
+let print_inv conf base =
+  match p_getint conf.env "i", p_getint conf.env "f" with
+    Some ip, Some ifam ->
       let u = poi base (Adef.iper_of_int ip) in
-      match
+      begin match
         find_families (Adef.ifam_of_int ifam) (Array.to_list (get_family u))
       with
-      [ Some (ifam1, ifam2) ->
+        Some (ifam1, ifam2) ->
           let p = poi base (Adef.iper_of_int ip) in
           print_inv1 conf base p ifam1 ifam2
-      | _ -> incorrect_request conf ]
-  | _ -> incorrect_request conf ]
-;
+      | _ -> incorrect_request conf
+      end
+  | _ -> incorrect_request conf
 
-value change_order conf base ip u ifam n =
+let change_order conf base ip u ifam n =
   let rec loop i =
-    fun
-    [ [] -> if i = n then [ifam] else []
-    | [fam :: faml] ->
+    function
+      [] -> if i = n then [ifam] else []
+    | fam :: faml ->
         if ifam = fam then
-          if i = n then [ifam :: loop (i+1) [fam :: faml]]
-          else loop i faml
-        else
-          if i = n then [ifam :: loop (i+1) [fam :: faml]]
-          else [fam :: loop (i+1) faml] ]
+          if i = n then ifam :: loop (i + 1) (fam :: faml) else loop i faml
+        else if i = n then ifam :: loop (i + 1) (fam :: faml)
+        else fam :: loop (i + 1) faml
   in
   loop 1 (Array.to_list (get_family u))
-;
 
-value print_change_order conf base =
+let print_change_order conf base =
   match
-    (p_getint conf.env "i", p_getint conf.env "f", p_getint conf.env "n")
+    p_getint conf.env "i", p_getint conf.env "f", p_getint conf.env "n"
   with
-  [ (Some ip, Some ifam, Some n) -> do {
+    Some ip, Some ifam, Some n ->
       let p = poi base (Adef.iper_of_int ip) in
       let print_list arr diff_arr =
         Array.iteri
@@ -643,25 +650,26 @@ value print_change_order conf base =
              let fam = foi base ifam in
              let sp = spouse (get_key_index p) fam in
              let sp = poi base sp in
-             tag "li" "%s"
-               (if diff_arr.(i) then "style=\"background:pink\"" else "")
-             begin
-               Wserver.wprint "%s%s" (p_first_name base p)
-                 (if get_occ p = 0 then "" else "." ^ string_of_int (get_occ p));
-               Wserver.wprint "  &amp;";
-               Wserver.wprint "%s\n"
-                 (Date.short_marriage_date_text conf base fam p sp);
-               Wserver.wprint "%s%s %s" (p_first_name base sp)
-                 (if get_occ sp = 0 then "" else "." ^ string_of_int (get_occ sp))
-                 (p_surname base sp);
-               Wserver.wprint "\n";
-             end)
+             Wserver.wprint "<li %s>\n"
+               (if diff_arr.(i) then "style=\"background:pink\"" else "");
+             Wserver.wprint "%s%s" (p_first_name base p)
+               (if get_occ p = 0 then ""
+                else "." ^ string_of_int (get_occ p));
+             Wserver.wprint "  &amp;";
+             Wserver.wprint "%s\n"
+               (Date.short_marriage_date_text conf base fam p sp);
+             Wserver.wprint "%s%s %s" (p_first_name base sp)
+               (if get_occ sp = 0 then ""
+                else "." ^ string_of_int (get_occ sp))
+               (p_surname base sp);
+             Wserver.wprint "\n";
+             Wserver.wprint "</li>\n")
           arr
       in
       let after =
         change_order conf base (get_key_index p) p (Adef.ifam_of_int ifam) n
       in
-      let (before, after) = (get_family p, Array.of_list after) in
+      let (before, after) = get_family p, Array.of_list after in
       let (bef_d, aft_d) = Diff.f before after in
       let title _ =
         Wserver.wprint "%s" (capitale (transl_decline conf "invert" ""))
@@ -669,34 +677,37 @@ value print_change_order conf base =
       Perso.interp_templ_with_menu title "perso_header" conf base p;
       Wserver.wprint "%s:"
         (capitale (transl conf "invert the order of the following families"));
-      tag "table" "style=\"margin:1em\"" begin
-        tag "tr" begin
-          tag "td" begin
-            tag "ul" "style=\"list-style-type:none\"" begin
-              print_list before bef_d;
-            end;
-          end;
-          tag "td" begin
-            tag "ul" "style=\"list-style-type:none\"" begin
-              print_list after aft_d;
-            end;
-          end;
-        end;
-      end;
-      tag "form" "method=\"post\" action=\"%s\"" conf.command begin
-        tag "p" begin
-          Util.hidden_env conf;
-          xtag "input" "type=\"hidden\" name=\"i\" value=\"%d\"" ip;
-          xtag "input" "type=\"hidden\" name=\"f\" value=\"%d\"" ifam;
-          xtag "input" "type=\"hidden\" name=\"n\" value=\"%d\"" n;
-          xtag "input" "type=\"hidden\" name=\"m\" value=\"CHG_FAM_ORD_OK\"";
-        end;
-        tag "p" begin
-          xtag "input" "type=\"submit\" value=\"Ok\"";
-        end;
-      end;
+      Wserver.wprint "<table style=\"margin:1em\">\n";
+      Wserver.wprint "<tr>\n";
+      Wserver.wprint "<td>\n";
+      Wserver.wprint "<ul style=\"list-style-type:none\">\n";
+      print_list before bef_d;
+      Wserver.wprint "</ul>\n";
+      Wserver.wprint "</td>\n";
+      Wserver.wprint "<td>\n";
+      Wserver.wprint "<ul style=\"list-style-type:none\">\n";
+      print_list after aft_d;
+      Wserver.wprint "</ul>\n";
+      Wserver.wprint "</td>\n";
+      Wserver.wprint "</tr>\n";
+      Wserver.wprint "</table>\n";
+      Wserver.wprint "<form method=\"post\" action=\"%s\">\n" conf.command;
+      Wserver.wprint "<p>\n";
+      Util.hidden_env conf;
+      Wserver.wprint "<input type=\"hidden\" name=\"i\" value=\"%d\"%s>\n" ip
+        conf.xhs;
+      Wserver.wprint "<input type=\"hidden\" name=\"f\" value=\"%d\"%s>\n"
+        ifam conf.xhs;
+      Wserver.wprint "<input type=\"hidden\" name=\"n\" value=\"%d\"%s>\n" n
+        conf.xhs;
+      Wserver.wprint
+        "<input type=\"hidden\" name=\"m\" value=\"CHG_FAM_ORD_OK\"%s>\n"
+        conf.xhs;
+      Wserver.wprint "</p>\n";
+      Wserver.wprint "<p>\n";
+      Wserver.wprint "<input type=\"submit\" value=\"Ok\"%s>\n" conf.xhs;
+      Wserver.wprint "</p>\n";
+      Wserver.wprint "</form>\n";
       Wserver.wprint "\n";
       trailer conf
-    }
-  | _ -> incorrect_request conf ]
-;
+  | _ -> incorrect_request conf

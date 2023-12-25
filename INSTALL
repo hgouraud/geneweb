@@ -2,30 +2,34 @@ INSTALLATIONS INSTRUCTIONS IN UNIX or MACOSX MACHINES
 
 For the compilation, you need the Objective Caml compiler installed
 in your computer. The compilation works for several versions of ocaml.
-You also need the preprocessor camlp5.
 
 They freely distributed at address:
      http://caml.inria.fr/ocaml/
      http://pauillac.inria.fr/~ddr/camlp5/
 
-1- In the top directory, do:
-      ./configure
+1. Have a clean switch with OCaml > 4.02
 
-2- If the command ocamlc.opt is not installed, edit the file
-   "tools/Makefile.inc" and change:
-       OCAMLC=ocamlc.opt
-       OCAMLOPT=ocamlopt.opt
-   into
-       OCAMLC=ocamlc
-       OCAMLOPT=ocamlopt
+```
+eval $(opam env)
+```
 
-3- If your platform has the command ocamlopt, do:
-      make
-   Otherwise do (warning: slower executables):
-      make out
+2. Install dependencies:
+
+```
+opam install --deps-only .
+```
+
+3. Build:
+
+```
+make
+```
 
 4- Do:
-      make distrib
+
+```
+make distrib
+```
 
    This creates a directory "distribution" where all executables programs
    and documentation are copied.

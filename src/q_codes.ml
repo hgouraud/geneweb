@@ -1,9 +1,9 @@
 (* $Id: q_codes.ml,v 5.4 2012-01-16 22:11:29 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-value f _ =
-  fun
-  [ "PREFIX_SMALL_BLOCK" -> "0x80"
+let f _ =
+  function
+    "PREFIX_SMALL_BLOCK" -> "0x80"
   | "PREFIX_SMALL_INT" -> "0x40"
   | "PREFIX_SMALL_STRING" -> "0x20"
   | "CODE_INT8" -> "0x0"
@@ -13,16 +13,11 @@ value f _ =
   | "CODE_BLOCK64" -> "0x13"
   | "CODE_STRING8" -> "0x9"
   | "CODE_STRING32" -> "0xA"
-(*
-  | "CODE_NZEROS8" -> "0x4"
-  | "CODE_NZEROS32" -> "0x5"
-*)
   | "CODE_DOUBLE_NATIVE" -> "11"
   | x ->
       Stdpp.raise_with_loc (Token.make_loc (0, String.length x))
-        (Failure ("bad code " ^ x)) ]
-;
+        (Failure ("bad code " ^ x))
 
-Quotation.add "codes" (Quotation.ExStr f);
-Quotation.default.val := "codes";
+let _ = Quotation.add "codes" (Quotation.ExStr f)
+let _ = Quotation.default := "codes"
 

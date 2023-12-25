@@ -1,37 +1,36 @@
 (* $Id: checkItem.mli,v 1.12 2007-09-05 13:19:25 ddr Exp $ *)
 (* Copyright (c) 2006-2007 INRIA *)
 
-open Gwdb;
+open Gwdb
 
-type base_error = Def.error person;
-type base_warning = Def.warning person family title;
-type base_misc = Def.misc person family title;
+type base_error = person Def.error
+type base_warning = (person, family, title) Def.warning
+type base_misc = (person, family, title) Def.misc
 
-value leap_year : int -> bool;
-value nb_days_in_month : int -> int -> int;
-value time_elapsed : Def.dmy -> Def.dmy -> Def.dmy;
-value strictly_before_dmy : Def.dmy -> Def.dmy -> bool;
-value strictly_before : Def.date -> Def.date -> bool;
-value strictly_after_dmy : Def.dmy -> Def.dmy -> bool;
-value strictly_after : Def.date -> Def.date -> bool;
-value date_of_death : Def.death -> option Adef.date;
-value compare_date : Def.date -> Def.date -> int;
+val leap_year : int -> bool
+val nb_days_in_month : int -> int -> int
+val time_elapsed : Def.dmy -> Def.dmy -> Def.dmy
+val strictly_before_dmy : Def.dmy -> Def.dmy -> bool
+val strictly_before : Def.date -> Def.date -> bool
+val strictly_after_dmy : Def.dmy -> Def.dmy -> bool
+val strictly_after : Def.date -> Def.date -> bool
+val date_of_death : Def.death -> Adef.date option
+val compare_date : Def.date -> Def.date -> int
 
-value person :
+val person :
   base -> (base_warning -> unit) -> person ->
-    option
-      (list (Adef.iper * person * option Def.sex * option (list relation)));
+    (Adef.iper * person * Def.sex option * relation list option) list option
 
-value family :
+val family :
   base -> (base_error -> unit) -> (base_warning -> unit) -> Def.ifam ->
-    family -> unit;
+    family -> unit
 
-value reduce_family :
+val reduce_family :
   base -> (base_error -> unit) -> (base_warning -> unit) -> Def.ifam ->
-    family -> unit;
+    family -> unit
 
-value sort_children :
-  base -> array Adef.iper -> option (array Adef.iper * array Adef.iper);
+val sort_children :
+  base -> Adef.iper array -> (Adef.iper array * Adef.iper array) option
 
-value check_other_fields :
-  base -> (base_misc -> unit) -> Def.ifam -> family -> unit;
+val check_other_fields :
+  base -> (base_misc -> unit) -> Def.ifam -> family -> unit

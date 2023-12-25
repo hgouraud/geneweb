@@ -2,14 +2,14 @@
 (* $Id: translate.mli,v 5.7 2007-09-12 09:58:44 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-value inline : string -> char -> (char -> string) -> string -> (string * bool);
+val inline : string -> char -> (char -> string) -> string -> string * bool
     (* [Translate.inline lang macro_char macro str] return the translation
        and a boolean telling True if it is actually the English version *)
 
-value language_name : string -> string -> string;
+val language_name : string -> string -> string
     (* [Translate.language_name lang lang_def] *)
 
-value eval : string -> string;
+val eval : string -> string
 (* [eval str] return a transformation of [str]. The input string may
    contain actions between "@(" and ")" whose contents are evaluated like
    this:

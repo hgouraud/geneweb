@@ -3,14 +3,13 @@
 
 (* checking database ; independant from its implementation on disk *)
 
-open Gwdb;
-open CheckItem;
+open Gwdb
+open CheckItem
 
-value print_base_error : out_channel -> base -> base_error -> unit;
-value print_base_warning : out_channel -> base -> base_warning -> unit;
+val print_base_error : out_channel -> base -> base_error -> unit
+val print_base_warning : out_channel -> base -> base_warning -> unit
 
-value check_base :
-  base -> (base_error -> unit) -> (base_warning -> unit) ->
-    (int -> bool) ->
-    ((Def.iper * person * option Def.sex * option (list relation)) -> unit) ->
-    bool -> unit;
+val check_base :
+  base -> (base_error -> unit) -> (base_warning -> unit) -> (int -> bool) ->
+    (Def.iper * person * Def.sex option * relation list option -> unit) ->
+    bool -> unit
