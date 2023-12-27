@@ -7,6 +7,12 @@ open Printf
 
 let magic_patch = "GwPt0002"
 
+module TYPES = struct
+
+type key2 =
+    Key of Adef.istr * Adef.istr * int
+  | Key0 of Adef.istr * Adef.istr
+
 type patches =
   { mutable nb_per : int;
     mutable nb_fam : int;
@@ -24,6 +30,9 @@ type patches =
 type db2 =
   { phony : unit -> unit;
     bdir2 : string;
+
+    (* cache of correspondances between file names (dir/base/[access,data])
+       and corresponding channels *)
     cache_chan : (string * string * string, in_channel) Hashtbl.t;
     patches : patches;
     mutable parents_array : ifam option array option;
@@ -33,6 +42,33 @@ type db2 =
     mutable mother_array : iper array option;
     mutable children_array : iper array array option }
 
+type string_person_index2 =
+  { is_first_name : bool;
+    index_of_first_char : (string * int) list;
+    mutable ini : string;
+    mutable curr_i : int;
+    mutable curr_s : string }
+
+type ('a, 'b) bucketlist =
+    Empty
+  | Cons of 'a * 'b * ('a, 'b) bucketlist
+
+type string_person =
+    Sp of int
+  | SpNew of string
+
+end
+
+open TYPES
+
+let first_item_pos len =
+  20 + (if Sys.word_size = 64 && len >= 1 lsl (32 - 10) then 9 else 5)
+
+let key2_of_key (fn, sn, oc) =
+  if oc = 0 then Key0 (fn, sn) else Key (fn, sn, oc)
+
+let add_basenames = List.fold_left Filename.concat
+
 (* reading in files style database 2 *)
 
 let fast_open_in_bin_and_seek db2 f1 f2 f pos =
@@ -40,14 +76,14 @@ let fast_open_in_bin_and_seek db2 f1 f2 f pos =
     try Hashtbl.find db2.cache_chan (f1, f2, f) with
       Not_found ->
         let ic =
-          open_in_bin (List.fold_left Filename.concat db2.bdir2 [f1; f2; f])
+          open_in_bin (add_basenames db2.bdir2 [f1; f2; f])
         in
         Hashtbl.add db2.cache_chan (f1, f2, f) ic; ic
   in
   seek_in ic pos; ic
 
 let field_exists db2 (f1, f2) =
-  let fname = List.fold_left Filename.concat db2.bdir2 [f1; f2; "access"] in
+  let fname = add_basenames db2.bdir2 [f1; f2; "access"] in
   Sys.file_exists fname
 
 let get_field_acc db2 i (f1, f2) =
@@ -74,10 +110,6 @@ let string_of_istr2 db2 f pos =
   if pos = -1 then "" else get_field_data db2 pos f "data"
 
 (* hash tables in disk *)
-
-type ('a, 'b) bucketlist =
-    Empty
-  | Cons of 'a * 'b * ('a, 'b) bucketlist
 
 let rec hashtbl_find_rec key =
   function
@@ -120,27 +152,17 @@ let hashtbl_find_all dir file key =
       close_in ic_ht; find_in_bucket bl
   | None -> []
 
-let key_hashtbl_find dir file k = hashtbl_find dir file (Db2.key2_of_key k)
+let key_hashtbl_find dir file k =
+  hashtbl_find dir file (key2_of_key k)
 
 (* string person index version 2 *)
-
-type string_person_index2 =
-  { is_first_name : bool;
-    index_of_first_char : (string * int) list;
-    mutable ini : string;
-    mutable curr_i : int;
-    mutable curr_s : string }
 
 let start_with s p =
   String.length p <= String.length s && String.sub s 0 (String.length p) = p
 
-type string_person =
-    Sp of int
-  | SpNew of string
-
 let sorted_patched_person_strings db2 is_first_name =
   let particles =
-    Mutil.input_particles (Filename.concat db2.bdir2 "particles.txt")
+    Mutil.input_particles (add_basenames db2.bdir2 ["particles.txt"])
   in
   let sl =
     Hashtbl.fold
@@ -279,7 +301,7 @@ let spi2gen_add pl db2 spi s =
     db2.patches.h_person pl
 
 let spi2_find db2 spi (f1, f2) pos =
-  let dir = List.fold_left Filename.concat db2.bdir2 [f1; f2] in
+  let dir = add_basenames db2.bdir2 [f1; f2] in
   let pl = hashtbl_find_all dir "person_of_string.ht" pos in
   let s = string_of_istr2 db2 (f1, f2) pos in spi2gen_add pl db2 spi s
 
@@ -288,7 +310,7 @@ let spi2gen_find = spi2gen_add []
 (* *)
 
 let disk_person2_of_key db2 fn sn oc =
-  let person_of_key_d = Filename.concat db2.bdir2 "person_of_key" in
+  let person_of_key_d = add_basenames db2.bdir2 ["person_of_key"] in
   try
     let ifn = hashtbl_find person_of_key_d "istr_of_string.ht" fn in
     let isn = hashtbl_find person_of_key_d "istr_of_string.ht" sn in
@@ -304,19 +326,19 @@ let person2_of_key db2 fn sn oc =
 
 let strings2_of_fsname db2 f s =
   let k = Name.crush_lower s in
-  let dir = List.fold_left Filename.concat db2.bdir2 ["person"; f] in
+  let dir = add_basenames db2.bdir2 ["person"; f] in
   hashtbl_find_all dir "string_of_crush.ht" k
 
 let persons2_of_name db2 s =
   let s = Name.crush_lower s in
-  let dir = Filename.concat db2.bdir2 "person_of_name" in
+  let dir = add_basenames db2.bdir2 ["person_of_name"] in
   List.rev_append (try Hashtbl.find db2.patches.h_name s with Not_found -> [])
     (hashtbl_find_all dir "person_of_name.ht" s)
 
 let persons_of_first_name_or_surname2 db2 is_first_name =
   let f1 = "person" in
   let f2 = if is_first_name then "first_name" else "surname" in
-  let fdir = List.fold_left Filename.concat db2.bdir2 [f1; f2] in
+  let fdir = add_basenames db2.bdir2 [f1; f2] in
   let index_ini_fname = Filename.concat fdir "index.ini" in
   let ic = open_in_bin index_ini_fname in
   let iofc : (string * int) list = input_value ic in
@@ -328,12 +350,8 @@ let load_array2 bdir nb_ini nb def f1 f2 get =
   if nb = 0 then [| |]
   else
     try
-      let ic_acc =
-        open_in_bin (List.fold_left Filename.concat bdir [f1; f2; "access"])
-      in
-      let ic_dat =
-        open_in_bin (List.fold_left Filename.concat bdir [f1; f2; "data"])
-      in
+      let ic_acc = open_in_bin (add_basenames bdir [f1; f2; "access"]) in
+      let ic_dat = open_in_bin (add_basenames bdir [f1; f2; "data"]) in
       let tab = Array.make nb def in
       for i = 0 to nb_ini - 1 do
         tab.(i) <- get ic_dat (input_binary_int ic_acc)
@@ -390,12 +408,10 @@ let parents_array2 db2 nb_ini nb =
 
 let consang_array2 db2 nb =
   let arr =
-    let cg_fname =
-      List.fold_left Filename.concat db2.bdir2 ["person"; "consang"; "data"]
-    in
+    let cg_fname = add_basenames db2.bdir2 ["person"; "consang"; "data"] in
     match try Some (open_in_bin cg_fname) with Sys_error _ -> None with
       Some ic ->
-        let tab = input_value ic in
+        let ( tab : Adef.fix array ) = input_value ic in
         close_in ic;
         if Array.length tab < db2.patches.nb_per_ini then
           failwith
@@ -412,11 +428,9 @@ let consang_array2 db2 nb =
   arr
 
 let family_array2 db2 =
-  let fname =
-    List.fold_left Filename.concat db2.bdir2 ["person"; "family"; "data"]
-  in
+  let fname = add_basenames db2.bdir2 ["person"; "family"; "data"] in
   let ic = open_in_bin fname in
-  let tab = input_value ic in
+  let ( tab : Def.ifam array array ) = input_value ic in
   close_in ic;
   if Array.length tab < db2.patches.nb_per_ini then
     failwith
@@ -425,11 +439,9 @@ let family_array2 db2 =
   tab
 
 let children_array2 db2 =
-  let fname =
-    List.fold_left Filename.concat db2.bdir2 ["family"; "children"; "data"]
-  in
+  let fname = add_basenames db2.bdir2 ["family"; "children"; "data"] in
   let ic = open_in_bin fname in
-  let tab = input_value ic in
+  let ( tab : Def.iper array array ) = input_value ic in
   close_in ic;
   if Array.length tab < db2.patches.nb_fam_ini then
     failwith
@@ -441,10 +453,10 @@ let read_notes db2 fnotes rn_mode =
   let bdir = db2.bdir2 in
   let fname =
     if fnotes = "" then "notes.txt"
-    else Filename.concat "notes_d" (fnotes ^ ".txt")
+    else add_basenames "notes_d" [fnotes ^ ".txt"]
   in
   match
-    try Some (Secure.open_in (Filename.concat bdir fname)) with
+    try Some (Secure.open_in (add_basenames bdir [fname])) with
       Sys_error _ -> None
   with
     Some ic ->
@@ -468,7 +480,7 @@ let check_magic ic magic id =
   if b <> magic then failwith (sprintf "bad %s magic number" id)
 
 let commit_patches2 db2 =
-  let fname = Filename.concat db2.bdir2 "patches" in
+  let fname = add_basenames db2.bdir2 ["patches"] in
   let oc = open_out_bin (fname ^ "1") in
   output_string oc magic_patch;
   output_value_no_sharing oc db2.patches;
@@ -480,12 +492,12 @@ let commit_patches2 db2 =
 let commit_notes2 db2 fnotes s =
   let bdir = db2.bdir2 in
   if fnotes <> "" then
-    (try Unix.mkdir (Filename.concat bdir "notes_d") 0o755 with _ -> ());
+    (try Unix.mkdir (add_basenames bdir ["notes_d"]) 0o755 with _ -> ());
   let fname =
     if fnotes = "" then "notes.txt"
-    else Filename.concat "notes_d" (fnotes ^ ".txt")
+    else add_basenames "notes_d" [fnotes ^ ".txt"]
   in
-  let fname = Filename.concat bdir fname in
+  let fname = add_basenames bdir [fname] in
   (try Sys.remove (fname ^ "~") with Sys_error _ -> ());
   (try Sys.rename fname (fname ^ "~") with _ -> ());
   if s = "" then ()
@@ -495,25 +507,23 @@ let base_of_base2 bname =
   let bname =
     if Filename.check_suffix bname ".gwb" then bname else bname ^ ".gwb"
   in
-  let bdir = Filename.concat bname "base_d" in
+  let bdir = add_basenames bname ["base_d"] in
   let patches =
-    let patch_fname = Filename.concat bdir "patches" in
+    let patch_fname = add_basenames bdir ["patches"] in
     match try Some (open_in_bin patch_fname) with Sys_error _ -> None with
       Some ic ->
         check_magic ic magic_patch "patch";
-        let p = input_value ic in close_in ic; flush stderr; p
+        let ( p : patches ) = input_value ic in
+        close_in ic;
+        flush stderr;
+        p
     | None ->
         let nb_per =
-          let fname =
-            List.fold_left Filename.concat bdir ["person"; "sex"; "access"]
-          in
+          let fname = add_basenames bdir ["person"; "sex"; "access"] in
           let st = Unix.lstat fname in st.Unix.st_size / 4
         in
         let nb_fam =
-          let fname =
-            List.fold_left Filename.concat bdir
-              ["family"; "marriage"; "access"]
-          in
+          let fname = add_basenames bdir ["family"; "marriage"; "access"] in
           let st = Unix.lstat fname in st.Unix.st_size / 4
         in
         let empty_ht () = Hashtbl.create 1 in

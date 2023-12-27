@@ -1,6 +1,7 @@
 (* camlp4r *)
 (* $Id: popule.ml,v 4.31 2007-02-16 10:35:39 deraugla Exp $ *)
 
+open Db1disk.TYPES
 open Def
 open Gwdb
 open Printf
@@ -101,8 +102,8 @@ let add_indi (base, cnt, bname) (fn, sn1, sn2, oc) sex =
       commit_patches !base;
       Gwdb.apply_base1 !base
         (fun base ->
-           let bname = base.Dbdisk.data.Dbdisk.bdir in
-           Outbase.output bname base);
+           let bname = base.data.bdir in
+           Db1out.output bname base);
       base := Gwdb.open_base bname
     end;
   incr cnt;
@@ -222,7 +223,7 @@ let popule bname size ngen gyear =
   commit_patches !base;
   Gwdb.apply_base1 !base
     (fun base ->
-       let bname = base.Dbdisk.data.Dbdisk.bdir in Outbase.output bname base)
+       let bname = base.data.bdir in Db1out.output bname base)
 
 let size = ref 100
 let ngen = ref 200

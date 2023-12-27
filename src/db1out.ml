@@ -1,8 +1,7 @@
 (* $Id: outbase.ml,v 5.21 2007-01-19 01:53:16 ddr Exp $ *)
 (* Copyright (c) 2006-2007 INRIA *)
 
-open Dbdisk
-open Dutil
+open Db1disk.TYPES
 open Def
 open Mutil
 
@@ -28,7 +27,7 @@ let just_copy bname what oc oc_acc =
   flush stderr;
   let ic =
     let ic = Secure.open_in_bin (Filename.concat bname "base") in
-    check_magic ic; ic
+    Db1disk.check_magic ic; ic
   in
   let ic_acc = Secure.open_in_bin (Filename.concat bname "base.acc") in
   let persons_len = input_binary_int ic in
@@ -89,7 +88,7 @@ let just_copy bname what oc oc_acc =
   loop 0
 
 let make_name_index base =
-  let t = Array.make table_size [| |] in
+  let t = Array.make Db1disk.table_size [| |] in
   let add_name key valu =
     let key = Name.crush (Name.abbrev key) in
     let i = Hashtbl.hash key mod Array.length t in
@@ -103,12 +102,12 @@ let make_name_index base =
   in
   for i = 0 to base.data.persons.len - 1 do
     let p = base.data.persons.get i in
-    let first_name = p_first_name base p in
-    let surname = p_surname base p in
+    let first_name = Db1disk.p_first_name base p in
+    let surname = Db1disk.p_surname base p in
     if first_name <> "?" && surname <> "?" then
       let names =
         Name.lower (first_name ^ " " ^ surname) ::
-        Dutil.dsk_person_misc_names base p (fun p -> p.titles)
+        Db1disk.dsk_person_misc_names base p (fun p -> p.titles)
       in
       add_names p.key_index names
   done;
@@ -130,11 +129,11 @@ let add_name t key valu =
   if array_mem valu t.(i) then () else t.(i) <- Array.append [| valu |] t.(i)
 
 let make_strings_of_fsname base =
-  let t = Array.make table_size [| |] in
+  let t = Array.make Db1disk.table_size [| |] in
   for i = 0 to base.data.persons.len - 1 do
-    let p = poi base (Adef.iper_of_int i) in
-    let first_name = p_first_name base p in
-    let surname = p_surname base p in
+    let p = Db1disk.poi base (Adef.iper_of_int i) in
+    let first_name = Db1disk.p_first_name base p in
+    let surname = Db1disk.p_surname base p in
     if first_name <> "?" then add_name t first_name p.first_name;
     if surname <> "?" then
       begin
@@ -185,11 +184,14 @@ let output_strings_hash oc2 base =
 let output_surname_index oc2 base tmp_snames_inx tmp_snames_dat =
   let module IstrTree =
     Btree.Make
-      (struct type t = dsk_istr let compare = compare_istr_fun base.data end)
+      (struct
+        type t = dsk_istr
+        let compare = Db1disk.compare_istr_fun base.data
+      end)
   in
   let bt = ref IstrTree.empty in
   for i = 0 to base.data.persons.len - 1 do
-    let p = poi base (Adef.iper_of_int i) in
+    let p = Db1disk.poi base (Adef.iper_of_int i) in
     let a = try IstrTree.find p.surname !bt with Not_found -> [] in
     bt := IstrTree.add p.surname (p.key_index :: a) !bt
   done;
@@ -217,11 +219,12 @@ let output_surname_index oc2 base tmp_snames_inx tmp_snames_dat =
 let output_first_name_index oc2 base tmp_fnames_inx tmp_fnames_dat =
   let module IstrTree =
     Btree.Make
-      (struct type t = dsk_istr let compare = compare_istr_fun base.data end)
+      (struct type t = dsk_istr
+        let compare = Db1disk.compare_istr_fun base.data end)
   in
   let bt = ref IstrTree.empty in
   for i = 0 to base.data.persons.len - 1 do
-    let p = poi base (Adef.iper_of_int i) in
+    let p = Db1disk.poi base (Adef.iper_of_int i) in
     let a = try IstrTree.find p.first_name !bt with Not_found -> [] in
     bt := IstrTree.add p.first_name (p.key_index :: a) !bt
   done;
@@ -281,7 +284,8 @@ let gen_output no_patches bname base =
     if epos <> pos_out oc then count_error epos (pos_out oc)
   in
   begin try
-    output_string oc (if !utf_8_db then magic_gwb else magic_gwb_iso_8859_1);
+      output_string oc (if !utf_8_db then Db1disk.magic_gwb
+                        else Db1disk.magic_gwb_iso_8859_1);
     output_binary_int oc base.data.persons.len;
     output_binary_int oc base.data.families.len;
     output_binary_int oc base.data.strings.len;

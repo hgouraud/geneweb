@@ -2,7 +2,7 @@
 (* $Id: gwtp.ml,v 5.8 2007-09-12 09:58:44 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-open Dbdisk
+open Db1disk.TYPES
 open Printf
 
 let gwtp_tmp = ref (Filename.concat ".." "gwtp_tmp")
@@ -587,7 +587,7 @@ let make_temp env b =
   printf "families: %d\n\n" base.data.families.len;
   flush stdout;
   Secure.set_base_dir (Filename.dirname bdir);
-  Outbase.output bdir base;
+  Db1out.output bdir base;
   flush stdout
 
 let copy_temp b =

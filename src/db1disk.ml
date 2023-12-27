@@ -1,10 +1,199 @@
 (* $Id: database.ml,v 5.19 2007-06-06 15:22:35 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-open Dbdisk
 open Def
-open Dutil
 open Mutil
+
+(* from dbdisk.mli *)
+
+module TYPES = struct
+
+  open Def
+
+  type dsk_istr = Adef.istr
+
+  type dsk_person = (iper, dsk_istr) gen_person
+  type dsk_ascend = ifam gen_ascend
+  type dsk_union = ifam gen_union
+  type dsk_family = (iper, dsk_istr) gen_family
+  type dsk_couple = iper gen_couple
+  type dsk_descend = iper gen_descend
+
+  type dsk_title = dsk_istr gen_title
+
+  type notes =
+    { nread : string -> rn_mode -> string;
+      norigin_file : string;
+      efiles : unit -> string list }
+
+  type 'a record_access =
+    { load_array : unit -> unit;
+      get : int -> 'a;
+      set : int -> 'a -> unit;
+      mutable len : int;
+      output_array : out_channel -> unit;
+      clear_array : unit -> unit }
+
+  type 'istr string_person_index =
+    { find : 'istr -> iper list;
+      cursor : string -> 'istr;
+      next : 'istr -> 'istr }
+
+  type visible_record_access =
+    { v_write : unit -> unit; v_get : (dsk_person -> bool) -> int -> bool }
+
+  type base_data =
+    { persons : dsk_person record_access;
+      ascends : dsk_ascend record_access;
+      unions : dsk_union record_access;
+      visible : visible_record_access;
+      families : dsk_family record_access;
+      couples : dsk_couple record_access;
+      descends : dsk_descend record_access;
+      strings : string record_access;
+      particles : string list;
+      bnotes : notes;
+      bdir : string }
+
+  type base_func =
+    { person_of_key : string -> string -> int -> iper option;
+      persons_of_name : string -> iper list;
+      strings_of_fsname : string -> dsk_istr list;
+      persons_of_surname : dsk_istr string_person_index;
+      persons_of_first_name : dsk_istr string_person_index;
+      patch_person : iper -> dsk_person -> unit;
+      patch_ascend : iper -> dsk_ascend -> unit;
+      patch_union : iper -> dsk_union -> unit;
+      patch_family : ifam -> dsk_family -> unit;
+      patch_couple : ifam -> dsk_couple -> unit;
+      patch_descend : ifam -> dsk_descend -> unit;
+      patch_name : string -> iper -> unit;
+      insert_string : string -> dsk_istr;
+      commit_patches : unit -> unit;
+      commit_notes : string -> string -> unit;
+      patched_ascends : unit -> iper list;
+      is_patched_person : iper -> bool;
+      cleanup : unit -> unit }
+
+  type db1 = { data : base_data; func : base_func }
+
+  type name_index_data = iper array array
+  type strings_of_fsname = dsk_istr array array
+
+end
+
+open TYPES
+
+(* from dutil.ml *)
+
+open Def
+open Mutil
+
+let magic_gwb = "GnWb0020"
+let magic_gwb_iso_8859_1 = "GnWb001y"
+let table_size = 0x3fff
+
+let poi base i = base.data.persons.get (Adef.int_of_iper i)
+let aoi base i = base.data.ascends.get (Adef.int_of_iper i)
+let uoi base i = base.data.unions.get (Adef.int_of_iper i)
+let coi base i = base.data.couples.get (Adef.int_of_ifam i)
+let sou base i = base.data.strings.get (Adef.int_of_istr i)
+
+let p_first_name base p = nominative (sou base p.first_name)
+let p_surname base p = nominative (sou base p.surname)
+
+let husbands base p =
+  let u = uoi base p.key_index in
+  List.map
+    (fun ifam ->
+       let cpl = coi base ifam in
+       let husband = poi base (Adef.father cpl) in
+       let husband_surname = p_surname base husband in
+       let husband_surnames_aliases =
+         List.map (sou base) husband.surnames_aliases
+       in
+       husband_surname, husband_surnames_aliases)
+    (Array.to_list u.family)
+
+let father_titles_places base p nobtit =
+  match (aoi base p.key_index).parents with
+    Some ifam ->
+      let cpl = coi base ifam in
+      let fath = poi base (Adef.father cpl) in
+      List.map (fun t -> sou base t.t_place) (nobtit fath)
+  | None -> []
+
+let dsk_person_misc_names base p nobtit =
+  let sou = sou base in
+  Futil.gen_person_misc_names (sou p.first_name) (sou p.surname)
+    (sou p.public_name) (List.map sou p.qualifiers) (List.map sou p.aliases)
+    (List.map sou p.first_names_aliases) (List.map sou p.surnames_aliases)
+    (List.map (Futil.map_title_strings sou) (nobtit p))
+    (if p.sex = Female then husbands base p else [])
+    (father_titles_places base p nobtit)
+
+let check_magic ic =
+  let b = really_input_string ic (String.length magic_gwb) in
+  Mutil.utf_8_db := true;
+  if b <> magic_gwb then
+    if b = magic_gwb_iso_8859_1 then Mutil.utf_8_db := false
+    else if String.sub magic_gwb 0 4 = String.sub b 0 4 then
+      failwith "this is a GeneWeb base, but not compatible"
+    else failwith "this is not a GeneWeb base, or it is a very old version"
+
+let unaccent =
+  function
+    'à' | 'á' | 'â' | 'ã' | 'ä' | 'å' | 'æ' -> 'a'
+  | 'ç' -> 'c'
+  | 'è' | 'é' | 'ê' | 'ë' -> 'e'
+  | 'ì' | 'í' | 'î' | 'ï' -> 'i'
+  | 'ð' -> 'd'
+  | 'ñ' -> 'n'
+  | 'ò' | 'ó' | 'ô' | 'õ' | 'ö' | 'ø' -> 'o'
+  | 'ù' | 'ú' | 'û' | 'ü' -> 'u'
+  | 'ý' | 'ÿ' -> 'y'
+  | 'þ' -> 'p'
+  | c -> c
+
+let compare_names_1 s1 s2 =
+  let compare_aux e1 e2 =
+    let rec loop i1 i2 =
+      if i1 = e1 && i2 = e2 then 0
+      else if i1 = e1 then -1
+      else if i2 = e2 then 1
+      else
+        let c1 = unaccent (Char.lowercase s1.[i1]) in
+        let c2 = unaccent (Char.lowercase s2.[i2]) in
+        match c1, c2 with
+          'a'..'z', 'a'..'z' ->
+            if c1 < c2 then -1
+            else if c1 > c2 then 1
+            else loop (i1 + 1) (i2 + 1)
+        | 'a'..'z', _ -> 1
+        | _, 'a'..'z' -> -1
+        | _ -> loop (i1 + 1) (i2 + 1)
+    in
+    loop
+  in
+  if s1 = s2 then 0
+  else
+    let i1 = initial s1 in
+    let i2 = initial s2 in
+    match compare_aux (String.length s1) (String.length s2) i1 i2 with
+      0 -> compare_aux i1 i2 0 0
+    | x -> x
+
+let compare_names base_data s1 s2 =
+  if !utf_8_db then compare_after_particle base_data.particles s1 s2
+  else compare_names_1 s1 s2
+
+let compare_istr_fun base_data is1 is2 =
+  if is1 = is2 then 0
+  else
+    compare_names base_data (base_data.strings.get (Adef.int_of_istr is1))
+      (base_data.strings.get (Adef.int_of_istr is2))
+
+(* from database.ml *)
 
 type person = dsk_person
 type ascend = dsk_ascend

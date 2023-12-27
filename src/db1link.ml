@@ -3,7 +3,7 @@
 
 open Gwcomp
 open Printf
-open Dbdisk
+open Db1disk.TYPES
 open Def
 open Mutil
 
@@ -895,7 +895,7 @@ let link next_family_fun bdir =
       if !do_consang then
         (let _ = (ConsangAll.compute base (-1) true false : _ option) in ());
       Gc.compact ();
-      Outbase.output bdir dsk_base;
+      Db1out.output bdir dsk_base;
       output_wizard_notes bdir gen.g_wiznotes;
       output_particles_file bdir dsk_base.data.particles;
       (try Mutil.remove_dir tmp_dir with _ -> ());

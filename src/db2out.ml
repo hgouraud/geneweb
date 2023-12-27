@@ -14,7 +14,7 @@ let output_value_array_no_compress bdir e len pad f =
   let oc_dat = open_out_bin (Filename.concat bdir ("data" ^ e)) in
   let header_pos = Iovalue.create_output_value_header oc_dat in
   Iovalue.output_block_header oc_dat 0 (max len phony_min_size);
-  assert (pos_out oc_dat = Db2.first_item_pos len);
+  assert (pos_out oc_dat = Db2disk.first_item_pos len);
   let nb_items = ref 0 in
   f oc_acc (output_item_no_compress_return_pos oc_dat nb_items);
   (* padding to at least 8 items to allow correct read by input_value *)
@@ -22,7 +22,7 @@ let output_value_array_no_compress bdir e len pad f =
     incr nb_items;
     Iovalue.output oc_dat (pad : 'a)
   done;
-  assert (Db2.first_item_pos !nb_items = Db2.first_item_pos len);
+  assert (Db2disk.first_item_pos !nb_items = Db2disk.first_item_pos len);
   let _ = (Iovalue.patch_output_value_header oc_dat header_pos : int) in
   close_out oc_dat;
   close_out oc_acc;
@@ -44,7 +44,7 @@ let output_value_array_compress bdir e _ pad f =
   let header_pos = Iovalue.create_output_value_header oc_dat in
   let len = phony_min_size in
   Iovalue.output_block_header oc_dat 0 len;
-  assert (pos_out oc_dat = Db2.first_item_pos len);
+  assert (pos_out oc_dat = Db2disk.first_item_pos len);
   let nb_items = ref 0 in
   f oc_acc (output_item_compress_return_pos oc_dat ht nb_items);
   (* padding to at least 8 items to allow correct read by input_value *)
@@ -52,25 +52,25 @@ let output_value_array_compress bdir e _ pad f =
     incr nb_items;
     Iovalue.output oc_dat (pad : 'a)
   done;
-  if Db2.first_item_pos !nb_items = Db2.first_item_pos len then
+  if Db2disk.first_item_pos !nb_items = Db2disk.first_item_pos len then
     begin
       Iovalue.size_32 := !(Iovalue.size_32) - len + !nb_items;
       Iovalue.size_64 := !(Iovalue.size_64) - len + !nb_items;
       let _ = (Iovalue.patch_output_value_header oc_dat header_pos : int) in
       Iovalue.output_block_header oc_dat 0 !nb_items;
-      assert (pos_out oc_dat = Db2.first_item_pos !nb_items);
+      assert (pos_out oc_dat = Db2disk.first_item_pos !nb_items);
       close_out oc_dat;
       close_out oc_acc;
       (* test *)
       let fname = Filename.concat bdir ("data" ^ e) in
       check_input_value "Db2out.output_value_array_compress" fname !nb_items
     end
-  else if Db2.first_item_pos !nb_items > Db2.first_item_pos len then
+  else if Db2disk.first_item_pos !nb_items > Db2disk.first_item_pos len then
     begin
       (* may happen one day and to be debugged then *)
       Printf.eprintf "nb_items %d\n" !nb_items;
       Printf.eprintf "first_item_pos nb_items %d\n"
-        (Db2.first_item_pos !nb_items);
+        (Db2disk.first_item_pos !nb_items);
       flush stderr;
       Printf.eprintf "rebuilding it...";
       flush stderr;
@@ -81,7 +81,7 @@ let output_value_array_compress bdir e _ pad f =
       let oc = open_out_bin (fname ^ "2") in
       let header_pos = Iovalue.create_output_value_header oc in
       Iovalue.output_block_header oc 0 !nb_items;
-      seek_in ic (Db2.first_item_pos len);
+      seek_in ic (Db2disk.first_item_pos len);
       begin try while true do output_byte oc (input_byte ic) done with
         End_of_file -> ()
       end;
@@ -106,7 +106,7 @@ and ('a, 'b) bucketlist =
     Empty
   | Cons of 'a * 'b * ('a, 'b) bucketlist
 
-let output_hashtbl dir file ht =
+let output_hashtbl ~dir ~file ht =
   let oc_ht = open_out_bin (Filename.concat dir file) in
   let oc_hta = open_out_bin (Filename.concat dir (file ^ "a")) in
   let ht : ('a, 'b) hashtbl_t = Obj.magic (ht : ('a, 'b) Hashtbl.t) in
@@ -178,7 +178,8 @@ let make_string_of_crush_index bpdir =
            end;
            close_in ic_dat
          end;
-       output_hashtbl field_d "string_of_crush.ht" ht;
+       output_hashtbl field_d "string_of_crush.ht"
+         ( ht : (string,int) Hashtbl.t );
        if !(Mutil.verbose) then begin Printf.eprintf "\n"; flush stderr end)
     ["first_name", false; "surname", true]
 
@@ -203,7 +204,8 @@ let make_person_of_string_index bpdir =
          loop 0
        end;
        close_in ic_acc;
-       output_hashtbl field_d "person_of_string.ht" ht;
+         output_hashtbl field_d "person_of_string.ht"
+           ( ht : (int,int) Hashtbl.t );
        if !(Mutil.verbose) then begin Printf.eprintf "\n"; flush stderr end)
     ["first_name"; "surname"]
 
@@ -345,7 +347,8 @@ let make_name_index base_d nbper =
        close_in ic_acc; close_in ic_dat; close_in ic_str)
     ic3_list;
   let dir = Filename.concat base_d "person_of_name" in
-  Mutil.mkdir_p dir; output_hashtbl dir "person_of_name.ht" ht
+  Mutil.mkdir_p dir; output_hashtbl dir "person_of_name.ht"
+    ( ht : (string, int) Hashtbl.t )
 
 let start_with s p =
   String.length p < String.length s && String.sub s 0 (String.length p) = p

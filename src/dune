@@ -5,18 +5,18 @@
   (wrapped false)
   (libraries geneweb_wserver geneweb_dag2html camlp5 camlp5.gramlib unix str)
   (modules
-  def dbdisk config templAst
-   argl lock adef iovalue buff name mutil secure btree futil dutil database db2 db2disk diff gwdb pqueue notesLinks consang checkItem calendar gutil num version translate gwlib util templDate templ hutil date update wiki history_diff history notes wiznotes srcfile dag perso updateInd updateIndOk updateFam updateFamOk place updateData
+  def config templAst
+   argl lock adef iovalue buff name mutil secure btree futil db1disk db2disk diff gwdb pqueue notesLinks consang checkItem calendar gutil num version translate gwlib util templDate templ hutil date update wiki history_diff history notes wiznotes srcfile dag perso updateInd updateIndOk updateFam updateFamOk place updateData
 
  merge mergeFamOk mergeFam mergeInd mergeIndOk mergeDup changeChildren sendImage relationLink relation descend birthday cousins alln some searchName advSearchOk birthDeath title doc forum image request base64 robot
 
- outbase progrBar consangAll check gwcomp
+ db1out progrBar consangAll check gwcomp
  db2out iochan db2link
  select
  ansel
 )
   (modules_without_implementation
-  def dbdisk config templAst)
+  def config templAst)
   (flags (-w -3 -warn-error +a -safe-string))
   )
 

@@ -4,6 +4,7 @@
 
 open Gwcomp
 open Printf
+open Db2link
 
 (* ******************************************************************** *)
 (*  [Fonc] check_magic : string -> in_channel -> unit                   *)
@@ -39,7 +40,7 @@ let next_family_fun_templ gwo_list fi =
   in
   let ic_opt = ref None in
   let gwo_list = ref gwo_list in
-  fi.Db2link.f_sep_file_inx <- 0;
+  fi.f_sep_file_inx <- 0;
   fun () ->
     let rec loop () =
       let r =
@@ -55,7 +56,7 @@ let next_family_fun_templ gwo_list fi =
             | None ->
                 close_in ic;
                 ic_opt := None;
-                fi.Db2link.f_sep_file_inx <- fi.Db2link.f_sep_file_inx + 1;
+                fi.f_sep_file_inx <- fi.f_sep_file_inx + 1;
                 None
             end
         | None -> None
@@ -69,11 +70,11 @@ let next_family_fun_templ gwo_list fi =
               gwo_list := rest;
               let ic = open_in_bin x in
               check_magic x ic;
-              fi.Db2link.f_curr_src_file <- input_value ic;
-              fi.Db2link.f_curr_gwo_file <- x;
-              fi.Db2link.f_separate <- separate;
-              fi.Db2link.f_has_separates <-
-                fi.Db2link.f_has_separates || separate;
+              fi.f_curr_src_file <- input_value ic;
+              fi.f_curr_gwo_file <- x;
+              fi.f_separate <- separate;
+              fi.f_has_separates <-
+                fi.f_has_separates || separate;
               ic_opt := Some ic;
               loop ()
           | [] ->
@@ -105,15 +106,15 @@ let speclist =
    "-o", Arg.String (fun s -> out_file := s),
    "<file> Output database (default: a.gwb)";
    "-f", Arg.Set force, " Remove database if already existing";
-   "-stats", Arg.Set Db2link.pr_stats, "Print statistics";
-   "-nc", Arg.Clear Db2link.do_check, "No consistency check";
-   "-cg", Arg.Set Db2link.do_consang, "Compute consanguinity";
+   "-stats", Arg.Set pr_stats, "Print statistics";
+   "-nc", Arg.Clear do_check, "No consistency check";
+   "-cg", Arg.Set do_consang, "Compute consanguinity";
    "-sep", Arg.Set separate, " Separate all persons in next file";
    "-sh", Arg.Int (fun x -> shift := x),
    "<int> Shift all persons numbers in next files";
-   "-ds", Arg.String (fun s -> Db2link.default_source := s), "\
+   "-ds", Arg.String (fun s -> default_source := s), "\
      <str> Set the source field for persons and families without source data";
-   "-part", Arg.String (fun s -> Db2link.particules_file := s), "\
+   "-part", Arg.String (fun s -> particules_file := s), "\
      <file> Particles file (default = predefined particles)";
    "-rgpd", Arg.String (fun s -> Gwcomp.rgpd_files := s), "\
      <file> Rgpd files (default = ./basename.gwb/RGPD)";
@@ -201,7 +202,7 @@ The database \"%s\" already exists. Use option -f to overwrite it.
                else !out_file ^ ".gwb"
              in
              let next_family_fun = next_family_fun_templ (List.rev !gwo) in
-             if Db2link.link next_family_fun bdir then ()
+             if link next_family_fun bdir then ()
              else
                begin
                  eprintf "*** database not created\n";

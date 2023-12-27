@@ -1,15 +1,15 @@
 (* $Id: gwdb.ml,v 5.244 2012-01-18 20:49:57 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-open Dbdisk
-open Db2disk
+open Db1disk.TYPES
+open Db2disk.TYPES
 open Def
 open Futil
 open Mutil
 open Printf
 
 type 'istr gen_string_person_index =
-  'istr Dbdisk.string_person_index =
+  'istr string_person_index =
     { find : 'istr -> iper list;
       cursor : string -> 'istr;
       next : 'istr -> 'istr }
@@ -58,8 +58,8 @@ let eq_istr i1 i2 =
   | Istr2 (_, (f11, f12), i1), Istr2 (_, (f21, f22), i2) ->
       i1 = i2 && f11 = f21 && f12 = f22
   | Istr2New (_, s1), Istr2New (_, s2) -> s1 = s2
-  | Istr2 (db2, f, pos), Istr2New (_, s2) -> string_of_istr2 db2 f pos = s2
-  | Istr2New (_, s1), Istr2 (db2, f, pos) -> s1 = string_of_istr2 db2 f pos
+  | Istr2 (db2, f, pos), Istr2New (_, s2) -> Db2disk.string_of_istr2 db2 f pos = s2
+  | Istr2New (_, s1), Istr2 (db2, f, pos) -> s1 = Db2disk.string_of_istr2 db2 f pos
   | _ -> failwith "eq_istr"
 
 (* Strings - implementation database 1 *)
@@ -73,11 +73,11 @@ let istr1_fun =
 
 let istr2_fun =
   {is_empty_string =
-    (fun (db2, path, pos) -> string_of_istr2 db2 path pos = "");
+    (fun (db2, path, pos) -> Db2disk.string_of_istr2 db2 path pos = "");
    is_quest_string =
-     (fun (db2, path, pos) -> string_of_istr2 db2 path pos = "?");
+     (fun (db2, path, pos) -> Db2disk.string_of_istr2 db2 path pos = "?");
    un_istr = (fun _ -> failwith "un_istr");
-   un_istr2 = fun (db2, path, pos) -> string_of_istr2 db2 path pos}
+   un_istr2 = fun (db2, path, pos) -> Db2disk.string_of_istr2 db2 path pos}
 
 let istr2new_fun =
   {is_empty_string = (fun (db2, s) -> s = "");
@@ -131,14 +131,14 @@ let spi2_fun =
     (fun (db2, spi) s ->
        let f1 = "person" in
        let f2 = if spi.is_first_name then "first_name" else "surname" in
-       match spi2_first db2 spi (f1, f2) s with
+       match Db2disk.spi2_first db2 spi (f1, f2) s with
          Sp pos -> Istr2 (db2, (f1, f2), pos)
        | SpNew s2 -> Istr2New (db2, s2));
    spi_next =
      (fun (db2, spi) istr need_whole_list ->
         let f1 = "person" in
         let f2 = if spi.is_first_name then "first_name" else "surname" in
-        let (sp, dlen) = spi2_next db2 spi (f1, f2) need_whole_list in
+        let (sp, dlen) = Db2disk.spi2_next db2 spi (f1, f2) need_whole_list in
         let r =
           match sp with
             Sp pos -> Istr2 (db2, (f1, f2), pos)
@@ -148,8 +148,8 @@ let spi2_fun =
    spi_find =
      fun (db2, spi) s ->
        match s with
-         Istr2 (db2, (f1, f2), pos) -> spi2_find db2 spi (f1, f2) pos
-       | Istr2New (db2, s) -> spi2gen_find db2 spi s
+         Istr2 (db2, (f1, f2), pos) -> Db2disk.spi2_find db2 spi (f1, f2) pos
+       | Istr2New (db2, s) -> Db2disk.spi2gen_find db2 spi s
        | _ -> failwith "not impl spi_find"}
 
 (* String person index - user functions *)
@@ -166,7 +166,7 @@ let spi_next = let f pf = pf.spi_next in wrap_spi f f
 (* Persons - common definitions *)
 
 type person =
-    Person of dsk_base * int * person1_dat
+    Person of db1 * int * person1_dat
   | Person2 of db2 * int * person2_dat
 and person1_dat =
   { mutable per1 : dsk_person option;
@@ -209,7 +209,7 @@ type ('p, 'a, 'u) person_fun =
     get_surnames_aliases : 'p -> istr list;
     get_titles : 'p -> title list;
     gen_person_of_person : 'p -> (iper, istr) Def.gen_person;
-    dsk_person_of_person : 'p -> Dbdisk.dsk_person;
+    dsk_person_of_person : 'p -> dsk_person;
     get_consang : 'a -> Adef.fix;
     get_parents : 'a -> ifam option;
     get_family : 'u -> ifam array }
@@ -262,41 +262,43 @@ let person1_fun =
 
 (* Persons - implementation database 2 *)
 
-let make_istr2 db2 path i = Istr2 (db2, path, get_field_acc db2 i path)
+let make_istr2 db2 path i = Istr2 (db2, path, Db2disk.get_field_acc db2 i path)
 
 let get_list_field db2 i f1f2 =
-  let pos = get_field_acc db2 i f1f2 in
-  if pos = -1 then [] else get_field_data db2 pos f1f2 "data2.ext"
+  let open Db2disk.TYPES in
+  let pos = Db2disk.get_field_acc db2 i f1f2 in
+  if pos = -1 then [] else Db2disk.get_field_data db2 pos f1f2 "data2.ext"
 
 let sou2 i =
   match i with
-    Istr2 (db2, f, pos) -> string_of_istr2 db2 f pos
+    Istr2 (db2, f, pos) -> Db2disk.string_of_istr2 db2 f pos
   | Istr2New (db2, s) -> s
   | _ -> assert false
 
 let person2_fun =
+  let open Db2disk.TYPES in
   let rec self =
-    {get_access = (fun (db2, i) -> get_field db2 i ("person", "access"));
+    {get_access = (fun (db2, i) -> Db2disk.get_field db2 i ("person", "access"));
      get_aliases =
        (fun (db2, i) ->
           let list = get_list_field db2 i ("person", "aliases") in
           List.map (fun pos -> Istr2 (db2, ("person", "aliases"), pos)) list);
-     get_baptism = (fun (db2, i) -> get_field db2 i ("person", "baptism"));
+     get_baptism = (fun (db2, i) -> Db2disk.get_field db2 i ("person", "baptism"));
      get_baptism_place =
        (fun (db2, i) -> make_istr2 db2 ("person", "baptism_place") i);
      get_baptism_src =
        (fun (db2, i) -> make_istr2 db2 ("person", "baptism_src") i);
-     get_birth = (fun (db2, i) -> get_field db2 i ("person", "birth"));
+     get_birth = (fun (db2, i) -> Db2disk.get_field db2 i ("person", "birth"));
      get_birth_place =
        (fun (db2, i) -> make_istr2 db2 ("person", "birth_place") i);
      get_birth_src =
        (fun (db2, i) -> make_istr2 db2 ("person", "birth_src") i);
-     get_burial = (fun (db2, i) -> get_field db2 i ("person", "burial"));
+     get_burial = (fun (db2, i) -> Db2disk.get_field db2 i ("person", "burial"));
      get_burial_place =
        (fun (db2, i) -> make_istr2 db2 ("person", "burial_place") i);
      get_burial_src =
        (fun (db2, i) -> make_istr2 db2 ("person", "burial_src") i);
-     get_death = (fun (db2, i) -> get_field db2 i ("person", "death"));
+     get_death = (fun (db2, i) -> Db2disk.get_field db2 i ("person", "death"));
      get_death_place =
        (fun (db2, i) -> make_istr2 db2 ("person", "death_place") i);
      get_death_src =
@@ -312,7 +314,7 @@ let person2_fun =
      get_image = (fun (db2, i) -> make_istr2 db2 ("person", "image") i);
      get_key_index = (fun (db2, i) -> Adef.iper_of_int i);
      get_notes = (fun (db2, i) -> make_istr2 db2 ("person", "notes") i);
-     get_occ = (fun (db2, i) -> get_field db2 i ("person", "occ"));
+     get_occ = (fun (db2, i) -> Db2disk.get_field db2 i ("person", "occ"));
      get_occupation =
        (fun (db2, i) -> make_istr2 db2 ("person", "occupation") i);
      get_psources = (fun (db2, i) -> make_istr2 db2 ("person", "psources") i);
@@ -325,27 +327,27 @@ let person2_fun =
             list);
      get_related =
        (fun (db2, i) ->
-          let pos = get_field_acc db2 i ("person", "related") in
+          let pos = Db2disk.get_field_acc db2 i ("person", "related") in
           let rec loop list pos =
             if pos = -1 then List.rev list
             else
               let (ip, pos) =
-                get_field_2_data db2 pos ("person", "related") "data"
+                Db2disk.get_field_2_data db2 pos ("person", "related") "data"
               in
               loop (ip :: list) pos
           in
           loop [] pos);
      get_rparents =
        (fun (db2, i) ->
-          let pos = get_field_acc db2 i ("person", "rparents") in
+          let pos = Db2disk.get_field_acc db2 i ("person", "rparents") in
           if pos = -1 then []
           else
-            let rl = get_field_data db2 pos ("person", "rparents") "data" in
+            let rl = Db2disk.get_field_data db2 pos ("person", "rparents") "data" in
             List.map
               (map_relation_ps (fun x -> x)
                  (fun _ -> Istr2 (db2, ("", ""), -1)))
               rl);
-     get_sex = (fun (db2, i) -> get_field db2 i ("person", "sex"));
+     get_sex = (fun (db2, i) -> Db2disk.get_field db2 i ("person", "sex"));
      get_surname = (fun (db2, i) -> make_istr2 db2 ("person", "surname") i);
      get_surnames_aliases =
        (fun (db2, i) ->
@@ -389,22 +391,22 @@ let person2_fun =
             Some tab -> tab.(i)
           | None ->
               let f = "person", "consang" in
-              if field_exists db2 f then get_field db2 i f
+              if Db2disk.field_exists db2 f then Db2disk.get_field db2 i f
               else Adef.no_consang);
      get_parents =
        (fun (db2, i) ->
           match db2.parents_array with
             Some tab -> tab.(i)
           | None ->
-              let pos = get_field_acc db2 i ("person", "parents") in
+              let pos = Db2disk.get_field_acc db2 i ("person", "parents") in
               if pos = -1 then None
               else
-                Some (get_field_data db2 pos ("person", "parents") "data"));
+                Some (Db2disk.get_field_data db2 pos ("person", "parents") "data"));
      get_family =
        fun (db2, i) ->
          match db2.family_array with
            Some tab -> tab.(i)
-         | None -> get_field db2 i ("person", "family")}
+         | None -> Db2disk.get_field db2 i ("person", "family")}
   in
   self
 
@@ -576,7 +578,7 @@ let get_family u = let f pf = pf.get_family in wrap_uni f f f u
 (* Families - common definitions *)
 
 type family =
-    Family of dsk_base * int * family1_dat
+    Family of db1 * int * family1_dat
   | Family2 of db2 * int * family2_dat
 and family1_dat =
   { mutable fam1 : dsk_family option;
@@ -633,18 +635,18 @@ let family1_fun =
 let family2_fun =
   let rec self =
     {get_comment = (fun (db2, i) -> make_istr2 db2 ("family", "comment") i);
-     get_divorce = (fun (db2, i) -> get_field db2 i ("family", "divorce"));
+     get_divorce = (fun (db2, i) -> Db2disk.get_field db2 i ("family", "divorce"));
      get_fsources = (fun (db2, i) -> make_istr2 db2 ("family", "fsources") i);
-     get_marriage = (fun (db2, i) -> get_field db2 i ("family", "marriage"));
+     get_marriage = (fun (db2, i) -> Db2disk.get_field db2 i ("family", "marriage"));
      get_marriage_place =
        (fun (db2, i) -> make_istr2 db2 ("family", "marriage_place") i);
      get_marriage_src =
        (fun (db2, i) -> make_istr2 db2 ("family", "marriage_src") i);
      get_origin_file =
        (fun (db2, i) -> make_istr2 db2 ("family", "origin_file") i);
-     get_relation = (fun (db2, i) -> get_field db2 i ("family", "relation"));
+     get_relation = (fun (db2, i) -> Db2disk.get_field db2 i ("family", "relation"));
      get_witnesses =
-       (fun (db2, i) -> get_field db2 i ("family", "witnesses"));
+       (fun (db2, i) -> Db2disk.get_field db2 i ("family", "witnesses"));
      gen_family_of_family =
        (fun (db2, i as f) ->
           {marriage = self.get_marriage f;
@@ -659,30 +661,30 @@ let family2_fun =
           let fath =
             match db2.father_array with
               Some tab -> tab.(i)
-            | None -> get_field db2 i ("family", "father")
+            | None -> Db2disk.get_field db2 i ("family", "father")
           in
           Adef.int_of_iper fath < 0);
      get_father =
        (fun (db2, i) ->
           match db2.father_array with
             Some tab -> tab.(i)
-          | None -> get_field db2 i ("family", "father"));
+          | None -> Db2disk.get_field db2 i ("family", "father"));
      get_mother =
        (fun (db2, i) ->
           match db2.mother_array with
             Some tab -> tab.(i)
-          | None -> get_field db2 i ("family", "mother"));
+          | None -> Db2disk.get_field db2 i ("family", "mother"));
      get_parent_array =
        (fun (db2, i) ->
-          let p1 = get_field db2 i ("family", "father") in
-          let p2 = get_field db2 i ("family", "mother") in [| p1; p2 |]);
+          let p1 = Db2disk.get_field db2 i ("family", "father") in
+          let p2 = Db2disk.get_field db2 i ("family", "mother") in [| p1; p2 |]);
      gen_couple_of_couple =
        (fun c -> Adef.couple (self.get_father c) (self.get_mother c));
      get_children =
        (fun (db2, i) ->
           match db2.children_array with
             Some tab -> tab.(i)
-          | None -> get_field db2 i ("family", "children"));
+          | None -> Db2disk.get_field db2 i ("family", "children"));
      gen_descend_of_descend = fun d -> {children = self.get_children d}}
   in
   self
@@ -866,8 +868,8 @@ type base =
     p_first_name : person -> string;
     p_surname : person -> string;
     date_of_last_change : unit -> float;
-    apply_base1 : (Dbdisk.dsk_base -> unit) -> unit;
-    apply_base2 : (Db2disk.db2 -> unit) -> unit }
+    apply_base1 : (db1 -> unit) -> unit;
+    apply_base2 : (db2 -> unit) -> unit }
 
 module C_base :
   sig
@@ -974,28 +976,28 @@ let base1 base =
      patch_person =
        (fun ip p ->
           let p = map_person_ps (fun p -> p) un_istr p in
-          base.func.Dbdisk.patch_person ip p);
-     patch_ascend = (fun ip a -> base.func.Dbdisk.patch_ascend ip a);
-     patch_union = (fun ip u -> base.func.Dbdisk.patch_union ip u);
+          base.func.patch_person ip p);
+     patch_ascend = (fun ip a -> base.func.patch_ascend ip a);
+     patch_union = (fun ip u -> base.func.patch_union ip u);
      patch_family =
        (fun ifam f ->
           let f = map_family_ps (fun p -> p) un_istr f in
-          base.func.Dbdisk.patch_family ifam f);
-     patch_descend = (fun ifam d -> base.func.Dbdisk.patch_descend ifam d);
-     patch_couple = (fun ifam c -> base.func.Dbdisk.patch_couple ifam c);
-     patch_name = (fun s ip -> base.func.Dbdisk.patch_name s ip);
+          base.func.patch_family ifam f);
+     patch_descend = (fun ifam d -> base.func.patch_descend ifam d);
+     patch_couple = (fun ifam c -> base.func.patch_couple ifam c);
+     patch_name = (fun s ip -> base.func.patch_name s ip);
      patch_key = (fun ip fn sn occ -> ()); delete_key = (fun fn sn occ -> ());
-     insert_string = (fun s -> Istr (base.func.Dbdisk.insert_string s));
-     commit_patches = base.func.Dbdisk.commit_patches;
-     commit_notes = base.func.Dbdisk.commit_notes;
-     is_patched_person = (fun ip -> base.func.Dbdisk.is_patched_person ip);
-     patched_ascends = base.func.Dbdisk.patched_ascends;
+     insert_string = (fun s -> Istr (base.func.insert_string s));
+     commit_patches = base.func.commit_patches;
+     commit_notes = base.func.commit_notes;
+     is_patched_person = (fun ip -> base.func.is_patched_person ip);
+     patched_ascends = base.func.patched_ascends;
      delete_family = (fun ifam -> C_base.delete_family self ifam);
-     person_of_key = base.func.Dbdisk.person_of_key;
-     persons_of_name = base.func.Dbdisk.persons_of_name;
+     person_of_key = base.func.person_of_key;
+     persons_of_name = base.func.persons_of_name;
      persons_of_first_name =
-       (fun () -> Spi base.func.Dbdisk.persons_of_first_name);
-     persons_of_surname = (fun () -> Spi base.func.Dbdisk.persons_of_surname);
+       (fun () -> Spi base.func.persons_of_first_name);
+     persons_of_surname = (fun () -> Spi base.func.persons_of_surname);
      base_visible_get =
        (fun f ->
           base.data.visible.v_get
@@ -1061,7 +1063,7 @@ let base1 base =
 
 let base2 db2 =
   let base_strings_of_first_name_or_surname field proj s =
-    let posl = strings2_of_fsname db2 field s in
+    let posl = Db2disk.strings2_of_fsname db2 field s in
     let istrl =
       List.map (fun pos -> Istr2 (db2, ("person", field), pos)) posl
     in
@@ -1110,7 +1112,7 @@ let base2 db2 =
      sou =
        (fun i ->
           match i with
-            Istr2 (db2, f, pos) -> string_of_istr2 db2 f pos
+            Istr2 (db2, f, pos) -> Db2disk.string_of_istr2 db2 f pos
           | Istr2New (db2, s) -> s
           | _ -> assert false);
      nb_of_persons = (fun () -> db2.patches.nb_per);
@@ -1164,24 +1166,24 @@ let base2 db2 =
        (fun fn sn occ ->
           let fn = Name.lower (nominative fn) in
           let sn = Name.lower (nominative sn) in
-          match disk_person2_of_key db2 fn sn occ with
+          match Db2disk.disk_person2_of_key db2 fn sn occ with
             Some _ -> Hashtbl.replace db2.patches.h_key (fn, sn, occ) None
           | None -> Hashtbl.remove db2.patches.h_key (fn, sn, occ));
      insert_string = (fun s -> Istr2New (db2, s));
-     commit_patches = (fun () -> commit_patches2 db2);
-     commit_notes = (fun fnotes s -> commit_notes2 db2 fnotes s);
+     commit_patches = (fun () -> Db2disk.commit_patches2 db2);
+     commit_notes = (fun fnotes s -> Db2disk.commit_notes2 db2 fnotes s);
      is_patched_person = (fun ip -> Hashtbl.mem db2.patches.h_person ip);
      patched_ascends =
        (fun () ->
           let r = ref [] in
           Hashtbl.iter (fun ip _ -> r := ip :: !r) db2.patches.h_ascend; !r);
      delete_family = (fun ifam -> C_base.delete_family self ifam);
-     person_of_key = (fun fn sn oc -> person2_of_key db2 fn sn oc);
-     persons_of_name = (fun s -> persons2_of_name db2 s);
+     person_of_key = (fun fn sn oc -> Db2disk.person2_of_key db2 fn sn oc);
+     persons_of_name = (fun s -> Db2disk.persons2_of_name db2 s);
      persons_of_first_name =
-       (fun () -> Spi2 (db2, persons_of_first_name_or_surname2 db2 true));
+       (fun () -> Spi2 (db2, Db2disk.persons_of_first_name_or_surname2 db2 true));
      persons_of_surname =
-       (fun () -> Spi2 (db2, persons_of_first_name_or_surname2 db2 false));
+       (fun () -> Spi2 (db2, Db2disk.persons_of_first_name_or_surname2 db2 false));
      base_visible_get = (fun f -> failwith "not impl visible_get");
      base_visible_write = (fun () -> failwith "not impl visible_write");
      base_particles =
@@ -1203,11 +1205,11 @@ let base2 db2 =
           let nb_ini = db2.patches.nb_per_ini in
           begin match db2.parents_array with
             Some _ -> ()
-          | None -> db2.parents_array <- Some (parents_array2 db2 nb_ini nb)
+          | None -> db2.parents_array <- Some (Db2disk.parents_array2 db2 nb_ini nb)
           end;
           match db2.consang_array with
             Some _ -> ()
-          | None -> db2.consang_array <- Some (consang_array2 db2 nb));
+          | None -> db2.consang_array <- Some (Db2disk.consang_array2 db2 nb));
      load_unions_array =
        (fun () ->
           match db2.family_array with
@@ -1215,8 +1217,8 @@ let base2 db2 =
           | None ->
               eprintf "*** loading unions array\n";
               flush stderr;
-              db2.family_array <- Some (family_array2 db2));
-     load_couples_array = (fun () -> load_couples_array2 db2);
+              db2.family_array <- Some (Db2disk.family_array2 db2));
+     load_couples_array = (fun () -> Db2disk.load_couples_array2 db2);
      load_descends_array =
        (fun () ->
           match db2.children_array with
@@ -1224,7 +1226,7 @@ let base2 db2 =
           | None ->
               eprintf "*** loading descends array\n";
               flush stderr;
-              db2.children_array <- Some (children_array2 db2));
+              db2.children_array <- Some (Db2disk.children_array2 db2));
      load_strings_array = (fun () -> ());
      persons_array = (fun () -> failwith "not impl persons_array");
      ascends_array =
@@ -1234,19 +1236,19 @@ let base2 db2 =
           let ptab =
             match db2.parents_array with
               Some tab -> tab
-            | None -> parents_array2 db2 nb_ini nb
+            | None -> Db2disk.parents_array2 db2 nb_ini nb
           in
           let cg_tab =
             match db2.consang_array with
               Some tab -> tab
-            | None -> consang_array2 db2 nb
+            | None -> Db2disk.consang_array2 db2 nb
           in
           let fget i = ptab.(i) in
           let cget i = cg_tab.(i) in
           let cset i v = cg_tab.(i) <- v in fget, cget, cset, Some cg_tab);
-     base_notes_read = (fun fnotes -> read_notes db2 fnotes RnAll);
-     base_notes_read_first_line = (fun fnotes -> read_notes db2 fnotes Rn1Ln);
-     base_notes_are_empty = (fun fnotes -> read_notes db2 fnotes RnDeg = "");
+     base_notes_read = (fun fnotes -> Db2disk.read_notes db2 fnotes RnAll);
+     base_notes_read_first_line = (fun fnotes -> Db2disk.read_notes db2 fnotes Rn1Ln);
+     base_notes_are_empty = (fun fnotes -> Db2disk.read_notes db2 fnotes RnDeg = "");
      base_notes_origin_file =
        (fun () ->
           let fname = Filename.concat db2.bdir2 "notes_of.txt" in
@@ -1278,8 +1280,8 @@ let open_base bname =
     if Filename.check_suffix bname ".gwb" then bname else bname ^ ".gwb"
   in
   if Sys.file_exists (Filename.concat bname "base_d") then
-    base2 (base_of_base2 bname)
-  else base1 (Database.opendb bname)
+    base2 (Db2disk.base_of_base2 bname)
+  else base1 (Db1disk.opendb bname)
 
 let close_base b = b.close_base ()
 let empty_person b = b.empty_person

@@ -3,42 +3,53 @@
 
 open Def
 
-type patches =
-  { mutable nb_per : int;
-    mutable nb_fam : int;
-    nb_per_ini : int;
-    nb_fam_ini : int;
-    h_person : (iper, (iper, string) gen_person) Hashtbl.t;
-    h_ascend : (iper, ifam gen_ascend) Hashtbl.t;
-    h_union : (iper, ifam gen_union) Hashtbl.t;
-    h_family : (ifam, (iper, string) gen_family) Hashtbl.t;
-    h_couple : (ifam, iper gen_couple) Hashtbl.t;
-    h_descend : (ifam, iper gen_descend) Hashtbl.t;
-    h_key : (string * string * int, iper option) Hashtbl.t;
-    h_name : (string, iper list) Hashtbl.t }
+module TYPES : sig
 
-type db2 =
-  { phony : unit -> unit;
-    bdir2 : string;
-    cache_chan : (string * string * string, in_channel) Hashtbl.t;
-    patches : patches;
-    mutable parents_array : ifam option array option;
-    mutable consang_array : Adef.fix array option;
-    mutable family_array : ifam array array option;
-    mutable father_array : iper array option;
-    mutable mother_array : iper array option;
-    mutable children_array : iper array array option }
+  type key2
 
-type string_person =
-    Sp of int
-  | SpNew of string
+  type patches =
+    { mutable nb_per : int;
+      mutable nb_fam : int;
+      nb_per_ini : int;
+      nb_fam_ini : int;
+      h_person : (iper, (iper, string) gen_person) Hashtbl.t;
+      h_ascend : (iper, ifam gen_ascend) Hashtbl.t;
+      h_union : (iper, ifam gen_union) Hashtbl.t;
+      h_family : (ifam, (iper, string) gen_family) Hashtbl.t;
+      h_couple : (ifam, iper gen_couple) Hashtbl.t;
+      h_descend : (ifam, iper gen_descend) Hashtbl.t;
+      h_key : (string * string * int, iper option) Hashtbl.t;
+      h_name : (string, iper list) Hashtbl.t }
 
-type string_person_index2 =
-  { is_first_name : bool;
-    index_of_first_char : (string * int) list;
-    mutable ini : string;
-    mutable curr_i : int;
-    mutable curr_s : string }
+  type db2 =
+    { phony : unit -> unit;
+      bdir2 : string;
+      cache_chan : (string * string * string, in_channel) Hashtbl.t;
+      patches : patches;
+      mutable parents_array : ifam option array option;
+      mutable consang_array : Adef.fix array option;
+      mutable family_array : ifam array array option;
+      mutable father_array : iper array option;
+      mutable mother_array : iper array option;
+      mutable children_array : iper array array option }
+
+  type string_person =
+      Sp of int
+    | SpNew of string
+
+  type string_person_index2 =
+    { is_first_name : bool;
+      index_of_first_char : (string * int) list;
+      mutable ini : string;
+      mutable curr_i : int;
+      mutable curr_s : string }
+
+end
+
+open TYPES
+
+val key2_of_key : Adef.istr * Adef.istr * int -> key2
+val first_item_pos : int -> int
 
 val field_exists : db2 -> string * string -> bool
 val get_field_acc : db2 -> int -> string * string -> int

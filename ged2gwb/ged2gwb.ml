@@ -2,7 +2,7 @@
 (* $Id: ged2gwb.ml,v 5.53 2007-09-12 09:58:44 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-open Dbdisk
+open Db1disk.TYPES
 open Def
 open Mutil
 open Printf
@@ -3632,7 +3632,7 @@ The database \"%s\" already exists. Use option -f to overwrite it.
   finish_base base arrays;
   begin match
     Lock.control (Mutil.lock_file !out_file) false
-      (fun () -> Outbase.output !out_file base; output_command_line !out_file)
+      (fun () -> Db1out.output !out_file base; output_command_line !out_file)
   with
     Some x -> x
   | None -> printf "Base is locked: cannot write it\n"; flush stdout; exit 2

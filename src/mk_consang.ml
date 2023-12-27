@@ -16,7 +16,7 @@ let speclist =
    "-i", Arg.Set indexes, ": build the indexes again";
    "-t", Arg.Int (fun i -> tlim := i), " <int>: time limit in seconds";
    "-scratch", Arg.Set scratch, ": from scratch";
-   "-mem", Arg.Set Outbase.save_mem,
+   "-mem", Arg.Set Db1out.save_mem,
    ": Save memory, but slower when rewritting database";
    "-nolock", Arg.Set Lock.no_lock_flag, ": do not lock database."]
 let anonfun s =
@@ -40,9 +40,10 @@ type ('index, 'item) field_info =
     fi_dir : string }
 
 let rebuild_any_field_array db2 fi pad compress (f2, get) =
+  let open Db2disk.TYPES in
   let f1 = fi.fi_dir in
   let bdir =
-    List.fold_left Filename.concat db2.Db2disk.bdir2 ["new_d"; f1; f2]
+    List.fold_left Filename.concat db2.bdir2 ["new_d"; f1; f2]
   in
   Mutil.mkdir_p bdir;
   rebuild_field_array db2 fi.fi_nb pad bdir compress
@@ -60,9 +61,10 @@ let rebuild_any_field_array db2 fi pad compress (f2, get) =
        done)
 
 let rebuild_option_field_array db2 fi pad (f2, get) =
+  let open Db2disk.TYPES in
   let f1 = fi.fi_dir in
   let bdir =
-    List.fold_left Filename.concat db2.Db2disk.bdir2 ["new_d"; f1; f2]
+    List.fold_left Filename.concat db2.bdir2 ["new_d"; f1; f2]
   in
   Mutil.mkdir_p bdir;
   rebuild_field_array db2 fi.fi_nb pad bdir true
@@ -98,7 +100,7 @@ let rebuild_list_field_array db2 fi (f2, get) =
     done
   in
   let bdir =
-    List.fold_left Filename.concat db2.Db2disk.bdir2 ["new_d"; f1; f2]
+    List.fold_left Filename.concat db2.bdir2 ["new_d"; f1; f2]
   in
   Mutil.mkdir_p bdir;
   if !(Mutil.verbose) then
@@ -147,7 +149,7 @@ let rebuild_list2_field_array db2 fi (f2, get) =
     done
   in
   let bdir =
-    List.fold_left Filename.concat db2.Db2disk.bdir2 ["new_d"; f1; f2]
+    List.fold_left Filename.concat db2.bdir2 ["new_d"; f1; f2]
   in
   Mutil.mkdir_p bdir;
   if !(Mutil.verbose) then
@@ -163,9 +165,10 @@ let rebuild_list2_field_array db2 fi (f2, get) =
   if !(Mutil.verbose) then begin eprintf "\n"; flush stderr end
 
 let rebuild_string_field db2 fi (f2, get) =
+  let open Db2disk.TYPES in
   let f1 = fi.fi_dir in
   let bdir =
-    List.fold_left Filename.concat db2.Db2disk.bdir2 ["new_d"; f1; f2]
+    List.fold_left Filename.concat db2.bdir2 ["new_d"; f1; f2]
   in
   Mutil.mkdir_p bdir;
   rebuild_field_array db2 fi.fi_nb "" bdir true
@@ -181,9 +184,10 @@ let rebuild_string_field db2 fi (f2, get) =
        done)
 
 let rebuild_list_with_string_field_array g h db2 fi (f2, get) =
+  let open Db2disk.TYPES in
   let f1 = fi.fi_dir in
   let bdir =
-    List.fold_left Filename.concat db2.Db2disk.bdir2 ["new_d"; f1; f2]
+    List.fold_left Filename.concat db2.bdir2 ["new_d"; f1; f2]
   in
   Mutil.mkdir_p bdir;
   let oc_ext = open_out_bin (Filename.concat bdir "data2.ext") in
@@ -221,6 +225,7 @@ let unique_key_string (ht, scnt) s =
       Hashtbl.add ht s istr; incr scnt; istr
 
 let make_key_index db2 nb_per bdir =
+  let open Db2disk.TYPES in
   if !(Mutil.verbose) then begin eprintf "key index..."; flush stderr end;
   let person_of_key_d = Filename.concat bdir "person_of_key" in
   (try Mutil.mkdir_p person_of_key_d with _ -> ());
@@ -245,11 +250,11 @@ let make_key_index db2 nb_per bdir =
       let fn = unique_key_string ht_strings fn in
       let sn = unique_key_string ht_strings sn in
       let oc = Db2disk.get_field db2 i f1f2_oc in
-      Hashtbl.add ht_index_of_key (Db2.key2_of_key (fn, sn, oc))
+      Hashtbl.add ht_index_of_key (Db2disk.key2_of_key (fn, sn, oc))
         (Adef.iper_of_int i)
   done;
   Db2out.output_hashtbl person_of_key_d "iper_of_key.ht"
-    (ht_index_of_key : (Db2.key2, Def.iper) Hashtbl.t);
+    (ht_index_of_key : (key2, Def.iper) Hashtbl.t);
   Hashtbl.clear ht_index_of_key;
   Db2out.output_hashtbl person_of_key_d "istr_of_string.ht"
     (fst ht_strings : (string, Adef.istr) Hashtbl.t);
@@ -257,19 +262,20 @@ let make_key_index db2 nb_per bdir =
   if !(Mutil.verbose) then begin eprintf "\n"; flush stderr end
 
 let rebuild_fields2 db2 =
+  let open Db2disk.TYPES in
   let fi_per =
-    {fi_nb = db2.Db2disk.patches.Db2disk.nb_per;
-     fi_ht = db2.Db2disk.patches.Db2disk.h_person;
+    {fi_nb = db2.patches.nb_per;
+     fi_ht = db2.patches.h_person;
      fi_index_of_int = Adef.iper_of_int; fi_dir = "person"}
   in
   let fi_asc =
-    {fi_nb = db2.Db2disk.patches.Db2disk.nb_per;
-     fi_ht = db2.Db2disk.patches.Db2disk.h_ascend;
+    {fi_nb = db2.patches.nb_per;
+     fi_ht = db2.patches.h_ascend;
      fi_index_of_int = Adef.iper_of_int; fi_dir = "person"}
   in
   let fi_uni =
-    {fi_nb = db2.Db2disk.patches.Db2disk.nb_per;
-     fi_ht = db2.Db2disk.patches.Db2disk.h_union;
+    {fi_nb = db2.patches.nb_per;
+     fi_ht = db2.patches.h_union;
      fi_index_of_int = Adef.iper_of_int; fi_dir = "person"}
   in
   List.iter (rebuild_string_field db2 fi_per)
@@ -315,18 +321,18 @@ let rebuild_fields2 db2 =
   rebuild_any_field_array db2 fi_uni [| |] false
     ("family", (fun p -> p.Def.family));
   let fi_fam =
-    {fi_nb = db2.Db2disk.patches.Db2disk.nb_fam;
-     fi_ht = db2.Db2disk.patches.Db2disk.h_family;
+    {fi_nb = db2.patches.nb_fam;
+     fi_ht = db2.patches.h_family;
      fi_index_of_int = Adef.ifam_of_int; fi_dir = "family"}
   in
   let fi_cpl =
-    {fi_nb = db2.Db2disk.patches.Db2disk.nb_fam;
-     fi_ht = db2.Db2disk.patches.Db2disk.h_couple;
+    {fi_nb = db2.patches.nb_fam;
+     fi_ht = db2.patches.h_couple;
      fi_index_of_int = Adef.ifam_of_int; fi_dir = "family"}
   in
   let fi_des =
-    {fi_nb = db2.Db2disk.patches.Db2disk.nb_fam;
-     fi_ht = db2.Db2disk.patches.Db2disk.h_descend;
+    {fi_nb = db2.patches.nb_fam;
+     fi_ht = db2.patches.h_descend;
      fi_index_of_int = Adef.ifam_of_int; fi_dir = "family"}
   in
   rebuild_any_field_array db2 fi_fam Adef.codate_None true
@@ -348,25 +354,25 @@ let rebuild_fields2 db2 =
   rebuild_any_field_array db2 fi_des [| |] false
     ("children", (fun f -> f.Def.children));
   let nb_per = fi_per.fi_nb in
-  let new_d = Filename.concat db2.Db2disk.bdir2 "new_d" in
+  let new_d = Filename.concat db2.bdir2 "new_d" in
   make_key_index db2 nb_per new_d;
   Gc.compact ();
   let particles =
-    Mutil.input_particles (Filename.concat db2.Db2disk.bdir2 "particles.txt")
+    Mutil.input_particles (Filename.concat db2.bdir2 "particles.txt")
   in
   Db2out.make_indexes new_d nb_per particles;
-  let old_d = Filename.concat db2.Db2disk.bdir2 "old_d" in
+  let old_d = Filename.concat db2.bdir2 "old_d" in
   Mutil.remove_dir old_d;
   Mutil.mkdir_p old_d;
   List.iter
     (fun f ->
-       Sys.rename (Filename.concat db2.Db2disk.bdir2 f)
+       Sys.rename (Filename.concat db2.bdir2 f)
          (Filename.concat old_d f))
     ["family"; "person"; "person_of_key"; "person_of_name"; "patches"];
   List.iter
     (fun f ->
        Sys.rename (Filename.concat new_d f)
-         (Filename.concat db2.Db2disk.bdir2 f))
+         (Filename.concat db2.bdir2 f))
     ["family"; "person"; "person_of_key"; "person_of_name"]
 
 let simple_output bname base carray =
@@ -374,7 +380,7 @@ let simple_output bname base carray =
     Some tab ->
       Gwdb.apply_base2 base
         (fun db2 ->
-           let bdir = db2.Db2disk.bdir2 in
+           let bdir = db2.bdir2 in
            let dir =
              List.fold_left Filename.concat bdir ["person"; "consang"]
            in
@@ -400,22 +406,22 @@ let simple_output bname base carray =
                       {a with Def.consang = tab.(Adef.int_of_iper ip)}
                     in
                     (ip, a) :: list)
-                 db2.Db2disk.patches.Db2disk.h_ascend []
+                 db2.patches.h_ascend []
              in
              List.iter
                (fun (ip, a) ->
-                  Hashtbl.replace db2.Db2disk.patches.Db2disk.h_ascend ip a)
+                  Hashtbl.replace db2.patches.h_ascend ip a)
                list;
              Db2disk.commit_patches2 db2;
              rebuild_fields2 db2)
   | None ->
       Gwdb.apply_base1 base
         (fun base ->
-           let bname = base.Dbdisk.data.Dbdisk.bdir in
+           let bname = base.data.bdir in
            let no_patches =
              not (Sys.file_exists (Filename.concat bname "patches"))
            in
-           Outbase.gen_output (no_patches && not !indexes) bname base)
+           Db1out.gen_output (no_patches && not !indexes) bname base)
 
 let designation base p =
   let first_name = Gwdb.p_first_name base p in

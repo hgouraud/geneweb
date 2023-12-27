@@ -15,7 +15,7 @@ val output_value_array_compress :
   string -> string -> int -> 'a -> (out_channel -> ('a -> int) -> unit) ->
     unit
 
-val output_hashtbl : string -> string -> (_, _) Hashtbl.t -> unit
+val output_hashtbl : dir:string -> file:string -> (_, _) Hashtbl.t -> unit
 
 val make_indexes : string -> int -> string list -> unit
 

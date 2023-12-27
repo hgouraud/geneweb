@@ -175,8 +175,8 @@ val date_of_last_change : base -> float
 (**/**)
 (** For database builders *)
 
-val base_of_base1 : Dbdisk.dsk_base -> base
-val dsk_person_of_person : person -> Dbdisk.dsk_person
+val base_of_base1 : Db1disk.TYPES.db1 -> base
+val dsk_person_of_person : person -> Db1disk.TYPES.dsk_person
 
-val apply_base1 : base -> (Dbdisk.dsk_base -> unit) -> unit
-val apply_base2 : base -> (Db2disk.db2 -> unit) -> unit
+val apply_base1 : base -> (Db1disk.TYPES.db1 -> unit) -> unit
+val apply_base2 : base -> (Db2disk.TYPES.db2 -> unit) -> unit
