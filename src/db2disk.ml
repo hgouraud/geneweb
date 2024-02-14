@@ -255,7 +255,12 @@ let spi2_next db2 spi (f1, f2) need_whole_list =
         | [] | [_] -> None
       in
       loop spi.index_of_first_char
-    else Some (spi.curr_i + 1)
+    else
+      (* Fabrice: this won't work if the spi2_first returned a patched
+         value the first time it was called, because then spi.curr_i =
+         0, but the corresponding person was never returned. Maybe spi
+         should start with curr_i = -1 ? *)
+      Some (spi.curr_i + 1)
   in
   let next_in_disk =
     match i_opt with

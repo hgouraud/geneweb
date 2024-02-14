@@ -181,7 +181,10 @@ let make_string_of_crush_index bpdir =
        output_hashtbl field_d "string_of_crush.ht"
          ( ht : (string,int) Hashtbl.t );
        if !(Mutil.verbose) then begin Printf.eprintf "\n"; flush stderr end)
-    ["first_name", false; "surname", true]
+    [
+      "first_name", false;
+      "surname", true;
+    ]
 
 let make_person_of_string_index bpdir =
   List.iter
@@ -347,7 +350,8 @@ let make_name_index base_d nbper =
        close_in ic_acc; close_in ic_dat; close_in ic_str)
     ic3_list;
   let dir = Filename.concat base_d "person_of_name" in
-  Mutil.mkdir_p dir; output_hashtbl dir "person_of_name.ht"
+  Mutil.mkdir_p dir;
+  output_hashtbl dir "person_of_name.ht"
     ( ht : (string, int) Hashtbl.t )
 
 let start_with s p =
@@ -356,8 +360,6 @@ let start_with s p =
 let make_index bdir particles f2 =
   let f1 = "person" in
   let fdir = List.fold_left Filename.concat bdir [f1; f2] in
-  let index_dat_fname = Filename.concat fdir "index.dat" in
-  let index_ini_fname = Filename.concat fdir "index.ini" in
   let pos_1st =
     let ic_acc = open_in_bin (Filename.concat fdir "access") in
     let pos = try input_binary_int ic_acc with End_of_file -> -1 in
@@ -381,15 +383,22 @@ let make_index bdir particles f2 =
                 String.sub s plen (String.length s - plen) ^ " (" ^ part ^ ")"
               with Not_found -> s
             in
-            let list = (s, pos) :: list in loop list (len + 1) (pos_in ic)
-        | None -> let _ = close_in ic in list, len
+            let list = (s, pos) :: list in
+            loop list (len + 1) (pos_in ic)
+        | None ->
+          close_in ic ;
+          list, len
       in
       loop [] 0 pos_1st
     else [], 0
   in
+  (* sort all (names, position) in alphabetical order.
+     This sort could be quite expensive on a large number of names.
+ *)
   let list = List.sort compare list in
+
   let a = Array.make len ("", 0) in
-  let iofc =
+  let iofc = (* Index Of First Char *)
     let rec loop rev_iofc i =
       function
         [] -> List.rev rev_iofc
@@ -399,7 +408,8 @@ let make_index bdir particles f2 =
             match rev_iofc with
               (prev_s, _) :: _ ->
                 if s = "" && i <> 0 then rev_iofc
-                else if prev_s = "" then (s, i) :: rev_iofc
+                else
+                if prev_s = "" then (s, i) :: rev_iofc
                 else
                   let prev_nbc = Name.nbc prev_s.[0] in
                   let nbc = Name.nbc s.[0] in
@@ -415,21 +425,42 @@ let make_index bdir particles f2 =
     in
     loop [] 0 list
   in
+
+  (*
+    `a` is index in sort order -> (`string`, `position of string in data`)
+    `iofc` is the rev list of (`string`, `position in a`)
+*)
+
+  let index_dat_fname = Filename.concat fdir "index.dat" in
   let oc = open_out_bin index_dat_fname in
   output_value oc (a : (string * int) array);
   close_out oc;
+
   let oc = open_out_bin (Filename.concat fdir "index.acc") in
   let _ =
     (Iovalue.output_array_access oc (Array.get a) (Array.length a) 0 : int)
   in
   close_out oc;
+
+  let index_ini_fname = Filename.concat fdir "index.ini" in
   let oc = open_out_bin index_ini_fname in
-  output_value oc (iofc : (string * int) list); close_out oc
+  output_value oc (iofc : (string * int) list);
+  close_out oc
 
 let make_indexes bbdir nb_per particles =
   let bpdir = Filename.concat bbdir "person" in
+
+  (* generate `string_of_crush.ht` in person/surname & person/first_name *)
   make_string_of_crush_index bpdir;
+
+  (* generate `person_of_string.ht` in person/surname & person/first_name *)
   make_person_of_string_index bpdir;
+
+  (* generate `person_of_name/person_of_name.ht` *)
   make_name_index bbdir nb_per;
+
+  (* generate person/first_name/index.* *)
   make_index bbdir particles "first_name";
+
+  (* generate person/surname/index.* *)
   make_index bbdir particles "surname"
