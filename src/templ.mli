@@ -1,37 +1,35 @@
 (* camlp5r *)
 (* $Id: templ.mli,v 5.8 2007-09-12 09:58:44 ddr Exp $ *)
 
-open Config;
-open Gwdb;
-open TemplAst;
+open Config
+open Gwdb
+open TemplAst
 
-type vother 'a = 'abstract;
-type env 'a = list (string * 'a);
+type 'a vother
+type 'a env = (string * 'a) list
 
-value eval_transl : config -> bool -> string -> string -> string;
-value copy_from_templ : config -> list (string * string) -> in_channel -> unit;
+val eval_transl : config -> bool -> string -> string -> string
+val copy_from_templ : config -> (string * string) list -> in_channel -> unit
 
-type interp_fun 'a 'b =
-  { eval_var : env 'a -> 'b -> loc -> list string -> expr_val 'b;
-    eval_transl : env 'a -> bool -> string -> string -> string;
-    eval_predefined_apply : env 'a -> string -> list (expr_val 'b) -> string;
-    get_vother : 'a -> option (vother 'b);
-    set_vother : vother 'b -> 'a;
+type ('a, 'b) interp_fun =
+  { eval_var : 'a env -> 'b -> loc -> string list -> 'b expr_val;
+    eval_transl : 'a env -> bool -> string -> string -> string;
+    eval_predefined_apply : 'a env -> string -> 'b expr_val list -> string;
+    get_vother : 'a -> 'b vother option;
+    set_vother : 'b vother -> 'a;
     print_foreach :
-      (env 'a -> 'b -> ast -> unit) ->
-         (env 'a -> 'b -> ast -> string) ->
-         env 'a -> 'b -> loc -> string -> list string ->
-         list (list ast) -> list ast -> unit }
-;
+      ('a env -> 'b -> ast -> unit) -> ('a env -> 'b -> ast -> string) ->
+        'a env -> 'b -> loc -> string -> string list -> ast list list ->
+        ast list -> unit }
 
-value interp_ast :
-  config -> option base -> interp_fun 'a 'b -> env 'a -> 'b -> list ast ->
-    unit;
+val interp_ast :
+  config -> base option -> ('a, 'b) interp_fun -> 'a env -> 'b -> ast list ->
+    unit
 
 (**)
 
-value template_file : ref string;
-value input_templ : config -> string -> option (list ast);
-value print_copyright : config -> unit;
-value print_copyright_with_logo : config -> unit;
-value include_hed_trl : config -> option base -> string -> unit;
+val template_file : string ref
+val input_templ : config -> string -> ast list option
+val print_copyright : config -> unit
+val print_copyright_with_logo : config -> unit
+val include_hed_trl : config -> base option -> string -> unit

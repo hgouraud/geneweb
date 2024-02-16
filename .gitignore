@@ -17,7 +17,6 @@
 .merlin
 
 src/compilation.ml
-src/gwlib.ml
 
 distribution
 
@@ -73,3 +72,7 @@ src/mk_consang
 
 tools/Makefile.inc
 tools/Makefile.ocaml
+
+/_opam
+/_build
+*~

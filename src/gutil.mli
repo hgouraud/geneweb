@@ -1,32 +1,32 @@
 (* $Id: gutil.mli,v 5.34 2007-01-19 01:53:16 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-open Def;
-open Gwdb;
+open Def
+open Gwdb
 
-value spouse : iper -> family -> iper;
+val spouse : iper -> family -> iper
 
-value person_ht_add : base -> string -> iper -> unit;
-value person_not_a_key_find_all : base -> string -> list iper;
-value person_ht_find_all : base -> string -> list iper;
-value person_of_string_key : base -> string -> option iper;
-value find_same_name : base -> person -> list person;
+val person_ht_add : base -> string -> iper -> unit
+val person_not_a_key_find_all : base -> string -> iper list
+val person_ht_find_all : base -> string -> iper list
+val person_of_string_key : base -> string -> iper option
+val find_same_name : base -> person -> person list
 
-value designation : base -> person -> string;
+val designation : base -> person -> string
 
-value strip_spaces : string -> string;
-value gen_strip_spaces : bool -> string -> string;
-value alphabetic_utf_8 : string -> string -> int;
-value alphabetic : string -> string -> int;
-value alphabetic_order : string -> string -> int;
+val strip_spaces : string -> string
+val gen_strip_spaces : bool -> string -> string
+val alphabetic_utf_8 : string -> string -> int
+val alphabetic : string -> string -> int
+val alphabetic_order : string -> string -> int
 
-value arg_list_of_string : string -> list string;
+val arg_list_of_string : string -> string list
 
-value sort_person_list : base -> list person -> list person;
+val sort_person_list : base -> person list -> person list
 
-value father : gen_couple 'a -> 'a;
-value mother : gen_couple 'a -> 'a;
-value couple : bool -> 'a -> 'a -> gen_couple 'a;
-value parent_array : gen_couple 'a -> array 'a;
+val father : 'a gen_couple -> 'a
+val mother : 'a gen_couple -> 'a
+val couple : bool -> 'a -> 'a -> 'a gen_couple
+val parent_array : 'a gen_couple -> 'a array
 
-value find_free_occ : base -> string -> string -> int -> int;
+val find_free_occ : base -> string -> string -> int -> int

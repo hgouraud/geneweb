@@ -2,33 +2,30 @@
 (* Copyright (c) 2006-2007 INRIA *)
 
 type page =
-  [ PgInd of Def.iper
+    PgInd of Def.iper
   | PgFam of Def.ifam
   | PgNotes
   | PgMisc of string
-  | PgWizard of string ]
-;
-type key = (string * string * int);
-type ind_link = { lnTxt : option string; lnPos : int };
-type notes_links_db = list (page * (list string * list (key * ind_link)));
+  | PgWizard of string
+type key = string * string * int
+type ind_link = { lnTxt : string option; lnPos : int }
+type notes_links_db = (page * (string list * (key * ind_link) list)) list
 type wiki_link =
-  [ WLpage of int and (list string * string) and string and string and string
-  | WLperson of int and key and string and option string
-  | WLwizard of int and string and string
-  | WLnone ]
-;
+    WLpage of int * (string list * string) * string * string * string
+  | WLperson of int * key * string * string option
+  | WLwizard of int * string * string
+  | WLnone
 
-value char_dir_sep : char;
-value check_file_name : string -> option (list string * string);
+val char_dir_sep : char
+val check_file_name : string -> (string list * string) option
 
-value misc_notes_link : string -> int -> wiki_link;
+val misc_notes_link : string -> int -> wiki_link
 
-value read_db_from_file : string -> notes_links_db;
-value update_db :
-  string -> page -> (list string * list (key * ind_link)) -> unit;
+val read_db_from_file : string -> notes_links_db
+val update_db : string -> page -> string list * (key * ind_link) list -> unit
 
-value read_db : string -> notes_links_db;
-value write_db : string -> notes_links_db -> unit;
-value add_in_db :
-  notes_links_db -> page -> (list string * list (key * ind_link)) ->
-    notes_links_db;
+val read_db : string -> notes_links_db
+val write_db : string -> notes_links_db -> unit
+val add_in_db :
+  notes_links_db -> page -> string list * (key * ind_link) list ->
+    notes_links_db

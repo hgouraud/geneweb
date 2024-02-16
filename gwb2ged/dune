@@ -1,0 +1,8 @@
+
+(executable
+  (name gwb2ged)
+  (public_name gwb2ged)
+  (libraries geneweb_src )
+  (modules gwb2ged)
+  (flags (-w -3-52 -warn-error +a-52 -safe-string))
+  )

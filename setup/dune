@@ -1,0 +1,8 @@
+
+(executable
+  (name setup)
+  (public_name setup)
+  (libraries geneweb_src )
+  (modules setup)
+  (flags (-w -3-52 -warn-error +a-52 -safe-string))
+  )

@@ -1,0 +1,8 @@
+
+(executable
+  (name gwtp)
+  (public_name gwtp)
+  (libraries geneweb_src )
+  (modules  httpEnv iolight gwtp)
+  (flags (-w -3-52 -warn-error +a-52 -safe-string))
+  )

@@ -1,0 +1,81 @@
+
+
+(executable
+  (name connex)
+  (public_name connex)
+  (libraries geneweb_src )
+  (modules  connex)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name hist)
+  (public_name hist)
+  (libraries geneweb_src )
+  (modules  hist)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name selroy)
+  (public_name selroy)
+  (libraries geneweb_src )
+  (modules select selroy)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name lune)
+  (public_name lune)
+  (libraries geneweb_src )
+  (modules  lune)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name popule)
+  (public_name popule)
+  (libraries geneweb_src )
+  (modules gwlib popule)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name toolhg)
+  (public_name toolhg)
+  (libraries geneweb_src )
+  (modules  toolhg)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name cache)
+  (public_name cache)
+  (libraries geneweb_src )
+  (modules  cache)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name public2)
+  (public_name public2)
+  (libraries geneweb_src )
+  (modules  public2)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name titres)
+  (public_name titres)
+  (libraries geneweb_src )
+  (modules  titres)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
+
+(executable
+  (name nbdesc)
+  (public_name nbdesc)
+  (libraries geneweb_src )
+  (modules  nbdesc)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )

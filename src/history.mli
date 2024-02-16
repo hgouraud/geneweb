@@ -1,14 +1,14 @@
 (* $Id: history.mli,v 5.4 2007-01-19 01:53:16 ddr Exp $ *)
 (* Copyright (c) 1998-2007 INRIA *)
 
-open Config;
-open Def;
-open Gwdb;
+open Config
+open Def
+open Gwdb
 
-value file_name : config -> string;
+val file_name : config -> string
 
-value record : config -> base -> base_changed iper string -> string -> unit;
-value notify : config -> base -> string -> unit;
+val record : config -> base -> (iper, string) base_changed -> string -> unit
+val notify : config -> base -> string -> unit
 
-value print : config -> base -> unit;
-value print_search : config -> base -> unit;
+val print : config -> base -> unit
+val print_search : config -> base -> unit

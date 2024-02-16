@@ -1,30 +1,31 @@
 (* camlp5r *)
 (* $Id: notes.mli,v 5.6 2007-09-12 09:58:44 ddr Exp $ *)
 
-open Config;
-open Gwdb;
-open NotesLinks;
+open Config
+open Gwdb
+open NotesLinks
 
-value file_path : config -> base -> string -> string;
-value read_notes : base -> string -> (list (string * string) * string);
+val file_path : config -> base -> string -> string
+val read_notes : base -> string -> (string * string) list * string
 
-value print : config -> base -> unit;
-value print_mod : config -> base -> unit;
-value update_notes_links_db : config -> page -> string -> unit;
-value print_mod_ok : config -> base -> unit;
+val print : config -> base -> unit
+val print_mod : config -> base -> unit
+val update_notes_links_db : config -> page -> string -> unit
+val print_mod_ok : config -> base -> unit
 
-value print_misc_notes : config -> base -> unit;
-value print_misc_notes_search : config -> base -> unit;
-value print_linked_list : config -> base -> list page -> unit;
+val print_misc_notes : config -> base -> unit
+val print_misc_notes_search : config -> base -> unit
+val print_linked_list : config -> base -> page list -> unit
 
-value merge_possible_aliases : config -> notes_links_db -> notes_links_db;
+val merge_possible_aliases : config -> notes_links_db -> notes_links_db
 
-value links_to_ind :
-  config -> base -> list (NotesLinks.page * ('a * list ('b * 'c))) ->
-    'b -> list NotesLinks.page;
+val links_to_ind :
+  config -> base -> (NotesLinks.page * ('a * ('b * 'c) list)) list -> 'b ->
+    NotesLinks.page list
 
-value has_linked_pages :
+val has_linked_pages :
   config -> base -> Def.iper ->
-    list (NotesLinks.page * ('a * list ((string * string * int) * 'b))) -> bool;
+    (NotesLinks.page * ('a * ((string * string * int) * 'b) list)) list ->
+    bool
 
-value patch_cache_person_linked_pages : config -> Def.iper -> bool -> unit;
+val patch_cache_person_linked_pages : config -> Def.iper -> bool -> unit

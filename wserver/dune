@@ -1,0 +1,9 @@
+; BEWARE: src/gwlib.ml is generated
+
+(library
+  (name geneweb_wserver)
+  (wrapped false)
+  (libraries unix )
+  (modules wserver)
+  (flags (-w -3 -warn-error +a -safe-string))
+  )
