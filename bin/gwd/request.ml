@@ -561,6 +561,8 @@ let treat_request =
           w_base @@ ImageCarrousel.print_c ~saved:true
         | "IM" ->
           w_base @@ ImageDisplay.print
+        | "FIM" ->
+          w_base @@ ImageDisplay.print_family
         | "IMH" ->
           w_base @@ fun conf _ -> ImageDisplay.print_html conf
         | "INV_FAM" ->
