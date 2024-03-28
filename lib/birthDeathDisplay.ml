@@ -107,7 +107,17 @@ let print_death conf base =
                   (Some a, ages_sum, ages_nb)
                 else (None, ages_sum, ages_nb)
           in
-          Output.print_sstring conf "<li><b>";
+          let img =
+            (* Roglo *)
+            if get_access p = SemiPublic then
+              Printf.sprintf
+                {|<img src="%s/friend.gif" width="16" height="16" alt="(f) ">|}
+                (Util.images_prefix conf)
+            else "  "
+          in
+          Output.print_sstring conf "<li>";
+          Output.print_sstring conf (Printf.sprintf "%s" img);
+          Output.print_sstring conf "<b>";
           Output.print_string conf (referenced_person_text conf base p);
           Output.print_sstring conf "</b>, ";
           Output.print_sstring conf
@@ -122,6 +132,11 @@ let print_death conf base =
               Output.print_string conf (DateDisplay.string_of_age conf a);
               Output.print_sstring conf ")</em>")
             age;
+          if get_access p = SemiPublic then
+            Output.print_sstring conf
+              (Format.sprintf " (%s)"
+                 (transl_nth conf "iftitle/private/semipublic/public" 2))
+          else ();
           Output.print_sstring conf "</li>";
           (month_txt, ages_sum, ages_nb))
         (Adef.safe "", (0, 0), (0, 0))

@@ -479,6 +479,7 @@ and eval_person_field_var conf base env p = function
   | [ "is_invisible" ] ->
       let conf = { conf with wizard = false; friend = false } in
       VVbool (not (Util.authorized_age conf base p))
+  | [ "is_semipublic" ] -> VVbool (get_access p = SemiPublic)
   | [ "title" ] -> safe_val (person_title conf base p)
   | [] ->
       VVstring

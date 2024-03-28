@@ -92,6 +92,7 @@ type wiki_info = {
   wi_mode : string;
   wi_file_path : string -> string;
   wi_person_exists : string * string * int -> bool;
+  wi_mark_if_not_public : string * string * int -> bool; (* Roglo *)
   wi_always_show_link : bool;
 }
 
@@ -188,24 +189,40 @@ let syntax_links conf wi s =
           in
           loop quot_lev pos j (Buff.mstore len t)
       | NotesLinks.WLperson (j, (fn, sn, oc), name, _) ->
+          (* Roglo new management of color *)
+          let name =
+            if
+              wi.wi_person_exists (fn, sn, oc)
+              || (conf.friend && conf.half_rgpd)
+              || conf.wizard
+            then name
+            else "x x"
+          in
+          let color = " style=\"color:red\"" in
+          let color1 =
+            if wi.wi_mark_if_not_public (fn, sn, oc) then "style=\"color:red\""
+            else ""
+          in
           let t =
-            if wi.wi_person_exists (fn, sn, oc) then
-              Printf.sprintf "<a id=\"p_%d\" href=\"%sp=%s&n=%s%s\">%s</a>" pos
+            if name = "x x" then name
+            else if wi.wi_person_exists (fn, sn, oc) then
+              Printf.sprintf "<a id=\"p_%d\" href=\"%sp=%s&n=%s%s\" %s>%s</a>"
+                pos
                 (commd conf :> string)
                 (encode fn) (encode sn)
                 (if oc = 0 then "" else "&oc=" ^ string_of_int oc)
-                name
+                color1 name
             else if wi.wi_always_show_link then
-              let s = " style=\"color:red\"" in
               Printf.sprintf "<a id=\"p_%d\" href=\"%sp=%s&n=%s%s\"%s>%s</a>"
                 pos
                 (commd conf :> string)
                 (encode fn) (encode sn)
                 (if oc = 0 then "" else "&oc=" ^ string_of_int oc)
-                s name
+                color name
             else
-              Printf.sprintf "<a href=\"%s\" style=\"color:red\">%s</a>"
+              Printf.sprintf "<a href=\"%s\" %s>%s</a>"
                 (commd conf :> string)
+                color
                 (if conf.hide_names then "x x" else escape name)
           in
           loop quot_lev (pos + 1) j (Buff.mstore len t)

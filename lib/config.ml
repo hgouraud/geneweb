@@ -56,6 +56,7 @@ type config = {
   username : string;
   userkey : string;
   auth_scheme : auth_scheme_kind;
+  half_rgpd : bool;
   command : string;
   indep_command : string;
   highlight : string;
@@ -73,8 +74,10 @@ type config = {
   private_years : int;
   private_years_death : int;
   private_years_marriage : int;
+  minor_age : int;
   hide_names : bool;
   use_restrict : bool;
+  use_restrict_rgpd : bool;
   no_image : bool;
   no_note : bool;
   bname : string;
@@ -136,6 +139,7 @@ let empty =
     username = "";
     userkey = "";
     auth_scheme = NoAuth;
+    half_rgpd = false;
     command = "";
     indep_command = "";
     highlight = "";
@@ -153,8 +157,10 @@ let empty =
     private_years = 0;
     private_years_death = 0;
     private_years_marriage = 0;
+    minor_age = 0;
     hide_names = false;
     use_restrict = false;
+    use_restrict_rgpd = false;
     no_image = false;
     no_note = false;
     bname = "";

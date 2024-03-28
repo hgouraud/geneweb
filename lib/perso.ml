@@ -64,7 +64,7 @@ let string_of_title ?(safe = false) ?(link = true) conf base
     match (nth, dates, name) with
     | n, _, _ when n > 0 -> true
     | _, _, Tname _ -> true
-    | _, (Some _, _) :: _, _ -> authorized_age conf base p
+    | _, (Some _, _) :: _, _ -> !GWPARAM.p_auth conf base p
     | _ -> false
   in
   let acc = if paren then acc ^>^ " (" else acc in
@@ -83,7 +83,7 @@ let string_of_title ?(safe = false) ?(link = true) conf base
     | _ -> (acc, first)
   in
   let acc =
-    if authorized_age conf base p && dates <> [ (None, None) ] then
+    if !GWPARAM.p_auth conf base p && dates <> [ (None, None) ] then
       fst
       @@ List.fold_left
            (fun (acc, first) (date_start, date_end) ->
@@ -151,12 +151,12 @@ let nobility_titles_list conf base p =
 
 (* ********************************************************************** *)
 
-(** [Description] : Indique si l'individu a été modifiée.
+(** [Description] : Indique si l'individu a été modifié.
     [Args] :
       - conf   : configuration de la base
       - base   : arbre
       - p      : person
-      - p_auth : indique si l'utilisateur est authentifié
+      - p_auth : indique si l'individu est accessible
     [Retour] : Vrai si la personne a été modifiée, Faux sinon.
     [Rem] : Exporté en clair hors de ce module.                           *)
 let has_history conf base p p_auth =
@@ -639,7 +639,7 @@ let tree_generation_list conf base gv p =
 (* Ancestors surnames list *)
 
 let get_date_place conf base auth_for_all_anc p =
-  if auth_for_all_anc || authorized_age conf base p then
+  if auth_for_all_anc || !GWPARAM.p_auth conf base p then
     let d1 =
       match Date.od_of_cdate (get_birth p) with
       | None -> Date.od_of_cdate (get_baptism p)
@@ -869,7 +869,7 @@ let build_surnames_list conf base v p =
     in
     Gwdb.iper_marker (Gwdb.ipers base) n
   in
-  let auth = conf.wizard || conf.friend in
+  let auth = !GWPARAM.p_auth conf base p in
   let add_surname sosa p surn dp =
     let r =
       try Hashtbl.find ht surn
@@ -883,7 +883,7 @@ let build_surnames_list conf base v p =
   let rec loop lev sosa p surn dp =
     if Gwdb.Marker.get mark (get_iper p) = 0 then ()
     else if lev > v then
-      if is_hide_names conf p && not (authorized_age conf base p) then ()
+      if is_hide_names conf p && not (!GWPARAM.p_auth conf base p) then ()
       else add_surname sosa p surn dp
     else (
       Gwdb.Marker.set mark (get_iper p) (Gwdb.Marker.get mark (get_iper p) - 1);
@@ -1019,7 +1019,7 @@ let build_list_eclair conf base v p =
   let rec loop lev p =
     let surn = get_surname p in
     if lev > v then
-      if is_hide_names conf p && not (authorized_age conf base p) then ()
+      if is_hide_names conf p && not (!GWPARAM.p_auth conf base p) then ()
       else add_person p surn
     else add_person p surn;
     match get_parents p with
@@ -1133,9 +1133,9 @@ let links_to_ind conf base db key =
       (fun pgl (pg, (_, il)) ->
         let record_it =
           match pg with
-          | Def.NLDB.PgInd ip -> authorized_age conf base (pget conf base ip)
+          | Def.NLDB.PgInd ip -> !GWPARAM.p_auth conf base (pget conf base ip)
           | Def.NLDB.PgFam ifam ->
-              authorized_age conf base
+              !GWPARAM.p_auth conf base
                 (pget conf base (get_father @@ foi base ifam))
           | Def.NLDB.PgNotes | Def.NLDB.PgMisc _ | Def.NLDB.PgWizard _ -> true
         in
@@ -1321,7 +1321,7 @@ let get_linked_page conf base p s =
 
 let make_ep conf base ip =
   let p = pget conf base ip in
-  let p_auth = authorized_age conf base p in
+  let p_auth = !GWPARAM.p_auth conf base p in
   (p, p_auth)
 
 let make_efam conf base ip ifam =
@@ -1331,8 +1331,8 @@ let make_efam conf base ip ifam =
   let ispouse = if ip = ifath then imoth else ifath in
   let cpl = (ifath, imoth, ispouse) in
   let m_auth =
-    authorized_age conf base (pget conf base ifath)
-    && authorized_age conf base (pget conf base imoth)
+    !GWPARAM.p_auth conf base (pget conf base ifath)
+    && !GWPARAM.p_auth conf base (pget conf base imoth)
   in
   (fam, cpl, m_auth)
 
@@ -1889,7 +1889,7 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
   | "descendant" :: sl -> (
       match get_env "descendant" env with
       | Vind p ->
-          let ep = (p, authorized_age conf base p) in
+          let ep = (p, !GWPARAM.p_auth conf base p) in
           eval_person_field_var conf base env ep loc sl
       | _ -> raise Not_found)
   | "anc_paths_cnt_raw" :: sl ->
@@ -1923,7 +1923,7 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
   | ("event_witness" as s) :: sl -> (
       match get_env s env with
       | Vind p ->
-          let ep = (p, authorized_age conf base p) in
+          let ep = (p, !GWPARAM.p_auth conf base p) in
           eval_person_field_var conf base env ep loc sl
       | _ -> raise Not_found)
   | [ "base"; "name" ] -> VVstring conf.bname
@@ -1940,7 +1940,7 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
   | "child" :: sl -> (
       match get_env "child" env with
       | Vind p when mode_local env ->
-          let auth = authorized_age conf base p in
+          let auth = !GWPARAM.p_auth conf base p in
           let ep = (p, auth) in
           eval_person_field_var conf base env ep loc sl
       | _ -> (
@@ -1958,7 +1958,7 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
   | "cousin" :: sl -> (
       match get_env "cousin" env with
       | Vind p when mode_local env ->
-          let auth = authorized_age conf base p in
+          let auth = !GWPARAM.p_auth conf base p in
           let ep = (p, auth) in
           eval_person_field_var conf base env ep loc sl
       | _ -> raise Not_found)
@@ -2056,13 +2056,13 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
   | "parent" :: sl -> (
       match get_env "parent" env with
       | Vind p ->
-          let ep = (p, authorized_age conf base p) in
+          let ep = (p, !GWPARAM.p_auth conf base p) in
           eval_person_field_var conf base env ep loc sl
       | _ -> raise Not_found)
   | "path_end" :: sl -> (
       match get_env "path_end" env with
       | Vind p ->
-          let auth = authorized_age conf base p in
+          let auth = !GWPARAM.p_auth conf base p in
           let ep = (p, auth) in
           eval_person_field_var conf base env ep loc sl
       | _ -> raise Not_found)
@@ -2198,7 +2198,7 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
           let ip0 = get_iper p0 in
           match Util.branch_of_sosa conf base s0 (pget conf base ip0) with
           | Some (p :: _) ->
-              let p_auth = authorized_age conf base p in
+              let p_auth = !GWPARAM.p_auth conf base p in
               eval_person_field_var conf base env (p, p_auth) loc sl
           | _ -> raise Not_found)
       | None -> raise Not_found)
@@ -2212,7 +2212,7 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
           let s0 = Sosa.of_string s in
           match Util.branch_of_sosa conf base s0 (pget conf base ip) with
           | Some (p :: _) ->
-              let p_auth = authorized_age conf base p in
+              let p_auth = !GWPARAM.p_auth conf base p in
               eval_person_field_var conf base env (p, p_auth) loc sl
           | _ -> raise Not_found)
       | _ -> raise Not_found)
@@ -2222,7 +2222,7 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
       *)
       match Util.p_of_sosa conf base (Sosa.of_string s) a with
       | Some np ->
-          let np_auth = authorized_age conf base np in
+          let np_auth = !GWPARAM.p_auth conf base np in
           eval_person_field_var conf base env (np, np_auth) loc sl
       | None -> raise Not_found)
   | "related" :: sl -> (
@@ -2272,7 +2272,7 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
   | "witness" :: sl -> (
       match get_env "witness" env with
       | Vind p ->
-          let ep = (p, authorized_age conf base p) in
+          let ep = (p, !GWPARAM.p_auth conf base p) in
           eval_person_field_var conf base env ep loc sl
       | _ -> raise Not_found)
   | "witness_relation" :: sl -> (
@@ -2508,8 +2508,8 @@ and eval_ancestor_field_var conf base env gp loc = function
           let ispouse = if ip = ifath then imoth else ifath in
           let c = (ifath, imoth, ispouse) in
           let m_auth =
-            authorized_age conf base (pget conf base ifath)
-            && authorized_age conf base (pget conf base imoth)
+            !GWPARAM.p_auth conf base (pget conf base ifath)
+            && !GWPARAM.p_auth conf base (pget conf base imoth)
           in
           eval_family_field_var conf base env (ifam, f, c, m_auth) loc sl
       | _ -> raise Not_found)
@@ -2654,14 +2654,14 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc = function
       match get_env "anc1" env with
       | Vind pa ->
           eval_person_field_var conf base env
-            (pa, authorized_age conf base pa)
+            (pa, !GWPARAM.p_auth conf base pa)
             loc sl
       | _ -> VVstring "")
   | "anc2" :: sl -> (
       match get_env "anc2" env with
       | Vind pa ->
           eval_person_field_var conf base env
-            (pa, authorized_age conf base pa)
+            (pa, !GWPARAM.p_auth conf base pa)
             loc sl
       | _ -> VVstring "")
   | [ "anc_f_list" ] -> (
@@ -2773,43 +2773,49 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc = function
               eval_person_field_var conf base env ep loc sl
           | None -> warning_use_has_parents_before_parent loc "father" null_val)
       )
-  | [ "has_linked_page"; s ] -> (
-      match get_env "nldb" env with
-      | Vnldb db ->
-          let key =
-            let fn = Name.lower (sou base (get_first_name p)) in
-            let sn = Name.lower (sou base (get_surname p)) in
-            (fn, sn, get_occ p)
-          in
-          let r =
-            List.exists
-              (fun (pg, (_, il)) ->
-                match pg with
-                | Def.NLDB.PgMisc pg ->
-                    if List.mem_assoc key il then
-                      let nenv, _ = Notes.read_notes base pg in
-                      List.mem_assoc s nenv
-                    else false
-                | _ -> false)
-              db
-          in
-          VVbool r
-      | _ -> raise Not_found)
-  | [ "has_linked_pages" ] -> (
-      match get_env "nldb" env with
-      | Vnldb db ->
-          let r =
-            if p_auth then
-              let key =
-                let fn = Name.lower (sou base (get_first_name p)) in
-                let sn = Name.lower (sou base (get_surname p)) in
-                (fn, sn, get_occ p)
-              in
-              links_to_ind conf base db key <> []
-            else false
-          in
-          VVbool r
-      | _ -> raise Not_found)
+  | [ "has_linked_page"; s ] ->
+      if p_auth then
+        (* Roglo *)
+        match get_env "nldb" env with
+        | Vnldb db ->
+            let key =
+              let fn = Name.lower (sou base (get_first_name p)) in
+              let sn = Name.lower (sou base (get_surname p)) in
+              (fn, sn, get_occ p)
+            in
+            let r =
+              List.exists
+                (fun (pg, (_, il)) ->
+                  match pg with
+                  | Def.NLDB.PgMisc pg ->
+                      if List.mem_assoc key il then
+                        let nenv, _ = Notes.read_notes base pg in
+                        List.mem_assoc s nenv
+                      else false
+                  | _ -> false)
+                db
+            in
+            VVbool r
+        | _ -> raise Not_found
+      else VVbool false
+  | [ "has_linked_pages" ] ->
+      if p_auth then
+        (* Roglo *)
+        match get_env "nldb" env with
+        | Vnldb db ->
+            let r =
+              if p_auth then
+                let key =
+                  let fn = Name.lower (sou base (get_first_name p)) in
+                  let sn = Name.lower (sou base (get_surname p)) in
+                  (fn, sn, get_occ p)
+                in
+                links_to_ind conf base db key <> []
+              else false
+            in
+            VVbool r
+        | _ -> raise Not_found
+      else VVbool false
   | [ "has_sosa" ] -> (
       match get_env "p_link" env with
       | Vbool _ -> VVbool false
@@ -2832,17 +2838,22 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc = function
       match get_env "lev_cnt" env with
       | Vint i -> str_val (string_of_int i)
       | _ -> raise Not_found)
-  | [ "linked_page"; s ] -> (
-      match get_env "nldb" env with
-      | Vnldb db ->
-          let key =
-            let fn = Name.lower (sou base (get_first_name p)) in
-            let sn = Name.lower (sou base (get_surname p)) in
-            (fn, sn, get_occ p)
-          in
-          List.fold_left (linked_page_text conf base p s key) (Adef.safe "") db
-          |> safe_val
-      | _ -> raise Not_found)
+  | [ "linked_page"; s ] ->
+      if p_auth then
+        (* Roglo *)
+        match get_env "nldb" env with
+        | Vnldb db ->
+            let key =
+              let fn = Name.lower (sou base (get_first_name p)) in
+              let sn = Name.lower (sou base (get_surname p)) in
+              (fn, sn, get_occ p)
+            in
+            List.fold_left
+              (linked_page_text conf base p s key)
+              (Adef.safe "") db
+            |> safe_val
+        | _ -> raise Not_found
+      else VVstring ""
   | "marriage_date" :: sl -> (
       match get_env "fam" env with
       | Vfam (_, fam, _, true) -> (
@@ -2893,7 +2904,7 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc = function
                   if so = Sosa.zero then null_val
                   else
                     let p = poi base ip in
-                    let p_auth = authorized_age conf base p in
+                    let p_auth = !GWPARAM.p_auth conf base p in
                     eval_person_field_var conf base env (p, p_auth) loc sl)
           | None -> null_val)
       | _ -> raise Not_found)
@@ -2907,7 +2918,7 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc = function
                   if Sosa.eq so Sosa.zero then null_val
                   else
                     let p = poi base ip in
-                    let p_auth = authorized_age conf base p in
+                    let p_auth = !GWPARAM.p_auth conf base p in
                     eval_person_field_var conf base env (p, p_auth) loc sl)
           | None -> null_val)
       | _ -> raise Not_found)
@@ -3097,7 +3108,7 @@ and eval_event_field_var conf base env (p, p_auth)
       match isp with
       | Some isp ->
           let sp = poi base isp in
-          let ep = (sp, authorized_age conf base sp) in
+          let ep = (sp, !GWPARAM.p_auth conf base sp) in
           eval_person_field_var conf base env ep loc sl
       | None -> null_val)
   | [ s ] -> (
@@ -3114,10 +3125,10 @@ and eval_event_field_var conf base env (p, p_auth)
 
 and eval_event_witness_relation_var conf base env (p, e) loc = function
   | "event" :: sl ->
-      let ep = (p, authorized_age conf base p) in
+      let ep = (p, !GWPARAM.p_auth conf base p) in
       eval_event_field_var conf base env ep e loc sl
   | "person" :: sl ->
-      let ep = (p, authorized_age conf base p) in
+      let ep = (p, !GWPARAM.p_auth conf base p) in
       eval_person_field_var conf base env ep loc sl
   | _ -> raise Not_found
 
@@ -3147,9 +3158,9 @@ and eval_bool_person_field conf base env (p, p_auth) = function
                   let mother = pget conf base (get_mother fam) in
                   if
                     d.prec = Sure
-                    && authorized_age conf base father
+                    && !GWPARAM.p_auth conf base father
                     && get_death father = NotDead
-                    && authorized_age conf base mother
+                    && !GWPARAM.p_auth conf base mother
                     && get_death mother = NotDead
                   then
                     d.day = conf.today.day && d.month = conf.today.month
@@ -3423,7 +3434,7 @@ and eval_bool_person_field conf base env (p, p_auth) = function
                 let isp = Gutil.spouse (get_iper p) fam in
                 let sp = poi base isp in
                 (* On sait que p_auth vaut vrai. *)
-                let m_auth = authorized_age conf base sp in
+                let m_auth = !GWPARAM.p_auth conf base sp in
                 m_auth
                 && (sou base (get_marriage_src fam) <> ""
                    || sou base (get_fsources fam) <> ""))
@@ -3456,7 +3467,7 @@ and eval_bool_person_field conf base env (p, p_auth) = function
   | "is_female" -> get_sex p = Female
   | "is_invisible" ->
       let conf = { conf with wizard = false; friend = false } in
-      not (authorized_age conf base p)
+      not (!GWPARAM.p_auth conf base p)
   | "is_male" -> get_sex p = Male
   | "is_private" -> get_access p = Private
   | "is_public" -> Util.is_public conf base p
@@ -4035,7 +4046,7 @@ and string_of_parent_age conf base (p, p_auth) parent : Adef.safe_string =
   | Some ifam ->
       let cpl = foi base ifam in
       let pp = pget conf base (parent cpl) in
-      if p_auth && authorized_age conf base pp then
+      if p_auth && !GWPARAM.p_auth conf base pp then
         match
           ( Date.cdate_to_dmy_opt (get_birth pp),
             Date.cdate_to_dmy_opt (get_birth p) )
@@ -4367,7 +4378,7 @@ let print_foreach conf base print_ast eval_expr =
         | _ ->
             let auth =
               Array.for_all
-                (fun ip -> authorized_age conf base (pget conf base ip))
+                (fun ip -> !GWPARAM.p_auth conf base (pget conf base ip))
                 (get_children fam)
             in
             let env = ("auth", Vbool auth) :: env in
@@ -4398,7 +4409,7 @@ let print_foreach conf base print_ast eval_expr =
                     ("pos", Vstring "next") :: env
                   else env
                 in
-                let ep = (p, authorized_age conf base p) in
+                let ep = (p, !GWPARAM.p_auth conf base p) in
                 List.iter (print_ast env ep) al)
               (get_children fam);
 
@@ -4624,8 +4635,8 @@ let print_foreach conf base print_ast eval_expr =
         let imoth = get_mother fam in
         let cpl = (ifath, imoth, imoth) in
         let m_auth =
-          authorized_age conf base (pget conf base ifath)
-          && authorized_age conf base (pget conf base imoth)
+          !GWPARAM.p_auth conf base (pget conf base ifath)
+          && !GWPARAM.p_auth conf base (pget conf base imoth)
         in
         if m_auth then
           let env = ("fam", Vfam (ifam, fam, cpl, true)) :: env in
@@ -4673,8 +4684,8 @@ let print_foreach conf base print_ast eval_expr =
              let ispouse = Gutil.spouse (get_iper p) fam in
              let cpl = (ifath, imoth, ispouse) in
              let m_auth =
-               authorized_age conf base (pget conf base ifath)
-               && authorized_age conf base (pget conf base imoth)
+               !GWPARAM.p_auth conf base (pget conf base ifath)
+               && !GWPARAM.p_auth conf base (pget conf base imoth)
              in
              let vfam = Vfam (ifam, fam, cpl, m_auth) in
              let env = ("#loop", Vint 0) :: env in
@@ -4931,7 +4942,7 @@ let print_foreach conf base print_ast eval_expr =
               let isp = Gutil.spouse (get_iper p) fam in
               let sp = poi base isp in
               (* On sait que p_auth vaut vrai. *)
-              let m_auth = authorized_age conf base sp in
+              let m_auth = !GWPARAM.p_auth conf base sp in
               if m_auth then
                 let lab =
                   if Array.length (get_family p) = 1 then ""
@@ -5100,7 +5111,7 @@ let print_foreach conf base print_ast eval_expr =
       | "child" :: sl -> (
           match get_env "child" env with
           | Vind p ->
-              let auth = authorized_age conf base p in
+              let auth = !GWPARAM.p_auth conf base p in
               let ep = (p, auth) in
               loop env ep efam sl
           | _ -> (
@@ -5108,7 +5119,7 @@ let print_foreach conf base print_ast eval_expr =
               | Vind p ->
                   let env = ("p_link", Vbool true) :: env in
                   let env = ("f_link", Vbool true) :: env in
-                  let auth = authorized_age conf base p in
+                  let auth = !GWPARAM.p_auth conf base p in
                   let ep = (p, auth) in
                   loop env ep efam sl
               | _ -> raise Not_found))
@@ -5120,7 +5131,7 @@ let print_foreach conf base print_ast eval_expr =
               let ifath = get_father cpl in
               let cpl = (ifath, get_mother cpl, ifath) in
               let m_auth =
-                p_auth && authorized_age conf base (pget conf base ifath)
+                p_auth && !GWPARAM.p_auth conf base (pget conf base ifath)
               in
               let efam = Vfam (ifam, foi base ifam, cpl, m_auth) in
               loop env ep efam sl
@@ -5146,7 +5157,7 @@ let print_foreach conf base print_ast eval_expr =
               let ifath = get_father cpl in
               let cpl = (ifath, get_mother cpl, ifath) in
               let m_auth =
-                p_auth && authorized_age conf base (pget conf base ifath)
+                p_auth && !GWPARAM.p_auth conf base (pget conf base ifath)
               in
               let efam = Vfam (ifam, foi base ifam, cpl, m_auth) in
               loop env ep efam sl
@@ -5262,7 +5273,7 @@ let eval_predefined_apply conf env f vl =
 
 let gen_interp_templ ?(no_headers = false) menu title templ_fname conf base p =
   template_file := templ_fname ^ ".txt";
-  let ep = (p, authorized_age conf base p) in
+  let ep = (p, !GWPARAM.p_auth conf base p) in
   let emal =
     match p_getint conf.env "v" with Some i -> i | None -> Cousins.mal
   in
@@ -5322,7 +5333,7 @@ let gen_interp_templ ?(no_headers = false) menu title templ_fname conf base p =
     let all_gp () = Vallgp (get_all_generations conf base p) in
     [
       ("p", Vind p);
-      ("p_auth", Vbool (authorized_age conf base p));
+      ("p_auth", Vbool (!GWPARAM.p_auth conf base p));
       ("count", Vcnt (ref 0));
       ("count1", Vcnt (ref 0));
       ("count2", Vcnt (ref 0));
@@ -5409,7 +5420,8 @@ let interp_notempl_with_menu title templ_fname conf base p =
 
 let print ?no_headers conf base p =
   let passwd =
-    if conf.wizard || conf.friend then None
+    (* Roglo *)
+    if conf.wizard || (conf.friend && get_access p = SemiPublic) then None
     else
       let src =
         match get_parents p with
@@ -5426,7 +5438,7 @@ let print ?no_headers conf base p =
   | Some _ | None -> interp_templ ?no_headers "perso" conf base p
 
 let print_what_links conf base p =
-  if authorized_age conf base p then (
+  if !GWPARAM.p_auth conf base p then (
     let key =
       let fn = Name.lower (sou base (get_first_name p)) in
       let sn = Name.lower (sou base (get_surname p)) in

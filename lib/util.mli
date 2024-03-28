@@ -363,6 +363,7 @@ val string_of_witness_kind : config -> sex -> witness_kind -> Adef.safe_string
 val relation_txt : config -> sex -> family -> (('a -> 'b) -> 'b, 'a, 'b) format
 val string_of_decimal_num : config -> float -> string
 val person_exists : config -> base -> string * string * int -> bool
+val mark_if_not_public : config -> base -> string * string * int -> bool
 val husband_wife : config -> base -> person -> bool -> Adef.safe_string
 
 val find_person_in_env : config -> base -> string -> person option
@@ -459,8 +460,12 @@ val html_highlight : bool -> string -> string -> string
 val wprint_in_columns :
   config -> ('a -> string) -> ('a -> unit) -> 'a list -> unit
 
+val is_hide_names_full : config -> base -> person -> bool
+(** Tells if person's names are hidden (if person's access is [SemiPublic] or 
+child of a Semipublic person, if mode [conf.hide_names_full] is enabled). *)
+
 val is_hide_names : config -> person -> bool
-(** Tells if person's names are hiden (if person's access is [Private] or if mode [conf.hide_names] is enabled). *)
+(** Tells if person's names are hidden (if person's access is [Private] or if mode [conf.hide_names] is enabled). *)
 
 val reduce_list : int -> 'a list -> 'a list
 (** [reduce_list n l] takes [n] first elements from the list [l] *)

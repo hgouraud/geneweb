@@ -61,6 +61,7 @@ type config = {
   username : string;
   userkey : string;
   auth_scheme : auth_scheme_kind;
+  half_rgpd : bool; (* Roglo *)
   command : string;
   indep_command : string;
   highlight : string;
@@ -78,8 +79,10 @@ type config = {
   private_years : int;
   private_years_death : int;
   private_years_marriage : int;
+  minor_age : int;
   hide_names : bool;
   use_restrict : bool;
+  use_restrict_rgpd : bool;
   no_image : bool;
   no_note : bool;
   bname : string;

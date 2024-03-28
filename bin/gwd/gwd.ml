@@ -52,6 +52,8 @@ let debug = ref false
 let use_auth_digest_scheme = ref false
 let wizard_just_friend = ref false
 let wizard_passwd = ref ""
+let rgpd = ref false (* Roglo *)
+let rgpd_files = ref ""
 
 let is_multipart_form =
   let s = "multipart/form-data" in
@@ -1248,6 +1250,10 @@ let make_conf from_addr request script_name env =
        begin try int_of_string (List.assoc "private_years_marriage" base_env) with
          Not_found | Failure _ -> private_years
        end;
+     minor_age =
+       begin try int_of_string (List.assoc "minor_age" base_env) with
+         Not_found | Failure _ -> 18
+       end;
      hide_names =
        if ar.ar_wizard || ar.ar_friend then false
        else
@@ -1260,6 +1266,16 @@ let make_conf from_addr request script_name env =
          begin try List.assoc "use_restrict" base_env = "yes" with
            Not_found -> false
          end;
+     use_restrict_rgpd = (* Roglo *)
+       if ar.ar_wizard || ar.ar_friend then false
+       else
+         begin try List.assoc "use_restrict_rgpd" base_env = "yes" with
+           Not_found -> false
+         end;
+     half_rgpd = (* Roglo *)
+       begin try List.assoc "half_rgpd" base_env = "yes" with
+         Not_found -> false
+       end;
      no_image =
        if ar.ar_wizard || ar.ar_friend then false
        else
@@ -2007,6 +2023,7 @@ let main () =
     ; ("-allowed_tags", Arg.String (fun x -> Util.allowed_tags_file := x), "<FILE> HTML tags which are allowed to be displayed. One tag per line in file.")
     ; ("-wizard", Arg.String (fun x -> wizard_passwd := x), "<PASSWD> Set a wizard password.")
     ; ("-friend", Arg.String (fun x -> friend_passwd := x), "<PASSWD> Set a friend password.")
+    ; ("-rgpd", Arg.String (fun s -> rgpd_files := s), "<file> Rgpd files")
     ; ("-wjf", Arg.Set wizard_just_friend, " Wizard just friend (permanently).")
     ; ("-lang", Arg.String (fun x -> default_lang := x), "<LANG> Set a default language (default: " ^ !default_lang ^ ").")
     ; ("-blang", Arg.Set choose_browser_lang, " Select the user browser language if any.")
@@ -2051,6 +2068,14 @@ let main () =
 #endif
   arg_parse_in_file (chop_extension Sys.argv.(0) ^ ".arg") speclist anonfun usage;
   Arg.parse speclist anonfun usage;
+  (* Roglo *)
+  if Sys.file_exists !rgpd_files && Sys.is_directory !rgpd_files
+    then rgpd := true
+    else rgpd := false;
+  if !rgpd
+    then Printf.printf "Rgpd status: True, files in: %s\n" !rgpd_files
+    else Printf.printf "Rgpd status: False\n";
+  flush stdout;
   Geneweb.GWPARAM.syslog := GwdLog.syslog;
   let gwd_cmd =
     Array.fold_left (fun acc arg ->

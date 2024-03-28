@@ -116,6 +116,41 @@ let escape_attribute =
           Bytes.unsafe_set buf ibuf c;
           loop (istr + 1) (ibuf + 1))
 
+(* Roglo show only first_name and surname *)
+let is_hide_names_full conf base p =
+  let is_access_friend =
+    match get_access p with
+    | SemiPublic -> true
+    | _ -> (
+        match
+          ( Date.od_of_cdate (get_birth p),
+            Date.od_of_cdate (get_baptism p),
+            get_death p,
+            Date.date_of_death (get_death p) )
+        with
+        | Some (Dgreg (d, _)), _, _, _ | _, Some (Dgreg (d, _)), _, _ ->
+            let a = Date.time_elapsed d conf.today in
+            if a.year < conf.minor_age then
+              match get_parents p with
+              | Some ifam ->
+                  let cpl = foi base ifam in
+                  get_access (poi base (get_father cpl)) = SemiPublic
+                  || get_access (poi base (get_mother cpl)) = SemiPublic
+              | None -> false
+            else false
+        | _ -> false)
+  in
+  let is_access_friend =
+    if conf.friend && conf.half_rgpd then true else is_access_friend
+  in
+  if conf.wizard || get_access p = Public then false
+  else if conf.friend && get_access p = Private && not conf.half_rgpd then true
+  else if
+    (conf.friend && get_access p = SemiPublic)
+    || (conf.friend && is_access_friend)
+  then false
+  else true
+
 let is_hide_names conf p =
   if conf.hide_names || get_access p = Private then true else false
 
@@ -1915,6 +1950,15 @@ let person_exists conf base (fn, sn, oc) =
       match person_of_key base fn sn oc with
       | Some ip -> authorized_age conf base (pget conf base ip)
       | None -> false)
+
+(* Roglo *)
+let mark_if_not_public conf base (fn, sn, oc) =
+  match p_getenv conf.env "red_if_not_public" with
+  | Some "on" -> (
+      match person_of_key base fn sn oc with
+      | Some ip -> get_access (poi base ip) <> Public
+      | None -> false)
+  | _ -> false
 
 let default_sosa_ref conf base =
   match List.assoc_opt "default_sosa_ref" conf.base_env with
