@@ -1213,6 +1213,7 @@ let make_conf from_addr request script_name env =
             username, ""
           end
   in
+  let gw_p = if !gw_prefix <> "" then !gw_prefix else "gw" in
 
   let conf =
     {from = from_addr;
@@ -1328,21 +1329,15 @@ let make_conf from_addr request script_name env =
         year = tm.Unix.tm_year + 1900; prec = Sure; delta = 0};
      today_wd = tm.Unix.tm_wday;
      time = tm.Unix.tm_hour, tm.Unix.tm_min, tm.Unix.tm_sec; ctime = utm;
-     gw_prefix =
-       if !gw_prefix <> "" then !gw_prefix
-       else String.concat Filename.dir_sep [ "gw" ];
-     images_prefix = (
-       match !gw_prefix, !images_prefix with
-       | gw_p, im_p when gw_p <> "" && im_p = "" ->
-           String.concat Filename.dir_sep [ gw_p; "images" ]
-       | _, im_p when im_p <> "" ->  im_p
-       | _, _ -> (Filename.concat "gw" "images"));
-     etc_prefix = (
-       match !gw_prefix, !etc_prefix with
-       | gw_p, etc_p when gw_p <> "" && etc_p = "" ->
-           String.concat Filename.dir_sep [ gw_p; "etc" ]
-       | _, etc_p when etc_p <> "" ->  etc_p
-       | _, _ -> (Filename.concat "gw" "etc"));
+     (* gw_p is defined just before the let conf = { ... } in *)
+     (* let gw_p = if !gw_prefix <> "" then !gw_prefix else "gw" in *)
+     gw_prefix = gw_p;
+     images_prefix =
+       if !images_prefix <> "" then !images_prefix
+       else String.concat Filename.dir_sep [ gw_p; "images" ];
+     etc_prefix =
+       if !etc_prefix <> "" then !etc_prefix
+       else String.concat Filename.dir_sep [ gw_p; "etc" ];
      cgi;
      output_conf;
      forced_plugins = !forced_plugins;
