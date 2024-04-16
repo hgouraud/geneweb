@@ -2088,6 +2088,7 @@ let main () =
   List.iter
     (fun dbn ->
        Printf.eprintf "Caching %s... %!" dbn;
+       let dbn = Util.bpath (dbn ^ ".gwb") in
        ignore (Gwdb.open_base ~keep_in_memory:true dbn);
        Printf.eprintf "Done.\n%!"
     )
