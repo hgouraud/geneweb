@@ -64,6 +64,19 @@ let relation_print conf base p =
   RelationDisplay.print conf base p p1
 
 let specify conf base n pl =
+  if List.length pl = 1 then (
+    Hutil.header conf (fun _ -> ());
+    Output.print_sstring conf
+    (Format.sprintf {|
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        window.location.href = '%s%s';
+    }, 500);
+});
+</script>|} (commd conf :> string) (acces conf base (List.nth pl 0) :> string));
+    Hutil.trailer conf)
+  else (
   let title _ = Output.printf conf "%s : %s" n (transl conf "specify") in
   let n = Name.crush_lower n in
   let ptll =
@@ -120,7 +133,7 @@ let specify conf base n pl =
        Output.print_sstring conf "</li>\n"
     ) ptll;
   Output.print_sstring conf "</ul>\n";
-  Hutil.trailer conf
+  Hutil.trailer conf)
 
 let incorrect_request ?(comment = "") conf =
   Hutil.incorrect_request ~comment:comment conf

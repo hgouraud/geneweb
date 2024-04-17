@@ -136,7 +136,7 @@ let search conf base an search_order specify unknown =
         match pl with
         | [ p ] ->
             record_visited conf (get_iper p);
-            Perso.print conf base p
+            specify conf base an [p]
         | _ -> loop l)
     | Key :: l -> (
         let pl = search_by_key conf base an in
@@ -144,7 +144,7 @@ let search conf base an search_order specify unknown =
         | [] -> loop l
         | [ p ] ->
             record_visited conf (get_iper p);
-            Perso.print conf base p
+            specify conf base an [p]
         | pl -> specify conf base an pl)
     | Surname :: l -> (
         let pl = Some.search_surname conf base an in
@@ -162,7 +162,7 @@ let search conf base an search_order specify unknown =
         | [] -> loop l
         | [ p ] ->
             record_visited conf (get_iper p);
-            Perso.print conf base p
+            specify conf base an [p]
         | pl -> specify conf base an pl)
     | PartialKey :: l -> (
         let pl = search_partial_key conf base an in
@@ -170,7 +170,7 @@ let search conf base an search_order specify unknown =
         | [] -> loop l
         | [ p ] ->
             record_visited conf (get_iper p);
-            Perso.print conf base p
+            specify conf base an [p]
         | pl -> specify conf base an pl)
     | DefaultSurname :: _ -> Some.search_surname_print conf base unknown an
   in
