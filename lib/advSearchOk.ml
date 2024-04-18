@@ -550,7 +550,7 @@ let advanced_search conf base max_answers =
           loop (pget conf base @@ get_iper sosa_ref) (IperSet.empty, ([], 0))
           |> snd
       | None -> ([], 0)
-    else if fn_list <> [] || sn_list <> [] then
+    else if fn_list <> [] || sn_list <> [] || alias_list <> [] then
       let list_aux strings_of persons_of split n_list exact =
         List.map
           (List.map (fun x ->
@@ -574,12 +574,18 @@ let advanced_search conf base max_answers =
             list_aux Gwdb.base_strings_of_surname Gwdb.persons_of_surname
               Name.split_sname sn_list
               (gets "exact_surname" = "on") )
-        else
+        else if fn_list <> [] then
           ( true,
             false,
             list_aux Gwdb.base_strings_of_first_name Gwdb.persons_of_first_name
               Name.split_fname fn_list
               (gets "exact_first_name" = "on") )
+        else
+          ( true,
+            true,
+            list_aux Gwdb.base_strings_of_alias Gwdb.persons_of_alias
+              Name.split_sname alias_list
+              (gets "exact_alias" = "on") )
       in
       let rec loop ((_, len) as acc) = function
         | [] -> acc
