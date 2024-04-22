@@ -721,7 +721,8 @@ let treat_request =
 
         | "RESET_IMAGE_C_OK" ->
           w_base @@ ImageCarrousel.print_main_c
-
+        |"BLASON_UP_ONE" -> w_base @@ ImageCarrousel.print_main_c
+        |"BLASON_STOP" -> w_base @@ ImageCarrousel.print_main_c
         | "RL" ->
           w_base @@ RelationLink.print
         | "RLM" ->
