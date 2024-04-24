@@ -2,6 +2,12 @@
 
 # assumes we are running in the repo folder
 # ./test/run-GW-test.sh
+pwd
+
+BASES_DIR="$HOME/Genea/GeneWeb-Bases"
+DIST_DIR="$HOME/GitHub/hgouraud/geneweb/distribution"
+BIN_DIR="$DIST_DIR/gw"
+LEX_PREFIX=""
 
 # this is the data of a specific person
 # for synonym test there should be several occurrences of FN+SN
@@ -19,8 +25,25 @@ OC2=0
 SN2=cosse
 
 # this assumes a fresh (empty) gwd.log file
-#rm -f $GW_DIR/distribution/gw/gwd.log
-#touch $GW_DIR/distribution/gw/gwd.log
+rm -f ./distribution/gw/gwd.log
+touch ./distribution/gw/gwd.log
+
+killall gwd
+
+OCAMLRUNPARAM=b "$BIN_DIR"/gwd \
+  -setup_link \
+  -bd "$BASES_DIR" \
+  -hd "$BIN_DIR" \
+  -add_lexicon "$BASES_DIR/$LEX_PREFIX"lang/lexicon-hg.txt \
+  -allowed_tags "$BASES_DIR/tags.txt" \
+  -trace_failed_passwd \
+  -robot_xcl 10000,1 \
+  -conn_tmout 3600 \
+  -blang \
+  -log "<stderr>" \
+  -plugins -unsafe "$BIN_DIR"/plugins \
+  > "$BIN_DIR"/gwd.log 2>&1 &
+
 
 echo "Running GW-test"
 
