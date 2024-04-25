@@ -49,7 +49,7 @@
 %define;havingchildren(cc)
   %if;(cc>1)
     %apply;havingaschildren%with;%apply;nth%with;[n (number)]%and;cc%end;%end;
-  %else;[having as children]0
+  %else;[having as children]0%nn;
   %end;
 %end;
 %( Copie des fonctions qui se trouvent dans perso.txt dont la SEULE
