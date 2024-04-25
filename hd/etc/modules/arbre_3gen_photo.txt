@@ -48,10 +48,10 @@
     %if;(not cancel_links)</a>%end;
   %elseif;(b.default_image="yes")
     <img height="75" src="%images_prefix;img_unknown_%if;(xx.sex=1)wo%end;man.png" alt="[missing image]">
-  %else;
+  %(%else;
     <span class="image_small_size rounded px-3 pt-1 pb-2 text-muted"
       %if;(father.has_parents and mother.has_image)%father.image_small_size;
-      %elseif;(mother.has_parents and father.has_image)%mother.image_small_size;%end;>?</span>
+      %elseif;(mother.has_parents and father.has_image)%mother.image_small_size;%end;>?</span>%)
   %end;
   <br>%apply;short_display_person_tree("xx")
 %end;
