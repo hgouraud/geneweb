@@ -7,7 +7,7 @@
 %define;vt(xx,yy,zz,cc)
   %if;((("xx"!="" and xx.has_sosa)
     or ("yy"!="" and yy.has_sosa))
-   and ("zz" in "yy" or "zz" in "yy" or (zz=self and self=sosa_ref)))
+   and ("zz" in "yy" or "zz" in "yy" or (zz=self and self=sosa_ref or self.has_sosa)))
     ║%if;(cc=2)<br>║%end;
   %else;│%if;(cc=2)<br>│%end;
   %end;
