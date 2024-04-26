@@ -28,7 +28,9 @@ GWDLOG=./distribution/gw/gwd.log
 FN=henri
 SN=gouraud
 OC=0
-ID=1711
+ID=1711 # individual Id, ideally should have multiple events
+FID=594 # family id for this individual, ideally, should have multiple families
+IMG_C="alain.0.de_fouchier.jpg" # une image du carrousel de $ID!
 # someone without grand parents
 FN1=paul
 OC1=1
@@ -127,8 +129,22 @@ crl "p=$FN2&n=$SN2&oc=$OC2"
 crl "p=xxx&n=yyy"
 
 crl "m=MOD_IND&i=$ID"
+crl "m=DEL_IND&i=$ID"
+crl "m=MRG&i=$ID"
 crl "m=CHG_EVT_IND_ORD&i=$ID"
+crl "m=NV_FAM&i=$ID&f=$FID" # f=family_id is base specific!
+crl "m=CHG_EVT_FAM_ORD&i=$FID&ip=$ID"
+crl "m=DEL_FAM&i=$FID&ip=$FID$ID1"
+
 crl "m=SND_IMAGE&i=$ID"
+crl "m=SND_IMAGE_C&i=$ID"
+crl "m=IM_C&i=$ID&s=$ID"
+crl "m=IM_C_S&i=$ID&s=$ID"
+crl "m=IM_C&i=$ID&s=$IMG_C" # TODO voir comportement si pas d'image sauvée
+crl "m=REFRESH&i=$ID"
+# ATTENTION, les autres fonctions du carrousel (_OK) ont une action immédiate!!
+crl "m=HIST_DIFF&t=SUM&f=$FN.$OC.$SN"
+crl "m=HIST_DIFF&t=SUM&f=$FN.$OC.$SN&new=0&old=1"
 crl "i=$ID&m=A"
 crl "i=$ID&m=A&t=T&v=5"
 crl "i=$ID&m=A&t=H&v=5"
