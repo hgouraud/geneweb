@@ -98,9 +98,10 @@ html {
     max-width: 100%; 
 }
 #content:focus { outline: none; }
+
 /* Remove overused p anchor top margin*/
 p {
-	margin-top:1rem;
+  margin-top:0rem;
 }
 
 /* Relation menu table */
