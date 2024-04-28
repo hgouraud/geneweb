@@ -36,7 +36,7 @@
     %include;buttons
 %end;
 %define;link(aaa,xxx,nnn)
-  %apply;image_MF("xxx") %if;(e.cgl="on")xxx%else;<a id="i_nnn" href="%prefix;aaa">xxx</a>%end;
+  %if;(e.cgl="on")xxx%else;<a id="i_nnn" href="%prefix;aaa">xxx</a>%end;
 %end;
 %define;date_popup(xxx,yyy)
   %let;symb;%if;("yyy"="birth")°%elseif;("yyy"="death" and xxx.is_dead)†%end;%in;
@@ -158,6 +158,7 @@
         %apply;add_in_sorted_listc(xxx.index)
         <div class="d-flex justify-content-between">
           <div class="align-self-center">%nn;
+            %apply;image_MF("xxx")%nn;
             %apply;link%with;%xxx.access;%and;%if;(e.fn=1)%xxx.first_name; %xxx.surname;%else;%xxx;%end;%and;%xxx.index;%end;
             %if;(e.tt=1 and xxx.title!=""), %xxx.title;%end;
           </div>
@@ -195,6 +196,7 @@
           %else;<div></div>
           %end;
           <div class="align-self-center px-1">
+            %apply;image_MF("xxx")
             %apply;link%with;%xxx.access;%and;%if;(e.fn=1)%xxx.first_name; %xxx.surname;%else;%xxx;%end;%and;%xxx.index;%end;
             %if;(e.tt=1 and xxx.title!=""), %xxx.title;%end;
           </div>
@@ -237,6 +239,7 @@
           %end;>%nn;
             %apply;add_in_sorted_list(spouse.index)
             %if;(zzz.nb_families>1)<span class="mr-1">%apply;letter(family_cnt)</span>%end;
+            %apply;image_MF("spouse")
             %apply;link%with;%spouse.access;%and;%if;(e.fn=1)%spouse.first_name; %spouse.surname;%else;%spouse;%end;%and;%spouse.index;%end;
             %if;(e.tt=1 and spouse.title!=""), %spouse.title;%end;
           </td>
@@ -432,7 +435,7 @@
   %( Les enfants d'une personne sont numérotés de 1 à n indépendamment du nombre de mariages %)
   %let;prfx;%if;("prefx"="-1")%else;prefx%end;%in;
   %if;(e.t="A") %( d’Aboville %)
-    <br>%prfx;
+    <br>%prfx; %apply;image_MF("xxx")
        %apply;link%with;%xxx.access;%and;%xxx.first_name; %xxx.surname;%nn;%and;%xxx.index;%end;%nn;
         %xxx.title;%nn;
     %if;(has_families)
@@ -444,6 +447,7 @@
         %else;
           %slash_marriage_date;%nn;
         %end;
+        %apply;image_MF("xxx.spouse")
         %apply;link%with;%xxx.spouse.access;%and;%xxx.spouse.first_name; %xxx.spouse.surname;%and;%xxx.index;%end;%nn;
         %xxx.spouse.title;
       %end;
@@ -550,6 +554,7 @@
         %end;
       </span>
       <span>
+        %sp;%apply;image_MF("xxx.spouse")
         %apply;link%with;%xxx.spouse.access;
         %and;%xxx.spouse.first_name; %xxx.spouse.surname;%and;%xxx.spouse.index;
         %end;

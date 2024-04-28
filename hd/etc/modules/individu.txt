@@ -271,21 +271,10 @@
     %if;(birth_date.year!= "" and today.year >= birth_date.year and l_nbd != "")%apply;compute_age("today","birth_date")%else;%age;%end;
   %end;
 %end;
-%foreach;event;
-  %if;(event.name=[birth] or event.name=[baptism] or event.name=[marriage event]
-    or event.name=[death] or event.name=[burial] or event.name=[cremation])%nn;
-    %if;(event.has_note)
-      %apply;setvar%with;ns%event.name;%and; data-toggle="tooltip" data-html="true"
-        title='<div class="text-wrap text-left small">
-               %if;event.has_note;[*note/notes]1 %event.name;[:] %event.note;%end;
-               %if;event.has_src;<br><br>[*source/sources]1[:] %event.src;.%end;</div>'%end;
-    %end;
-  %end;
-%end;
 %define;etat_civil()
   <ul class="fa-ul%if;(not (has_image or b.default_image="yes")) pl-0%end;">
     %if;(has_birth_date or has_birth_place)
-      <li%apply;getvar%with;ns[birth]%end;>
+      <li title="[*birth]">
         <span class="fa-li"><i class="fas fa-baby"></i></span>
         %if;has_birth_date;[*born]s %on_birth_date;
           %if;has_birth_place; [in (place)] %birth_place;%end;
@@ -302,7 +291,7 @@
       %end;
     %end;
     %if;(has_baptism_date or has_baptism_place)
-      <li%apply;getvar%with;ns[baptism]%end;>
+      <li title="[*baptism]">
         <span class="fa-li"><i class="fas fa-dove"></i></span>
         %if;has_baptism_date;[*baptized]s %on_baptism_date;
             %if;has_baptism_place; [in (place)] %baptism_place;%end;
@@ -313,7 +302,7 @@
       </li>%nl;
     %end;
     %if;is_dead;
-      <li class="mt-1"%apply;getvar%with;ns[death]%end;>
+      <li class="mt-1" title="[*death]">
         <span class="fa-li"><i class="fas fa-skull-crossbones"></i></span>
         %apply;capitalize(died)
         %if;has_death_date; %on_death_date;%end;
@@ -321,7 +310,7 @@
         %if;(has_linked_page.DEATH and linked_page.DEATH!="") (%linked_page.DEATH;)%end;</li>%nl;
     %end;
     %if;(is_buried or is_cremated)
-      <li %if;(is_buried)%apply;getvar%with;ns[burial]%end;%elseif;(is_cremated)%apply;getvar%with;ns[cremation]%end;%end;>
+      <li title="%if;(is_buried)[*burial]%elseif;(is_cremated)[*cremation]%end;">
         <span class="fa-li"><i class="fas fa-cross"></i></span>
         %if;is_buried;[*buried]s
           %if;has_burial_date; %on_burial_date;%end;
