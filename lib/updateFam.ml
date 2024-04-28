@@ -575,9 +575,8 @@ let print_inv1 conf base p ifam1 ifam2 =
 
 let print_add conf base =
   let fath, moth, digest =
-    match p_getenv conf.env "ip" with
-    | Some i ->
-        let p = poi base (iper_of_string i) in
+    match Util.find_person_in_env conf base "p" with
+    | Some p ->
         let fath =
           if
             get_sex p = Male
@@ -619,10 +618,9 @@ let print_add conf base =
   print_update_fam conf base (fam, cpl, des) digest
 
 let print_add_parents conf base =
-  match p_getenv conf.env "ip" with
+  match Util.find_person_in_env conf base "p" with
   | None -> Hutil.incorrect_request conf
-  | Some i ->
-      let p = poi base (iper_of_string i) in
+  | Some p ->
       let fam =
         {
           marriage = Date.cdate_None;
