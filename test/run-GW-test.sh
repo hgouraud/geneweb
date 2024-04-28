@@ -80,15 +80,15 @@ else
   exit
 fi
 
-curlopt='-sS -o ./tmp.tmp'
+curlopt='-sS -o /tmp/tmp.txt'
 crl () {
   local cmd=$1
   curl $curlopt "http://localhost:2317/$BASE?w=$PWD&$cmd"
-  if grep "<h1>Incorrect request</h1>" ./tmp.tmp; then
-    echo "Incorrect request with $cmd."
-  fi
   if [ $? -ne 0 ]; then
     echo "Failed to execute $cmd."
+  fi
+  if grep "<h1>Incorrect request</h1>" /tmp/tmp.txt; then
+    echo "Incorrect request with $cmd."
   fi
 }
 
@@ -194,6 +194,17 @@ crl "m=SRC&v=$TXT_SRC"
 crl "m=H&v=$TXT_SRC"
 crl "m=L"
 
+#crl "m=MRG_DUP"
+#crl "m=MRG_DUP_IND_Y_N"
+#crl "m=MRG_FAM"
+#crl "m=MRG_DUP_FAM_Y_N"
+crl "m=MRG_IND"
+crl "m=PERSO&i=$ID"
+crl "m=PS"
+crl "m=PPS"
+crl "m=R&i=$ID"
+#crl "m=RL&i=$ID&i1" # m=RL&i=5316&l1=3&i1=1711&l2=2&i2=6223&dag=on
+crl "m=RLM&i1=$ID&p2=$FN2&n2=$SN2&oc2=$OC2"
 
 
 

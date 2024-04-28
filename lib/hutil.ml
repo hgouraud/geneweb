@@ -119,7 +119,8 @@ let error_cannot_access conf fname =
       ^<^ (Util.escape_html fname : Adef.escaped_string :> Adef.safe_string)
       ^>^ ".txt\".")
 
-let header_with_title ?(error = false) ?(fluid = false) ?(no_title = false) conf title =
+let header_with_title ?(error = false) ?(fluid = false) ?(no_title = false) conf
+    title =
   Util.html conf;
   header_without_http_nor_home conf title;
   Templ_parser.wrap "home" (fun () ->
