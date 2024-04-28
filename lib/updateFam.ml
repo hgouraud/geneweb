@@ -768,7 +768,7 @@ let print_change_order conf base =
         (Utf8.capitalize_fst (transl_nth conf "validate/delete" 0));
       Output.print_sstring conf "</button></p></form>";
       Hutil.trailer conf
-  | _ -> Hutil.incorrect_request conf
+  | _ -> Hutil.incorrect_request conf ~comment:"bad params for CHG_FAM_ORD"
 
 let print_change_event_order conf base =
   match p_getenv conf.env "i" with

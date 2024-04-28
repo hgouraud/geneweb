@@ -25,12 +25,14 @@ GWDLOG=./distribution/gw/gwd.log
 
 # this is the data for specific persons
 # for synonym test there should be several occurrences of FN+SN
+WIZ=hg
 FN=henri
 SN=gouraud
 OC=0
 ID=1711 # individual Id, ideally should have multiple events
-FID=594 # family id for this individual, ideally, should have multiple families
+FID=597 # family id for this individual, ideally, should have multiple families
 IMG_C="alain.0.de_fouchier.jpg" # une image du carrousel de $ID!
+IMG_C_S="alain.0.boucher.jpg" # une image sauvegardée du carrousel de $ID!
 IMG_SRC="famille-h-gouraud.jpg" # une image dans bases/src/mabase/images
 TXT_SRC="famille-h-gouraud.txt" # une source dans bases/src/mabase
 IMG_IM="henri.0.gouraud.jpg" # un portrait dans bases/images/mabase
@@ -78,10 +80,13 @@ else
   exit
 fi
 
-curlopt='-sS -o /dev/null'
+curlopt='-sS -o ./tmp.tmp'
 crl () {
   local cmd=$1
   curl $curlopt "http://localhost:2317/$BASE?w=$PWD&$cmd"
+  if grep "<h1>Incorrect request</h1>" ./tmp.tmp; then
+    echo "Incorrect request with $cmd."
+  fi
   if [ $? -ne 0 ]; then
     echo "Failed to execute $cmd."
   fi
@@ -116,6 +121,8 @@ crl "m=MOD_DATA&data=sn"
 crl "m=MOD_DATA&data=place"
 crl "m=MOD_DATA&data=occu"
 crl "m=MOD_DATA&data=src"
+crl "MOD_NOTES&f=$NOTE"
+crl "MOD_WIZNOTES&f=$WIZ"
 crl "m=TT"
 crl "m=TT&p=*"
 crl "m=N&tri=A"
@@ -138,20 +145,24 @@ crl "m=CHG_EVT_IND_ORD&i=$ID"
 crl "m=INV_FAM&i=$ID&f=$FID" # f=family_id is base specific!
 crl "m=CHG_EVT_FAM_ORD&i=$FID&ip=$ID"
 crl "m=DEL_FAM&i=$FID&ip=$ID1"
-crl "m=CHG_FAM_ORD&i=$FID&ip=$ID1"
+crl "m=CHG_FAM_ORD&f=$FID&i=$ID&n=2"
 crl "m=CHG_CHN&ip=$FID"
 
 crl "m=SND_IMAGE&i=$ID"
 crl "m=SND_IMAGE_C&i=$ID"
 crl "m=IM&s=$IMG_SRC"
 crl "m=IMH&s=$IMG_SRC"
-crl "m=IM_C&i=$ID&s=$ID"
-crl "m=IM_C_S&i=$ID&s=$ID"
+crl "m=IM_C&i=$ID"
+crl "m=IM_C_S&i=$ID"
+crl "m=IM_C&i=$ID&s=$IMG_C"
+crl "m=IM_C_S&i=$ID&s=$IMG_C_S"
 crl "m=IM_C&i=$ID&s=$IMG_C" # TODO voir comportement si pas d'image sauvée
 crl "m=REFRESH&i=$ID"
 # ATTENTION, les autres fonctions du carrousel (_OK) ont une action immédiate!!
 crl "m=HIST_DIFF&t=SUM&f=$FN.$OC.$SN"
 crl "m=HIST_DIFF&t=SUM&f=$FN.$OC.$SN&new=0&old=1"
+crl "m=HIST_CLEAN&i=$ID&f=$FN.$OC.$SN"
+crl "m=HIST_SEARCH&i=$ID"
 crl "m=A&i=$ID"
 crl "m=A&i=$ID&t=T&v=5"
 crl "m=A&i=$ID&t=H&v=5"
@@ -175,11 +186,16 @@ crl "m=F&p=odette&n=loubry"
 
 crl "m=ADD_FAM"
 crl "m=ADD_IND"
-crl "m=ADD_PAR&p=$FN2&n=$SN2&$oc=$OC2"
+crl "m=ADD_PAR&pp=$FN2&np=$SN2&$ocp=$OC2"
 crl "m=CONN_WIZ"
 crl "m=DOC&s=$IMG_SRC"
 crl "m=DOCH&s=$IMG_SRC"
 crl "m=SRC&v=$TXT_SRC"
+crl "m=H&v=$TXT_SRC"
+crl "m=L"
+
+
+
 
 # assumes no error in generated gwd.log
 set +ex
