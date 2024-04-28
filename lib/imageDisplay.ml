@@ -101,7 +101,8 @@ let print_portrait conf base p =
   match Image.get_portrait conf base p with
   | Some (`Path path) ->
       Result.fold ~ok:ignore
-        ~error:(fun _ -> Hutil.incorrect_request conf)
+        ~error:(fun _ ->
+          Hutil.incorrect_request conf ~comment:"print_image_file failed (portrait)")
         (print_image_file conf path)
   | Some (`Url url) ->
       Util.html conf;
@@ -110,16 +111,17 @@ let print_portrait conf base p =
       Output.print_sstring conf "</title></head><body>";
       Output.print_sstring conf (Printf.sprintf {|<img src=%s>|} url);
       Output.print_sstring conf "</body></html>"
-  | None -> Hutil.incorrect_request conf
+  | None -> Hutil.incorrect_request conf ~comment:"no path nor url"
 
 let print_source conf f =
   let fname = if f.[0] = '/' then String.sub f 1 (String.length f - 1) else f in
   let fname = Image.source_filename conf fname in
   if (conf.wizard || conf.friend) || Image.is_not_private_img conf fname then
     Result.fold ~ok:ignore
-      ~error:(fun _ -> Hutil.incorrect_request conf)
+      ~error:(fun _ ->
+        Hutil.incorrect_request conf ~comment:"print_image_file failed (source)")
       (print_image_file conf fname)
-  else Hutil.incorrect_request conf
+  else Hutil.incorrect_request conf ~comment:"no access to file"
 
 let print conf base =
   match Util.p_getenv conf.env "s" with
@@ -127,7 +129,7 @@ let print conf base =
   | None -> (
       match Util.find_person_in_env conf base "" with
       | Some p -> print_portrait conf base p
-      | None -> Hutil.incorrect_request conf)
+      | None -> Hutil.incorrect_request conf ~comment:"no person identified")
 
 let print_html conf =
   let ext =
