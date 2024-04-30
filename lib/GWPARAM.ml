@@ -20,6 +20,12 @@ type syslog_level =
   | `LOG_NOTICE
   | `LOG_WARNING ]
 
+module IperSet = Set.Make (struct
+  type t = Gwdb.iper
+
+  let compare = Stdlib.compare
+end)
+
 module Default = struct
   let init () = Secure.add_assets Filename.current_dir_name
 
@@ -70,6 +76,63 @@ module Default = struct
               | Some fn -> output_file conf fn
               | None -> Output.print_sstring conf ""))
 
+  (* is p2 an ancestor of p1? *)
+  (* code copied from MergeInd.ml *)
+  let is_ancestor conf base p1 p2 =
+    let ip1 = Gwdb.get_iper p1 in
+    let ip2 = Gwdb.get_iper p2 in
+    if ip1 = ip2 then true
+    else
+      let rec loop n set tl =
+        if n = 0 then false
+        else
+          match tl with
+          | [] -> false
+          | ip :: tl -> (
+              if IperSet.mem ip set then loop n set tl
+              else if ip = ip1 then true
+              else
+                let set = IperSet.add ip set in
+                match Gwdb.get_parents (Gwdb.poi base ip) with
+                | Some ifam ->
+                    let cpl = Gwdb.foi base ifam in
+                    loop (n - 1) set
+                      (Gwdb.get_father cpl :: Gwdb.get_mother cpl :: tl)
+                | None -> loop n set tl)
+      in
+      let max =
+        try List.assoc "is_semi_public_max" conf.Config.base_env
+        with Not_found -> "4" |> String.trim
+        (* limit search to n generations *)
+      in
+      let max = if max = "" then 4 else int_of_string max in
+      loop max IperSet.empty [ ip2 ]
+
+  (* is semi public if the user (identified by conf.userkey is semi public
+     and p is one of its descendant or ancesstor
+  *)
+  let is_semi_public conf base p =
+    let split_key key =
+      let dot = match String.index_opt key '.' with Some i -> i | _ -> -1 in
+      let space = match String.index_opt key ' ' with Some i -> i | _ -> -1 in
+      if dot <> -1 && space <> -1 then
+        ( String.sub key 0 dot,
+          String.sub key (dot + 1) (space - dot - 1),
+          String.sub key (space + 1) (String.length key - space - 1) )
+      else ("?", "", "?")
+    in
+    let fn, oc, sn = split_key conf.Config.userkey in
+    match
+      Gwdb.person_of_key base fn sn (if oc = "" then 0 else int_of_string oc)
+    with
+    | Some ip1 ->
+        Gwdb.get_access (Gwdb.poi base ip1)
+        = Public (* will be SemiPublic in due time *)
+        && (Gwdb.get_access p = Public
+           || is_ancestor conf base p (Gwdb.poi base ip1)
+           || is_ancestor conf base (Gwdb.poi base ip1) p)
+    | _ -> false
+
   (** Calcul les droits de visualisation d'une personne en
       fonction de son age.
       Renvoie (dans l'ordre des tests) :
@@ -87,9 +150,10 @@ module Default = struct
                   privée et public_if_no_date = yes
       - Vrai si : la personne s'est mariée depuis plus de private_years
       - Faux dans tous les autres cas *)
+  (* check that p is parent or descendant of conf.key *)
+
   let p_auth conf base p =
-    conf.Config.wizard || conf.friend
-    || Gwdb.get_access p = Public
+    conf.Config.wizard || conf.friend || is_semi_public conf base p
     || conf.public_if_titles
        && Gwdb.get_access p = IfTitles
        && Gwdb.nobtitles base conf.allowed_titles conf.denied_titles p <> []
@@ -172,6 +236,7 @@ let base_path = ref Default.base_path
 let bpath = ref Default.bpath
 let output_error = ref Default.output_error
 let p_auth = ref Default.p_auth
+let is_semi_public = ref Default.is_semi_public
 let syslog = ref Default.syslog
 
 (** [wrap_output conf title content]

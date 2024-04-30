@@ -49,6 +49,9 @@ val output_error :
     Also send [headers] and use [content] (typically a HTML string describing the error) if provided.
 *)
 
+val is_semi_public : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
+(** Check if a person is an asc or desc of conf.userkey *)
+
 val p_auth : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
 (** Check if a person should be displayed or not *)
 
@@ -81,6 +84,12 @@ module Default : sig
     unit
   (** If [?content] is not set, sends page content from {/etc/<status-code>-<lang>.html}.
       If the current lang is not available, use `en` *)
+
+  val is_semi_public : Config.config -> Gwdb.base -> Gwdb.person -> bool
+  (** determines if the person is a descendant or an ancestor of conf.userkey
+      conf.userkey is the person visiting the base
+      the search for asc or desc is limited to 4 generations
+  *)
 
   val p_auth : Config.config -> Gwdb.base -> Gwdb.person -> bool
   (** Calculate the access rights to the person's information in

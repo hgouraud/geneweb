@@ -133,9 +133,13 @@ val is_hidden : person -> bool
 
 val is_public : config -> base -> person -> bool
 (** Tells if person is public
-    - access=Public or
+    - access = Public or
     - IfTitle and has titles or
     - is_old_person) *)
+
+val is_semi_public : config -> base -> person -> bool
+(** tells if person is semi_public
+    - access = SemiPublic *)
 
 val pget : config -> base -> iper -> person
 (** Returns person with giving id from the base.
@@ -359,6 +363,7 @@ val string_of_witness_kind : config -> sex -> witness_kind -> Adef.safe_string
 val relation_txt : config -> sex -> family -> (('a -> 'b) -> 'b, 'a, 'b) format
 val string_of_decimal_num : config -> float -> string
 val person_exists : config -> base -> string * string * int -> bool
+val mark_if_not_public : config -> base -> string * string * int -> bool
 val husband_wife : config -> base -> person -> bool -> Adef.safe_string
 
 val find_person_in_env : config -> base -> string -> person option
