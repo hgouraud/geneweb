@@ -1575,6 +1575,8 @@ let expand_env =
         loop 0
     | _ -> s
 
+(* in srcfileDisplay, there is a macro function with many more macros! *)
+(* not necessarily easy to transpose in this context (base absent) *)
 let string_with_macros conf env s =
   let start_with s i p =
     i + String.length p <= String.length s
@@ -2062,6 +2064,15 @@ let person_exists conf base (fn, sn, oc) =
   match List.assoc_opt "red_if_not_exist" conf.base_env with
   | Some "off" -> (true, fn, sn)
   | Some _ | None -> (auth, fn, sn)
+
+let mark_if_not_public conf base (fn, sn, oc) =
+  Printf.eprintf "mark_if_not_public %s %s\n" fn sn;
+  match p_getenv conf.env "red_if_not_public" with
+  | Some "on" -> (
+      match person_of_key base fn sn oc with
+      | Some ip -> get_access (poi base ip) <> Public
+      | None -> false)
+  | _ -> false
 
 let default_sosa_ref conf base =
   match List.assoc_opt "default_sosa_ref" conf.base_env with
