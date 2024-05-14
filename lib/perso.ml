@@ -1705,6 +1705,7 @@ and eval_simple_str_var conf base env (p, p_auth) = function
       | _ -> null_val)
   | "url_in_env" -> (
       match get_env "url" env with Vstring x -> str_val x | _ -> str_val "")
+  (*| "url_no_index" -> No_index/url_no_index conf base ~pwd:false*)
   | "incr_count" -> (
       match get_env "count" env with
       | Vcnt c ->
