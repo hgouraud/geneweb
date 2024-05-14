@@ -1,0 +1,54 @@
+<!-- Trailer Base v1.1 -->
+
+<div class="border border-primary rounded d-flex flex-column flex-md-row justify-content-lg-center">
+
+<div class="d-none d-lg-block col-md-0 order-md-1 mt-3 ml-0">
+<a href="%prefix;">
+  <img src="%images_prefix;logo-roglo.png" alt="logo Roglo" width="40"></a>
+</div>
+ <div class="mt-2 ml-2 my-0 order-md-2 flex-fill text-lg-justify align-self-md-center text-justify">
+
+%apply;interp([
+fr: <span style="color: red; font-weight: bold;">Important&nbsp;! Attention&nbsp;!</span> Cette base de données est une 
+    <span style="color: red; font-weight: bold;">copie de la base généalogique Roglo prise
+en: <span style="color: red; font-weight: bold;">Very important&nbsp;! Warning&nbsp;!</span> This data base is
+    <span style="color: red; font-weight: bold;">a copy of the Roglo base captured
+])%sp;%apply;interp([
+en: on 2024 May 15th at 23:23.
+fr: le 15 mai 2024 à 23:23.
+])%apply;interp([
+fr: </span><br><b>Cette copie simule la base magicien!.</b>
+en: </span><br><b>This copy emulates the wizards base!.</b>
+])
+</div>
+</div>
+
+%( <hr class="my-0"/> %)
+%( <div class="d-flex flex-column flex-md-row justify-content-lg-centeri mt-1" style="border:2px solid"> %)
+<div class="border border-primary rounded d-flex flex-column flex-md-row justify-content-lg-center text-justify mt-1 border">
+
+<div class="d-none d-lg-block col-md-0 order-md-1 mt-2">
+%apply;interp([
+fr: <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.fr">
+    <img src="https://img.roglo.eu/ccbyncnd.png" alt="licence" width="132" 
+    style="border:0;float:left;margin-left:10px" /></a>
+en: <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode/">
+    <img src="https://img.roglo.eu/ccbyncnd.png" alt="licence" width="132" 
+    style="border:0;float:left;margin-left:10px" /></a>
+])
+</div>
+ <div class="ml-3 my-0 order-md-2 flex-fill text-lg-justify align-self-md-center pr-1 pl-1 border">
+%apply;interp([
+fr: Le contenu de la base généalogique Roglo est mis à disposition selon les termes
+    de la <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.fr">Licence Creative Commons</a>
+    <!-- Attribution - Utilisation non commerciale - Pas d’Œuvre dérivée--> 4.0 International.
+    Sa reproduction partielle par des tiers est autorisée à condition de citer le nom de
+    l'auteur et la source, elle est restreinte à une utilisation non commerciale et sans modification du contenu.
+en: The content of the Roglo genealogical database is made available under the terms of the
+    <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode">Licence Creative Commons</a>
+    <!-- Attribution - NonCommercial - NoDerivatives--> 4.0 International. its partial 
+    reproduction by third parties is authorized provided that the name of the author and the 
+    source are mentioned, it is restricted to non-commercial use without modification of the content.
+])
+</div>
+</div>
