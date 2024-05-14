@@ -285,14 +285,16 @@ let print_all_titles conf base =
   Hutil.trailer conf
 
 let print_all_places conf base =
+  let ini = match p_getenv conf.env "ini" with Some s -> s | None -> "" in
   let title _ =
     Output.print_sstring conf
       (Utf8.capitalize_fst (transl conf "all the estates"))
   in
   let list =
-    let l = select_all_places conf base in
+    let l = select_all_places conf base ini in
     List.sort_uniq my_alphabetic l
   in
+  (* TODO isoler les particules, retrier les chaines *)
   Hutil.header conf title;
   Output.print_sstring conf "<ul>\n";
   List.iter

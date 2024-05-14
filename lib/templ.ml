@@ -401,6 +401,7 @@ let rec eval_variable conf = function
   | [ "user"; "ident" ] -> conf.user
   | [ "user"; "name" ] -> conf.username
   | [ "user"; "key" ] -> conf.userkey
+  | [ "user"; "passwd" ] -> conf.cgi_passwd
   | [ s ] -> eval_simple_variable conf s
   | _ -> raise Not_found
 

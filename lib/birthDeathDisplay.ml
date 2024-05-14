@@ -105,7 +105,15 @@ let print_death conf base =
                   (Some a, ages_sum, ages_nb)
                 else (None, ages_sum, ages_nb)
           in
-          Output.print_sstring conf "<li><b>";
+          Output.print_sstring conf "<li>";
+          let img =
+            if get_access p = SemiPublic then
+              Printf.sprintf
+                {|<span class="fa fa-user text-warning mr-2"></span>|}
+            else "  "
+          in
+          Output.print_sstring conf img;
+          Output.print_sstring conf "<b>";
           Output.print_string conf (referenced_person_text conf base p);
           Output.print_sstring conf "</b>, ";
           Output.print_sstring conf

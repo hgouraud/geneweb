@@ -114,24 +114,38 @@ module Default = struct
   let is_semi_public conf base p =
     let split_key key =
       let dot = match String.index_opt key '.' with Some i -> i | _ -> -1 in
-      let space = match String.index_opt key ' ' with Some i -> i | _ -> -1 in
-      if dot <> -1 && space <> -1 then
+      let space =
+        match String.index_from_opt key dot ' ' with Some i -> i | _ -> -1
+      in
+      let plus =
+        match String.index_from_opt key dot '+' with Some i -> i | _ -> -1
+      in
+      let sep = if space > 0 then space else if plus > 0 then plus else -1 in
+      if
+        dot > 0 && sep > 0
+        && String.length key > dot + 1
+        && String.length key > sep + 1
+      then
         ( String.sub key 0 dot,
-          String.sub key (dot + 1) (space - dot - 1),
-          String.sub key (space + 1) (String.length key - space - 1) )
+          String.sub key (dot + 1) (sep - dot - 1),
+          String.sub key (sep + 1) (String.length key - sep - 1) )
       else ("?", "", "?")
     in
-    let fn, oc, sn = split_key conf.Config.userkey in
-    match
-      Gwdb.person_of_key base fn sn (if oc = "" then 0 else int_of_string oc)
-    with
-    | Some ip1 ->
-        Gwdb.get_access (Gwdb.poi base ip1)
-        = Public (* will be SemiPublic in due time *)
-        && (Gwdb.get_access p = Public
-           || is_ancestor conf base p (Gwdb.poi base ip1)
-           || is_ancestor conf base (Gwdb.poi base ip1) p)
-    | _ -> false
+    if conf.Config.userkey = "" then false
+    else if Gwdb.get_access p = SemiPublic then true
+    else
+      let fn, oc, sn = split_key conf.Config.userkey in
+      match
+        Gwdb.person_of_key base fn sn (if oc = "" then 0 else int_of_string oc)
+      with
+      | Some ip1 ->
+          (* I (ip1) am semi_public and p is a descendant or ancestor *)
+          Gwdb.get_access (Gwdb.poi base ip1) = SemiPublic
+          && (is_ancestor conf base p (Gwdb.poi base ip1)
+             || is_ancestor conf base (Gwdb.poi base ip1) p)
+      | _ -> false
+
+  (* check that p is parent or descendant of conf.key *)
 
   (** Calcul les droits de visualisation d'une personne en
       fonction de son age.
@@ -150,10 +164,11 @@ module Default = struct
                   privée et public_if_no_date = yes
       - Vrai si : la personne s'est mariée depuis plus de private_years
       - Faux dans tous les autres cas *)
-  (* check that p is parent or descendant of conf.key *)
-
   let p_auth conf base p =
-    conf.Config.wizard || conf.friend || is_semi_public conf base p
+    conf.Config.wizard
+    (* is_semi_public takes into account ancestors and descendants *)
+    || (conf.friend && is_semi_public conf base p)
+    || Gwdb.get_access p = Public
     || conf.public_if_titles
        && Gwdb.get_access p = IfTitles
        && Gwdb.nobtitles base conf.allowed_titles conf.denied_titles p <> []
