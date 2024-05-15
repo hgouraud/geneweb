@@ -413,8 +413,42 @@
       %end;
     %end;
     <span class="font-weight-light small">%dates;</span>
-  </h1>
-  </div> %( closing div just before h1 %)
+    %if;(wizard or friend)
+      &nbsp;
+      %let;userid;%if;(user.key!="")%user.key;%else;%user.name;%end;%in;
+      <a href="%prefix;m=NG&em=R&ei=%index;&select=input&n=%user.key;&t=PN&spouse=on&long=on&et=S"
+         title="Chemin le plus court entre moi et cette personne">
+      <i class="fa fa-link fa-xs" style="color:green"></i></a>
+    %end;
+    %if;(b.show_invisible = "on" or true)
+      <a href="%if;(b.http_mode="https" and cgi)%b.commd;?b=roglo&%else;%b.Base_Wiz;_f?%end;%nn;
+         lang=%e.lang;&%if;(e.templ!="")templ=%e.templ;&%end;i=%index;&oc=%occ;"
+         title="Comment apparaît cette personne pour les %if;(b.http_mode="https" and cgi)visiteurs%else;amis%end;?">
+       %if;is_private;
+        <i class="fa fa-user fa-xs" style="color:red"></i>%nn;
+       %elseif;is_semi_public;
+        <i class="fa fa-user fa-xs" style="color:yellow"></i>%nn;
+      %elseif;is_invisible;
+        <i class="fa fa-user fa-xs" style="color:pink"></i>%nn;
+      %else;
+        <i class="fa fa-user fa-xs" style="color:green"></i>%nn;
+      %end;</a>
+    %end;
+    %(if;(wizard)
+      %if;(base.name = "wizard")
+        <a href="%if;(b.http_mode="https" and cgi)%b.commd;?b=wizard&w=%user.passwd;&%else;%prefix;%end;%nn;
+          m=MOD_IND&i=%index;">
+      %else;
+        <a href="%if;(b.http_mode="https" and cgi)%b.commd;?b=wizard&w=%user.passwd;&%else;%b.Base_Wiz;_w?%end;%nn;
+          lang=%e.lang;&%if;(e.templ!="")templ=%e.templ;%end;&m=MOD_IND&i=%index;&o=%occ;">
+      %end;
+      <img src="%images_prefix;b_edit.png" alt="edit"></a>
+    %end;%)
+  %if;(wizard and birth_date.year>1870 and death_date="")
+    <a href="https://deces.matchid.io/search?advanced=true&ln=%surname;&fn=%first_name;&bd=%slash_birth_date;">
+      <i class="fa fa-file fa-xs" style="color:green"></i></a>
+  %end;
+  </h1>  </div> %( closing div just before h1 %)
 
   %if;((p_mod="zz" or p_mod="") and e.m!="F")
     <div class="col-lg-8">
