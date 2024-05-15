@@ -29,6 +29,22 @@
     %end;
   %end;
 %end;
+%define;msg_lang_link(xx,yy)
+  %if;(b.yy_xx != "")
+    %if;(b.yy_lnk != "")<a role="button" class="btn btn-outline-success mr-1" href="%b.yy_lnk;">%end;
+    %if;(b.yy_not != "")<a role="button" class="btn btn-outline-success mr-1" href="%prefix;m=NOTES;f=%b.yy_not;">%end;
+    %b.yy_xx
+    %if;(b.yy_lnk != "" or b.yy_not != "")</a>%end;
+  %else;
+    %if;(b.yy != "")
+      %if;(b.yy_not != "")<a role="button" class="btn btn-outline-success mr-1" href="%prefix;m=NOTES;f=%b.yy_not;">%end;
+      %if;(b.yy_lnk != "")<a role="button" class="btn btn-outline-success mr-1" href="%b.yy_lnk;">%end;
+      %b.yy
+      %if;(b.yy_lnk != "" or b.yy_not != "")</a>%end;
+    %end;
+  %end;
+%end;
+
 %define;get_random(xxx)
   %random.init;
   %random.xxx;
@@ -77,6 +93,21 @@
           or (friend and (b.friend_passwd_file!="" or b.friend_passwd!="")))
           <a class="btn btn-outline-danger mt-1 w-100" href="%prefix;w=" role="button"><i class="fas fa-right-from-bracket mr-1" aria-hidden="true"></i>[*disconnect]</a>
         %end;
+        <a href="https://asso.roglo.eu/page/419445-s-inscrire-comme-ami"
+          class="btn btn-outline-success text-nowrap" 
+          role="button">
+[
+en: Obtain an access code
+fr: Obtenir un code d’accès
+]</a><br%/>
+        <a href="https://asso.roglo.eu/membres/profil"
+          class="btn btn-outline-success text-nowrap" 
+          role="button">
+[
+en: My account
+fr: Mon compte
+]</a>
+
       </div>
     </div>
     <div class="bg-white my-0 order-md-2 flex-fill text-lg-center align-self-md-center">
@@ -198,7 +229,7 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
       %end;
     </div>
     <div class="d-flex flex-column justify-items-lg-center mt-3 mt-lg-4">
-      <div class="h4 text-lg-center"><i class="fas fa-screwdriver-wrench fa-sm fa-fw text-secondary mr-1"></i>[*tools]</div>
+      <div class="h4 text-lg-left"><i class="fas fa-screwdriver-wrench fa-sm fa-fw text-secondary mr-1"></i>[*tools]</div>
       <div class="d-inline-flex justify-content-lg-center">
         %if;(wizard and not base.has_notes)
           <a role="button" class="btn btn-outline-primary mr-1"
@@ -261,7 +292,7 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
       </div>
     </div>
     %if;wizard;
-      <div class="d-flex flex-column flex-lg-row justify-content-lg-center mt-2 mt-lg-4">
+      <div class="d-inline-flex justify-content-lg-center mt-2 mt-lg-4">
         <div class="h4 align-self-lg-center mr-lg-2">
           <i class="fas fa-book fa-sm fa-fw text-muted mr-1"></i>[*book/books]1%nn;
         </div>
@@ -289,7 +320,30 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
         </div>
       </div>
     %end;
-    %if;(plugins!="")
+
+    <div class="d-flex flex-column justify-items-lg-center mt-3 mt-lg-4">
+      <div class="h4 text-lg-left"><img src="%images_prefix;logo-roglo.png" height="50pt" alt="Roglo" title="Roglo"></div>
+      <div class="d-inline-flex justify-content-lg-center">
+        %if;(bvar.menu06 != "") %( le coin des magiciens %)
+          %apply;msg_lang_link%with;%evar.lang;%and;menu06%end;
+        %end;
+        %if;(b.menu21 != "") %( anomalies %)
+          %apply;msg_lang_link%with;%evar.lang;%and;menu21%end;
+        %end;
+        %if;(b.menu22 != "") %( fonctionnement de Roglo %)
+          %apply;msg_lang_link%with;%evar.lang;%and;menu22%end;
+        %end;
+        %if;(b.menu23 != "") %( l'Assocoation Roglo %)
+          %apply;msg_lang_link%with;%evar.lang;%and;menu23%end;
+        %end;
+        %if;(b.menu24 != "") %( mail to association %)
+          %apply;msg_lang_link%with;%evar.lang;%and;menu24%end;
+        %end;
+      </div>
+      </div>
+    </div>
+
+    %if;(wizard and plugins!="" and b.plugins!="")
       <div class="d-flex flex-column flex-lg-row justify-content-lg-center mt-2 mt-lg-4">
         <div class="h4 align-self-lg-center mr-lg-2">
           [*plugins][:]
