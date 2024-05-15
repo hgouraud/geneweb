@@ -44,6 +44,13 @@
     %end;
   %end;
 %end;
+%define;notes_title(lang)
+  %if;(b.base_notes_title_lang!="")%b.base_notes_title_lang;
+  %elseif;(b.base_notes_title!="")%b.base_notes_title;
+  %else;
+    <i class="far fa-file-lines fa-fw mr-1" aria-hidden="true"></i>[*base notes]
+  %end;
+%end;
 
 %define;get_random(xxx)
   %random.init;
@@ -238,9 +245,7 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
         %if;base.has_notes;
           <a role="button" class="btn btn-outline-primary mr-1"
             href="%prefix;m=NOTES">
-            %if;(b.base_notes_title="")
-              <i class="far fa-file-lines fa-fw mr-1" aria-hidden="true"></i>[*base notes]
-            %else;%b.base_notes_title;%end;
+            %apply;notes_title(lang)
           </a>
         %end;
         %if;has_misc_notes;

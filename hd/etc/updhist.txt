@@ -65,6 +65,7 @@
             <a href="%prefix;%person.access;">%person;</a>, %person.title;
             %person.dates;
             %if;(b.show_invisible="on" and wizard and person.is_invisible)
+              <i class="fa fa-user style="color:red"></i>
               <img src="%images_prefix;restricted.png"%wid_hei;restricted.png; alt=" (x)">%nn;
             %end;
           %elseif;is_note;
