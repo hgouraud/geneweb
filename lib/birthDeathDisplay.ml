@@ -109,8 +109,7 @@ let print_death conf base =
           let img =
             if get_access p = SemiPublic then
               Printf.sprintf
-                {|<img src="%s/friend.gif" width="16" height="16" alt="(f) ">|}
-                (Util.images_prefix conf)
+                {|<span class="text-warning fa fa-user mr-2"></span>|}
             else "  "
           in
           Output.print_sstring conf img;

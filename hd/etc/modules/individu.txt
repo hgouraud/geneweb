@@ -423,15 +423,25 @@
     %if;(b.show_invisible = "on" or true)
       <a href="%if;(b.http_mode="https" and cgi)%b.commd;?b=roglo&%else;%b.Base_Wiz;_f?%end;%nn;
          lang=%e.lang;&%if;(e.templ!="")templ=%e.templ;&%end;i=%index;&oc=%occ;"
-         title="Comment apparaît cette personne pour les %if;(b.http_mode="https" and cgi)visiteurs%else;amis%end;?">
-       %if;is_private;
-        <i class="fa fa-user fa-xs" style="color:red"></i>%nn;
-       %elseif;is_semi_public;
-        <i class="fa fa-user fa-xs" style="color:yellow"></i>%nn;
-      %elseif;is_invisible;
-        <i class="fa fa-user fa-xs" style="color:pink"></i>%nn;
+         title="Pour les %if;(b.http_mode="https" and cgi)visiteurs%else;amis%end;
+         cette personne est :
+          %if;is_private;
+            Privé%nn;
+          %elseif;is_semi_public;
+            SemiPublic%nn;
+          %elseif;is_visible;
+            Visible%nn;
+          %else;
+            Invisible%nn;
+          %end;">
+      %if;is_private;
+        <i class="text-danger fa fa-user fa-xs mr-1"></i>%nn;
+      %elseif;is_semi_public;
+        <i class="text-warning fa fa-user fa-xs mr-1"></i>%nn;
+      %elseif;is_visible;
+        <i class="text-info-50 fa fa-user fa-xs mr-1"></i>%nn;
       %else;
-        <i class="fa fa-user fa-xs" style="color:green"></i>%nn;
+        <i class="text-dark-50 fa fa-user-slash fa-xs mr-1"></i>%nn;
       %end;</a>
     %end;
     %(if;(wizard)

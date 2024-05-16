@@ -105,14 +105,14 @@
           <a class="btn btn-outline-danger mt-1 w-100" href="%prefix;w=" role="button"><i class="fas fa-right-from-bracket mr-1" aria-hidden="true"></i>[*disconnect]</a>
         %end;
         <a href="https://asso.roglo.eu/page/419445-s-inscrire-comme-ami"
-          class="btn btn-outline-%if;friend;primary%elseif;wizard;success%end; text-nowrap mt-3" 
+          class="btn btn-outline-%if;friend;primary%elseif;wizard;success%else;dark%end; text-nowrap mt-3" 
           role="button">
 [
 en: Obtain a Friend access code
 fr: Obtenir un code d’accès Ami
 ]</a><br%/>
         <a href="https://asso.roglo.eu/membres/profil"
-          class="btn btn-outline-%if;friend;primary%elseif;wizard;success%end; text-nowrap mt-1" 
+          class="btn btn-outline-%if;friend;primary%elseif;wizard;success%else;dark%end; text-nowrap mt-1" 
           role="button">
 [
 en: My account with Assoc. Roglo

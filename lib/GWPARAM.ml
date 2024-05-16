@@ -126,8 +126,7 @@ module Default = struct
       Gwdb.person_of_key base fn sn (if oc = "" then 0 else int_of_string oc)
     with
     | Some ip1 ->
-        Gwdb.get_access (Gwdb.poi base ip1)
-        = Public (* will be SemiPublic in due time *)
+        Gwdb.get_access (Gwdb.poi base ip1) = SemiPublic
         && (Gwdb.get_access p = Public
            || is_ancestor conf base p (Gwdb.poi base ip1)
            || is_ancestor conf base (Gwdb.poi base ip1) p)
