@@ -391,7 +391,7 @@
             <div class="dropdown-menu dropdown-menu-transl">
               <a class="dropdown-item" href="%prefix;%access;&m=R" %laR;><span class="fa fa-gear fa-fw mr-2"></span>[*relationship computing]</a>
               <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="%prefix;m=C&%access;&v=3"
+                <a class="dropdown-item" href="%prefix;m=C&%access;&v=7"
                   title="[*relationship link/relationship links]0 [with] [close family]"><span class="fa fa-elevator fa-fw mr-2"></span>[*relationship]</a>
               <div class="dropdown-divider"></div>
               <a class="dropdown-item" %nn;
