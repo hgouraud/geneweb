@@ -131,6 +131,7 @@ let speclist =
       Arg.Set_string Db1link.particules_file,
       "<file> Particles file (default = predefined particles)" );
     ("-q", Arg.Clear Mutil.verbose, " Quiet");
+    ("-rgpd", Arg.String (fun s -> Gwcomp.rgpd_files := s), "<file> Rgpd files");
     ("-sep", Arg.Set separate, " Separate all persons in next file");
     ("-sh", Arg.Set_int shift, "<int> Shift all persons numbers in next files");
     ("-stats", Arg.Set Db1link.pr_stats, " Print statistics");
@@ -157,6 +158,10 @@ let errmsg =
 
 let main () =
   Mutil.verbose := false;
+  (try
+     if Sys.is_directory !Gwcomp.rgpd_files then Gwcomp.rgpd := true
+     else Gwcomp.rgpd := false
+   with Sys_error _ -> Gwcomp.rgpd := false);
   Arg.parse speclist anonfun errmsg;
   if not (Mutil.good_name (Filename.basename !out_file)) then (
     (* Util.transl conf not available !*)
@@ -166,6 +171,10 @@ let main () =
     flush stdout;
     exit 2);
   Secure.set_base_dir (Filename.dirname !out_file);
+  if !Gwcomp.rgpd then
+    Printf.eprintf "Rgpd status: True, files in: %s\n" !Gwcomp.rgpd_files
+  else Printf.eprintf "Rgpd status: False\n";
+  flush stdout;
   let gwo = ref [] in
   List.iter
     (fun (x, separate, bnotes, shift) ->
