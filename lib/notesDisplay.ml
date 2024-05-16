@@ -39,7 +39,7 @@ let print_search_form conf from_note =
 
 let print_whole_notes conf base fnotes (title : Adef.safe_string) s ho =
   Hutil.header_with_title conf (fun _ -> ());
-  (* TODO: DO†WE†NEED†ME?
+  (* TODO: DO‚ WE‚ NEED‚ ME?
      let what_links_page () =
        if fnotes <> "" then (
          Output.print_sstring conf {|<a href="|};

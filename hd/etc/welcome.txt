@@ -29,9 +29,13 @@
     %end;
   %end;
 %end;
+%define;help(lang)
+  <a role="button" class="btn btn-outline-success mt-2" href="%prefix;m=NOTES;f=Roglo:help_lang;">
+    <i class="fa fa-question fa-fw mr-1"></i>[*help]</a>
+%end;
 %define;msg_lang_link(xx,yy)
   %if;(b.yy_xx != "")
-    %if;(b.yy_lnk != "")<a role="button" class="btn btn-outline-success mr-1" href="%b.yy_lnk;">%end;
+    %if;(b.yy_lnk != "")<a role="button" class="btn btn-outline-success mr-1" href="%b.yy_lnk;"> Charte%end;
     %if;(b.yy_not != "")<a role="button" class="btn btn-outline-success mr-1" href="%prefix;m=NOTES;f=%b.yy_not;">%end;
     %b.yy_xx
     %if;(b.yy_lnk != "" or b.yy_not != "")</a>%end;
@@ -101,20 +105,20 @@
           <a class="btn btn-outline-danger mt-1 w-100" href="%prefix;w=" role="button"><i class="fas fa-right-from-bracket mr-1" aria-hidden="true"></i>[*disconnect]</a>
         %end;
         <a href="https://asso.roglo.eu/page/419445-s-inscrire-comme-ami"
-          class="btn btn-outline-success text-nowrap" 
+          class="btn btn-outline-%if;friend;primary%elseif;wizard;success%end; text-nowrap mt-3" 
           role="button">
 [
-en: Obtain an access code
-fr: Obtenir un code d’accès
+en: Obtain a Friend access code
+fr: Obtenir un code d’accès Ami
 ]</a><br%/>
         <a href="https://asso.roglo.eu/membres/profil"
-          class="btn btn-outline-success text-nowrap" 
+          class="btn btn-outline-%if;friend;primary%elseif;wizard;success%end; text-nowrap mt-1" 
           role="button">
 [
-en: My account
-fr: Mon compte
+en: My account with Assoc. Roglo
+fr: Mon compte Assoc. Roglo
 ]</a>
-
+        %apply;help(lang)
       </div>
     </div>
     <div class="bg-white my-0 order-md-2 flex-fill text-lg-center align-self-md-center">
@@ -329,7 +333,10 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
     <div class="d-flex flex-column justify-items-lg-center mt-3 mt-lg-4">
       <div class="h4 text-lg-left"><img src="%images_prefix;logo-roglo.png" height="50pt" alt="Roglo" title="Roglo"></div>
       <div class="d-inline-flex justify-content-lg-center">
-        %if;(bvar.menu06 != "") %( le coin des magiciens %)
+        %if;(bvar.menu05 != "") %( charte des magiciens %)
+          %apply;msg_lang_link%with;%evar.lang;%and;menu05%end;
+        %end;
+        %if;(bvar.menu06 != "") %( coin des magiciens %)
           %apply;msg_lang_link%with;%evar.lang;%and;menu06%end;
         %end;
         %if;(b.menu21 != "") %( anomalies %)
@@ -338,7 +345,7 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
         %if;(b.menu22 != "") %( fonctionnement de Roglo %)
           %apply;msg_lang_link%with;%evar.lang;%and;menu22%end;
         %end;
-        %if;(b.menu23 != "") %( l'Assocoation Roglo %)
+        %if;(b.menu23 != "") %( assocoation Roglo %)
           %apply;msg_lang_link%with;%evar.lang;%and;menu23%end;
         %end;
         %if;(b.menu24 != "") %( mail to association %)

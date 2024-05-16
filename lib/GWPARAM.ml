@@ -153,7 +153,7 @@ module Default = struct
   (* check that p is parent or descendant of conf.key *)
 
   let p_auth conf base p =
-    conf.Config.wizard 
+    conf.Config.wizard
     (* is_semi_public takes into account ancestors and descendants *)
     || (conf.friend && is_semi_public conf base p)
     || Gwdb.get_access p = Public
