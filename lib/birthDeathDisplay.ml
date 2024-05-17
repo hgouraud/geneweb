@@ -109,7 +109,7 @@ let print_death conf base =
           let img =
             if get_access p = SemiPublic then
               Printf.sprintf
-                {|<span class="text-warning fa fa-user mr-2"></span>|}
+                {|<span class="fa fa-user text-warning mr-2"></span>|}
             else "  "
           in
           Output.print_sstring conf img;

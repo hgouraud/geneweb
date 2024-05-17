@@ -435,13 +435,13 @@
             Invisible%nn;
           %end;">
       %if;is_private;
-        <i class="text-danger fa fa-user fa-xs mr-1"></i>%nn;
+        <i class="fa fa-user fa-xs text-danger mr-1"></i>%nn;
       %elseif;is_semi_public;
-        <i class="text-warning fa fa-user fa-xs mr-1"></i>%nn;
+        <i class="fa fa-user fa-xs text-warning mr-1"></i>%nn;
       %elseif;is_visible;
-        <i class="text-info-50 fa fa-user fa-xs mr-1"></i>%nn;
+        <i class="fa fa-user fa-xs text-info-50 mr-1"></i>%nn;
       %else;
-        <i class="text-dark-50 fa fa-user-slash fa-xs mr-1"></i>%nn;
+        <i class="fa fa-user-slash fa-xs text-dark-50 mr-1"></i>%nn;
       %end;</a>
     %end;
     %(if;(wizard)
