@@ -12240,6 +12240,10 @@ sl: več kot %d zadetkov
 sv: fler än %d svar
 tr: %d cevaptan daha fazla
 
+    move coat of arms to father
+fr: Déplacer le blason vers le père
+en: move coat of arms to father
+
     move union comments to notes
 en: transfer the historical “comments of union” input to the adjacent “marriage notes” one.
 fr: transférer le champ historique « commentaires d’union » vers celui des « notes de mariage » ci-contre.
