@@ -181,6 +181,18 @@ let load_lexicon =
     | Some lex -> lex
     | None ->
        let lex =
+       if !Wserver.cgi then (
+            let ht = Hashtbl.create 0 in
+            let rec rev_iter fn = function
+              | [] -> ()
+              | hd :: tl -> rev_iter fn tl ; fn hd
+            in
+            rev_iter begin fun fname ->
+              Mutil.input_lexicon lang ht begin fun () ->
+                Secure.open_in (Util.search_in_assets fname)
+              end end !lexicon_list ;
+            ht)
+       else (
         Mutil.read_or_create_value ~wait:true ~magic:Mutil.random_magic fname
           begin fun () ->
             let ht = Hashtbl.create 0 in
@@ -193,7 +205,7 @@ let load_lexicon =
                 Secure.open_in (Util.search_in_assets fname)
               end end !lexicon_list ;
             ht
-          end
+          end)
       in
       Hashtbl.add lexicon_cache fname lex ;
       lex
