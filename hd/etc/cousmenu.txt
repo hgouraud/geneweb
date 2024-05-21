@@ -1,4 +1,4 @@
-<!-- $Id: cousmenu.txt v7.1 16/05/2024 19:55:02 $ -->
+<!-- $Id: cousmenu.txt v7.1 20/05/2024 15:53:41 $ -->
 <!DOCTYPE html>
 <html lang="%lang;">
 <head>
@@ -32,7 +32,7 @@
 %define;picklvl(vvv)
   <a role="button" class="btn btn-sm btn-light%if;(vvv=e_v or (e_v>max and vvv=max)) disabled font-weight-bold text-white bg-dark%end; p-1%if;(vvv<10) px-2%end;" href="%url_set.v.vvv;"%sp;
   aria-label="select ascending generation level vvv to display ancestors up to that degree."%sp;
-  title="[*ascending/descending (degree)]0 vvv%if;(vvv=0)[:] [person/persons]0 [and] [descendants]%end;">vvv</a>%nn;
+  title="[*ascending/descending (degree)]0 vvv%if;(vvv=0) ([ascending/descending (degree)]1 [up to] %max_desc_level;)%end;">vvv</a>%nn;
 %end;
 %if;(max!=0 and not (max=1 and not has_children))
   <div class="d-flex flex-wrap align-self-center btn-toolbar py-0 mx-3 mt-1" role="toolbar" aria-label="buttons to select maximum ascending level v">
@@ -82,35 +82,38 @@
     %let;cous_sex;%apply;pindex(path_end.index,"sex")%in;
     %let;birth_prec;%if;(path_end.birth_date.prec="&#60;")1%end;%in;
     %let;death_prec;%if;(path_end.death_date.prec="&#62;")1%end;%in;
+    %( TODO:  add julian_day to allow better sorting by age %)
+    %let;julian_age_;%if;(cous_isdead=1 and  path_end.death_date.julian_day!="" and path_end.birth_date.julian_day!="" and path_end.death_date.julian_day>=path_end.birth_date.julian_day)
+      %expr(path_end.death_date.julian_day-path_end.birth_date.julian_day)%elseif;(cous_isdead=0 and path_end.birth_date.julian_day!="" and today.julian_day>=path_end.birth_date.julian_day)%expr(today.julian_day-path_end.birth_date.julian_day)%end;%in;
+    %let;julian_age;%if;(julian_age_!="")%if;(julian_age_<10000)0%end;%if;(julian_age_<1000)0%end;%if;(julian_age_<100)0%end;%if;(julian_age_<10)0%end;%julian_age_;%end;%in;
     %( percent of birth/death into a linear bicolor gradient %)
     %let;birth_age;%if;((path_end.birth_date.prec="" or path_end.birth_date.prec="<") and path_end.birth_date.year!="" and max_date_vvv_www>min_date_vvv_www)%expr(100-(100*(max_date_vvv_www-path_end.birth_date.year)/(max_date_vvv_www-min_date_vvv_www)))%end;%in;
     %let;death_age_;%if;((path_end.death_date.prec="" or path_end.death_date.prec=">") and path_end.death_date.year!="" and max_date_vvv_www>min_date_vvv_www)%expr(100-(100*(max_date_vvv_www-path_end.death_date.year)/(max_date_vvv_www-min_date_vvv_www)))%end;%in;
+    %let;cous_age_;%if;((death_age="" and birth_age="") or path_end.birth_date.prec!="" or path_end.death_date.prec!="")00%else;%if;(cous_isdead=1 and path_end.death_date.year!="" and path_end.death_date.prec="" and path_end.birth_date.year!="" and path_end.birth_date.prec="")%expr(path_end.death_date.year-path_end.birth_date.year)%elseif;(cous_isdead=0 and path_end.birth_date.year!="" and path_end.birth_date.prec="")%expr(today.year-path_end.birth_date.year)%end;%end;%in;
+    %let;cous_age;%if;(cous_age_!="")%if;(cous_age_<100)0%end;%if;(cous_age_<10)0%end;%cous_age_;%end;%in;
+    %( todo: manage all age cases (path_end.death_date.year-path_end.birth_date.year<10 and cous_isdead=1) or (today.year-path_end.birth_date.year<10 and cous_isdead=0) %)
     %( fix gradient for individual who are dead < 1 year old by forcing a 1% white space %)
     %let;death_age;%if;(death_age_!="" and birth_age!= "" and death_age_=birth_age and birth_age>0)%expr(birth_age+1)%else;%death_age_;%end;%in;
     %let;white;%if;(cous_isdead=1)rgba(245,245,235,1)%else;rgba(255,255,255,1)%end;%in;
-    %(%let;brown;rgba(245,231,216,1)%in;%)    %let;brown;rgba(193,46,46,1)%in;
+    %let;brown;rgba(245,231,216,1)%in;
     %let;yellow;rgba(255,235,210,1)%in;
     %if;(path_end.surname="?" and path_end.first_name="?")%incr_count3;
     %else;
       %( store all cous_paths individual list item with their 5 buttons in a sorted_list %)
       %let;name_;%path_end.surname_key;%path_end.first_name_key;%in;
-      %let;date_;%path_end.birth_date.year;%path_end.birth_date.month;%path_end.birth_date.day;%path_end.birth_date.prec;%in;
-      %apply;add_in_sorted_list%with;%path_end.dates; %path_end.surname; %path_end.first_name; %path_end.occ;%and;%nn;
+      %let;date_;%if;(path_end.birth_date.year!="")%path_end.birth_date.year;%end;%if;(path_end.birth_date.month!="")%if;(path_end.birth_date.month<10)0%end;%path_end.birth_date.month;%else;00%end;%if;(path_end.birth_date.day!="")%if;(path_end.birth_date.day<10)0%end;%path_end.birth_date.day;%else;00%end;%path_end.birth_date.prec;%in;
+      %apply;add_in_sorted_list%with;%date_; %name_;%path_end.occ;%and;%nn;
       <li class="card text-small nbr_%path_end.nbr; rounded-lg border-top-0 border-bottom-0 mr-2
-        border-%if;(path_end.sex=0)primary%elseif;(path_end.sex=1)danger%else;dark%end; border-left-5%if;(cous_nodesc!=1) border-double%end;
-        %if;(cous_isdead=1)border-right-5-black"%sp;
-        style="%if;(birth_age!="" and death_age="")background:linear-gradient(90deg, %brown; %birth_age;%%, %white; %birth_age;%%);%nn;
-               %else;
-                 background:linear-gradient(90deg,%sp;
-                 %if;(birth_age="" and death_age!="" and death_age>0)%yellow; 0%%
-                 %else;%brown; %if;(birth_prec=1)0%else;%birth_age;%end;%%, %white; %birth_age;%%%end;,%nn;
-                 %if;(death_age="" and birth_age!="" and birth_age>0)%yellow; 100%%
-                 %else;%white; %death_age;%%, %brown; %if;(death_prec=1)100%else;%death_age;%end;%%%end;);%nn;
-               %end;
-          %end;"
-          data-surname="%name_;%date_;" data-birth_year="%date_;%name_;"
-        %( TODO: toggle between 3 functions in jQuery script to sort by age!
-         data-age="%if;((path_end.death_date.year-path_end.birth_date.year<10 and cous_isdead=1) or (today.year-path_end.birth_date.year<10 and cous_isdead=0))0%end;%if;(cous_isdead=1)%expr(path_end.death_date.year-path_end.birth_date.year)%else;%expr(today.year-path_end.birth_date.year)%end;%path_end.surname_key;%path_end.first_name_key;%path_end.birth_date.year;"%)>%nn;
+        border-%if;(path_end.sex=0)primary%elseif;(path_end.sex=1)danger%else;dark%end; border-left-5%if;(cous_nodesc!=1) border-double%end;%if;(cous_isdead=1) border-right-5-black%end;"%sp;
+        style="background:linear-gradient(90deg,%sp;
+        %if;(cous_isdead=0 and birth_age!="")%brown; %birth_age;%%, %white; %birth_age;%%);%nn;
+        %else;
+          %if;(birth_age="" and death_age!="" and death_age>0)%yellow; 0%%
+          %else;%brown; %if;(birth_prec=1)0%else;%birth_age;%end;%%, %white; %birth_age;%%%end;,%nn;
+          %if;(death_age="" and birth_age!="" and birth_age>0)%yellow; 100%%
+          %else;%white; %death_age;%%, %brown; %if;(death_prec=1)100%else;%death_age;%end;%%%end;);%nn;
+        %end;" data-surname="%name_;%date_;" data-birth="%date_; %name_;%path_end.occ;"
+        data-age="%julian_age;%path_end.birth_date.year;%path_end.death_date.year;%path_end.surname_key;%path_end.first_name_key;">%nn;
         <div class="d-flex justify-content-between align-items-start ml-n2">
           <div class="d-block pl-n2 pr-2 align-self-center order-1 position-relative">
             <a role="button" href="%prefix;%path_end.access;&m=C&v=%e_v;" title="[navigation] [with]…"
@@ -130,14 +133,14 @@
           %end;
           </div>
           <div class="d-block flex-grow-1 justify-content-start align-self-center order-2 text-truncate text-nowrap px-0">
-            <a class="lh-2" href="%prefix;%path_end.access;"%if;(path_end.occ!="0") title="occ %path_end.occ;"%end;%sp;
-              %(data-anclist="%path_end.anc_f_list;"%)> %cous_isdead; | %birth_age;-%death_age_; | %path_end.birth_date.year; %path_end.death_date.year; || %path_end.nbr; | %path_end.lev_cnt; | %path_end.anc_level; DEBUG %path_end.surname; %path_end.first_name;%nn;
+            <a class="lh-2" href="%prefix;%path_end.access;"title="%if;(cous_age_!="" and julian_age_!="" and julian_age_>364)%cous_age_; [years old] (%julian_age_; [days old])%elseif;(julian_age_!="" and julian_age_<365 and julian_age_>1)%julian_age_; [days old]%elseif;(julian_age_=1)[one day old]%elseif;(julian_age_=0)0 [year/month/day]2%end;%if;(path_end.occ!="0") (occ %path_end.occ;)%end;"%sp;
+              %(data-anclist="%path_end.anc_f_list;"%)>%(%julian_age; %cous_age; %if;(cous_isdead=1)†%else;°%end; %birth_age;-%death_age_; (%cous_age_; yo) %path_end.birth_date.year;%path_end.birth_date.prec; %path_end.death_date.year;%path_end.death_date.prec; || %path_end.nbr; | %path_end.lev_cnt; | %path_end.anc_level; DEBUG %)%path_end.surname; %path_end.first_name;%nn;
             </a>
-            %if;wizard;<a href="%prefix;&m=MOD_IND&i=%path_end.index;">%end;
+            %if;wizard;<a href="%prefix;&m=MOD_IND&i=%path_end.index;"%else;<span%end; title="%if;wizard;[modify] [person/persons]0%end;">
               %if;(path_end.dates!="")%path_end.dates;
               %else;%if;(cous_isdead=1)†%else;°%end;
               %end;
-            %if;wizard;</a>%end;
+            %if;wizard;</a>%else;</span>%end;
           </div>
         </div>
        </li>%and;%path_end.cnt;%and;%path_end.index;%end;
@@ -152,7 +155,7 @@
   %end;
   %( overflow-y: scroll is tofix : quick hack to allow scrolling on next modal and not body after dismissing a first modal %)
   <div class="modal fade px-4 overflow-y-scroll" id="modal_vvv_www" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl w-100" %( modal-dialog-centered%) style="max-width:1600px;%nn;
+    <div class="modal-dialog modal-xl w-100" %( modal-dialog-centered%) style="max-width:1500px;%nn;
       %(%if;(listb_size>127)1600%elseif;(listb_size>31)1200%elseif;(listb_size>9)992%else;600%end;px;%)">
       <div class="modal-content bg-transparent border-0">
         <div class="%(modal-header %)position-relative p-2 pb-1 rounded-lg bg-%if;(count!=0)white%else;linen%end;">
@@ -191,14 +194,14 @@
               </div>
               %(<div class="flex-grow-1 bg-transparent"> </div>%)
               %let;cousdown;%apply;cousins_cnt%with;vvv%and;%expr(www+1)%end;%in;
-              <div class="d-flex justify-content-end align-items-end ml-2 z-index-1">
+              <div class="d-flex justify-content-end align-items-end ml-2 z-index1">
                 <div class="d-inline-flex align-self-center">
-                  <div class="d-flex align-items-end">
+                  <div class="d-inline-flex align-items-end mr-1">
                     %if;(vvv>0 and www=0)
-                      <button type="button" class="btn btn-sm py-0 mb-1 btn-light" data-dismiss="modal" data-toggle="modal" data-target="#modal_%expr(vvv-1)_www"><i class="fa-solid fa-arrow-down-long fa-fw fa-rotate-by" style="--fa-rotate-angle: 45deg;" title="%expr(vvv-1)/0 ancestors at g-1" data-toggle="tooltip"></i></button>
+                      <button type="button" class="btn btn-sm py-0 mb-2 btn-light" data-dismiss="modal" data-toggle="modal" data-target="#modal_%expr(vvv-1)_www"><i class="fa-solid fa-arrow-down-long fa-fw fa-rotate-by" style="--fa-rotate-angle: 45deg;" title="%expr(vvv-1)/0 ancestors at g-1" data-toggle="tooltip"></i></button>
                     %end;
                   </div>
-                  <div class="d-inline-flex flex-column ml-2">
+                  <div class="d-inline-flex flex-column mr-2">
                     <div>
                       <button type="button" class="btn btn-sm py-0 mt-2 btn-light%if;(vvv=e_v and www=0) disabled%end;" data-dismiss="modal" data-toggle="modal" data-target="#modal_%if;(www=0)%expr(vvv+1)_0%else;vvv_%expr(www-1)%end;"><span title="%if;(www=0)%expr(vvv+1)/0%else;vvv/%expr(www-1)%end;" data-toggle="tooltip" data-html="true"><i class="fa-solid fa-arrow-up-%if;(www=0)right-dots%else;long%end; fa-fw"></i>vvv</span></button>
                     </div>
@@ -207,13 +210,14 @@
                     </div>
                   </div>
                   <a role="button" href="%prefix;%access;&m=C&v1=vvv&v2=www" 
-                    class="btn btn-lg btn-light mx-3 my-2">
-                      <span data-toggle="tooltip" data-html="true" title="%expr(vvv+www) %if;(vvv+www<2)[degree of kinship]0%else;[degree of kinship]1%end; [show all] [relationship link/relationship links]1)">
+                    class="btn btn-lg btn-light p-2 mr-2 align-self-center">
+                      <span data-toggle="tooltip" data-html="true" title="%expr(vvv+www) %if;(vvv+www<2)[degree of kinship]0%else;[degree of kinship]1%end; ([show all] [relationship link/relationship links]1)">
                         <i class="fa-solid fa-person-arrow-up-from-line"></i>
                         <i class="fa-solid fa-person-arrow-down-to-line fa-fw fa-flip-horizontal"></i>
                       </span>
                   </a>
-                  <button type="button" class="btn btn-light sortbtn flex-shrink-1"><i class="fa-solid fa-user fa-fw mr-1 sorticon"></i>[sort by/branch/alphabetic order]0<br><span class="sorttype">[surname/surnames]0</span></button>
+                  <button type="button" class="btn btn-light p-2 flex-shrink-1 mr-2 sortbtn">%nn;
+                    <i class="fa-solid fa-user fa-fw mr-1 sorticon"></i>[sort by/branch/alphabetic order]0<br><span class="sorttype">[surname/surnames]0</span></button>
                 </div>
               </div>
             </div>
@@ -289,7 +293,7 @@
               %let;tot;%apply;cous_paths_cnt%with;%i;%and;%k;%end;%in;
               %let;tot_next;%apply;cous_paths_cnt%with;%i;%and;%expr(k+1)%end;%in;
               %if;(i>1 and k=0)
-                <td class="h4 font-weight-light user-select-none text-left align-middle border-top-0 pb-3">%nn;
+                <td class="h4 font-weight-light user-select-none text-left align-middle border-top-0 pb-3 pl-3">%nn;
                   %if;(maxa>4)%expr(maxa-j)%else;%end;
                 </td>
                 %if;(i>2)<td colspan="%expr(i-2)" class="border-0"></td>%end;
@@ -382,27 +386,29 @@ $(function () {
 $(function () {
   $('[data-toggle="popover"]').popover()
 })
-function sort1() {
+%( order: -1 for descreasing sort %)
+const sortTypes = %[
+  { type: 'surname', icon: 'fa-arrow-down-9-1', label: '[age]0' },
+  { type: 'age',  order: -1, icon: 'fa-cake-candles', label: '[birth]0' },
+  { type: 'birth', icon: 'fa-user', label: '[surname/surnames]0' }
+%];
+let currentSortIndex = -1;
+function sort(sortType) {
   $(".listitems").each(function(){
     $(this).html($(this).children('li').sort(function(a, b){
-    return ($(b).data('surname')) < ($(a).data('surname')) ? 1 : -1;
+      if (sortType.order === -1) {
+        return ($(b).data(sortType.type)) > ($(a).data(sortType.type)) ? 1 : -1;
+      } else {
+        return ($(b).data(sortType.type)) < ($(a).data(sortType.type)) ? 1 : -1;
+      }
     }));
-    $('.sorticon').removeClass('fa-user').addClass('fa-cake-candles');
-    $('.sorttype').text('[birth]');
   });
-}
-function sort2() {
-  $(".listitems").each(function(){
-    $(this).html($(this).children('li').sort(function(a, b){
-    return ($(b).data('birth_year')) < ($(a).data('birth_year')) ? 1 : -1;
-    }));
-    $('.sorticon').removeClass('fa-cake-candles').addClass('fa-user');
-    $('.sorttype').text('[surname/surnames]0');
-  });
+  $('.sorticon').removeClass(sortTypes.map(t => t.icon).join(' ')).addClass(sortType.icon);
+  $('.sorttype').text(sortType.label);
 }
 $(document).on('click', '.sortbtn', function() {
-  var el = this;
-  return (el.tog^=1) ? sort1() : sort2();
+  currentSortIndex = (currentSortIndex + 1) % sortTypes.length;
+  sort(sortTypes[currentSortIndex]);
 });
 $(document).ready(function() {
   $(".toggle-lev .btn").click(function() {
