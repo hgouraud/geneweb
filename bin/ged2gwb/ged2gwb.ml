@@ -63,12 +63,6 @@ let in_file = ref ""
 let print_location pos =
   Printf.fprintf !log_oc "File \"%s\", line %d:\n" !in_file pos
 
-(*
-let rec skip_eol =
-  parser
-  | [< ''\010' | '\013'; _ = skip_eol >] -> ()
-  | [< >] -> ()
-*)
 let rec skip_eol (strm__ : _ Stream.t) =
   match Stream.peek strm__ with
     Some ('\010' | '\013') ->
@@ -79,13 +73,6 @@ let rec skip_eol (strm__ : _ Stream.t) =
       ()
   | _ -> ()
 
-(*let rec get_to_eoln len =
-  parser
-  | [< ''\010' | '\013'; _ = skip_eol >] -> Buff.get len
-  | [< ''\t'; s >] -> get_to_eoln (Buff.store len ' ') s
-  | [< 'c; s >] -> get_to_eoln (Buff.store len c) s
-  | [< >] -> Buff.get len
-*)
 let rec get_to_eoln len (strm__ : _ Stream.t) =
   match Stream.peek strm__ with
     Some ('\010' | '\013') ->
@@ -94,16 +81,12 @@ let rec get_to_eoln len (strm__ : _ Stream.t) =
         try skip_eol strm__ with Stream.Failure -> raise (Stream.Error "")
       in
       Buff.get len
-  | Some '\t' -> Stream.junk strm__; get_to_eoln (Buff.store len ' ') strm__
-  | Some c -> Stream.junk strm__; get_to_eoln (Buff.store len c) strm__
+  | Some '\t' ->
+      Stream.junk strm__; let s = strm__ in get_to_eoln (Buff.store len ' ') s
+  | Some c ->
+      Stream.junk strm__; let s = strm__ in get_to_eoln (Buff.store len c) s
   | _ -> Buff.get len
 
-(*let rec skip_to_eoln =
-  parser
-  | [< ''\010' | '\013'; _ = skip_eol >] -> ()
-  | [< '_; s >] -> skip_to_eoln s
-  | [< >] -> ()
-*)
 let rec skip_to_eoln (strm__ : _ Stream.t) =
   match Stream.peek strm__ with
     Some ('\010' | '\013') ->
@@ -112,43 +95,26 @@ let rec skip_to_eoln (strm__ : _ Stream.t) =
         try skip_eol strm__ with Stream.Failure -> raise (Stream.Error "")
       in
       ()
-  | Some _ -> Stream.junk strm__; skip_to_eoln strm__
+  | Some _ -> Stream.junk strm__; let s = strm__ in skip_to_eoln s
   | _ -> ()
 
 let eol_chars = ['\010'; '\013']
 
-(*let rec get_ident len =
-  parser
-  | [< '' ' | '\t' >] -> Buff.get len
-  | [< 'c when not (List.mem c eol_chars); s >] ->
-      get_ident (Buff.store len c) s
-  | [< >] -> Buff.get len
-*)
 let rec get_ident len (strm__ : _ Stream.t) =
   match Stream.peek strm__ with
     Some (' ' | '\t') -> Stream.junk strm__; Buff.get len
   | Some c when not (List.mem c eol_chars) ->
-      Stream.junk strm__; get_ident (Buff.store len c) strm__
+      Stream.junk strm__; let s = strm__ in get_ident (Buff.store len c) s
   | _ -> Buff.get len
 
-(*let skip_space =
-  parser
-  | [< '' ' | '\t' >] -> ()
-  | [< >] -> ()
-*)
 let skip_space (strm__ : _ Stream.t) =
   match Stream.peek strm__ with
     Some (' ' | '\t') -> Stream.junk strm__; ()
   | _ -> ()
 
-(*let rec line_start num =
-  parser
-  | [< '' '; s >] -> line_start num s
-  | [< 'x when x = num >] -> ()
-*)
 let rec line_start num (strm__ : _ Stream.t) =
   match Stream.peek strm__ with
-    Some ' ' -> Stream.junk strm__; line_start num strm__
+    Some ' ' -> Stream.junk strm__; let s = strm__ in line_start num s
   | Some x when x = num -> Stream.junk strm__; ()
   | _ -> raise Stream.Failure
 
@@ -297,39 +263,12 @@ let ascii_of_macintosh s =
 
 let utf8_of_string s =
   match !charset with
-  | Ansel -> Mutil.utf_8_of_iso_8859_1 (Ansel.to_iso_8859_1 s)
+    Ansel -> Mutil.utf_8_of_iso_8859_1 (Ansel.to_iso_8859_1 s)
   | Ansi -> Mutil.utf_8_of_iso_8859_1 s
   | Ascii -> Mutil.utf_8_of_iso_8859_1 s
   | Msdos -> Mutil.utf_8_of_iso_8859_1 (ascii_of_msdos s)
   | MacIntosh -> Mutil.utf_8_of_iso_8859_1 (ascii_of_macintosh s)
   | Utf8 -> s
-
-(*
-let rec get_lev n =
-  parser
-    [< _ = line_start n; _ = skip_space; r1 = get_ident 0; strm >] ->
-      let (rlab, rval, rcont, l) =
-        if String.length r1 > 0 && r1.[0] = '@' then parse_address n r1 strm
-        else parse_text n r1 strm
-      in
-      {rlab = rlab; rval = utf8_of_string rval;
-       rcont = utf8_of_string rcont; rsons = List.rev l; rpos = !line_cnt;
-       rused = false}
-and parse_address n r1 =
-  parser
-    [< r2 = get_ident 0; r3 = get_to_eoln 0 (* ? "get to eoln" *);
-       l = get_lev_list [] (Char.chr (Char.code n + 1)) (* ? "get lev list" *) >] ->
-      (r2, r1, r3, l)
-and parse_text n r1 =
-  parser
-    [< r2 = get_to_eoln 0;
-       l = get_lev_list [] (Char.chr (Char.code n + 1)) (* ? "get lev list" *) >] ->
-      (r1, r2, "", l)
-and get_lev_list l n =
-  parser
-  | [< x = get_lev n; s >] -> get_lev_list (x :: l) n s
-  | [< >] -> l
-*)
 
 let rec get_lev n (strm__ : _ Stream.t) =
   let _ = line_start n strm__ in
@@ -349,26 +288,24 @@ let rec get_lev n (strm__ : _ Stream.t) =
 and parse_address n r1 (strm__ : _ Stream.t) =
   let r2 = get_ident 0 strm__ in
   let r3 =
-    try get_to_eoln 0 strm__ with
-      Stream.Failure -> raise (Stream.Error "get to eoln")
+    try get_to_eoln 0 strm__ with Stream.Failure -> raise (Stream.Error "")
   in
   let l =
     try get_lev_list [] (Char.chr (Char.code n + 1)) strm__ with
-      Stream.Failure -> raise (Stream.Error "get lev list")
+      Stream.Failure -> raise (Stream.Error "")
   in
   r2, r1, r3, l
 and parse_text n r1 (strm__ : _ Stream.t) =
   let r2 = get_to_eoln 0 strm__ in
   let l =
     try get_lev_list [] (Char.chr (Char.code n + 1)) strm__ with
-      Stream.Failure -> raise (Stream.Error "get lev list")
+      Stream.Failure -> raise (Stream.Error "")
   in
   r1, r2, "", l
 and get_lev_list l n (strm__ : _ Stream.t) =
   match try Some (get_lev n strm__) with Stream.Failure -> None with
-    Some x -> get_lev_list (x :: l) n strm__
+    Some x -> let s = strm__ in get_lev_list (x :: l) n s
   | _ -> l
-
 
 (* Error *)
 
@@ -395,36 +332,16 @@ let warning_month_number_dates () =
   match !month_number_dates with
     MonthNumberHappened s ->
       Printf.fprintf !log_oc
-        "  Warning: the file holds dates with numbered months (like: 12/05/1912).\n  \
- \n  \
-  GEDCOM standard *requires* that months in dates be identifiers. The\n  \
-  correct form for this example would be 12 MAY 1912 or 5 DEC 1912.\n  \
-  \n  \
-  Consider restarting with option \"-dates_dm\" or \"-dates_md\".\n  \
-  Use option -help to see what they do.\n  \
-  \n  \
-  (example found in gedcom: \"%s\")"
+        "  Warning: the file holds dates with numbered months (like: 12/05/1912).\n  \n  GEDCOM standard *requires* that months in dates be identifiers. The\n  correct form for this example would be 12 MAY 1912 or 5 DEC 1912.\n  \n  Consider restarting with option \"-dates_dm\" or \"-dates_md\".\n  Use option -help to see what they do.\n  \n  (example found in gedcom: \"%s\")"
         s;
       flush !log_oc
   | _ -> ()
 
 (* Decoding fields *)
-(*
-let rec skip_spaces =
-  parser
-  | [< '' '; s >] -> skip_spaces s
-  | [< >] -> ()
-let rec ident_slash len =
-  parser
-  | [< ''/' >] -> Buff.get len
-  | [< ''\t'; a = ident_slash (Buff.store len ' ') >] -> a
-  | [< 'c; a = ident_slash (Buff.store len c) >] -> a
-  | [< >] -> Buff.get len
-*)
 
 let rec skip_spaces (strm__ : _ Stream.t) =
   match Stream.peek strm__ with
-    Some ' ' -> Stream.junk strm__; skip_spaces strm__
+    Some ' ' -> Stream.junk strm__; let s = strm__ in skip_spaces s
   | _ -> ()
 
 let rec ident_slash len (strm__ : _ Stream.t) =
@@ -441,7 +358,6 @@ let rec ident_slash len (strm__ : _ Stream.t) =
         Stream.Failure -> raise (Stream.Error "")
       end
   | _ -> Buff.get len
-
 
 let strip c str =
   let start =
@@ -498,20 +414,6 @@ let less_greater_escaped s =
     let len = compute_len 0 0 in copy_code_in (Bytes.create len) 0 0
   else s
 
-(*
-let parse_name =
-  parser
-    [< _ = skip_spaces;
-       invert =
-       (parser
-       | [< ''/' >] -> true
-       | [< >] -> false) ;
-       f = ident_slash 0; _ = skip_spaces; s = ident_slash 0 >] ->
-  let (f, s) = if invert then (s, f) else (f, s) in
-  let f = strip_spaces f in
-  let s = strip_spaces s in
-  ((if f = "" then "x" else f), (if s = "" then "?" else s))
-*)
 let parse_name (strm__ : _ Stream.t) =
   let _ = skip_spaces strm__ in
   let invert =
@@ -532,7 +434,6 @@ let parse_name (strm__ : _ Stream.t) =
   let f = strip_spaces f in
   let s = strip_spaces s in
   (if f = "" then "x" else f), (if s = "" then "?" else s)
-
 
 let rec find_field lab =
   function
@@ -556,32 +457,6 @@ let rec find_field_with_value lab v =
       else find_field_with_value lab v rl
   | [] -> false
 
-(*
-let rec lexing_date =
-  parser
-  | [< ''0'..'9' as c; n = number (Buff.store 0 c) >] -> ("INT", n)
-  | [< ''A'..'Z' as c; i = ident (Buff.store 0 c) >] -> ("ID", i)
-  | [< ''('; len = text 0 >] -> ("TEXT", Buff.get len)
-  | [< ''.' >] -> ("", ".")
-  | [< '' ' | '\t' | '\013'; s >] -> lexing_date s
-  | [< _ = Stream.empty >] -> ("EOI", "")
-  | [< 'x >] -> ("", String.make 1 x)
-and number len =
-  parser
-  | [< ''0'..'9' as c; a = number (Buff.store len c) >] -> a
-  | [< >] -> Buff.get len
-and ident len =
-  parser
-  | [< ''A'..'Z' as c; a = ident (Buff.store len c) >] -> a
-  | [< >] -> Buff.get len
-and text len =
-  parser
-  | [< '')' >] -> len
-  | [< ''('; len = text (Buff.store len '('); s >] ->
-      text (Buff.store len ')') s
-  | [< 'c; s >] -> text (Buff.store len c) s
-  | [< >] -> len
-*)
 let rec lexing_date (strm__ : _ Stream.t) =
   match Stream.peek strm__ with
     Some ('0'..'9' as c) ->
@@ -605,14 +480,16 @@ let rec lexing_date (strm__ : _ Stream.t) =
       in
       "TEXT", Buff.get len
   | Some '.' -> Stream.junk strm__; "", "."
-  | Some (' ' | '\t' | '\013') -> Stream.junk strm__; lexing_date strm__
+  | Some (' ' | '\t' | '\013') ->
+      Stream.junk strm__; let s = strm__ in lexing_date s
   | _ ->
       match try Some (Stream.empty strm__) with Stream.Failure -> None with
         Some _ -> "EOI", ""
       | _ ->
           match Stream.peek strm__ with
             Some x -> Stream.junk strm__; "", String.make 1 x
-          | _ -> raise Stream.Failure
+            | _ -> raise Stream.Failure
+
 and number len (strm__ : _ Stream.t) =
   match Stream.peek strm__ with
     Some ('0'..'9' as c) ->
@@ -638,11 +515,9 @@ and text len (strm__ : _ Stream.t) =
         try text (Buff.store len '(') strm__ with
           Stream.Failure -> raise (Stream.Error "")
       in
-      text (Buff.store len ')') strm__
-  | Some c -> Stream.junk strm__; text (Buff.store len c) strm__
+      let s = strm__ in text (Buff.store len ')') s
+  | Some c -> Stream.junk strm__; let s = strm__ in text (Buff.store len c) s
   | _ -> len
-
-
 
 let make_date_lexing s = Stream.from (fun _ -> Some (lexing_date s))
 
@@ -658,17 +533,13 @@ let using_token (p_con, _) =
             "\" is not recognized by the lexer"))
 
 let date_lexer =
-  { Token.tok_func =
-      (fun s -> make_date_lexing s
-              ,  { Plexing.Locations.locations = ref [||]
-                 ; overflow = ref true }
-      )
-  ; Token.tok_using = using_token
-  ; Token.tok_removing = (fun _ -> ())
-  ; Token.tok_match = tparse
-  ; Token.tok_text = (fun _ -> "<tok>")
-  ; Token.tok_comm = None
-  }
+  {Token.tok_func =
+    (fun s ->
+       make_date_lexing s,
+       {Plexing.Locations.locations = ref [| |]; overflow = ref true});
+   Token.tok_using = using_token; Token.tok_removing = (fun _ -> ());
+   Token.tok_match = tparse; Token.tok_text = (fun _ -> "<tok>");
+   Token.tok_comm = None}
 
 type 'a range =
     Begin of 'a
@@ -687,13 +558,6 @@ let start_with_int x =
   try let s = String.sub x 0 1 in let _ = int_of_string s in true with
     _ -> false
 
-(*
-let roman_int =
-  let p =
-    parser [< '("ID", x) when is_roman_int x >] -> Mutil.arabian_of_roman x
-  in
-  Grammar.Entry.of_parser date_g "roman int" p
-*)
 let roman_int =
   let p (strm__ : _ Stream.t) =
     match Stream.peek strm__ with
@@ -749,186 +613,957 @@ let make_date n1 n2 n3 =
       {day = 0; month = 0; year = y; prec = Sure; delta = 0}
   | _ -> raise (Stream.Error "bad date")
 
-let recover_date cal = function
-  | Dgreg (d, Dgregorian) ->
-    let d =
-      match cal with
-      | Dgregorian -> d
-      | Djulian -> Calendar.gregorian_of_julian d
-      | Dfrench -> Calendar.gregorian_of_french d
-      | Dhebrew -> Calendar.gregorian_of_hebrew d
-    in
-    Dgreg (d, cal)
+let recover_date cal =
+  function
+    Dgreg (d, Dgregorian) ->
+      let d =
+        match cal with
+          Dgregorian -> d
+        | Djulian -> Calendar.gregorian_of_julian d
+        | Dfrench -> Calendar.gregorian_of_french d
+        | Dhebrew -> Calendar.gregorian_of_hebrew d
+      in
+      Dgreg (d, cal)
   | d -> d
 
 [@@@ocaml.warning "-27"]
-EXTEND
-  GLOBAL: date_value date_interval date_value_recover;
-  date_value:
-    [ [ d = date_or_text; EOI -> d ] ]
-  ;
-  date_value_recover:
-    [ [ "@"; "#"; ID "DGREGORIAN"; "@"; d = date_value ->
-          recover_date Dgregorian d
-      | "@"; "#"; ID "DJULIAN"; "@"; d = date_value ->
-          recover_date Djulian d
-      | "@"; "#"; ID "DFRENCH"; ID "R"; "@"; d = date_value ->
-          recover_date Dfrench d
-      | "@"; "#"; ID "DHEBREW"; "@"; d = date_value ->
-          recover_date Dhebrew d ] ]
-  ;
-  date_interval:
-    [ [ ID "BEF"; dt = date_or_text; EOI -> End dt
-      | ID "AFT"; dt = date_or_text; EOI -> Begin dt
-      | ID "BET"; dt = date_or_text; ID "AND"; dt1 = date_or_text; EOI ->
-          BeginEnd (dt, dt1)
-      | ID "TO"; dt = date_or_text; EOI -> End dt
-      | ID "FROM"; dt = date_or_text; EOI -> Begin dt
-      | ID "FROM"; dt = date_or_text; ID "TO"; dt1 = date_or_text; EOI ->
-          BeginEnd (dt, dt1)
-      | dt = date_or_text; EOI -> Begin dt ] ]
-  ;
-  date_or_text:
-    [ [ dr = date_range ->
-          begin match dr with
-          | Begin (d, cal) -> Dgreg ({d with prec = After}, cal)
-          | End (d, cal) -> Dgreg ({d with prec = Before}, cal)
-          | BeginEnd ((d1, cal1), (d2, cal2)) ->
-              let dmy2 =
-                match cal2 with
-                | Dgregorian ->
-                    {day2 = d2.day; month2 = d2.month;
-                     year2 = d2.year; delta2 = 0}
-                | Djulian ->
-                    let dmy2 = Calendar.julian_of_gregorian d2 in
-                    {day2 = dmy2.day; month2 = dmy2.month;
-                     year2 = dmy2.year; delta2 = 0}
-                | Dfrench ->
-                    let dmy2 = Calendar.french_of_gregorian d2 in
-                    {day2 = dmy2.day; month2 = dmy2.month;
-                     year2 = dmy2.year; delta2 = 0}
-                | Dhebrew ->
-                    let dmy2 = Calendar.hebrew_of_gregorian d2 in
-                    {day2 = dmy2.day; month2 = dmy2.month;
-                     year2 = dmy2.year; delta2 = 0}
-              in
-              Dgreg ({d1 with prec = YearInt dmy2}, cal1) end
-      | (d, cal) = date -> Dgreg (d, cal)
-      | s = TEXT -> Dtext s ] ]
-  ;
-  date_range:
-    [ [ ID "BEF"; dt = date -> End dt
-      | ID "AFT"; dt = date -> Begin dt
-      | ID "BET"; dt = date; ID "AND"; dt1 = date -> BeginEnd (dt, dt1)
-      | ID "TO"; dt = date -> End dt
-      | ID "FROM"; dt = date -> Begin dt
-      | ID "FROM"; dt = date; ID "TO"; dt1 = date -> BeginEnd (dt, dt1) ] ]
-  ;
-  date:
-    [ [ ID "ABT"; (d, cal) = date_calendar -> ({(d) with prec = About}, cal)
-      | ID "ENV"; (d, cal) = date_calendar -> ({(d) with prec = About}, cal)
-      | ID "EST"; (d, cal) = date_calendar -> ({(d) with prec = Maybe}, cal)
-      | ID "AFT"; (d, cal) = date_calendar -> ({(d) with prec = Before}, cal)
-      | ID "BEF"; (d, cal) = date_calendar -> ({(d) with prec = After}, cal)
-      | (d, cal) = date_calendar -> (d, cal) ] ]
-  ;
-  date_calendar:
-    [ [ "@"; "#"; ID "DGREGORIAN"; "@"; d = date_greg -> (d, Dgregorian)
-      | "@"; "#"; ID "DJULIAN"; "@"; d = date_greg ->
-          (Calendar.gregorian_of_julian d, Djulian)
-      | "@"; "#"; ID "DFRENCH"; ID "R"; "@"; d = date_fren ->
-          (Calendar.gregorian_of_french d, Dfrench)
-      | "@"; "#"; ID "DHEBREW"; "@"; d = date_hebr ->
-          (Calendar.gregorian_of_hebrew d, Dhebrew)
-      | d = date_greg -> (d, Dgregorian) ] ]
-  ;
-  date_greg:
-    [ [ LIST0 "."; n1 = OPT int; LIST0 [ "." | "/" ]; n2 = OPT gen_month;
-        LIST0 [ "." | "/" ]; n3 = OPT int; LIST0 "." ->
-          make_date n1 n2 n3 ] ]
-  ;
-  date_fren:
-    [ [ LIST0 "."; n1 = int; (n2, n3) = date_fren_kont ->
-          make_date (Some n1) n2 n3
-      | LIST0 "."; n1 = year_fren -> make_date (Some n1) None None
-      | LIST0 "."; (n2, n3) = date_fren_kont -> make_date None n2 n3 ] ]
-  ;
-  date_fren_kont:
-    [ [ LIST0 [ "." | "/" ]; n2 = OPT gen_french; LIST0 [ "." | "/" ];
-        n3 = OPT year_fren; LIST0 "." ->
-          (n2, n3) ] ]
-  ;
-  date_hebr:
-    [ [ LIST0 "."; n1 = OPT int; LIST0 [ "." | "/" ]; n2 = OPT gen_hebr;
-        LIST0 [ "." | "/" ]; n3 = OPT int; LIST0 "." ->
-          make_date n1 n2 n3 ] ]
-  ;
-  gen_month:
-    [ [ i = int -> Left (abs i)
-      | m = month -> Right m ] ]
-  ;
-  month:
-    [ [ ID "JAN" -> 1
-      | ID "FEB" -> 2
-      | ID "MAR" -> 3
-      | ID "APR" -> 4
-      | ID "MAY" -> 5
-      | ID "JUN" -> 6
-      | ID "JUL" -> 7
-      | ID "AUG" -> 8
-      | ID "SEP" -> 9
-      | ID "OCT" -> 10
-      | ID "NOV" -> 11
-      | ID "DEC" -> 12 ] ]
-  ;
-  gen_french:
-    [ [ m = french -> Right m ] ]
-  ;
-  french:
-    [ [ ID "VEND" -> 1
-      | ID "BRUM" -> 2
-      | ID "FRIM" -> 3
-      | ID "NIVO" -> 4
-      | ID "PLUV" -> 5
-      | ID "VENT" -> 6
-      | ID "GERM" -> 7
-      | ID "FLOR" -> 8
-      | ID "PRAI" -> 9
-      | ID "MESS" -> 10
-      | ID "THER" -> 11
-      | ID "FRUC" -> 12
-      | ID "COMP" -> 13 ] ]
-  ;
-  year_fren:
-    [ [ i = int -> i
-      | ID "AN"; i = roman_int -> i
-      | i = roman_int -> i ] ]
-  ;
-  gen_hebr:
-    [ [ m = hebr -> Right m ] ]
-  ;
-  hebr:
-    [ [ ID "TSH" -> 1
-      | ID "CSH" -> 2
-      | ID "KSL" -> 3
-      | ID "TVT" -> 4
-      | ID "SHV" -> 5
-      | ID "ADR" -> 6
-      | ID "ADS" -> 7
-      | ID "NSN" -> 8
-      | ID "IYR" -> 9
-      | ID "SVN" -> 10
-      | ID "TMZ" -> 11
-      | ID "AAV" -> 12
-      | ID "ELL" -> 13 ] ]
-  ;
-  int:
-    [ [ i = INT ->
-          (try int_of_string i with Failure _ -> raise Stream.Failure)
-      |i = INT; ID "BCE" ->
-          (try (- int_of_string i) with  Failure _ -> raise Stream.Failure) ] ]
-  ;
-END
+(* camlp5
+-EXTEND
+-  GLOBAL: date_value date_interval date_value_recover;
+-  date_value:
+-    [ [ d = date_or_text; EOI -> d ] ]
+-  ;
+-  date_value_recover:
+-    [ [ "@"; "#"; ID "DGREGORIAN"; "@"; d = date_value ->
+-          recover_date Dgregorian d
+-      | "@"; "#"; ID "DJULIAN"; "@"; d = date_value ->
+-          recover_date Djulian d
+-      | "@"; "#"; ID "DFRENCH"; ID "R"; "@"; d = date_value ->
+-          recover_date Dfrench d
+-      | "@"; "#"; ID "DHEBREW"; "@"; d = date_value ->
+-          recover_date Dhebrew d ] ]
+-  ;
+-  date_interval:
+-    [ [ ID "BEF"; dt = date_or_text; EOI -> End dt
+-      | ID "AFT"; dt = date_or_text; EOI -> Begin dt
+-      | ID "BET"; dt = date_or_text; ID "AND"; dt1 = date_or_text; EOI ->
+-          BeginEnd (dt, dt1)
+-      | ID "TO"; dt = date_or_text; EOI -> End dt
+-      | ID "FROM"; dt = date_or_text; EOI -> Begin dt
+-      | ID "FROM"; dt = date_or_text; ID "TO"; dt1 = date_or_text; EOI ->
+-          BeginEnd (dt, dt1)
+-      | dt = date_or_text; EOI -> Begin dt ] ]
+-  ;
+-  date_or_text:
+-    [ [ dr = date_range ->
+-          begin match dr with
+-          | Begin (d, cal) -> Dgreg ({d with prec = After}, cal)
+-          | End (d, cal) -> Dgreg ({d with prec = Before}, cal)
+-          | BeginEnd ((d1, cal1), (d2, cal2)) ->
+-              let dmy2 =
+-                match cal2 with
+-                | Dgregorian ->
+-                    {day2 = d2.day; month2 = d2.month;
+-                     year2 = d2.year; delta2 = 0}
+-                | Djulian ->
+-                    let dmy2 = Calendar.julian_of_gregorian d2 in
+-                    {day2 = dmy2.day; month2 = dmy2.month;
+-                     year2 = dmy2.year; delta2 = 0}
+-                | Dfrench ->
+-                    let dmy2 = Calendar.french_of_gregorian d2 in
+-                    {day2 = dmy2.day; month2 = dmy2.month;
+-                     year2 = dmy2.year; delta2 = 0}
+-                | Dhebrew ->
+-                    let dmy2 = Calendar.hebrew_of_gregorian d2 in
+-                    {day2 = dmy2.day; month2 = dmy2.month;
+-                     year2 = dmy2.year; delta2 = 0}
+-              in
+-              Dgreg ({d1 with prec = YearInt dmy2}, cal1) end
+-      | (d, cal) = date -> Dgreg (d, cal)
+-      | s = TEXT -> Dtext s ] ]
+-  ;
+-  date_range:
+-    [ [ ID "BEF"; dt = date -> End dt
+-      | ID "AFT"; dt = date -> Begin dt
+-      | ID "BET"; dt = date; ID "AND"; dt1 = date -> BeginEnd (dt, dt1)
+-      | ID "TO"; dt = date -> End dt
+-      | ID "FROM"; dt = date -> Begin dt
+-      | ID "FROM"; dt = date; ID "TO"; dt1 = date -> BeginEnd (dt, dt1) ] ]
+-  ;
+-  date:
+-    [ [ ID "ABT"; (d, cal) = date_calendar -> ({(d) with prec = About}, cal)
+-      | ID "ENV"; (d, cal) = date_calendar -> ({(d) with prec = About}, cal)
+-      | ID "EST"; (d, cal) = date_calendar -> ({(d) with prec = Maybe}, cal)
+-      | ID "AFT"; (d, cal) = date_calendar -> ({(d) with prec = Before}, cal)
+-      | ID "BEF"; (d, cal) = date_calendar -> ({(d) with prec = After}, cal)
+-      | (d, cal) = date_calendar -> (d, cal) ] ]
+-  ;
+-  date_calendar:
+-    [ [ "@"; "#"; ID "DGREGORIAN"; "@"; d = date_greg -> (d, Dgregorian)
+-      | "@"; "#"; ID "DJULIAN"; "@"; d = date_greg ->
+-          (Calendar.gregorian_of_julian d, Djulian)
+-      | "@"; "#"; ID "DFRENCH"; ID "R"; "@"; d = date_fren ->
+-          (Calendar.gregorian_of_french d, Dfrench)
+-      | "@"; "#"; ID "DHEBREW"; "@"; d = date_hebr ->
+-          (Calendar.gregorian_of_hebrew d, Dhebrew)
+-      | d = date_greg -> (d, Dgregorian) ] ]
+-  ;
+-  date_greg:
+-    [ [ LIST0 "."; n1 = OPT int; LIST0 [ "." | "/" ]; n2 = OPT gen_month;
+-        LIST0 [ "." | "/" ]; n3 = OPT int; LIST0 "." ->
+-          make_date n1 n2 n3 ] ]
+-  ;
+-  date_fren:
+-    [ [ LIST0 "."; n1 = int; (n2, n3) = date_fren_kont ->
+-          make_date (Some n1) n2 n3
+-      | LIST0 "."; n1 = year_fren -> make_date (Some n1) None None
+-      | LIST0 "."; (n2, n3) = date_fren_kont -> make_date None n2 n3 ] ]
+-  ;
+-  date_fren_kont:
+-    [ [ LIST0 [ "." | "/" ]; n2 = OPT gen_french; LIST0 [ "." | "/" ];
+-        n3 = OPT year_fren; LIST0 "." ->
+-          (n2, n3) ] ]
+-  ;
+-  date_hebr:
+-    [ [ LIST0 "."; n1 = OPT int; LIST0 [ "." | "/" ]; n2 = OPT gen_hebr;
+-        LIST0 [ "." | "/" ]; n3 = OPT int; LIST0 "." ->
+-          make_date n1 n2 n3 ] ]
+-  ;
+-  gen_month:
+-    [ [ i = int -> Left (abs i)
+-      | m = month -> Right m ] ]
+-  ;
+-  month:
+-    [ [ ID "JAN" -> 1
+-      | ID "FEB" -> 2
+-      | ID "MAR" -> 3
+-      | ID "APR" -> 4
+-      | ID "MAY" -> 5
+-      | ID "JUN" -> 6
+-      | ID "JUL" -> 7
+-      | ID "AUG" -> 8
+-      | ID "SEP" -> 9
+-      | ID "OCT" -> 10
+-      | ID "NOV" -> 11
+-      | ID "DEC" -> 12 ] ]
+-  ;
+-  gen_french:
+-    [ [ m = french -> Right m ] ]
+-  ;
+-  french:
+-    [ [ ID "VEND" -> 1
+-      | ID "BRUM" -> 2
+-      | ID "FRIM" -> 3
+-      | ID "NIVO" -> 4
+-      | ID "PLUV" -> 5
+-      | ID "VENT" -> 6
+-      | ID "GERM" -> 7
+-      | ID "FLOR" -> 8
+-      | ID "PRAI" -> 9
+-      | ID "MESS" -> 10
+-      | ID "THER" -> 11
+-      | ID "FRUC" -> 12
+-      | ID "COMP" -> 13 ] ]
+-  ;
+-  year_fren:
+-    [ [ i = int -> i
+-      | ID "AN"; i = roman_int -> i
+-      | i = roman_int -> i ] ]
+-  ;
+-  gen_hebr:
+-    [ [ m = hebr -> Right m ] ]
+-  ;
+-  hebr:
+-    [ [ ID "TSH" -> 1
+-      | ID "CSH" -> 2
+-      | ID "KSL" -> 3
+-      | ID "TVT" -> 4
+-      | ID "SHV" -> 5
+-      | ID "ADR" -> 6
+-      | ID "ADS" -> 7
+-      | ID "NSN" -> 8
+-      | ID "IYR" -> 9
+-      | ID "SVN" -> 10
+-      | ID "TMZ" -> 11
+-      | ID "AAV" -> 12
+-      | ID "ELL" -> 13 ] ]
+-  ;
+-  int:
+-    [ [ i = INT ->
+-          (try int_of_string i with Failure _ -> raise Stream.Failure)
+-      |i = INT; ID "BCE" ->
+-          (try (- int_of_string i) with  Failure _ -> raise Stream.Failure) ] ]
+-  ;
+-END
+*)
+let _ =
+  Grammar.safe_extend
+    (let _ = (date_value : 'date_value Grammar.Entry.e)
+     and _ = (date_interval : 'date_interval Grammar.Entry.e)
+     and _ = (date_value_recover : 'date_value_recover Grammar.Entry.e) in
+     let grammar_entry_create s =
+       Grammar.create_local_entry (Grammar.of_entry date_value) s
+     in
+     let date_or_text : 'date_or_text Grammar.Entry.e =
+       grammar_entry_create "date_or_text"
+     and date_range : 'date_range Grammar.Entry.e =
+       grammar_entry_create "date_range"
+     and date : 'date Grammar.Entry.e = grammar_entry_create "date"
+     and date_calendar : 'date_calendar Grammar.Entry.e =
+       grammar_entry_create "date_calendar"
+     and date_greg : 'date_greg Grammar.Entry.e =
+       grammar_entry_create "date_greg"
+     and date_fren : 'date_fren Grammar.Entry.e =
+       grammar_entry_create "date_fren"
+     and date_fren_kont : 'date_fren_kont Grammar.Entry.e =
+       grammar_entry_create "date_fren_kont"
+     and date_hebr : 'date_hebr Grammar.Entry.e =
+       grammar_entry_create "date_hebr"
+     and gen_month : 'gen_month Grammar.Entry.e =
+       grammar_entry_create "gen_month"
+     and month : 'month Grammar.Entry.e = grammar_entry_create "month"
+     and gen_french : 'gen_french Grammar.Entry.e =
+       grammar_entry_create "gen_french"
+     and french : 'french Grammar.Entry.e = grammar_entry_create "french"
+     and year_fren : 'year_fren Grammar.Entry.e =
+       grammar_entry_create "year_fren"
+     and gen_hebr : 'gen_hebr Grammar.Entry.e =
+       grammar_entry_create "gen_hebr"
+     and hebr : 'hebr Grammar.Entry.e = grammar_entry_create "hebr"
+     and int : 'int Grammar.Entry.e = grammar_entry_create "int" in
+     [Grammar.extension (date_value : 'date_value Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop
+                  (Grammar.s_nterm
+                     (date_or_text : 'date_or_text Grammar.Entry.e)))
+               (Grammar.s_token ("EOI", "")),
+             "194fe98d",
+             (fun _ (d : 'date_or_text) (loc : Ploc.t) ->
+                (d : 'date_value)))]];
+      Grammar.extension
+        (date_value_recover : 'date_value_recover Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next Grammar.r_stop
+                           (Grammar.s_token ("", "@")))
+                        (Grammar.s_token ("", "#")))
+                     (Grammar.s_token ("ID", "DHEBREW")))
+                  (Grammar.s_token ("", "@")))
+               (Grammar.s_nterm (date_value : 'date_value Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d : 'date_value) _ _ _ _ (loc : Ploc.t) ->
+                (recover_date Dhebrew d : 'date_value_recover)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next
+                           (Grammar.r_next Grammar.r_stop
+                              (Grammar.s_token ("", "@")))
+                           (Grammar.s_token ("", "#")))
+                        (Grammar.s_token ("ID", "DFRENCH")))
+                     (Grammar.s_token ("ID", "R")))
+                  (Grammar.s_token ("", "@")))
+               (Grammar.s_nterm (date_value : 'date_value Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d : 'date_value) _ _ _ _ _ (loc : Ploc.t) ->
+                (recover_date Dfrench d : 'date_value_recover)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next Grammar.r_stop
+                           (Grammar.s_token ("", "@")))
+                        (Grammar.s_token ("", "#")))
+                     (Grammar.s_token ("ID", "DJULIAN")))
+                  (Grammar.s_token ("", "@")))
+               (Grammar.s_nterm (date_value : 'date_value Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d : 'date_value) _ _ _ _ (loc : Ploc.t) ->
+                (recover_date Djulian d : 'date_value_recover)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next Grammar.r_stop
+                           (Grammar.s_token ("", "@")))
+                        (Grammar.s_token ("", "#")))
+                     (Grammar.s_token ("ID", "DGREGORIAN")))
+                  (Grammar.s_token ("", "@")))
+               (Grammar.s_nterm (date_value : 'date_value Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d : 'date_value) _ _ _ _ (loc : Ploc.t) ->
+                (recover_date Dgregorian d : 'date_value_recover)))]];
+      Grammar.extension (date_interval : 'date_interval Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop
+                  (Grammar.s_nterm
+                     (date_or_text : 'date_or_text Grammar.Entry.e)))
+               (Grammar.s_token ("EOI", "")),
+             "194fe98d",
+             (fun _ (dt : 'date_or_text) (loc : Ploc.t) ->
+                (Begin dt : 'date_interval)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next Grammar.r_stop
+                           (Grammar.s_token ("ID", "FROM")))
+                        (Grammar.s_nterm
+                           (date_or_text : 'date_or_text Grammar.Entry.e)))
+                     (Grammar.s_token ("ID", "TO")))
+                  (Grammar.s_nterm
+                     (date_or_text : 'date_or_text Grammar.Entry.e)))
+               (Grammar.s_token ("EOI", "")),
+             "194fe98d",
+             (fun _ (dt1 : 'date_or_text) _ (dt : 'date_or_text) _
+                  (loc : Ploc.t) ->
+                (BeginEnd (dt, dt1) : 'date_interval)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next Grammar.r_stop
+                     (Grammar.s_token ("ID", "FROM")))
+                  (Grammar.s_nterm
+                     (date_or_text : 'date_or_text Grammar.Entry.e)))
+               (Grammar.s_token ("EOI", "")),
+             "194fe98d",
+             (fun _ (dt : 'date_or_text) _ (loc : Ploc.t) ->
+                (Begin dt : 'date_interval)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next Grammar.r_stop
+                     (Grammar.s_token ("ID", "TO")))
+                  (Grammar.s_nterm
+                     (date_or_text : 'date_or_text Grammar.Entry.e)))
+               (Grammar.s_token ("EOI", "")),
+             "194fe98d",
+             (fun _ (dt : 'date_or_text) _ (loc : Ploc.t) ->
+                (End dt : 'date_interval)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next Grammar.r_stop
+                           (Grammar.s_token ("ID", "BET")))
+                        (Grammar.s_nterm
+                           (date_or_text : 'date_or_text Grammar.Entry.e)))
+                     (Grammar.s_token ("ID", "AND")))
+                  (Grammar.s_nterm
+                     (date_or_text : 'date_or_text Grammar.Entry.e)))
+               (Grammar.s_token ("EOI", "")),
+             "194fe98d",
+             (fun _ (dt1 : 'date_or_text) _ (dt : 'date_or_text) _
+                  (loc : Ploc.t) ->
+                (BeginEnd (dt, dt1) : 'date_interval)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next Grammar.r_stop
+                     (Grammar.s_token ("ID", "AFT")))
+                  (Grammar.s_nterm
+                     (date_or_text : 'date_or_text Grammar.Entry.e)))
+               (Grammar.s_token ("EOI", "")),
+             "194fe98d",
+             (fun _ (dt : 'date_or_text) _ (loc : Ploc.t) ->
+                (Begin dt : 'date_interval)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next Grammar.r_stop
+                     (Grammar.s_token ("ID", "BEF")))
+                  (Grammar.s_nterm
+                     (date_or_text : 'date_or_text Grammar.Entry.e)))
+               (Grammar.s_token ("EOI", "")),
+             "194fe98d",
+             (fun _ (dt : 'date_or_text) _ (loc : Ploc.t) ->
+                (End dt : 'date_interval)))]];
+      Grammar.extension (date_or_text : 'date_or_text Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("TEXT", "")),
+             "194fe98d",
+             (fun (s : string) (loc : Ploc.t) -> (Dtext s : 'date_or_text)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop
+               (Grammar.s_nterm (date : 'date Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d, cal : 'date) (loc : Ploc.t) ->
+                (Dgreg (d, cal) : 'date_or_text)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop
+               (Grammar.s_nterm (date_range : 'date_range Grammar.Entry.e)),
+             "194fe98d",
+             (fun (dr : 'date_range) (loc : Ploc.t) ->
+                (match dr with
+                   Begin (d, cal) -> Dgreg ({d with prec = After}, cal)
+                 | End (d, cal) -> Dgreg ({d with prec = Before}, cal)
+                 | BeginEnd ((d1, cal1), (d2, cal2)) ->
+                     let dmy2 =
+                       match cal2 with
+                         Dgregorian ->
+                           {day2 = d2.day; month2 = d2.month; year2 = d2.year;
+                            delta2 = 0}
+                       | Djulian ->
+                           let dmy2 = Calendar.julian_of_gregorian d2 in
+                           {day2 = dmy2.day; month2 = dmy2.month;
+                            year2 = dmy2.year; delta2 = 0}
+                       | Dfrench ->
+                           let dmy2 = Calendar.french_of_gregorian d2 in
+                           {day2 = dmy2.day; month2 = dmy2.month;
+                            year2 = dmy2.year; delta2 = 0}
+                       | Dhebrew ->
+                           let dmy2 = Calendar.hebrew_of_gregorian d2 in
+                           {day2 = dmy2.day; month2 = dmy2.month;
+                            year2 = dmy2.year; delta2 = 0}
+                     in
+                     Dgreg ({d1 with prec = YearInt dmy2}, cal1) :
+                 'date_or_text)))]];
+      Grammar.extension (date_range : 'date_range Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next Grammar.r_stop
+                        (Grammar.s_token ("ID", "FROM")))
+                     (Grammar.s_nterm (date : 'date Grammar.Entry.e)))
+                  (Grammar.s_token ("ID", "TO")))
+               (Grammar.s_nterm (date : 'date Grammar.Entry.e)),
+             "194fe98d",
+             (fun (dt1 : 'date) _ (dt : 'date) _ (loc : Ploc.t) ->
+                (BeginEnd (dt, dt1) : 'date_range)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop
+                  (Grammar.s_token ("ID", "FROM")))
+               (Grammar.s_nterm (date : 'date Grammar.Entry.e)),
+             "194fe98d",
+             (fun (dt : 'date) _ (loc : Ploc.t) -> (Begin dt : 'date_range)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "TO")))
+               (Grammar.s_nterm (date : 'date Grammar.Entry.e)),
+             "194fe98d",
+             (fun (dt : 'date) _ (loc : Ploc.t) -> (End dt : 'date_range)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next Grammar.r_stop
+                        (Grammar.s_token ("ID", "BET")))
+                     (Grammar.s_nterm (date : 'date Grammar.Entry.e)))
+                  (Grammar.s_token ("ID", "AND")))
+               (Grammar.s_nterm (date : 'date Grammar.Entry.e)),
+             "194fe98d",
+             (fun (dt1 : 'date) _ (dt : 'date) _ (loc : Ploc.t) ->
+                (BeginEnd (dt, dt1) : 'date_range)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "AFT")))
+               (Grammar.s_nterm (date : 'date Grammar.Entry.e)),
+             "194fe98d",
+             (fun (dt : 'date) _ (loc : Ploc.t) -> (Begin dt : 'date_range)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "BEF")))
+               (Grammar.s_nterm (date : 'date Grammar.Entry.e)),
+             "194fe98d",
+             (fun (dt : 'date) _ (loc : Ploc.t) -> (End dt : 'date_range)))]];
+      Grammar.extension (date : 'date Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next Grammar.r_stop
+               (Grammar.s_nterm
+                  (date_calendar : 'date_calendar Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d, cal : 'date_calendar) (loc : Ploc.t) ->
+                (d, cal : 'date)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "BEF")))
+               (Grammar.s_nterm
+                  (date_calendar : 'date_calendar Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d, cal : 'date_calendar) _ (loc : Ploc.t) ->
+                ({d with prec = After}, cal : 'date)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "AFT")))
+               (Grammar.s_nterm
+                  (date_calendar : 'date_calendar Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d, cal : 'date_calendar) _ (loc : Ploc.t) ->
+                ({d with prec = Before}, cal : 'date)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "EST")))
+               (Grammar.s_nterm
+                  (date_calendar : 'date_calendar Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d, cal : 'date_calendar) _ (loc : Ploc.t) ->
+                ({d with prec = Maybe}, cal : 'date)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "ENV")))
+               (Grammar.s_nterm
+                  (date_calendar : 'date_calendar Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d, cal : 'date_calendar) _ (loc : Ploc.t) ->
+                ({d with prec = About}, cal : 'date)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "ABT")))
+               (Grammar.s_nterm
+                  (date_calendar : 'date_calendar Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d, cal : 'date_calendar) _ (loc : Ploc.t) ->
+                ({d with prec = About}, cal : 'date)))]];
+      Grammar.extension (date_calendar : 'date_calendar Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next Grammar.r_stop
+               (Grammar.s_nterm (date_greg : 'date_greg Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d : 'date_greg) (loc : Ploc.t) ->
+                (d, Dgregorian : 'date_calendar)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next Grammar.r_stop
+                           (Grammar.s_token ("", "@")))
+                        (Grammar.s_token ("", "#")))
+                     (Grammar.s_token ("ID", "DHEBREW")))
+                  (Grammar.s_token ("", "@")))
+               (Grammar.s_nterm (date_hebr : 'date_hebr Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d : 'date_hebr) _ _ _ _ (loc : Ploc.t) ->
+                (Calendar.gregorian_of_hebrew d, Dhebrew : 'date_calendar)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next
+                           (Grammar.r_next Grammar.r_stop
+                              (Grammar.s_token ("", "@")))
+                           (Grammar.s_token ("", "#")))
+                        (Grammar.s_token ("ID", "DFRENCH")))
+                     (Grammar.s_token ("ID", "R")))
+                  (Grammar.s_token ("", "@")))
+               (Grammar.s_nterm (date_fren : 'date_fren Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d : 'date_fren) _ _ _ _ _ (loc : Ploc.t) ->
+                (Calendar.gregorian_of_french d, Dfrench : 'date_calendar)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next Grammar.r_stop
+                           (Grammar.s_token ("", "@")))
+                        (Grammar.s_token ("", "#")))
+                     (Grammar.s_token ("ID", "DJULIAN")))
+                  (Grammar.s_token ("", "@")))
+               (Grammar.s_nterm (date_greg : 'date_greg Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d : 'date_greg) _ _ _ _ (loc : Ploc.t) ->
+                (Calendar.gregorian_of_julian d, Djulian : 'date_calendar)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next Grammar.r_stop
+                           (Grammar.s_token ("", "@")))
+                        (Grammar.s_token ("", "#")))
+                     (Grammar.s_token ("ID", "DGREGORIAN")))
+                  (Grammar.s_token ("", "@")))
+               (Grammar.s_nterm (date_greg : 'date_greg Grammar.Entry.e)),
+             "194fe98d",
+             (fun (d : 'date_greg) _ _ _ _ (loc : Ploc.t) ->
+                (d, Dgregorian : 'date_calendar)))]];
+      Grammar.extension (date_greg : 'date_greg Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next
+                           (Grammar.r_next
+                              (Grammar.r_next Grammar.r_stop
+                                 (Grammar.s_list0
+                                    (Grammar.s_token ("", "."))))
+                              (Grammar.s_opt
+                                 (Grammar.s_nterm
+                                    (int : 'int Grammar.Entry.e))))
+                           (Grammar.s_list0
+                              (Grammar.s_rules
+                                 [Grammar.production
+                                    (Grammar.r_next Grammar.r_stop
+                                       (Grammar.s_token ("", "/")),
+                                     "194fe98d",
+                                     (fun (x : string) (loc : Ploc.t) ->
+                                        (x : 'e__1)));
+                                  Grammar.production
+                                    (Grammar.r_next Grammar.r_stop
+                                       (Grammar.s_token ("", ".")),
+                                     "194fe98d",
+                                     (fun (x : string) (loc : Ploc.t) ->
+                                        (x : 'e__1)))])))
+                        (Grammar.s_opt
+                           (Grammar.s_nterm
+                              (gen_month : 'gen_month Grammar.Entry.e))))
+                     (Grammar.s_list0
+                        (Grammar.s_rules
+                           [Grammar.production
+                              (Grammar.r_next Grammar.r_stop
+                                 (Grammar.s_token ("", "/")),
+                               "194fe98d",
+                               (fun (x : string) (loc : Ploc.t) ->
+                                  (x : 'e__2)));
+                            Grammar.production
+                              (Grammar.r_next Grammar.r_stop
+                                 (Grammar.s_token ("", ".")),
+                               "194fe98d",
+                               (fun (x : string) (loc : Ploc.t) ->
+                                  (x : 'e__2)))])))
+                  (Grammar.s_opt
+                     (Grammar.s_nterm (int : 'int Grammar.Entry.e))))
+               (Grammar.s_list0 (Grammar.s_token ("", "."))),
+             "194fe98d",
+             (fun _ (n3 : 'int option) _ (n2 : 'gen_month option) _
+                  (n1 : 'int option) _ (loc : Ploc.t) ->
+                (make_date n1 n2 n3 : 'date_greg)))]];
+      Grammar.extension (date_fren : 'date_fren Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop
+                  (Grammar.s_list0 (Grammar.s_token ("", "."))))
+               (Grammar.s_nterm
+                  (date_fren_kont : 'date_fren_kont Grammar.Entry.e)),
+             "194fe98d",
+             (fun (n2, n3 : 'date_fren_kont) _ (loc : Ploc.t) ->
+                (make_date None n2 n3 : 'date_fren)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop
+                  (Grammar.s_list0 (Grammar.s_token ("", "."))))
+               (Grammar.s_nterm (year_fren : 'year_fren Grammar.Entry.e)),
+             "194fe98d",
+             (fun (n1 : 'year_fren) _ (loc : Ploc.t) ->
+                (make_date (Some n1) None None : 'date_fren)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next Grammar.r_stop
+                     (Grammar.s_list0 (Grammar.s_token ("", "."))))
+                  (Grammar.s_nterm (int : 'int Grammar.Entry.e)))
+               (Grammar.s_nterm
+                  (date_fren_kont : 'date_fren_kont Grammar.Entry.e)),
+             "194fe98d",
+             (fun (n2, n3 : 'date_fren_kont) (n1 : 'int) _ (loc : Ploc.t) ->
+                (make_date (Some n1) n2 n3 : 'date_fren)))]];
+      Grammar.extension (date_fren_kont : 'date_fren_kont Grammar.Entry.e)
+        None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next Grammar.r_stop
+                           (Grammar.s_list0
+                              (Grammar.s_rules
+                                 [Grammar.production
+                                    (Grammar.r_next Grammar.r_stop
+                                       (Grammar.s_token ("", "/")),
+                                     "194fe98d",
+                                     (fun (x : string) (loc : Ploc.t) ->
+                                        (x : 'e__3)));
+                                  Grammar.production
+                                    (Grammar.r_next Grammar.r_stop
+                                       (Grammar.s_token ("", ".")),
+                                     "194fe98d",
+                                     (fun (x : string) (loc : Ploc.t) ->
+                                        (x : 'e__3)))])))
+                        (Grammar.s_opt
+                           (Grammar.s_nterm
+                              (gen_french : 'gen_french Grammar.Entry.e))))
+                     (Grammar.s_list0
+                        (Grammar.s_rules
+                           [Grammar.production
+                              (Grammar.r_next Grammar.r_stop
+                                 (Grammar.s_token ("", "/")),
+                               "194fe98d",
+                               (fun (x : string) (loc : Ploc.t) ->
+                                  (x : 'e__4)));
+                            Grammar.production
+                              (Grammar.r_next Grammar.r_stop
+                                 (Grammar.s_token ("", ".")),
+                               "194fe98d",
+                               (fun (x : string) (loc : Ploc.t) ->
+                                  (x : 'e__4)))])))
+                  (Grammar.s_opt
+                     (Grammar.s_nterm
+                        (year_fren : 'year_fren Grammar.Entry.e))))
+               (Grammar.s_list0 (Grammar.s_token ("", "."))),
+             "194fe98d",
+             (fun _ (n3 : 'year_fren option) _ (n2 : 'gen_french option) _
+                  (loc : Ploc.t) ->
+                (n2, n3 : 'date_fren_kont)))]];
+      Grammar.extension (date_hebr : 'date_hebr Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next
+                  (Grammar.r_next
+                     (Grammar.r_next
+                        (Grammar.r_next
+                           (Grammar.r_next
+                              (Grammar.r_next Grammar.r_stop
+                                 (Grammar.s_list0
+                                    (Grammar.s_token ("", "."))))
+                              (Grammar.s_opt
+                                 (Grammar.s_nterm
+                                    (int : 'int Grammar.Entry.e))))
+                           (Grammar.s_list0
+                              (Grammar.s_rules
+                                 [Grammar.production
+                                    (Grammar.r_next Grammar.r_stop
+                                       (Grammar.s_token ("", "/")),
+                                     "194fe98d",
+                                     (fun (x : string) (loc : Ploc.t) ->
+                                        (x : 'e__5)));
+                                  Grammar.production
+                                    (Grammar.r_next Grammar.r_stop
+                                       (Grammar.s_token ("", ".")),
+                                     "194fe98d",
+                                     (fun (x : string) (loc : Ploc.t) ->
+                                        (x : 'e__5)))])))
+                        (Grammar.s_opt
+                           (Grammar.s_nterm
+                              (gen_hebr : 'gen_hebr Grammar.Entry.e))))
+                     (Grammar.s_list0
+                        (Grammar.s_rules
+                           [Grammar.production
+                              (Grammar.r_next Grammar.r_stop
+                                 (Grammar.s_token ("", "/")),
+                               "194fe98d",
+                               (fun (x : string) (loc : Ploc.t) ->
+                                  (x : 'e__6)));
+                            Grammar.production
+                              (Grammar.r_next Grammar.r_stop
+                                 (Grammar.s_token ("", ".")),
+                               "194fe98d",
+                               (fun (x : string) (loc : Ploc.t) ->
+                                  (x : 'e__6)))])))
+                  (Grammar.s_opt
+                     (Grammar.s_nterm (int : 'int Grammar.Entry.e))))
+               (Grammar.s_list0 (Grammar.s_token ("", "."))),
+             "194fe98d",
+             (fun _ (n3 : 'int option) _ (n2 : 'gen_hebr option) _
+                  (n1 : 'int option) _ (loc : Ploc.t) ->
+                (make_date n1 n2 n3 : 'date_hebr)))]];
+      Grammar.extension (gen_month : 'gen_month Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next Grammar.r_stop
+               (Grammar.s_nterm (month : 'month Grammar.Entry.e)),
+             "194fe98d",
+             (fun (m : 'month) (loc : Ploc.t) -> (Right m : 'gen_month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop
+               (Grammar.s_nterm (int : 'int Grammar.Entry.e)),
+             "194fe98d",
+             (fun (i : 'int) (loc : Ploc.t) ->
+                (Left (abs i) : 'gen_month)))]];
+      Grammar.extension (month : 'month Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "DEC")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (12 : 'month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "NOV")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (11 : 'month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "OCT")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (10 : 'month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "SEP")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (9 : 'month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "AUG")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (8 : 'month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "JUL")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (7 : 'month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "JUN")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (6 : 'month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "MAY")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (5 : 'month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "APR")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (4 : 'month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "MAR")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (3 : 'month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "FEB")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (2 : 'month)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "JAN")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (1 : 'month)))]];
+      Grammar.extension (gen_french : 'gen_french Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next Grammar.r_stop
+               (Grammar.s_nterm (french : 'french Grammar.Entry.e)),
+             "194fe98d",
+             (fun (m : 'french) (loc : Ploc.t) -> (Right m : 'gen_french)))]];
+      Grammar.extension (french : 'french Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "COMP")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (13 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "FRUC")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (12 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "THER")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (11 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "MESS")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (10 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "PRAI")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (9 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "FLOR")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (8 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "GERM")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (7 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "VENT")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (6 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "PLUV")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (5 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "NIVO")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (4 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "FRIM")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (3 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "BRUM")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (2 : 'french)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "VEND")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (1 : 'french)))]];
+      Grammar.extension (year_fren : 'year_fren Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next Grammar.r_stop
+               (Grammar.s_nterm (roman_int : 'roman_int Grammar.Entry.e)),
+             "194fe98d",
+             (fun (i : 'roman_int) (loc : Ploc.t) -> (i : 'year_fren)));
+          Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "AN")))
+               (Grammar.s_nterm (roman_int : 'roman_int Grammar.Entry.e)),
+             "194fe98d",
+             (fun (i : 'roman_int) _ (loc : Ploc.t) -> (i : 'year_fren)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop
+               (Grammar.s_nterm (int : 'int Grammar.Entry.e)),
+             "194fe98d",
+             (fun (i : 'int) (loc : Ploc.t) -> (i : 'year_fren)))]];
+      Grammar.extension (gen_hebr : 'gen_hebr Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next Grammar.r_stop
+               (Grammar.s_nterm (hebr : 'hebr Grammar.Entry.e)),
+             "194fe98d",
+             (fun (m : 'hebr) (loc : Ploc.t) -> (Right m : 'gen_hebr)))]];
+      Grammar.extension (hebr : 'hebr Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "ELL")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (13 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "AAV")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (12 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "TMZ")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (11 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "SVN")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (10 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "IYR")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (9 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "NSN")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (8 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "ADS")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (7 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "ADR")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (6 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "SHV")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (5 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "TVT")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (4 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "KSL")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (3 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "CSH")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (2 : 'hebr)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("ID", "TSH")),
+             "194fe98d", (fun _ (loc : Ploc.t) -> (1 : 'hebr)))]];
+      Grammar.extension (int : 'int Grammar.Entry.e) None
+        [None, None,
+         [Grammar.production
+            (Grammar.r_next
+               (Grammar.r_next Grammar.r_stop (Grammar.s_token ("INT", "")))
+               (Grammar.s_token ("ID", "BCE")),
+             "194fe98d",
+             (fun _ (i : string) (loc : Ploc.t) ->
+                (try -int_of_string i with Failure _ -> raise Stream.Failure :
+                 'int)));
+          Grammar.production
+            (Grammar.r_next Grammar.r_stop (Grammar.s_token ("INT", "")),
+             "194fe98d",
+             (fun (i : string) (loc : Ploc.t) ->
+                (try int_of_string i with Failure _ -> raise Stream.Failure :
+                 'int)))]]])
 [@@@ocaml.warning "+27"]
 
 (* Perform a regular expression match. *)
@@ -950,43 +1585,41 @@ let date_of_field d =
 
 (* Creating base *)
 
-type 'a tab = { mutable arr : 'a array ; mutable tlen : int }
+type 'a tab = { mutable arr : 'a array; mutable tlen : int }
 
 type gen =
-  { g_per : (string, person, ascend, union) choice3 tab
-  ; g_fam : (string, family, couple, descend) choice3 tab
-  ; g_str : string tab
-  ; mutable g_bnot : string
-  ; g_ic : in_channel
-  ; g_not : (string, int) Hashtbl.t
-  ; g_src : (string, int) Hashtbl.t
-  ; g_hper : (string, int) Hashtbl.t
-  ; g_hfam : (string, int) Hashtbl.t
-  ; g_hstr : (string, int) Hashtbl.t
-  ; g_hnam : (string, int ref) Hashtbl.t
-  ; g_adop : (string, int * string) Hashtbl.t
-  ; mutable g_godp : (int * int) list
-  ; mutable g_prelated : (int * int) list
-  ; mutable g_frelated : (int * int) list
-  ; mutable g_witn : (int * int) list
-  }
+  { g_per : (string, person, ascend, union) choice3 tab;
+    g_fam : (string, family, couple, descend) choice3 tab;
+    g_str : string tab;
+    mutable g_bnot : string;
+    g_ic : in_channel;
+    g_not : (string, int) Hashtbl.t;
+    g_src : (string, int) Hashtbl.t;
+    g_hper : (string, int) Hashtbl.t;
+    g_hfam : (string, int) Hashtbl.t;
+    g_hstr : (string, int) Hashtbl.t;
+    g_hnam : (string, int ref) Hashtbl.t;
+    g_adop : (string, int * string) Hashtbl.t;
+    mutable g_godp : (int * int) list;
+    mutable g_prelated : (int * int) list;
+    mutable g_frelated : (int * int) list;
+    mutable g_witn : (int * int) list }
 
 let assume_tab tab none =
   if tab.tlen = Array.length tab.arr then
     let new_len = 2 * Array.length tab.arr + 1 in
     let new_arr = Array.make new_len none in
-    Array.blit tab.arr 0 new_arr 0 (Array.length tab.arr) ;
-    tab.arr <- new_arr
+    Array.blit tab.arr 0 new_arr 0 (Array.length tab.arr); tab.arr <- new_arr
 
 let add_string gen s =
-  try Hashtbl.find gen.g_hstr s
-  with Not_found ->
-    let i = gen.g_str.tlen in
-    assume_tab gen.g_str "";
-    gen.g_str.arr.(i) <- s;
-    gen.g_str.tlen <- gen.g_str.tlen + 1;
-    Hashtbl.add gen.g_hstr s i;
-    i
+  try Hashtbl.find gen.g_hstr s with
+    Not_found ->
+      let i = gen.g_str.tlen in
+      assume_tab gen.g_str "";
+      gen.g_str.arr.(i) <- s;
+      gen.g_str.tlen <- gen.g_str.tlen + 1;
+      Hashtbl.add gen.g_hstr s i;
+      i
 
 let extract_addr addr =
   if String.length addr > 0 && addr.[0] = '@' then
@@ -1000,33 +1633,35 @@ let output_pindex i str =
 
 let per_index gen lab =
   let lab = extract_addr lab in
-  try Hashtbl.find gen.g_hper lab
-  with Not_found ->
-    let i = gen.g_per.tlen in
-    assume_tab gen.g_per (Left3 "");
-    gen.g_per.arr.(i) <- Left3 lab;
-    gen.g_per.tlen <- gen.g_per.tlen + 1;
-    Hashtbl.add gen.g_hper lab i;
-    output_pindex i lab;
-    i
+  try Hashtbl.find gen.g_hper lab with
+    Not_found ->
+      let i = gen.g_per.tlen in
+      assume_tab gen.g_per (Left3 "");
+      gen.g_per.arr.(i) <- Left3 lab;
+      gen.g_per.tlen <- gen.g_per.tlen + 1;
+      Hashtbl.add gen.g_hper lab i;
+      output_pindex i lab;
+      i
 
 let fam_index gen lab =
   let lab = extract_addr lab in
-  try Hashtbl.find gen.g_hfam lab
-  with Not_found ->
-    let i = gen.g_fam.tlen in
-    assume_tab gen.g_fam (Left3 "");
-    gen.g_fam.arr.(i) <- Left3 lab;
-    gen.g_fam.tlen <- gen.g_fam.tlen + 1;
-    Hashtbl.add gen.g_hfam lab i;
-    i
+  try Hashtbl.find gen.g_hfam lab with
+    Not_found ->
+      let i = gen.g_fam.tlen in
+      assume_tab gen.g_fam (Left3 "");
+      gen.g_fam.arr.(i) <- Left3 lab;
+      gen.g_fam.tlen <- gen.g_fam.tlen + 1;
+      Hashtbl.add gen.g_hfam lab i;
+      i
 
 let string_empty = 0
 let string_quest = 1
 let string_x = 2
 
 let unknown_per i sex =
-  let p = { (Mutil.empty_person string_empty string_quest) with sex ; occ = i ; key_index = i }
+  let p =
+    {(Mutil.empty_person string_empty string_quest) with sex = sex; occ = i;
+     key_index = i}
   and a = {parents = None; consang = Adef.fix (-1)}
   and u = {family = [| |]} in
   p, a, u
@@ -1042,7 +1677,7 @@ let phony_per gen sex =
 let unknown_fam gen i =
   let father = phony_per gen Male in
   let mother = phony_per gen Female in
-  let f = { (Mutil.empty_family string_empty) with fam_index = i }
+  let f = {(Mutil.empty_family string_empty) with fam_index = i}
   and c = Adef.couple father mother
   and d = {children = [| |]} in
   f, c, d
@@ -1060,16 +1695,16 @@ let this_year =
 
 let infer_death birth bapt =
   match birth, bapt with
-  | Some (Dgreg (d, _)), _ ->
-    let a = this_year - d.year in
-    if a > !dead_years then DeadDontKnowWhen
-    else if a < !alive_years then NotDead
-    else DontKnowIfDead
+    Some (Dgreg (d, _)), _ ->
+      let a = this_year - d.year in
+      if a > !dead_years then DeadDontKnowWhen
+      else if a < !alive_years then NotDead
+      else DontKnowIfDead
   | _, Some (Dgreg (d, _)) ->
-    let a = this_year - d.year in
-    if a > !dead_years then DeadDontKnowWhen
-    else if a < !alive_years then NotDead
-    else DontKnowIfDead
+      let a = this_year - d.year in
+      if a > !dead_years then DeadDontKnowWhen
+      else if a < !alive_years then NotDead
+      else DontKnowIfDead
   | _ -> DontKnowIfDead
 
 (* Fonctions utiles pour la mise en forme des noms. *)
@@ -1083,8 +1718,7 @@ let string_ini_eq s1 i s2 =
   in
   loop i 0
 
-let particle s i =
-  List.exists (string_ini_eq s i) !particles
+let particle s i = List.exists (string_ini_eq s i) !particles
 
 let look_like_a_number s =
   let rec loop i =
@@ -1397,25 +2031,27 @@ let treat_indi_title gen public_name r =
    t_date_end = Date.cdate_of_od date_end; t_nth = nth}
 
 let forward_adop gen ip lab which_parent =
-  Hashtbl.add
-    gen.g_adop lab
-    (ip, match which_parent with Some r when r.rval <> "" -> r.rval | _ -> "BOTH")
+  Hashtbl.add gen.g_adop lab
+    (ip,
+     (match which_parent with
+        Some r when r.rval <> "" -> r.rval
+      | _ -> "BOTH"))
 
 let adop_parent gen ip r =
   let i = per_index gen r.rval in
   match gen.g_per.arr.(i) with
-  | Left3 _ -> None
+    Left3 _ -> None
   | Right3 (p, a, u) ->
-    if List.mem ip p.related then ()
-    else
-      begin let p = { p with related = ip :: p.related } in
-        gen.g_per.arr.(i) <- Right3 (p, a, u)
-      end;
-    Some p.key_index
+      if List.mem ip p.related then ()
+      else
+        begin let p = {p with related = ip :: p.related} in
+          gen.g_per.arr.(i) <- Right3 (p, a, u)
+        end;
+      Some p.key_index
 
 let set_adop_fam gen ip which_parent fath moth =
   match gen.g_per.arr.(ip) with
-  | Left3 _ -> ()
+    Left3 _ -> ()
   | Right3 (per, asc, uni) ->
       let r_fath =
         match which_parent, fath with
@@ -1431,7 +2067,7 @@ let set_adop_fam gen ip which_parent fath moth =
         {r_type = Adoption; r_fath = r_fath; r_moth = r_moth;
          r_sources = string_empty}
       in
-      let per = { per with rparents = r :: per.rparents } in
+      let per = {per with rparents = r :: per.rparents} in
       gen.g_per.arr.(ip) <- Right3 (per, asc, uni)
 
 let forward_godp gen ip rval =
@@ -1509,18 +2145,16 @@ let rec find_all_rela nl =
           loop nl
       | None -> find_all_rela nl rl
 
-let witness_kind_of_rval rval = match rval with
-  | "GODP"               -> Witness_GodParent
-  | "officer"
-  | "Civil officer"
-  | "Registry officer"   -> Witness_CivilOfficer
-  | "Religious officer"
-  | "Officiating priest" -> Witness_ReligiousOfficer
-  | "Informant"          -> Witness_Informant
-  | "Attending"          -> Witness_Attending
-  | "Mentioned"          -> Witness_Mentioned
-  | "Other"              -> Witness_Other
-  | _                    -> Witness
+let witness_kind_of_rval rval =
+  match rval with
+    "GODP" -> Witness_GodParent
+  | "officer" | "Civil officer" | "Registry officer" -> Witness_CivilOfficer
+  | "Religious officer" | "Officiating priest" -> Witness_ReligiousOfficer
+  | "Informant" -> Witness_Informant
+  | "Attending" -> Witness_Attending
+  | "Mentioned" -> Witness_Mentioned
+  | "Other" -> Witness_Other
+  | _ -> Witness
 
 let find_event_witness gen tag ip r =
   let rec find_witnesses =
@@ -1832,7 +2466,7 @@ let reconstitute_from_pevents pevents bi bp de bu =
             else
               let death =
                 match Date.od_of_cdate evt.epers_date with
-                | Some d -> Death (Unspecified, Date.cdate_of_date d)
+                  Some d -> Death (Unspecified, Date.cdate_of_date d)
                 | None -> DeadDontKnowWhen
               in
               let de =
@@ -1865,81 +2499,81 @@ let add_indi gen r =
   let givn =
     match name_sons with
       Some n ->
-      begin match find_field "GIVN" n.rsons with
+        begin match find_field "GIVN" n.rsons with
           Some r -> r.rval
         | None -> ""
-      end
+        end
     | None -> ""
   in
   let (first_name, surname, occ, public_name, first_names_aliases) =
     match name_sons with
-    | Some n ->
-      let (f, s) = parse_name (Stream.of_string n.rval) in
-      let pn = "" in
-      let fal = if givn = f then [] else [givn] in
-      let (f, fal) =
-        match !first_names_brackets with
-          Some (bb, eb) ->
-          let first_enclosed f =
-            let i = String.index f bb in
-            let j =
-              if i + 2 >= String.length f then raise Not_found
-              else String.index_from f (i + 2) eb
-            in
-            let fn = String.sub f (i + 1) (j - i - 1) in
-            let fa =
-              String.sub f 0 i ^ fn ^
-              String.sub f (j + 1) (String.length f - j - 1)
-            in
-            fn, fa
-          in
-          let rec loop first ff accu =
-            try
-              let (fn, fa) = first_enclosed ff in
-              let accu =
-                if first then fn
-                else if fn <> "" then accu ^ " " ^ fn
-                else accu
+      Some n ->
+        let (f, s) = parse_name (Stream.of_string n.rval) in
+        let pn = "" in
+        let fal = if givn = f then [] else [givn] in
+        let (f, fal) =
+          match !first_names_brackets with
+            Some (bb, eb) ->
+              let first_enclosed f =
+                let i = String.index f bb in
+                let j =
+                  if i + 2 >= String.length f then raise Not_found
+                  else String.index_from f (i + 2) eb
+                in
+                let fn = String.sub f (i + 1) (j - i - 1) in
+                let fa =
+                  String.sub f 0 i ^ fn ^
+                  String.sub f (j + 1) (String.length f - j - 1)
+                in
+                fn, fa
               in
-              loop false fa accu
-            with Not_found -> if f = ff then f, fal else accu, ff :: fal
+              let rec loop first ff accu =
+                try
+                  let (fn, fa) = first_enclosed ff in
+                  let accu =
+                    if first then fn
+                    else if fn <> "" then accu ^ " " ^ fn
+                    else accu
+                  in
+                  loop false fa accu
+                with Not_found -> if f = ff then f, fal else accu, ff :: fal
+              in
+              loop true f ""
+          | None -> f, fal
+        in
+        let (f, pn, fal) =
+          if !extract_public_names || !extract_first_names then
+            let i = next_word_pos f 0 in
+            let j = next_sep_pos f i in
+            if j = String.length f then f, pn, fal
+            else
+              let fn = String.sub f i (j - i) in
+              if pn = "" && !extract_public_names then
+                if is_a_public_name f j then fn, f, fal
+                else if !extract_first_names then fn, "", f :: fal
+                else f, "", fal
+              else fn, pn, f :: fal
+          else f, pn, fal
+        in
+        let f = if !lowercase_first_names then capitalize_name f else f in
+        let fal =
+          if !lowercase_first_names then List.map capitalize_name fal else fal
+        in
+        let pn = if capitalize_name pn = f then "" else pn in
+        let pn = if !lowercase_first_names then capitalize_name pn else pn in
+        let fal =
+          List.fold_right (fun fa fal -> if fa = pn then fal else fa :: fal)
+            fal []
+        in
+        let s = applycase_surname s in
+        let r =
+          let key =
+            Name.strip_lower (Mutil.nominative f ^ " " ^ Mutil.nominative s)
           in
-          loop true f ""
-        | None -> f, fal
-      in
-      let (f, pn, fal) =
-        if !extract_public_names || !extract_first_names then
-          let i = next_word_pos f 0 in
-          let j = next_sep_pos f i in
-          if j = String.length f then f, pn, fal
-          else
-            let fn = String.sub f i (j - i) in
-            if pn = "" && !extract_public_names then
-              if is_a_public_name f j then fn, f, fal
-              else if !extract_first_names then fn, "", f :: fal
-              else f, "", fal
-            else fn, pn, f :: fal
-        else f, pn, fal
-      in
-      let f = if !lowercase_first_names then capitalize_name f else f in
-      let fal =
-        if !lowercase_first_names then List.map capitalize_name fal else fal
-      in
-      let pn = if capitalize_name pn = f then "" else pn in
-      let pn = if !lowercase_first_names then capitalize_name pn else pn in
-      let fal =
-        List.fold_right (fun fa fal -> if fa = pn then fal else fa :: fal) fal []
-      in
-      let s = applycase_surname s in
-      let r =
-        let key = Name.strip_lower (Mutil.nominative f ^ " " ^ Mutil.nominative s) in
-        try Hashtbl.find gen.g_hnam key
-        with Not_found ->
-          let r = ref (-1) in
-          Hashtbl.add gen.g_hnam key r ;
-          r
-      in
-      incr r; f, s, !r, pn, fal
+          try Hashtbl.find gen.g_hnam key with
+            Not_found -> let r = ref (-1) in Hashtbl.add gen.g_hnam key r; r
+        in
+        incr r; f, s, !r, pn, fal
     | None -> "?", "?", ip, givn, []
   in
   (* S'il y a des caractères interdits, on les supprime *)
@@ -1949,25 +2583,25 @@ let add_indi gen r =
   let qualifier =
     match name_sons with
       Some n ->
-      begin match find_field "NICK" n.rsons with
+        begin match find_field "NICK" n.rsons with
           Some r -> r.rval
         | None -> ""
-      end
+        end
     | None -> ""
   in
   let surname_aliases =
     match name_sons with
       Some n ->
-      begin match find_field "SURN" n.rsons with
+        begin match find_field "SURN" n.rsons with
           Some r ->
-          let list = purge_list (list_of_string r.rval) in
-          List.fold_right
-            (fun x list ->
-               let x = applycase_surname x in
-               if x <> surname then x :: list else list)
-            list []
+            let list = purge_list (list_of_string r.rval) in
+            List.fold_right
+              (fun x list ->
+                 let x = applycase_surname x in
+                 if x <> surname then x :: list else list)
+              list []
         | _ -> []
-      end
+        end
     | None -> []
   in
   let aliases =
@@ -1984,10 +2618,10 @@ let add_indi gen r =
   let image =
     match find_field "OBJE" r.rsons with
       Some r ->
-      begin match find_field "FILE" r.rsons with
+        begin match find_field "FILE" r.rsons with
           Some r -> if !no_picture then "" else r.rval
         | None -> ""
-      end
+        end
     | None -> ""
   in
   let parents =
@@ -2070,27 +2704,27 @@ let add_indi gen r =
   in
   let witn = find_all_rela ["witness"] rasso in
   let () =
-    List.iter (fun (_, rval) -> (@@) ignore (forward_witn gen ip rval)) witn
+    List.iter (fun (_, rval) -> ignore @@ forward_witn gen ip rval) witn
   in
   let (birth, birth_place, (birth_note, _), (birth_src, birth_nt)) =
     match find_field "BIRT" r.rsons with
       Some r ->
-      let d =
-        match find_field "DATE" r.rsons with
-          Some r -> date_of_field r.rval
-        | _ -> None
-      in
-      let p =
-        match find_field "PLAC" r.rsons with
-          Some r -> strip_spaces r.rval
-        | _ -> ""
-      in
-      let note =
-        match find_all_fields "NOTE" r.rsons with
-          [] -> ""
-        | rl -> treat_notes gen rl
-      in
-      d, p, (note, []), source gen r
+        let d =
+          match find_field "DATE" r.rsons with
+            Some r -> date_of_field r.rval
+          | _ -> None
+        in
+        let p =
+          match find_field "PLAC" r.rsons with
+            Some r -> strip_spaces r.rval
+          | _ -> ""
+        in
+        let note =
+          match find_all_fields "NOTE" r.rsons with
+            [] -> ""
+          | rl -> treat_notes gen rl
+        in
+        d, p, (note, []), source gen r
     | None -> None, "", ("", []), ("", [])
   in
   let (bapt, bapt_place, (bapt_note, _), (bapt_src, bapt_nt)) =
@@ -2101,113 +2735,113 @@ let add_indi gen r =
     in
     match ro with
       Some r ->
-      let d =
-        match find_field "DATE" r.rsons with
-          Some r -> date_of_field r.rval
-        | _ -> None
-      in
-      let p =
-        match find_field "PLAC" r.rsons with
-          Some r -> strip_spaces r.rval
-        | _ -> ""
-      in
-      let note =
-        match find_all_fields "NOTE" r.rsons with
-          [] -> ""
-        | rl -> treat_notes gen rl
-      in
-      d, p, (note, []), source gen r
+        let d =
+          match find_field "DATE" r.rsons with
+            Some r -> date_of_field r.rval
+          | _ -> None
+        in
+        let p =
+          match find_field "PLAC" r.rsons with
+            Some r -> strip_spaces r.rval
+          | _ -> ""
+        in
+        let note =
+          match find_all_fields "NOTE" r.rsons with
+            [] -> ""
+          | rl -> treat_notes gen rl
+        in
+        d, p, (note, []), source gen r
     | None -> None, "", ("", []), ("", [])
   in
   let (death, death_place, (death_note, _), (death_src, death_nt)) =
     match find_field "DEAT" r.rsons with
-    | Some r ->
-      if r.rsons = [] then
-        if r.rval = "Y" then DeadDontKnowWhen, "", ("", []), ("", [])
-        else infer_death birth bapt, "", ("", []), ("", [])
-      else
-        let d =
-          match find_field "DATE" r.rsons with
-            Some r ->
-            begin match date_of_field r.rval with
-              | Some d -> Death (Unspecified, Date.cdate_of_date d)
-              | None -> DeadDontKnowWhen
-            end
-          | _ -> DeadDontKnowWhen
-        in
-        let p =
-          match find_field "PLAC" r.rsons with
-          | Some r -> strip_spaces r.rval
-          | None -> ""
-        in
-        let note =
-          match find_all_fields "NOTE" r.rsons with
-          | [] -> ""
-          | rl -> treat_notes gen rl
-        in
-        d, p, (note, []), source gen r
+      Some r ->
+        if r.rsons = [] then
+          if r.rval = "Y" then DeadDontKnowWhen, "", ("", []), ("", [])
+          else infer_death birth bapt, "", ("", []), ("", [])
+        else
+          let d =
+            match find_field "DATE" r.rsons with
+              Some r ->
+                begin match date_of_field r.rval with
+                  Some d -> Death (Unspecified, Date.cdate_of_date d)
+                | None -> DeadDontKnowWhen
+                end
+            | _ -> DeadDontKnowWhen
+          in
+          let p =
+            match find_field "PLAC" r.rsons with
+              Some r -> strip_spaces r.rval
+            | None -> ""
+          in
+          let note =
+            match find_all_fields "NOTE" r.rsons with
+              [] -> ""
+            | rl -> treat_notes gen rl
+          in
+          d, p, (note, []), source gen r
     | None -> infer_death birth bapt, "", ("", []), ("", [])
   in
   let (burial, burial_place, (burial_note, _), (burial_src, burial_nt)) =
     let (buri, buri_place, (buri_note, _), (buri_src, buri_nt)) =
       match find_field "BURI" r.rsons with
         Some r ->
-        if r.rsons = [] then
-          if r.rval = "Y" then
-            Buried Date.cdate_None, "", ("", []), ("", [])
-          else UnknownBurial, "", ("", []), ("", [])
-        else
-          let d =
-            match find_field "DATE" r.rsons with
-              Some r -> date_of_field r.rval
-            | _ -> None
-          in
-          let p =
-            match find_field "PLAC" r.rsons with
-              Some r -> strip_spaces r.rval
-            | _ -> ""
-          in
-          let note =
-            match find_all_fields "NOTE" r.rsons with
-              [] -> ""
-            | rl -> treat_notes gen rl
-          in
-          Buried (Date.cdate_of_od d), p, (note, []), source gen r
+          if r.rsons = [] then
+            if r.rval = "Y" then
+              Buried Date.cdate_None, "", ("", []), ("", [])
+            else UnknownBurial, "", ("", []), ("", [])
+          else
+            let d =
+              match find_field "DATE" r.rsons with
+                Some r -> date_of_field r.rval
+              | _ -> None
+            in
+            let p =
+              match find_field "PLAC" r.rsons with
+                Some r -> strip_spaces r.rval
+              | _ -> ""
+            in
+            let note =
+              match find_all_fields "NOTE" r.rsons with
+                [] -> ""
+              | rl -> treat_notes gen rl
+            in
+            Buried (Date.cdate_of_od d), p, (note, []), source gen r
       | None -> UnknownBurial, "", ("", []), ("", [])
     in
     let (crem, crem_place, (crem_note, _), (crem_src, crem_nt)) =
       match find_field "CREM" r.rsons with
         Some r ->
-        if r.rsons = [] then
-          if r.rval = "Y" then
-            Cremated Date.cdate_None, "", ("", []), ("", [])
-          else UnknownBurial, "", ("", []), ("", [])
-        else
-          let d =
-            match find_field "DATE" r.rsons with
-              Some r -> date_of_field r.rval
-            | _ -> None
-          in
-          let p =
-            match find_field "PLAC" r.rsons with
-              Some r -> strip_spaces r.rval
-            | _ -> ""
-          in
-          let note =
-            match find_all_fields "NOTE" r.rsons with
-              [] -> ""
-            | rl -> treat_notes gen rl
-          in
-          Cremated (Date.cdate_of_od d), p, (note, []), source gen r
+          if r.rsons = [] then
+            if r.rval = "Y" then
+              Cremated Date.cdate_None, "", ("", []), ("", [])
+            else UnknownBurial, "", ("", []), ("", [])
+          else
+            let d =
+              match find_field "DATE" r.rsons with
+                Some r -> date_of_field r.rval
+              | _ -> None
+            in
+            let p =
+              match find_field "PLAC" r.rsons with
+                Some r -> strip_spaces r.rval
+              | _ -> ""
+            in
+            let note =
+              match find_all_fields "NOTE" r.rsons with
+                [] -> ""
+              | rl -> treat_notes gen rl
+            in
+            Cremated (Date.cdate_of_od d), p, (note, []), source gen r
       | None -> UnknownBurial, "", ("", []), ("", [])
     in
     match buri, crem with
       UnknownBurial, Cremated _ ->
-      crem, crem_place, (crem_note, []), (crem_src, crem_nt)
+        crem, crem_place, (crem_note, []), (crem_src, crem_nt)
     | _ -> buri, buri_place, (buri_note, []), (buri_src, buri_nt)
   in
-  let birth =Date.cdate_of_od birth in
-  let bapt =Date.cdate_of_od bapt in
+  let birth = Date.cdate_of_od birth in
+  let bapt = Date.cdate_of_od bapt in
   let (psources, psources_nt) =
     let (s, s_nt) = source gen r in
     if s = "" then !default_source, s_nt else s, s_nt
@@ -2277,17 +2911,17 @@ let add_indi gen r =
   let (death, death_place, death_note, death_src) = de in
   let (burial, burial_place, burial_note, burial_src) = bu in
   let person =
-    {first_name = add_string gen first_name;
-     surname = add_string gen surname; occ = occ;
-     public_name = add_string gen public_name; image = add_string gen image;
-     qualifiers =
-       if qualifier <> "" then [add_string gen qualifier] else [];
+    {first_name = add_string gen first_name; surname = add_string gen surname;
+     occ = occ; public_name = add_string gen public_name;
+     image = add_string gen image;
+     qualifiers = if qualifier <> "" then [add_string gen qualifier] else [];
      aliases = List.map (add_string gen) aliases;
      first_names_aliases = List.map (add_string gen) first_names_aliases;
      surnames_aliases = List.map (add_string gen) surname_aliases;
      titles = titles; rparents = rparents; related = [];
      occupation = add_string gen occupation; sex = sex;
-     access = if !no_public_if_titles && titles = [] then Private else IfTitles;
+     access =
+       if !no_public_if_titles && titles = [] then Private else IfTitles;
      birth = birth; birth_place = birth_place; birth_note = birth_note;
      birth_src = birth_src; baptism = bapt; baptism_place = bapt_place;
      baptism_note = bapt_note; baptism_src = bapt_src; death = death;
@@ -2301,12 +2935,12 @@ let add_indi gen r =
   let union = {family = Array.of_list family} in
   gen.g_per.arr.(ip) <- Right3 (person, ascend, union);
   begin match find_field "ADOP" r.rsons with
-    | Some r ->
+    Some r ->
       begin match find_field "FAMC" r.rsons with
-        | Some r -> forward_adop gen ip r.rval (find_field "ADOP" r.rsons)
-        | _ -> ()
+        Some r -> forward_adop gen ip r.rval (find_field "ADOP" r.rsons)
+      | _ -> ()
       end
-    | _ -> ()
+  | _ -> ()
   end;
   r.rused <- true
 
@@ -2540,7 +3174,7 @@ let reconstitute_from_fevents gen gay fevents marr witn div =
               (* mariage, on met une précision "vers".      *)
               let date =
                 match Date.od_of_cdate evt.efam_date with
-                | Some (Dgreg (dmy, cal)) ->
+                  Some (Dgreg (dmy, cal)) ->
                     let dmy = {dmy with prec = About} in
                     Date.cdate_of_od (Some (Dgreg (dmy, cal)))
                 | _ -> evt.efam_date
@@ -2597,141 +3231,141 @@ let add_fam_norm gen r adop_list =
   let i = fam_index gen r.rval in
   let (fath, moth, gay) =
     match find_all_fields "HUSB" r.rsons, find_all_fields "WIFE" r.rsons with
-    | [f1], [m1] -> per_index gen f1.rval, per_index gen m1.rval, false
+      [f1], [m1] -> per_index gen f1.rval, per_index gen m1.rval, false
     | [f1; f2], [] -> per_index gen f1.rval, per_index gen f2.rval, true
     | [], [m1; m2] -> per_index gen m1.rval, per_index gen m2.rval, true
     | _ ->
-      let fath =
-        match find_field "HUSB" r.rsons with
-          Some r -> per_index gen r.rval
-        | None -> phony_per gen Male
-      in
-      let moth =
-        match find_field "WIFE" r.rsons with
-          Some r -> per_index gen r.rval
-        | None -> phony_per gen Female
-      in
-      fath, moth, false
+        let fath =
+          match find_field "HUSB" r.rsons with
+            Some r -> per_index gen r.rval
+          | None -> phony_per gen Male
+        in
+        let moth =
+          match find_field "WIFE" r.rsons with
+            Some r -> per_index gen r.rval
+          | None -> phony_per gen Female
+        in
+        fath, moth, false
   in
   begin match gen.g_per.arr.(fath) with
-    | Left3 _ -> ()
-    | Right3 (p, a, u) ->
+    Left3 _ -> ()
+  | Right3 (p, a, u) ->
       let u =
-        if not (Array.mem i u.family)
-        then { family = Array.append u.family [| i |] }
+        if not (Array.mem i u.family) then
+          {family = Array.append u.family [| i |]}
         else u
       in
-      let p = if p.sex = Neuter then { p with sex = Male } else p in
+      let p = if p.sex = Neuter then {p with sex = Male} else p in
       gen.g_per.arr.(fath) <- Right3 (p, a, u)
-  end ;
+  end;
   begin match gen.g_per.arr.(moth) with
-    | Left3 _ -> ()
-    | Right3 (p, a, u) ->
+    Left3 _ -> ()
+  | Right3 (p, a, u) ->
       let u =
-        if not (Array.mem i u.family)
-        then { family = Array.append u.family [| i |] }
+        if not (Array.mem i u.family) then
+          {family = Array.append u.family [| i |]}
         else u
       in
-      let p = if p.sex = Neuter then { p with sex = Female } else p in
+      let p = if p.sex = Neuter then {p with sex = Female} else p in
       gen.g_per.arr.(moth) <- Right3 (p, a, u)
   end;
   let children =
     let rl = find_all_fields "CHIL" r.rsons in
-    List.fold_right begin fun r ipl ->
-      let ip = per_index gen r.rval in
-      if List.mem_assoc ip adop_list then
-        match gen.g_per.arr.(ip) with
-        | Right3 (p, a, u) ->
-          begin
-            match a.parents with
-            | Some ifam when ifam = i ->
-              let a = { a with parents = None } in
-              gen.g_per.arr.(ip) <- Right3 (p, a, u) ;
-              ipl
-            | _ -> ip :: ipl
-          end
-        | _ -> ip :: ipl
-      else ip :: ipl
-    end rl []
+    List.fold_right
+      (fun r ipl ->
+         let ip = per_index gen r.rval in
+         if List.mem_assoc ip adop_list then
+           match gen.g_per.arr.(ip) with
+             Right3 (p, a, u) ->
+               begin match a.parents with
+                 Some ifam when ifam = i ->
+                   let a = {a with parents = None} in
+                   gen.g_per.arr.(ip) <- Right3 (p, a, u); ipl
+               | _ -> ip :: ipl
+               end
+           | _ -> ip :: ipl
+         else ip :: ipl)
+      rl []
   in
-  let (relation, marr, marr_place, (marr_note, _), (marr_src, marr_nt), witnesses) =
+  let (relation, marr, marr_place, (marr_note, _), (marr_src, marr_nt),
+   witnesses) =
     let (relation, sons) =
       match find_field "MARR" r.rsons with
-      | Some r -> if gay then NoSexesCheckMarried, Some r else Married, Some r
+        Some r -> if gay then NoSexesCheckMarried, Some r else Married, Some r
       | None ->
-        match find_field "ENGA" r.rsons with
-        | Some r -> Engaged, Some r
-        | None -> !relation_status, None
+          match find_field "ENGA" r.rsons with
+            Some r -> Engaged, Some r
+          | None -> !relation_status, None
     in
     match sons with
       Some r ->
-      let (u, p) =
-        match find_all_fields "PLAC" r.rsons with
-          r :: rl ->
-          if String.uncapitalize_ascii r.rval = "unmarried" then
-            NotMarried, ""
-          else
-            let p = strip_spaces r.rval in
-            let rec loop =
-              function
-                r :: rl ->
-                if String.uncapitalize_ascii r.rval = "unmarried" then
-                  NotMarried, p
-                else loop rl
-              | [] -> relation, p
-            in
-            loop rl
-        | [] -> relation, ""
-      in
-      let u =
-        match find_field "TYPE" r.rsons with
-          Some r ->
-          if String.uncapitalize_ascii r.rval = "gay" then
-            NoSexesCheckNotMarried
-          else u
-        | None -> u
-      in
-      let d =
-        match find_field "DATE" r.rsons with
-          Some r -> date_of_field r.rval
-        | _ -> None
-      in
-      let rec heredis_witnesses =
-        function
-          [] -> []
-        | r :: asso_l ->
-          if find_field_with_value "RELA" "Witness" r.rsons &&
-             find_field_with_value "TYPE" "INDI" r.rsons
-          then
-            let witness = per_index gen r.rval in
-            witness :: heredis_witnesses asso_l
-          else begin r.rused <- false; heredis_witnesses asso_l end
-      in
-      let witnesses =
-        match find_all_fields "ASSO" r.rsons with
-          [] -> []
-        | wl -> heredis_witnesses wl
-      in
-      let note =
-        match find_all_fields "NOTE" r.rsons with
-          [] -> ""
-        | rl -> treat_notes gen rl
-      in
-      u, d, p, (note, []), source gen r, witnesses
+        let (u, p) =
+          match find_all_fields "PLAC" r.rsons with
+            r :: rl ->
+              if String.uncapitalize_ascii r.rval = "unmarried" then
+                NotMarried, ""
+              else
+                let p = strip_spaces r.rval in
+                let rec loop =
+                  function
+                    r :: rl ->
+                      if String.uncapitalize_ascii r.rval = "unmarried" then
+                        NotMarried, p
+                      else loop rl
+                  | [] -> relation, p
+                in
+                loop rl
+          | [] -> relation, ""
+        in
+        let u =
+          match find_field "TYPE" r.rsons with
+            Some r ->
+              if String.uncapitalize_ascii r.rval = "gay" then
+                NoSexesCheckNotMarried
+              else u
+          | None -> u
+        in
+        let d =
+          match find_field "DATE" r.rsons with
+            Some r -> date_of_field r.rval
+          | _ -> None
+        in
+        let rec heredis_witnesses =
+          function
+            [] -> []
+          | r :: asso_l ->
+              if find_field_with_value "RELA" "Witness" r.rsons &&
+                 find_field_with_value "TYPE" "INDI" r.rsons
+              then
+                let witness = per_index gen r.rval in
+                witness :: heredis_witnesses asso_l
+              else begin r.rused <- false; heredis_witnesses asso_l end
+        in
+        let witnesses =
+          match find_all_fields "ASSO" r.rsons with
+            [] -> []
+          | wl -> heredis_witnesses wl
+        in
+        let note =
+          match find_all_fields "NOTE" r.rsons with
+            [] -> ""
+          | rl -> treat_notes gen rl
+        in
+        u, d, p, (note, []), source gen r, witnesses
     | None -> relation, None, "", ("", []), ("", []), []
   in
   let witnesses = Array.of_list witnesses in
   let div =
     match find_field "DIV" r.rsons with
       Some r ->
-      begin match find_field "DATE" r.rsons with
+        begin match find_field "DATE" r.rsons with
           Some d -> Divorced (Date.cdate_of_od (date_of_field d.rval))
         | _ ->
-          match find_field "PLAC" r.rsons with
-            Some _ -> Divorced Date.cdate_None
-          | _ ->
-            if r.rval = "Y" then Divorced Date.cdate_None else NotDivorced
-      end
+            match find_field "PLAC" r.rsons with
+              Some _ -> Divorced Date.cdate_None
+            | _ ->
+                if r.rval = "Y" then Divorced Date.cdate_None else NotDivorced
+        end
     | None -> NotDivorced
   in
   let fevents = treat_fam_fevent gen fath r in
@@ -2766,17 +3400,17 @@ let add_fam_norm gen r adop_list =
   in
   let add_in_person_notes iper =
     match gen.g_per.arr.(iper) with
-    | Left3 _ -> ()
+      Left3 _ -> ()
     | Right3 (p, a, u) ->
-      let notes = gen.g_str.arr.(p.notes) in
-      let notes =
-        if notes = "" then ext_sources ^ ext_notes
-        else if ext_sources = "" then notes ^ "\n" ^ ext_notes
-        else notes ^ "<br>\n" ^ ext_sources ^ ext_notes
-      in
-      let new_notes = add_string gen notes in
-      let p = { p with notes = new_notes } in
-      gen.g_per.arr.(iper) <- Right3 (p, a, u)
+        let notes = gen.g_str.arr.(p.notes) in
+        let notes =
+          if notes = "" then ext_sources ^ ext_notes
+          else if ext_sources = "" then notes ^ "\n" ^ ext_notes
+          else notes ^ "<br>\n" ^ ext_sources ^ ext_notes
+        in
+        let new_notes = add_string gen notes in
+        let p = {p with notes = new_notes} in
+        gen.g_per.arr.(iper) <- Right3 (p, a, u)
   in
   let _ =
     if ext_notes = "" then ()
@@ -2800,10 +3434,9 @@ let add_fam_norm gen r adop_list =
   let witnesses = witn in
   let div = div in
   let fam =
-    {marriage = marr; marriage_place = marr_place;
-     marriage_note = marr_note; marriage_src = marr_src;
-     witnesses = witnesses; relation = relation; divorce = div;
-     fevents = fevents; comment = add_string gen comment;
+    {marriage = marr; marriage_place = marr_place; marriage_note = marr_note;
+     marriage_src = marr_src; witnesses = witnesses; relation = relation;
+     divorce = div; fevents = fevents; comment = add_string gen comment;
      origin_file = string_empty; fsources = add_string gen fsources;
      fam_index = i}
   and cpl = Adef.couple fath moth
@@ -2876,17 +3509,16 @@ let make_gen3 gen r =
   | "TRLR" -> Printf.eprintf "*** Trailer ok\n"; flush stderr
   | s -> Printf.fprintf !log_oc "Not implemented typ = %s\n" s; flush !log_oc
 
-let sortable_by_date proj =
-  Array.for_all begin fun e -> proj e <> None end
+let sortable_by_date proj = Array.for_all (fun e -> proj e <> None)
 
 let sort_by_date proj array =
-  if sortable_by_date proj array
-  then
-    Array.stable_sort begin fun e1 e2 ->
-      match proj e1, proj e2 with
-      | Some d1, Some d2 -> Date.compare_date d1 d2
-      | _ -> 1
-    end array
+  if sortable_by_date proj array then
+    Array.stable_sort
+      (fun e1 e2 ->
+         match proj e1, proj e2 with
+           Some d1, Some d2 -> Date.compare_date d1 d2
+         | _ -> 1)
+      array
 
 let find_lev0 (strm__ : _ Stream.t) =
   let bp = Stream.count strm__ in
@@ -2926,13 +3558,14 @@ let pass1 gen fname =
   loop (); close_in ic
 
 let fill_g_per gen list =
-  List.iter begin fun (ipp, ip) ->
-    match gen.g_per.arr.(ipp) with
-    | Right3 (p, a, u) when not @@ List.mem ip p.related ->
-      let p = { p with related = ip :: p.related } in
-      gen.g_per.arr.(ipp) <- Right3 (p, a, u)
-    | _ -> ()
-  end list
+  List.iter
+    (fun (ipp, ip) ->
+       match gen.g_per.arr.(ipp) with
+         Right3 (p, a, u) when not @@ List.mem ip p.related ->
+           let p = {p with related = ip :: p.related} in
+           gen.g_per.arr.(ipp) <- Right3 (p, a, u)
+       | _ -> ())
+    list
 
 let pass2 gen fname =
   let ic = open_in_bin fname in
@@ -2958,9 +3591,9 @@ let pass2 gen fname =
             let (_ : string) = get_to_eoln 0 strm in loop ()
         | _ -> ()
   in
-  loop () ;
-  fill_g_per gen gen.g_godp ;
-  fill_g_per gen gen.g_prelated ;
+  loop ();
+  fill_g_per gen gen.g_godp;
+  fill_g_per gen gen.g_prelated;
   close_in ic
 
 let pass3 gen fname =
@@ -2985,51 +3618,57 @@ let pass3 gen fname =
         | Some c ->
             Stream.junk strm__;
             print_location !line_cnt;
-            Printf.fprintf !log_oc "Strange input '%c' (%i).\n" c (Char.code c);
+            Printf.fprintf !log_oc "Strange input '%c' (%i).\n" c
+              (Char.code c);
             flush !log_oc;
             let (_ : string) = get_to_eoln 0 strm in loop ()
         | _ -> ()
   in
   loop ();
-  List.iter begin fun (ifam, ip) ->
-    match gen.g_fam.arr.(ifam) with
-    | Right3 (fam, cpl, des) ->
-      begin match gen.g_per.arr.(Adef.father cpl), gen.g_per.arr.(ip) with
-        | Right3 _, Right3 (p, a, u) ->
-          if List.mem (Adef.father cpl) p.related then ()
-          else begin
-            let p = { p with related = Adef.father cpl :: p.related } in
-            gen.g_per.arr.(ip) <- Right3 (p, a, u)
-          end ;
-          if Array.mem ip fam.witnesses then ()
-          else
-            let fam =
-              { fam with witnesses = Array.append fam.witnesses [| ip |] }
-            in
-            gen.g_fam.arr.(ifam) <- Right3 (fam, cpl, des)
-        | _ -> ()
-      end
-    | _ -> ()
-  end gen.g_witn ;
-  fill_g_per gen gen.g_frelated ;
+  List.iter
+    (fun (ifam, ip) ->
+       match gen.g_fam.arr.(ifam) with
+         Right3 (fam, cpl, des) ->
+           begin match
+             gen.g_per.arr.(Adef.father cpl), gen.g_per.arr.(ip)
+           with
+             Right3 _, Right3 (p, a, u) ->
+               if List.mem (Adef.father cpl) p.related then ()
+               else
+                 begin let p =
+                   {p with related = Adef.father cpl :: p.related}
+                 in
+                   gen.g_per.arr.(ip) <- Right3 (p, a, u)
+                 end;
+               if Array.mem ip fam.witnesses then ()
+               else
+                 let fam =
+                   {fam with witnesses = Array.append fam.witnesses [| ip |]}
+                 in
+                 gen.g_fam.arr.(ifam) <- Right3 (fam, cpl, des)
+           | _ -> ()
+           end
+       | _ -> ())
+    gen.g_witn;
+  fill_g_per gen gen.g_frelated;
   close_in ic
 
 let check_undefined gen =
   for i = 0 to gen.g_per.tlen - 1 do
     match gen.g_per.arr.(i) with
-    | Right3 (_, _, _) -> ()
+      Right3 (_, _, _) -> ()
     | Left3 lab ->
-      let (p, a, u) = unknown_per i Neuter in
-      Printf.fprintf !log_oc "Warning: undefined person %s\n" lab;
-      gen.g_per.arr.(i) <- Right3 (p, a, u)
+        let (p, a, u) = unknown_per i Neuter in
+        Printf.fprintf !log_oc "Warning: undefined person %s\n" lab;
+        gen.g_per.arr.(i) <- Right3 (p, a, u)
   done;
   for i = 0 to gen.g_fam.tlen - 1 do
     match gen.g_fam.arr.(i) with
-    | Right3 (_, _, _) -> ()
+      Right3 (_, _, _) -> ()
     | Left3 lab ->
-      let (f, c, d) = unknown_fam gen i in
-      Printf.fprintf !log_oc "Warning: undefined family %s\n" lab;
-      gen.g_fam.arr.(i) <- Right3 (f, c, d)
+        let (f, c, d) = unknown_fam gen i in
+        Printf.fprintf !log_oc "Warning: undefined family %s\n" lab;
+        gen.g_fam.arr.(i) <- Right3 (f, c, d)
   done
 
 let add_parents_to_isolated gen =
@@ -3044,8 +3683,9 @@ let add_parents_to_isolated gen =
       if i = gen.g_fam.tlen then ()
       else
         match gen.g_fam.arr.(i) with
-        | Right3 (_, _, des) ->
-          Array.iter (fun ip -> Hashtbl.add ht_missing_children ip true) des.children ;
+          Right3 (_, _, des) ->
+            Array.iter (fun ip -> Hashtbl.add ht_missing_children ip true)
+              des.children;
             loop (i + 1)
         | Left3 _ -> loop (i + 1)
     in
@@ -3053,28 +3693,26 @@ let add_parents_to_isolated gen =
   in
   for i = 0 to gen.g_per.tlen - 1 do
     match gen.g_per.arr.(i) with
-    | Right3 (p, a, u) ->
-        if a.parents = None
-        && Array.length u.family = 0
-        && p.rparents = []
-        && p.related = []
-        && not (Hashtbl.mem ht_missing_children p.key_index)
+      Right3 (p, a, u) ->
+        if a.parents = None && Array.length u.family = 0 && p.rparents = [] &&
+           p.related = [] && not (Hashtbl.mem ht_missing_children p.key_index)
         then
           let fn = gen.g_str.arr.(p.first_name) in
           let sn = gen.g_str.arr.(p.surname) in
           if fn = "?" && sn = "?" then ()
-          else begin
-            Printf.fprintf !log_oc
-              "Adding parents to isolated person: %s.%d %s\n" fn p.occ sn ;
-            let ifam = phony_fam gen in
-            match gen.g_fam.arr.(ifam) with
-            | Right3 (fam, cpl, _) ->
-              let des = { children = [| p.key_index |] } in
-              gen.g_fam.arr.(ifam) <- Right3 (fam, cpl, des);
-              let a = { a with parents = Some ifam } in
-              gen.g_per.arr.(i) <- Right3 (p, a, u)
-            | _ -> ()
-          end
+          else
+            begin
+              Printf.fprintf !log_oc
+                "Adding parents to isolated person: %s.%d %s\n" fn p.occ sn;
+              let ifam = phony_fam gen in
+              match gen.g_fam.arr.(ifam) with
+                Right3 (fam, cpl, _) ->
+                  let des = {children = [| p.key_index |]} in
+                  gen.g_fam.arr.(ifam) <- Right3 (fam, cpl, des);
+                  let a = {a with parents = Some ifam} in
+                  gen.g_per.arr.(i) <- Right3 (p, a, u)
+              | _ -> ()
+            end
     | Left3 _ -> ()
   done
 
@@ -3117,7 +3755,7 @@ let make_subarrays (g_per, g_fam, g_str, g_bnot) =
     let ua = Array.make g_per.tlen (Obj.magic 0) in
     for i = 0 to g_per.tlen - 1 do
       match g_per.arr.(i) with
-      | Right3 (p, a, u) -> pa.(i) <- p; aa.(i) <- a; ua.(i) <- u
+        Right3 (p, a, u) -> pa.(i) <- p; aa.(i) <- a; ua.(i) <- u
       | Left3 lab -> failwith ("undefined person " ^ lab)
     done;
     pa, aa, ua
@@ -3145,116 +3783,121 @@ let designation strings p =
   let sn = Mutil.nominative strings.(p.surname) in
   fn ^ "." ^ string_of_int p.occ ^ " " ^ sn
 
-let check_parents_children persons ascends unions families couples descends strings =
+let check_parents_children persons ascends unions families couples descends
+    strings =
   let prints = Printf.fprintf !log_oc in
   let print = Printf.fprintf !log_oc in
   let designation = designation strings in
   for i = 0 to Array.length ascends - 1 do
     let a = ascends.(i) in
     begin match a.parents with
-      | Some ifam ->
+      Some ifam ->
         let fam = families.(ifam) in
-        if fam.fam_index = -1
-        then ascends.(i) <- { a with parents = None }
+        if fam.fam_index = -1 then ascends.(i) <- {a with parents = None}
         else
           let cpl = couples.(ifam) in
           let des = descends.(ifam) in
           if Array.memq i des.children then ()
           else
             let p = persons.(i) in
-            prints "%s is not the child of his/her parents\n" (designation p) ;
-            prints "- %s\n" (designation persons.(Adef.father cpl)) ;
-            prints "- %s\n" (designation persons.(Adef.mother cpl)) ;
-            print "=> no more parents for him/her\n" ;
-            print "\n" ;
-            flush !log_oc ;
-            ascends.(i) <- { a with parents = None }
-      | None -> ()
+            prints "%s is not the child of his/her parents\n" (designation p);
+            prints "- %s\n" (designation persons.(Adef.father cpl));
+            prints "- %s\n" (designation persons.(Adef.mother cpl));
+            print "=> no more parents for him/her\n";
+            print "\n";
+            flush !log_oc;
+            ascends.(i) <- {a with parents = None}
+    | None -> ()
     end;
     let u = unions.(i) in
     let fam_to_delete =
-      Array.fold_left begin fun acc ifam ->
-        let cpl = couples.(ifam) in
-        if i <> Adef.father cpl && i <> Adef.mother cpl
-        then begin
-          let acc =
-            prints "%s is spouse in this family but neither husband nor wife:\n"
-              (designation persons.(i)) ;
-            prints "- %s\n" (designation persons.(Adef.father cpl)) ;
-            prints "- %s\n" (designation persons.(Adef.mother cpl)) ;
-            let fath = persons.(Adef.father cpl) in
-            let moth = persons.(Adef.mother cpl) in
-            let ffn = strings.(fath.first_name) in
-            let fsn = strings.(fath.surname) in
-            let mfn = strings.(moth.first_name) in
-            let msn = strings.(moth.surname) in
-            if ffn = "?" && fsn = "?" && mfn <> "?" && msn <> "?" then begin
-              print "However, the husband is unknown, I set him as husband\n" ;
-              unions.(Adef.father cpl) <- {family = [| |]};
-              couples.(ifam) <- Adef.couple i (Adef.mother cpl) ;
-              acc
-            end else if mfn = "?" && msn = "?" && ffn <> "?" && fsn <> "?" then begin
-              print "However, the wife is unknown, I set her as wife\n" ;
-              unions.(Adef.mother cpl) <- {family = [| |]} ;
-              couples.(ifam) <- Adef.couple (Adef.father cpl) i ;
-              acc
-            end else begin
-              print "=> deleted this family for him/her\n" ;
-              ifam :: acc
-            end
-          in
-          print "\n";
-          flush !log_oc ;
-          acc
-        end else acc
-      end [] u.family
+      Array.fold_left
+        (fun acc ifam ->
+           let cpl = couples.(ifam) in
+           if i <> Adef.father cpl && i <> Adef.mother cpl then
+             let acc =
+               prints
+                 "%s is spouse in this family but neither husband nor wife:\n"
+                 (designation persons.(i));
+               prints "- %s\n" (designation persons.(Adef.father cpl));
+               prints "- %s\n" (designation persons.(Adef.mother cpl));
+               let fath = persons.(Adef.father cpl) in
+               let moth = persons.(Adef.mother cpl) in
+               let ffn = strings.(fath.first_name) in
+               let fsn = strings.(fath.surname) in
+               let mfn = strings.(moth.first_name) in
+               let msn = strings.(moth.surname) in
+               if ffn = "?" && fsn = "?" && mfn <> "?" && msn <> "?" then
+                 begin
+                   print
+                     "However, the husband is unknown, I set him as husband\n";
+                   unions.(Adef.father cpl) <- {family = [| |]};
+                   couples.(ifam) <- Adef.couple i (Adef.mother cpl);
+                   acc
+                 end
+               else if mfn = "?" && msn = "?" && ffn <> "?" && fsn <> "?" then
+                 begin
+                   print "However, the wife is unknown, I set her as wife\n";
+                   unions.(Adef.mother cpl) <- {family = [| |]};
+                   couples.(ifam) <- Adef.couple (Adef.father cpl) i;
+                   acc
+                 end
+               else
+                 begin
+                   print "=> deleted this family for him/her\n";
+                   ifam :: acc
+                 end
+             in
+             print "\n"; flush !log_oc; acc
+           else acc)
+        [] u.family
     in
     if fam_to_delete <> [] then
       let list =
-        Array.fold_right begin fun x acc ->
-          if List.mem x fam_to_delete then acc
-          else x :: acc
-        end u.family []
+        Array.fold_right
+          (fun x acc -> if List.mem x fam_to_delete then acc else x :: acc)
+          u.family []
       in
-      unions.(i) <- { family = Array.of_list list }
-  done ;
+      unions.(i) <- {family = Array.of_list list}
+  done;
   for i = 0 to Array.length families - 1 do
     let to_delete = ref [] in
     let fam = families.(i) in
     let cpl = couples.(i) in
     let des = descends.(i) in
-    Array.iter begin fun ip ->
-      let a = ascends.(ip) in
-      let p = persons.(ip) in
-      match a.parents with
-      | Some ifam ->
-        if ifam <> i then begin
-            prints "Other parents for %s\n" (designation p);
-            prints "- %s\n" (designation persons.(Adef.father cpl)) ;
-            prints "- %s\n" (designation persons.(Adef.mother cpl)) ;
-            print "=> deleted in this family\n" ;
-            print "\n" ;
-            flush !log_oc ;
-            to_delete := p.key_index :: !to_delete
-          end
-      | None ->
-        prints "%s has no parents but is the child of\n" (designation p) ;
-        prints "- %s\n" (designation persons.(Adef.father cpl)) ;
-        prints "- %s\n" (designation persons.(Adef.mother cpl)) ;
-        print "=> added parents\n" ;
-        print "\n" ;
-        flush !log_oc ;
-        let a = { a with parents = Some fam.fam_index } in
-        ascends.(ip) <- a
-    end des.children ;
-    if !to_delete <> []
-    then
+    Array.iter
+      (fun ip ->
+         let a = ascends.(ip) in
+         let p = persons.(ip) in
+         match a.parents with
+           Some ifam ->
+             if ifam <> i then
+               begin
+                 prints "Other parents for %s\n" (designation p);
+                 prints "- %s\n" (designation persons.(Adef.father cpl));
+                 prints "- %s\n" (designation persons.(Adef.mother cpl));
+                 print "=> deleted in this family\n";
+                 print "\n";
+                 flush !log_oc;
+                 to_delete := p.key_index :: !to_delete
+               end
+         | None ->
+             prints "%s has no parents but is the child of\n" (designation p);
+             prints "- %s\n" (designation persons.(Adef.father cpl));
+             prints "- %s\n" (designation persons.(Adef.mother cpl));
+             print "=> added parents\n";
+             print "\n";
+             flush !log_oc;
+             let a = {a with parents = Some fam.fam_index} in
+             ascends.(ip) <- a)
+      des.children;
+    if !to_delete <> [] then
       let l =
-        Array.fold_right begin fun ip acc ->
-          if List.mem ip !to_delete then acc else ip :: acc
-        end des.children []
+        Array.fold_right
+          (fun ip acc -> if List.mem ip !to_delete then acc else ip :: acc)
+          des.children []
       in
-      descends.(i) <- { children = Array.of_list l }
+      descends.(i) <- {children = Array.of_list l}
   done
 
 let check_parents_sex persons families couples strings =
@@ -3265,41 +3908,42 @@ let check_parents_sex persons families couples strings =
     let imoth = Adef.mother cpl in
     let fath = persons.(ifath) in
     let moth = persons.(imoth) in
-    if fam.relation = NoSexesCheckNotMarried
-    || fam.relation = NoSexesCheckMarried
-    then ()
+    if fam.relation = NoSexesCheckNotMarried ||
+       fam.relation = NoSexesCheckMarried
+    then
+      ()
     else if fath.sex = Female || moth.sex = Male then
       begin
-        if fath.sex = Female
-        then
+        if fath.sex = Female then
           Printf.fprintf !log_oc "Warning - husband with female sex: %s\n"
-            (designation strings fath) ;
-        if moth.sex = Male
-        then
+            (designation strings fath);
+        if moth.sex = Male then
           Printf.fprintf !log_oc "Warning - wife with male sex: %s\n"
-            (designation strings moth) ;
-        flush !log_oc ;
-        families.(i) <- { fam with relation = NoSexesCheckNotMarried }
+            (designation strings moth);
+        flush !log_oc;
+        families.(i) <- {fam with relation = NoSexesCheckNotMarried}
       end
     else
       begin
-        persons.(ifath) <- { fath with sex = Male } ;
-        persons.(imoth) <- { moth with sex = Female }
+        persons.(ifath) <- {fath with sex = Male};
+        persons.(imoth) <- {moth with sex = Female}
       end
   done
 
-let neg_year_dmy = function
-  | {day = d; month = m; year = y; prec = OrYear dmy2} ->
-    let dmy2 = {dmy2 with year2 = -abs dmy2.year2} in
-    {day = d; month = m; year = -abs y; prec = OrYear dmy2; delta = 0}
+let neg_year_dmy =
+  function
+    {day = d; month = m; year = y; prec = OrYear dmy2} ->
+      let dmy2 = {dmy2 with year2 = -abs dmy2.year2} in
+      {day = d; month = m; year = -abs y; prec = OrYear dmy2; delta = 0}
   | {day = d; month = m; year = y; prec = YearInt dmy2} ->
-    let dmy2 = {dmy2 with year2 = -abs dmy2.year2} in
-    {day = d; month = m; year = -abs y; prec = YearInt dmy2; delta = 0}
+      let dmy2 = {dmy2 with year2 = -abs dmy2.year2} in
+      {day = d; month = m; year = -abs y; prec = YearInt dmy2; delta = 0}
   | {day = d; month = m; year = y; prec = p} ->
-    {day = d; month = m; year = -abs y; prec = p; delta = 0}
+      {day = d; month = m; year = -abs y; prec = p; delta = 0}
 
-let neg_year = function
-  | Dgreg (d, cal) -> Dgreg (neg_year_dmy d, cal)
+let neg_year =
+  function
+    Dgreg (d, cal) -> Dgreg (neg_year_dmy d, cal)
   | x -> x
 
 let neg_year_cdate cd = Date.cdate_of_date (neg_year (Date.date_of_cdate cd))
@@ -3307,15 +3951,15 @@ let neg_year_cdate cd = Date.cdate_of_date (neg_year (Date.date_of_cdate cd))
 let rec negative_date_ancestors persons ascends unions families couples i =
   let p = persons.(i) in
   let p =
-    { p with
-      birth = begin match Date.od_of_cdate p.birth with
-        | Some d1 -> Date.cdate_of_od (Some (neg_year d1))
-        | None -> p.birth
-      end ;
-      death = match p.death with
-        | Death (dr, cd2) -> Death (dr, neg_year_cdate cd2)
-        | _ -> p.death
-    }
+    {p with birth =
+      begin match Date.od_of_cdate p.birth with
+        Some d1 -> Date.cdate_of_od (Some (neg_year d1))
+      | None -> p.birth
+      end;
+     death =
+       match p.death with
+         Death (dr, cd2) -> Death (dr, neg_year_cdate cd2)
+       | _ -> p.death}
   in
   persons.(i) <- p;
   let u = unions.(i) in
@@ -3323,30 +3967,30 @@ let rec negative_date_ancestors persons ascends unions families couples i =
     let j = u.family.(i) in
     let fam = families.(j) in
     match Date.od_of_cdate fam.marriage with
-    | None -> ()
+      None -> ()
     | Some d ->
-      let fam =
-        { fam with marriage = Date.cdate_of_od (Some (neg_year d)) }
-      in
-      families.(j) <- fam
-  done ;
+        let fam =
+          {fam with marriage = Date.cdate_of_od (Some (neg_year d))}
+        in
+        families.(j) <- fam
+  done;
   let a = ascends.(i) in
   match a.parents with
-  | None -> ()
+    None -> ()
   | Some ifam ->
-    let cpl = couples.(ifam) in
-    negative_date_ancestors
-      persons ascends unions families couples (Adef.father cpl) ;
-    negative_date_ancestors
-      persons ascends unions families couples (Adef.mother cpl)
+      let cpl = couples.(ifam) in
+      negative_date_ancestors persons ascends unions families couples
+        (Adef.father cpl);
+      negative_date_ancestors persons ascends unions families couples
+        (Adef.mother cpl)
 
 let negative_dates persons ascends unions families couples =
   for i = 0 to Array.length persons - 1 do
     let p = persons.(i) in
     match Date.cdate_to_dmy_opt p.birth, Date.dmy_of_death p.death with
-    | Some d1, Some d2 ->
-      if d1.year > 0 && d2.year > 0 && Date.compare_dmy d2 d1 < 0
-      then negative_date_ancestors persons ascends unions families couples i
+      Some d1, Some d2 ->
+        if d1.year > 0 && d2.year > 0 && Date.compare_dmy d2 d1 < 0 then
+          negative_date_ancestors persons ascends unions families couples i
     | _ -> ()
   done
 
@@ -3356,131 +4000,114 @@ let finish_base (persons, families, strings, _) =
   for i = 0 to Array.length descends - 1 do
     let des = descends.(i) in
     let children = des.children in
-    sort_by_date (fun i -> Date.od_of_cdate persons.(i).birth) children ;
-    descends.(i) <- { children }
-  done ;
+    sort_by_date (fun i -> Date.od_of_cdate persons.(i).birth) children;
+    descends.(i) <- {children = children}
+  done;
   for i = 0 to Array.length unions - 1 do
     let u = unions.(i) in
     let family = u.family in
-    sort_by_date (fun i -> Date.od_of_cdate families.(i).marriage) family ;
-    unions.(i) <- { family }
-  done ;
+    sort_by_date (fun i -> Date.od_of_cdate families.(i).marriage) family;
+    unions.(i) <- {family = family}
+  done;
   for i = 0 to Array.length persons - 1 do
     let p = persons.(i) in
     let a = ascends.(i) in
     let u = unions.(i) in
-    if a.parents <> None
-    && Array.length u.family != 0
- || p.notes <> string_empty
+    if a.parents <> None && Array.length u.family != 0 ||
+       p.notes <> string_empty
     then
       let (fn, occ) =
         if strings.(p.first_name) = "?" then string_x, i
         else p.first_name, p.occ
       in
       let (sn, occ) =
-        if strings.(p.surname) = "?" then string_x, i
-        else p.surname, occ
+        if strings.(p.surname) = "?" then string_x, i else p.surname, occ
       in
-      persons.(i) <- { p with first_name = fn; surname = sn; occ }
+      persons.(i) <- {p with first_name = fn; surname = sn; occ = occ}
   done;
-  check_parents_sex persons families couples strings ;
-  check_parents_children persons ascends unions families couples descends strings ;
-  if !try_negative_dates then negative_dates persons ascends unions families couples
+  check_parents_sex persons families couples strings;
+  check_parents_children persons ascends unions families couples descends
+    strings;
+  if !try_negative_dates then
+    negative_dates persons ascends unions families couples
 
 (* Main *)
 
 let out_file = ref "a"
 
 let speclist =
-  [ ( "-o", Arg.String (fun s -> out_file := s)
-    , "<file> Output database (default: \"a\")." )
-  ; ( "-f", Arg.Set force
-    , "Remove database if already existing" )
-  ; ( "-log", Arg.String (fun s -> log_oc := open_out s)
-    , "<file> Redirect log trace to this file." )
-  ; ( "-lf", Arg.Set lowercase_first_names
-    , "Convert first names to lowercase letters, with initials in uppercase." )
-  ; ( "-trackid", Arg.Set track_ged2gw_id,
-      "Print gedcom id to gw id matches." )
-  ; ( "-ls", Arg.Unit (fun () -> case_surnames := LowerCase)
-    , "Convert surnames to lowercase letters, with initials in uppercase. \
-       Try to keep lowercase particles." )
-  ; ( "-us", Arg.Unit (fun () -> case_surnames := UpperCase)
-    , "Convert surnames to uppercase letters." )
-  ; ( "-fne"
-    , Arg.String begin fun s ->
-        if String.length s = 2
-        then first_names_brackets := Some (s.[0], s.[1])
-        else raise (Arg.Bad "-fne option must be followed by a 2 characters string")
-      end
-    , "<be> When creating a person, if the GEDCOM first name part holds \
-       a part between 'b' (any character) and 'e' (any character), it \
-       is considered to be the usual first name: e.g. -fne '\"\"' or \
-       -fne \"()\"." )
-  ; ( "-efn", Arg.Set extract_first_names
-    , "When creating a person, if the GEDCOM first name part holds several \
-       names, the first of this names becomes the person \"first name\" and \
-       the complete GEDCOM first name part a \"first name alias\"." )
-  ; ( "-no_efn", Arg.Clear extract_first_names,
-      "Cancels the previous option." )
-  ; ( "-epn", Arg.Set extract_public_names
-    , "When creating a person, if the GEDCOM first name part looks like a \
-       public name, i.e. holds:\n\
-       * a number or a roman number, supposed to be a number of a nobility title,\n\
-       * one of the words: \"der\", \"den\", \"die\", \"el\", \"le\", \"la\", \"the\", \
-       supposed to be the beginning of a qualifier, \
-       then the GEDCOM first name part becomes the person \"public name\" \
-       and its first word his \"first name\"." )
-  ; ( "-no_epn", Arg.Clear extract_public_names
-    , "Cancels the previous option." )
-  ; ( "-no_pit", Arg.Set no_public_if_titles
-    , "Do not consider persons having titles as public")
-  ; ( "-tnd", Arg.Set try_negative_dates
-    , "Set negative dates when inconsistency (e.g. birth after death)" )
-  ; ( "-no_nd", Arg.Set no_negative_dates
-    , "Don't interpret a year preceded by a minus sign as a negative year" )
-  ; ( "-nc", Arg.Clear do_check, "No consistency check" )
-  ; ( "-nopicture", Arg.Set no_picture, "Don't extract individual picture." )
-  ; ( "-udi"
-    , Arg.String begin fun s ->
-        match String.index_opt s '-' with
-        | Some i ->
-          let a = String.sub s 0 i in
-          let b = String.sub s (i + 1) (String.length s - i - 1) in
-          let a = if a = "" then !alive_years else int_of_string a in
-          let b = max a (if b = "" then !dead_years else int_of_string b) in
-          alive_years := a ;
-          dead_years := b ;
-        | None -> raise (Arg.Bad "bad parameter for -udi")
-      end
-    , "x-y Set the interval for persons whose death part is undefined:\n\
-       - if before x years, they are considered as alive\n\
-       - if after y year, they are considered as death\n\
-       - between x and y year, they are considered as \"don't know\"\n\
-       Default x is " ^ string_of_int !alive_years ^ " and y is " ^ string_of_int !dead_years)
-  ; ( "-uin", Arg.Set untreated_in_notes
-    , "Put untreated GEDCOM tags in notes" )
-  ; ( "-ds", Arg.Set_string default_source
-    , "Set the source field for persons and families without source data" )
-  ; ( "-dates_dm", Arg.Unit (fun () -> month_number_dates := DayMonthDates)
-    ,"Interpret months-numbered dates as day/month/year" )
-  ; ( "-dates_md", Arg.Unit (fun () -> month_number_dates := MonthDayDates)
-    , "Interpret months-numbered dates as month/day/year" )
-  ; ( "-rs_no_mention", Arg.Unit (fun () -> relation_status := NoMention)
-    , "Force relation status to NoMention (default is Married)" )
-  ; ( "-charset"
-    , Arg.String begin function
-        | "ANSEL" -> charset_option := Some Ansel
-        | "ASCII" -> charset_option := Some Ascii
-        | "MSDOS" -> charset_option := Some Msdos
-        | _ -> raise (Arg.Bad "bad -charset value")
-      end
-    , "[ANSEL|ASCII|MSDOS] Force given charset decoding, \
-       overriding the possible setting in GEDCOM" )
-  ; ( "-particles"
-    , Arg.String (fun s -> particles := Mutil.input_particles s)
-    , "<FILE> Use the given file as list of particles" )
-  ] |> List.sort compare |> Arg.align
+  (["-o", Arg.String (fun s -> out_file := s),
+    "<file> Output database (default: \"a\").";
+    "-f", Arg.Set force, "Remove database if already existing";
+    "-log", Arg.String (fun s -> log_oc := open_out s),
+    "<file> Redirect log trace to this file.";
+    "-lf", Arg.Set lowercase_first_names,
+    "Convert first names to lowercase letters, with initials in uppercase.";
+    "-trackid", Arg.Set track_ged2gw_id, "Print gedcom id to gw id matches.";
+    "-ls", Arg.Unit (fun () -> case_surnames := LowerCase),
+    "Convert surnames to lowercase letters, with initials in uppercase. Try to keep lowercase particles.";
+    "-us", Arg.Unit (fun () -> case_surnames := UpperCase),
+    "Convert surnames to uppercase letters.";
+    "-fne",
+    Arg.String
+      (fun s ->
+         if String.length s = 2 then
+           first_names_brackets := Some (s.[0], s.[1])
+         else
+           raise
+             (Arg.Bad
+                "-fne option must be followed by a 2 characters string")),
+    "<be> When creating a person, if the GEDCOM first name part holds a part between 'b' (any character) and 'e' (any character), it is considered to be the usual first name: e.g. -fne '\"\"' or -fne \"()\".";
+    "-efn", Arg.Set extract_first_names,
+    "When creating a person, if the GEDCOM first name part holds several names, the first of this names becomes the person \"first name\" and the complete GEDCOM first name part a \"first name alias\".";
+    "-no_efn", Arg.Clear extract_first_names, "Cancels the previous option.";
+    "-epn", Arg.Set extract_public_names,
+    "When creating a person, if the GEDCOM first name part looks like a public name, i.e. holds:\n* a number or a roman number, supposed to be a number of a nobility title,\n* one of the words: \"der\", \"den\", \"die\", \"el\", \"le\", \"la\", \"the\", supposed to be the beginning of a qualifier, then the GEDCOM first name part becomes the person \"public name\" and its first word his \"first name\".";
+    "-no_epn", Arg.Clear extract_public_names, "Cancels the previous option.";
+    "-no_pit", Arg.Set no_public_if_titles,
+    "Do not consider persons having titles as public";
+    "-tnd", Arg.Set try_negative_dates,
+    "Set negative dates when inconsistency (e.g. birth after death)";
+    "-no_nd", Arg.Set no_negative_dates,
+    "Don't interpret a year preceded by a minus sign as a negative year";
+    "-nc", Arg.Clear do_check, "No consistency check";
+    "-nopicture", Arg.Set no_picture, "Don't extract individual picture.";
+    "-udi",
+    Arg.String
+      (fun s ->
+         match String.index_opt s '-' with
+           Some i ->
+             let a = String.sub s 0 i in
+             let b = String.sub s (i + 1) (String.length s - i - 1) in
+             let a = if a = "" then !alive_years else int_of_string a in
+             let b =
+               max a (if b = "" then !dead_years else int_of_string b)
+             in
+             alive_years := a; dead_years := b
+         | None -> raise (Arg.Bad "bad parameter for -udi")),
+    "x-y Set the interval for persons whose death part is undefined:\n- if before x years, they are considered as alive\n- if after y year, they are considered as death\n- between x and y year, they are considered as \"don't know\"\nDefault x is " ^
+    string_of_int !alive_years ^ " and y is " ^ string_of_int !dead_years;
+    "-uin", Arg.Set untreated_in_notes, "Put untreated GEDCOM tags in notes";
+    "-ds", Arg.Set_string default_source,
+    "Set the source field for persons and families without source data";
+    "-dates_dm", Arg.Unit (fun () -> month_number_dates := DayMonthDates),
+    "Interpret months-numbered dates as day/month/year";
+    "-dates_md", Arg.Unit (fun () -> month_number_dates := MonthDayDates),
+    "Interpret months-numbered dates as month/day/year";
+    "-rs_no_mention", Arg.Unit (fun () -> relation_status := NoMention),
+    "Force relation status to NoMention (default is Married)";
+    "-charset",
+    Arg.String
+      (function
+         "ANSEL" -> charset_option := Some Ansel
+       | "ASCII" -> charset_option := Some Ascii
+       | "MSDOS" -> charset_option := Some Msdos
+       | _ -> raise (Arg.Bad "bad -charset value")),
+    "[ANSEL|ASCII|MSDOS] Force given charset decoding, overriding the possible setting in GEDCOM";
+    "-particles", Arg.String (fun s -> particles := Mutil.input_particles s),
+    "<FILE> Use the given file as list of particles"] |>
+     List.sort compare) |>
+    Arg.align
 
 let anonfun s =
   if !in_file = "" then in_file := s
@@ -3494,20 +4121,22 @@ let main () =
   let arrays = make_arrays !in_file in
   Gc.compact ();
   let arrays = make_subarrays arrays in
-  finish_base arrays ;
+  finish_base arrays;
   let base = Gwdb.make !out_file !particles arrays in
   warning_month_number_dates ();
-  if !do_check then begin
-    let base_error x =
+  if !do_check then
+    begin let base_error x =
       Check.print_base_error !log_oc base x; Printf.fprintf !log_oc "\n"
     in
-    let base_warning = function
-      | UndefinedSex _ -> ()
-      | x ->
-        Check.print_base_warning !log_oc base x; Printf.fprintf !log_oc "\n"
-    in
-    Check.check_base base base_error base_warning ignore; flush !log_oc
-  end ;
+      let base_warning =
+        function
+          UndefinedSex _ -> ()
+        | x ->
+            Check.print_base_warning !log_oc base x;
+            Printf.fprintf !log_oc "\n"
+      in
+      Check.check_base base base_error base_warning ignore; flush !log_oc
+    end;
   if !log_oc != stdout then close_out !log_oc
 
 let _ =
