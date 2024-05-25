@@ -539,7 +539,8 @@ let date_lexer =
        {Plexing.Locations.locations = ref [| |]; overflow = ref true});
    Token.tok_using = using_token; Token.tok_removing = (fun _ -> ());
    Token.tok_match = tparse; Token.tok_text = (fun _ -> "<tok>");
-   Token.tok_comm = None}
+   Token.tok_comm = None;
+   Token.kwds = Hashtbl.create 10}
 
 type 'a range =
     Begin of 'a
