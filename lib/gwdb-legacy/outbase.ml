@@ -307,7 +307,7 @@ let output base =
         close_out oc_inx;
         close_out oc_inx_acc;
 
-        if save_mem then (
+        if !save_mem then (
           trace "compacting";
           Gc.compact ());
         Gc.compact ();
@@ -323,7 +323,7 @@ let output base =
           Gc.compact ());
         trace "create first name index";
         output_first_name_index base tmp_fnames_inx tmp_fnames_dat;
-        if save_mem then (
+        if !save_mem then (
           trace "compacting";
           Gc.compact ());
         trace "create first name index";
