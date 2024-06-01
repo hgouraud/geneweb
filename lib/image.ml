@@ -1,10 +1,7 @@
 open Config
 open Gwdb
 
-let path_str path =
-   match path with
-  | Some (`Path pa) -> pa
-  | None -> "" 
+let path_str path = match path with Some (`Path pa) -> pa | None -> ""
 
 let get_dir_name mode bname =
   match mode with
@@ -13,22 +10,19 @@ let get_dir_name mode bname =
   | _ -> Filename.concat (Util.base_path [ "src" ] bname) "images"
 
 let portrait_folder conf = get_dir_name "portraits" conf.bname
-
 let carrousel_folder conf = get_dir_name "carrousel" conf.bname
-  
+
 (** [default_image_filename_of_key fmode n sn occ] is the default filename
  of the corresponding person's portrait or blason. WITHOUT its file extenssion.
  e.g: default_image_filename "blasons"_of_key "Jean Claude" "DUPOND" 3
  is "jean_claude.3.dupond" or "jean_claude.3.dupond.blason"
  *)
- let default_image_filename_of_key mode first_name surname occ =
+let default_image_filename_of_key mode first_name surname occ =
   let space_to_unders = Mutil.tr ' ' '_' in
   let f = space_to_unders (Name.lower first_name) in
   let s = space_to_unders (Name.lower surname) in
-  if mode = "blasons" then 
-    Format.sprintf "%s.%d.%s.blason" f occ s
-  else
-    Format.sprintf "%s.%d.%s" f occ s
+  if mode = "blasons" then Format.sprintf "%s.%d.%s.blason" f occ s
+  else Format.sprintf "%s.%d.%s" f occ s
 
 let default_image_filename mode base p =
   default_image_filename_of_key mode (p_first_name base p) (p_surname base p)
@@ -55,7 +49,6 @@ let find_img_opt f =
           | None -> None
           | Some f -> Some (`Path f)))
 
-          
 (** [full_image_path mode conf base p] is [Some path] if [p] has a portrait or a blason.
     [path] is a the full path of the file with file extension. *)
 let full_image_path mode conf base p =
@@ -216,7 +209,8 @@ let has_access_to_carrousel conf base p =
      && not (Util.is_hide_names conf p)
 
 let get_portrait_path conf base p =
-  if has_access_to_image "portraits" conf base p then full_image_path "portraits" conf base p
+  if has_access_to_image "portraits" conf base p then
+    full_image_path "portraits" conf base p
   else None
 
 (* parse a string to an `Url or a `Path *)
@@ -269,7 +263,9 @@ let get_portrait conf base p =
 let get_blason conf base p self =
   if has_access_to_image "blasons" conf base p then
     let rec loop p =
-      match src_of_string conf (path_str (full_image_path "blasons" conf base p)) with
+      match
+        src_of_string conf (path_str (full_image_path "blasons" conf base p))
+      with
       | `Src_with_size_info _s as s_info -> (
           match parse_src_with_size_info conf s_info with
           | Error _e -> None
@@ -347,11 +343,14 @@ let get_old_blason conf base p =
     find_img_opt f
   else None
 
-let rename_portrait conf base p (nfn, nsn, noc) =
-  match get_portrait conf base p with
+let rename_portrait_or_blason conf base mode p (nfn, nsn, noc) =
+  match
+    if mode = "portraits" then get_portrait conf base p
+    else get_blason conf base p true
+  with
   | Some (`Path old_f) -> (
-      let new_s = default_image_filename_of_key "portraits" nfn nsn noc in
-      let old_s = default_image_filename "portraits" base p in
+      let new_s = default_image_filename_of_key mode nfn nsn noc in
+      let old_s = default_image_filename mode base p in
       let f = Filename.concat (portrait_folder conf) new_s in
       let old_ext = Filename.extension old_f in
       let new_f = f ^ old_ext in
@@ -359,8 +358,8 @@ let rename_portrait conf base p (nfn, nsn, noc) =
        with Sys_error e ->
          !GWPARAM.syslog `LOG_ERR
            (Format.sprintf
-              "Error renaming portrait: old_path=%s new_path=%s : %s" old_f
-              new_f e));
+              "Error renaming portrait/blasons: old_path=%s new_path=%s : %s"
+              old_f new_f e));
       let new_s_f =
         String.concat Filename.dir_sep [ portrait_folder conf; "old"; new_s ]
       in
@@ -372,8 +371,9 @@ let rename_portrait conf base p (nfn, nsn, noc) =
        with Sys_error e ->
          !GWPARAM.syslog `LOG_ERR
            (Format.sprintf
-              "Error renaming old portrait: old_path=%s new_path=%s : %s" old_f
-              new_f e));
+              "Error renaming old portrait/blasons: old_path=%s new_path=%s : \
+               %s"
+              old_f new_f e));
       let new_s_f =
         String.concat Filename.dir_sep [ carrousel_folder conf; new_s ]
       in
@@ -389,6 +389,10 @@ let rename_portrait conf base p (nfn, nsn, noc) =
                old_f new_f e))
   | Some (`Url _url) -> () (* old url still applies *)
   | None -> ()
+
+let rename_portrait_and_blason conf base p (nfn, nsn, noc) =
+  rename_portrait_or_blason conf base "portraits" p (nfn, nsn, noc);
+  rename_portrait_or_blason conf base "blasons" p (nfn, nsn, noc)
 
 let get_portrait_with_size conf base p =
   if has_access_to_image "portraits" conf base p then
@@ -411,7 +415,9 @@ let get_portrait_with_size conf base p =
 let get_blason_with_size conf base p self =
   if has_access_to_image "blasons" conf base p then
     let rec loop p =
-      match src_of_string conf (path_str (full_image_path "blasons" conf base p)) with
+      match
+        src_of_string conf (path_str (full_image_path "blasons" conf base p))
+      with
       | `Src_with_size_info _s as s_info -> (
           match parse_src_with_size_info conf s_info with
           | Error _e -> None
@@ -428,7 +434,7 @@ let get_blason_with_size conf base p self =
               let fa = poi base (get_father cpl) in
               loop fa
           | _ -> (
-              match (path_str (full_image_path "blasons" conf base p)) with
+              match path_str (full_image_path "blasons" conf base p) with
               | "" -> None
               | path ->
                   Some

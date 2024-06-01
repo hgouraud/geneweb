@@ -4,7 +4,6 @@ open Gwdb
 val portrait_folder : config -> string
 val carrousel_folder : config -> string
 val authorized_image_file_extension : string array
-
 val get_dir_name : string -> string -> string
 
 val scale_to_fit : max_w:int -> max_h:int -> w:int -> h:int -> int * int
@@ -19,8 +18,6 @@ val default_image_filename : string -> base -> person -> string
  e.g: default_image_filename "Jean Claude" "DUPOND" 3 is "jean_claude.3.dupond" or "jean_claude.3.dupond.blason"
  *)
 
-
-
 val size_from_path : [ `Path of string ] -> (int * int, unit) result
 (** [size_from_path path]
     - Error () if failed to read or parse file
@@ -31,7 +28,8 @@ val path_of_filename : string -> [> `Path of string ]
 (** [path_of_filename fname] search for image {i images/fname} inside the base and assets directories.
     Return the path to found file or [fname] if file isn't found.  *)
 
-val rename_portrait : config -> base -> person -> string * string * int -> unit
+val rename_portrait_and_blason :
+  config -> base -> person -> string * string * int -> unit
 (** Rename portrait to match updated name *)
 
 val src_to_string : [< `Path of string | `Url of string ] -> string

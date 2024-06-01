@@ -1359,7 +1359,8 @@ let get_note_source conf base ?p auth no_note note_source =
     let env =
       match p with
       | None -> []
-      | Some p -> [ ('i', fun () -> Image.default_image_filename "portraits" base p) ]
+      | Some p ->
+          [ ('i', fun () -> Image.default_image_filename "portraits" base p) ]
     in
     Notes.source_note_with_env conf base env (sou base note_source)
   else Adef.safe ""
@@ -3746,7 +3747,8 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       | _ -> get_iper p |> string_of_iper |> Mutil.encode |> safe_val)
   (* carrousel functions *)
   | "carrousel" -> Image.default_image_filename "portraits" base p |> str_val
-  | "blason_carrousel" -> Image.default_image_filename "blasons" base p |> str_val
+  | "blason_carrousel" ->
+      Image.default_image_filename "blasons" base p |> str_val
   | "carrousel_img_nbr" ->
       string_of_int (List.length (Image.get_carrousel_imgs conf base p))
       |> str_val
