@@ -771,11 +771,15 @@ let effective_copy_portrait_to_blason conf base p =
       [ dir; Image.default_image_filename "blasons" base p ^ ext ]
   in
   (* FIXME *)
-     let has_blason_self = Image.has_blason conf base p true in
-     let _deleted = (if has_blason_self then effective_delete_c_ok ~portrait:false conf base p else "OK") <> "" in
-     let portrait_filename = String.concat Filename.dir_sep [ dir; fname ^ ext] in
-     file_copy portrait_filename blason_filename;
-     let _ = effective_delete_c_ok ~portrait:true conf base p in
+  let has_blason_self = Image.has_blason conf base p true in
+  let _deleted =
+    (if has_blason_self then effective_delete_c_ok ~portrait:false conf base p
+    else "OK")
+    <> ""
+  in
+  let portrait_filename = String.concat Filename.dir_sep [ dir; fname ^ ext ] in
+  file_copy portrait_filename blason_filename;
+  let _ = effective_delete_c_ok ~portrait:true conf base p in
   History.record conf base
     (U_Send_image (Util.string_gen_person base (gen_person_of_person p)))
     "ca";
