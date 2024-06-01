@@ -375,7 +375,7 @@
   </ul>
 %end;
 %define;portrait()
-  %if;(has_image or b.default_image="yes")
+  %if;(has_image or has_blason or b.default_image="yes")
     <div class="d-flex align-items-center">
       %if;has_image;
         %if;(e.cgl!="on") 
@@ -384,6 +384,14 @@
           </a>%nn;
         %else;
           <img src="%image_url;"%image_size; class="%if;(op_m=3)align-self-center mx-1%end; rounded" alt="[image/images]0">%nn;
+        %end;
+      %elseif;has_blason;
+        %if;(e.cgl!="on") 
+          <a href="%blason_url;" target="_blank">
+            <img src="%blason_url;"%blason_size; class="%if;(op_m=3)align-self-center mx-1%end; rounded" alt="[image/images]0">%nn;
+          </a>%nn;
+        %else;
+          <img src="%blason_url;"%blason_size; class="%if;(op_m=3)align-self-center mx-1%end; rounded" alt="[image/images]0">%nn;
         %end;
       %elseif;(b.default_image="yes")
         <img class="%if;(op_m=3)d-flex align-self-center mx-1%end; rounded" src="%images_prefix;img_unknown_%if;(is_female)wo%elseif;(is_male)%else;u_%end;man.png"%image_size; alt="[missing image]">
