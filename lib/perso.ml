@@ -3478,7 +3478,7 @@ and eval_bool_person_field conf base env (p, p_auth) = function
       | Some (`Url _url) -> true
       | _ -> false)
   | "has_old_image_url" | "has_old_portrait_url" -> (
-      match Image.get_old_portrait conf base p with
+      match Image.get_old_portrait_or_blason conf base "portraits" p with
       | Some (`Url _url) -> true
       | _ -> false)
   | "has_blason_url" -> (
@@ -3486,15 +3486,16 @@ and eval_bool_person_field conf base env (p, p_auth) = function
       | Some (`Url _url) -> true
       | _ -> false)
   | "has_old_blason_url" -> (
-      match Image.get_old_blason conf base p with
+      match Image.get_old_portrait_or_blason conf base "blasons" p with
       | Some (`Url _url) -> true
       | _ -> false)
   (* carrousel *)
   | "has_carrousel" -> Image.get_carrousel_imgs conf base p <> []
   | "has_old_carrousel" -> Image.get_carrousel_old_imgs conf base p <> []
   | "has_old_image" | "has_old_portrait" ->
-      Image.get_old_portrait conf base p |> Option.is_some
-  | "has_old_blason" -> Image.get_old_blason conf base p |> Option.is_some
+      Image.get_old_portrait_or_blason conf base "portraits" p |> Option.is_some
+  | "has_old_blason" ->
+      Image.get_old_portrait_or_blason conf base "blasons" p |> Option.is_some
   | "has_nephews_or_nieces" -> has_nephews_or_nieces conf base p
   | "has_nobility_titles" -> p_auth && Util.nobtit conf base p <> []
   | "has_notes" | "has_pnotes" ->
@@ -3789,22 +3790,22 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
   | "blason_name" -> str_val (Image.get_blason_name conf base p false)
   | "blason_name_self" -> str_val (Image.get_blason_name conf base p true)
   | "portrait_saved" -> (
-      match Image.get_old_portrait conf base p with
+      match Image.get_old_portrait_or_blason conf base "portraits" p with
       | Some (`Path s) -> str_val s
       | Some (`Url u) -> str_val u
       | None -> null_val)
   | "blason_saved" -> (
-      match Image.get_old_blason conf base p with
+      match Image.get_old_portrait_or_blason conf base "blasons" p with
       | Some (`Path s) -> str_val s
       | Some (`Url u) -> str_val u
       | None -> null_val)
   | "blason_saved_name" -> (
-      match Image.get_old_blason conf base p with
+      match Image.get_old_portrait_or_blason conf base "blasons" p with
       | Some (`Path s) -> str_val (Filename.basename s)
       | Some (`Url u) -> str_val u
       | None -> null_val)
   | "portrait_saved_name" -> (
-      match Image.get_old_portrait conf base p with
+      match Image.get_old_portrait_or_blason conf base "portraits" p with
       | Some (`Path s) -> str_val (Filename.basename s)
       | Some (`Url u) -> str_val u (* ?? *)
       | None -> null_val)

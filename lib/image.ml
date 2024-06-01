@@ -321,22 +321,9 @@ let get_blason_owner conf base p =
    - the image as the original image.jpg/png/tif image
    - the url to the image as content of a image.url text file
 *)
-let get_old_portrait conf base p =
-  if has_access_to_image "portraits" conf base p then
-    let key = default_image_filename "portraits" base p in
-    let f =
-      Filename.concat (Filename.concat (portrait_folder conf) "old") key
-    in
-    find_img_opt f
-  else None
-
-(* In images/carrousel we store either
-   - the image as the original image.jpg/png/tif image
-   - the url to the image as content of a image.url text file
-*)
-let get_old_blason conf base p =
-  if has_access_to_image "blasons" conf base p then
-    let key = default_image_filename "blasons" base p in
+let get_old_portrait_or_blason conf base mode p =
+  if has_access_to_image mode conf base p then
+    let key = default_image_filename mode base p in
     let f =
       Filename.concat (Filename.concat (portrait_folder conf) "old") key
     in

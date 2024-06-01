@@ -984,19 +984,17 @@ let print_family conf base =
 
 (* carrousel *)
 let print_c ?(saved = false) ?(portrait = true) conf base =
+  let mode = if portrait then "portraits" else "blasons" in
   match (Util.p_getenv conf.env "s", Util.find_person_in_env conf base "") with
   | Some f, Some p ->
-      let k =
-        if portrait then Image.default_image_filename "portraits" base p
-        else Image.default_image_filename "blasons" base p
-      in
+      let k = Image.default_image_filename mode base p in
       let f = Filename.concat k f in
       ImageDisplay.print_source conf (if saved then insert_saved f else f)
   | Some f, _ -> ImageDisplay.print_source conf f
   | _, Some p -> (
       match
-        if saved then Image.get_old_portrait conf base p
-        else if portrait then Image.get_portrait conf base p
+        if saved then Image.get_old_portrait_or_blason conf base "portraits" p
+        else if mode = "portraits" then Image.get_portrait conf base p
         else Image.get_blason conf base p false
       with
       | Some (`Path f) ->
