@@ -499,7 +499,6 @@ let gen_match_auth_file test_user_and_password auth_file =
                 String.sub s 0 i ^ String.sub s (i + 1) (len - i - 1)
               with Not_found -> s
             in
-            let (username, _) = split_username username in
             Some username
           else loop aul
       | [] -> None
@@ -911,7 +910,6 @@ let basic_authorization from_addr request base_env passwd access_type utm
               Some username -> true, false, true, username
             | None -> true, false, false, ""
   in
-  let (username, _userkey) = split_username username in
   let user =
     match String.index_opt uauth ':' with
       Some i ->
@@ -1219,7 +1217,6 @@ let make_conf from_addr request script_name env =
     Not_found | Failure _ -> 150
   in
   let username, userkey = split_username ar.ar_name in
-
   let conf =
     {from = from_addr;
      api_mode = false;
