@@ -295,7 +295,7 @@ let print_send_image conf base p =
       Output.print_sstring conf (Format.sprintf ".%d " (get_occ p));
       Output.print_string conf (Util.escape_html (p_surname base p)))
   in
-  let digest = Image.default_portrait_filename base p in
+  let digest = Image.default_image_filename "portraits" base p in
   Hutil.header conf title;
   Output.printf conf
     "<form method=\"post\" action=\"%s\" enctype=\"multipart/form-data\">\n"
@@ -492,7 +492,7 @@ let print_send_ok conf base =
     with Failure _ -> incorrect conf "print send ok"
   in
   let p = poi base ip in
-  let digest = Image.default_portrait_filename base p in
+  let digest = Image.default_image_filename "portraits" base p in
   if (digest :> string) = Mutil.decode (raw_get conf "idigest") then
     raw_get conf "file" |> Adef.as_string |> effective_send_ok conf base p
   else Update.error_digest conf
