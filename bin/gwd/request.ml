@@ -564,7 +564,7 @@ let treat_request =
         | "IM" ->
           w_base @@ ImageDisplay.print
         | "FIM" ->
-          w_base @@ ImageDisplay.print_family
+          w_base @@ ImageDisplay.print_blason
         | "IMH" ->
           w_base @@ fun conf _ -> ImageDisplay.print_html conf
         | "INV_FAM" ->

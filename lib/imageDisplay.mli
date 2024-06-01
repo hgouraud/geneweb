@@ -16,10 +16,10 @@ val print : config -> Gwdb.base -> unit
     HTTP response with its content on the socket. If filename isn't presented,
     looks up personal image (portrait) for person mentionned in [conf.env] *)
 
-val print_family : config -> Gwdb.base -> unit
-(** Searches family image's filename in the environement [conf.env] and sends
+val print_blason : config -> Gwdb.base -> unit
+(** Searches blason filename in the environement [conf.env] and sends
         HTTP response with its content on the socket. If filename isn't presented,
-        looks up family image (family_portrait) for person mentionned in [conf.env] *)
+        looks up family image (blason) for person mentionned in [conf.env] *)
 
 val print_html : config -> unit
 (** Sends HTTP response with HTML page containg just image specified in

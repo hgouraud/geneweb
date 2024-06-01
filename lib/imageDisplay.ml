@@ -125,7 +125,7 @@ let print_portrait conf base p =
       - p : personne dans la base dont il faut afficher l'image de la famille
     [Retour] : aucun
     [Rem] : Ne pas utiliser en dehors de ce module.                           *)
-let print_blason conf base p =
+let print_blason_aux conf base p =
   match Image.get_blason conf base p false with
   | Some (`Path path) ->
       Result.fold ~ok:ignore
@@ -157,12 +157,12 @@ let print conf base =
       | Some p -> print_portrait conf base p
       | None -> Hutil.incorrect_request conf)
 
-let print_family conf base =
+let print_blason conf base =
   match Util.p_getenv conf.env "s" with
   | Some f -> print_source conf f
   | None -> (
       match Util.find_person_in_env conf base "" with
-      | Some p -> print_blason conf base p
+      | Some p -> print_blason_aux conf base p
       | None -> Hutil.incorrect_request conf)
 
 let print_html conf =

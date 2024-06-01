@@ -330,7 +330,7 @@ let print_send_image conf base p =
   print_link_delete_image conf base p;
   Hutil.trailer conf
 
-let print_send_family_image conf base p =
+let print_send_blason conf base p =
   let title h =
     if Option.is_some @@ Image.get_blason conf base p true then
       transl_nth conf "image/images" 0
@@ -440,7 +440,7 @@ let effective_send_ok conf base p file =
   History.record conf base changed "si";
   print_sent conf base p
 
-let effective_family_send_ok conf base p file =
+let effective_blason_send_ok conf base p file =
   let mode =
     try (List.assoc "mode" conf.env :> string) with Not_found -> "portraits"
   in
@@ -500,7 +500,7 @@ let print_send_ok conf base =
     raw_get conf "file" |> Adef.as_string |> effective_send_ok conf base p
   else Update.error_digest conf
 
-let print_family_send_ok conf base =
+let print_blason_send_ok conf base =
   let ip =
     try raw_get conf "i" |> Mutil.decode |> iper_of_string
     with Failure _ -> incorrect conf "print family send ok"
@@ -509,7 +509,7 @@ let print_family_send_ok conf base =
   let digest = Update.digest_person (UpdateInd.string_person_of base p) in
   if (digest :> string) = Mutil.decode (raw_get conf "digest") then
     raw_get conf "file" |> Adef.as_string
-    |> effective_family_send_ok conf base p
+    |> effective_blason_send_ok conf base p
   else Update.error_digest conf
 
 (* carrousel *)
@@ -980,7 +980,7 @@ let print_family conf base =
       let p = poi base (iper_of_string ip) in
       let sn = p_surname base p in
       if sn = "?" then Hutil.incorrect_request conf
-      else print_send_family_image conf base p
+      else print_send_blason conf base p
 
 (* carrousel *)
 let print_c ?(saved = false) ?(portrait = true) conf base =
