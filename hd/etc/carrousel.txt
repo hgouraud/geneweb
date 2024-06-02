@@ -339,7 +339,7 @@
         %foreach;img_in_carrousel;
           <div class="d-flex mt-1">
             <a role="button"
-              href=%if;(url_in_env!="")"%url_in_env;"%else;"%prefix;m=IM_C&i=%index;&s=%carrousel_img;"%end;
+              href="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C&i=%index;&s=%carrousel_img;%end;"
               target="_blank" rel="noopener" data-toggle="tooltip" data-html="true" data-placement="left"
               title='<strong><i class="fas fa-images fa-xs mr-1"></i>[*see] [image/images]0</strong>
                      <br><span class="small">%carrousel_img;</span>
@@ -387,7 +387,7 @@
         %foreach;img_in_carrousel_old;
           <div class="d-flex mt-1">
             <a role="button"
-              href=%if;(url_in_env!="")"%url_in_env;"%else;"%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;"%end;
+              href="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;%end;"
               target="_blank" rel="noopener" data-toggle="tooltip" data-html="true" data-placement="left"
               title='<strong><i class="fas fa-images fa-xs mr-1"></i>[*see] [saved images]0</strong>
                      <br><span class="small">%carrousel_img;</span>

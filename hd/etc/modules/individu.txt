@@ -378,21 +378,13 @@
   %if;(has_image or has_blason or b.default_image="yes")
     <div class="d-flex align-items-center">
       %if;has_image;
-        %if;(e.cgl!="on") 
-          <a href="%image_url;" target="_blank">
-            <img src="%image_url;"%image_size; class=" %if;(op_m=3)align-self-center mx-1%end; rounded" alt="[image/images]0">%nn;
-          </a>%nn;
-        %else;
-          <img src="%image_url;"%image_size; class="%if;(op_m=3)align-self-center mx-1%end; rounded" alt="[image/images]0">%nn;
-        %end;
+        %if;not cancel_links;<a href="%image_url;" target="_blank">%end;
+          <img src="%image_url;"%image_size; class=" %if;(op_m=3)align-self-center mx-1%end; rounded" alt="[image/images]0">%nn;
+        %if;not cancel_links;</a>%end;
       %elseif;has_blason;
-        %if;(e.cgl!="on") 
-          <a href="%blason_url;" target="_blank">
-            <img src="%blason_url;"%blason_size; class="%if;(op_m=3)align-self-center mx-1%end; rounded" alt="[image/images]0">%nn;
-          </a>%nn;
-        %else;
-          <img src="%blason_url;"%blason_size; class="%if;(op_m=3)align-self-center mx-1%end; rounded" alt="[image/images]0">%nn;
-        %end;
+        %if;not cancel_links;<a href="%blason_url;" target="_blank">%end;
+            <img src="%blason_url;"%blason_size; class="%if;(op_m=3)align-self-center mx-1%end; rounded" alt="[coat of arms]">%nn;
+        %if;not cancel_links</a>%end;
       %elseif;(b.default_image="yes")
         <img class="%if;(op_m=3)d-flex align-self-center mx-1%end; rounded" src="%images_prefix;img_unknown_%if;(is_female)wo%elseif;(is_male)%else;u_%end;man.png"%image_size; alt="[missing image]">
       %end;
@@ -407,14 +399,12 @@
 %if;(e.m!="MOD_IND")
   <div class="col-12">
   <h1 class="%if;(op_m=2)text-center%else;text-xs-center text-md-left%end;">
-    %if;(not has_image and has_blason and blason_name!="")
-      %if;(e.cgl!="on") 
-        <a href="%blason_url;" target="_blank">
-          <img src="%blason_url;"%blason_small_size; class="%if;(op_m=3)align-self-center mx-1%end; rounded" alt="[image/images]0">%nn;
-        </a>%nn;
-      %else;
-        <img src="%blason_url;"%blason_small_size; class="%if;(op_m=3)align-self-center mx-1%end; rounded" alt="[image/images]0">%nn;
-      %end;
+    %( FIXME has_portrait ou portrait_name répondent si s'il n'y a pas de portrait et un blason,
+        portrait_name!=blason_name déconne aussi, portrait_url pas mieux ?!!!! %)
+    %if;has_blason;
+      %if;not cancel_links;<a href="%blason_url;" target="_blank">%end;
+       <img src="%blason_url;"%blason_small_size; class="%if;(op_m=3)align-self-center mx-1%end; rounded mr-1" alt="[coat of arms]0">%nn;
+      %if;not cancel_links;</a>%end;
     %end;
     %if;has_public_name;
       %if;has_qualifiers;%public_name; <em>%qualifier;</em>
