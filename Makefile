@@ -51,7 +51,8 @@ dune-workspace: dune-workspace.in Makefile.config
 COMPIL_DATE := $(shell date +'%Y-%m-%d')
 COMMIT_DATE := $(shell git show -s --date=short --pretty=format:'%cd')
 COMMIT_ID := $(shell git rev-parse --short HEAD)
-COMMIT_MSG := $(shell git log -1 --pretty="%s%n%n%b" | sed 's/"/\\"/g')
+COMMIT_TITLE := $(shell git log -1 --pretty="%s" | sed "s/\"/\\\"/g")
+COMMIT_COMMENT:= $(shell git log -1 --pretty="%b" | sed "s/\"/\\\"/g")
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 VERSION := $(shell awk -F\" '/er =/ {print $$2}' lib/version.txt)
 SOURCE := $(shell git remote get-url origin | sed -n 's|^.*m/\([^/]\+/[^/.]\+\)\(.git\)\?|\1|p')
@@ -89,8 +90,10 @@ UNPATCH = $(MAKE) --no-print-directory unpatch_files
 
 info:
 	@printf "Building \033[1;37mGeneweb $(VERSION)\033[0m with $(OCAMLV).\n\n"
-	@printf "Repository \033[1;37m$(SOURCE)\033[0m. Branch \033[1;37m$(BRANCH)\033[0m.\n\n"
-	@printf "Last commit \033[1;37m$(COMMIT_ID)\033[0m with message “\033[1;37m%s\033[0m”.\n" '$(subst ','\'',$(COMMIT_MSG))'
+	@printf "Repository \033[1;37m$(SOURCE)\033[0m. Branch \033[1;37m$(BRANCH)\033[0m. "
+	@printf "Last commit \033[1;37m$(COMMIT_ID)\033[0m message:\n\n"
+	@printf "\033[1;37m  %s\033[0m\n" '$(subst ','\'',$(COMMIT_TITLE))'
+	@printf "  %s\n" '$(subst ','\'',$(COMMIT_COMMENT))' | fmt -w 80
 	@printf "\n\033[1;37mGenerating configuration files\033[0m\n"
 .PHONY: patch_files unpatch_files info
 
@@ -121,8 +124,9 @@ GENERATED_FILES_DEP = \
 	test/dune \
 
 generated: $(GENERATED_FILES_DEP)
+	@printf "Done.\n"
 
-fmt build install uninstall: info patch_files $(GENERATED_FILES_DEP)
+fmt build install uninstall: info patch_files generated
 
 fmt: ## Format Ocaml code
 ifneq ($(OS_TYPE),Win)
@@ -134,7 +138,8 @@ endif
 
 build: ## Build the geneweb package (libraries and binaries)
 	@printf "\n\033[1;37mBuilding executables\033[0m\n"
-	dune build -p geneweb --profile $(DUNE_PROFILE) ; $(UNPATCH)
+	@dune build -p geneweb --profile $(DUNE_PROFILE) ; $(UNPATCH)
+	@printf "Done."
 
 install: ## Install geneweb using dune
 	dune build @install --profile $(DUNE_PROFILE) ; $(UNPATCH)
@@ -144,12 +149,12 @@ uninstall: ## Uninstall geneweb using dune
 	dune build @install --profile $(DUNE_PROFILE) ; $(UNPATCH)
 	dune uninstall
 
-distrib: ## Build the project and copy what is necessary for distribution
-distrib: info
-	@$(MAKE) --no-print-directory patch_files $(GENERATED_FILES_DEP)
-	@printf "\n\033[1;37mBuilding executables\033[0m\n"
-	dune build -p geneweb --profile $(DUNE_PROFILE)
-	$(RM) -r $(DISTRIB_DIR)
+distrib: info ## Build the project and copy what is necessary for distribution
+	@$(MAKE) --no-print-directory patch_files generated
+	@printf "\n\033[1;37mBuilding executables.\n\033[0m"
+	@dune build -p geneweb --profile $(DUNE_PROFILE)
+	@printf "Done.\n"
+	@$(RM) -r $(DISTRIB_DIR)
 	@printf "\n\033[1;37mCreating distribution directory\033[0m\n"
 	mkdir $(DISTRIB_DIR)
 	mkdir -p $(DISTRIB_DIR)/bases
@@ -184,7 +189,10 @@ endif
 	cp $(BUILD_DISTRIB_DIR)gwc/gwc.exe $(DISTRIB_DIR)/gw/gwc$(EXT)
 	cp $(BUILD_DISTRIB_DIR)gwd/gwd.exe $(DISTRIB_DIR)/gw/gwd$(EXT)
 	cp $(BUILD_DISTRIB_DIR)gwdiff/gwdiff.exe $(DISTRIB_DIR)/gw/gwdiff$(EXT)
-	if test -f $(BUILD_DISTRIB_DIR)gwrepl/gwrepl.bc ; then cp $(BUILD_DISTRIB_DIR)gwrepl/gwrepl.bc $(DISTRIB_DIR)/gw/gwrepl$(EXT); fi
+	@if test -f $(BUILD_DISTRIB_DIR)gwrepl/gwrepl.bc ; then \
+	  printf "cp %s %s\n" "$(BUILD_DISTRIB_DIR)gwrepl/gwrepl.bc" "$(DISTRIB_DIR)/gw/gwrepl$(EXT)"; \
+	  cp $(BUILD_DISTRIB_DIR)gwrepl/gwrepl.bc $(DISTRIB_DIR)/gw/gwrepl$(EXT); \
+	fi
 	cp $(BUILD_DISTRIB_DIR)gwu/gwu.exe $(DISTRIB_DIR)/gw/gwu$(EXT)
 	cp $(BUILD_DISTRIB_DIR)setup/setup.exe $(DISTRIB_DIR)/gw/gwsetup$(EXT)
 	cp $(BUILD_DISTRIB_DIR)update_nldb/update_nldb.exe $(DISTRIB_DIR)/gw/update_nldb$(EXT)
@@ -200,19 +208,22 @@ endif
 	cp bin/setup/lang/intro.txt $(DISTRIB_DIR)/gw/setup/lang/
 	@printf "\n\033[1;37m└ Copy plugins in $(DISTRIB_DIR)/gw/plugins\033[0m\n"
 	mkdir $(DISTRIB_DIR)/gw/plugins
-	for P in $(shell ls plugins); do \
-		if [ -f $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs ] ; then \
-			mkdir $(DISTRIB_DIR)/gw/plugins/$$P; \
-			cp $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs $(DISTRIB_DIR)/gw/plugins/$$P/; \
-			if [ -d plugins/$$P/assets ] ; then \
-				cp -R $(BUILD_DIR)/plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/; \
-			fi; \
-			if [ -f $(BUILD_DIR)/plugins/$$P/META ] ; then \
-				cp $(BUILD_DIR)/plugins/$$P/META $(DISTRIB_DIR)/gw/plugins/$$P/; \
-			fi; \
-		fi; \
+	@for P in $(shell ls plugins); do \
+	  if [ -f $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs ] ; then \
+	    mkdir $(DISTRIB_DIR)/gw/plugins/$$P; \
+	    printf "cp %s %s\n" "$(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs" "$(DISTRIB_DIR)/gw/plugins/$$P/"; \
+	    cp $(BUILD_DIR)/plugins/$$P/plugin_$$P.cmxs $(DISTRIB_DIR)/gw/plugins/$$P/; \
+	    if [ -d plugins/$$P/assets ] ; then \
+	      printf "cp -R %s %s\n" "$(BUILD_DIR)/plugins/$$P/assets" "$(DISTRIB_DIR)/gw/plugins/$$P/"; \
+	      cp -R $(BUILD_DIR)/plugins/$$P/assets $(DISTRIB_DIR)/gw/plugins/$$P/; \
+	    fi; \
+	    if [ -f $(BUILD_DIR)/plugins/$$P/META ] ; then \
+	      printf "cp %s %s\n" "$(BUILD_DIR)/plugins/$$P/META" "$(DISTRIB_DIR)/gw/plugins/$$P/"; \
+	      cp $(BUILD_DIR)/plugins/$$P/META $(DISTRIB_DIR)/gw/plugins/$$P/; \
+	    fi; \
+	  fi; \
 	done
-	@printf "\033[1;37mBuild complete.\033[0m\n"
+	@printf "Done.\n\n\033[1;37mDistribution complete.\033[0m\n"
 	@$(MAKE) --no-print-directory unpatch_files
 	@printf "You can launch Geneweb with “\033[1;37mcd $(DISTRIB_DIR)\033[0m” followed by “\033[1;37mgw/gwd$(EXT)\033[0m”.\n"
 .PHONY: fmt install uninstall distrib
