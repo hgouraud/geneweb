@@ -124,8 +124,8 @@ let fmt_fnote_title conf base fnotes =
 
 let linked_page_rows conf base pg =
   let typ = p_getenv conf.env "type" in
-  match pg, typ with
-  | Def.NLDB.PgInd ip, None ->
+  match (pg, typ) with
+  | Def.NLDB.PgInd ip, _ ->
       let p = pget conf base ip in
       if conf.wizard then
         Output.print_sstring conf
@@ -144,7 +144,7 @@ let linked_page_rows conf base pg =
            (Util.referenced_person_title_text conf base p :> string)
            (DateDisplay.short_dates_text conf base p :> string)
            (Utf8.capitalize_fst (transl conf "individual notes")))
-  | Def.NLDB.PgFam ifam, None ->
+  | Def.NLDB.PgFam ifam, _ ->
       let fam = Gwdb.foi base ifam in
       let fath = pget conf base (Gwdb.get_father fam) in
       let moth = pget conf base (Gwdb.get_mother fam) in
@@ -172,7 +172,7 @@ let linked_page_rows conf base pg =
            (DateDisplay.short_dates_text conf base moth :> string)
            (Utf8.capitalize_fst (transl conf "comment"))
            (transl_nth conf "family/families" 0))
-  | Def.NLDB.PgNotes, None ->
+  | Def.NLDB.PgNotes, _ ->
       let fnote_title = fmt_fnote_title conf base "" in
       if conf.wizard then
         Output.print_sstring conf
@@ -191,13 +191,14 @@ let linked_page_rows conf base pg =
            (Utf8.capitalize (transl conf "base notes"))
            (Util.safe_html fnote_title :> string))
   | Def.NLDB.PgMisc fnotes, typ ->
-      if match typ with
+      if
+        match typ with
         | Some t ->
             let nenv, _ = read_notes base fnotes in
             let n_type = try List.assoc "TYPE" nenv with Not_found -> "" in
             t = n_type
         | None -> true
-      then begin
+      then (
         let fnote_title = fmt_fnote_title conf base fnotes in
         if conf.wizard then
           Output.print_sstring conf
@@ -217,9 +218,8 @@ let linked_page_rows conf base pg =
              (commd conf :> string)
              (Util.uri_encode fnotes)
              (fnotes :> string)
-             (Util.safe_html fnote_title :> string))
-      end
-  | Def.NLDB.PgWizard wizname, None ->
+             (Util.safe_html fnote_title :> string)))
+  | Def.NLDB.PgWizard wizname, _ ->
       if conf.wizard then
         Output.print_sstring conf
           (Format.sprintf
@@ -245,18 +245,19 @@ let print_linked_list_gallery conf base pgl =
   Wserver.printf "<div class=\"flex_gallery\">\n";
   List.iter
     (fun pg ->
-       match pg with
-       | NotesLinks.PgMisc fnotes ->
-          let (nenv, s) = read_notes base fnotes in
-          if (try List.assoc "TYPE" nenv with Not_found -> "") = "gallery" then
-            Wserver.printf "<div class=\"item_gallery\">\
-                            <a href=\"%sm=NOTES&f=%s&\">\
-                            <img src=\"%s\">\
-                            </a>\
-                            </div>\n"
-              (commd conf) fnotes (json_extract_img conf s)
-       | _ -> ()
-    ) pgl;
+      match pg with
+      | Def.NLDB.PgMisc fnotes ->
+          let nenv, s = read_notes base fnotes in
+          if (try List.assoc "TYPE" nenv with Not_found -> "") = "gallery"
+          then
+            Wserver.printf
+              "<div class=\"item_gallery\"><a href=\"%sm=NOTES&f=%s&\"><img \
+               src=\"%s\"></a></div>\n"
+              (commd conf :> string)
+              fnotes
+              (Notes.json_extract_img conf s)
+      | _ -> ())
+    pgl;
   Wserver.printf "</div>\n"
 
 let print_linked_list_standard conf base pgl =
@@ -269,12 +270,12 @@ let print_linked_list_standard conf base pgl =
       Output.print_sstring conf "</tr>\n")
     pgl;
   Output.print_sstring conf "</table>"
-  | _, _ -> None
 
 let print_linked_list conf base pgl =
   match p_getenv conf.env "type" with
   | Some "gallery" -> print_linked_list_gallery conf base pgl
-  | _ -> print_linked_list_standard conf pgl
+  | _ -> print_linked_list_standard conf base pgl
+
 let print_what_links conf base fnotes =
   let title h =
     Output.print_sstring conf (Utf8.capitalize_fst (transl conf "linked pages"));
@@ -311,27 +312,30 @@ let print conf base =
         try
           let typ = List.assoc "TYPE" nenv in
           let fname = "notes_" ^ typ in
-          Util.open_templ conf fname, typ
-        with Not_found -> None, ""
+          (Util.open_etc_file conf fname, typ)
+        with Not_found -> (None, "")
       in
       match templ with
-      | Some ic ->
-         begin match p_getenv conf.env "ajax" with
-         | Some "on" ->
-            let charset = if conf.charset = "" then "utf-8" else conf.charset in
-            Wserver.header "Content-type: application/json; charset=%s" charset ;
-            Wserver.printf "%s" (match typ with
-              | "gallery" -> safe_gallery conf s
-              | _ -> s
-            )
-         | _ -> Templ.copy_from_templ conf [] ic
-         end
-      | None ->
-         let title = try List.assoc "TITLE" nenv with Not_found -> "" in
-         let title = Util.safe_html title in
-         match p_getint conf.env "v" with
-         | Some cnt0 -> print_notes_part conf base fnotes title s cnt0
-         | None -> print_whole_notes conf base fnotes title s None)
+      | Some (ic, _fname) -> (
+          match p_getenv conf.env "ajax" with
+          | Some "on" ->
+              let charset =
+                if conf.charset = "" then "utf-8" else conf.charset
+              in
+              Wserver.header
+                (Format.sprintf "Content-type: application/json; charset=%s"
+                   charset);
+              Wserver.printf "%s"
+                (match typ with
+                | "gallery" -> Notes.safe_gallery conf s
+                | _ -> s)
+          | _ -> Templ.copy_from_templ conf [] ic)
+      | None -> (
+          let title = try List.assoc "TITLE" nenv with Not_found -> "" in
+          let title = Util.safe_html title in
+          match p_getint conf.env "v" with
+          | Some cnt0 -> print_notes_part conf base fnotes title s cnt0
+          | None -> print_whole_notes conf base fnotes title s None))
 
 let print_mod conf base =
   let fnotes =
@@ -339,11 +343,11 @@ let print_mod conf base =
     | Some f -> if NotesLinks.check_file_name f <> None then f else ""
     | None -> ""
   in
-  let (env, s) = read_notes base fnotes in
+  let env, s = read_notes base fnotes in
   let typ = try List.assoc "TYPE" env with Not_found -> "" in
   let templ =
     let fname = "notes_upd_" ^ typ in
-    Util.open_templ conf fname
+    Util.open_etc_file conf fname
   in
   let title _ =
     Output.printf conf "%s - %s%s"
@@ -351,23 +355,25 @@ let print_mod conf base =
       conf.bname
       (if fnotes = "" then "" else " (" ^ fnotes ^ ")")
   in
-  match templ, p_getenv conf.env "notmpl" with
+  match (templ, p_getenv conf.env "notmpl") with
   | Some _, Some "on" ->
-     Wiki.print_mod_view_page conf true "NOTES" fnotes title env s
-  | Some ic, _ ->
-      begin match p_getenv conf.env "ajax" with
+      Wiki.print_mod_view_page conf true (Adef.encoded "NOTES") fnotes title env
+        s
+  | Some (ic, _fname), _ -> (
+      match p_getenv conf.env "ajax" with
       | Some "on" ->
-         let s_digest =
-           List.fold_left (fun s (k, v) -> s ^ k ^ "=" ^ v ^ "\n") "" env ^ s
-         in
-         let digest = Iovalue.digest s_digest in
-         let charset = if conf.charset = "" then "utf-8" else conf.charset in
-         Wserver.header "Content-type: application/json; charset=%s" charset ;
-         Wserver.printf "{\"digest\":\"%s\",\"r\":%s}" digest s
-      | _ -> Templ.copy_from_templ conf [] ic
-      end
+          let _s_digest =
+            List.fold_left (fun s (k, v) -> s ^ k ^ "=" ^ v ^ "\n") "" env ^ s
+          in
+          let digest = "temp" (* FIXME Iovalue.digest s_digest*) in
+          let charset = if conf.charset = "" then "utf-8" else conf.charset in
+          Wserver.header
+            (Format.sprintf "Content-type: application/json; charset=%s" charset);
+          Wserver.printf "{\"digest\":\"%s\",\"r\":%s}" digest s
+      | _ -> Templ.copy_from_templ conf [] ic)
   | _ ->
-     Wiki.print_mod_view_page conf true "NOTES" fnotes title env s
+      Wiki.print_mod_view_page conf true (Adef.encoded "NOTES") fnotes title env
+        s
 
 let print_mod_ok conf base =
   let fname = function

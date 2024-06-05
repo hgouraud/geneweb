@@ -127,70 +127,56 @@ let notes_links_db conf base eliminate_unlinked =
 
 let json_extract_img conf s =
   let extract l =
-    List.fold_left (fun state e ->
-      match state, e with
-      | (None, img), ("path", `String s) -> (Some s, img)
-      | (path, None), ("img", `String s) -> (path, Some s)
-      | state, _ -> state
-    ) (None, None) l
+    List.fold_left
+      (fun state e ->
+        match (state, e) with
+        | (None, img), ("path", `String s) -> (Some s, img)
+        | (path, None), ("img", `String s) -> (path, Some s)
+        | state, _ -> state)
+      (None, None) l
   in
-  let json =
-    try Yojson.Basic.from_string s
-    with _ -> `Null
-  in
-  let path, img =
-    match json with
-    | `Assoc l -> extract l
-    | _ -> (None, None)
-  in
-  match path, img with
-  | Some path, Some img ->
-     begin match path with
-     | "doc" -> (Util.commd conf) ^ "m=DOC&s=" ^ img
-     | "private" ->
-        begin match Util.p_getenv conf.base_env "gallery_path_private" with
-        | Some s -> s ^ img
-        | None -> ""
-        end
-     | "public" ->
-        begin match Util.p_getenv conf.base_env "gallery_path" with
-        | Some s -> s ^ img
-        | None -> ""
-        end
-     | path -> path ^ img
-     end
+  let json = try Yojson.Basic.from_string s with _ -> `Null in
+  let path, img = match json with `Assoc l -> extract l | _ -> (None, None) in
+  match (path, img) with
+  | Some path, Some img -> (
+      match path with
+      | "doc" -> (Util.commd conf :> string) ^ "m=DOC&s=" ^ img
+      | "private" -> (
+          match List.assoc_opt "gallery_path_private" conf.base_env with
+          | Some s -> s ^ img
+          | None -> "")
+      | "public" -> (
+          match List.assoc_opt "gallery_path" conf.base_env with
+          | Some s -> s ^ img
+          | None -> "")
+      | path -> path ^ img)
   | _ -> ""
 
 let safe_gallery conf s =
-  let html s = safe_html (string_with_macros conf [] s) in
+  let html s = Util.string_with_macros conf [] s in
   let safe_map e =
     match e with
-    | `Assoc l -> `Assoc (List.map (function
-        | key, `String s when key = "alt"
-          -> key, `String (html s)
-        | e -> e
-      ) l)
+    | `Assoc l ->
+        `Assoc
+          (List.map
+             (function
+               | key, `String s when key = "alt" -> (key, `String (html s))
+               | e -> e)
+             l)
     | _ -> `Assoc []
   in
   let safe_json l =
-    List.map (function
-      | key, `String s when key = "title"
-        -> key, `String (html s)
-      | key, `String s when key = "desc"
-        -> key, `String (html s)
-      | "map", `List lmap
-        -> "map", `List (List.map safe_map lmap)
-      | e -> e
-    ) l
+    List.map
+      (function
+        | key, `String s when key = "title" -> (key, `String (html s))
+        | key, `String s when key = "desc" -> (key, `String (html s))
+        | "map", `List lmap -> ("map", `List (List.map safe_map lmap))
+        | e -> e)
+      l
   in
+  let json = try Yojson.Basic.from_string s with _ -> `Assoc [] in
   let json =
-    try Yojson.Basic.from_string s
-    with _ -> `Assoc []
-  in
-  let json =
-    match json with
-    | `Assoc l -> `Assoc (safe_json l)
-    | _ -> `Assoc []
+    match json with `Assoc l -> `Assoc (safe_json l) | _ -> `Assoc []
   in
   Yojson.Basic.to_string json
 
