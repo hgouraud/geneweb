@@ -410,6 +410,14 @@ let test_base bname =
     exit 2);
   init_etc bname
 
+let d_portraits_d bname =
+  String.concat Filename.dir_sep [Secure.base_dir (); "images"; bname]
+let portraits_d = ref d_portraits_d
+
+let d_images_d bname =
+  String.concat Filename.dir_sep [Secure.base_dir (); "src"; bname; "images"]
+let images_d = ref d_images_d
+
 (** [wrap_output conf title content]
     Plugins defining a page content but not a complete UI
     may want to wrap their page using [wrap_output].

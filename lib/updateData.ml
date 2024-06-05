@@ -510,6 +510,14 @@ let update_person_list conf base new_input list nb_pers max_updates =
             incr cnt;
             let o_p = Util.string_gen_person base (gen_person_of_person p) in
             let np = update_person conf base old new_input p in
+            (if action = "fn" || action = "sn" then
+             let pi = np.key_index in
+             let op = poi base pi in
+             let sp =
+               Futil.map_person_ps (fun ip -> ip) (fun istr -> sou base istr) np
+             in
+             Image.rename_portrait_and_blason conf base op
+               (sp.first_name, sp.surname, sp.occ));
             patch_person base np.key_index np;
             if test_family then
               Array.iter
