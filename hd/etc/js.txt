@@ -23,18 +23,12 @@
                          sha512-NHHjSaRwEJ7OOPdQlvxa0gYbL9Np67IYbl+yJ3jDCTUxCCGKhCNlX77eacvuKmf4RszZBA8Elh71V26SKmElWA=="
               crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     %end;
-    %if;("NOTES" in e.m)
-      <script src="https://cdn.datatables.net/v/bs4/dt-2.0.8/datatables.min.js"></script>
-    %end;
   %else;
     <script src="%etc_prefix;js/jquery.min.js?version=3.7.1"></script>
     <script src="%etc_prefix;js/bootstrap.bundle.min.js?version=4.6.1"></script>
     %if;(e.m="A" and e.t="")
       <script src="%etc_prefix;js/select2.min.js?version=4.1.0rc"></script>
       <script src="%etc_prefix;js/select2-maximize-height.min.js?version=1.0.4"></script>
-    %end;
-    %if;("NOTES" in e.m)
-      <script src="%etc_prefix;js/select2-maximize-height.min.js?datatables.min.js?version=2.0.8"></script>
     %end;
   %end;
   %if;(e.m="A" and e.t="T" and e.t1="CT")

@@ -13780,6 +13780,10 @@ sl: samo izbrana generacija
 sv: endast den valda generationen
 tr: sadece seçilen nesil
 
+    on this image
+en: on this image
+fr: sur cette image
+
     open individual page
 co: apre a pagina individuale
 de: individuelle Seite öffnen
