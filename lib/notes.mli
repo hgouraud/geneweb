@@ -60,5 +60,5 @@ val source_note_with_env :
     Interprets wiki syntax in a "source" context with a predefined env.
 *)
 
-val json_extract_img : Config.config -> string -> string
+val json_extract_img : Config.config -> string -> string * string
 val safe_gallery : Config.config -> string -> string

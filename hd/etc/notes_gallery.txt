@@ -9,20 +9,14 @@
   <link rel="shortcut icon" href="%image_prefix;favicon_gwd.png">
   <link rel="apple-touch-icon" href="%image_prefix;favicon_gwd.png">
   %include;css
-  <style>
-    .in { background-color: coral; }
-    .list_comma li { display: inline; }
-    .list_comma li:not(:last-child):after { content: ", "; }
-    .list_comma li:last-child:after { content: "."; }
-  </style>
   %include;hed
 </head>
 <body%body_prop;>
-<div class="container-fluid">
+<div class="container-fluid mx-2">
 <div class="small float-right mr-4 mt-2">
   (<a href="%url;&ref=on">[linked pages]</a>)
 </div>
-%(%include;home%)
+%include;home
 <h1 id="h1">Chargement en cours…</h1>
 %if(wizard)
   <div class="small float-right mr-4">

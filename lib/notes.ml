@@ -139,18 +139,20 @@ let json_extract_img conf s =
   let path, img = match json with `Assoc l -> extract l | _ -> (None, None) in
   match (path, img) with
   | Some path, Some img -> (
-      match path with
-      | "doc" -> (Util.commd conf :> string) ^ "m=DOC&s=" ^ img
-      | "private" -> (
-          match List.assoc_opt "gallery_path_private" conf.base_env with
-          | Some s -> s ^ img
-          | None -> "")
-      | "public" -> (
-          match List.assoc_opt "gallery_path" conf.base_env with
-          | Some s -> s ^ img
-          | None -> "")
-      | path -> path ^ img)
-  | _ -> ""
+      let full_path = match path with
+        | "doc" -> (Util.commd conf :> string) ^ "m=DOC&s=" ^ img
+        | "private" -> (
+            match List.assoc_opt "gallery_path_private" conf.base_env with
+            | Some s -> s ^ img
+            | None -> "")
+        | "public" -> (
+            match List.assoc_opt "gallery_path" conf.base_env with
+            | Some s -> s ^ img
+            | None -> "")
+        | path -> path ^ img
+      in
+      (full_path, img))
+  | _ -> ("", "")
 
 let safe_gallery conf s =
   let html s = Util.string_with_macros conf [] s in

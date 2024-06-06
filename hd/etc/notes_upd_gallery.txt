@@ -35,9 +35,9 @@
 </head>
 <body%body_prop;>
 <div class="container-fluid">
-%(%include;home%)
+%include;home
 
-<h1 class="mt-1">Éditeur d’image réactives%( TODO: TRANSLATE ME%)</h1>
+<h1 class="mt-1 ml-2">Éditeur d’image réactives%( TODO: TRANSLATE ME%)</h1>
 
 <div id="fd_error"></div>
 

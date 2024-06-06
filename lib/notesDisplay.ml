@@ -242,7 +242,7 @@ let linked_page_rows conf base pg =
            (Utf8.capitalize_fst (transl conf "base wizard notes")))
 
 let print_linked_list_gallery conf base pgl =
-  Wserver.printf "<div class=\"flex_gallery\">\n";
+  Wserver.printf "<div class=\"d-flex flex-wrap\">\n";
   List.iter
     (fun pg ->
       match pg with
@@ -250,12 +250,15 @@ let print_linked_list_gallery conf base pgl =
           let nenv, s = read_notes base fnotes in
           if (try List.assoc "TYPE" nenv with Not_found -> "") = "gallery"
           then
+            let img_url, img_name = Notes.json_extract_img conf s in
             Wserver.printf
-              "<div class=\"item_gallery\"><a href=\"%sm=NOTES&f=%s&\"><img \
-               src=\"%s\"></a></div>\n"
+              "<div class=\"item_gallery\"><a href=\"%sm=NOTES&f=%s\"><img \
+               src=\"%s\" title=\"%s | %s\"></a></div>\n"
               (commd conf :> string)
               fnotes
-              (Notes.json_extract_img conf s)
+              img_url
+              fnotes
+              img_name
       | _ -> ())
     pgl;
   Wserver.printf "</div>\n"
