@@ -1715,6 +1715,18 @@ tr: etkinleştir/kaldır
 en: suppress this path
 fr: supprimer ce chemin
 
+    group/groups
+en: group/groups
+fr: groupe/groupes
+
+    group label
+en: group label
+fr: nom du groupe
+
+    add new group
+en: add new group
+fr: ajouter un nouveau groupe
+
     add
 af: byvoeg
 bg: добавяне на
