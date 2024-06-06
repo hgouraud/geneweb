@@ -138,8 +138,9 @@ let json_extract_img conf s =
   let json = try Yojson.Basic.from_string s with _ -> `Null in
   let path, img = match json with `Assoc l -> extract l | _ -> (None, None) in
   match (path, img) with
-  | Some path, Some img -> (
-      let full_path = match path with
+  | Some path, Some img ->
+      let full_path =
+        match path with
         | "doc" -> (Util.commd conf :> string) ^ "m=DOC&s=" ^ img
         | "private" -> (
             match List.assoc_opt "gallery_path_private" conf.base_env with
@@ -151,7 +152,7 @@ let json_extract_img conf s =
             | None -> "")
         | path -> path ^ img
       in
-      (full_path, img))
+      (full_path, img)
   | _ -> ("", "")
 
 let safe_gallery conf s =
@@ -217,10 +218,11 @@ let commit_notes conf base fnotes s =
       [ base_notes_dir base; fname ]
   in
   Mutil.mkdir_p (Filename.dirname fpath);
-  try Gwdb.commit_notes base fname s with Sys_error m ->
+  try Gwdb.commit_notes base fname s
+  with Sys_error m ->
     Hutil.incorrect_request conf ~comment:("explication todo: " ^ m);
-  History.record conf base (Def.U_Notes (p_getint conf.env "v", fnotes)) "mn";
-  update_notes_links_db base pg s
+    History.record conf base (Def.U_Notes (p_getint conf.env "v", fnotes)) "mn";
+    update_notes_links_db base pg s
 
 let wiki_aux pp conf base env str =
   let s = Util.string_with_macros conf env str in

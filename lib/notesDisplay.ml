@@ -255,10 +255,7 @@ let print_linked_list_gallery conf base pgl =
               "<div class=\"item_gallery\"><a href=\"%sm=NOTES&f=%s\"><img \
                src=\"%s\" title=\"%s | %s\"></a></div>\n"
               (commd conf :> string)
-              fnotes
-              img_url
-              fnotes
-              img_name
+              fnotes img_url fnotes img_name
       | _ -> ())
     pgl;
   Wserver.printf "</div>\n"
@@ -315,8 +312,8 @@ let print conf base =
         try
           let typ = List.assoc "TYPE" nenv in
           let fname = "notes_" ^ typ in
-          Util.open_etc_file conf fname, typ
-        with Not_found -> None, ""
+          (Util.open_etc_file conf fname, typ)
+        with Not_found -> (None, "")
       in
       match templ with
       | Some (ic, _fname) -> (
