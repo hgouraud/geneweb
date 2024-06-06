@@ -296,7 +296,13 @@ $(document).ready(function() {
           //$("#grp_table").append(g_row(name, labl));
           table_grp.row(grp-1).node().id = "g" + grp;
         } );
-        }
+
+       json.groups.forEach( function( r ) {
+          var grp = get(r.name);
+          var labl = get(r.label);
+          $("#group_labels").append(grp + " : " +labl + "\n");
+       });
+    }
   } );
 
   table = $('#map_table').DataTable( {
@@ -520,12 +526,6 @@ zh: Chinese
          // Make sure we can find the row in table
          table.row(cnt-1).node().id = "row" + cnt;
        });
-
-       json.groups.forEach( function( r ) {
-          var grp = get(r.name);
-          var labl = get(r.label);
-          $("#group_labels").append(grp + " : " +labl + "\n");
-       });
     }
   } );
 
@@ -688,7 +688,8 @@ zh: Chinese
       "desc": $("#page_desc").val(),
       "path": $("input[name=path]:checked").val(),
       "img": $("#fname").val(),
-      "map": table.rows().data().toArray()
+      "map": table.rows().data().toArray(),
+      "groups": table_grp.rows().data().toArray()
     };
     // Cleanup data before to save
     for( i=0, ien=res.map.length ; i < ien ; i++ ) {
