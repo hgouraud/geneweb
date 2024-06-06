@@ -312,8 +312,8 @@ let print conf base =
         try
           let typ = List.assoc "TYPE" nenv in
           let fname = "notes_" ^ typ in
-          (Util.open_etc_file conf fname, typ)
-        with Not_found -> (None, "")
+          Util.open_etc_file conf fname, typ
+        with Not_found -> None, ""
       in
       match templ with
       | Some (ic, _fname) -> (
@@ -362,10 +362,10 @@ let print_mod conf base =
   | Some (ic, _fname), _ -> (
       match p_getenv conf.env "ajax" with
       | Some "on" ->
-          let _s_digest =
+          let s_digest =
             List.fold_left (fun s (k, v) -> s ^ k ^ "=" ^ v ^ "\n") "" env ^ s
           in
-          let digest = "temp" (* FIXME Iovalue.digest s_digest*) in
+          let digest = Mutil.digest s_digest in
           let charset = if conf.charset = "" then "utf-8" else conf.charset in
           Wserver.header
             (Format.sprintf "Content-type: application/json; charset=%s" charset);

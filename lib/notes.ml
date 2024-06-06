@@ -215,7 +215,8 @@ let commit_notes conf base fnotes s =
       [ base_notes_dir base; fname ]
   in
   Mutil.mkdir_p (Filename.dirname fpath);
-  Gwdb.commit_notes base fname s;
+  try Gwdb.commit_notes base fname s with Sys_error m ->
+    Hutil.incorrect_request conf ~comment:("explication todo: " ^ m);
   History.record conf base (Def.U_Notes (p_getint conf.env "v", fnotes)) "mn";
   update_notes_links_db base pg s
 

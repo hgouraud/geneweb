@@ -1,3 +1,4 @@
+<!-- $Id: notes_upd.txt v7.1 06/06/2024 05:51:09 $ -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,8 +6,8 @@
   <meta name="robots" content="none">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png">
-  <link rel="apple-touch-icon" href="%image_prefix;/favicon_gwd.png">
+  <link rel="shortcut icon" href="%image_prefix;favicon_gwd.png">
+  <link rel="apple-touch-icon" href="%image_prefix;favicon_gwd.png">
   %include;css
   <style>
     .in { background-color: coral; }
@@ -19,16 +20,15 @@
 <body%body_prop;>
 <div class="container-fluid">
 <div class="small float-right mr-4 mt-2">
-  (<a href="%url;ref=on">[linked pages]</a>)
+  (<a href="%url;&ref=on">[linked pages]</a>)
 </div>
-%include;home
+%(%include;home%)
 <h1 id="h1">Chargement en cours…</h1>
 %if(wizard)
   <div class="small float-right mr-4">
-    (<a href="%prefix;m=MOD_NOTES&f=%evar.f;">[modify]</a>)
+    (<a href="%prefix;m=MOD_NOTES&f=%e.f;">[modify]</a>)
   </div>
 %end;
-
 <div id="description"></div>
 
 <map id="map" name="map"></map>
@@ -48,7 +48,7 @@
 
 </div>
 %include;js
-<script src="%if(cgi)%bvar.static_path;%end;js/jquery.maphilight.js"></script>
+<script src="%etc_prefix;js/jquery.maphilight.js"></script>
 <script>
 function get( v ) {
   if( typeof v !== "undefined" ) {
@@ -59,10 +59,10 @@ function get( v ) {
 }
 
 var doc_path="%prefix;m=DOC&s=";
-var public_path="%bvar.gallery_path;";
-var private_path="%bvar.gallery_path_private;";
+var public_path="%b.gallery_path;";
+var private_path="%b.gallery_path_private;";
 $(document).ready(function() {
-  $.ajax( "%url;ajax=on" )
+  $.ajax( "%url;&ajax=on" )
   .done( function( json ) {
     $("#h1").html( json.title );
     $("#description").html( json.desc );

@@ -404,19 +404,6 @@
               %end;
             </div>
           </li>
-          %( TODO: merge with new notes button nearly identical %)
-          <li class="nav-item">
-            <a class="nav-link" href="%prefix;m=LINKED;%access;&type=" title="[*linked pages]">
-              <span class="fa fa-book fa-fw" aria-hidden="true"></span>
-              <span class="small align-top"><sup>%nb_linked_pages_type.;</sup></span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="%prefix;m=LINKED;%access;&type=gallery" title="[*linked pages]">
-              <span class="fa fa-images fa-fw" aria-hidden="true"></span>
-              <span class="small align-top"><sup>%nb_linked_pages_type.gallery;</sup></span>
-            </a>
-          </li>
           %( SND_IMAGE_C carrousel button %)
           %if;(carrousel_img_nbr>0)
             <li class="nav-item">
@@ -440,10 +427,17 @@
           %if;has_linked_pages;
             <li class="nav-item">
               <a class="nav-link text-secondary" href="%url_set.m.LINKED;"
-                title="%linked_pages_nbr; [linked pages]">
+                title="[*visualize/show/hide/summary]1 [linked pages]">
                 <i class="fa fa-file-lines fa-fw mr-1" aria-hidden="true"></i>%nn;
                 <sup class="small">%linked_pages_nbr;</sup>%nn;
                 <span class="sr-only">file-lines icon</span>%nn;
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-secondary" href="%url_set.m_type.LINKED_gallery"
+                title="[*visualize/show/hide/summary]1 “imagemap” [*linked pages]%( TODO: TRANSLATION %)">
+                <i class="fa fa-images fa-fw mr-1" aria-hidden="true"></i>
+                <sup class="small">%nb_linked_pages_type.gallery;</sup>
               </a>
             </li>
           %end;
