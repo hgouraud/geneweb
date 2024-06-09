@@ -117,6 +117,7 @@ module Default = struct
       let space = match String.index_from_opt key dot ' ' with Some i -> i | _ -> -1 in
       let plus = match String.index_from_opt key dot '+' with Some i -> i | _ -> -1 in
       let sep = if space > 0 then space else if plus > 0 then plus else -1 in
+      Printf.eprintf "Key: %d, %d, (%s)\n" dot sep key;
       if dot >= 0 && sep > 0 then
         ( String.sub key 0 dot,
           String.sub key (dot + 1) (sep - dot - 1),
