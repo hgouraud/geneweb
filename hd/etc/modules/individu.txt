@@ -423,16 +423,15 @@
     %if;(b.show_invisible = "on" or true)
       <a href="%if;(b.http_mode="https" and cgi)%b.commd;?b=roglo&%else;%b.Base_Wiz;_f?%end;%nn;
          lang=%e.lang;&%if;(e.templ!="")templ=%e.templ;&%end;i=%index;&oc=%occ;"
-         title="Pour les %if;(b.http_mode="https" and cgi)visiteurs%else;amis%end;
-         cette personne est :
+         title="Pour les amis et visiteurs cette personne est :
           %if;is_private;
-            Privé%nn;
+            Privé (invisible pour les deux)
           %elseif;is_semi_public;
-            SemiPublic%nn;
+            SemiPublic (visible pour les amis, invisible pour les visiteurs)
           %elseif;is_visible;
-            Visible%nn;
+            Visible (pour les deux)
           %else;
-            Invisible%nn;
+            Invisible (nom/prénom seuls pour les amis, invisible pour les visiteurs)
           %end;">
       %if;is_private;
         <i class="fa fa-user fa-xs text-danger mr-1"></i>%nn;

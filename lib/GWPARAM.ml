@@ -114,11 +114,13 @@ module Default = struct
   let is_semi_public conf base p =
     let split_key key =
       let dot = match String.index_opt key '.' with Some i -> i | _ -> -1 in
-      let space = match String.index_opt key ' ' with Some i -> i | _ -> -1 in
-      if dot <> -1 && space <> -1 then
+      let space = match String.index_from_opt key dot ' ' with Some i -> i | _ -> -1 in
+      let plus = match String.index_from_opt key dot '+' with Some i -> i | _ -> -1 in
+      let sep = if space > 0 then space else if plus > 0 then plus else -1 in
+      if dot >= 0 && sep > 0 then
         ( String.sub key 0 dot,
-          String.sub key (dot + 1) (space - dot - 1),
-          String.sub key (space + 1) (String.length key - space - 1) )
+          String.sub key (dot + 1) (sep - dot - 1),
+          String.sub key (sep + 1) (String.length key - sep - 1) )
       else ("?", "", "?")
     in
     let fn, oc, sn = split_key conf.Config.userkey in
@@ -150,7 +152,6 @@ module Default = struct
       - Vrai si : la personne s'est mariée depuis plus de private_years
       - Faux dans tous les autres cas *)
   (* check that p is parent or descendant of conf.key *)
-
   let p_auth conf base p =
     conf.Config.wizard
     (* is_semi_public takes into account ancestors and descendants *)
