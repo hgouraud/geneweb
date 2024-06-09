@@ -3571,7 +3571,7 @@ and eval_bool_person_field conf base env (p, p_auth) = function
       not (authorized_age conf base p)
   | "is_visible" ->
       let conf = { conf with wizard = false; friend = false } in
-      (authorized_age conf base p)
+      authorized_age conf base p
   | "is_male" -> get_sex p = Male
   | "is_private" -> get_access p = Private
   | "is_public" -> Util.is_public conf base p
