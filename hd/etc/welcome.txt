@@ -280,7 +280,7 @@ en: Around the tree
 fr: Autour de l'arbre
 ]   </div>
     <div class="d-inline-flex justify-content-lg-center">
-      %if;((wizard or friend) and (plugin.forum and b.disable_forum!="yes"))
+      %if;(plugin.forum and b.disable_forum!="yes")
         <a class="btn  btn-outline-primary mr-1"
           href="%prefix;m=FORUM"><i class="far fa-comments fa-fw mr-1" aria-hidden="true"></i>[*forum]</a>
       %end;
