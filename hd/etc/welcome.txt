@@ -301,7 +301,7 @@ fr: Autour de l'arbre
       %if;has_misc_notes;
         <a role="button" class="btn btn-outline-primary mr-1"
 %(          href="%prefix;m=MISC_NOTES"><i class="fas fa-align-justify fa-fw mr-1" aria-hidden="true"></i>[*base index notes]</a> %)
-          href="%prefix;m=MISC_NOTES"><i class="fas fa-align-justify fa-fw mr-1" aria-hidden="true"></i>Encyclopédie Roglo</a>
+          href="%prefix;m=NOTES&f=0_Sommaire_des_notes_diverses"><i class="fas fa-align-justify fa-fw mr-1" aria-hidden="true"></i>Encyclopédie Roglo</a>
       %end;
 %(      %if;((wizard or friend) and
           (b.wizard_passwd_file!="" or b.wizard_descr_file!=""))
