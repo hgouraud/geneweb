@@ -71,7 +71,7 @@
       %if;(b.welcome_logo!="")
         <img src="%prefix;m=IM;s=%b.welcome_logo;"
            style="%if;(b.welcome_logo_style!="")%b.welcome_logo_style;%end; width:200px"
-           alt="MyBase" title="MyBase">
+           alt="Logo MyBase" title="Logo MyBase">
       %else;
         <img src="%images_prefix;gwlogo.png" alt="GeneWeb" title="GeneWeb" style="width:200px">
       %end;

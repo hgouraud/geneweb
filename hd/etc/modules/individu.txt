@@ -1,4 +1,4 @@
-<!-- $Id: modules/individu.txt v7.1 27/03/2024 07:42:02 $ -->
+<!-- $Id: modules/individu.txt Roglo v7.1 12/06/2024 07:42:02 $ -->
 %( options
 0: skip
 1: standard
@@ -420,9 +420,9 @@
          title="Chemin le plus court entre moi et cette personne">
       <i class="fa fa-link fa-xs" style="color:green"></i></a>
     %end;
-    %if;(b.show_invisible = "on" or true)
-      <a href="%if;(b.http_mode="https" and cgi)%b.commd;?b=roglo&%else;%b.Base_Wiz;_f?%end;%nn;
-         lang=%e.lang;&%if;(e.templ!="")templ=%e.templ;&%end;i=%index;&oc=%occ;"
+    %if;(b.show_invisible = "on" or wizard)
+      <a href="%if;(base.name="wizard")%b.Base_Amis;_f%else;%b.Base_Wiz;_w%end;?%nn;
+         lang=%e.lang;&%if;(e.templ!="")templ=%e.templ;&%end;i=%index;"
          title="Pour les amis et visiteurs cette personne est :
           %if;is_private;
             Privé (invisible pour les deux)
