@@ -423,13 +423,13 @@
     %if;(b.show_invisible = "on" or wizard)
       <a href="%if;(base.name="wizard")%b.Base_Amis;_f%else;%b.Base_Wiz;_w%end;?%nn;
          lang=%e.lang;&%if;(e.templ!="")templ=%e.templ;&%end;i=%index;"
-         title="Pour les amis et visiteurs cette personne est :
+         title="Visibilité :%sp;%nn;
           %if;is_private;
-            Privé (invisible pour les deux)
+            Privé (invisible pour les amis et visiteurs)
           %elseif;is_semi_public;
             SemiPublic (visible pour les amis, invisible pour les visiteurs)
           %elseif;is_visible;
-            Visible (pour les deux)
+            Visible (pour les amis et visiteurs)
           %else;
             Invisible (nom/prénom seuls pour les amis, invisible pour les visiteurs)
           %end;">

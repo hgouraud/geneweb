@@ -132,15 +132,16 @@ module Default = struct
       else ("?", "", "?")
     in
     if conf.Config.userkey = "" then false
+    else if Gwdb.get_access p = SemiPublic then true
     else
       let fn, oc, sn = split_key conf.Config.userkey in
       match
         Gwdb.person_of_key base fn sn (if oc = "" then 0 else int_of_string oc)
       with
       | Some ip1 ->
+          (* I (ip1) am semi_public and p is a descendant or ancestor *)
           Gwdb.get_access (Gwdb.poi base ip1) = SemiPublic
-          && (Gwdb.get_access p = Public
-             || is_ancestor conf base p (Gwdb.poi base ip1)
+          && ( is_ancestor conf base p (Gwdb.poi base ip1)
              || is_ancestor conf base (Gwdb.poi base ip1) p)
       | _ -> false
 
