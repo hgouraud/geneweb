@@ -141,7 +141,7 @@ module Default = struct
       | Some ip1 ->
           (* I (ip1) am semi_public and p is a descendant or ancestor *)
           Gwdb.get_access (Gwdb.poi base ip1) = SemiPublic
-          && ( is_ancestor conf base p (Gwdb.poi base ip1)
+          && (is_ancestor conf base p (Gwdb.poi base ip1)
              || is_ancestor conf base (Gwdb.poi base ip1) p)
       | _ -> false
 

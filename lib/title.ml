@@ -206,12 +206,14 @@ let select_place conf base place =
     (Gwdb.ipers base);
   (!list, !clean_name)
 
-let select_all proj conf base =
+let select_all proj conf base ini =
   Gwdb.Collection.fold
     (fun acc i ->
       let x = pget conf base i in
       List.fold_left
-        (fun s t -> StrSet.add (sou base (proj t)) s)
+        (fun s t ->
+          let str = sou base (proj t) in
+          if Mutil.start_with ini 0 str then StrSet.add str s else s)
         acc (nobtit conf base x))
     StrSet.empty (Gwdb.ipers base)
   |> StrSet.elements
@@ -237,4 +239,6 @@ let select_all2 proj conf base =
   Hashtbl.fold (fun s cnt list -> (s, !cnt) :: list) ht []
 
 let select_all_titles = select_all2 (fun t -> t.t_ident)
-let select_all_places = select_all (fun t -> t.t_place)
+
+let select_all_places conf base ini =
+  select_all (fun t -> t.t_place) conf base ini
