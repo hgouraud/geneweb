@@ -70,10 +70,10 @@
   <div class="d-none d-lg-block col-md-2 order-md-1">
       %if;(b.welcome_logo!="")
         <img src="%prefix;m=IM;s=%b.welcome_logo;"
-           style="%if;(b.welcome_logo_style!="")%b.welcome_logo_style;%end; width:200px"
+           style="%if;(b.welcome_logo_style!="")%b.welcome_logo_style;%else;width:200px%end;"
            alt="Logo MyBase" title="Logo MyBase">
       %else;
-        <img src="%images_prefix;gwlogo.png" alt="GeneWeb" title="GeneWeb" style="width:200px">
+        <img src="%images_prefix;logo-roglo.png" alt="Logo Roglo" title="GeneWeb" style="width:100px">
       %end;
   
     <div class="flex-fill align-self-md-center h6">
