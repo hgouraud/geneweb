@@ -217,7 +217,8 @@ let clean_saved_portrait file =
   let file = Filename.remove_extension file in
   Array.iter
     (fun ext -> Mutil.rm (file ^ ext))
-    Image.authorized_image_file_extension
+    Image.ext_list_1
+
 
 let get_extension conf saved fname =
   let f =
@@ -733,6 +734,14 @@ let effective_delete_c_ok ?(portrait = true) conf base p =
     try List.assoc "delete" conf.env = Adef.encoded "on"
     with Not_found -> false
   in
+  let saved =
+    try List.assoc "saved" conf.env = Adef.encoded "on"
+    with Not_found -> false
+  in
+
+  Printf.eprintf "effective delete m=%s, d=%s, s=%s\n" mode
+    (if delete then "on" else "off")
+    (if saved then "on" else "off");
   let keydir = Image.default_image_filename "portraits" base p in
   let fname =
     if portrait then
@@ -745,7 +754,7 @@ let effective_delete_c_ok ?(portrait = true) conf base p =
           | Ok (s, _size) -> Image.src_to_string s)
       | `Url u -> u
       | `Path p -> if Sys.file_exists p then p else ""
-      | `Empty -> ""
+      | `Empty -> Image.default_image_filename "portraits" base p
     else Image.default_image_filename "blasons" base p
   in
   let file_name =
@@ -753,7 +762,8 @@ let effective_delete_c_ok ?(portrait = true) conf base p =
   in
   let file = if file_name = "" then fname else file_name in
   let dir =
-    if mode = "portraits" then Util.base_path [ "images"; keydir ] conf.bname
+    if mode = "portraits" || mode = "blasons" then
+      Util.base_path [ "images"; ] conf.bname
     else
       String.concat Filename.dir_sep
         [ Util.base_path [ "src" ] conf.bname; "images"; keydir ]
@@ -761,7 +771,16 @@ let effective_delete_c_ok ?(portrait = true) conf base p =
   if not (Sys.file_exists dir) then Mutil.mkdir_p dir;
   (* TODO verify we dont destroy a saved image
       having the same name as portrait! *)
-  if delete then Mutil.rm (String.concat Filename.dir_sep [ dir; "saved"; file ])
+  Printf.eprintf "1 file: %s / %s\n" dir file;
+  let dir0 = if saved then Filename.concat dir "saved" else dir in
+  let full_file = Image.find_file_without_ext (Filename.concat dir0 file ) in
+  Printf.eprintf "full file: %s\n" full_file;
+  let dir1 = Filename.dirname full_file in
+  let file = Filename.basename full_file in
+  Printf.eprintf "2 file: %s / %s\n" dir1 file;
+  if full_file = "" then incorrect conf "empty file name"
+  (* if delete is on, we are talking about saved files *)
+  else if delete then Mutil.rm (Filename.concat dir1 file )
   else if move_file_to_save dir file = 0 then incorrect conf "effective delete";
   let changed =
     U_Delete_image (Util.string_gen_person base (gen_person_of_person p))

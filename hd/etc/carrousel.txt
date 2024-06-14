@@ -196,10 +196,10 @@
               href="%if;has_portrait_url;%portrait;%else;%prefix;kch=%random.bits;&m=IM_C&i=%index;"%end;%sp;
               target="_blank" rel="noopener"%sp;
               data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<strong>[*see portrait]</strong><br><span class="small">%portrait;</span>
-                   <br><img class="rounded my-1"
-              src=%if;has_portrait_url;"%portrait;"%else;"%prefix;kch=%random.bits;&m=IM_C&i=%index;%end;"%sp;
-                   width="185px">'>
+              title='<strong>[*see portrait]</strong><br><span class="small">%portrait;</span><br>
+                  <img class="rounded my-1"
+                    src=%if;has_portrait_url;"%portrait;"%else;"%prefix;kch=%random.bits;&m=IM_C&i=%index;%end;"%sp;
+                    width="185px">'>
               <i class="far fa-file-image fa-fw text-primary"></i></a>
           <span class="invisible"><i class="fas fa-retweet fa-rotate-90 fa-fw text-primary"></i></span>
           %if;has_portrait_url;%portrait_name;%else;
@@ -208,10 +208,10 @@
           <a role="button" class="ml-auto col-1"
             href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&idigest=%idigest;"
             data-toggle="tooltip" data-html="true" data-placement="left"
-            title='<i class="far fa-trash-can text-warning mr-1"></i><strong>[*delete portrait]</strong><br><span class="small">%portrait;</span>
-                    <br><img class="rounded my-1"
-            src="%if;has_portrait_url;%portrait;%else;%prefix;kch=%random.bits;&m=IM_C&i=%index;%end;"%sp;
-                 width="185px">'>
+            title='<i class="far fa-trash-can text-warning mr-1"></i><strong>[*delete portrait]</strong><br><span class="small">%portrait;</span><br>
+                <img class="rounded my-1"
+                  src="%if;has_portrait_url;%portrait;%else;%prefix;kch=%random.bits;&m=IM_C&i=%index;%end;"%sp;
+                  width="185px">'>
             <i class="far fa-trash-can text-warning"></i>%nn;</a>
           <a href="%prefix;m=PORTRAIT_TO_BLASON&i=%index;"
             title='[*move portrait to blason]'><i class="fa-solid fa-user-shield text-success"></i></a>
@@ -223,10 +223,10 @@
               href="%if;has_old_portrait_url;%portrait;%else;%prefix;kch=%random.bits;&m=IM_C_S&i=%index;%end;"
               target="_blank" rel="noopener"%sp;
               data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<strong>[*see portrait]</strong><br><span class="small">%portrait_saved</span>
-                   <br><img class="rounded my-1"
-              src="%if;has_old_portrait_url;%portrait_saved;%else;%prefix;kch=%random.bits;&m=IM_C_S&i=%index;%end;"
-                   width="185px">'>
+              title='<strong>[*see portrait]</strong><br><span class="small">%portrait_saved</span><br>
+                  <img class="rounded my-1"
+                    src="%if;has_old_portrait_url;%portrait_saved;%else;%prefix;kch=%random.bits;&m=IM_C_S&i=%index;%end;"
+                    width="185px">'>
               <i class="far fa-file-image fa-fw text-primary"></i></a>
             <a role="button" href="%prefix;m=RESET_IMAGE_C_OK&i=%index;&file_name=%portrait;&idigest=%idigest;"
                title="[*restore portrait saved]">
@@ -238,8 +238,9 @@
             <a role="button" class="ml-auto col-1"
               href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&idigest=%idigest;&delete=on"
               data-toggle="tooltip" data-html="true" data-placement="left"
-               title='<i class="far fa-trash-can text-danger mr-1"></i><strong>[*delete portrait saved]0</strong><br><span class="small">%portrait_saved;</span>
-                      <br><img class="rounded my-1" src="%prefix;m=IM_C_S&i=%index;"
+               title='<i class="far fa-trash-can text-danger mr-1"></i><strong>[*delete portrait saved]0</strong><br><span class="small">%portrait_saved;</span><br>
+                    <img class="rounded my-1"
+                      src="%prefix;m=IM_C_S&i=%index;"
                       width="185px">'>
               <i class="far fa-trash-can text-danger"></i></a>
           </div>
@@ -256,26 +257,26 @@
       <h1 class="display-4">[*coat of arms]0</h1>
       %if;has_blason_self;
         <div class="d-flex mt-1">
-          <a role="button" 
-            href="%if;has_blason_url;%blason;%else;%prefix;kch=%random.bits;&m=FIM_C&i=%index;%end;"%sp;
+          <a role="button"%sp;
+            href="%if;has_blason_url;%blason;%else;%prefix;kch=%random.bits;&m=FIM_C&i=%index;&mode=blasons%end;"%sp;
             target="_blank" rel="noopener"%sp;
             data-toggle="tooltip" data-html="true" data-placement="left"
-            title='<strong>[*see coat of arms]</strong><br><span class="small">%blason;</span>
-                 <br><img class="rounded my-1"
-            src="%if;has_portrait_url;%blason;%else;%prefix;kch=%random.bits;&m=FIM_C&i=%index;%end;"%sp;
-                 width="185px">'>
+            title='<strong>[*see coat of arms]</strong><br><span class="small">%blason;</span><br>
+                <img class="rounded my-1"
+                  src="%if;has_blason_url;%blason;%else;%prefix;kch=%random.bits;&m=FIM_C&i=%index;%end;"%sp;
+                  width="185px">'>
             <i class="far fa-file-image fa-fw text-primary"></i>
           </a>
           <span class="invisible"><i class="fas fa-retweet fa-rotate-90 fa-fw text-primary"></i></span>
           <strong><samp class="text-truncate">%portraits_store;%X;</samp></strong><samp>%nn;%if;has_blason_url;%carrousel;.url%else;%blason_name;%end;</samp>
-          <a role="button" class="ml-auto col-1"  href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&fdigest=%idigest;"
-            data-toggle="tooltip" data-html="true" data-placement="left"
-            title='<i class="far fa-trash-can text-warning mr-1"></i><strong>[*delete coat of arms]</strong><br><span class="small">%blason;</span>
-                  <br><img class="rounded my-1"
-            src="%if;has_blason_url;%blason;%else;%prefix;kch=%random.bits;&m=FIM_C&i=%index;%end;"%sp;
-                 width="185px">'>
+          <a role="button" class="ml-auto col-1"  href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=blasons&fdigest=%idigest;"%sp;
+            data-toggle="tooltip" data-html="true" data-placement="left"%sp;
+            title='<i class="far fa-trash-can text-warning mr-1"></i><strong>[*delete coat of arms]</strong><br><span class="small">%blason;</span><br>
+                <img class="rounded my-1"
+                  src="%if;has_blason_url;%blason;%else;%prefix;kch=%random.bits;&m=FIM_C&i=%index;&mode=blasons%end;"%sp;
+                  width="185px">'>
           <i class="far fa-trash-can text-warning"></i>%nn;</a> 
-          <a href="%prefix;m=BLASON_UP_ONE&i=%index;" title='[*move coat of arms to father]'>
+          <a href="%prefix;m=BLASON_UP_ONE&i=%index;&mode=blason" title='[*move coat of arms to father]'>
             <i class="fa-solid fa-shield text-warning"></i><i class="fa-arrow-turn-up text-warning"></i>
           </a>
         </div>
@@ -283,50 +284,52 @@
       <div class="d-flex mt-1">
         <span class="invisible"><i class="fas fa-retweet fa-rotate-90 fa-fw text-primary"></i></span>
         [stops to use coat of arms of]0&nbsp;<a  href="%prefix;%blason_owner.access;" %nn; class="%if;(blason_owner.sex=0)male%elseif;(blason_owner.sex=1)female%else;neuter%end;-underline">%blason_owner;</a>%nn;
-        <a role="button" class="ml-auto col-1"  href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&fdigest=%idigest;"
+        <a role="button" class="ml-auto col-1"  href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=blasons&fdigest=%idigest;"
            data-toggle="tooltip" data-html="true" data-placement="left">
           <i class="far fa-trash-can text-warning"></i>%nn;</a> 
       </div>
       %elseif;has_blason;
       <div class="d-flex mt-1">
-        <a role="button" 
-          href="%if;has_blason_url;%blason;%else;%prefix;kch=%random.bits;&m=FIM_C&i=%index;%end;"%sp;
+        <a role="button"%sp;
+          href="%if;has_blason_url;%blason;%else;%prefix;kch=%random.bits;&m=FIM_C&i=%index;&mode=blasons%end;"%sp;
           target="_blank" rel="noopener"%sp;
-          data-toggle="tooltip" data-html="true" data-placement="left"
-          title='<strong>[*see coat of arms]</strong><br><span class="small">%blason;</span>
-               <br><img class="rounded my-1"
-          src=%if;has_portrait_url;"%blason;"%else;"%prefix;kch=%random.bits;&m=FIM_C&i=%index;"%end;%sp;
-               width="185px">'>
+          data-toggle="tooltip" data-html="true" data-placement="left"%sp;
+          title='<strong>[*see coat of arms]</strong><br><span class="small">%blason;</span><br>
+              <img class="rounded my-1"%sp;
+                src="%if;has_portrait_url;%blason;%else;%prefix;kch=%random.bits;&m=FIM_C&i=%index;%end;"%sp;
+                width="185px">'>
           <i class="far fa-file-image fa-fw text-primary"></i>
         </a>
         <span class="invisible"><i class="fas fa-retweet fa-rotate-90 fa-fw text-primary"></i></span>
         [use coat of arms of]0&nbsp;<a  href="%prefix;%blason_owner.access;" %nn; class="%if;(blason_owner.sex=0)male%elseif;(blason_owner.sex=1)female%else;neuter%end;-underline">%blason_owner;</a>%nn;
-        <a role="button" class="ml-auto col-1"  href="%prefix;m=BLASON_STOP&i=%index;"
+        <a role="button" class="ml-auto col-1"  href="%prefix;m=BLASON_STOP&i=%index;&mode=blasons"%sp;
            data-toggle="tooltip" data-html="true" data-placement="left">
           <i class="fa-solid fa-xmark text-warning"></i>%nn;</a> 
       </div>
       %end;
       %if;has_old_blason;
         <div class="d-flex mt-1">
-          <a role="button" 
-            href="%if;has_old_blason_url;%blason;%else;%prefix;kch=%random.bits;&m=FIM_C_S&i=%index;%end;"
+          <a role="button"%sp;
+            href="%if;has_old_blason_url;%blason_saved;%else;%prefix;kch=%random.bits;&m=FIM_C&i=%index;&mode=blasons%end;"%sp;
             target="_blank" rel="noopener"%sp;
-            data-toggle="tooltip" data-html="true" data-placement="left"
-            title='<strong>[*see coat of arms]</strong><br><span class="small">%blason_saved</span>
-                 <br><img class="rounded my-1"
-            src="%if;has_old_blason_url;%blason_saved;%else;%prefix;kch=%random.bits;&m=FIM_C_S&i=%index;%end;"
-                 width="185px">'>
-            <i class="far fa-file-image fa-fw text-primary"></i></a>
-          <a role="button" href="%prefix;m=RESET_IMAGE_C_OK&i=%index;&file_name=%portrait;&fdigest=%idigest;"
-             title="[*restore coat of arms saved]">
+            data-toggle="tooltip" data-html="true" data-placement="left"%sp;
+            title='<strong>[*see coat of arms]</strong><br><span class="small">%blason;</span><br>
+                <img class="rounded my-1"%sp;
+                  src="%if;has_old_blason_url;%blason_saved;%else;%prefix;kch=%random.bits;&m=FIM_C&i=%index;%end;"%sp;
+                  width="185px">'>
+            <i class="far fa-file-image fa-fw text-primary"></i>
+          </a>
+          <a role="button" href="%prefix;m=RESET_IMAGE_C_OK&i=%index;&mode=blasons&file_name=%portrait;&fdigest=%idigest;"%sp;
+            title="[*restore coat of arms saved]">
             <i class="fa fa-retweet fa-rotate-90 fa-fw text-success"></i>%nn;</a>
           <strong><samp class="text-truncate">%saved_portraits_store;%X;</samp></strong><samp>
           %if;has_old_blason_url;%carrousel;.url%else;%blason_saved_name;%end;</samp>
-          <a role="button" class="ml-auto col-1" href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&fdigest=%idigest;&delete=on"
-            data-toggle="tooltip" data-html="true" data-placement="left"
-             title='<i class="far fa-trash-can text-danger mr-1"></i><strong>[*delete coat of arms saved]0</strong><br><span class="small">%blason_saved;</span>
-                    <br><img class="rounded my-1" src="%prefix;m=IM_C_S&i=%index;"
-                    width="185px">'>
+          <a role="button" class="ml-auto col-1" href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=blasons&delete=on&fdigest=%idigest;"%sp;
+            data-toggle="tooltip" data-html="true" data-placement="left"%sp;
+            title='<strong>[*delete coat of arms saved]0</strong><br><span class="small">%blason_saved;</span><br>
+                <img class="rounded my-1"%sp;
+                  src="%if;has_old_blason_url;%blason_saved;%else;%prefix;kch=%random.bits;&m=FIM_C_S&i=%index;%end;"%sp;
+                  width="185px">'>
             <i class="far fa-trash-can text-danger"></i></a>
         </div>
       %end;
@@ -349,12 +352,11 @@
             <a role="button"
               href="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C&i=%index;&s=%carrousel_img;%end;"
               target="_blank" rel="noopener" data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<strong><i class="fas fa-images fa-xs mr-1"></i>[*see] [image/images]0</strong>
-                     <br><span class="small">%carrousel_img;</span>
-                     <br><img class="rounded my-1"
-              src="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C&i=%index;&s=%carrousel_img;%end;"
-                     width="185px">
-                     '>
+              title='<strong><i class="fas fa-images fa-xs mr-1"></i>[*see] [image/images]0</strong><br>
+                    <span class="small">%carrousel_img;</span><br>
+                    <img class="rounded my-1"
+                      src="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C&i=%index;&s=%carrousel_img;%end;"
+                      width="185px">'>
               <i class="far fa-file-image fa-fw text-primary"></i></a>
             <a role="button" href="#" id="source_%img_cnt;" class="text-%if;(carrousel_img_src="")danger%else;primary%end;"
               onclick='get_source(%img_cnt;, "%carrousel_img;"); return false;' data-source="%carrousel_img_src;"
@@ -375,11 +377,11 @@
               <a role="button"
                 href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&file_name=%carrousel_img;&mode=others&idigest=%idigest;"
                 data-toggle="tooltip" data-html="true" data-placement="left"
-                title='<i class="far fa-trash-can text-warning mr-1"></i><strong>[*delete image]</strong>
-                       <br><span class="small">%carrousel_img;</span>
-                       <br><img class="rounded my-1"
-                src="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C&i=%index;&s=%carrousel_img;%end;"
-                width="185px">'>
+                title='<i class="far fa-trash-can text-warning mr-1"></i><strong>[*delete image]</strong><br>
+                    <span class="small">%carrousel_img;</span><br>
+                    <img class="rounded my-1"
+                      src="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C&i=%index;&s=%carrousel_img;%end;"
+                      width="185px">'>
                 <i class="far fa-trash-can text-warning"></i></a>
             </div>
           </div>
@@ -397,11 +399,11 @@
             <a role="button"
               href="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;%end;"
               target="_blank" rel="noopener" data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<strong><i class="fas fa-images fa-xs mr-1"></i>[*see] [saved images]0</strong>
-                     <br><span class="small">%carrousel_img;</span>
-                     <br><img class="rounded my-1"
-              src="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;%end;"
-              width="185px">'>
+              title='<strong><i class="fas fa-images fa-xs mr-1"></i>[*see] [saved images]0</strong><br>
+                  <span class="small">%carrousel_img;</span><br>
+                  <img class="rounded my-1"
+                    src="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;%end;"
+                    width="185px">'>
               <i class="far fa-file-image fa-fw text-primary"></i></a>
             <a role="button" href="%prefix;m=RESET_IMAGE_C_OK&i=%index;&mode=others&file_name=%carrousel_img;&idigest=%idigest;"
                %if;(url_in_env!="")%else;data-toggle="tooltip" data-html="true" data-placement="top"%end;
@@ -414,11 +416,11 @@
                   &idigest=%idigest;&file_name=%carrousel_img;&mode=others%nn;
                   &delete=on"%sp;
                 data-toggle="tooltip" data-html="true" data-placement="left"
-                title='<i class="far fa-trash-can text-warning mr-1"></i><strong>[*delete image saved]</strong>
-                         <br><span class="small">%carrousel_img;</span>
-                         <br><img class="rounded my-1"
-                src="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;%end;"
-                width="185px">'>
+                title='<i class="far fa-trash-can text-warning mr-1"></i><strong>[*delete image saved]</strong><br>
+                    <span class="small">%carrousel_img;</span><br>
+                    <img class="rounded my-1"
+                      src="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;%end;"
+                      width="185px">'>
                 <i class="far fa-trash-can text-danger fa-fw text-primary"></i></a>
             </div>
           </div>

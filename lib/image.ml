@@ -29,7 +29,8 @@ let default_image_filename mode base p =
   default_image_filename_of_key mode (p_first_name base p) (p_surname base p)
     (get_occ p)
 
-let authorized_image_file_extension = [| ".jpg"; ".jpeg"; ".png"; ".gif" |]
+let ext_list_1 = [| ".jpg"; ".jpeg"; ".png"; ".gif" |]
+let ext_list_2 = [| ".jpg"; ".jpeg"; ".png"; ".gif"; ".url"; ".stop" |]
 
 let find_img_opt f =
   let exists ext =
@@ -46,9 +47,18 @@ let find_img_opt f =
       match exists ".stop" with
       | Some f -> Some (`Path f)
       | None -> (
-          match Mutil.array_find_map exists authorized_image_file_extension with
+          match Mutil.array_find_map exists ext_list_1 with
           | None -> None
           | Some f -> Some (`Path f)))
+
+let find_file_without_ext f =
+  let exists ext =
+    let fname = f ^ ext in
+    if Sys.file_exists fname then Some fname else None
+  in
+  match Mutil.array_find_map exists ext_list_2 with
+  | None -> ""
+  | Some f -> f
 
 (** [full_image_path mode conf base p] is [Some path] if [p] has a portrait or a blason.
     [path] is a the full path of the file with file extension. *)
@@ -306,11 +316,14 @@ let has_blason conf base p self =
   | Some (`Url _u) -> true
 
 let has_blason_stop conf base p =
-  match get_blason conf base p true with
-  | None -> false
-  | Some (`Path p) when Filename.extension p = ".stop" -> true
-  | Some (`Path _p) -> false
-  | Some (`Url _u) -> false
+  if has_access_to_image "blasons" conf base p then
+    match
+      src_of_string conf (path_str (full_image_path "blasons" conf base p))
+    with
+    | `Src_with_size_info s when Filename.extension s = ".stop" -> true
+    | `Path p when Filename.extension p = ".stop" -> true
+    | _ -> false
+  else false
 
 let get_blason_owner conf base p =
   if has_access_to_image "blasons" conf base p then
@@ -491,7 +504,7 @@ let get_carrousel_img_aux conf base p old =
             if
               f1 <> ""
               && f1.[0] <> '.'
-              && (Array.mem ext authorized_image_file_extension || ext = ".url")
+              && (Array.mem ext ext_list_1 || ext = ".url")
             then
               match get_carrousel_img f1 with
               | None -> acc

@@ -3,8 +3,11 @@ open Gwdb
 
 val portrait_folder : config -> string
 val carrousel_folder : config -> string
-val authorized_image_file_extension : string array
+val ext_list_1 : string array
+val ext_list_2 : string array
 val get_dir_name : string -> string -> string
+
+val find_file_without_ext : string -> string
 
 val src_of_string :
   config ->
