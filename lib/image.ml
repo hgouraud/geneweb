@@ -56,9 +56,12 @@ let find_file_without_ext f =
     let fname = f ^ ext in
     if Sys.file_exists fname then Some fname else None
   in
-  match Mutil.array_find_map exists ext_list_2 with
-  | None -> ""
-  | Some f -> f
+  let ext = Filename.extension f in
+  if Array.mem ext ext_list_2 then f
+  else
+    match Mutil.array_find_map exists ext_list_2 with
+    | None -> ""
+    | Some f -> f
 
 (** [full_image_path mode conf base p] is [Some path] if [p] has a portrait or a blason.
     [path] is a the full path of the file with file extension. *)

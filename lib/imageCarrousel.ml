@@ -219,7 +219,7 @@ let clean_saved_portrait file =
     (fun ext -> Mutil.rm (file ^ ext))
     Image.ext_list_1
 
-
+(* TODO merge with Image.file_without_extension *)
 let get_extension conf saved fname =
   let f =
     if saved then
@@ -734,17 +734,10 @@ let effective_delete_c_ok ?(portrait = true) conf base p =
     try List.assoc "delete" conf.env = Adef.encoded "on"
     with Not_found -> false
   in
-  let saved =
-    try List.assoc "saved" conf.env = Adef.encoded "on"
-    with Not_found -> false
-  in
-
-  Printf.eprintf "effective delete m=%s, d=%s, s=%s\n" mode
-    (if delete then "on" else "off")
-    (if saved then "on" else "off");
   let keydir = Image.default_image_filename "portraits" base p in
   let fname =
-    if portrait then
+    match mode with
+    | "portraits" -> (
       match
         Image.src_of_string conf (sou base (get_image p))
       with
@@ -754,13 +747,13 @@ let effective_delete_c_ok ?(portrait = true) conf base p =
           | Ok (s, _size) -> Image.src_to_string s)
       | `Url u -> u
       | `Path p -> if Sys.file_exists p then p else ""
-      | `Empty -> Image.default_image_filename "portraits" base p
-    else Image.default_image_filename "blasons" base p
+      | `Empty -> Image.default_image_filename "portraits" base p)
+    | "blasons" -> (
+      Image.default_image_filename "blasons" base p)
+    | "carrousel" -> (
+      try (List.assoc "file_name" conf.env :> string) with Not_found -> "")
+    | _ -> ""
   in
-  let file_name =
-    try List.assoc "file_name" conf.env |> Mutil.decode with Not_found -> ""
-  in
-  let file = if file_name = "" then fname else file_name in
   let dir =
     if mode = "portraits" || mode = "blasons" then
       Util.base_path [ "images"; ] conf.bname
@@ -771,23 +764,22 @@ let effective_delete_c_ok ?(portrait = true) conf base p =
   if not (Sys.file_exists dir) then Mutil.mkdir_p dir;
   (* TODO verify we dont destroy a saved image
       having the same name as portrait! *)
-  Printf.eprintf "1 file: %s / %s\n" dir file;
-  let dir0 = if saved then Filename.concat dir "saved" else dir in
-  let full_file = Image.find_file_without_ext (Filename.concat dir0 file ) in
-  Printf.eprintf "full file: %s\n" full_file;
-  let dir1 = Filename.dirname full_file in
+  let full_file = Image.find_file_without_ext 
+    (Filename.concat 
+      (if delete then Filename.concat dir "saved" else dir) fname )
+  in
+  let dir = Filename.dirname full_file in
   let file = Filename.basename full_file in
-  Printf.eprintf "2 file: %s / %s\n" dir1 file;
   if full_file = "" then incorrect conf "empty file name"
   (* if delete is on, we are talking about saved files *)
-  else if delete then Mutil.rm (Filename.concat dir1 file )
+  else if delete then Mutil.rm (Filename.concat dir file )
   else if move_file_to_save dir file = 0 then incorrect conf "effective delete";
   let changed =
     U_Delete_image (Util.string_gen_person base (gen_person_of_person p))
   in
   History.record conf base changed
     (if mode = "portraits" then if portrait then "di" else "dc" else "do");
-  file_name
+  fname
 
 let effective_copy_portrait_to_blason conf base p =
   let create_url_file keydir url =
@@ -834,15 +826,14 @@ let effective_reset_c_ok ?(portrait = true) conf base p =
   let mode =
     try (List.assoc "mode" conf.env :> string) with Not_found -> "portraits"
   in
-  let carrousel =
-    if portrait then Image.default_image_filename "portraits" base p
-    else Image.default_image_filename "blasons" base p
-  in
+  let keydir = Image.default_image_filename "portraits" base p in
   let file_name =
-    try List.assoc "file_name" conf.env with Not_found -> Adef.encoded ""
+    match mode with
+    | "portrait" | "blasons" -> Image.default_image_filename "portraits" base p
+    | "carrousel" -> (
+      try (List.assoc "file_name" conf.env :> string) with Not_found -> "")
+    | _ -> ""
   in
-  let file_name = (Mutil.decode file_name :> string) in
-  let file_name = if mode = "portraits" then carrousel else file_name in
   let ext = get_extension conf false file_name in
   let old_ext = get_extension conf true file_name in
   let ext =
@@ -858,20 +849,9 @@ let effective_reset_c_ok ?(portrait = true) conf base p =
         [ Util.base_path [ "images" ] conf.bname; file_name ^ old_ext ]
     else
       String.concat Filename.dir_sep
-        [ Util.base_path [ "src" ] conf.bname; "images"; carrousel; file_name ]
+        [ Util.base_path [ "src" ] conf.bname; "images"; keydir; file_name ]
   in
-  (if Sys.file_exists file_in_new then ()
-  else
-    match
-      if portrait then Image.get_portrait conf base p
-      else Image.get_blason conf base p true
-    with
-    | Some (`Url url) -> (
-        try write_file file_in_new url
-        with _ ->
-          incorrect conf
-            (Printf.sprintf "reset portrait (swap file %s)" file_in_new))
-    | _ -> ());
+    
   swap_files file_in_new ext old_ext;
   let changed =
     U_Send_image (Util.string_gen_person base (gen_person_of_person p))
