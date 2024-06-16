@@ -829,13 +829,16 @@ let effective_reset_c_ok ?(portrait = true) conf base p =
   let keydir = Image.default_image_filename "portraits" base p in
   let file_name =
     match mode with
-    | "portrait" | "blasons" -> Image.default_image_filename "portraits" base p
+    | "portraits" | "blasons" -> Image.default_image_filename "portraits" base p
     | "carrousel" -> (
       try (List.assoc "file_name" conf.env :> string) with Not_found -> "")
-    | _ -> ""
+    | _ -> "xx"
   in
+  Printf.eprintf "before: (%s)\n" file_name;
   let ext = get_extension conf false file_name in
+  Printf.eprintf "get extension: %s\n" file_name;
   let old_ext = get_extension conf true file_name in
+  Printf.eprintf "get extension old: %s\n" file_name;
   let ext =
     match Image.get_portrait conf base p with
     | Some src ->
@@ -844,14 +847,14 @@ let effective_reset_c_ok ?(portrait = true) conf base p =
     | _ -> ext
   in
   let file_in_new =
-    if mode = "portraits" then
+    if mode = "portraits" || mode = "blasons" then
       String.concat Filename.dir_sep
         [ Util.base_path [ "images" ] conf.bname; file_name ^ old_ext ]
     else
       String.concat Filename.dir_sep
         [ Util.base_path [ "src" ] conf.bname; "images"; keydir; file_name ]
   in
-    
+  Printf.eprintf "fine in new: %s\n" file_in_new;
   swap_files file_in_new ext old_ext;
   let changed =
     U_Send_image (Util.string_gen_person base (gen_person_of_person p))
