@@ -15415,7 +15415,7 @@ fr: sauvegardé/sauvegardée
 co: fiura arregistrata/fiure arregistrate
 de: gespeichertes Bild/gespeicherte Bilder
 en: saved image/saved images
-fr: image sauvegardée/images sauvegardées
+fr: sauvegarde/sauvegardes
 
     scale
 co: anni à a generazione

@@ -644,13 +644,16 @@ let effective_send_c_ok ?(portrait = true) conf base p file file_name =
     U_Send_image (Util.string_gen_person base (gen_person_of_person p))
   in
   History.record conf base changed
-    (if mode = "portraits" then if portrait then "si" else "ca"
-    else if file_name <> "" && note <> Adef.safe "" && source <> Adef.safe ""
-   then "sb"
-    else if file_name <> "" then "so"
-    else if note <> Adef.safe "" then "sc"
-    else if source <> Adef.safe "" then "ss"
-    else "sn");
+    (match mode with
+    | "portraits" -> "sp"
+    | "blasons" -> "sb"
+    | "carrousel" ->
+      if file_name <> "" && note <> Adef.safe "" && source <> Adef.safe "" then "s3"
+      else if file_name <> "" then "sf"
+      else if note <> Adef.safe "" then "so"
+      else if source <> Adef.safe "" then "ss"
+      else "sx"
+    | _ -> "s?");
   file_name
 
 (* Delete *)
@@ -727,6 +730,7 @@ let print_del conf base =
 (* if delete=on permanently deletes the file in old folder *)
 
 let effective_delete_c_ok ?(portrait = true) conf base p =
+  let _ = portrait in
   let mode =
     try (List.assoc "mode" conf.env :> string) with Not_found -> "portraits"
   in
@@ -778,7 +782,12 @@ let effective_delete_c_ok ?(portrait = true) conf base p =
     U_Delete_image (Util.string_gen_person base (gen_person_of_person p))
   in
   History.record conf base changed
-    (if mode = "portraits" then if portrait then "di" else "dc" else "do");
+    (match mode with
+    | "portraits" -> "dq"
+    | "blasons" -> "db"
+    | "carrousel" -> "dc"
+    | _ -> "d?"
+    );
   fname
 
 let effective_copy_portrait_to_blason conf base p =
@@ -816,13 +825,14 @@ let effective_copy_portrait_to_blason conf base p =
   let _ = effective_delete_c_ok ~portrait:true conf base p in
   History.record conf base
     (U_Send_image (Util.string_gen_person base (gen_person_of_person p)))
-    "ca";
+    "cb";
   blason_filename
 
 (* carrousel *)
 (* reset portrait or image from old folder to portrait or others *)
 
 let effective_reset_c_ok ?(portrait = true) conf base p =
+  let _ = portrait in
   let mode =
     try (List.assoc "mode" conf.env :> string) with Not_found -> "portraits"
   in
@@ -859,7 +869,13 @@ let effective_reset_c_ok ?(portrait = true) conf base p =
   let changed =
     U_Send_image (Util.string_gen_person base (gen_person_of_person p))
   in
-  History.record conf base changed (if portrait then "ri" else "rc");
+  History.record conf base changed 
+    (match mode with
+    | "portraits" -> "rp"
+    | "blasons" -> "rb"
+    | "carrousel" -> "rc"
+    | _ -> "r?"
+    );
   file_name
 
 (* ************************************************************************** *)
