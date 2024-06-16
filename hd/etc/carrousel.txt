@@ -345,7 +345,7 @@
         <div class="d-flex align-items-center">
           <i class="fa fa-folder-open fa-lg text-warning mx-2" aria-hidden="true"></i>
           <strong><samp class="text-truncate" title="%images_store;%X;%carrousel;">%images_store;%X;%carrousel;%X;</samp></strong>
-          <div class="ml-auto">(%carrousel_img_nbr; %if;(carrousel_img_nbr>1)[image/images]1%else;[image/images]0%end;)</div>
+          <div class="ml-auto">(%carrousel_img_nbr;)</div>
         </div>
         %foreach;img_in_carrousel;
           <div class="d-flex mt-1">
@@ -392,7 +392,7 @@
         <div class="d-flex align-items-center">
           <i class="fa fa-folder-open fa-lg text-warning mx-2" aria-hidden="true"></i>
           <strong><samp class="text-truncate" title="%images_store;%X;%carrousel;%X;saved%X;">%images_store%X;%carrousel;%X;saved%X;</samp></strong>
-          <div class="ml-auto">(%carrousel_old_img_nbr; %if;(carrousel_old_img_nbr>1)[image/images]1%else;[image/images]0%end;)</div>
+          <div class="ml-auto">(%carrousel_old_img_nbr;)</div>
         </div>
         %foreach;img_in_carrousel_old;
           <div class="d-flex mt-1">
