@@ -237,6 +237,8 @@ let is_url str =
 let urlorpath_of_string conf s =
   if is_url s then `Url s
   else if Filename.is_implicit s then
+  (* FIXME basename does not work with sub fodlers *)
+   let s = Filename.basename s in
     match List.assoc_opt "images_path" conf.base_env with
     | Some p when p <> "" -> `Path (Filename.concat p s)
     | Some _ | None ->
@@ -281,20 +283,31 @@ let get_portrait conf base p =
 
 (* if self = true, then do not loop for fathers *)
 let get_blason conf base p self =
+  Printf.eprintf "Image get blason\n";
   if has_access_to_image "blasons" conf base p then
     let rec loop p =
       match
         src_of_string conf (path_str (full_image_path "blasons" conf base p))
       with
-      | `Src_with_size_info s when Filename.extension s = ".stop" -> None
-      | `Src_with_size_info _s as s_info -> (
+      | `Src_with_size_info s when Filename.extension s = ".stop" -> (
+          Printf.eprintf "Src-stop: %s\n" s;
+          None)
+      | `Src_with_size_info s as s_info -> (
+          Printf.eprintf "Src-size: %s\n" s;
           match parse_src_with_size_info conf s_info with
           | Error _e -> None
           | Ok (s, _size) -> Some s)
-      | `Path p when Filename.extension p = ".stop" -> None
-      | `Path p -> Some (`Path p)
-      | `Url u -> Some (`Url u)
+      | `Path p when Filename.extension p = ".stop" -> 
+          Printf.eprintf "Src-size: %s\n" p;
+          None
+      | `Path p -> (
+          Printf.eprintf "Src-size: %s\n" p;
+          Some (`Path p))
+      | `Url u -> (
+          Printf.eprintf "Src-url: %s\n" u;
+          Some (`Url u))
       | `Empty -> (
+          Printf.eprintf "Src-empty\n";
           match get_parents p with
           | Some ifam when not self ->
               let cpl = foi base ifam in
@@ -306,12 +319,14 @@ let get_blason conf base p self =
   else None
 
 let get_blason_name conf base p self =
+  Printf.eprintf "get blason name\n";
   match get_blason conf base p self with
   | Some (`Path p) -> Filename.basename p
   | Some (`Url u) -> u
   | None -> ""
 
 let has_blason conf base p self =
+  Printf.eprintf "has blason \n";
   match get_blason conf base p self with
   | None -> false
   | Some (`Path p) when Filename.extension p = ".stop" -> false
@@ -319,6 +334,7 @@ let has_blason conf base p self =
   | Some (`Url _u) -> true
 
 let has_blason_stop conf base p =
+  Printf.eprintf "has blason stop\n";
   if has_access_to_image "blasons" conf base p then
     match
       src_of_string conf (path_str (full_image_path "blasons" conf base p))
@@ -329,6 +345,7 @@ let has_blason_stop conf base p =
   else false
 
 let get_blason_owner conf base p =
+  Printf.eprintf "get owner blason \n";
   if has_access_to_image "blasons" conf base p then
     let rec loop p =
       match get_parents p with
@@ -347,6 +364,7 @@ let get_blason_owner conf base p =
    - the url to the image as content of a image.url text file
 *)
 let get_old_portrait_or_blason conf base mode p =
+  Printf.eprintf "get old portrait or blason \n";
   if has_access_to_image mode conf base p then
     let key = default_image_filename mode base p in
     let f =
@@ -430,6 +448,7 @@ let get_portrait_with_size conf base p =
   else None
 
 let get_blason_with_size conf base p self =
+  Printf.eprintf "get blason with size\n";
   if has_access_to_image "blasons" conf base p then
     let rec loop p =
       match
