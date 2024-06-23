@@ -13,6 +13,10 @@ let translate_title conf len =
     | Some "src" -> transl_nth conf "source/sources" plural
     | Some "fn" -> transl_nth conf "first name/first names" plural
     | Some "sn" -> transl_nth conf "surname/surnames" plural
+    | Some "alias" -> transl_nth conf "alias/aliases" plural
+    | Some "pubn" -> transl conf "public name"
+    | Some "title" -> transl_nth conf "title/titles" plural
+    | Some "domain" -> transl_nth conf "domain/domains" plural
     | _ -> ""
   in
   (Printf.sprintf (ftransl conf "book of %s") title, title)
@@ -269,8 +273,6 @@ and eval_simple_str_var conf _base env _xx = function
         match String.rindex_opt s '(' with
         | Some i ->
             let part = String.sub s (i + 1) (String.length s - i - 2) in
-            if Mutil.contains s "OEREN" then
-              Printf.eprintf "Part: %s (%s) %d\n" s part (String.length part);
             let part =
               if
                 part.[String.length part - 1] = '\''

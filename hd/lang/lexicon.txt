@@ -17993,6 +17993,14 @@ pt: cronologia
 sv: kronologi
 tr: zaman çizelgesi
 
+    domain/domains
+en: domain/domains
+fr: domaine/domaines
+
+    alias/aliases
+en: alias/aliases
+fr: alias/aliases
+
     title/titles
 af: titel/titels
 bg: титла/титли

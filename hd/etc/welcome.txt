@@ -278,6 +278,14 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
             title="[*modify] %apply;book_of%with;[surname/surnames]1%end;%sp;
               ([wizard/wizards/friend/friends/exterior]0)"><i class="fa fa-signature fa-fw mr-1"></i>[*surname/surnames]1</a>
           <a role="button" class="btn btn-outline-success mr-1" 
+            href="%prefix;m=MOD_DATA&data=alias"
+            title="[*modify] %apply;book_of%with;[alias/aliases]1%end;%sp;
+              ([wizard/wizards/friend/friends/exterior]0)"><i class="fa fa-mask fa-fw mr-1"></i>[*alias/aliases]1</a>
+          <a role="button" class="btn btn-outline-success mr-1" 
+            href="%prefix;m=MOD_DATA&data=pubn"
+            title="[*modify] %apply;book_of%with;[public name]%end;%sp;
+              ([wizard/wizards/friend/friends/exterior]0)"><i class="fa fa-pen fa-fw mr-1"></i>[*public name]</a>
+          <a role="button" class="btn btn-outline-success mr-1" 
             href="%prefix;m=MOD_DATA&data=place"
             title="[*modify] %apply;book_of%with;[place/places]1%end;%sp;
               ([wizard/wizards/friend/friends/exterior]0)"><i class="fa fa-map-location-dot fa-fw mr-1"></i>[*place/places]1</a>
@@ -289,6 +297,14 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
             href="%prefix;m=MOD_DATA&data=src"
             title="[*modify] %apply;book_of%with;[source/sources]1%end;%sp;
               ([wizard/wizards/friend/friends/exterior]0)"><i class="fa fa-box-archive fa-fw mr-1"></i>[*source/sources]1</a>
+          <a role="button" class="btn btn-outline-success" 
+            href="%prefix;m=MOD_DATA&data=title"
+            title="[*modify] %apply;book_of%with;[title/titles]1%end;%sp;
+              ([wizard/wizards/friend/friends/exterior]0)"><i class="fa fa-crown fa-fw mr-1"></i>[*title/titles]1</a>
+          <a role="button" class="btn btn-outline-success" 
+            href="%prefix;m=MOD_DATA&data=domain"
+            title="[*modify] %apply;book_of%with;[domain/domains]1%end;%sp;
+              ([wizard/wizards/friend/friends/exterior]0)"><i class="fa fa-chess-rook fa-fw mr-1"></i>[*domain/domains]1</a>
         </div>
       </div>
     %end;
