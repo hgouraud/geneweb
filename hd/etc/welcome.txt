@@ -282,6 +282,10 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
             title="[*modify] %apply;book_of%with;[alias/aliases]1%end;%sp;
               ([wizard/wizards/friend/friends/exterior]0)"><i class="fa fa-mask fa-fw mr-1"></i>[*alias/aliases]1</a>
           <a role="button" class="btn btn-outline-success mr-1" 
+            href="%prefix;m=MOD_DATA&data=qual"
+            title="[*modify] %apply;book_of%with;[alias/aliases]1%end;%sp;
+              ([wizard/wizards/friend/friends/exterior]0)"><i class="fa fa-comment fa-fw mr-1"></i>[*qualifier/qualifiers]1</a>
+          <a role="button" class="btn btn-outline-success mr-1" 
             href="%prefix;m=MOD_DATA&data=pubn"
             title="[*modify] %apply;book_of%with;[public name]%end;%sp;
               ([wizard/wizards/friend/friends/exterior]0)"><i class="fa fa-pen fa-fw mr-1"></i>[*public name]</a>

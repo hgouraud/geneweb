@@ -83,6 +83,7 @@ let get_data conf =
   | Some "fn" -> ([ get_first_name_x ], [], [], [])
   | Some "sn" -> ([ get_surname_x ], [], [], [])
   | Some "alias" -> ([ get_aliases ], [], [], [])
+  | Some "qual" -> ([ get_qualifiers ], [], [], [])
   | Some "pubn" -> ([ get_public_name_x ], [], [], [])
   | Some "title" -> ([ get_title ], [], [], [])
   | Some "domain" -> ([ get_domain ], [], [], [])
@@ -369,6 +370,14 @@ let update_person conf base old new_input p =
       let new_istr = Gwdb.insert_string base (only_printable new_input) in
       let public_name = new_istr in
       { (gen_person_of_person p) with public_name }
+  | Some "qual" ->
+      let new_istr = Gwdb.insert_string base (only_printable new_input) in
+      let old_qualifiers = get_qualifiers p in
+      let qualifiers =
+        List.map
+          (fun q -> if old = sou base q then new_istr else q) old_qualifiers
+      in
+      { (gen_person_of_person p) with qualifiers }
   | Some "title" ->
       let new_istr = Gwdb.insert_string base (only_printable new_input) in
       let old_titles = get_titles p in
@@ -479,6 +488,7 @@ let update_person_list conf base new_input list nb_pers max_updates =
     | Some "sn" -> "sn"
     | Some "alias" -> "ma"
     | Some "pubn" -> "mu"
+    | Some "qual" -> "mx"
     | Some "title" -> "mt"
     | Some "domain" -> "md"
     | _ -> ""

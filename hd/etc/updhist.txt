@@ -137,6 +137,7 @@
   %elseif;(uu = "ms" or uu = "cs")[modify::source/sources]0%nn;
   %elseif;(uu = "mt")[modify::title/titles]0%nn;
   %elseif;(uu = "mu")[modify::public name]0%nn;
+  %elseif;(uu = "mx")[modify::qualifier/qualifiers]0%nn;
   %elseif;(uu = "rb")[restore::coat of arms]0%nn;
   %elseif;(uu = "rc")[restore::carrousel image]%nn;
   %elseif;(uu = "rp")[restore::portrait]%nn;

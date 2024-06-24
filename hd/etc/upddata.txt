@@ -46,6 +46,7 @@
       %apply;list_of("fn",[first name/first names]1,"child")
       %apply;list_of("sn",[surname/surnames]1,"signature")
       %apply;list_of("alias",[alias/aliases]1,"mask")
+      %apply;list_of("qual",[qualifier/qualifiers]1,"comment")
       %apply;list_of("pubn",[public name],"pen")
       %apply;list_of("place",[place/places]1,"map-location-dot")
       %apply;list_of("occu",[occupation/occupations]1,"user-doctor")

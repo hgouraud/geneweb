@@ -18001,6 +18001,10 @@ fr: domaine/domaines
 en: alias/aliases
 fr: alias/aliases
 
+    qualifier/qualifiers
+en: qualifier/qualifiers
+fr: sobriquet/sobriquets
+
     title/titles
 af: titel/titels
 bg: титла/титли
