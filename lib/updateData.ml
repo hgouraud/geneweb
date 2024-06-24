@@ -375,7 +375,8 @@ let update_person conf base old new_input p =
       let old_qualifiers = get_qualifiers p in
       let qualifiers =
         List.map
-          (fun q -> if old = sou base q then new_istr else q) old_qualifiers
+          (fun q -> if old = sou base q then new_istr else q)
+          old_qualifiers
       in
       { (gen_person_of_person p) with qualifiers }
   | Some "title" ->

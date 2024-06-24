@@ -14630,6 +14630,10 @@ sl: javno
 sv: offentligt
 tr: kamu
 
+    public name/public names
+en: public name/public names
+fr: nom public/noms publics
+
     public name
 af: noemnaam
 bg: официално име

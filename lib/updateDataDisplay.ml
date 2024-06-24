@@ -14,7 +14,8 @@ let translate_title conf len =
     | Some "fn" -> transl_nth conf "first name/first names" plural
     | Some "sn" -> transl_nth conf "surname/surnames" plural
     | Some "alias" -> transl_nth conf "alias/aliases" plural
-    | Some "pubn" -> transl conf "public name"
+    | Some "qual" -> transl_nth conf "qualifier/qualifiers" plural
+    | Some "pubn" -> transl_nth conf "public name/public names" plural
     | Some "title" -> transl_nth conf "title/titles" plural
     | Some "domain" -> transl_nth conf "domain/domains" plural
     | _ -> ""
@@ -222,8 +223,9 @@ and eval_simple_var conf base env xx = function
       let istr, p_list = List.hd (get_person_from_data conf base) in
       (* same code as in place.ml *)
       let head =
-        Printf.sprintf "<a href=\"%sm=L%s&k=%s&nb=%d"
+        Printf.sprintf "<a href=\"%sm=L%s%s&k=%s&nb=%d"
           (commd conf :> string)
+          (Format.sprintf "&data=%s" data)
           "&bi=on&ba=on&ma=on&de=on&bu=on&parents=0"
           (Mutil.encode (sou base istr) :> string)
           (List.length p_list)
@@ -317,10 +319,8 @@ and eval_simple_str_var conf _base env _xx = function
   | "substr" -> eval_string_env "substr" env
   | "tail" -> eval_string_env "tail" env
   | "title" ->
-      let len =
-        match get_env "list" env with Vlist_data l -> List.length l | _ -> 0
-      in
-      let book_of, _ = translate_title conf len in
+      let book_of, _ = translate_title conf 2 in
+      (* book of is always plural *)
       Utf8.capitalize_fst book_of
   | "subtitle" ->
       let len =
