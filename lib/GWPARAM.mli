@@ -35,11 +35,12 @@ val bpath : (string -> string) ref
 val base_path : (string list -> string -> string) ref
 (** [!base_path pref fname] function that returns a path to a file identified by [pref] [fname]
     related to bases. [pref] is like a category for file [fname].
-
     See {!val:GWPARAM.Default.base_path} for a concrete example.
 *)
 
 val cnt_d : (string -> string) ref
+
+val adm_file : (string -> string) ref
 
 val output_error :
   (?headers:string list ->
@@ -72,6 +73,7 @@ module Reorg : sig
 
   val config : string -> string
   val cnt_d : string -> string
+  val adm_file : string -> string
   val portraits_d : string -> string
   val src_d : string -> string
   val etc_d : string -> string
@@ -98,6 +100,7 @@ module Default : sig
 
   val config : string -> string
   val cnt_d : string -> string
+  val adm_file : string -> string
   val portraits_d : string -> string
   val src_d : string -> string
   val etc_d : string -> string

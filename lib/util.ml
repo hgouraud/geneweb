@@ -2148,8 +2148,6 @@ let escache_value base =
   let v = int_of_float (mod_float t (float_of_int max_int)) in
   Adef.encoded (string_of_int v)
 
-let adm_file f =  Filename.concat !GWPARAM.cnt_dir f
-
 let sprintf_today conf =
   let hh, mm, ss = conf.time in
   let tm =
@@ -2215,7 +2213,7 @@ let commit_patches conf base =
       try List.assoc "wizard_passwd_file" conf.base_env with Not_found -> ""
     in
     if wpf <> "" then
-      let fname = adm_file (conf.bname ^ "_u.txt") in
+      let fname = !GWPARAM.adm_file (conf.bname ^ "_u.txt") in
       update_wf_trace conf fname
 
 let short_f_month m =

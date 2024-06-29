@@ -350,7 +350,7 @@ let print_renamed conf new_n =
       Hutil.trailer conf)
 
 let log_redirect from request req =
-  Lock.control (SrcfileDisplay.adm_file "gwd.lck") true
+  Lock.control (!GWPARAM.adm_file "gwd.lck") true
     ~onerror:(fun () -> ()) begin fun () ->
     let referer = Mutil.extract_param "referer: " '\n' request in
     GwdLog.syslog `LOG_NOTICE @@
@@ -535,7 +535,7 @@ let compatible_tokens check_from (addr1, base1_pw1) (addr2, base2_pw2) =
   (not check_from || addr1 = addr2) && base1_pw1 = base2_pw2
 
 let get_actlog check_from utm from_addr base_password =
-  let fname = SrcfileDisplay.adm_file "actlog" in
+  let fname = !GWPARAM.adm_file "actlog" in
   try
     let ic = Secure.open_in fname in
       let tmout = float_of_int !login_timeout in
@@ -586,7 +586,7 @@ let get_actlog check_from utm from_addr base_password =
     [], ATnormal, false)
 
 let set_actlog list =
-  let fname = SrcfileDisplay.adm_file "actlog" in
+  let fname = !GWPARAM.adm_file "actlog" in
   try
     let oc = Secure.open_out fname in
     List.iter
@@ -601,7 +601,7 @@ let set_actlog list =
     ())
 
 let get_token check_from utm from_addr base_password =
-  Lock.control (SrcfileDisplay.adm_file "gwd.lck") true
+  Lock.control (!GWPARAM.adm_file "gwd.lck") true
     ~onerror:(fun () -> ATnormal)
     (fun () ->
        let (list, r, changed) =
@@ -623,7 +623,7 @@ let random_self_init () =
   Random.init seed
 
 let set_token utm from_addr base_file acc user username =
-  Lock.control (SrcfileDisplay.adm_file "gwd.lck") true
+  Lock.control (!GWPARAM.adm_file "gwd.lck") true
     ~onerror:(fun () -> "")
     (fun () ->
        random_self_init ();
@@ -1381,7 +1381,7 @@ let log tm conf from gauth request script_name contents =
     end
 
 let is_robot from =
-  Lock.control (SrcfileDisplay.adm_file "gwd.lck") true
+  Lock.control (!GWPARAM.adm_file "gwd.lck") true
     ~onerror:(fun () -> false)
     (fun () ->
        let (robxcl, _) = Robot.robot_excl () in
@@ -1428,7 +1428,7 @@ let log_and_robot_check conf auth from request script_name contents =
   if !robot_xcl = None
   then log (Unix.time ()) conf from auth request script_name contents
   else
-    Lock.control (SrcfileDisplay.adm_file "gwd.lck") true ~onerror:ignore
+    Lock.control (!GWPARAM.adm_file "gwd.lck") true ~onerror:ignore
       begin fun () ->
         let tm = Unix.time () in
         begin match !robot_xcl with
@@ -1487,7 +1487,7 @@ let conf_and_connection =
           if is_robot from then Robot.robot_error conf 0 0
           else
             let tm = Unix.time () in
-            Lock.control (SrcfileDisplay.adm_file "gwd.lck") true
+            Lock.control (!GWPARAM.adm_file "gwd.lck") true
               ~onerror:(fun () -> ())
               (fun () -> log_passwd_failed ar tm from request conf.bname) ;
             unauth_server conf ar
