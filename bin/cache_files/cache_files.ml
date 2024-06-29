@@ -18,9 +18,7 @@ let write_cache_file bname fname list =
     else bname
   in
   let fname =
-    Filename.concat
-      (Util.base_path [] (bname ^ ".gwb"))
-      (bname ^ "_" ^ fname ^ "_cache.txt")
+    Filename.concat (!GWPARAM.bpath bname) (bname ^ "_" ^ fname ^ "_cache.txt")
   in
   Printf.printf "Write to : %s\n" fname;
   match try Some (Secure.open_out fname) with Sys_error _ -> None with
