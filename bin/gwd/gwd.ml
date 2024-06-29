@@ -373,8 +373,7 @@ let print_redirected conf from request new_addr =
 let nonce_private_key =
   Lazy.from_fun
     (fun () ->
-       let cnt_dir = Filename.concat !(Util.cnt_dir) "cnt" in
-       let fname = Filename.concat cnt_dir "gwd_private.txt" in
+       let fname = Filename.concat !GWPARAM.cnt_dir "gwd_private.txt" in
        let k =
          try
            let ic = open_in fname in
@@ -1353,6 +1352,7 @@ let make_conf from_addr request script_name env =
      plugins = !plugins;
     }
   in
+  GWPARAM.cnt_dir := !GWPARAM.cnt_d conf.bname;
   conf, ar
 
 let log tm conf from gauth request script_name contents =
@@ -1845,7 +1845,7 @@ let geneweb_server () =
             null_reopen [Unix.O_WRONLY] Unix.stderr
           end
         else exit 0;
-       Mutil.mkdir_p ~perm:0o777 (Filename.concat !Util.cnt_dir "cnt")
+       Mutil.mkdir_p ~perm:0o777 !GWPARAM.cnt_dir 
     end;
   Wserver.f GwdLog.syslog !selected_addr !selected_port !conn_timeout
     (if Sys.unix then !max_clients else None) connection
@@ -1866,7 +1866,7 @@ let manage_cgi_timeout tmout =
 
 let geneweb_cgi addr script_name contents =
   if Sys.unix then manage_cgi_timeout !conn_timeout;
-  begin try Unix.mkdir (Filename.concat !(Util.cnt_dir) "cnt") 0o755 with
+  begin try Unix.mkdir !GWPARAM.cnt_dir 0o755 with
     Unix.Unix_error (_, _, _) -> ()
   end;
   let add k x request =
@@ -1939,7 +1939,7 @@ let make_cnt_dir x =
       Wserver.sock_in := Filename.concat x "gwd.sin";
       Wserver.sock_out := Filename.concat x "gwd.sou"
     end;
-  Util.cnt_dir := x
+  GWPARAM.cnt_dir := x
 
 let arg_plugin_doc opt doc =
   doc ^ " Combine with -force to enable for every base. \
@@ -2117,10 +2117,9 @@ let main () =
     in
       images_prefix := "file://" ^ slashify abs_dir
     end;
-  if !(Util.cnt_dir) = Filename.current_dir_name then
-    Util.cnt_dir := Secure.base_dir ();
+  GWPARAM.cnt_dir := !GWPARAM.cnt_d "";
   Wserver.stop_server :=
-    List.fold_left Filename.concat !(Util.cnt_dir) ["cnt"; "STOP_SERVER"];
+    List.fold_left Filename.concat !GWPARAM.cnt_dir ["STOP_SERVER"];
   let (query, cgi) =
     try Sys.getenv "QUERY_STRING" |> Adef.encoded, true
     with Not_found -> "" |> Adef.encoded, !force_cgi

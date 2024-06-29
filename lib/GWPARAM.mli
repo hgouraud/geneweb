@@ -3,6 +3,7 @@ val errors_undef : string list ref
 val errors_other : string list ref
 val set_vars : string list ref
 val gwd_cmd : string ref
+val cnt_dir : string ref
 
 type syslog_level =
   [ `LOG_EMERG  (** A panic condition. *)
@@ -28,6 +29,9 @@ val init : (unit -> unit) ref
 (** Function called before gwd starts
     e.g. inititialise assets folders in Secure module. *)
 
+val bpath : (string -> string) ref
+(** Same as {!val:base_path}, but without the prefix (avoid unecessary empty list). *)
+
 val base_path : (string list -> string -> string) ref
 (** [!base_path pref fname] function that returns a path to a file identified by [pref] [fname]
     related to bases. [pref] is like a category for file [fname].
@@ -35,8 +39,7 @@ val base_path : (string list -> string -> string) ref
     See {!val:GWPARAM.Default.base_path} for a concrete example.
 *)
 
-val bpath : (string -> string) ref
-(** Same as {!val:base_path}, but without the prefix (avoid unecessary empty list). *)
+val cnt_d : (string -> string) ref
 
 val output_error :
   (?headers:string list ->
@@ -61,11 +64,50 @@ val wrap_output :
     Wrap the display of [title] and [content] in a defined template.
 *)
 
+module Reorg : sig
+  val init : unit -> unit
+  (** Inititialise assets directories for gwd server:
+      * current directory
+      *)
+
+  val config : string -> string
+  val cnt_d : string -> string
+  val portraits_d : string -> string
+  val src_d : string -> string
+  val etc_d : string -> string
+  val images_d : string -> string
+  val forum : string -> string
+  val history_d : string -> string
+  val history : string -> string
+  val notes : string -> string
+  val notes_d : string -> string
+  val wizard_d : string -> string
+
+  val bpath : string -> string
+  (** [Filename.concat (Secure.base_dir ())] *)
+
+  val base_path : string list -> string -> string
+  (** Use concatenation of [Secure.base_dir ()], [pref] and [fname] *)
+end
+
 module Default : sig
   val init : unit -> unit
   (** Inititialise assets directories for gwd server:
       * current directory
       *)
+
+  val config : string -> string
+  val cnt_d : string -> string
+  val portraits_d : string -> string
+  val src_d : string -> string
+  val etc_d : string -> string
+  val images_d : string -> string
+  val forum : string -> string
+  val history_d : string -> string
+  val history : string -> string
+  val notes : string -> string
+  val notes_d : string -> string
+  val wizard_d : string -> string
 
   val base_path : string list -> string -> string
   (** Use concatenation of [Secure.base_dir ()], [pref] and [fname] *)

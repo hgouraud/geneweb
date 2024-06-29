@@ -119,7 +119,7 @@ let escape_attribute =
 let is_hide_names conf p =
   if conf.hide_names || get_access p = Private then true else false
 
-let cnt_dir = ref Filename.current_dir_name
+let cnt_dir = !GWPARAM.cnt_dir
 
 let search_in_path p s =
   let rec loop = function
@@ -2148,7 +2148,7 @@ let escache_value base =
   let v = int_of_float (mod_float t (float_of_int max_int)) in
   Adef.encoded (string_of_int v)
 
-let adm_file f = List.fold_right Filename.concat [ !cnt_dir; "cnt" ] f
+let adm_file f =  Filename.concat !GWPARAM.cnt_dir f
 
 let sprintf_today conf =
   let hh, mm, ss = conf.time in
