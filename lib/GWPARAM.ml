@@ -9,6 +9,8 @@ let errors_undef = ref []
 let errors_other = ref []
 let set_vars = ref []
 let gwd_cmd = ref ""
+let reorg = ref false
+let cnt_dir = ref ""
 
 type syslog_level =
   [ `LOG_ALERT
@@ -20,13 +22,125 @@ type syslog_level =
   | `LOG_NOTICE
   | `LOG_WARNING ]
 
-module Default = struct
+module Reorg = struct
+  let config bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "config.txt" ]
+
+  let cnt_d bname =
+    if bname <> "" then
+      String.concat Filename.dir_sep
+        [ Secure.base_dir (); bname ^ ".gwb"; "cnt" ]
+    else if !cnt_dir = "" then
+       String.concat Filename.dir_sep
+        [ Secure.base_dir (); "cnt" ]
+    else !cnt_dir
+
+  let portraits_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "portraits" ]
+
+  let src_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "src" ]
+
+  let etc_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "etc" ]
+
+  let images_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "src"; "images" ]
+
+  let forum bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "forum" ]
+
+  let history_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "history_d" ]
+  let history bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "history" ]
+
+  let notes bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "notes" ]
+  let notes_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "notes_d" ]
+
+  let wizard_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "wiznotes" ]
+
+  let bpath bname =
+    Filename.concat (Secure.base_dir ()) (if bname <> "" then (bname ^ ".gwb") else "")
+
+  (* base_path [A; B] mybase becomes bases/mybase.gwb/A/B/ *)
+  let base_path pref bname =
+    List.fold_left Filename.concat (bpath bname) pref
+
   let init () = Secure.add_assets Filename.current_dir_name
+end
+
+
+module Default = struct
+  let config bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwf" ]
+
+  let cnt_d _bname =
+    if !cnt_dir = "" then
+      String.concat Filename.dir_sep
+        [ Secure.base_dir (); "cnt" ]
+    else !cnt_dir
+
+  let portraits_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); "images"; bname ]
+
+  let src_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); "src"; bname ]
+
+  let etc_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); "etc"; bname ]
+
+  let images_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); "src"; "images"; bname ]
+
+  let forum bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "forum" ]
+
+  let history_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "history_d" ]
+  let history bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "history" ]
+
+  let notes bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "notes" ]
+  let notes_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "notes_d" ]
+
+  let wizard_d bname =
+    String.concat Filename.dir_sep
+      [ Secure.base_dir (); bname ^ ".gwb"; "wiznotes" ]
+
+  let bpath bname =
+    Filename.concat (Secure.base_dir ()) bname
 
   let base_path pref bname =
     List.fold_right Filename.concat (Secure.base_dir () :: pref) bname
 
-  let bpath bname = Filename.concat (Secure.base_dir ()) bname
+  let init () = Secure.add_assets Filename.current_dir_name
 
   (** [output_error ?headers ?content conf code]
       Send the http status [code], [headers] and
@@ -167,12 +281,25 @@ module Default = struct
     Output.print_sstring conf {|</body></html>|}
 end
 
-let init = ref Default.init
-let base_path = ref Default.base_path
-let bpath = ref Default.bpath
+let init = if !reorg then ref Reorg.init else ref Default.init
+let _config = if !reorg then ref Reorg.config else ref Default.config
+let cnt_d = if !reorg then ref Reorg.cnt_d else ref Default.cnt_d
+let _portraits_d = if !reorg then ref Reorg.portraits_d else ref Default.portraits_d
+let _src_d = if !reorg then ref Reorg.src_d else ref Default.src_d
+let _etc_d = if !reorg then ref Reorg.etc_d else ref Default.etc_d
+let _images_d = if !reorg then ref Reorg.images_d else ref Default.images_d
+let _forum = if !reorg then ref Reorg.forum else ref Default.forum
+let _history = if !reorg then ref Reorg.history else ref Default.history
+let _history_d = if !reorg then ref Reorg.history_d else ref Default.history_d
+let _notes = if !reorg then ref Reorg.notes else ref Default.notes
+let _notes_d = if !reorg then ref Reorg.notes_d else ref Default.notes_d
+let _wizard_d = if !reorg then ref Reorg.wizard_d else ref Default.wizard_d
+let bpath = if !reorg then ref Reorg.bpath else ref Default.bpath
+let base_path = if !reorg then ref Reorg.base_path else ref Default.base_path
 let output_error = ref Default.output_error
 let p_auth = ref Default.p_auth
 let syslog = ref Default.syslog
+
 
 (** [wrap_output conf title content]
     Plugins defining a page content but not a complete UI
