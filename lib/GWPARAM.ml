@@ -28,13 +28,18 @@ module Reorg = struct
       [ Secure.base_dir (); bname ^ ".gwb"; "config.txt" ]
 
   let cnt_d bname =
-    if bname <> "" then
-      String.concat Filename.dir_sep
+    if bname <> "" then (
+      let str = String.concat Filename.dir_sep
         [ Secure.base_dir (); bname ^ ".gwb"; "cnt" ]
-    else if !cnt_dir = "" then
-       String.concat Filename.dir_sep
-        [ Secure.base_dir (); "cnt" ]
+      in
+      cnt_dir := str; str)
+    else if !cnt_dir = "" then (
+      let str = String.concat Filename.dir_sep [ Secure.base_dir (); "cnt" ] in
+      cnt_dir := str; str)
     else !cnt_dir
+
+  let adm_file file =
+    Filename.concat !cnt_dir file
 
   let portraits_d bname =
     String.concat Filename.dir_sep
@@ -91,10 +96,14 @@ module Default = struct
       [ Secure.base_dir (); bname ^ ".gwf" ]
 
   let cnt_d _bname =
-    if !cnt_dir = "" then
-      String.concat Filename.dir_sep
-        [ Secure.base_dir (); "cnt" ]
+    if !cnt_dir = "" then (
+      let str = String.concat Filename.dir_sep [ Secure.base_dir (); "cnt" ] in
+      cnt_dir := str;
+      str)
     else !cnt_dir
+
+  let adm_file file =
+    Filename.concat !cnt_dir file
 
   let portraits_d bname =
     String.concat Filename.dir_sep
@@ -284,6 +293,7 @@ end
 let init = if !reorg then ref Reorg.init else ref Default.init
 let _config = if !reorg then ref Reorg.config else ref Default.config
 let cnt_d = if !reorg then ref Reorg.cnt_d else ref Default.cnt_d
+let adm_file = if !reorg then ref Reorg.adm_file else ref Default.adm_file
 let _portraits_d = if !reorg then ref Reorg.portraits_d else ref Default.portraits_d
 let _src_d = if !reorg then ref Reorg.src_d else ref Default.src_d
 let _etc_d = if !reorg then ref Reorg.etc_d else ref Default.etc_d

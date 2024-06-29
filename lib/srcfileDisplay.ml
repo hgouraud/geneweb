@@ -18,14 +18,11 @@ type counter = {
 let get_date conf =
   Printf.sprintf "%02d/%02d/%d" conf.today.day conf.today.month conf.today.year
 
-let adm_file f =  Filename.concat !GWPARAM.cnt_dir f
-let cnt conf ext = adm_file (conf.bname ^ ext)
-
 let input_int ic =
   try int_of_string (input_line ic) with End_of_file | Failure _ -> 0
 
 let count conf =
-  let fname = cnt conf ".txt" in
+  let fname = !GWPARAM.adm_file (conf.bname ^ ".txt") in
   try
     let ic = Secure.open_in fname in
     let rd =
@@ -67,7 +64,7 @@ let count conf =
     }
 
 let write_counter conf r =
-  let fname = cnt conf ".txt" in
+  let fname = !GWPARAM.adm_file (conf.bname ^ ".txt") in
   try
     let oc = Secure.open_out_bin fname in
     output_string oc (string_of_int r.welcome_cnt);
@@ -91,7 +88,7 @@ let set_wizard_and_friend_traces conf =
       try List.assoc "wizard_passwd_file" conf.base_env with Not_found -> ""
     in
     if wpf <> "" then
-      let fname = adm_file (conf.bname ^ "_w.txt") in
+      let fname = !GWPARAM.adm_file (conf.bname ^ "_w.txt") in
       update_wf_trace conf fname)
   else if conf.friend && (not conf.just_friend_wizard) && conf.user <> "" then
     let fpf =
@@ -104,11 +101,11 @@ let set_wizard_and_friend_traces conf =
       fpf <> ""
       && is_that_user_and_password conf.auth_scheme conf.user fp = false
     then
-      let fname = adm_file (conf.bname ^ "_f.txt") in
+      let fname = !GWPARAM.adm_file (conf.bname ^ "_f.txt") in
       update_wf_trace conf fname
 
 let incr_counter f conf =
-  let lname = cnt conf ".lck" in
+  let lname = !GWPARAM.adm_file (conf.bname ^ ".lck") in
   Lock.control lname true
     ~onerror:(fun () -> None)
     (fun () ->
