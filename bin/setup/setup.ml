@@ -479,7 +479,7 @@ let cut_at_equal s =
   | None -> (s, "")
 
 let read_base_env bname =
-  let fname = bname ^ ".gwf" in
+  let fname = !GWPARAM.config bname in
   match try Some (open_in fname) with Sys_error _ -> None with
   | Some ic ->
     let rec loop env =
@@ -909,17 +909,10 @@ let print_default_gwf_file conf =
      "max_desc_level=12"; "max_desc_tree=4"; "max_cousins=2000";
      "max_cousins_level=5"; "latest_event=20"; "template=*"; "long_date=no";
      "counter=no"; "full_siblings=yes"; "hide_advanced_request=no";
-     "perso_module_i=individu"; "perso_module_p=parents";
-     "perso_module_g=gr_parents"; "perso_module_u=unions";
-     "perso_module_f=fratrie"; "perso_module_r=relations";
-     "perso_module_c=chronologie"; "perso_module_n=notes";
-     "perso_module_s=sources"; "perso_module_a=arbres";
-     "perso_module_h=htrees"; "perso_module_d=data_3col";
-     "perso_module_l=ligne"; "p_mod="]
+     "p_mod="]
   in
   let bname = try List.assoc "o" conf.env with Not_found -> "" in
-  let dir = Sys.getcwd () in
-  let fname = Filename.concat dir (bname ^ ".gwf") in
+  let fname = !GWPARAM.config bname in
   if Sys.file_exists fname then ()
   else
     let oc = open_out fname in
