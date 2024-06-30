@@ -42,6 +42,9 @@ val cnt_d : (string -> string) ref
 
 val adm_file : (string -> string) ref
 
+val portraits_d : (string -> string) ref
+val images_d : (string -> string) ref
+
 val output_error :
   (?headers:string list ->
   ?content:Adef.safe_string ->
