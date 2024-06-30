@@ -307,7 +307,7 @@ let read_base_env bname =
             error fname);
       []
   in
-  let fname1 = !GWPARAM.bpath bname in
+  let fname1 = !GWPARAM.config bname in
   if Sys.file_exists fname1 then
     load_file fname1
   else
@@ -2097,7 +2097,7 @@ let main () =
   List.iter
     (fun dbn ->
        Printf.eprintf "Caching database %s in memory… %!" dbn;
-       let dbn = !GWPARAM.bpath dbn in
+       let dbn = !GWPARAM.bpath (dbn ^ ".gwb") in
        ignore (Gwdb.open_base ~keep_in_memory:true dbn);
        Printf.eprintf "Done.\n%!"
     )

@@ -38,6 +38,7 @@ val base_path : (string list -> string -> string) ref
     See {!val:GWPARAM.Default.base_path} for a concrete example.
 *)
 
+val config : (string -> string) ref
 val cnt_d : (string -> string) ref
 
 val adm_file : (string -> string) ref
