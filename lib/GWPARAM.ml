@@ -291,7 +291,7 @@ module Default = struct
 end
 
 let init = if !reorg then ref Reorg.init else ref Default.init
-let _config = if !reorg then ref Reorg.config else ref Default.config
+let config = if !reorg then ref Reorg.config else ref Default.config
 let cnt_d = if !reorg then ref Reorg.cnt_d else ref Default.cnt_d
 let adm_file = if !reorg then ref Reorg.adm_file else ref Default.adm_file
 let portraits_d = if !reorg then ref Reorg.portraits_d else ref Default.portraits_d
