@@ -119,7 +119,7 @@ module Default = struct
 
   let images_d bname =
     String.concat Filename.dir_sep
-      [ Secure.base_dir (); "src"; "images"; bname ]
+      [ Secure.base_dir (); "src"; bname; "images" ]
 
   let forum bname =
     String.concat Filename.dir_sep
@@ -294,10 +294,10 @@ let init = if !reorg then ref Reorg.init else ref Default.init
 let _config = if !reorg then ref Reorg.config else ref Default.config
 let cnt_d = if !reorg then ref Reorg.cnt_d else ref Default.cnt_d
 let adm_file = if !reorg then ref Reorg.adm_file else ref Default.adm_file
-let _portraits_d = if !reorg then ref Reorg.portraits_d else ref Default.portraits_d
+let portraits_d = if !reorg then ref Reorg.portraits_d else ref Default.portraits_d
 let _src_d = if !reorg then ref Reorg.src_d else ref Default.src_d
 let _etc_d = if !reorg then ref Reorg.etc_d else ref Default.etc_d
-let _images_d = if !reorg then ref Reorg.images_d else ref Default.images_d
+let images_d = if !reorg then ref Reorg.images_d else ref Default.images_d
 let _forum = if !reorg then ref Reorg.forum else ref Default.forum
 let _history = if !reorg then ref Reorg.history else ref Default.history
 let _history_d = if !reorg then ref Reorg.history_d else ref Default.history_d
