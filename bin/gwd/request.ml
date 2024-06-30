@@ -314,7 +314,7 @@ let try_plugin list conf base_name m =
   List.exists fn (Hashtbl.find_all GwdPlugin.ht m)
 
 let w_lock ~onerror fn conf (base_name : string option) =
-  let bfile = Util.bpath (conf.bname ^ ".gwb") in
+  let bfile = !GWPARAM.bpath (conf.bname ^ ".gwb") in
   Lock.control
     (Mutil.lock_file bfile) true
     ~onerror:(fun () -> onerror conf base_name)
@@ -370,11 +370,12 @@ let treat_request =
   fun conf ->
   let bfile =
     if conf.bname = "" then None
-    else
-      let bfile = Util.bpath (conf.bname ^ ".gwb") in
+    else (
+      let bfile = !GWPARAM.bpath (conf.bname ^ ".gwb")in
+      Printf.eprintf "bfile: %s\n" bfile;
       if Sys.file_exists bfile
       then Some bfile
-      else None
+      else None)
   in
   let process () =
   if conf.wizard
