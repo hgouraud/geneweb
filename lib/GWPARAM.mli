@@ -40,6 +40,7 @@ val base_path : (string list -> string -> string) ref
 
 val config : (string -> string) ref
 val cnt_d : (string -> string) ref
+val etc_d : (string -> string) ref
 
 val adm_file : (string -> string) ref
 

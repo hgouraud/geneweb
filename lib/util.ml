@@ -1186,15 +1186,14 @@ let etc_file_name conf fname =
      - dans la base (bases/etc/templx/name.txt)
      - dans le répertoire des programmes (gw/etc/templx/name.txt) *)
   let file_exist dir =
-    let fn =
-      Filename.concat conf.bname (fname ^ ".txt")
-      |> Filename.concat "etc" |> bpath
-    in
+    let fn = Filename.concat (!GWPARAM.etc_d conf.bname) (fname ^ ".txt") in
     if Sys.file_exists fn then fn
     else
       let fn =
-        Filename.concat (Filename.basename dir) (fname ^ ".txt")
-        |> Filename.concat "etc" |> bpath
+        String.concat Filename.dir_sep
+          [ (!GWPARAM.etc_d conf.bname);
+            (Filename.basename dir);
+            (fname ^ ".txt") ]
       in
       if Sys.file_exists fn then fn
       else
@@ -1966,7 +1965,7 @@ let create_topological_sort conf base =
       Consang.topological_sort base (pget conf)
   | Some "no_tstab" -> Gwdb.iper_marker (Gwdb.ipers base) 0
   | _ ->
-      let bfile = bpath (conf.bname ^ ".gwb") in
+      let bfile = !GWPARAM.bpath (conf.bname ^ ".gwb") in
       let tstab_file =
         if conf.use_restrict && (not conf.wizard) && not conf.friend then
           Filename.concat bfile "tstab_visitor"
@@ -2538,7 +2537,7 @@ let cache_visited conf =
     if Filename.check_suffix conf.bname ".gwb" then conf.bname
     else conf.bname ^ ".gwb"
   in
-  Filename.concat (bpath bname) "cache_visited"
+  Filename.concat (!GWPARAM.bpath bname) "cache_visited"
 
 (* ************************************************************************ *)
 (*  [Fonc] read_visited : string -> cache_visited_t                         *)
