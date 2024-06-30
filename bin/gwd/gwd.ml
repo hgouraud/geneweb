@@ -307,7 +307,7 @@ let read_base_env bname =
             error fname);
       []
   in
-  let fname1 = Util.bpath (bname ^ ".gwf") in
+  let fname1 = !GWPARAM.bpath bname in
   if Sys.file_exists fname1 then
     load_file fname1
   else
@@ -1317,7 +1317,7 @@ let make_conf from_addr request script_name env =
      auth_file =
        begin try
          let x = List.assoc "auth_file" base_env in
-         if x = "" then !auth_file else Util.bpath x
+         if x = "" then !auth_file else Filename.concat (!GWPARAM.bpath base_file) x
        with Not_found -> !auth_file
        end;
      border =
@@ -2097,7 +2097,7 @@ let main () =
   List.iter
     (fun dbn ->
        Printf.eprintf "Caching database %s in memory… %!" dbn;
-       let dbn = Util.bpath (dbn ^ ".gwb") in
+       let dbn = !GWPARAM.bpath dbn in
        ignore (Gwdb.open_base ~keep_in_memory:true dbn);
        Printf.eprintf "Done.\n%!"
     )
