@@ -784,7 +784,8 @@ let empty_patch_ht () =
   }
 
 let input_patches bname =
-  let fname = Filename.concat bname "patches" in
+  let bname2 = Filename.basename bname in
+  let fname = Filename.concat (!GWPARAM.bpath bname2) "patches" in
   if Sys.file_exists fname then
     try
       let ic = Secure.open_in_bin fname in
@@ -815,8 +816,9 @@ let input_patches bname =
   else Ok (empty_patch_ht ())
 
 let input_synchro bname =
+  let bname2 = Filename.basename bname in
   try
-    let ic = Secure.open_in_bin (Filename.concat bname "synchro_patches") in
+    let ic = Secure.open_in_bin (Filename.concat (!GWPARAM.bpath bname2) "synchro_patches") in
     let r : synchro_patch = input_value ic in
     close_in ic;
     r
@@ -856,7 +858,9 @@ let opendb ?(read_only = false) bname =
   let bname =
     if Filename.check_suffix bname ".gwb" then bname else bname ^ ".gwb"
   in
-  let tm_fname = Filename.concat bname "commit_timestamp" in
+  let bname2 = !GWPARM.bpath (Filename.basename bname) in
+  let bname3 = Filename.basename bname in
+  let tm_fname = Filename.concat bname2 "commit_timestamp" in
   let patches = input_patches bname in
   let pending : patches_ht = empty_patch_ht () in
   let patches, perm =
@@ -876,9 +880,9 @@ let opendb ?(read_only = false) bname =
   in
   let synchro = input_synchro bname in
   let particles =
-    Mutil.input_particles (Filename.concat bname "particles.txt")
+    Mutil.input_particles (Filename.concat bname2 "particles.txt")
   in
-  let ic = Secure.open_in_bin (Filename.concat bname "base") in
+  let ic = Secure.open_in_bin (Filename.concat bname2 "base") in
   let version =
     if Mutil.check_magic Dutil.magic_GnWb0024 ic then GnWb0024
     else if Mutil.check_magic Dutil.magic_GnWb0023 ic then GnWb0023
@@ -901,14 +905,14 @@ let opendb ?(read_only = false) bname =
   let strings_array_pos = input_binary_int ic in
   let norigin_file = input_value ic in
   let ic_acc =
-    try Some (Secure.open_in_bin (Filename.concat bname "base.acc"))
+    try Some (Secure.open_in_bin (Filename.concat bname2 "base.acc"))
     with Sys_error _ ->
       Printf.eprintf "File base.acc not found; trying to continue...\n";
       flush stderr;
       None
   in
   let ic2 =
-    try Some (Secure.open_in_bin (Filename.concat bname "strings.inx"))
+    try Some (Secure.open_in_bin (Filename.concat bname2 "strings.inx"))
     with Sys_error _ ->
       Printf.eprintf "File strings.inx not found; trying to continue...\n";
       flush stderr;
@@ -1037,8 +1041,8 @@ let opendb ?(read_only = false) bname =
     match ic2 with Some ic2 -> close_in ic2 | None -> ()
   in
   let commit_synchro () =
-    let tmp_fname = Filename.concat bname "1synchro_patches" in
-    let fname = Filename.concat bname "synchro_patches" in
+    let tmp_fname = Filename.concat bname2 "1synchro_patches" in
+    let fname = Filename.concat bname2 "synchro_patches" in
     let oc9 =
       try Secure.open_out_bin tmp_fname
       with Sys_error _ -> raise (Failure "the database is not writable")
@@ -1053,7 +1057,7 @@ let opendb ?(read_only = false) bname =
     close_out oc9;
     move_with_backup tmp_fname fname
   in
-  let nbp_fname = Filename.concat bname "nb_persons" in
+  let nbp_fname = Filename.concat bname2 "nb_persons" in
   let is_empty_name p =
     (0 = p.surname || 1 = p.surname) && (0 = p.first_name || 1 = p.first_name)
   in
@@ -1112,8 +1116,8 @@ let opendb ?(read_only = false) bname =
       aux patches.h_descend pending.h_descend;
       aux patches.h_string pending.h_string;
       (* update "patches" file *)
-      let tmp_fname = Filename.concat bname "1patches" in
-      let fname = Filename.concat bname "patches" in
+      let tmp_fname = Filename.concat bname2 "1patches" in
+      let fname = Filename.concat bname2 "patches" in
       let tm_oc = Secure.open_out_bin tm_fname in
       output_string tm_oc (tm : Adef.safe_string :> string);
       close_out tm_oc;
@@ -1196,7 +1200,10 @@ let opendb ?(read_only = false) bname =
       else Filename.concat "notes_d" (fnotes ^ ".txt")
     in
     try
-      let ic = Secure.open_in (Filename.concat bname fname) in
+      let ic = Secure.open_in
+        (if fnotes = "" then Filename.concat bname2 "notes"
+        else Filename.concat (!GWPARAM.notes_d bname3) (fnotes ^ ".txt"))
+      in
       let str =
         match rn_mode with
         | RnDeg -> if in_channel_length ic = 0 then "" else " "
@@ -1217,12 +1224,12 @@ let opendb ?(read_only = false) bname =
     if perm = RDONLY then fun _ _ -> raise (HttpExn (Forbidden, __LOC__))
     else fun fnotes s ->
       let fname =
-        if fnotes = "" then "notes"
+        if fnotes = "" then
+          Filename.concat (!GWPARAM.bpath bname3) "notes"
         else (
-          (try Unix.mkdir (Filename.concat bname "notes_d") 0o755 with _ -> ());
-          Filename.concat "notes_d" (fnotes ^ ".txt"))
+          (try Unix.mkdir (!GWPARAM.notes_d bname3) 0o755 with _ -> ());
+          Filename.concat (!GWPARAM.notes_d bname3) (fnotes ^ ".txt"))
       in
-      let fname = Filename.concat bname fname in
       (try Sys.remove (fname ^ "~") with Sys_error _ -> ());
       (try Sys.rename fname (fname ^ "~") with _ -> ());
       if s <> "" then (
@@ -1231,7 +1238,7 @@ let opendb ?(read_only = false) bname =
         close_out oc)
   in
   let ext_files () =
-    let top = Filename.concat bname "notes_d" in
+    let top = (!GWPARAM.notes_d bname3) in
     let rec loop list subdir =
       let dir = Filename.concat top subdir in
       try
