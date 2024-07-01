@@ -374,7 +374,7 @@
 # List of wizards moderating the database forum.
 # If empty or empty file, no moderation.
 # One wizard name by line.
-#moderator_file=
+#moderators_file=
 
 # Forum supervisor. The forum is not moderated but controlled afterwards.
 # This supervisor is a wizard who can delete any forum message. He can

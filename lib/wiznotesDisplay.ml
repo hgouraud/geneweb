@@ -4,10 +4,7 @@ open Config
 open Def
 open Util
 
-let dir conf base =
-  Filename.concat
-    (Util.bpath (conf.bname ^ ".gwb"))
-    (Gwdb.base_wiznotes_dir base)
+let dir conf base = !GWPARAM.wizard_d conf.bname
 
 let wzfile wddir wz = Filename.concat wddir (wz ^ ".txt")
 
