@@ -125,30 +125,29 @@ let incr_request_counter =
   incr_counter (fun r -> r.request_cnt <- r.request_cnt + 1)
 
 let lang_file_name conf fname =
-  let fname1 =
-    Util.base_path [ "lang"; conf.lang ] (Filename.basename fname ^ ".txt")
+  let fname1 = Filename.concat
+    (!GWPARAM.lang_d conf.bname conf.lang) (Filename.basename fname ^ ".txt")
   in
   if Sys.file_exists fname1 then fname1
   else
     search_in_assets
       (Filename.concat conf.lang (Filename.basename fname ^ ".txt"))
 
-let any_lang_file_name fname =
-  let fname1 = Util.base_path [ "lang" ] (Filename.basename fname ^ ".txt") in
+let any_lang_file_name conf fname =
+  let fname1 = Filename.concat
+    (!GWPARAM.lang_d conf.bname "") (Filename.basename fname ^ ".txt") in
   if Sys.file_exists fname1 then fname1
   else
     search_in_assets (Filename.concat "lang" (Filename.basename fname ^ ".txt"))
 
 let source_file_name conf fname =
-  let bname = conf.bname in
-  let lang = conf.lang in
   let fname1 =
     List.fold_right Filename.concat
-      [ Util.base_path [ "src" ] bname; lang ]
+      [ !GWPARAM.src_d conf.bname; conf.lang ]
       (fname ^ ".txt")
   in
   if Sys.file_exists fname1 then fname1
-  else Filename.concat (Util.base_path [ "src" ] bname) (fname ^ ".txt")
+  else Filename.concat (!GWPARAM.src_d conf.bname) (fname ^ ".txt")
 
 let extract_date s =
   try Scanf.sscanf s "%d/%d/%d" (fun d m y -> Some (d, m, y)) with _ -> None
@@ -420,7 +419,7 @@ and src_translate conf base nomin strm echo mode =
 and copy_from_file conf base name mode =
   let fname =
     match mode with
-    | Lang -> any_lang_file_name name
+    | Lang -> any_lang_file_name conf name
     | Source -> source_file_name conf name
   in
   match try Some (Secure.open_in fname) with Sys_error _ -> None with
@@ -441,7 +440,7 @@ let gen_print mode conf base fname =
     | Lang -> (
         try Some (Secure.open_in (lang_file_name conf fname))
         with Sys_error _ -> (
-          try Some (Secure.open_in (any_lang_file_name fname))
+          try Some (Secure.open_in (any_lang_file_name conf fname))
           with Sys_error _ -> None))
     | Source -> (
         try Some (Secure.open_in (source_file_name conf fname))

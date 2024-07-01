@@ -11,6 +11,7 @@ let set_vars = ref []
 let gwd_cmd = ref ""
 let reorg = ref false
 let cnt_dir = ref ""
+let bases = ref (Secure.base_dir ())
 
 type syslog_level =
   [ `LOG_ALERT
@@ -53,6 +54,14 @@ module Reorg = struct
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "etc" ]
 
+  let lang_d bname lang =
+    if lang = "" then
+      String.concat Filename.dir_sep
+        [ Secure.base_dir (); "lang"; bname ]
+    else
+      String.concat Filename.dir_sep
+        [ Secure.base_dir (); "lang"; lang; bname ]
+
   let images_d bname =
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "src"; "images" ]
@@ -61,7 +70,7 @@ module Reorg = struct
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "forum" ]
 
-  let history_d bname =
+  let history_d _conf bname =
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "history_d" ]
   let history bname =
@@ -117,6 +126,14 @@ module Default = struct
     String.concat Filename.dir_sep
       [ Secure.base_dir (); "etc"; bname ]
 
+  let lang_d bname lang =
+    if lang = "" then
+      String.concat Filename.dir_sep
+        [ Secure.base_dir (); "lang"; bname ]
+    else
+      String.concat Filename.dir_sep
+        [ Secure.base_dir (); "lang"; lang; bname ]
+
   let images_d bname =
     String.concat Filename.dir_sep
       [ Secure.base_dir (); "src"; bname; "images" ]
@@ -125,7 +142,7 @@ module Default = struct
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "forum" ]
 
-  let history_d bname =
+  let history_d _conf bname =
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "history_d" ]
   let history bname =
@@ -295,8 +312,9 @@ let config = if !reorg then ref Reorg.config else ref Default.config
 let cnt_d = if !reorg then ref Reorg.cnt_d else ref Default.cnt_d
 let adm_file = if !reorg then ref Reorg.adm_file else ref Default.adm_file
 let portraits_d = if !reorg then ref Reorg.portraits_d else ref Default.portraits_d
-let _src_d = if !reorg then ref Reorg.src_d else ref Default.src_d
-let _etc_d = if !reorg then ref Reorg.etc_d else ref Default.etc_d
+let src_d = if !reorg then ref Reorg.src_d else ref Default.src_d
+let etc_d = if !reorg then ref Reorg.etc_d else ref Default.etc_d
+let lang_d = if !reorg then ref Reorg.lang_d else ref Default.lang_d
 let images_d = if !reorg then ref Reorg.images_d else ref Default.images_d
 let _forum = if !reorg then ref Reorg.forum else ref Default.forum
 let _history = if !reorg then ref Reorg.history else ref Default.history

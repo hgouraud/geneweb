@@ -13,9 +13,6 @@ val time_debug :
 val cnt_dir : string
 (** Alias for !GWPARAM.cnt_dir *)
 
-val base_path : string list -> string -> string
-(** Alias for !GWPARAM.base_path *)
-
 val bpath : string -> string
 (** Alias for !GWPARAM.bpath *)
 

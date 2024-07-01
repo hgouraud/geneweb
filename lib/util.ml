@@ -1137,7 +1137,6 @@ let string_of_witness_kind conf sex witness_kind =
   in
   Adef.safe @@ transl_nth conf s n
 
-let base_path pref bname = !GWPARAM.base_path pref bname
 let bpath bname = !GWPARAM.bpath bname
 let copy_from_templ_ref = ref (fun _ _ _ -> assert false)
 let copy_from_templ conf env ic = !copy_from_templ_ref conf env ic
@@ -1278,7 +1277,7 @@ let get_request_string conf =
 let message_to_wizard conf =
   if conf.wizard || conf.just_friend_wizard then (
     let print_file fname =
-      let fname = base_path [ "etc"; conf.bname ] (fname ^ ".txt") in
+      let fname = Filename.concat (!GWPARAM.etc_d conf.bname) (fname ^ ".txt") in
       try
         let ic = Secure.open_in fname in
         try
@@ -2238,7 +2237,7 @@ let short_f_month m =
 type auth_user = { au_user : string; au_passwd : string; au_info : string }
 
 let read_gen_auth_file fname =
-  let fname = bpath fname in
+  let fname = !GWPARAM.bpath fname in
   try
     let ic = Secure.open_in fname in
     let rec loop data =
@@ -2810,7 +2809,7 @@ let has_children base u =
 
 let get_bases_list ?(format_fun = fun x -> x) () =
   let list = ref [] in
-  let dh = Unix.opendir (!GWPARAM.bpath "") in
+  let dh = Unix.opendir !GWPARAM.bases in
   (try
      while true do
        let e = Unix.readdir dh in

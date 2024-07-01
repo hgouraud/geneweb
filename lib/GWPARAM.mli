@@ -4,6 +4,7 @@ val errors_other : string list ref
 val set_vars : string list ref
 val gwd_cmd : string ref
 val cnt_dir : string ref
+val bases : string ref
 
 type syslog_level =
   [ `LOG_EMERG  (** A panic condition. *)
@@ -40,6 +41,9 @@ val base_path : (string list -> string -> string) ref
 
 val config : (string -> string) ref
 val cnt_d : (string -> string) ref
+val etc_d : (string -> string) ref
+val src_d : (string -> string) ref
+val lang_d : (string -> string -> string) ref
 
 val adm_file : (string -> string) ref
 
@@ -81,9 +85,10 @@ module Reorg : sig
   val portraits_d : string -> string
   val src_d : string -> string
   val etc_d : string -> string
+  val lang_d : string -> string -> string
   val images_d : string -> string
   val forum : string -> string
-  val history_d : string -> string
+  val history_d : Config.config -> string -> string
   val history : string -> string
   val notes : string -> string
   val notes_d : string -> string
@@ -108,9 +113,10 @@ module Default : sig
   val portraits_d : string -> string
   val src_d : string -> string
   val etc_d : string -> string
+  val lang_d : string -> string -> string
   val images_d : string -> string
   val forum : string -> string
-  val history_d : string -> string
+  val history_d : Config.config -> string -> string
   val history : string -> string
   val notes : string -> string
   val notes_d : string -> string

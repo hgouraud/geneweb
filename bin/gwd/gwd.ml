@@ -1613,12 +1613,12 @@ let content_misc conf len misc_fname =
   Output.header conf "Cache-control: private, max-age=%d" (60 * 60 * 24 * 365);
   Output.flush conf
 
-let find_misc_file name =
+let find_misc_file conf name =
   if Sys.file_exists name
   && List.exists (fun p -> Mutil.start_with (Filename.concat p "assets") 0 name) !plugins
   then name
   else
-    let name' = Filename.concat (base_path ["etc"] "") name in
+    let name' = Filename.concat (!GWPARAM.etc_d conf.bname) name in
     if Sys.file_exists name' then name'
     else
       let name' = Util.search_in_assets @@ Filename.concat "etc" name in
@@ -1667,7 +1667,7 @@ let print_misc_file conf misc_fname =
     true
 
 let misc_request conf fname =
-  let fname = find_misc_file fname in
+  let fname = find_misc_file conf fname in
   if fname <> "" then
     let misc_fname =
       if Filename.check_suffix fname ".css" then Css fname
