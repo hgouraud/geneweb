@@ -43,6 +43,7 @@ val config : (string -> string) ref
 val cnt_d : (string -> string) ref
 val etc_d : (string -> string) ref
 val src_d : (string -> string) ref
+val history_d : (Config.config -> string) ref
 val lang_d : (string -> string -> string) ref
 
 val adm_file : (string -> string) ref
@@ -88,7 +89,7 @@ module Reorg : sig
   val lang_d : string -> string -> string
   val images_d : string -> string
   val forum : string -> string
-  val history_d : Config.config -> string -> string
+  val history_d : Config.config -> string
   val history : string -> string
   val notes : string -> string
   val notes_d : string -> string
@@ -116,7 +117,7 @@ module Default : sig
   val lang_d : string -> string -> string
   val images_d : string -> string
   val forum : string -> string
-  val history_d : Config.config -> string -> string
+  val history_d : Config.config -> string
   val history : string -> string
   val notes : string -> string
   val notes_d : string -> string

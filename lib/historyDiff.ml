@@ -21,18 +21,7 @@ let history_file fn sn occ =
 
 (* history directory path *)
 let history_d conf =
-  let path =
-    match List.assoc_opt "history_path" conf.base_env with
-    | Some path when path <> "" -> path
-    | _ -> "history_d"
-  in
-  if Filename.is_relative path then
-    let bname =
-      if Filename.check_suffix conf.bname ".gwb" then conf.bname
-      else conf.bname ^ ".gwb"
-    in
-    Filename.concat (Util.bpath bname) path
-  else path
+  !GWPARAM.history_d conf
 
 (* Le chemin du fichier historique dans le dossier history_d. *)
 let history_path conf fname =

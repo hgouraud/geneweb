@@ -70,9 +70,17 @@ module Reorg = struct
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "forum" ]
 
-  let history_d _conf bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "history_d" ]
+  let history_d conf =
+    let path =
+      match List.assoc_opt "history_path" conf.Config.base_env with
+      | Some path when path <> "" -> path
+      | _ -> "history_d"
+    in
+    if Filename.is_relative path then
+      String.concat Filename.dir_sep
+        [ Secure.base_dir (); conf.bname ^ ".gwb"; path ]
+    else path
+
   let history bname =
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "history" ]
@@ -142,9 +150,17 @@ module Default = struct
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "forum" ]
 
-  let history_d _conf bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "history_d" ]
+  let history_d conf =
+    let path =
+      match List.assoc_opt "history_path" conf.Config.base_env with
+      | Some path when path <> "" -> path
+      | _ -> "history_d"
+    in
+    if Filename.is_relative path then
+      String.concat Filename.dir_sep
+        [ Secure.base_dir (); conf.bname ^ ".gwb"; path ]
+    else path
+      
   let history bname =
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "history" ]
@@ -318,7 +334,7 @@ let lang_d = if !reorg then ref Reorg.lang_d else ref Default.lang_d
 let images_d = if !reorg then ref Reorg.images_d else ref Default.images_d
 let _forum = if !reorg then ref Reorg.forum else ref Default.forum
 let _history = if !reorg then ref Reorg.history else ref Default.history
-let _history_d = if !reorg then ref Reorg.history_d else ref Default.history_d
+let history_d = if !reorg then ref Reorg.history_d else ref Default.history_d
 let _notes = if !reorg then ref Reorg.notes else ref Default.notes
 let _notes_d = if !reorg then ref Reorg.notes_d else ref Default.notes_d
 let _wizard_d = if !reorg then ref Reorg.wizard_d else ref Default.wizard_d
