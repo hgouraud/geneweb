@@ -170,9 +170,9 @@ module MF : MF = struct
   let close_in ic = close_in ic.ic_chan
 end
 
-let forum_file conf =
-  let fn = Filename.concat (bpath (conf.bname ^ ".gwb")) "forum" in
-  MF.filename_of_string fn
+(* REORG *)
+let forum_file conf = MF.filename_of_string
+  (String.concat Filename.dir_sep [ Secure.base_dir (); conf.bname ^ ".gwb"; "forum" ])
 
 (* Black list *)
 
@@ -193,7 +193,7 @@ let match_strings regexp s =
 let can_post conf =
   try
     let fname = List.assoc "forum_exclude_file" conf.base_env in
-    let fname = Util.bpath fname in
+    let fname = Filename.concat (!GWPARAM.bpath conf.bname) fname in
     let ic = open_in fname in
     let rec loop () =
       match try Some (input_line ic) with End_of_file -> None with
@@ -367,10 +367,10 @@ let passwd_in_file conf kind =
   | Some _ -> true
 
 let moderators conf =
-  match List.assoc_opt "moderator_file" conf.base_env with
+  match List.assoc_opt "moderators_file" conf.base_env with
   | None | Some "" -> []
   | Some fname -> (
-      let fname = Util.bpath fname in
+      let fname = Filename.concat (!Geneweb.GWPARAM.bpath conf.bname) fname in
       match try Some (Secure.open_in fname) with Sys_error _ -> None with
       | Some ic ->
           let list =

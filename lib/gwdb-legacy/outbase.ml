@@ -2,6 +2,16 @@
 
 open Dbdisk
 
+(* REORG *)
+let loc_bpath bname =
+  let bname = Filename.chop_extension bname in
+  Filename.concat (Secure.base_dir ()) (bname ^ ".gwb")
+
+let loc_notes_d bname =
+  let bname = Filename.chop_extension bname in
+  String.concat Filename.dir_sep [Secure.base_dir (); bname ^ ".gwb"; "notes_d"]
+
+
 let load_ascends_array base = base.data.ascends.load_array ()
 let load_unions_array base = base.data.unions.load_array ()
 let load_couples_array base = base.data.couples.load_array ()
@@ -183,19 +193,21 @@ let output base =
   (* create database directory *)
   let bname = base.data.bdir in
   if not (Sys.file_exists bname) then Unix.mkdir bname 0o755;
+  let bname2 = Filename.chop_extension bname in
+  let bname3 = loc_bpath bname2 in
   (* temporary files *)
-  let tmp_particles = Filename.concat bname "1particles.txt" in
-  let tmp_base = Filename.concat bname "1base" in
-  let tmp_base_acc = Filename.concat bname "1base.acc" in
-  let tmp_names_inx = Filename.concat bname "1names.inx" in
-  let tmp_names_acc = Filename.concat bname "1names.acc" in
-  let tmp_snames_inx = Filename.concat bname "1snames.inx" in
-  let tmp_snames_dat = Filename.concat bname "1snames.dat" in
-  let tmp_fnames_inx = Filename.concat bname "1fnames.inx" in
-  let tmp_fnames_dat = Filename.concat bname "1fnames.dat" in
-  let tmp_strings_inx = Filename.concat bname "1strings.inx" in
-  let tmp_notes = Filename.concat bname "1notes" in
-  let tmp_notes_d = Filename.concat bname "1notes_d" in
+  let tmp_particles = Filename.concat bname3 "1particles.txt" in
+  let tmp_base = Filename.concat bname3 "1base" in
+  let tmp_base_acc = Filename.concat bname3 "1base.acc" in
+  let tmp_names_inx = Filename.concat bname3 "1names.inx" in
+  let tmp_names_acc = Filename.concat bname3 "1names.acc" in
+  let tmp_snames_inx = Filename.concat bname3 "1snames.inx" in
+  let tmp_snames_dat = Filename.concat bname3 "1snames.dat" in
+  let tmp_fnames_inx = Filename.concat bname3 "1fnames.inx" in
+  let tmp_fnames_dat = Filename.concat bname3 "1fnames.dat" in
+  let tmp_strings_inx = Filename.concat bname3 "1strings.inx" in
+  let tmp_notes = Filename.concat bname3 "1notes" in
+  let tmp_notes_d = Filename.concat bname3 "1notes_d" in
   load_ascends_array base;
   load_unions_array base;
   load_couples_array base;
@@ -338,7 +350,7 @@ let output base =
        in
        loop 0 0
      in
-     let oc = Secure.open_out_bin @@ Filename.concat bname "nb_persons" in
+     let oc = Secure.open_out_bin @@ Filename.concat bname3 "nb_persons" in
      output_value oc nbp;
      close_out oc
    with e ->
@@ -352,39 +364,39 @@ let output base =
      Mutil.remove_dir tmp_notes_d;
      raise e);
   close_base base;
-  Mutil.rm (Filename.concat bname "base");
-  Sys.rename tmp_base (Filename.concat bname "base");
-  Mutil.rm (Filename.concat bname "base.acc");
-  Sys.rename tmp_base_acc (Filename.concat bname "base.acc");
-  Mutil.rm (Filename.concat bname "names.inx");
-  Sys.rename tmp_names_inx (Filename.concat bname "names.inx");
-  Mutil.rm (Filename.concat bname "names.acc");
-  Sys.rename tmp_names_acc (Filename.concat bname "names.acc");
-  Mutil.rm (Filename.concat bname "snames.dat");
-  Sys.rename tmp_snames_dat (Filename.concat bname "snames.dat");
-  Mutil.rm (Filename.concat bname "snames.inx");
-  Sys.rename tmp_snames_inx (Filename.concat bname "snames.inx");
-  Mutil.rm (Filename.concat bname "fnames.dat");
-  Sys.rename tmp_fnames_dat (Filename.concat bname "fnames.dat");
-  Mutil.rm (Filename.concat bname "fnames.inx");
-  Sys.rename tmp_fnames_inx (Filename.concat bname "fnames.inx");
-  Mutil.rm (Filename.concat bname "strings.inx");
-  Sys.rename tmp_strings_inx (Filename.concat bname "strings.inx");
-  Sys.rename tmp_particles (Filename.concat bname "particles.txt");
-  Mutil.rm (Filename.concat bname "notes");
+  Mutil.rm (Filename.concat bname3 "base");
+  Sys.rename tmp_base (Filename.concat bname3 "base");
+  Mutil.rm (Filename.concat bname3 "base.acc");
+  Sys.rename tmp_base_acc (Filename.concat bname3 "base.acc");
+  Mutil.rm (Filename.concat bname3 "names.inx");
+  Sys.rename tmp_names_inx (Filename.concat bname3 "names.inx");
+  Mutil.rm (Filename.concat bname3 "names.acc");
+  Sys.rename tmp_names_acc (Filename.concat bname3 "names.acc");
+  Mutil.rm (Filename.concat bname3 "snames.dat");
+  Sys.rename tmp_snames_dat (Filename.concat bname3 "snames.dat");
+  Mutil.rm (Filename.concat bname3 "snames.inx");
+  Sys.rename tmp_snames_inx (Filename.concat bname3 "snames.inx");
+  Mutil.rm (Filename.concat bname3 "fnames.dat");
+  Sys.rename tmp_fnames_dat (Filename.concat bname3 "fnames.dat");
+  Mutil.rm (Filename.concat bname3 "fnames.inx");
+  Sys.rename tmp_fnames_inx (Filename.concat bname3 "fnames.inx");
+  Mutil.rm (Filename.concat bname3 "strings.inx");
+  Sys.rename tmp_strings_inx (Filename.concat bname3 "strings.inx");
+  Sys.rename tmp_particles (Filename.concat bname3 "particles.txt");
+  Mutil.rm (Filename.concat (loc_bpath bname3) "notes");
   if Sys.file_exists tmp_notes then
-    Sys.rename tmp_notes (Filename.concat bname "notes");
+    Sys.rename tmp_notes (Filename.concat (loc_bpath bname2) "notes");
   if Sys.file_exists tmp_notes_d then (
-    let notes_d = Filename.concat bname "notes_d" in
+    let notes_d = loc_notes_d bname2 in
     Mutil.remove_dir notes_d;
     Sys.rename tmp_notes_d notes_d);
-  Mutil.rm (Filename.concat bname "patches");
-  Mutil.rm (Filename.concat bname "patches~");
-  Mutil.rm (Filename.concat bname "synchro_patches");
-  Mutil.rm (Filename.concat bname "notes_link");
-  Mutil.rm (Filename.concat bname "restrict");
-  Mutil.rm (Filename.concat bname "tstab_visitor");
-  Mutil.rm (Filename.concat bname "nb_persons");
+  Mutil.rm (Filename.concat bname3 "patches");
+  Mutil.rm (Filename.concat bname3 "patches~");
+  Mutil.rm (Filename.concat bname3 "synchro_patches");
+  Mutil.rm (Filename.concat bname3 "notes_link");
+  Mutil.rm (Filename.concat bname3 "restrict");
+  Mutil.rm (Filename.concat bname3 "tstab_visitor");
+  Mutil.rm (Filename.concat bname3 "nb_persons");
   (* FIXME: should not be present in this part of the code? *)
-  Mutil.rm (Filename.concat bname "tstab");
-  Mutil.rm (Filename.concat bname "tstab_visitor")
+  Mutil.rm (Filename.concat bname3 "tstab");
+  Mutil.rm (Filename.concat bname3 "tstab_visitor")
