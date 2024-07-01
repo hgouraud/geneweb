@@ -84,7 +84,7 @@ let compute base bdir =
    with Sys_error _ -> ());
   Printf.eprintf "--- misc notes\n";
   flush stderr;
-  let ndir = (!GWPARAM.notes_d bdir) in
+  let ndir = !GWPARAM.notes_d bdir in
   let rec loop dir name =
     try
       let cdir = Filename.concat ndir dir in

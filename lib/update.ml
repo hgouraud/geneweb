@@ -361,7 +361,7 @@ let delete_topological_sort_v conf _base =
 
 let delete_topological_sort conf base =
   let _ = delete_topological_sort_v conf base in
-  let tstab_file = Filename.concat !GWPARAM.bpath conf.bname "tstab" in
+  let tstab_file = Filename.concat (!GWPARAM.bpath conf.bname) "tstab" in
   Mutil.rm tstab_file
 
 let print_someone conf base p =

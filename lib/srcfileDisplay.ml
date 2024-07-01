@@ -125,8 +125,10 @@ let incr_request_counter =
   incr_counter (fun r -> r.request_cnt <- r.request_cnt + 1)
 
 let lang_file_name conf fname =
-  let fname1 = Filename.concat
-    (!GWPARAM.lang_d conf.bname conf.lang) (Filename.basename fname ^ ".txt")
+  let fname1 =
+    Filename.concat
+      (!GWPARAM.lang_d conf.bname conf.lang)
+      (Filename.basename fname ^ ".txt")
   in
   if Sys.file_exists fname1 then fname1
   else
@@ -134,8 +136,11 @@ let lang_file_name conf fname =
       (Filename.concat conf.lang (Filename.basename fname ^ ".txt"))
 
 let any_lang_file_name conf fname =
-  let fname1 = Filename.concat
-    (!GWPARAM.lang_d conf.bname "") (Filename.basename fname ^ ".txt") in
+  let fname1 =
+    Filename.concat
+      (!GWPARAM.lang_d conf.bname "")
+      (Filename.basename fname ^ ".txt")
+  in
   if Sys.file_exists fname1 then fname1
   else
     search_in_assets (Filename.concat "lang" (Filename.basename fname ^ ".txt"))
@@ -315,7 +320,7 @@ let rec copy_from_stream conf base strm mode =
     | 'l' -> no_tables
     | 'm' -> Gwdb.read_nldb base <> []
     | 'n' -> not (base_notes_are_empty base "")
-    | 'o' -> Sys.file_exists (WiznotesDisplay.dir conf base)
+    | 'o' -> Sys.file_exists (WiznotesDisplay.dir conf)
     | 'p' -> (
         match List.assoc_opt (get_variable strm) conf.base_env with
         | Some "" | None -> false
@@ -523,7 +528,7 @@ let eval_var conf base env () _loc = function
   | [ "start_date" ] ->
       VVstring (string_of_start_date conf : Adef.safe_string :> string)
   | [ "wiznotes_dir_exists" ] ->
-      VVbool (Sys.file_exists (WiznotesDisplay.dir conf base))
+      VVbool (Sys.file_exists (WiznotesDisplay.dir conf))
   | _ -> raise Not_found
 
 let print_foreach _conf _print_ast _eval_expr = raise Not_found

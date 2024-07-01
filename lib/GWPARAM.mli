@@ -47,9 +47,7 @@ val notes_d : (string -> string) ref
 val wizard_d : (string -> string) ref
 val history_d : (Config.config -> string) ref
 val lang_d : (string -> string -> string) ref
-
 val adm_file : (string -> string) ref
-
 val portraits_d : (string -> string) ref
 val images_d : (string -> string) ref
 

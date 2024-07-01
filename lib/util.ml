@@ -1190,9 +1190,7 @@ let etc_file_name conf fname =
     else
       let fn =
         String.concat Filename.dir_sep
-          [ (!GWPARAM.etc_d conf.bname);
-            (Filename.basename dir);
-            (fname ^ ".txt") ]
+          [ !GWPARAM.etc_d conf.bname; Filename.basename dir; fname ^ ".txt" ]
       in
       if Sys.file_exists fn then fn
       else
@@ -1276,7 +1274,9 @@ let get_request_string conf =
 let message_to_wizard conf =
   if conf.wizard || conf.just_friend_wizard then (
     let print_file fname =
-      let fname = Filename.concat (!GWPARAM.etc_d conf.bname) (fname ^ ".txt") in
+      let fname =
+        Filename.concat (!GWPARAM.etc_d conf.bname) (fname ^ ".txt")
+      in
       try
         let ic = Secure.open_in fname in
         try

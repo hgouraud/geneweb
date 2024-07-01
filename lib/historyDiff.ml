@@ -20,8 +20,7 @@ let history_file fn sn occ =
   f ^ "." ^ string_of_int occ ^ "." ^ s
 
 (* history directory path *)
-let history_d conf =
-  !GWPARAM.history_d conf
+let history_d conf = !GWPARAM.history_d conf
 
 (* Le chemin du fichier historique dans le dossier history_d. *)
 let history_path conf fname =

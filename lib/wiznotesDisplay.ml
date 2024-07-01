@@ -4,8 +4,7 @@ open Config
 open Def
 open Util
 
-let dir conf base = !GWPARAM.wizard_d conf.bname
-
+let dir conf = !GWPARAM.wizard_d conf.bname
 let wzfile wddir wz = Filename.concat wddir (wz ^ ".txt")
 
 let read_auth_file fname =
@@ -209,8 +208,8 @@ let print_old_wizards conf list =
       list;
     Output.print_sstring conf " </dd></dl></dd></dl>")
 
-let wizard_list_from_dir conf base =
-  match try Some (Sys.readdir (dir conf base)) with Sys_error _ -> None with
+let wizard_list_from_dir conf _base =
+  match try Some (Sys.readdir (dir conf)) with Sys_error _ -> None with
   | Some arr ->
       List.fold_left
         (fun list fname ->
@@ -269,7 +268,7 @@ let print_main conf base auth_file =
         list
     else list
   in
-  let wddir = dir conf base in
+  let wddir = dir conf in
   Hutil.header_without_home conf title;
   (* mouais... *)
   let list =
@@ -423,7 +422,7 @@ let print conf base =
     match f with
     | Some wz -> (
         let wz = Filename.basename wz in
-        let wfile = wzfile (dir conf base) wz in
+        let wfile = wzfile (dir conf) wz in
         let s, date = read_wizard_notes wfile in
         match p_getint conf.env "v" with
         | Some cnt0 -> print_part_wiznote conf base wz s cnt0
@@ -439,29 +438,29 @@ let print_aux conf fn =
     | Some wz -> fn wz
     | None -> Hutil.incorrect_request conf
 
-let print_mod conf base =
+let print_mod conf _base =
   print_aux conf (fun wz ->
       let wz = Filename.basename wz in
       let can_edit = (conf.wizard && conf.user = wz) || conf.manitou in
       if can_edit then
         let title = wizard_page_title conf (Util.escape_html wz) in
-        let wfile = wzfile (dir conf base) wz in
+        let wfile = wzfile (dir conf) wz in
         let s, _ = read_wizard_notes wfile in
         Wiki.print_mod_view_page conf true (Adef.encoded "WIZNOTES") wz title []
           s
       else Hutil.incorrect_request conf)
 
-let print_view conf base =
+let print_view conf _base =
   print_aux conf (fun wz ->
       let wz = Filename.basename wz in
       let title = wizard_page_title conf (Util.escape_html wz) in
-      let wfile = wzfile (dir conf base) wz in
+      let wfile = wzfile (dir conf) wz in
       let s, _ = read_wizard_notes wfile in
       Wiki.print_mod_view_page conf false (Adef.encoded "WIZNOTES") wz title []
         s)
 
 let commit_wiznotes conf base wz s =
-  let wddir = dir conf base in
+  let wddir = dir conf in
   let fname = wzfile wddir wz in
   (try Unix.mkdir wddir 0o755 with Unix.Unix_error (_, _, _) -> ());
   write_wizard_notes fname s;
@@ -478,9 +477,7 @@ let print_mod_ok conf base =
       else None
     in
     let mode = "NOTES" in
-    let read_string wz =
-      ([], fst (read_wizard_notes (wzfile (dir conf base) wz)))
-    in
+    let read_string wz = ([], fst (read_wizard_notes (wzfile (dir conf) wz))) in
     let commit = commit_wiznotes conf base in
     let string_filter s = string_with_macros conf [] s in
     let file_path = Notes.file_path conf base in
@@ -537,13 +534,13 @@ let print_connected_wizard conf first wddir wz tm_user =
       Output.print_sstring conf (transl conf "since the last click");
       Output.print_sstring conf ")</span>"))
 
-let do_connected_wizards conf base (_, _, _, wl) =
+let do_connected_wizards conf _base (_, _, _, wl) =
   let title _ =
     transl_nth conf "wizard/wizards/friend/friends/exterior" 1
     |> Utf8.capitalize_fst |> Output.print_sstring conf
   in
   Hutil.header_without_home conf title;
-  let wddir = dir conf base in
+  let wddir = dir conf in
   let denying = wizard_denying wddir in
   let wl =
     if not (List.mem_assoc conf.user wl) then (conf.user, conf.ctime) :: wl
@@ -598,7 +595,7 @@ let connected_wizards conf base =
   | None -> Hutil.incorrect_request conf
 
 let do_change_wizard_visibility conf base x set_vis =
-  let wddir = dir conf base in
+  let wddir = dir conf in
   if not @@ Sys.file_exists wddir then Unix.mkdir wddir 0o755;
   let denying = wizard_denying wddir in
   let is_visible = not (List.mem conf.user denying) in
@@ -649,7 +646,7 @@ let search_text conf base s =
       | [] -> None
       | wz :: list ->
           let wz = Filename.basename wz in
-          let wfile = wzfile (dir conf base) wz in
+          let wfile = wzfile (dir conf) wz in
           let nt, dt = read_wizard_notes wfile in
           if in_text case_sens s nt then Some (wz, wfile, nt, dt) else loop list
     in

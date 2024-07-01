@@ -177,8 +177,7 @@ let get_extension conf saved fname =
       String.concat Filename.dir_sep
         [ !GWPARAM.portraits_d conf.bname; "old"; fname ]
     else
-      String.concat Filename.dir_sep
-        [ !GWPARAM.portraits_d conf.bname; fname ]
+      String.concat Filename.dir_sep [ !GWPARAM.portraits_d conf.bname; fname ]
   in
   if Sys.file_exists (f ^ ".jpg") then ".jpg"
   else if Sys.file_exists (f ^ ".jpeg") then ".jpeg"
@@ -573,7 +572,7 @@ let effective_delete_c_ok conf base p =
   let file = if file_name = "" then fname ^ ext else file_name in
   let dir =
     if mode = "portraits" then !GWPARAM.portraits_d conf.bname
-    else Filename.concat (!GWPARAM.images_d conf.bname) fname 
+    else Filename.concat (!GWPARAM.images_d conf.bname) fname
   in
   if not (Sys.file_exists dir) then Mutil.mkdir_p dir;
   (* TODO verify we dont destroy a saved image

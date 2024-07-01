@@ -4,7 +4,7 @@
 open Config
 open Gwdb
 
-val dir : config -> base -> string
+val dir : config -> string
 (** Returns the path to the wizard notes files associated to the base. *)
 
 val print : config -> base -> unit
