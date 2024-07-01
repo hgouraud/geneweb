@@ -43,6 +43,8 @@ val config : (string -> string) ref
 val cnt_d : (string -> string) ref
 val etc_d : (string -> string) ref
 val src_d : (string -> string) ref
+val notes_d : (string -> string) ref
+val wizard_d : (string -> string) ref
 val history_d : (Config.config -> string) ref
 val lang_d : (string -> string -> string) ref
 

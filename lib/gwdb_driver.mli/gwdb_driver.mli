@@ -530,9 +530,6 @@ val base_notes_are_empty : base -> string -> bool
 val base_notes_origin_file : base -> string
 (** Retruns origin file (.gw file) of the note *)
 
-val base_notes_dir : base -> string
-(** Directory where extended pages are stored *)
-
 val base_wiznotes_dir : base -> string
 (** Directory where wizard notes are stored *)
 

@@ -65,14 +65,12 @@ let compute base bdir =
   Printf.eprintf "--- wizard notes\n";
   flush stderr;
   (try
-     let files = Sys.readdir (Filename.concat bdir (base_wiznotes_dir base)) in
+     let files = Sys.readdir (!GWPARAM.wizard_d bdir) in
      for i = 0 to Array.length files - 1 do
        let file = files.(i) in
        if Filename.check_suffix file ".txt" then
          let wizid = Filename.chop_suffix file ".txt" in
-         let wfile =
-           List.fold_left Filename.concat bdir [ base_wiznotes_dir base; file ]
-         in
+         let wfile = Filename.concat (!GWPARAM.wizard_d bdir) file in
          let list = notes_links (read_file_contents wfile) in
          if list = ([], []) then ()
          else (
@@ -86,7 +84,7 @@ let compute base bdir =
    with Sys_error _ -> ());
   Printf.eprintf "--- misc notes\n";
   flush stderr;
-  let ndir = Filename.concat bdir (base_notes_dir base) in
+  let ndir = (!GWPARAM.notes_d bdir) in
   let rec loop dir name =
     try
       let cdir = Filename.concat ndir dir in
