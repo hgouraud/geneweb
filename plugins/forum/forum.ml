@@ -171,8 +171,10 @@ module MF : MF = struct
 end
 
 (* REORG *)
-let forum_file conf = MF.filename_of_string
-  (String.concat Filename.dir_sep [ Secure.base_dir (); conf.bname ^ ".gwb"; "forum" ])
+let forum_file conf =
+  MF.filename_of_string
+    (String.concat Filename.dir_sep
+       [ Secure.base_dir (); conf.bname ^ ".gwb"; "forum" ])
 
 (* Black list *)
 

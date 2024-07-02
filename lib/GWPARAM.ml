@@ -9,9 +9,9 @@ let errors_undef = ref []
 let errors_other = ref []
 let set_vars = ref []
 let gwd_cmd = ref ""
-let reorg = ref false
 let cnt_dir = ref ""
 let bases = ref (Secure.base_dir ())
+let reorg = !Mutil.reorg
 
 type syslog_level =
   [ `LOG_ALERT
@@ -313,26 +313,26 @@ module Default = struct
     Output.print_sstring conf {|</body></html>|}
 end
 
-let init = if !reorg then ref Reorg.init else ref Default.init
-let config = if !reorg then ref Reorg.config else ref Default.config
-let cnt_d = if !reorg then ref Reorg.cnt_d else ref Default.cnt_d
-let adm_file = if !reorg then ref Reorg.adm_file else ref Default.adm_file
+let init = if reorg then ref Reorg.init else ref Default.init
+let config = if reorg then ref Reorg.config else ref Default.config
+let cnt_d = if reorg then ref Reorg.cnt_d else ref Default.cnt_d
+let adm_file = if reorg then ref Reorg.adm_file else ref Default.adm_file
 
 let portraits_d =
-  if !reorg then ref Reorg.portraits_d else ref Default.portraits_d
+  if reorg then ref Reorg.portraits_d else ref Default.portraits_d
 
-let src_d = if !reorg then ref Reorg.src_d else ref Default.src_d
-let etc_d = if !reorg then ref Reorg.etc_d else ref Default.etc_d
-let lang_d = if !reorg then ref Reorg.lang_d else ref Default.lang_d
-let images_d = if !reorg then ref Reorg.images_d else ref Default.images_d
-let _forum = if !reorg then ref Reorg.forum else ref Default.forum
-let _history = if !reorg then ref Reorg.history else ref Default.history
-let history_d = if !reorg then ref Reorg.history_d else ref Default.history_d
-let _notes = if !reorg then ref Reorg.notes else ref Default.notes
-let notes_d = if !reorg then ref Reorg.notes_d else ref Default.notes_d
-let wizard_d = if !reorg then ref Reorg.wizard_d else ref Default.wizard_d
-let bpath = if !reorg then ref Reorg.bpath else ref Default.bpath
-let base_path = if !reorg then ref Reorg.base_path else ref Default.base_path
+let src_d = if reorg then ref Reorg.src_d else ref Default.src_d
+let etc_d = if reorg then ref Reorg.etc_d else ref Default.etc_d
+let lang_d = if reorg then ref Reorg.lang_d else ref Default.lang_d
+let images_d = if reorg then ref Reorg.images_d else ref Default.images_d
+let _forum = if reorg then ref Reorg.forum else ref Default.forum
+let _history = if reorg then ref Reorg.history else ref Default.history
+let history_d = if reorg then ref Reorg.history_d else ref Default.history_d
+let _notes = if reorg then ref Reorg.notes else ref Default.notes
+let notes_d = if reorg then ref Reorg.notes_d else ref Default.notes_d
+let wizard_d = if reorg then ref Reorg.wizard_d else ref Default.wizard_d
+let bpath = if reorg then ref Reorg.bpath else ref Default.bpath
+let base_path = if reorg then ref Reorg.base_path else ref Default.base_path
 let output_error = ref Default.output_error
 let p_auth = ref Default.p_auth
 let syslog = ref Default.syslog

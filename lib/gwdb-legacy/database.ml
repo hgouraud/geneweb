@@ -11,13 +11,16 @@ type couple = dsk_couple
 type descend = dsk_descend
 
 (* REORG *)
+let _reorg = !Mutil.reorg
+
 let loc_bpath bname =
-  let bname = Filename.chop_extension bname in
+  let bname = Filename.remove_extension bname in
   Filename.concat (Secure.base_dir ()) (bname ^ ".gwb")
 
 let loc_notes_d bname =
-  let bname = Filename.chop_extension bname in
-  String.concat Filename.dir_sep [Secure.base_dir (); bname ^ ".gwb"; "notes_d"]
+  let bname = Filename.remove_extension bname in
+  String.concat Filename.dir_sep
+    [ Secure.base_dir (); bname ^ ".gwb"; "notes_d" ]
 
 let move_with_backup src dst =
   Mutil.rm (dst ^ "~");
@@ -827,7 +830,9 @@ let input_patches bname =
 let input_synchro bname =
   let bname2 = Filename.basename bname in
   try
-    let ic = Secure.open_in_bin (Filename.concat (loc_bpath bname2) "synchro_patches") in
+    let ic =
+      Secure.open_in_bin (Filename.concat (loc_bpath bname2) "synchro_patches")
+    in
     let r : synchro_patch = input_value ic in
     close_in ic;
     r
@@ -1205,9 +1210,10 @@ let opendb ?(read_only = false) bname =
   in
   let read_notes fnotes rn_mode =
     try
-      let ic = Secure.open_in
-        (if fnotes = "" then Filename.concat bname2 "notes"
-        else Filename.concat (loc_notes_d bname3) (fnotes ^ ".txt"))
+      let ic =
+        Secure.open_in
+          (if fnotes = "" then Filename.concat bname2 "notes"
+          else Filename.concat (loc_notes_d bname3) (fnotes ^ ".txt"))
       in
       let str =
         match rn_mode with
@@ -1229,8 +1235,7 @@ let opendb ?(read_only = false) bname =
     if perm = RDONLY then fun _ _ -> raise (HttpExn (Forbidden, __LOC__))
     else fun fnotes s ->
       let fname =
-        if fnotes = "" then
-          Filename.concat (loc_bpath bname3) "notes"
+        if fnotes = "" then Filename.concat (loc_bpath bname3) "notes"
         else (
           (try Unix.mkdir (loc_notes_d bname3) 0o755 with _ -> ());
           Filename.concat (loc_notes_d bname3) (fnotes ^ ".txt"))
@@ -1243,7 +1248,7 @@ let opendb ?(read_only = false) bname =
         close_out oc)
   in
   let ext_files () =
-    let top = (loc_notes_d bname3) in
+    let top = loc_notes_d bname3 in
     let rec loop list subdir =
       let dir = Filename.concat top subdir in
       try

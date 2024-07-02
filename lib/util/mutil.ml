@@ -1,5 +1,7 @@
 (* Copyright (c) 2006-2007 INRIA *)
 
+let reorg = ref false
+
 let bench name fn =
   let pprint_gc gc =
     let open Gc in

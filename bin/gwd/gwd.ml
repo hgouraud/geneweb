@@ -2065,6 +2065,7 @@ let main () =
         else
           failwith "-cache-in-memory option unavailable for this build."
       ), "<DATABASE> Preload this database in memory")
+    ; ("-reorg", Arg.Set Mutil.reorg, " Use new REORG folder structure")
     ]
   in
   let speclist = List.sort compare speclist in

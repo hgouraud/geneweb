@@ -4,13 +4,13 @@ open Dbdisk
 
 (* REORG *)
 let loc_bpath bname =
-  let bname = Filename.chop_extension bname in
+  let bname = Filename.remove_extension bname in
   Filename.concat (Secure.base_dir ()) (bname ^ ".gwb")
 
 let loc_notes_d bname =
-  let bname = Filename.chop_extension bname in
-  String.concat Filename.dir_sep [Secure.base_dir (); bname ^ ".gwb"; "notes_d"]
-
+  let bname = Filename.remove_extension bname in
+  String.concat Filename.dir_sep
+    [ Secure.base_dir (); bname ^ ".gwb"; "notes_d" ]
 
 let load_ascends_array base = base.data.ascends.load_array ()
 let load_unions_array base = base.data.unions.load_array ()

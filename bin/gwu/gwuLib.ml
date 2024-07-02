@@ -1750,7 +1750,7 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
           let wizid = Filename.chop_suffix file ".txt" in
           let wfile =
             List.fold_left Filename.concat in_dir
-              [ (!GWPARAM.wizard_d bname); file ]
+              [ !GWPARAM.wizard_d bname; file ]
           in
           let s = String.trim (read_file_contents wfile) in
           Printf.ksprintf oc "\nwizard-note %s\n" wizid;
