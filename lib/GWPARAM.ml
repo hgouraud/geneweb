@@ -162,10 +162,11 @@ module Default = struct
       - Vrai si : la personne s'est mariée depuis plus de private_years
       - Faux dans tous les autres cas *)
   let p_auth conf base p =
+    let access = Gwdb.get_access p in
     conf.Config.wizard
-    || Gwdb.get_access p = Public
+    || access = Public
     || conf.public_if_titles
-       && Gwdb.get_access p = IfTitles
+       && access = IfTitles
        && Gwdb.nobtitles base conf.allowed_titles conf.denied_titles p <> []
     ||
     begin
@@ -188,10 +189,10 @@ module Default = struct
           conf.private_years
         @@ fun () ->
         check_date
-          (Gwdb.get_death p |> Date.dmy_of_death)
+          (Date.dmy_of_death death)
           conf.private_years_death
         @@ fun () ->
-        (Gwdb.get_access p <> Def.Private && conf.public_if_no_date)
+        (access <> Def.Private && conf.public_if_no_date)
         ||
         let families = Gwdb.get_family p in
         let len = Array.length families in
@@ -207,6 +208,34 @@ module Default = struct
     end
     (* is_semi_public takes into account ancestors and descendants *)
     || (conf.friend && is_semi_public conf base p)
+
+  type auth_cache = {
+    mutable pmap : bool IperMap.t;
+    mutable cconf : Config.config;
+    mutable cbase : Gwdb.base option;
+  }
+
+  let auth_cache = {
+    pmap = IperMap.empty;
+    cconf = Config.empty;
+    cbase = None;
+  }
+
+  let p_auth conf base p =
+    let pi = Gwdb.get_iper p in
+    if not (conf == auth_cache.cconf
+            && (Option.fold ~none:false ~some:((==) base) auth_cache.cbase))
+    then begin
+      auth_cache.pmap <- IperMap.empty;
+      auth_cache.cconf <- conf;
+      auth_cache.cbase <- Some base;
+    end;
+    match IperMap.find_opt pi auth_cache.pmap with
+    | Some auth -> auth
+    | None ->
+      let auth = p_auth conf base p in
+      auth_cache.pmap <- IperMap.add pi auth auth_cache.pmap;
+      auth
 
   let syslog (level : syslog_level) msg =
     let tm = Unix.(time () |> localtime) in
