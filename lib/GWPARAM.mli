@@ -5,6 +5,20 @@ val set_vars : string list ref
 val gwd_cmd : string ref
 val cnt_dir : string ref
 val bases : string ref
+val reorg : bool ref
+
+type my_fun_2 = string -> string
+type my_fun_3 = string -> string -> string
+
+val config : my_fun_2 ref
+val cnt_d : my_fun_2 ref
+val adm_file : my_fun_2 ref
+val src_d : my_fun_2 ref
+val etc_d : my_fun_2 ref
+val lang_d : my_fun_3 ref
+val bpath : my_fun_2 ref
+val portraits_d : my_fun_2 ref
+val images_d : my_fun_2 ref
 
 type syslog_level =
   [ `LOG_EMERG  (** A panic condition. *)
@@ -26,29 +40,9 @@ type syslog_level =
 
 (* S: Move it to gwd_lib?  *)
 
-val init : (unit -> unit) ref
+val init : unit -> unit
 (** Function called before gwd starts
     e.g. inititialise assets folders in Secure module. *)
-
-val bpath : (string -> string) ref
-(** Same as {!val:base_path}, but without the prefix (avoid unecessary empty list). *)
-
-val base_path : (string list -> string -> string) ref
-(** [!base_path pref fname] function that returns a path to a file identified by [pref] [fname]
-    related to bases. [pref] is like a category for file [fname].
-    See {!val:GWPARAM.Default.base_path} for a concrete example.
-*)
-
-val config : (string -> string) ref
-val cnt_d : (string -> string) ref
-val etc_d : (string -> string) ref
-val src_d : (string -> string) ref
-val lang_d : (string -> string -> string) ref
-
-val adm_file : (string -> string) ref
-
-val portraits_d : (string -> string) ref
-val images_d : (string -> string) ref
 
 val output_error :
   (?headers:string list ->
@@ -74,11 +68,6 @@ val wrap_output :
 *)
 
 module Reorg : sig
-  val init : unit -> unit
-  (** Inititialise assets directories for gwd server:
-      * current directory
-      *)
-
   val config : string -> string
   val cnt_d : string -> string
   val adm_file : string -> string
@@ -87,26 +76,12 @@ module Reorg : sig
   val etc_d : string -> string
   val lang_d : string -> string -> string
   val images_d : string -> string
-  val forum : string -> string
-  val history_d : Config.config -> string -> string
-  val history : string -> string
-  val notes : string -> string
-  val notes_d : string -> string
-  val wizard_d : string -> string
 
   val bpath : string -> string
   (** [Filename.concat (Secure.base_dir ())] *)
-
-  val base_path : string list -> string -> string
-  (** Use concatenation of [Secure.base_dir ()], [pref] and [fname] *)
 end
 
 module Default : sig
-  val init : unit -> unit
-  (** Inititialise assets directories for gwd server:
-      * current directory
-      *)
-
   val config : string -> string
   val cnt_d : string -> string
   val adm_file : string -> string
@@ -115,15 +90,6 @@ module Default : sig
   val etc_d : string -> string
   val lang_d : string -> string -> string
   val images_d : string -> string
-  val forum : string -> string
-  val history_d : Config.config -> string -> string
-  val history : string -> string
-  val notes : string -> string
-  val notes_d : string -> string
-  val wizard_d : string -> string
-
-  val base_path : string list -> string -> string
-  (** Use concatenation of [Secure.base_dir ()], [pref] and [fname] *)
 
   val bpath : string -> string
   (** [Filename.concat (Secure.base_dir ())] *)

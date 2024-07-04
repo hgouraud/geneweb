@@ -1277,7 +1277,9 @@ let get_request_string conf =
 let message_to_wizard conf =
   if conf.wizard || conf.just_friend_wizard then (
     let print_file fname =
-      let fname = Filename.concat (!GWPARAM.etc_d conf.bname) (fname ^ ".txt") in
+      let fname =
+        Filename.concat (!GWPARAM.etc_d conf.bname) (fname ^ ".txt")
+      in
       try
         let ic = Secure.open_in fname in
         try
@@ -2809,7 +2811,7 @@ let has_children base u =
 
 let get_bases_list ?(format_fun = fun x -> x) () =
   let list = ref [] in
-  let dh = Unix.opendir !GWPARAM.bases in
+  let dh = Unix.opendir (Secure.base_dir ()) in
   (try
      while true do
        let e = Unix.readdir dh in

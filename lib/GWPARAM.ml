@@ -30,17 +30,19 @@ module Reorg = struct
 
   let cnt_d bname =
     if bname <> "" then (
-      let str = String.concat Filename.dir_sep
-        [ Secure.base_dir (); bname ^ ".gwb"; "cnt" ]
+      let str =
+        String.concat Filename.dir_sep
+          [ Secure.base_dir (); bname ^ ".gwb"; "cnt" ]
       in
-      cnt_dir := str; str)
+      cnt_dir := str;
+      str)
     else if !cnt_dir = "" then (
       let str = String.concat Filename.dir_sep [ Secure.base_dir (); "cnt" ] in
-      cnt_dir := str; str)
+      cnt_dir := str;
+      str)
     else !cnt_dir
 
-  let adm_file file =
-    Filename.concat !cnt_dir file
+  let adm_file file = Filename.concat !cnt_dir file
 
   let portraits_d bname =
     String.concat Filename.dir_sep
@@ -48,61 +50,31 @@ module Reorg = struct
 
   let src_d bname =
     String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "src" ]
+      [ Secure.base_dir (); bname ^ ".gwb"; "documents"; "src" ]
 
   let etc_d bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "etc" ]
+    String.concat Filename.dir_sep [ Secure.base_dir (); bname ^ ".gwb"; "etc" ]
 
   let lang_d bname lang =
     if lang = "" then
       String.concat Filename.dir_sep
-        [ Secure.base_dir (); "lang"; bname ]
+        [ Secure.base_dir (); bname ^ ".gwb"; "lang"; bname ]
     else
       String.concat Filename.dir_sep
-        [ Secure.base_dir (); "lang"; lang; bname ]
+        [ Secure.base_dir (); bname ^ ".gwb"; "lang"; lang; bname ]
 
   let images_d bname =
     String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "src"; "images" ]
-
-  let forum bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "forum" ]
-
-  let history_d _conf bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "history_d" ]
-  let history bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "history" ]
-
-  let notes bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "notes" ]
-  let notes_d bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "notes_d" ]
-
-  let wizard_d bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "wiznotes" ]
+      [ Secure.base_dir (); bname ^ ".gwb"; "documents"; "images" ]
 
   let bpath bname =
-    Filename.concat (Secure.base_dir ()) (if bname <> "" then (bname ^ ".gwb") else "")
-
-  (* base_path [A; B] mybase becomes bases/mybase.gwb/A/B/ *)
-  let base_path pref bname =
-    List.fold_left Filename.concat (bpath bname) pref
-
-  let init () = Secure.add_assets Filename.current_dir_name
+    if bname = "" then Secure.base_dir ()
+    else Filename.concat (Secure.base_dir ()) (bname ^ ".gwb")
 end
-
 
 module Default = struct
   let config bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwf" ]
+    String.concat Filename.dir_sep [ Secure.base_dir (); bname ^ ".gwf" ]
 
   let cnt_d _bname =
     if !cnt_dir = "" then (
@@ -111,62 +83,30 @@ module Default = struct
       str)
     else !cnt_dir
 
-  let adm_file file =
-    Filename.concat !cnt_dir file
+  let adm_file file = Filename.concat !cnt_dir file
 
   let portraits_d bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); "images"; bname ]
+    String.concat Filename.dir_sep [ Secure.base_dir (); "images"; bname ]
 
   let src_d bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); "src"; bname ]
+    String.concat Filename.dir_sep [ Secure.base_dir (); "src"; bname ]
 
   let etc_d bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); "etc"; bname ]
+    String.concat Filename.dir_sep [ Secure.base_dir (); "etc"; bname ]
 
   let lang_d bname lang =
     if lang = "" then
-      String.concat Filename.dir_sep
-        [ Secure.base_dir (); "lang"; bname ]
+      String.concat Filename.dir_sep [ Secure.base_dir (); "lang"; bname ]
     else
-      String.concat Filename.dir_sep
-        [ Secure.base_dir (); "lang"; lang; bname ]
+      String.concat Filename.dir_sep [ Secure.base_dir (); "lang"; lang; bname ]
 
   let images_d bname =
     String.concat Filename.dir_sep
       [ Secure.base_dir (); "src"; bname; "images" ]
 
-  let forum bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "forum" ]
-
-  let history_d _conf bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "history_d" ]
-  let history bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "history" ]
-
-  let notes bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "notes" ]
-  let notes_d bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "notes_d" ]
-
-  let wizard_d bname =
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "wiznotes" ]
-
   let bpath bname =
-    Filename.concat (Secure.base_dir ()) bname
-
-  let base_path pref bname =
-    List.fold_right Filename.concat (Secure.base_dir () :: pref) bname
-
-  let init () = Secure.add_assets Filename.current_dir_name
+    if bname = "" then Secure.base_dir ()
+    else Filename.concat (Secure.base_dir ()) (bname ^ ".gwb")
 
   (** [output_error ?headers ?content conf code]
       Send the http status [code], [headers] and
@@ -307,27 +247,45 @@ module Default = struct
     Output.print_sstring conf {|</body></html>|}
 end
 
-let init = if !reorg then ref Reorg.init else ref Default.init
-let config = if !reorg then ref Reorg.config else ref Default.config
-let cnt_d = if !reorg then ref Reorg.cnt_d else ref Default.cnt_d
-let adm_file = if !reorg then ref Reorg.adm_file else ref Default.adm_file
-let portraits_d = if !reorg then ref Reorg.portraits_d else ref Default.portraits_d
-let src_d = if !reorg then ref Reorg.src_d else ref Default.src_d
-let etc_d = if !reorg then ref Reorg.etc_d else ref Default.etc_d
-let lang_d = if !reorg then ref Reorg.lang_d else ref Default.lang_d
-let images_d = if !reorg then ref Reorg.images_d else ref Default.images_d
-let _forum = if !reorg then ref Reorg.forum else ref Default.forum
-let _history = if !reorg then ref Reorg.history else ref Default.history
-let _history_d = if !reorg then ref Reorg.history_d else ref Default.history_d
-let _notes = if !reorg then ref Reorg.notes else ref Default.notes
-let _notes_d = if !reorg then ref Reorg.notes_d else ref Default.notes_d
-let _wizard_d = if !reorg then ref Reorg.wizard_d else ref Default.wizard_d
-let bpath = if !reorg then ref Reorg.bpath else ref Default.bpath
-let base_path = if !reorg then ref Reorg.base_path else ref Default.base_path
+type my_fun_2 = string -> string
+type my_fun_3 = string -> string -> string
+
+let config = ref (Default.config : my_fun_2)
+let cnt_d = ref (Default.cnt_d : my_fun_2)
+let adm_file = ref (Default.adm_file : my_fun_2)
+let src_d = ref (Default.src_d : my_fun_2)
+let etc_d = ref (Default.etc_d : my_fun_2)
+let lang_d = ref (Default.lang_d : my_fun_3)
+let bpath = ref (Default.bpath : my_fun_2)
+let portraits_d = ref (Default.portraits_d : my_fun_2)
+let images_d = ref (Default.images_d : my_fun_2)
+
+let init () =
+  Secure.add_assets Filename.current_dir_name;
+  if !reorg then (
+    config := Reorg.config;
+    cnt_d := Reorg.cnt_d;
+    adm_file := Reorg.adm_file;
+    src_d := Reorg.src_d;
+    etc_d := Reorg.etc_d;
+    lang_d := Reorg.lang_d;
+    bpath := Reorg.bpath;
+    portraits_d := Reorg.portraits_d;
+    images_d := Reorg.images_d)
+  else (
+    config := Default.config;
+    cnt_d := Default.cnt_d;
+    adm_file := Default.adm_file;
+    src_d := Default.src_d;
+    etc_d := Default.etc_d;
+    lang_d := Default.lang_d;
+    bpath := Default.bpath;
+    portraits_d := Default.portraits_d;
+    images_d := Default.images_d)
+
 let output_error = ref Default.output_error
 let p_auth = ref Default.p_auth
 let syslog = ref Default.syslog
-
 
 (** [wrap_output conf title content]
     Plugins defining a page content but not a complete UI

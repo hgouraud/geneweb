@@ -2,7 +2,6 @@ open Config
 open Gwdb
 
 let portrait_folder conf = !GWPARAM.portraits_d conf.bname
-
 let carrousel_folder conf = !GWPARAM.images_d conf.bname
 
 (** [default_portrait_filename_of_key fn sn occ] is the default filename
@@ -50,12 +49,10 @@ let full_portrait_path conf base p =
   | None ->
       None
 
-let path_of_filename src =
-  let fname1 =
-    String.concat Filename.dir_sep [ Secure.base_dir (); "images"; src ]
-  in
+let path_of_filename conf fname =
+  let fname1 = Filename.concat (!GWPARAM.images_d conf.bname) fname in
   if Sys.file_exists fname1 then `Path fname1
-  else `Path (Util.search_in_assets (Filename.concat "images" src))
+  else `Path (Util.search_in_assets (Filename.concat "images" fname))
 
 let png_size ic =
   let magic = really_input_string ic 4 in

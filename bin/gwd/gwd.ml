@@ -311,7 +311,7 @@ let read_base_env bname =
   if Sys.file_exists fname1 then
     load_file fname1
   else
-    let fname2 = Filename.concat !gw_prefix "etc/a.gwf" in
+    let fname2 = Filename.concat !gw_prefix "a.gwf" in
     if Sys.file_exists fname2 then begin
       if !debug then GwdLog.log (fun oc ->
           Printf.fprintf oc "Using configuration from %s\n%!" fname2);
@@ -1552,12 +1552,12 @@ let excluded from =
 
 let image_request conf script_name env =
   match Util.p_getenv env "m", Util.p_getenv env "v" with
-    Some "IM", Some fname ->
+  | Some "IM", Some fname ->
       let fname =
         if fname.[0] = '/' then String.sub fname 1 (String.length fname - 1)
         else fname
       in
-      let `Path fname = Image.path_of_filename fname in
+      let `Path fname = Image.path_of_filename conf fname in
       let _ = ImageDisplay.print_image_file conf fname in true
   | _ ->
       let s = script_name in
@@ -1568,7 +1568,7 @@ let image_request conf script_name env =
         (* empeche d'avoir des images qui se trouvent dans le dossier   *)
         (* image. Si on ne fait pas de basename, alors ça marche.       *)
         (* let fname = Filename.basename fname in *)
-        let `Path fname = Image.path_of_filename fname in
+        let `Path fname = Image.path_of_filename conf fname in
         let _ = ImageDisplay.print_image_file conf fname in true
       else false
 
@@ -2065,6 +2065,7 @@ let main () =
         else
           failwith "-cache-in-memory option unavailable for this build."
       ), "<DATABASE> Preload this database in memory")
+    ; ("-reorg", Arg.Set GWPARAM.reorg, "Use new reorg folder structure")
     ]
   in
   let speclist = List.sort compare speclist in
@@ -2092,7 +2093,7 @@ let main () =
   in
   Geneweb.GWPARAM.gwd_cmd := gwd_cmd;
   List.iter register_plugin !plugins ;
-  !GWPARAM.init () ;
+  GWPARAM.init () ;
   cache_lexicon () ;
   List.iter
     (fun dbn ->

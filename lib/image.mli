@@ -20,7 +20,7 @@ val size_from_path : [ `Path of string ] -> (int * int, unit) result
     - Ok (width, height) of the file.
 It works by opening the file and reading magic numbers *)
 
-val path_of_filename : string -> [> `Path of string ]
+val path_of_filename : config -> string -> [> `Path of string ]
 (** [path_of_filename fname] search for image {i images/fname} inside the base and assets directories.
     Return the path to found file or [fname] if file isn't found.  *)
 

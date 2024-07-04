@@ -125,8 +125,10 @@ let incr_request_counter =
   incr_counter (fun r -> r.request_cnt <- r.request_cnt + 1)
 
 let lang_file_name conf fname =
-  let fname1 = Filename.concat
-    (!GWPARAM.lang_d conf.bname conf.lang) (Filename.basename fname ^ ".txt")
+  let fname1 =
+    Filename.concat
+      (!GWPARAM.lang_d conf.bname conf.lang)
+      (Filename.basename fname ^ ".txt")
   in
   if Sys.file_exists fname1 then fname1
   else
@@ -134,8 +136,11 @@ let lang_file_name conf fname =
       (Filename.concat conf.lang (Filename.basename fname ^ ".txt"))
 
 let any_lang_file_name conf fname =
-  let fname1 = Filename.concat
-    (!GWPARAM.lang_d conf.bname "") (Filename.basename fname ^ ".txt") in
+  let fname1 =
+    Filename.concat
+      (!GWPARAM.lang_d conf.bname "")
+      (Filename.basename fname ^ ".txt")
+  in
   if Sys.file_exists fname1 then fname1
   else
     search_in_assets (Filename.concat "lang" (Filename.basename fname ^ ".txt"))

@@ -362,7 +362,9 @@ let treat_request =
   let w_base =
     let none conf =
       if conf.bname = "" then output_error conf Def.Bad_Request
+        ~content:(Adef.safe "conf.bname empty")
       else output_error conf Def.Not_Found
+        ~content:(Adef.safe "base not found")
     in
     w_base ~none
   in
@@ -371,8 +373,7 @@ let treat_request =
   let bfile =
     if conf.bname = "" then None
     else (
-      let bfile = !GWPARAM.bpath (conf.bname ^ ".gwb")in
-      Printf.eprintf "bfile: %s\n" bfile;
+      let bfile = Filename.concat (Secure.base_dir ()) (conf.bname ^ ".gwb") in
       if Sys.file_exists bfile
       then Some bfile
       else None)
