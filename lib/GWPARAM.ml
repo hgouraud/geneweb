@@ -166,48 +166,50 @@ module Default = struct
       - Faux dans tous les autres cas *)
   let p_auth conf base p =
     conf.Config.wizard
-    (* is_semi_public takes into account ancestors and descendants *)
-    || (conf.friend && is_semi_public conf base p)
     || Gwdb.get_access p = Public
     || conf.public_if_titles
        && Gwdb.get_access p = IfTitles
        && Gwdb.nobtitles base conf.allowed_titles conf.denied_titles p <> []
     ||
-    let death = Gwdb.get_death p in
-    if death = NotDead then conf.private_years < 1
-    else
-      let check_date d lim none =
-        match d with
-        | None -> none ()
-        | Some d ->
+    begin
+      let death = Gwdb.get_death p in
+      if death = NotDead then conf.private_years < 1
+      else
+        let check_date d lim none =
+          match d with
+          | None -> none ()
+          | Some d ->
             let a = Date.time_elapsed d conf.today in
             if a.Def.year > lim then true
             else if a.year < conf.private_years then false
             else a.month > 0 || a.day > 0
-      in
-      check_date (Gwdb.get_birth p |> Date.cdate_to_dmy_opt) conf.private_years
-      @@ fun () ->
-      check_date
-        (Gwdb.get_baptism p |> Date.cdate_to_dmy_opt)
-        conf.private_years
-      @@ fun () ->
-      check_date
-        (Gwdb.get_death p |> Date.dmy_of_death)
-        conf.private_years_death
-      @@ fun () ->
-      (Gwdb.get_access p <> Def.Private && conf.public_if_no_date)
-      ||
-      let families = Gwdb.get_family p in
-      let len = Array.length families in
-      let rec loop i =
-        i < len
-        && check_date
-             (Array.get families i |> Gwdb.foi base |> Gwdb.get_marriage
-            |> Date.cdate_to_dmy_opt)
-             conf.private_years_marriage
-             (fun () -> loop (i + 1))
-      in
-      loop 0
+        in
+        check_date (Gwdb.get_birth p |> Date.cdate_to_dmy_opt) conf.private_years
+        @@ fun () ->
+        check_date
+          (Gwdb.get_baptism p |> Date.cdate_to_dmy_opt)
+          conf.private_years
+        @@ fun () ->
+        check_date
+          (Gwdb.get_death p |> Date.dmy_of_death)
+          conf.private_years_death
+        @@ fun () ->
+        (Gwdb.get_access p <> Def.Private && conf.public_if_no_date)
+        ||
+        let families = Gwdb.get_family p in
+        let len = Array.length families in
+        let rec loop i =
+          i < len
+          && check_date
+            (Array.get families i |> Gwdb.foi base |> Gwdb.get_marriage
+             |> Date.cdate_to_dmy_opt)
+            conf.private_years_marriage
+            (fun () -> loop (i + 1))
+        in
+        loop 0
+    end
+    (* is_semi_public takes into account ancestors and descendants *)
+    || (conf.friend && is_semi_public conf base p)
 
   let syslog (level : syslog_level) msg =
     let tm = Unix.(time () |> localtime) in
