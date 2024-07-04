@@ -530,14 +530,6 @@ val is_empty_name : person -> bool
     [false] if we knwon the first name or the last name of [p].
 *)
 
-module IperSet : sig
-  include Set.S with type elt = iper
-end
-
-module IfamSet : sig
-  include Set.S with type elt = ifam
-end
-
 (**/**)
 
 val copy_from_templ_ref :
