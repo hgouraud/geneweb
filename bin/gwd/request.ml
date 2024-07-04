@@ -314,7 +314,7 @@ let try_plugin list conf base_name m =
   List.exists fn (Hashtbl.find_all GwdPlugin.ht m)
 
 let w_lock ~onerror fn conf (base_name : string option) =
-  let bfile = !GWPARAM.bpath (conf.bname ^ ".gwb") in
+  let bfile = !GWPARAM.bpath conf.bname in
   Lock.control
     (Mutil.lock_file bfile) true
     ~onerror:(fun () -> onerror conf base_name)

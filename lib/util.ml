@@ -2239,7 +2239,7 @@ let short_f_month m =
 type auth_user = { au_user : string; au_passwd : string; au_info : string }
 
 let read_gen_auth_file fname =
-  let fname = !GWPARAM.bpath fname in
+  let fname = Filename.concat (!GWPARAM.bpath "") fname in
   try
     let ic = Secure.open_in fname in
     let rec loop data =
