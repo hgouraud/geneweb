@@ -68,7 +68,7 @@ val string_of_image_medium_size : config -> base -> person * bool -> string
 val string_of_image_small_size : config -> base -> person * bool -> string
 
 val get_link :
-  generation_person list -> Util.IperSet.elt -> generation_person option
+  generation_person list -> Gwdb.IperSet.elt -> generation_person option
 
 (**)
 
@@ -80,7 +80,7 @@ val make_desc_level_table :
   base ->
   int ->
   person ->
-  (Util.IperSet.elt, int) Gwdb.Marker.t * (ifam, int) Gwdb.Marker.t
+  (Gwdb.IperSet.elt, int) Gwdb.Marker.t * (ifam, int) Gwdb.Marker.t
 
 type dup = DupFam of ifam * ifam | DupInd of iper * iper | NoDup
 type excl_dup = (iper * iper) list * (ifam * ifam) list

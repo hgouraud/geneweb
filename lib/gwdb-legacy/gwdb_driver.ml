@@ -6,6 +6,11 @@ type istr = int
 type ifam = int
 type iper = int
 
+module IperSet = Set.Make(Int)
+module IperMap = Map.Make(Int)
+
+module IfamSet = IperSet
+
 let string_of_iper = string_of_int
 let string_of_ifam = string_of_int
 let string_of_istr = string_of_int

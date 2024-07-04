@@ -9,6 +9,11 @@ type ifam
 type iper
 (** Person id *)
 
+module IperSet : Set.S with type elt = iper
+module IperMap : Map.S with type key = iper
+
+module IfamSet : Set.S with type elt = ifam
+
 val string_of_iper : iper -> string
 (** Convert [iper] to string *)
 

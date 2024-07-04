@@ -20,11 +20,8 @@ type syslog_level =
   | `LOG_NOTICE
   | `LOG_WARNING ]
 
-module IperSet = Set.Make (struct
-  type t = Gwdb.iper
-
-  let compare = Stdlib.compare
-end)
+module IperSet = Gwdb.IperSet
+module IperMap = Gwdb.IperMap
 
 module Default = struct
   let init () = Secure.add_assets Filename.current_dir_name
