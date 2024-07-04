@@ -50,7 +50,7 @@ module Reorg = struct
 
   let src_d bname =
     String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "documents"; "src" ]
+      [ Secure.base_dir (); bname ^ ".gwb"; "documents" ]
 
   let etc_d bname =
     String.concat Filename.dir_sep [ Secure.base_dir (); bname ^ ".gwb"; "etc" ]
