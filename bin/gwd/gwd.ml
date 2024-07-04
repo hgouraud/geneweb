@@ -2098,7 +2098,7 @@ let main () =
   List.iter
     (fun dbn ->
        Printf.eprintf "Caching database %s in memory… %!" dbn;
-       let dbn = !GWPARAM.bpath (dbn ^ ".gwb") in
+       let dbn = !GWPARAM.bpath dbn in
        ignore (Gwdb.open_base ~keep_in_memory:true dbn);
        Printf.eprintf "Done.\n%!"
     )
