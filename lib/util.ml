@@ -1180,26 +1180,24 @@ let etc_file_name conf fname =
   let fname =
     List.fold_left Filename.concat "" (String.split_on_char '/' fname)
   in
+
   (* On cherche le fichier dans cet ordre :
      - dans la base (bases/etc/base_name/name.txt)
-     - dans la base (bases/etc/templx/name.txt)
-     - dans le répertoire des programmes (gw/etc/templx/name.txt) *)
+     - dans les base (bases/etc/templx/name.txt)
+     - dans la distribution (gw/etc/templx/name.txt) *)
   let file_exist dir =
-    let fn =
-      Filename.concat conf.bname (fname ^ ".txt")
-      |> Filename.concat "etc" |> bpath
-    in
+    let fn = Filename.concat (!GWPARAM.etc_d conf.bname) (fname ^ ".txt") in
     if Sys.file_exists fn then fn
     else
       let fn =
-        Filename.concat (Filename.basename dir) (fname ^ ".txt")
-        |> Filename.concat "etc" |> bpath
+        String.concat Filename.dir_sep
+          [ !GWPARAM.bpath ""; "etc"; dir; fname ^ ".txt" ]
       in
       if Sys.file_exists fn then fn
       else
         let fn =
-          Filename.concat dir (fname ^ ".txt")
-          |> Filename.concat "etc" |> search_in_assets
+          search_in_assets
+            (String.concat Filename.dir_sep [ "etc"; dir; fname ^ ".txt" ])
         in
         if Sys.file_exists fn then fn else ""
   in
