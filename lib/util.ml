@@ -1184,22 +1184,34 @@ let etc_file_name conf fname =
   (* On cherche le fichier dans cet ordre :
      - dans la base (bases/etc/base_name/name.txt)
      - dans les base (bases/etc/templx/name.txt)
-     - dans la distribution (gw/etc/templx/name.txt) *)
-  let file_exist dir =
-    let fn = Filename.concat (!GWPARAM.etc_d conf.bname) (fname ^ ".txt") in
-    if Sys.file_exists fn then fn
-    else
-      let fn =
-        String.concat Filename.dir_sep
-          [ !GWPARAM.bpath ""; "etc"; dir; fname ^ ".txt" ]
-      in
-      if Sys.file_exists fn then fn
+     - dans la distribution (gw/etc/templx/name.txt)
+     - dans la distribution (gw/etc/name.txt) *)
+  let file_exist dir pass =
+    if dir <> "*" then
+      let fn = Filename.concat (!GWPARAM.etc_d conf.bname) (fname ^ ".txt") in
+      if pass = 1 && Sys.file_exists fn then fn
       else
         let fn =
-          search_in_assets
-            (String.concat Filename.dir_sep [ "etc"; dir; fname ^ ".txt" ])
+          String.concat Filename.dir_sep
+            (if dir <> "" then [ !GWPARAM.bpath ""; "etc"; dir; fname ^ ".txt" ]
+            else [ !GWPARAM.bpath ""; "etc"; fname ^ ".txt" ])
         in
-        if Sys.file_exists fn then fn else ""
+        if Sys.file_exists fn then fn
+        else
+          let fn =
+            String.concat Filename.dir_sep
+              [ !GWPARAM.bpath ""; "etc"; fname ^ ".txt" ]
+          in
+          if dir <> "" && Sys.file_exists fn then fn
+          else
+            let fn =
+              search_in_assets
+                (String.concat Filename.dir_sep
+                   (if dir <> "" then [ "etc"; dir; fname ^ ".txt" ]
+                   else [ "etc"; fname ^ ".txt" ]))
+            in
+            if Sys.file_exists fn then fn else ""
+    else ""
   in
   (* Recherche le template par défaut en fonction de la variable gwf *)
   (* template = templ1,templ2,*                                      *)
@@ -1207,7 +1219,7 @@ let etc_file_name conf fname =
     match config_templ with
     | [] | [ "*" ] -> std_fname
     | x :: l -> (
-        match file_exist x with "" -> default_templ l std_fname | s -> s)
+        match file_exist x 2 with "" -> default_templ l std_fname | s -> s)
   in
   let config_templ =
     try
@@ -1218,8 +1230,9 @@ let etc_file_name conf fname =
         else loop list (i + 1) (Buff.store len s.[i])
       in
       loop [] 0 0
-    with Not_found -> [ conf.bname; "*" ]
+    with Not_found -> [ "*" ]
   in
+  (* what is the semantic of "*" ? *)
   let dir =
     match p_getenv conf.env "templ" with
     | Some x when List.mem "*" config_templ -> x
@@ -1227,12 +1240,18 @@ let etc_file_name conf fname =
     | Some _ | None -> (
         match config_templ with [] | [ "*" ] -> "" | x :: _ -> x)
   in
+  (* remove dir from config_templ as it will have already been tested for *)
+  let config_templ =
+    List.fold_left
+      (fun acc t -> if t <> dir then t :: acc else acc)
+      [] (List.rev config_templ)
+  in
   (* template par défaut *)
   let std_fname = search_in_assets (Filename.concat "etc" (fname ^ ".txt")) in
   (* On cherche le template dans l'ordre de file_exist.         *)
   (* Si on ne trouve rien, alors on cherche le premier template *)
   (* par défaut tel que défini par la variable template du gwf  *)
-  match file_exist dir with
+  match file_exist dir 1 with
   | "" -> default_templ config_templ std_fname
   | s -> s
 

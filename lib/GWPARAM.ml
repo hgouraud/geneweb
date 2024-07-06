@@ -24,8 +24,9 @@ type syslog_level =
   | `LOG_WARNING ]
 
 let is_reorg_base bname =
-  Sys.file_exists (String.concat Filename.dir_sep
-    [Secure.base_dir (); bname ^ ".gwb"; "config.txt" ])
+  Sys.file_exists
+    (String.concat Filename.dir_sep
+       [ Secure.base_dir (); bname ^ ".gwb"; "config.txt" ])
 
 module Reorg = struct
   let config bname =
