@@ -67,6 +67,8 @@ val wrap_output :
     Wrap the display of [title] and [content] in a defined template.
 *)
 
+val is_reorg_base : string -> bool
+
 module Reorg : sig
   val config : string -> string
   val cnt_d : string -> string
