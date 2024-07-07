@@ -20,6 +20,13 @@ let printer_conf =
                         }
   }
 
+let test_reorg in_base =
+  if Sys.file_exists
+    (Filename.concat (!GWPARAM.bpath in_base) "config.txt")
+  then (
+    GWPARAM.reorg := true;
+    GWPARAM.init ())
+
 let slashify s =
   String.map (function '\\' -> '/' | c -> c) s
 
@@ -486,6 +493,12 @@ let read_base_env bname =
       match try Some (input_line ic) with End_of_file -> None with
       | None -> close_in ic ; env
       | Some s ->
+        let s =
+          if String.length s >= 1 &&
+          (Char.code s.[String.length s - 1] = 13)
+          then String.sub s 0 (String.length s - 1)
+          else s
+        in
         if s = "" || s.[0] = '#'
         then loop env
         else loop (cut_at_equal s :: env)
@@ -566,6 +579,7 @@ let rec copy_from_stream conf print strm =
                     (slashify_linux_dos (!bin_dir ^ "/setup/" ^ in_file))
                 in
                 let in_base = strip_spaces (s_getenv conf.env "anon") in
+                test_reorg in_base;
                 let benv = read_base_env in_base in
                 let conf = { conf with env = benv @ conf.env} in
                 (* depending on when %f is called, conf may be sketchy *)
@@ -654,7 +668,7 @@ let rec copy_from_stream conf print strm =
               | 'V' | 'F' ->
                   let k = get_variable strm in
                   begin match p_getenv conf.env k with
-                    Some v -> print v
+                  | Some v -> print v
                   | None -> ()
                   end
               | 'S' -> print (parameters_3 conf.env)
@@ -913,7 +927,7 @@ let print_default_gwf_file conf =
   in
   let bname = try List.assoc "o" conf.env with Not_found -> "" in
   let fname = !GWPARAM.config bname in
-  if Sys.file_exists fname then ()
+  if bname = "" || Sys.file_exists fname then ()
   else
     let oc = open_out fname in
     List.iter (fun s -> Printf.fprintf oc "%s\n" s) gwf; close_out oc
@@ -1526,12 +1540,14 @@ let gwf conf =
       Some f -> strip_spaces f
     | None -> ""
   in
+  test_reorg in_base;
   if in_base = "" then print_file conf "err_miss.htm"
   else
     let benv = read_base_env in_base in
     let trailer =
-      (in_base ^ ".trl")
-      |> Filename.concat "lang"
+      if !GWPARAM.reorg
+        then (Filename.concat (!GWPARAM.lang_d in_base "") (in_base ^ ".trl"))
+        else (Filename.concat "lang" (in_base ^ ".trl"))
       |> file_contents
       |> Util.escape_html
       |> fun s -> (s :> string)
@@ -1545,9 +1561,14 @@ let gwf_1 conf =
       Some f -> strip_spaces f
     | None -> ""
   in
+  test_reorg in_base;
   let benv = read_base_env in_base in
   let (vars, _) = variables "gwf_1.htm" in
-  let oc = open_out (in_base ^ ".gwf") in
+  let oc = open_out
+    ( if !GWPARAM.reorg then
+        (Filename.concat (!GWPARAM.bpath in_base) "config.txt")
+      else (in_base ^ ".gwf"))
+  in
   let body_prop =
     match p_getenv conf.env "proposed_body_prop" with
       Some "" | None -> s_getenv conf.env "body_prop"
@@ -1567,8 +1588,15 @@ let gwf_1 conf =
     benv;
   close_out oc;
   let trl = strip_spaces (strip_control_m (s_getenv conf.env "trailer")) in
-  let trl_file = Filename.concat "lang" (in_base ^ ".trl") in
-  (try Unix.mkdir "lang" 0o755 with Unix.Unix_error (_, _, _) -> ());
+  let trl_file =
+    if !GWPARAM.reorg
+    then Filename.concat (!GWPARAM.lang_d in_base "") (in_base ^ ".trl")
+    else Filename.concat "lang" (in_base ^ ".trl")
+  in
+  (if !GWPARAM.reorg
+    then try Unix.mkdir "lang" 0o755 with Unix.Unix_error (_, _, _) -> ()
+    else try Unix.mkdir (!GWPARAM.lang_d in_base "") 0o755 with Unix.Unix_error (_, _, _) -> ()
+  );
   begin try
     if trl = "" then Sys.remove trl_file
     else
@@ -1935,7 +1963,7 @@ let daemon = ref false
 let usage =
   "Usage: " ^ Filename.basename Sys.argv.(0) ^ " [options] where options are:"
 let speclist =
-  [("-bd", Arg.String (fun x -> base_dir := x),
+  [("-bd", Arg.String (fun x -> Secure.set_base_dir x; base_dir := x),
     "<dir> Directory where the databases are installed.");
    ("-gwd_p", Arg.Int (fun x -> gwd_port := x),
     "<number> Specify the port number of gwd (default = " ^
@@ -1982,6 +2010,7 @@ let intro () =
     !default_lang, !default_lang
 #endif
   in
+  Secure.set_base_dir ".";
   Arg.parse speclist anonfun usage;
   if !bin_dir = "" then bin_dir := !setup_dir;
   default_lang := default_setup_lang;
