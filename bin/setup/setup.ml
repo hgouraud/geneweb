@@ -21,7 +21,7 @@ let printer_conf =
   }
 
 let test_reorg in_base =
-  if Sys.file_exists
+  if !GWPARAM.reorg || Sys.file_exists
     (Filename.concat (!GWPARAM.bpath in_base) "config.txt")
   then (
     GWPARAM.reorg := true;
@@ -1558,9 +1558,15 @@ let gwf conf =
 let gwf_1 conf =
   let in_base =
     match p_getenv conf.env "anon" with
-      Some f -> strip_spaces f
+    | Some f -> strip_spaces f
     | None -> ""
   in
+  let reorg =
+    match p_getenv conf.env "reorg" with
+    | Some s ->  s
+    | _ -> ""
+  in
+  if reorg = "on" then GWPARAM.reorg := true;
   test_reorg in_base;
   let benv = read_base_env in_base in
   let (vars, _) = variables "gwf_1.htm" in
@@ -1578,7 +1584,7 @@ let gwf_1 conf =
   List.iter
     (fun k ->
        match k with
-         "body_prop" ->
+       | "body_prop" ->
            if body_prop = "" then ()
            else Printf.fprintf oc "body_prop=%s\n" body_prop
        | _ -> Printf.fprintf oc "%s=%s\n" k (s_getenv conf.env k))
@@ -1587,16 +1593,11 @@ let gwf_1 conf =
     (fun (k, v) -> if List.mem k vars then () else Printf.fprintf oc "%s=%s\n" k v)
     benv;
   close_out oc;
+  (* FIXME I dont think this was working as expected!! *)
   let trl = strip_spaces (strip_control_m (s_getenv conf.env "trailer")) in
-  let trl_file =
-    if !GWPARAM.reorg
-    then Filename.concat (!GWPARAM.lang_d in_base "") (in_base ^ ".trl")
-    else Filename.concat "lang" (in_base ^ ".trl")
-  in
-  (if !GWPARAM.reorg
-    then try Unix.mkdir "lang" 0o755 with Unix.Unix_error (_, _, _) -> ()
-    else try Unix.mkdir (!GWPARAM.lang_d in_base "") 0o755 with Unix.Unix_error (_, _, _) -> ()
-  );
+  let trl_dir = !GWPARAM.etc_d in_base in
+  let trl_file = Filename.concat trl_dir ("trl.txt") in
+  try Unix.mkdir trl_dir  0o755 with Unix.Unix_error (_, _, _) -> ();
   begin try
     if trl = "" then Sys.remove trl_file
     else

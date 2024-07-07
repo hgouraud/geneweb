@@ -63,10 +63,10 @@ module Reorg = struct
   let lang_d bname lang =
     if lang = "" then
       String.concat Filename.dir_sep
-        [ Secure.base_dir (); bname ^ ".gwb"; "lang"; bname ]
+        [ Secure.base_dir (); bname ^ ".gwb"; "lang" ]
     else
       String.concat Filename.dir_sep
-        [ Secure.base_dir (); bname ^ ".gwb"; "lang"; lang; bname ]
+        [ Secure.base_dir (); bname ^ ".gwb"; "lang"; lang ]
 
   let images_d bname =
     String.concat Filename.dir_sep
