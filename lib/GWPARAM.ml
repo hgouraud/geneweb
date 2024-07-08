@@ -23,11 +23,6 @@ type syslog_level =
   | `LOG_NOTICE
   | `LOG_WARNING ]
 
-let is_reorg_base bname =
-  Sys.file_exists
-    (String.concat Filename.dir_sep
-       [ Secure.base_dir (); bname ^ ".gwb"; "config.txt" ])
-
 module Reorg = struct
   let config bname =
     String.concat Filename.dir_sep
@@ -291,6 +286,17 @@ let init () =
 let output_error = ref Default.output_error
 let p_auth = ref Default.p_auth
 let syslog = ref Default.syslog
+
+let is_reorg_base bname =
+  Sys.file_exists
+    (String.concat Filename.dir_sep
+       [ Secure.base_dir (); bname ^ ".gwb"; "config.txt" ])
+
+let test_reorg in_base =
+  if !reorg || Sys.file_exists (Filename.concat (!bpath in_base) "config.txt")
+  then (
+    reorg := true;
+    init ())
 
 (** [wrap_output conf title content]
     Plugins defining a page content but not a complete UI

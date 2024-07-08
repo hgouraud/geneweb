@@ -4,6 +4,51 @@ open Config
 open Def
 open Gwdb
 
+let rec cut_at_equal i s =
+  if i = String.length s then (s, "")
+  else if s.[i] = '=' then
+    (String.sub s 0 i, String.sub s (succ i) (String.length s - succ i))
+  else cut_at_equal (succ i) s
+
+let read_base_env bname gw_prefix debug =
+  let load_file fname =
+    try
+      let ic = Secure.open_in fname in
+      let env =
+        let rec loop env =
+          match input_line ic with
+          | s ->
+              let s = Mutil.strip_all_trailing_spaces s in
+              if s = "" || s.[0] = '#' then loop env
+              else loop (cut_at_equal 0 s :: env)
+          | exception End_of_file -> env
+        in
+        loop []
+      in
+      close_in ic;
+      env
+    with Sys_error error ->
+      !GWPARAM.syslog `LOG_WARNING
+        (Printf.sprintf "Error %s while loading %s, using empty config\n%!"
+           error fname);
+      []
+  in
+  let fname1 = !GWPARAM.config bname in
+  if Sys.file_exists fname1 then load_file fname1
+  else
+    let fname2 = Filename.concat gw_prefix "a.gwf" in
+    if Sys.file_exists fname2 then (
+      if debug then
+        !GWPARAM.syslog `LOG_WARNING
+          (Printf.sprintf "Using configuration from %s\n%!" fname2);
+      load_file fname2)
+    else (
+      if debug then
+        !GWPARAM.syslog `LOG_WARNING
+          (Printf.sprintf "No config file found in either %s or %s\n%!" fname1
+             fname2);
+      [])
+
 let time_debug conf query_time nb_errors errors_undef errors_other set_vars =
   (*Printf.eprintf "Errors set_vars:\n";
     List.iter (fun e -> Printf.eprintf "%s\n" e) set_vars;*)
@@ -2255,8 +2300,12 @@ let short_f_month m =
 
 type auth_user = { au_user : string; au_passwd : string; au_info : string }
 
-let read_gen_auth_file fname =
-  let fname = Filename.concat (!GWPARAM.bpath "") fname in
+let read_gen_auth_file fname base_file =
+  let fname =
+    if GWPARAM.is_reorg_base base_file then
+      Filename.concat (!GWPARAM.bpath base_file) fname
+    else Filename.concat (Secure.base_dir ()) fname
+  in
   try
     let ic = Secure.open_in fname in
     let rec loop data =

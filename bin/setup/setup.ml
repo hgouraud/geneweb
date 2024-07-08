@@ -20,13 +20,6 @@ let printer_conf =
                         }
   }
 
-let test_reorg in_base =
-  if !GWPARAM.reorg || Sys.file_exists
-    (Filename.concat (!GWPARAM.bpath in_base) "config.txt")
-  then (
-    GWPARAM.reorg := true;
-    GWPARAM.init ())
-
 let slashify s =
   String.map (function '\\' -> '/' | c -> c) s
 
@@ -485,7 +478,7 @@ let cut_at_equal s =
     (String.sub s 0 i, String.sub s (succ i) (String.length s - succ i))
   | None -> (s, "")
 
-let read_base_env bname =
+let loc_read_base_env bname =
   let fname = !GWPARAM.config bname in
   match try Some (open_in fname) with Sys_error _ -> None with
   | Some ic ->
@@ -579,8 +572,8 @@ let rec copy_from_stream conf print strm =
                     (slashify_linux_dos (!bin_dir ^ "/setup/" ^ in_file))
                 in
                 let in_base = strip_spaces (s_getenv conf.env "anon") in
-                test_reorg in_base;
-                let benv = read_base_env in_base in
+                GWPARAM.test_reorg in_base;
+                let benv = loc_read_base_env in_base in
                 let conf = { conf with env = benv @ conf.env} in
                 (* depending on when %f is called, conf may be sketchy *)
                 (* conf will know bvars from basename.gwf and evars from url *)
@@ -1540,10 +1533,10 @@ let gwf conf =
       Some f -> strip_spaces f
     | None -> ""
   in
-  test_reorg in_base;
+  GWPARAM.test_reorg in_base;
   if in_base = "" then print_file conf "err_miss.htm"
   else
-    let benv = read_base_env in_base in
+    let benv = loc_read_base_env in_base in
     let trailer =
       if !GWPARAM.reorg
         then (Filename.concat (!GWPARAM.lang_d in_base "") (in_base ^ ".trl"))
@@ -1567,8 +1560,8 @@ let gwf_1 conf =
     | _ -> ""
   in
   if reorg = "on" then GWPARAM.reorg := true;
-  test_reorg in_base;
-  let benv = read_base_env in_base in
+  GWPARAM.test_reorg in_base;
+  let benv = loc_read_base_env in_base in
   let (vars, _) = variables "gwf_1.htm" in
   let oc = open_out
     ( if !GWPARAM.reorg then

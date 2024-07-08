@@ -68,6 +68,7 @@ val wrap_output :
 *)
 
 val is_reorg_base : string -> bool
+val test_reorg : string -> unit
 
 module Reorg : sig
   val config : string -> string

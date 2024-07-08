@@ -265,64 +265,6 @@ let alias_lang lang =
       close_in ic ; lang
     with Sys_error _ -> lang
 
-let rec cut_at_equal i s =
-  if i = String.length s then s, ""
-  else if s.[i] = '=' then
-    String.sub s 0 i, String.sub s (succ i) (String.length s - succ i)
-  else cut_at_equal (succ i) s
-
-let strip_trailing_spaces s =
-  let len =
-    let rec loop len =
-      if len = 0 then 0
-      else
-        match s.[len-1] with
-          ' ' | '\n' | '\r' | '\t' -> loop (len - 1)
-        | _ -> len
-    in
-    loop (String.length s)
-  in
-  String.sub s 0 len
-
-let read_base_env bname =
-  let load_file fname =
-    try
-      let ic = Secure.open_in fname in
-      let env =
-        let rec loop env =
-          match input_line ic with
-          | s ->
-            let s = strip_trailing_spaces s in
-            if s = "" || s.[0] = '#' then loop env
-            else loop (cut_at_equal 0 s :: env)
-          | exception End_of_file -> env
-        in
-        loop []
-      in
-      close_in ic;
-      env
-    with Sys_error error ->
-      GwdLog.log (fun oc ->
-          Printf.fprintf oc "Error %s while loading %s, using empty config\n%!"
-            error fname);
-      []
-  in
-  let fname1 = !GWPARAM.config bname in
-  if Sys.file_exists fname1 then
-    load_file fname1
-  else
-    let fname2 = Filename.concat !gw_prefix "a.gwf" in
-    if Sys.file_exists fname2 then begin
-      if !debug then GwdLog.log (fun oc ->
-          Printf.fprintf oc "Using configuration from %s\n%!" fname2);
-      load_file fname2
-    end else begin
-      if !debug then GwdLog.log (fun oc ->
-          Printf.fprintf oc "No config file found in either %s or %s\n%!"
-            fname1 fname2);
-      []
-    end
-
 let print_renamed conf new_n =
   let link =
     let req = Util.get_request_string conf in
@@ -477,10 +419,10 @@ let unauth_server conf ar =
   Output.print_sstring conf "</dl>\n";
   Hutil.trailer conf
 
-let gen_match_auth_file test_user_and_password auth_file =
+let gen_match_auth_file test_user_and_password auth_file base_file =
   if auth_file = "" then None
   else
-    let aul = read_gen_auth_file auth_file in
+    let aul = read_gen_auth_file auth_file base_file in
     let rec loop =
       function
         au :: aul ->
@@ -504,12 +446,12 @@ let gen_match_auth_file test_user_and_password auth_file =
     in
     loop aul
 
-let basic_match_auth_file uauth =
-  gen_match_auth_file (fun au -> au.au_user ^ ":" ^ au.au_passwd = uauth)
+let basic_match_auth_file uauth base_file =
+  gen_match_auth_file (fun au -> au.au_user ^ ":" ^ au.au_passwd = uauth) base_file
 
-let digest_match_auth_file asch =
+let digest_match_auth_file asch base_file =
   gen_match_auth_file
-    (fun au -> is_that_user_and_password asch au.au_user au.au_passwd)
+    (fun au -> is_that_user_and_password asch au.au_user au.au_passwd) base_file
 
 let match_simple_passwd sauth uauth =
   match String.index_opt sauth ':' with
@@ -520,9 +462,9 @@ let match_simple_passwd sauth uauth =
           sauth = String.sub uauth (i + 1) (String.length uauth - i - 1)
       | None -> sauth = uauth
 
-let basic_match_auth passwd auth_file uauth =
+let basic_match_auth passwd auth_file uauth base_file =
   if passwd <> "" && match_simple_passwd passwd uauth then Some ""
-  else basic_match_auth_file uauth auth_file
+  else basic_match_auth_file uauth auth_file base_file
 
 type access_type =
     ATwizard of string * string
@@ -885,27 +827,27 @@ let basic_authorization from_addr request base_env passwd access_type utm
         if wizard_passwd = "" && wizard_passwd_file = "" then
           true, true, friend_passwd = "", ""
         else
-          match basic_match_auth wizard_passwd wizard_passwd_file uauth with
-            Some username -> true, true, false, username
+          match basic_match_auth wizard_passwd wizard_passwd_file uauth base_file with
+          | Some username -> true, true, false, username
           | None -> false, false, false, ""
       else if passwd = "f" then
         if friend_passwd = "" && friend_passwd_file = "" then
           true, false, true, ""
         else
-          match basic_match_auth friend_passwd friend_passwd_file uauth with
-            Some username -> true, false, true, username
+          match basic_match_auth friend_passwd friend_passwd_file uauth base_file with
+          | Some username -> true, false, true, username
           | None -> false, false, false, ""
       else assert false
     else if wizard_passwd = "" && wizard_passwd_file = "" then
       true, true, friend_passwd = "", ""
     else
-      match basic_match_auth wizard_passwd wizard_passwd_file uauth with
+      match basic_match_auth wizard_passwd wizard_passwd_file uauth base_file with
         Some username -> true, true, false, username
       | _ ->
           if friend_passwd = "" && friend_passwd_file = "" then
             true, false, true, ""
           else
-            match basic_match_auth friend_passwd friend_passwd_file uauth with
+            match basic_match_auth friend_passwd friend_passwd_file uauth base_file with
               Some username -> true, false, true, username
             | None -> true, false, false, ""
   in
@@ -964,7 +906,7 @@ let bad_nonce_report command passwd_char =
    ar_scheme = NoAuth; ar_user = ""; ar_name = ""; ar_wizard = false;
    ar_friend = false; ar_uauth = ""; ar_can_stale = true}
 
-let test_passwd ds nonce command wf_passwd wf_passwd_file passwd_char wiz =
+let test_passwd ds nonce command wf_passwd wf_passwd_file passwd_char wiz base_file =
   let asch = HttpAuth (Digest ds) in
   if wf_passwd <> "" &&
      is_that_user_and_password asch ds.ds_username wf_passwd
@@ -976,7 +918,7 @@ let test_passwd ds nonce command wf_passwd wf_passwd_file passwd_char wiz =
        ar_name = ""; ar_wizard = wiz; ar_friend = not wiz; ar_uauth = "";
        ar_can_stale = false}
   else
-    match digest_match_auth_file asch wf_passwd_file with
+    match digest_match_auth_file asch wf_passwd_file base_file with
       Some username ->
         if ds.ds_nonce <> nonce then bad_nonce_report command passwd_char
         else
@@ -1040,10 +982,10 @@ let digest_authorization request base_env passwd utm base_file command =
                passwd nonce ds.ds_meth ds.ds_uri)
       in
       if passwd = "w" then
-        test_passwd ds nonce command wizard_passwd wizard_passwd_file "w" true
+        test_passwd ds nonce command wizard_passwd wizard_passwd_file "w" true base_file
       else if passwd = "f" then
-        test_passwd ds nonce command friend_passwd friend_passwd_file "f"
-          false
+        test_passwd ds nonce command friend_passwd friend_passwd_file "f" 
+          false base_file
       else failwith (Printf.sprintf "not impl (2) %s %s" auth meth)
     else
       {ar_ok = false; ar_command = command; ar_passwd = passwd;
@@ -1156,7 +1098,8 @@ let make_conf from_addr request script_name env =
   let (threshold_test, env) = extract_assoc "threshold" env in
   if threshold_test <> ""
   then RelationLink.threshold := int_of_string threshold_test;
-  let base_env = read_base_env base_file in
+  GWPARAM.test_reorg base_file;
+  let base_env = Util.read_base_env base_file !gw_prefix !debug in
   let default_lang =
     try
       let x = List.assoc "default_lang" base_env in
@@ -1455,7 +1398,7 @@ let conf_and_connection =
   fun from request script_name (contents: Adef.encoded_string) env ->
   let (conf, passwd_err) = make_conf from request script_name env in
   match !redirected_addr with
-    Some addr -> print_redirected conf from request addr
+  | Some addr -> print_redirected conf from request addr
   | None ->
       let (auth_err, auth) =
         if conf.auth_file = "" then false, ""
@@ -1470,7 +1413,7 @@ let conf_and_connection =
           log_and_robot_check conf auth from request script_name (contents :> string)
         end;
       match !(Wserver.cgi), auth_err, passwd_err with
-        true, true, _ ->
+      | true, true, _ ->
           if is_robot from then Robot.robot_error conf 0 0
           else no_access conf
       | _, true, _ ->
@@ -1783,16 +1726,18 @@ let connection (addr, request) script_name contents0 =
   if script_name = "robots.txt" then robots_txt printer_conf
   else if excluded from then refuse_log printer_conf from
   else
-    begin let accept =
-      if !only_addresses = [] then true else List.mem from !only_addresses
-    in
+    begin
+      let accept =
+        if !only_addresses = [] then true else List.mem from !only_addresses
+      in
       if not accept then only_log printer_conf from
       else
         try
           let (contents, env) = build_env request contents0 in
           if not (image_request printer_conf script_name env)
           && not (misc_request printer_conf script_name)
-          then conf_and_connection from request script_name contents env
+          then 
+            conf_and_connection from request script_name contents env
         with Exit -> ()
     end
 
@@ -1845,7 +1790,7 @@ let geneweb_server () =
             null_reopen [Unix.O_WRONLY] Unix.stderr
           end
         else exit 0;
-       Mutil.mkdir_p ~perm:0o777 !GWPARAM.cnt_dir 
+        Mutil.mkdir_p ~perm:0o777 !GWPARAM.cnt_dir 
     end;
   Wserver.f GwdLog.syslog !selected_addr !selected_port !conn_timeout
     (if Sys.unix then !max_clients else None) connection

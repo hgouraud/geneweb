@@ -4,6 +4,9 @@ open Config
 open Def
 open Gwdb
 
+val read_base_env : string -> string -> bool -> (string * string) list
+(** read base environment bname.gwf or bname.gwb/config.txt *)
+
 val time_debug :
   config -> float -> int -> string list -> string list -> string list -> unit
 (** prints the query duration and reports it in the "home" section *)
@@ -438,7 +441,7 @@ val short_f_month : int -> string
 type auth_user = { au_user : string; au_passwd : string; au_info : string }
 (** Authenticated user from from authorization file. *)
 
-val read_gen_auth_file : string -> auth_user list
+val read_gen_auth_file : string -> string -> auth_user list
 (** Read all authenticated users with their passwords from authorization file (associated to {i "wizard_passwd_file"} in [conf.base_env]) *)
 
 val is_that_user_and_password : auth_scheme_kind -> string -> string -> bool

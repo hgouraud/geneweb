@@ -830,7 +830,9 @@ let treat_request =
   else process ()
 
 let treat_request conf =
-  
   if GWPARAM.is_reorg_base conf.bname then GWPARAM.reorg := true ;
   GWPARAM.init () ;
+  let conf = { conf with
+    base_env = Util.read_base_env conf.bname conf.gw_prefix conf.debug }
+  in
   try treat_request conf with Update.ModErr _ -> Output.flush conf
