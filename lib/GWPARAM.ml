@@ -26,13 +26,13 @@ type syslog_level =
 module Reorg = struct
   let config bname =
     String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "config.txt" ]
+      [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "config.txt" ]
 
   let cnt_d bname =
     if bname <> "" then (
       let str =
         String.concat Filename.dir_sep
-          [ Secure.base_dir (); bname ^ ".gwb"; "cnt" ]
+          [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "cnt" ]
       in
       cnt_dir := str;
       str)
@@ -46,7 +46,7 @@ module Reorg = struct
 
   let portraits_d bname =
     String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "portraits" ]
+      [ Secure.base_dir (); bname ^ ".gwb"; "documents"; "portraits" ]
 
   let src_d bname =
     String.concat Filename.dir_sep
@@ -58,10 +58,10 @@ module Reorg = struct
   let lang_d bname lang =
     if lang = "" then
       String.concat Filename.dir_sep
-        [ Secure.base_dir (); bname ^ ".gwb"; "lang" ]
+        [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "lang" ]
     else
       String.concat Filename.dir_sep
-        [ Secure.base_dir (); bname ^ ".gwb"; "lang"; lang ]
+        [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "lang"; lang ]
 
   let images_d bname =
     String.concat Filename.dir_sep
@@ -287,16 +287,17 @@ let output_error = ref Default.output_error
 let p_auth = ref Default.p_auth
 let syslog = ref Default.syslog
 
+(* attention; ne pas utiliser !config! *)
 let is_reorg_base bname =
   Sys.file_exists
     (String.concat Filename.dir_sep
-       [ Secure.base_dir (); bname ^ ".gwb"; "config.txt" ])
+       [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "config.txt" ])
 
-let test_reorg in_base =
-  if !reorg || Sys.file_exists (Filename.concat (!bpath in_base) "config.txt")
-  then (
-    reorg := true;
-    init ())
+let test_reorg bname =
+  if !reorg || Sys.file_exists
+    (String.concat Filename.dir_sep
+       [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "config.txt" ])
+  then ( reorg := true; init ())
 
 (** [wrap_output conf title content]
     Plugins defining a page content but not a complete UI
