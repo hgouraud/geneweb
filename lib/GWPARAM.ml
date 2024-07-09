@@ -294,10 +294,14 @@ let is_reorg_base bname =
        [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "config.txt" ])
 
 let test_reorg bname =
-  if !reorg || Sys.file_exists
-    (String.concat Filename.dir_sep
-       [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "config.txt" ])
-  then ( reorg := true; init ())
+  if
+    !reorg
+    || Sys.file_exists
+         (String.concat Filename.dir_sep
+            [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "config.txt" ])
+  then (
+    reorg := true;
+    init ())
 
 (** [wrap_output conf title content]
     Plugins defining a page content but not a complete UI

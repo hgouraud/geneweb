@@ -4,6 +4,38 @@ open Config
 open Def
 open Gwdb
 
+let print_default_gwf_file bname =
+  let gwf =
+    [
+      "access_by_key=yes";
+      "disable_forum=yes";
+      "hide_private_names=no";
+      "use_restrict=no";
+      "show_consang=yes";
+      "display_sosa=yes";
+      "place_surname_link_to_ind=yes";
+      "max_anc_level=8";
+      "max_anc_tree=7";
+      "max_desc_level=12";
+      "max_desc_tree=4";
+      "max_cousins=2000";
+      "max_cousins_level=5";
+      "latest_event=20";
+      "template=*";
+      "long_date=no";
+      "counter=no";
+      "full_siblings=yes";
+      "hide_advanced_request=no";
+      "p_mod=";
+    ]
+  in
+  let fname = !GWPARAM.config bname in
+  if bname = "" || Sys.file_exists fname then ()
+  else
+    let oc = open_out fname in
+    List.iter (fun s -> Printf.fprintf oc "%s\n" s) gwf;
+    close_out oc
+
 let rec cut_at_equal i s =
   if i = String.length s then (s, "")
   else if s.[i] = '=' then

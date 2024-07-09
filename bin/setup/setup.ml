@@ -908,23 +908,6 @@ let setup_gen conf =
     Some fname -> print_file conf (basename fname)
   | _ -> error conf "request needs \"v\" parameter"
 
-let print_default_gwf_file conf =
-  let gwf =
-    ["access_by_key=yes"; "disable_forum=yes"; "hide_private_names=no";
-     "use_restrict=no"; "show_consang=yes"; "display_sosa=yes";
-     "place_surname_link_to_ind=yes"; "max_anc_level=8"; "max_anc_tree=7";
-     "max_desc_level=12"; "max_desc_tree=4"; "max_cousins=2000";
-     "max_cousins_level=5"; "latest_event=20"; "template=*"; "long_date=no";
-     "counter=no"; "full_siblings=yes"; "hide_advanced_request=no";
-     "p_mod="]
-  in
-  let bname = try List.assoc "o" conf.env with Not_found -> "" in
-  let fname = !GWPARAM.config bname in
-  if bname = "" || Sys.file_exists fname then ()
-  else
-    let oc = open_out fname in
-    List.iter (fun s -> Printf.fprintf oc "%s\n" s) gwf; close_out oc
-
 let simple conf =
   let ged =
     match p_getenv conf.env "anon" with
@@ -1022,7 +1005,7 @@ let gwc conf =
   Printf.eprintf "\n";
   flush stderr;
   if rc > 1 then print_file conf "bso_err.htm"
-  else begin print_default_gwf_file conf; print_file conf "bso_ok.htm" end
+  else print_file conf "bso_ok.htm"
 
 let gwdiff_check conf =
   print_file conf "bsi_diff.htm"
@@ -1639,7 +1622,10 @@ let ged2gwb conf =
   Printf.eprintf "\n";
   flush stderr;
   if rc > 1 then print_file conf "bso_err.htm"
-  else begin print_default_gwf_file conf; print_file conf "bso_ok.htm" end
+  else (
+    let bname = try List.assoc "o" conf.env with Not_found -> "" in
+    Util.print_default_gwf_file bname;
+    print_file conf "bso_ok.htm")
 
 let consang conf ok_file =
   let rc =

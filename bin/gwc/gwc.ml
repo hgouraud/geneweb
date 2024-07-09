@@ -135,6 +135,7 @@ let speclist =
     ("-sh", Arg.Set_int shift, "<int> Shift all persons numbers in next files");
     ("-stats", Arg.Set Db1link.pr_stats, " Print statistics");
     ("-v", Arg.Set Mutil.verbose, " Verbose");
+    ("-reorg", Arg.Set Geneweb.GWPARAM.reorg, " Mode reorg");
   ]
   |> List.sort compare |> Arg.align
 
@@ -158,6 +159,7 @@ let errmsg =
 let main () =
   Mutil.verbose := false;
   Arg.parse speclist anonfun errmsg;
+  if !Geneweb.GWPARAM.reorg then Geneweb.GWPARAM.init ();
   if not (Mutil.good_name (Filename.basename !out_file)) then (
     (* Util.transl conf not available !*)
     Printf.eprintf "The database name \"%s\" contains a forbidden character./n"
@@ -197,7 +199,9 @@ let main () =
           else !out_file ^ ".gwb"
         in
         let next_family_fun = next_family_fun_templ (List.rev !gwo) in
-        if Db1link.link next_family_fun bdir then ()
+        if Db1link.link next_family_fun bdir then
+          let bname = Filename.remove_extension !out_file in
+          Geneweb.Util.print_default_gwf_file bname
         else (
           flush stderr;
           Printf.eprintf "*** database not created\n";

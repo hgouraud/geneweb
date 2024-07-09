@@ -2010,7 +2010,7 @@ let main () =
         else
           failwith "-cache-in-memory option unavailable for this build."
       ), "<DATABASE> Preload this database in memory")
-    ; ("-reorg", Arg.Set GWPARAM.reorg, "Use new reorg folder structure")
+    ; ("-reorg", Arg.Set Geneweb.GWPARAM.reorg, "Use new reorg folder structure")
     ]
   in
   let speclist = List.sort compare speclist in

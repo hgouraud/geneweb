@@ -4,6 +4,9 @@ open Config
 open Def
 open Gwdb
 
+val print_default_gwf_file : string -> unit
+(** print default config file mybase.gwf or mybase.gwb/etc/config.txt *)
+
 val read_base_env : string -> string -> bool -> (string * string) list
 (** read base environment bname.gwf or bname.gwb/config.txt *)
 
