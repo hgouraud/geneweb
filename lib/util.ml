@@ -29,12 +29,18 @@ let print_default_gwf_file bname =
       "p_mod=";
     ]
   in
+  let etc_d = !GWPARAM.etc_d bname in
   let fname = !GWPARAM.config bname in
-  if bname = "" || Sys.file_exists fname then ()
-  else
-    let oc = open_out fname in
-    List.iter (fun s -> Printf.fprintf oc "%s\n" s) gwf;
-    close_out oc
+  try
+    if not (Sys.file_exists etc_d) then Unix.mkdir etc_d 0o755;
+    if bname = "" || Sys.file_exists fname then ()
+    else
+      let oc = open_out fname in
+      List.iter (fun s -> Printf.fprintf oc "%s\n" s) gwf;
+      close_out oc
+  with Unix.Unix_error (_, _, _) ->
+    !GWPARAM.syslog `LOG_WARNING
+      (Printf.sprintf "Error while creating %s or %s\n" etc_d fname)
 
 let rec cut_at_equal i s =
   if i = String.length s then (s, "")
