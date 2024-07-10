@@ -306,7 +306,7 @@ let rec eval_variable conf = function
           acc
           ^ Format.sprintf "<b%s>%s</b>=%s<br>\n" duplicate k
               (Util.escape_html v :> string))
-        "" l
+        "" conf.base_env
   | [ "gwd"; "arglist" ] -> !GWPARAM.gwd_cmd
   | [ "bvar"; v ] | [ "b"; v ] -> (
       try List.assoc v conf.base_env with Not_found -> "")

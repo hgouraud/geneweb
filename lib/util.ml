@@ -58,7 +58,7 @@ let read_base_env bname gw_prefix debug =
         loop []
       in
       close_in ic;
-      env
+      List.rev env
     with Sys_error error ->
       !GWPARAM.syslog `LOG_WARNING
         (Printf.sprintf "Error %s while loading %s, using empty config\n%!"

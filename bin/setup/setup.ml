@@ -1548,7 +1548,7 @@ let gwf_1 conf =
   let (vars, _) = variables "gwf_1.htm" in
   let oc = open_out
     ( if !GWPARAM.reorg then
-        (Filename.concat (!GWPARAM.bpath in_base) "config.txt")
+        (Filename.concat (!GWPARAM.bpath in_base) in_base ^ ".gwf")
       else (in_base ^ ".gwf"))
   in
   let body_prop =

@@ -26,7 +26,7 @@ type syslog_level =
 module Reorg = struct
   let config bname =
     String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "config.txt" ]
+      [ Secure.base_dir (); bname ^ ".gwb"; "etc"; bname ^ ".gwf" ]
 
   let cnt_d bname =
     if bname <> "" then (
@@ -291,15 +291,10 @@ let syslog = ref Default.syslog
 let is_reorg_base bname =
   Sys.file_exists
     (String.concat Filename.dir_sep
-       [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "config.txt" ])
+       [ Secure.base_dir (); bname ^ ".gwb"; "etc"; bname ^ ".gwf" ])
 
 let test_reorg bname =
-  if
-    !reorg
-    || Sys.file_exists
-         (String.concat Filename.dir_sep
-            [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "config.txt" ])
-  then (
+  if !reorg || is_reorg_base bname then (
     reorg := true;
     init ())
 

@@ -57,7 +57,7 @@
   <h2>[*configuration parameters]</h2>
   <div>
     Mode: <b>%if;reorg;Reorg%else;Classic%end;</b>[:]%sp;
-    <tt>%if;reorg;%base.name;.gwb%/config.txt%else;%base.name;.gwf%end;</tt><br>
+    <tt>%if;reorg;%base.name;.gwb%/etc%/%base.name;%else;%base.name;%end;.gwf</tt><br>
     %bvar.list;
   </div>
 </section>
