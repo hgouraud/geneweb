@@ -112,7 +112,7 @@
     </div>
   </div>
   <div class="table-responsive-md">
-    <table id="grp_table" class="table table-sm">
+    <table id="table_grp" class="table table-sm">
       <thead><tr>
         <th>[*group/groups]0</th>
         <th>[*group label]</th>
@@ -151,9 +151,6 @@
 %end;
 <script src="%etc_prefix;js/jquery.maphilight.js"></script>
 
-
-
-
 <script>
 function get( v ) {
   if( typeof v !== "undefined" ) {
@@ -173,6 +170,7 @@ var private_path = "%b.gallery_path_private;";
 var mouseIsNotOverLegend = true;
 
 var table;
+var table_grp;
 
 // Selection
 var x1, y1, x2, y2;
@@ -220,7 +218,7 @@ function add_new_group() {
       "name": "",
       "label": ""
     }).draw(false);
-    //$("#grp_table").append(g_row( "", ""));
+    //$("#table_grp").append(g_row( "", ""));
     new_row.node().id = "g_row" + grp;
 }
 
@@ -248,7 +246,7 @@ $(document).ready(function() {
    $("#image").maphilight();
   });
 
-  table_grp = $('#grp_table').DataTable( {
+  table_grp = $('#table_grp').DataTable( {
     "ajax": {
       "url": "%url;&ajax=on",
       "dataSrc": "r.groups"
@@ -260,7 +258,7 @@ $(document).ready(function() {
         "defaultContent": "",
         "render": function ( data, type, row, meta ) {
           var disabled = "";
-          return "<input class='form-control update' type='number' value='" + get(data) + "' min='0' step='1'" + disabled + ">";
+          return "<input class='form-control update' type='text' size='4' value='" + get(data) + "'" + disabled + ">";
         }
       },
       {
@@ -293,7 +291,7 @@ $(document).ready(function() {
           var grp = ++global_grp;
           var name = get(r.name);
           var labl = get(r.label);
-          //$("#grp_table").append(g_row(name, labl));
+          //$("#table_grp").append(g_row(name, labl));
           table_grp.row(grp-1).node().id = "g" + grp;
         } );
 
@@ -301,6 +299,9 @@ $(document).ready(function() {
           var grp = get(r.name);
           var labl = get(r.label);
           $("#group_labels").append(grp + " : " +labl + "\n");
+
+         // Make sure we can find the row in table
+         table_grp.row(cnt-1).node().id = "row" + cnt;
        });
     }
   } );
@@ -529,16 +530,6 @@ zh: Chinese
     }
   } );
 
-  $(document).on( "mouseover", "grp_table", function(e) {
-    var n = $(this).attr("id").replace(/[a-z]/g, "");
-    $( "#g" + n ).mouseover();
-    $( "#g" + n ).addClass( "in" );
-  });
-  $(document).on( "mouseout", "grp_table", function(e) {
-    var n = $(this).attr("id").replace(/[a-z]/g, "");
-    $( "#g" + n ).mouseout();
-    $( "#g" + n ).removeClass( "in" );
-  });
   $(document).on( "mouseover", ".legend", function(e) {
     var n = $(this).attr("id").replace(/[a-z]/g, "");
     $( "#area" + n ).mouseover();
@@ -591,6 +582,19 @@ zh: Chinese
     }
   });
 
+  $(document).on( "change", ".update", function() {
+    let td = table_grp.cell( this.closest('td') );
+    let tr = $(this).closest('tr');
+
+    // Propagate change to Datatables
+    td.data( $(this).val() ).draw();
+
+    // This is needed to update rendering on other input fields
+    if( this.nodeName == "SELECT" ) {
+      tr.find("input.update").change();
+    }
+  });
+
   $(document).on( "click", ".remove", function (e) {
     var tr = $(this).closest('tr');
     var n = tr.attr("id").replace(/[a-z]/g, "");
@@ -600,31 +604,14 @@ zh: Chinese
     table.row( tr ).remove().draw();
   });
 
+  $(document).on( "click", ".remove", function (e) {
+    var tr = $(this).closest('tr');
+    var n = tr.attr("id").replace(/[a-z]/g, "");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    $( "#area" + n ).remove();
+    $( "#a" + n ).remove();
+    table_grp.row( tr ).remove().draw();
+  });
 
 
   $("#frame").mousedown( function(e) {
@@ -708,7 +695,12 @@ zh: Chinese
       if( res.map[i].coords == "" ) { delete res.map[i].coords ; }
       if( res.map[i].gw == "" ) { delete res.map[i].gw ; }
     }
+    for( i=0, ien=res.groups.length ; i < ien ; i++ ) {
+      if( res.groups[i].name == "" ) { delete res.groups[i].name ; }
+      if( res.groups[i].label == "" ) { delete res.groups[i].label ; }
+    }
     var title = $("#page_title").val();
+    console.log(JSON.stringify(res, null, 2));
     if( title == "" ) { title = "&hellip;" }
     $("#notes").val( "TITLE=" + title + "\nTYPE=gallery\n" + JSON.stringify( res ) );
     $(this).unbind('submit').submit();
