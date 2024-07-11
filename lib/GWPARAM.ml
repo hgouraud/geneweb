@@ -29,20 +29,25 @@ module Reorg = struct
       [ Secure.base_dir (); bname ^ ".gwb"; "etc"; bname ^ ".gwf" ]
 
   let cnt_d bname =
-    if bname <> "" then (
-      let str =
-        String.concat Filename.dir_sep
-          [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "cnt" ]
-      in
-      cnt_dir := str;
-      str)
-    else if !cnt_dir = "" then (
-      let str = String.concat Filename.dir_sep [ Secure.base_dir (); "cnt" ] in
-      cnt_dir := str;
-      str)
+    if !cnt_dir = "" then (
+      cnt_dir :=
+        if bname <> "" then
+          String.concat Filename.dir_sep
+            [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "cnt" ]
+        else String.concat Filename.dir_sep [ Secure.base_dir (); "cnt" ];
+      (if not (Sys.file_exists !cnt_dir) then
+       try Unix.mkdir !cnt_dir 0o755
+       with Unix.Unix_error (_, _, _) ->
+         Printf.eprintf "Warning: Failure when creating cnt_dir");
+      !cnt_dir)
     else !cnt_dir
 
-  let adm_file file = Filename.concat !cnt_dir file
+  let adm_file file =
+    (if not (Sys.file_exists !cnt_dir) then
+       try Unix.mkdir !cnt_dir 0o755
+       with Unix.Unix_error (_, _, _) ->
+         Printf.eprintf "Warning: Failure when creating cnt_dir");
+    Filename.concat !cnt_dir file
 
   let portraits_d bname =
     String.concat Filename.dir_sep
