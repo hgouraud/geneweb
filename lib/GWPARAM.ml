@@ -11,6 +11,7 @@ let set_vars = ref []
 let gwd_cmd = ref ""
 let reorg = ref false
 let cnt_dir = ref ""
+let sock_dir = ref ""
 let bases = ref (Secure.base_dir ())
 
 type syslog_level =
@@ -29,25 +30,16 @@ module Reorg = struct
       [ Secure.base_dir (); bname ^ ".gwb"; "etc"; bname ^ ".gwf" ]
 
   let cnt_d bname =
-    if !cnt_dir = "" then (
+    if !sock_dir = "" then
       cnt_dir :=
         if bname <> "" then
           String.concat Filename.dir_sep
             [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "cnt" ]
-        else String.concat Filename.dir_sep [ Secure.base_dir (); "cnt" ];
-      (if not (Sys.file_exists !cnt_dir) then
-       try Unix.mkdir !cnt_dir 0o755
-       with Unix.Unix_error (_, _, _) ->
-         Printf.eprintf "Warning: Failure when creating cnt_dir");
-      !cnt_dir)
-    else !cnt_dir
+        else String.concat Filename.dir_sep [ Secure.base_dir (); "cnt" ]
+    else cnt_dir := !sock_dir;
+    !cnt_dir
 
-  let adm_file file =
-    (if not (Sys.file_exists !cnt_dir) then
-       try Unix.mkdir !cnt_dir 0o755
-       with Unix.Unix_error (_, _, _) ->
-         Printf.eprintf "Warning: Failure when creating cnt_dir");
-    Filename.concat !cnt_dir file
+  let adm_file file = Filename.concat !cnt_dir file
 
   let portraits_d bname =
     String.concat Filename.dir_sep
@@ -265,8 +257,20 @@ let bpath = ref (Default.bpath : my_fun_2)
 let portraits_d = ref (Default.portraits_d : my_fun_2)
 let images_d = ref (Default.images_d : my_fun_2)
 
-let init () =
+(* attention; ne pas utiliser !config! *)
+let is_reorg_base bname =
+  Sys.file_exists
+    (String.concat Filename.dir_sep
+       [ Secure.base_dir (); bname ^ ".gwb"; "etc"; bname ^ ".gwf" ])
+
+let output_error = ref Default.output_error
+let p_auth = ref Default.p_auth
+let syslog = ref Default.syslog
+
+let init bname =
   Secure.add_assets Filename.current_dir_name;
+  (* Note: for is_reorg to work, etc_d must exist!! *)
+  reorg := is_reorg_base bname;
   if !reorg then (
     config := Reorg.config;
     cnt_d := Reorg.cnt_d;
@@ -286,22 +290,18 @@ let init () =
     lang_d := Default.lang_d;
     bpath := Default.bpath;
     portraits_d := Default.portraits_d;
-    images_d := Default.images_d)
+    images_d := Default.images_d);
 
-let output_error = ref Default.output_error
-let p_auth = ref Default.p_auth
-let syslog = ref Default.syslog
-
-(* attention; ne pas utiliser !config! *)
-let is_reorg_base bname =
-  Sys.file_exists
-    (String.concat Filename.dir_sep
-       [ Secure.base_dir (); bname ^ ".gwb"; "etc"; bname ^ ".gwf" ])
+  if not (Sys.file_exists (!cnt_d bname)) then
+    try Unix.mkdir (!cnt_d bname) 0o755
+    with Unix.Unix_error (_, _, _) ->
+      !syslog `LOG_WARNING
+        (Format.sprintf "Failure when creating cnt_dir: %s" (!cnt_d bname))
 
 let test_reorg bname =
   if !reorg || is_reorg_base bname then (
     reorg := true;
-    init ())
+    init bname)
 
 (** [wrap_output conf title content]
     Plugins defining a page content but not a complete UI

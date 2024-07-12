@@ -1876,7 +1876,7 @@ let slashify s =
   in
   String.init (String.length s) conv_char
 
-let make_cnt_dir x =
+let make_sock_dir x =
   Mutil.mkdir_p x;
   if Sys.unix then ()
   else
@@ -1884,7 +1884,7 @@ let make_cnt_dir x =
       Wserver.sock_in := Filename.concat x "gwd.sin";
       Wserver.sock_out := Filename.concat x "gwd.sou"
     end;
-  GWPARAM.cnt_dir := x
+  GWPARAM.sock_dir := x
 
 let arg_plugin_doc opt doc =
   doc ^ " Combine with -force to enable for every base. \
@@ -1966,7 +1966,7 @@ let main () =
     [
       ("-hd", Arg.String (fun x -> gw_prefix := x; Secure.add_assets x), "<DIR> Specify where the “etc”, “images” and “lang” directories are installed (default if empty is “gw”).")
     ; ("-bd", Arg.String Secure.set_base_dir, "<DIR> Specify where the “bases” directory with databases is installed (default if empty is “bases”).")
-    ; ("-wd", Arg.String make_cnt_dir, "<DIR> Directory for socket communication (Windows) and access count.")
+    ; ("-wd", Arg.String make_sock_dir, "<DIR> Directory for socket communication (Windows) and access count.")
     ; ("-cache_langs", Arg.String (fun s -> List.iter (Mutil.list_ref_append cache_langs) @@ String.split_on_char ',' s), " Lexicon languages to be cached.")
     ; ("-cgi", Arg.Set force_cgi, " Force CGI mode.")
     ; ("-etc_prefix", Arg.String (fun x -> etc_prefix := x; Secure.add_assets x), "<DIR> Specify where the “etc” directory is installed (default if empty is [-hd value]/etc).")
@@ -2010,7 +2010,7 @@ let main () =
         else
           failwith "-cache-in-memory option unavailable for this build."
       ), "<DATABASE> Preload this database in memory")
-    ; ("-reorg", Arg.Set Geneweb.GWPARAM.reorg, "Use new reorg folder structure")
+    ; ("-reorg", Arg.Set Geneweb.GWPARAM.reorg, " Use new reorg folder structure")
     ]
   in
   let speclist = List.sort compare speclist in
@@ -2038,7 +2038,7 @@ let main () =
   in
   Geneweb.GWPARAM.gwd_cmd := gwd_cmd;
   List.iter register_plugin !plugins ;
-  GWPARAM.init () ;
+  GWPARAM.init "" ;
   cache_lexicon () ;
   List.iter
     (fun dbn ->

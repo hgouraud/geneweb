@@ -159,7 +159,7 @@ let errmsg =
 let main () =
   Mutil.verbose := false;
   Arg.parse speclist anonfun errmsg;
-  if !Geneweb.GWPARAM.reorg then Geneweb.GWPARAM.init ();
+  if !Geneweb.GWPARAM.reorg then Geneweb.GWPARAM.init !out_file;
   if not (Mutil.good_name (Filename.basename !out_file)) then (
     (* Util.transl conf not available !*)
     Printf.eprintf "The database name \"%s\" contains a forbidden character./n"

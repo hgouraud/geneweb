@@ -16,9 +16,6 @@ val time_debug :
 
 (** The directory where counters (e.g. number page displayed) are stored. *)
 
-val cnt_dir : string
-(** Alias for !GWPARAM.cnt_dir *)
-
 val bpath : string -> string
 (** Alias for !GWPARAM.bpath *)
 

@@ -202,8 +202,6 @@ let escape_attribute =
 let is_hide_names conf p =
   if conf.hide_names || get_access p = Private then true else false
 
-let cnt_dir = !GWPARAM.cnt_dir
-
 let search_in_path p s =
   let rec loop = function
     | d :: dl ->

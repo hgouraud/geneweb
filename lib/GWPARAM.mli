@@ -4,6 +4,7 @@ val errors_other : string list ref
 val set_vars : string list ref
 val gwd_cmd : string ref
 val cnt_dir : string ref
+val sock_dir : string ref
 val bases : string ref
 val reorg : bool ref
 
@@ -40,7 +41,7 @@ type syslog_level =
 
 (* S: Move it to gwd_lib?  *)
 
-val init : unit -> unit
+val init : string -> unit
 (** Function called before gwd starts
     e.g. inititialise assets folders in Secure module. *)
 

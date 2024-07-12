@@ -64,7 +64,9 @@ let count conf =
     }
 
 let write_counter conf r =
-  let fname = !GWPARAM.adm_file (conf.bname ^ ".txt") in
+  let fname =
+    Filename.concat (!GWPARAM.cnt_d conf.bname) (conf.bname ^ ".txt")
+  in
   try
     let oc = Secure.open_out_bin fname in
     output_string oc (string_of_int r.welcome_cnt);
