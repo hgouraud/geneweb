@@ -104,6 +104,9 @@ let files = ref []
 
 let speclist =
   [
+    ("-bd", Arg.String Secure.set_base_dir,
+      "<DIR> Specify where the “bases” directory with databases is \
+      installed (default if empty is “.”).");
     ( "-bnotes",
       Arg.Set_string bnotes,
       " [drop|erase|first|merge] Behavior for base notes of the next file. \
@@ -159,6 +162,7 @@ let errmsg =
 let main () =
   Mutil.verbose := false;
   Arg.parse speclist anonfun errmsg;
+  Printf.eprintf "Mode: %s, %s\n" (if !Geneweb.GWPARAM.reorg then "reorg" else "classic") !out_file;
   if !Geneweb.GWPARAM.reorg then Geneweb.GWPARAM.init !out_file;
   if not (Mutil.good_name (Filename.basename !out_file)) then (
     (* Util.transl conf not available !*)

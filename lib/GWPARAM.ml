@@ -268,9 +268,10 @@ let p_auth = ref Default.p_auth
 let syslog = ref Default.syslog
 
 let init bname =
+  Printf.eprintf "Init: %s\n" bname;
   Secure.add_assets Filename.current_dir_name;
-  (* Note: for is_reorg to work, etc_d must exist!! *)
-  reorg := is_reorg_base bname;
+  
+  reorg := !reorg || is_reorg_base bname;
   if !reorg then (
     config := Reorg.config;
     cnt_d := Reorg.cnt_d;
@@ -292,11 +293,21 @@ let init bname =
     portraits_d := Default.portraits_d;
     images_d := Default.images_d);
 
+  (if not (Sys.file_exists (!bpath bname)) then
+    try Unix.mkdir (!bpath bname) 0o755
+    with Unix.Unix_error (_, _, _) ->
+      !syslog `LOG_WARNING
+        (Printf.sprintf "Failure when creating base_dir: %s" (!bpath bname)));
+  (if not (Sys.file_exists (!etc_d bname)) then
+    try Unix.mkdir (!etc_d bname) 0o755
+    with Unix.Unix_error (_, _, _) ->
+      !syslog `LOG_WARNING
+        (Printf.sprintf "Failure when creating etc_dir: %s" (!etc_d bname)));
   if not (Sys.file_exists (!cnt_d bname)) then
     try Unix.mkdir (!cnt_d bname) 0o755
     with Unix.Unix_error (_, _, _) ->
       !syslog `LOG_WARNING
-        (Format.sprintf "Failure when creating cnt_dir: %s" (!cnt_d bname))
+        (Printf.sprintf "Failure when creating cnt_dir: %s" (!cnt_d bname))
 
 let test_reorg bname =
   if !reorg || is_reorg_base bname then (
