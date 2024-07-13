@@ -10,6 +10,7 @@ let errors_other = ref []
 let set_vars = ref []
 let gwd_cmd = ref ""
 let reorg = ref false
+let force = ref false
 let cnt_dir = ref ""
 let sock_dir = ref ""
 let bases = ref (Secure.base_dir ())
@@ -268,7 +269,6 @@ let p_auth = ref Default.p_auth
 let syslog = ref Default.syslog
 
 let init bname =
-  Printf.eprintf "Init: %s\n" bname;
   Secure.add_assets Filename.current_dir_name;
   
   reorg := !reorg || is_reorg_base bname;
@@ -294,7 +294,8 @@ let init bname =
     images_d := Default.images_d);
 
   (if not (Sys.file_exists (!bpath bname)) then
-    try Unix.mkdir (!bpath bname) 0o755
+    try (Unix.mkdir (!bpath bname) 0o755;
+    force := true)
     with Unix.Unix_error (_, _, _) ->
       !syslog `LOG_WARNING
         (Printf.sprintf "Failure when creating base_dir: %s" (!bpath bname)));

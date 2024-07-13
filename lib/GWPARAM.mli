@@ -7,6 +7,7 @@ val cnt_dir : string ref
 val sock_dir : string ref
 val bases : string ref
 val reorg : bool ref
+val force : bool ref
 
 type my_fun_2 = string -> string
 type my_fun_3 = string -> string -> string

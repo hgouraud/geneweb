@@ -96,7 +96,7 @@ let next_family_fun_templ gwo_list fi =
 
 let just_comp = ref false
 let out_file = ref (Filename.concat Filename.current_dir_name "a")
-let force = ref false
+let in_file = ref ""
 let separate = ref false
 let bnotes = ref "merge"
 let shift = ref 0
@@ -119,7 +119,7 @@ let speclist =
       Arg.Set_string Db1link.default_source,
       "<str> Set the source field for persons and families without source data"
     );
-    ("-f", Arg.Set force, " Remove database if already existing");
+    ("-f", Arg.Set Geneweb.GWPARAM.force, " Remove database if already existing");
     ("-mem", Arg.Set Outbase.save_mem, " Save memory, but slower");
     ("-nc", Arg.Clear Db1link.do_check, " No consistency check");
     ("-nofail", Arg.Set Gwcomp.no_fail, " No failure in case of error");
@@ -145,8 +145,8 @@ let speclist =
 let anonfun x =
   let bn = !bnotes in
   let sep = !separate in
-  if Filename.check_suffix x ".gw" then ()
-  else if Filename.check_suffix x ".gwo" then ()
+  if Filename.check_suffix x ".gw" then (in_file := x)
+  else if Filename.check_suffix x ".gwo" then (in_file := x)
   else raise (Arg.Bad ("Don't know what to do with \"" ^ x ^ "\""));
   separate := false;
   bnotes := "merge";
@@ -162,11 +162,18 @@ let errmsg =
 let main () =
   Mutil.verbose := false;
   Arg.parse speclist anonfun errmsg;
-  Printf.eprintf "Mode: %s, %s\n" (if !Geneweb.GWPARAM.reorg then "reorg" else "classic") !out_file;
+  if not (Array.mem "-bd" Sys.argv) then
+    Secure.set_base_dir ".";
+  in_file := Filename.remove_extension !in_file;
+  if not (Array.mem "-o" Sys.argv && (Mutil.good_name !in_file)) then
+    out_file := !in_file;
+  Printf.eprintf "Mode: %s, for base %s\n"
+    (if !Geneweb.GWPARAM.reorg then "reorg" else "classic")
+    (!Geneweb.GWPARAM.bpath !out_file);
   if !Geneweb.GWPARAM.reorg then Geneweb.GWPARAM.init !out_file;
   if not (Mutil.good_name (Filename.basename !out_file)) then (
     (* Util.transl conf not available !*)
-    Printf.eprintf "The database name \"%s\" contains a forbidden character./n"
+    Printf.eprintf "The database name \"%s\" contains a forbidden character.\n"
       !out_file;
     Printf.eprintf "Allowed characters: a..z, A..Z, 0..9, -";
     flush stdout;
@@ -190,7 +197,7 @@ let main () =
       if Filename.check_suffix !out_file ".gwb" then !out_file
       else !out_file ^ ".gwb"
     in
-    if (not !force) && Sys.file_exists bdir then (
+    if (not !Geneweb.GWPARAM.force) && Sys.file_exists bdir then (
       Printf.eprintf
         "The database \"%s\" already exists. Use option -f to overwrite it."
         !out_file;
