@@ -104,10 +104,10 @@ let files = ref []
 
 let speclist =
   [
-    ( "-bd",
-      Arg.String Secure.set_base_dir,
-      "<DIR> Specify where the “bases” directory with databases is installed \
-       (default if empty is “.”)." );
+    (* "-bd",
+       Arg.String Secure.set_base_dir,
+       "<DIR> Specify where the “bases” directory with databases is installed \
+        (default if empty is “.”)." );*)
     ( "-bnotes",
       Arg.Set_string bnotes,
       " [drop|erase|first|merge] Behavior for base notes of the next file. \
@@ -165,7 +165,7 @@ let main () =
   Arg.parse speclist anonfun errmsg;
   if not (Array.mem "-bd" Sys.argv) then Secure.set_base_dir ".";
   in_file := Filename.remove_extension (Filename.basename !in_file);
-  if not (Array.mem "-o" Sys.argv && Mutil.good_name !in_file) then
+  if (not (Array.mem "-o" Sys.argv)) && Mutil.good_name !in_file then
     out_file := !in_file;
   Printf.eprintf "Mode: %s, for base %s\n"
     (if !Geneweb.GWPARAM.reorg then "reorg" else "classic")
