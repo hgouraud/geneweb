@@ -104,10 +104,10 @@ let files = ref []
 
 let speclist =
   [
-    (* "-bd",
-       Arg.String Secure.set_base_dir,
-       "<DIR> Specify where the “bases” directory with databases is installed \
-        (default if empty is “.”)." );*)
+    ( "-bd",
+      Arg.String Secure.set_base_dir,
+      "<DIR> Specify where the “bases” directory with databases is installed \
+       (default if empty is “.”)." );
     ( "-bnotes",
       Arg.Set_string bnotes,
       " [drop|erase|first|merge] Behavior for base notes of the next file. \
@@ -167,18 +167,18 @@ let main () =
   in_file := Filename.remove_extension (Filename.basename !in_file);
   if (not (Array.mem "-o" Sys.argv)) && Mutil.good_name !in_file then
     out_file := !in_file;
+  let bname = Filename.remove_extension (Filename.basename !out_file) in
   Printf.eprintf "Mode: %s, for base %s\n"
     (if !Geneweb.GWPARAM.reorg then "reorg" else "classic")
-    (!Geneweb.GWPARAM.bpath !out_file);
-  if !Geneweb.GWPARAM.reorg then Geneweb.GWPARAM.init !out_file;
-  if not (Mutil.good_name (Filename.basename !out_file)) then (
+    (Filename.concat (!Geneweb.GWPARAM.bpath "") (bname ^ ".gwb"));
+  Geneweb.GWPARAM.init bname;
+  if not (Mutil.good_name (Filename.basename bname)) then (
     (* Util.transl conf not available !*)
     Printf.eprintf "The database name \"%s\" contains a forbidden character.\n"
-      !out_file;
+      bname;
     Printf.eprintf "Allowed characters: a..z, A..Z, 0..9, -";
     flush stdout;
     exit 2);
-  Secure.set_base_dir (Filename.dirname !out_file);
   let gwo = ref [] in
   List.iter
     (fun (x, separate, bnotes, shift) ->
@@ -193,30 +193,25 @@ let main () =
       else raise (Arg.Bad ("Don't know what to do with \"" ^ x ^ "\"")))
     (List.rev !files);
   if not !just_comp then (
-    let bdir =
-      if Filename.check_suffix !out_file ".gwb" then !out_file
-      else !out_file ^ ".gwb"
-    in
+    let bdir = !Geneweb.GWPARAM.bpath bname in
     if (not !Geneweb.GWPARAM.force) && Sys.file_exists bdir then (
       Printf.eprintf
         "The database \"%s\" already exists. Use option -f to overwrite it."
         !out_file;
       flush stdout;
       exit 2);
-    Lock.control (Mutil.lock_file !out_file)
-      false ~onerror:Lock.print_error_and_exit (fun () ->
-        let bdir =
-          if Filename.check_suffix !out_file ".gwb" then !out_file
-          else !out_file ^ ".gwb"
-        in
+    Lock.control (Mutil.lock_file bdir) false ~onerror:Lock.print_error_and_exit
+      (fun () ->
         let next_family_fun = next_family_fun_templ (List.rev !gwo) in
         if Db1link.link next_family_fun bdir then
-          let bname = Filename.remove_extension !out_file in
           Geneweb.Util.print_default_gwf_file bname
         else (
           flush stderr;
           Printf.eprintf "*** database not created\n";
           flush stderr;
-          exit 2)))
+          exit 2));
+    (* FIXME see why db1link cant delete this tmp file *)
+    let tmp_file = Filename.concat Filename.current_dir_name "gw_tmp" in
+    Mutil.rm_rf tmp_file)
 
 let _ = main ()

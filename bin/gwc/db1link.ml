@@ -1708,7 +1708,7 @@ let link next_family_fun bdir =
   if !do_check && gen.g_pcnt > 0 then (
     Check.check_base base (set_error base gen) (set_warning base) ignore;
     if !pr_stats then Stats.(print_stats base @@ stat_base base));
-  Mutil.remove_dir tmp_dir;
+  Mutil.rm_rf tmp_dir;
   if not gen.g_errored then (
     if !do_consang then ignore @@ ConsangAll.compute base true;
     Gwdb.sync base;
@@ -1716,5 +1716,5 @@ let link next_family_fun bdir =
     output_command_line bdir;
     true)
   else (
-    Mutil.remove_dir bdir;
+    Mutil.rm_rf bdir;
     false)

@@ -604,7 +604,9 @@ let rec copy_from_stream conf print strm =
           | 't' -> print_if conf print (not Sys.unix) strm
           | 'v' ->
               let out = strip_spaces (s_getenv conf.env "o") in
-              print_if conf print (Sys.file_exists (out ^ ".gwb")) strm
+              let bd = strip_spaces (s_getenv conf.env "bd") in
+              let base = Filename.concat bd out in
+              print_if conf print (Sys.file_exists (base ^ ".gwb")) strm
           | 'y' -> for_all conf print (all_db (s_getenv conf.env "anon")) strm
           | 'z' -> print (string_of_int !port)
           | 'A'..'Z' | '0'..'9' as c ->

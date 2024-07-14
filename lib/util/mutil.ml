@@ -189,17 +189,6 @@ let mkdir_p ?(perm = 0o755) d =
   in
   loop d
 
-let rec remove_dir d =
-  begin try
-    let files = Sys.readdir d in
-    for i = 0 to Array.length files - 1 do
-      remove_dir (Filename.concat d files.(i));
-      rm (Filename.concat d files.(i))
-    done
-  with Sys_error _ -> ()
-  end;
-  try Unix.rmdir d with Unix.Unix_error (_, _, _) -> ()
-
 let lock_file bname =
   let bname =
     if Filename.check_suffix bname ".gwb" then
