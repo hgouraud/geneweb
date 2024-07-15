@@ -122,6 +122,7 @@ let speclist =
       "<str> Set the source field for persons and families without source data"
     );
     ("-f", Arg.Set Geneweb.GWPARAM.force, " Remove database if already existing");
+    ("-gwo", Arg.Set kill_gwo, " Suppress .gwo files after base creation");
     ("-mem", Arg.Set Outbase.save_mem, " Save memory, but slower");
     ("-nc", Arg.Clear Db1link.do_check, " No consistency check");
     ("-nofail", Arg.Set Gwcomp.no_fail, " No failure in case of error");
@@ -137,12 +138,11 @@ let speclist =
       Arg.Set_string Db1link.particules_file,
       "<file> Particles file (default = predefined particles)" );
     ("-q", Arg.Clear Mutil.verbose, " Quiet");
+    ("-reorg", Arg.Set Geneweb.GWPARAM.reorg, " Mode reorg");
     ("-sep", Arg.Set separate, " Separate all persons in next file");
     ("-sh", Arg.Set_int shift, "<int> Shift all persons numbers in next files");
     ("-stats", Arg.Set Db1link.pr_stats, " Print statistics");
     ("-v", Arg.Set Mutil.verbose, " Verbose");
-    ("-reorg", Arg.Set Geneweb.GWPARAM.reorg, " Mode reorg");
-    ("-gwo", Arg.Set kill_gwo, " Suppress .gwo files after base creation");
   ]
   |> List.sort compare |> Arg.align
 
