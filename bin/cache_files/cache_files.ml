@@ -1,4 +1,3 @@
-open Geneweb
 open Gwdb
 
 let bname = ref ""
@@ -10,6 +9,7 @@ let snames = ref false
 let alias = ref false
 let qual = ref false
 let all = ref false
+let reorg = ref false
 let prog = ref false
 
 let write_cache_file bname fname list =
@@ -17,15 +17,39 @@ let write_cache_file bname fname list =
     if Filename.check_suffix bname ".gwb" then Filename.remove_extension bname
     else bname
   in
-  let fname =
-    Filename.concat (!GWPARAM.bpath bname) (bname ^ "_" ^ fname ^ "_cache.txt")
+  let cache =
+    if !reorg then
+      let mybase = bname ^ ".gwb" in
+      let etc = Filename.concat mybase "etc" in
+      let cache = Filename.concat etc "cache" in
+      Mutil.mkdir_p etc;
+      Mutil.mkdir_p cache;
+      cache
+    else
+      let mybase = Filename.concat "etc" bname in
+      let cache = Filename.concat mybase "cache" in
+      Mutil.mkdir_p "etc";
+      Mutil.mkdir_p mybase;
+      Mutil.mkdir_p cache;
+      cache
   in
-  Printf.printf "Write to : %s\n" fname;
-  match try Some (Secure.open_out fname) with Sys_error _ -> None with
-  | Some oc ->
-      List.iter (fun (v, _) -> output_string oc ("<option>" ^ v ^ "\n")) list;
-      close_out oc
-  | None -> ()
+  let fname =
+    Filename.concat cache (bname ^ "_" ^ fname ^ ".txt")
+  in
+  if not !prog then Printf.printf "\n";
+  let fname_width = String.length fname + 6 in
+  Printf.printf "%-*s" fname_width fname;
+  try
+    match try Some (Secure.open_out fname) with Sys_error _ -> None with
+    | Some oc ->
+        List.iter (fun (v, _) -> output_string oc ("<option>" ^ v ^ "\n")) list;
+        close_out oc
+    | None -> failwith "Failed to open file for writing"
+  with
+  | exn ->
+      Printf.printf "Debug: Exception occurred: %s\n" (Printexc.to_string exn);
+      Printf.printf "Debug: Stack trace:\n%s\n" (Printexc.get_backtrace ());
+      raise exn
 
 let places_all base bname fname =
   let start = Unix.gettimeofday () in
@@ -40,7 +64,7 @@ let places_all base bname fname =
   in
   let len = nb_of_persons base in
   if !prog then (
-    Printf.printf "Places\n";
+    Printf.printf "\nplaces\n";
     flush stdout;
     ProgrBar.full := '*';
     ProgrBar.start ());
@@ -87,8 +111,8 @@ let places_all base bname fname =
   write_cache_file bname fname places_list;
   flush stderr;
   let stop = Unix.gettimeofday () in
-  Printf.printf "Number of places: %d\n" (List.length places_list);
-  Printf.printf "Execution time: %fs\n" (stop -. start);
+  Printf.printf "%+20d places" (List.length places_list);
+  Printf.printf "%+10.2f s" (stop -. start);
   flush stderr
 
 let names_all base bname fname =
@@ -149,8 +173,8 @@ let names_all base bname fname =
   write_cache_file bname fname name_list;
   flush stderr;
   let stop = Unix.gettimeofday () in
-  Printf.printf "Number of %s : %d\n" fname (Hashtbl.length ht);
-  Printf.printf "Execution time: %fs\n" (stop -. start);
+  Printf.printf "%+20d %s" (Hashtbl.length ht) fname;
+  Printf.printf "%+10.2f s" (stop -. start);
   flush stderr
 
 let speclist =
@@ -163,6 +187,7 @@ let speclist =
     ("-all", Arg.Set all, " produce all");
     ("-fna", Arg.Set fname_alias, " add first names aliases");
     ("-prog", Arg.Set prog, " show progress bar");
+    ("-reorg", Arg.Set reorg, " use base reorganistion architecture");
   ]
   |> List.sort compare |> Arg.align
 
@@ -178,6 +203,7 @@ let main () =
     exit 2);
   let base = Gwdb.open_base !bname in
   bname := Filename.basename !bname;
+  Printf.printf "Generating cache(s)";
   if !places then places_all base !bname "places";
   if !fnames then names_all base !bname "fnames";
   if !snames then names_all base !bname "snames";
