@@ -9,33 +9,12 @@ let snames = ref false
 let alias = ref false
 let qual = ref false
 let all = ref false
-let reorg = ref false
 let prog = ref false
 
 let write_cache_file bname fname list =
-  let bname =
-    if Filename.check_suffix bname ".gwb" then Filename.remove_extension bname
-    else bname
-  in
-  let cache =
-    if !reorg then
-      let mybase = bname ^ ".gwb" in
-      let etc = Filename.concat mybase "etc" in
-      let cache = Filename.concat etc "cache" in
-      Mutil.mkdir_p etc;
-      Mutil.mkdir_p cache;
-      cache
-    else
-      let mybase = Filename.concat "etc" bname in
-      let cache = Filename.concat mybase "cache" in
-      Mutil.mkdir_p "etc";
-      Mutil.mkdir_p mybase;
-      Mutil.mkdir_p cache;
-      cache
-  in
-  let fname =
-    Filename.concat cache (bname ^ "_" ^ fname ^ ".txt")
-  in
+  let cache = Filename.concat  (!Geneweb.GWPARAM.etc_d bname) "cache" in
+  let fname = Filename.concat cache (bname ^ "_" ^ fname ^ ".txt") in
+  Printf.eprintf "Fname: %s\n" fname;
   if not !prog then Printf.printf "\n";
   let fname_width = String.length fname + 6 in
   Printf.printf "%-*s" fname_width fname;
@@ -179,6 +158,7 @@ let names_all base bname fname =
 
 let speclist =
   [
+    ("-bd", Arg.String Secure.set_base_dir, " bases folder");
     ("-fn", Arg.Set fnames, " produce first names");
     ("-sn", Arg.Set snames, " produce surnames");
     ("-al", Arg.Set alias, " produce aliases");
@@ -187,7 +167,7 @@ let speclist =
     ("-all", Arg.Set all, " produce all");
     ("-fna", Arg.Set fname_alias, " add first names aliases");
     ("-prog", Arg.Set prog, " show progress bar");
-    ("-reorg", Arg.Set reorg, " use base reorganistion architecture");
+    ("-reorg", Arg.Set Geneweb.GWPARAM.reorg, " use base reorganistion architecture");
   ]
   |> List.sort compare |> Arg.align
 
@@ -197,13 +177,17 @@ let usage =
   "Usage: cache_files [options] base\n cd bases; before running cache_files."
 
 let main () =
+  Secure.set_base_dir ".";
   Arg.parse speclist anonfun usage;
   if !bname = "" || !bname <> Filename.basename !bname then (
     Arg.usage speclist usage;
     exit 2);
   let base = Gwdb.open_base !bname in
-  bname := Filename.basename !bname;
-  Printf.printf "Generating cache(s)";
+  bname := Filename.remove_extension (Filename.basename !bname);
+  Geneweb.GWPARAM.init !bname;
+  Geneweb.GWPARAM.init_etc !bname;
+  Mutil.mkdir_p (Filename.concat (!Geneweb.GWPARAM.etc_d !bname) "cache");
+  Printf.printf "Generating cache(s) %s mode" (if !Geneweb.GWPARAM.reorg then "reorg" else "classic");
   if !places then places_all base !bname "places";
   if !fnames then names_all base !bname "fnames";
   if !snames then names_all base !bname "snames";
