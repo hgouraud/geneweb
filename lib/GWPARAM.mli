@@ -46,6 +46,10 @@ val init : string -> unit
 (** Function called before gwd starts
     e.g. inititialise assets folders in Secure module. *)
 
+val init_etc : string -> unit
+(** Function called before gwd starts
+    e.g. inititialise etc folders in reorg mode. *)
+
 val output_error :
   (?headers:string list ->
   ?content:Adef.safe_string ->

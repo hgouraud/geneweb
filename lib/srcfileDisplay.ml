@@ -22,6 +22,7 @@ let input_int ic =
   try int_of_string (input_line ic) with End_of_file | Failure _ -> 0
 
 let count conf =
+  let _ = Util.test_cnt_d conf in
   let fname = !GWPARAM.adm_file (conf.bname ^ ".txt") in
   try
     let ic = Secure.open_in fname in
@@ -64,9 +65,8 @@ let count conf =
     }
 
 let write_counter conf r =
-  let fname =
-    Filename.concat (!GWPARAM.cnt_d conf.bname) (conf.bname ^ ".txt")
-  in
+  let cnt_d = Util.test_cnt_d conf in
+  let fname = Filename.concat cnt_d (conf.bname ^ ".txt") in
   try
     let oc = Secure.open_out_bin fname in
     output_string oc (string_of_int r.welcome_cnt);
@@ -85,6 +85,7 @@ let write_counter conf r =
   with _ -> ()
 
 let set_wizard_and_friend_traces conf =
+  let _ = Util.test_cnt_d conf in
   if conf.wizard && conf.user <> "" then (
     let wpf =
       try List.assoc "wizard_passwd_file" conf.base_env with Not_found -> ""
@@ -107,6 +108,7 @@ let set_wizard_and_friend_traces conf =
       update_wf_trace conf fname
 
 let incr_counter f conf =
+  let _ = Util.test_cnt_d conf in
   let lname = !GWPARAM.adm_file (conf.bname ^ ".lck") in
   Lock.control lname true
     ~onerror:(fun () -> None)

@@ -831,6 +831,7 @@ let treat_request =
 
 let treat_request conf =
   GWPARAM.init conf.bname ;
+  (* TODO verify if we need init_etc here *)
   let conf = { conf with
     base_env = Util.read_base_env conf.bname conf.gw_prefix conf.debug }
   in
