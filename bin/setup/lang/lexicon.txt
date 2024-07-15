@@ -68,6 +68,10 @@ fr: Si vous mettez rien, la valeur par défaut sera "."
 en: Reorg mode
 fr: Mode reorg
 
+    Kill .gwo files after base creation.
+en: Kill .gwo files after base creation.
+fr: Détruire les fichiers .gwo après création de la base
+
     "first names enclosed": the -fne option must be followed by a two characters string "be". When creating a person, if the GEDCOM first name part holds a part between 'b' (any character) and 'e' (any character), it is considered to be the usual first name: e.g. -fne "\\" or -fne "()".
 aa: ged2gwb.htm
 co: L’ozzione « first names enclosed » deve esse seguitata da una catena di dui caratteri di u furmatu "pf". Durante a creazione d’una persona, s’è una parte di a catena <i>nome</i> di u schedariu GEDCOM <b>p</b>rincipia da u caratteru 'p' è si <b>f</b>inisce da u caratteru 'f', sta parte serà impiegata per u nome usuale. Esempii : <span  style="font-family: monospace">-fne "\\"</span> o <span style="font-family: monospace"> -fne "()"</span>.

@@ -101,6 +101,7 @@ let separate = ref false
 let bnotes = ref "merge"
 let shift = ref 0
 let files = ref []
+let kill_gwo = ref false
 
 let speclist =
   [
@@ -140,6 +141,7 @@ let speclist =
     ("-stats", Arg.Set Db1link.pr_stats, " Print statistics");
     ("-v", Arg.Set Mutil.verbose, " Verbose");
     ("-reorg", Arg.Set Geneweb.GWPARAM.reorg, " Mode reorg");
+    ("-gwo", Arg.Set kill_gwo, " Suppress .gwo files after base creation");
   ]
   |> List.sort compare |> Arg.align
 
@@ -165,20 +167,24 @@ let main () =
   Arg.parse speclist anonfun errmsg;
   if not (Array.mem "-bd" Sys.argv) then Secure.set_base_dir ".";
   in_file := Filename.remove_extension (Filename.basename !in_file);
-  if (not (Array.mem "-o" Sys.argv)) && Mutil.good_name !in_file then
-    out_file := !in_file;
+  if not (Array.mem "-o" Sys.argv) then out_file := !in_file;
+  if List.length !files > 1 then (
+    Printf.eprintf "The database name must be specified with -o\n";
+    flush stdout;
+    exit 2);
+  if not (Mutil.good_name (Filename.basename !out_file)) then (
+    (* Util.transl conf not available !*)
+    Printf.eprintf "The database name \"%s\" contains a forbidden character.\n"
+      !out_file;
+    Printf.eprintf "Allowed characters: a..z, A..Z, 0..9, -";
+    flush stdout;
+    exit 2);
   let bname = Filename.remove_extension (Filename.basename !out_file) in
   Printf.eprintf "Mode: %s, for base %s\n"
     (if !Geneweb.GWPARAM.reorg then "reorg" else "classic")
     (Filename.concat (!Geneweb.GWPARAM.bpath "") (bname ^ ".gwb"));
   Geneweb.GWPARAM.init bname;
-  if not (Mutil.good_name (Filename.basename bname)) then (
-    (* Util.transl conf not available !*)
-    Printf.eprintf "The database name \"%s\" contains a forbidden character.\n"
-      bname;
-    Printf.eprintf "Allowed characters: a..z, A..Z, 0..9, -";
-    flush stdout;
-    exit 2);
+
   let gwo = ref [] in
   List.iter
     (fun (x, separate, bnotes, shift) ->
@@ -203,8 +209,13 @@ let main () =
     Lock.control (Mutil.lock_file bdir) false ~onerror:Lock.print_error_and_exit
       (fun () ->
         let next_family_fun = next_family_fun_templ (List.rev !gwo) in
-        if Db1link.link next_family_fun bdir then
-          Geneweb.Util.print_default_gwf_file bname
+        if Db1link.link next_family_fun bdir then (
+          Geneweb.Util.print_default_gwf_file bname;
+          if !kill_gwo then
+            List.iter
+              (fun (x, _separate, _bnotes, _shift) ->
+                if Sys.file_exists (x ^ "o") then Mutil.rm (x ^ "o"))
+              (List.rev !files))
         else (
           flush stderr;
           Printf.eprintf "*** database not created\n";
