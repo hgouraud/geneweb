@@ -210,7 +210,6 @@ let main () =
           Printf.eprintf "*** database not created\n";
           flush stderr;
           exit 2));
-    (* FIXME see why db1link cant delete this tmp file *)
     let tmp_file = Filename.concat Filename.current_dir_name "gw_tmp" in
     Mutil.rm_rf tmp_file)
 
