@@ -1646,75 +1646,70 @@ let link next_family_fun bdir =
   let tmp_per = Filename.concat tmp_dir "gwc_per" in
   let tmp_fam_index = Filename.concat tmp_dir "gwc_fam_index" in
   let tmp_fam = Filename.concat tmp_dir "gwc_fam" in
-  let fi =
-    {
-      f_local_names = Hashtbl.create 20011;
-      f_curr_src_file = "";
-      f_curr_gwo_file = "";
-      f_separate = false;
-      f_shift = 0;
-      f_bnotes = `merge;
-    }
-  in
-  let gen =
-    {
-      g_strings = Hashtbl.create 20011;
-      g_names = Hashtbl.create 20011;
-      g_pcnt = 0;
-      g_fcnt = 0;
-      g_scnt = 0;
-      g_file_info = fi;
-      g_base = empty_base;
-      g_patch_p = Hashtbl.create 20011;
-      g_wiznotes = [];
-      g_def = [||];
-      g_first_av_occ = Hashtbl.create 1;
-      g_errored = false;
-      g_per_index = open_out_bin tmp_per_index;
-      g_per = open_out_bin tmp_per;
-      g_fam_index = open_out_bin tmp_fam_index;
-      g_fam = open_out_bin tmp_fam;
-    }
-  in
+  let fi = {
+    f_local_names = Hashtbl.create 20011;
+    f_curr_src_file = "";
+    f_curr_gwo_file = "";
+    f_separate = false;
+    f_shift = 0;
+    f_bnotes = `merge;
+  } in
+  let gen = {
+    g_strings = Hashtbl.create 20011;
+    g_names = Hashtbl.create 20011;
+    g_pcnt = 0;
+    g_fcnt = 0;
+    g_scnt = 0;
+    g_file_info = fi;
+    g_base = empty_base;
+    g_patch_p = Hashtbl.create 20011;
+    g_wiznotes = [];
+    g_def = [||];
+    g_first_av_occ = Hashtbl.create 1;
+    g_errored = false;
+    g_per_index = open_out_bin tmp_per_index;
+    g_per = open_out_bin tmp_per;
+    g_fam_index = open_out_bin tmp_fam_index;
+    g_fam = open_out_bin tmp_fam;
+  } in
   let per_index_ic = open_in_bin tmp_per_index in
   let per_ic = open_in_bin tmp_per in
   let istr_empty = unique_string gen "" in
   let istr_quest = unique_string gen "?" in
   assert (istr_empty = 0);
   assert (istr_quest = 1);
-  if Sys.unix then Sys.remove tmp_per_index;
-  if Sys.unix then Sys.remove tmp_per;
-  if Sys.unix then Sys.remove tmp_fam_index;
-  if Sys.unix then Sys.remove tmp_fam;
   let next_family = next_family_fun fi in
-  (let rec loop () =
-     match next_family () with
-     | Some fam ->
-         insert_syntax fi.f_curr_src_file gen fam;
-         loop ()
-     | None -> ()
-   in
-   loop ());
-  close_out gen.g_per_index;
-  close_out gen.g_per;
+  let rec loop () =
+    match next_family () with
+    | Some fam ->
+        insert_syntax fi.f_curr_src_file gen fam;
+        loop ()
+    | None -> ()
+  in
+  loop ();
   close_out gen.g_fam_index;
   close_out gen.g_fam;
+  close_out gen.g_per_index;
+  close_out gen.g_per;
   Hashtbl.clear gen.g_strings;
   Hashtbl.clear gen.g_names;
   Hashtbl.clear fi.f_local_names;
-  Gc.compact ();
   let base = make_base bdir gen per_index_ic per_ic in
   Hashtbl.clear gen.g_patch_p;
+  Gc.compact (); 
+  close_in per_index_ic;
+  close_in per_ic;
   if !do_check && gen.g_pcnt > 0 then (
     Check.check_base base (set_error base gen) (set_warning base) ignore;
-    if !pr_stats then Stats.(print_stats base @@ stat_base base));
-  Mutil.rm_rf tmp_dir;
+    if !pr_stats then Stats.(print_stats base @@ stat_base base);
+  Mutil.rm_rf tmp_dir);
   if not gen.g_errored then (
     if !do_consang then ignore @@ ConsangAll.compute base true;
     Gwdb.sync base;
     output_wizard_notes bdir gen.g_wiznotes;
     output_command_line bdir;
-    true)
-  else (
+    true
+  ) else (
     Mutil.rm_rf bdir;
-    false)
+    false
+  )
