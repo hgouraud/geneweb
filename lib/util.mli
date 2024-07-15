@@ -608,3 +608,6 @@ val designation : base -> person -> Adef.escaped_string
 
 val has_children : base -> person -> bool
 val get_bases_list : ?format_fun:(string -> string) -> unit -> string list
+
+val test_cnt_d : config -> string
+(** tests if cnt_d exists and creaets it if needed *)

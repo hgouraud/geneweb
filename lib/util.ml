@@ -2301,7 +2301,18 @@ let update_wf_trace conf fname =
   in
   write_wf_trace fname (List.sort (fun x y -> compare y x) wt)
 
+let test_cnt_d conf =
+  let cnt_d = !GWPARAM.cnt_d conf.bname in
+  if not (Sys.file_exists cnt_d) then
+    try Unix.mkdir cnt_d 0o755
+    with Unix.Unix_error (_, _, _) ->
+      !GWPARAM.syslog `LOG_WARNING
+        (Printf.sprintf "Failure when creating cnt_dir: %s" cnt_d)
+  else ();
+  cnt_d
+
 let commit_patches conf base =
+  let _ = test_cnt_d in
   Gwdb.commit_patches base;
   conf.henv <-
     List.map

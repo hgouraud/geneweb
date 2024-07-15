@@ -184,7 +184,6 @@ let main () =
     (if !Geneweb.GWPARAM.reorg then "reorg" else "classic")
     (Filename.concat (!Geneweb.GWPARAM.bpath "") (bname ^ ".gwb"));
   Geneweb.GWPARAM.init bname;
-
   let gwo = ref [] in
   List.iter
     (fun (x, separate, bnotes, shift) ->
@@ -206,6 +205,7 @@ let main () =
         !out_file;
       flush stdout;
       exit 2);
+    Geneweb.GWPARAM.init_etc bname;
     Lock.control (Mutil.lock_file bdir) false ~onerror:Lock.print_error_and_exit
       (fun () ->
         let next_family_fun = next_family_fun_templ (List.rev !gwo) in
