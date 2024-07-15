@@ -131,7 +131,8 @@ let speclist =
       " Do not create associative pictures" );
     ( "-o",
       Arg.Set_string out_file,
-      "<file> Output database (default: a.gwb). Alphanumerics and -" );
+      "<file> Output database (default: <input file name>.gwb, \
+        a.gwb if not available). Alphanumerics and -" );
     ( "-particles",
       Arg.Set_string Db1link.particules_file,
       "<file> Particles file (default = predefined particles)" );
@@ -166,8 +167,11 @@ let main () =
   Mutil.verbose := false;
   Arg.parse speclist anonfun errmsg;
   if not (Array.mem "-bd" Sys.argv) then Secure.set_base_dir ".";
-  in_file := Filename.remove_extension (Filename.basename !in_file);
-  if not (Array.mem "-o" Sys.argv) then out_file := !in_file;
+  in_file :=
+    if !in_file <> "" then
+      Filename.remove_extension (Filename.basename !in_file)
+    else !in_file;
+  if !in_file <> "" && not (Array.mem "-o" Sys.argv) then out_file := !in_file;
   if List.length !files > 1 then (
     Printf.eprintf "The database name must be specified with -o\n";
     flush stdout;
