@@ -1700,13 +1700,12 @@ let link next_family_fun bdir =
   Hashtbl.clear fi.f_local_names;
   let base = make_base bdir gen per_index_ic per_ic in
   Hashtbl.clear gen.g_patch_p;
-  Gc.compact ();
+  Gc.full_major();
   close_in per_index_ic;
   close_in per_ic;
   if !do_check && gen.g_pcnt > 0 then (
     Check.check_base base (set_error base gen) (set_warning base) ignore;
-    (if !pr_stats then Stats.(print_stats base @@ stat_base base));
-    Mutil.rm_rf tmp_dir);
+    if !pr_stats then Stats.(print_stats base @@ stat_base base));
   if not gen.g_errored then (
     if !do_consang then ignore @@ ConsangAll.compute base true;
     Gwdb.sync base;
