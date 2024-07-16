@@ -20,13 +20,20 @@ let width = ref 50
 
 let write_cache_file bname fname list =
   let cache = Filename.concat (!Geneweb.GWPARAM.etc_d bname) "cache" in
-  let fname = Filename.concat cache (bname ^ "_" ^ fname ^ ".cache") in
+  let filename = (bname ^ "_" ^ fname ^ ".cache") in
+  let file = Filename.concat cache filename in
+  let gz_file = file ^ ".gz" in
   try
-    match try Some (Secure.open_out fname) with Sys_error _ -> None with
-    | Some oc ->
-        List.iter (fun (v, _) -> output_string oc (v ^ "\n")) list;
-        close_out oc
-    | None -> failwith "Failed to open file for writing"
+    let temp_file = Filename.temp_file "temp_" ".cache" in
+    let oc = open_out temp_file in
+    List.iter (fun (v, _) -> output_string oc (v ^ "\n")) list;
+    close_out oc;
+    let gzip_command = Printf.sprintf "gzip -9 -c < %s > %s" temp_file gz_file in
+    let status = Unix.system gzip_command in
+    Sys.remove temp_file;
+    match status with
+    | Unix.WEXITED 0 -> () (* Compression successful *)
+    | _ -> failwith "Gzip compression failed"
   with exn ->
     Printf.printf "Debug: Exception occurred: %s\n" (Printexc.to_string exn);
     Printf.printf "Debug: Stack trace:\n%s\n" (Printexc.get_backtrace ());
@@ -93,7 +100,7 @@ let places_all base bname fname =
   flush stderr;
   let stop = Unix.gettimeofday () in
   let cache = Filename.concat (!Geneweb.GWPARAM.etc_d bname) "cache" in
-  let full_name = Filename.concat cache (bname ^ "_" ^ fname ^ ".cache") in
+  let full_name = Filename.concat cache (bname ^ "_" ^ fname ^ ".cache.gz") in
   Format.printf "@[<h>%-*s@ %8d@ %-14s@ %6.2f s@]@," !width full_name
     (List.length places_list) "places" (stop -. start);
   flush stderr
@@ -166,7 +173,7 @@ let names_all base bname fname =
   flush stderr;
   let stop = Unix.gettimeofday () in
   let cache = Filename.concat (!Geneweb.GWPARAM.etc_d bname) "cache" in
-  let full_name = Filename.concat cache (bname ^ "_" ^ fname ^ ".cache") in
+  let full_name = Filename.concat cache (bname ^ "_" ^ fname ^ ".cache.gz") in
   Format.printf "@[<h>%-*s@ %8d@ %-14s@ %6.2f s@]@," !width full_name
     (Hashtbl.length ht) fname (stop -. start)
 
@@ -204,14 +211,14 @@ let main () =
   Geneweb.GWPARAM.init !bname;
   Geneweb.GWPARAM.init_etc !bname;
   Mutil.mkdir_p (Filename.concat (!Geneweb.GWPARAM.etc_d !bname) "cache");
-  Printf.printf "Generating cache(s) %s mode\n"
+  Printf.printf "Generating cache(s) compressed with gzip, %s mode\n"
     (if !Geneweb.GWPARAM.reorg then "reorg" else "classic");
 
   let cache = Filename.concat (!Geneweb.GWPARAM.etc_d !bname) "cache" in
-  let full_name = Filename.concat cache (!bname ^ "_occupations.cache") in
+  let full_name = Filename.concat cache (!bname ^ "_occupations.cache.gz") in
   width := String.length full_name + 2;
   Format.printf "@[<v>";
-  (* Ouvre une boÃ®te verticale *)
+  (* Ouvre une boîte verticale *)
   if !places then places_all base !bname "places";
   if !fnames then names_all base !bname "fnames";
   if !snames then names_all base !bname "snames";
@@ -241,7 +248,7 @@ let main () =
     alias := false;
     names_all base !bname "qualifiers");
   Format.printf "@]";
-  (* Ferme la boÃ®te verticale *)
+  (* Ferme la boîte verticale *)
   flush stderr
 
 let _ = main ()
