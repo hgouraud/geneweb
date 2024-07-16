@@ -1,5 +1,3 @@
-%base.name;
-
 %( Input datalists and function to populate all datalists %)
 %if;(b.datalist_aliases=1 and "IND" in e.m)<datalist id="datalist_aliases"></datalist>%end;
 %if;(b.datalist_fnames=1)<datalist id="datalist_fnames"></datalist>%end;
