@@ -18,14 +18,14 @@ let write_cache_file bname fname list =
     else 1
   in
   let cache = Filename.concat (!Geneweb.GWPARAM.etc_d bname) "cache" in
-  let fname = Filename.concat cache (bname ^ "_" ^ fname ^ ".txt") in
+  let fname = Filename.concat cache (bname ^ "_" ^ fname ^ ".cache") in
   if not !prog then Printf.printf "\n";
   let fname_width = String.length fname + margin in
   Printf.printf "%-*s" fname_width fname;
   try
     match try Some (Secure.open_out fname) with Sys_error _ -> None with
     | Some oc ->
-        List.iter (fun (v, _) -> output_string oc ("<option>" ^ v ^ "\n")) list;
+        List.iter (fun (v, _) -> output_string oc (v ^ "\n")) list;
         close_out oc
     | None -> failwith "Failed to open file for writing"
   with
