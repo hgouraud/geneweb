@@ -12,11 +12,15 @@ let all = ref false
 let prog = ref false
 
 let write_cache_file bname fname list =
-  let cache = Filename.concat  (!Geneweb.GWPARAM.etc_d bname) "cache" in
+  let margin =
+    if fname = "places" || fname = "fnames" || fname = "snames" then 5
+    else if fname = "aliases" then 4
+    else 1
+  in
+  let cache = Filename.concat (!Geneweb.GWPARAM.etc_d bname) "cache" in
   let fname = Filename.concat cache (bname ^ "_" ^ fname ^ ".txt") in
-  Printf.eprintf "Fname: %s\n" fname;
   if not !prog then Printf.printf "\n";
-  let fname_width = String.length fname + 6 in
+  let fname_width = String.length fname + margin in
   Printf.printf "%-*s" fname_width fname;
   try
     match try Some (Secure.open_out fname) with Sys_error _ -> None with
@@ -90,8 +94,8 @@ let places_all base bname fname =
   write_cache_file bname fname places_list;
   flush stderr;
   let stop = Unix.gettimeofday () in
-  Printf.printf "%+20d places" (List.length places_list);
-  Printf.printf "%+10.2f s" (stop -. start);
+  Printf.printf "%10d %-11s" (List.length places_list) ("places");
+  Printf.printf " %6.2f s" (stop -. start);
   flush stderr
 
 let names_all base bname fname =
@@ -152,8 +156,8 @@ let names_all base bname fname =
   write_cache_file bname fname name_list;
   flush stderr;
   let stop = Unix.gettimeofday () in
-  Printf.printf "%+20d %s" (Hashtbl.length ht) fname;
-  Printf.printf "%+10.2f s" (stop -. start);
+  Printf.printf "%10d %-11s" (Hashtbl.length ht) fname;
+  Printf.printf " %6.2f s" (stop -. start);
   flush stderr
 
 let speclist =
@@ -167,7 +171,6 @@ let speclist =
     ("-all", Arg.Set all, " produce all");
     ("-fna", Arg.Set fname_alias, " add first names aliases");
     ("-prog", Arg.Set prog, " show progress bar");
-    ("-reorg", Arg.Set Geneweb.GWPARAM.reorg, " use base reorganistion architecture");
   ]
   |> List.sort compare |> Arg.align
 
