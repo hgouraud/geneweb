@@ -16,18 +16,11 @@ let titles = ref false
 let qual = ref false
 let all = ref false
 let prog = ref false
+let width = ref 50
 
 let write_cache_file bname fname list =
-  let margin =
-    if fname = "places" || fname = "fnames" || fname = "snames" then 5
-    else if fname = "aliases" then 4
-    else 1
-  in
   let cache = Filename.concat (!Geneweb.GWPARAM.etc_d bname) "cache" in
   let fname = Filename.concat cache (bname ^ "_" ^ fname ^ ".cache") in
-  if not !prog then Printf.printf "\n";
-  let fname_width = String.length fname + margin in
-  Printf.printf "%-*s" fname_width fname;
   try
     match try Some (Secure.open_out fname) with Sys_error _ -> None with
     | Some oc ->
@@ -99,8 +92,10 @@ let places_all base bname fname =
   write_cache_file bname fname places_list;
   flush stderr;
   let stop = Unix.gettimeofday () in
-  Printf.printf "%10d %-11s" (List.length places_list) "places";
-  Printf.printf " %6.2f s" (stop -. start);
+  let cache = Filename.concat (!Geneweb.GWPARAM.etc_d bname) "cache" in
+  let full_name = Filename.concat cache (bname ^ "_" ^ fname ^ ".cache") in
+  Format.printf "@[<h>%-*s@ %8d@ %-14s@ %6.2f s@]@," !width full_name
+    (List.length places_list) "places" (stop -. start);
   flush stderr
 
 let names_all base bname fname =
@@ -170,9 +165,10 @@ let names_all base bname fname =
   write_cache_file bname fname name_list;
   flush stderr;
   let stop = Unix.gettimeofday () in
-  Printf.printf "%10d %-11s" (Hashtbl.length ht) fname;
-  Printf.printf " %6.2f s" (stop -. start);
-  flush stderr
+  let cache = Filename.concat (!Geneweb.GWPARAM.etc_d bname) "cache" in
+  let full_name = Filename.concat cache (bname ^ "_" ^ fname ^ ".cache") in
+  Format.printf "@[<h>%-*s@ %8d@ %-14s@ %6.2f s@]@," !width full_name
+    (Hashtbl.length ht) fname (stop -. start)
 
 let speclist =
   [
@@ -208,8 +204,14 @@ let main () =
   Geneweb.GWPARAM.init !bname;
   Geneweb.GWPARAM.init_etc !bname;
   Mutil.mkdir_p (Filename.concat (!Geneweb.GWPARAM.etc_d !bname) "cache");
-  Printf.printf "Generating cache(s) %s mode"
+  Printf.printf "Generating cache(s) %s mode\n"
     (if !Geneweb.GWPARAM.reorg then "reorg" else "classic");
+
+  let cache = Filename.concat (!Geneweb.GWPARAM.etc_d !bname) "cache" in
+  let full_name = Filename.concat cache (!bname ^ "_occupations.cache") in
+  width := String.length full_name + 2;
+  Format.printf "@[<v>";
+  (* Ouvre une boîte verticale *)
   if !places then places_all base !bname "places";
   if !fnames then names_all base !bname "fnames";
   if !snames then names_all base !bname "snames";
@@ -237,6 +239,9 @@ let main () =
     names_all base !bname "occupations";
     fname_alias := false;
     alias := false;
-    names_all base !bname "qualifiers")
+    names_all base !bname "qualifiers");
+  Format.printf "@]";
+  (* Ferme la boîte verticale *)
+  flush stderr
 
 let _ = main ()
