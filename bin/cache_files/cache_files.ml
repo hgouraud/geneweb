@@ -10,10 +10,10 @@ let pub_names = ref false
 let fname_alias = ref false
 let sname_alias = ref false
 let places = ref false
-let domains = ref false
+let estates = ref false
 let occupations = ref false
 let titles = ref false
-let qual = ref false
+let qualifiers = ref false
 let all = ref false
 let prog = ref false
 let width = ref 50
@@ -129,7 +129,7 @@ let names_all base bname fname =
         | "occupations" -> [ get_occupation p ]
         | "qualifiers" -> get_qualifiers p
         | "pub_names" -> [ get_public_name p ]
-        | "domains" ->
+        | "estates" ->
             List.fold_left (fun acc t -> t.t_place :: acc) [] (get_titles p)
         | _ -> []
       in
@@ -186,9 +186,9 @@ let speclist =
     ("-pu", Arg.Set pub_names, " public names");
     ("-fna", Arg.Set fname_alias, " add first name aliases");
     ("-sna", Arg.Set sname_alias, " add surname aliases");
-    ("-qu", Arg.Set qual, " qualifiers");
+    ("-qu", Arg.Set qualifiers, " qualifiers");
     ("-pl", Arg.Set places, " places");
-    ("-do", Arg.Set domains, " domains");
+    ("-es", Arg.Set estates, " estates");
     ("-oc", Arg.Set occupations, " occupations");
     ("-all", Arg.Set all, " all");
     ("-prog", Arg.Set prog, " show progress bar");
@@ -224,8 +224,8 @@ let main () =
   if !snames then names_all base !bname "snames";
   if !alias then names_all base !bname "aliases";
   if !pub_names then names_all base !bname "pub_names";
-  if !qual then names_all base !bname "qualifiers";
-  if !domains then names_all base !bname "domains";
+  if !qualifiers then names_all base !bname "qualifiers";
+  if !estates then names_all base !bname "estates";
   if !occupations then names_all base !bname "occupations";
   if !all then (
     places_all base !bname "places";
@@ -240,7 +240,7 @@ let main () =
     alias := false;
     names_all base !bname "pub_names";
     alias := false;
-    names_all base !bname "domains";
+    names_all base !bname "estates";
     fname_alias := false;
     alias := false;
     names_all base !bname "occupations";
