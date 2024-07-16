@@ -68,6 +68,26 @@ fr: Si vous mettez rien, la valeur par défaut sera "."
 en: Reorg mode
 fr: Mode reorg
 
+    public names
+en: Public names
+fr: Noms publics
+
+    sn alias
+en: Add surname aliases to the list of surnames
+fr: Ajouter les patronymes alias à la liste des patronymes
+
+    domains
+en: Domains
+fr: Domaines
+
+    occupations
+en: Occupations
+fr: Professions
+
+    cache files computed
+en: Cache files computed
+fr: Fichiers cache calculés
+
     Kill .gwo files after base creation.
 en: Kill .gwo files after base creation.
 fr: Détruire les fichiers .gwo après création de la base
