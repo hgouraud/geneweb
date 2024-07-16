@@ -11,8 +11,8 @@ let fname_alias = ref false
 let sname_alias = ref false
 let places = ref false
 let estates = ref false
-let occupations = ref false
 let titles = ref false
+let occupations = ref false
 let qualifiers = ref false
 let all = ref false
 let prog = ref false
@@ -106,8 +106,6 @@ let places_all base bname fname =
   flush stderr
 
 let names_all base bname fname =
-  let fn = fname = "fnames" in
-  let sn = fname = "snames" in
   let start = Unix.gettimeofday () in
   let ht = Hashtbl.create 1 in
   let nb_ind = nb_of_persons base in
@@ -126,38 +124,36 @@ let names_all base bname fname =
         match fname with
         | "fnames" -> [ get_first_name p ]
         | "snames" -> [ get_surname p ]
+        | "alias" -> get_aliases p
         | "occupations" -> [ get_occupation p ]
         | "qualifiers" -> get_qualifiers p
         | "pub_names" -> [ get_public_name p ]
         | "estates" ->
             List.fold_left (fun acc t -> t.t_place :: acc) [] (get_titles p)
+        | "titles" ->
+            List.fold_left (fun acc t -> t.t_ident :: acc) [] (get_titles p)
         | _ -> []
       in
-      let al = if !alias then get_aliases p else [] in
-      let fna = if !fname_alias && fn then get_first_names_aliases p else [] in
-      let sna = if !sname_alias && sn then get_surnames_aliases p else [] in
-
       List.iter
         (fun nam ->
-          let nam = sou base nam in
-          let key = nam in
-          if not (Hashtbl.mem ht key) then Hashtbl.add ht key (nam, 1)
+          let key = sou base nam in
+          if not (Hashtbl.mem ht key) then Hashtbl.add ht key (key, 1)
           else
             let vv, i = Hashtbl.find ht key in
             Hashtbl.replace ht key (vv, i + 1))
         nam;
 
+      let fna = if !fname_alias && !fnames then get_first_names_aliases p else [] in
+      let sna = if !sname_alias && !snames then get_surnames_aliases p else [] in
       let nam2 =
-        if al <> [] then al
-        else if fna <> [] then fna
+        if fna <> [] then fna
         else if sna <> [] then sna
         else []
       in
       List.iter
         (fun nam ->
-          let nam = sou base nam in
-          let key = nam in
-          if not (Hashtbl.mem ht key) then Hashtbl.add ht key (nam, 1)
+          let key = sou base nam in
+          if not (Hashtbl.mem ht key) then Hashtbl.add ht key (key, 1)
           else
             let vv, i = Hashtbl.find ht key in
             Hashtbl.replace ht key (vv, i + 1))
@@ -189,6 +185,7 @@ let speclist =
     ("-qu", Arg.Set qualifiers, " qualifiers");
     ("-pl", Arg.Set places, " places");
     ("-es", Arg.Set estates, " estates");
+    ("-ti", Arg.Set titles, " titles");
     ("-oc", Arg.Set occupations, " occupations");
     ("-all", Arg.Set all, " all");
     ("-prog", Arg.Set prog, " show progress bar");
@@ -218,7 +215,7 @@ let main () =
   let full_name = Filename.concat cache (!bname ^ "_occupations.cache.gz") in
   width := String.length full_name + 2;
   Format.printf "@[<v>";
-  (* Ouvre une boîte verticale *)
+  (* Ouvre une boite verticale *)
   if !places then places_all base !bname "places";
   if !fnames then names_all base !bname "fnames";
   if !snames then names_all base !bname "snames";
@@ -226,29 +223,28 @@ let main () =
   if !pub_names then names_all base !bname "pub_names";
   if !qualifiers then names_all base !bname "qualifiers";
   if !estates then names_all base !bname "estates";
+  if !titles then names_all base !bname "titles";
   if !occupations then names_all base !bname "occupations";
   if !all then (
+    fname_alias := true;
+    sname_alias := true;
     places_all base !bname "places";
     fnames := true;
+    snames := false;
     names_all base !bname "fnames";
     fnames := false;
     snames := true;
     names_all base !bname "snames";
+    fnames := false;
     snames := false;
-    alias := true;
     names_all base !bname "aliases";
-    alias := false;
     names_all base !bname "pub_names";
-    alias := false;
     names_all base !bname "estates";
-    fname_alias := false;
-    alias := false;
+    names_all base !bname "titles";
     names_all base !bname "occupations";
-    fname_alias := false;
-    alias := false;
     names_all base !bname "qualifiers");
   Format.printf "@]";
-  (* Ferme la boîte verticale *)
+  (* Ferme la boite verticale *)
   flush stderr
 
 let _ = main ()
