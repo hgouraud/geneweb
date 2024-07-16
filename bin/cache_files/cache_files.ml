@@ -1,12 +1,18 @@
 open Gwdb
+open Def
 
 let bname = ref ""
 let trace = ref false
 let fnames = ref false
-let places = ref false
-let fname_alias = ref false
 let snames = ref false
 let alias = ref false
+let pub_names = ref false
+let fname_alias = ref false
+let sname_alias = ref false
+let places = ref false
+let domains = ref false
+let occupations = ref false
+let titles = ref false
 let qual = ref false
 let all = ref false
 let prog = ref false
@@ -28,11 +34,10 @@ let write_cache_file bname fname list =
         List.iter (fun (v, _) -> output_string oc (v ^ "\n")) list;
         close_out oc
     | None -> failwith "Failed to open file for writing"
-  with
-  | exn ->
-      Printf.printf "Debug: Exception occurred: %s\n" (Printexc.to_string exn);
-      Printf.printf "Debug: Stack trace:\n%s\n" (Printexc.get_backtrace ());
-      raise exn
+  with exn ->
+    Printf.printf "Debug: Exception occurred: %s\n" (Printexc.to_string exn);
+    Printf.printf "Debug: Stack trace:\n%s\n" (Printexc.get_backtrace ());
+    raise exn
 
 let places_all base bname fname =
   let start = Unix.gettimeofday () in
@@ -94,7 +99,7 @@ let places_all base bname fname =
   write_cache_file bname fname places_list;
   flush stderr;
   let stop = Unix.gettimeofday () in
-  Printf.printf "%10d %-11s" (List.length places_list) ("places");
+  Printf.printf "%10d %-11s" (List.length places_list) "places";
   Printf.printf " %6.2f s" (stop -. start);
   flush stderr
 
@@ -116,36 +121,45 @@ let names_all base bname fname =
       if !prog then ProgrBar.run i nb_ind;
       let p = poi base ip in
       let nam =
-        if fn then sou base (get_first_name p)
-        else if sn then sou base (get_surname p)
-        else ""
+        match fname with
+        | "fnames" -> [ get_first_name p ]
+        | "snames" -> [ get_surname p ]
+        | "occupations" -> [ get_occupation p ]
+        | "qualifiers" -> get_qualifiers p
+        | "pub_names" -> [ get_public_name p ]
+        | "domains" ->
+            List.fold_left (fun acc t -> t.t_place :: acc) [] (get_titles p)
+        | _ -> []
       in
       let al = if !alias then get_aliases p else [] in
-      let qual = if !qual then get_qualifiers p else [] in
       let fna = if !fname_alias && fn then get_first_names_aliases p else [] in
-      let key = nam in
-      if nam <> "" then
-        if not (Hashtbl.mem ht key) then Hashtbl.add ht key (nam, 1)
-        else
-          let vv, i = Hashtbl.find ht key in
-          Hashtbl.replace ht key (vv, i + 1)
-      else ();
+      let sna = if !sname_alias && sn then get_surnames_aliases p else [] in
+
+      List.iter
+        (fun nam ->
+          let nam = sou base nam in
+          let key = nam in
+          if not (Hashtbl.mem ht key) then Hashtbl.add ht key (nam, 1)
+          else
+            let vv, i = Hashtbl.find ht key in
+            Hashtbl.replace ht key (vv, i + 1))
+        nam;
+
       let nam2 =
         if al <> [] then al
         else if fna <> [] then fna
-        else if qual <> [] then qual
+        else if sna <> [] then sna
         else []
       in
-      if nam2 <> [] then
-        List.iter
-          (fun nam ->
-            let nam = sou base nam in
-            let key = nam in
-            if not (Hashtbl.mem ht key) then Hashtbl.add ht key (nam, 1)
-            else
-              let vv, i = Hashtbl.find ht key in
-              Hashtbl.replace ht key (vv, i + 1))
-          nam2;
+      List.iter
+        (fun nam ->
+          let nam = sou base nam in
+          let key = nam in
+          if not (Hashtbl.mem ht key) then Hashtbl.add ht key (nam, 1)
+          else
+            let vv, i = Hashtbl.find ht key in
+            Hashtbl.replace ht key (vv, i + 1))
+        nam2;
       if !prog then ProgrBar.run i nb_ind else ())
     (Gwdb.ipers base);
 
@@ -163,13 +177,17 @@ let names_all base bname fname =
 let speclist =
   [
     ("-bd", Arg.String Secure.set_base_dir, " bases folder");
-    ("-fn", Arg.Set fnames, " produce first names");
-    ("-sn", Arg.Set snames, " produce surnames");
-    ("-al", Arg.Set alias, " produce aliases");
-    ("-qu", Arg.Set qual, " produce qualifiers");
-    ("-pl", Arg.Set places, " produce places");
-    ("-all", Arg.Set all, " produce all");
-    ("-fna", Arg.Set fname_alias, " add first names aliases");
+    ("-fn", Arg.Set fnames, " first names");
+    ("-sn", Arg.Set snames, " surnames");
+    ("-al", Arg.Set alias, " aliases");
+    ("-pu", Arg.Set pub_names, " public names");
+    ("-fna", Arg.Set fname_alias, " add first name aliases");
+    ("-sna", Arg.Set sname_alias, " add surname aliases");
+    ("-qu", Arg.Set qual, " qualifiers");
+    ("-pl", Arg.Set places, " places");
+    ("-do", Arg.Set domains, " domains");
+    ("-oc", Arg.Set occupations, " occupations");
+    ("-all", Arg.Set all, " all");
     ("-prog", Arg.Set prog, " show progress bar");
   ]
   |> List.sort compare |> Arg.align
@@ -182,20 +200,24 @@ let usage =
 let main () =
   Secure.set_base_dir ".";
   Arg.parse speclist anonfun usage;
+  bname := Filename.remove_extension (Filename.basename !bname);
   if !bname = "" || !bname <> Filename.basename !bname then (
     Arg.usage speclist usage;
     exit 2);
-  let base = Gwdb.open_base !bname in
-  bname := Filename.remove_extension (Filename.basename !bname);
+  let base = Gwdb.open_base (!Geneweb.GWPARAM.bpath !bname) in
   Geneweb.GWPARAM.init !bname;
   Geneweb.GWPARAM.init_etc !bname;
   Mutil.mkdir_p (Filename.concat (!Geneweb.GWPARAM.etc_d !bname) "cache");
-  Printf.printf "Generating cache(s) %s mode" (if !Geneweb.GWPARAM.reorg then "reorg" else "classic");
+  Printf.printf "Generating cache(s) %s mode"
+    (if !Geneweb.GWPARAM.reorg then "reorg" else "classic");
   if !places then places_all base !bname "places";
   if !fnames then names_all base !bname "fnames";
   if !snames then names_all base !bname "snames";
   if !alias then names_all base !bname "aliases";
+  if !pub_names then names_all base !bname "pub_names";
   if !qual then names_all base !bname "qualifiers";
+  if !domains then names_all base !bname "domains";
+  if !occupations then names_all base !bname "occupations";
   if !all then (
     places_all base !bname "places";
     fnames := true;
@@ -207,8 +229,14 @@ let main () =
     alias := true;
     names_all base !bname "aliases";
     alias := false;
-    qual := true;
-    names_all base !bname "qualifiers";
-    qual := false)
+    names_all base !bname "pub_names";
+    alias := false;
+    names_all base !bname "domains";
+    fname_alias := false;
+    alias := false;
+    names_all base !bname "occupations";
+    fname_alias := false;
+    alias := false;
+    names_all base !bname "qualifiers")
 
 let _ = main ()

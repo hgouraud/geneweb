@@ -1700,7 +1700,7 @@ let link next_family_fun bdir =
   Hashtbl.clear fi.f_local_names;
   let base = make_base bdir gen per_index_ic per_ic in
   Hashtbl.clear gen.g_patch_p;
-  Gc.full_major();
+  Gc.full_major ();
   close_in per_index_ic;
   close_in per_ic;
   if !do_check && gen.g_pcnt > 0 then (

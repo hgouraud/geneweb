@@ -132,8 +132,8 @@ let speclist =
       " Do not create associative pictures" );
     ( "-o",
       Arg.Set_string out_file,
-      "<file> Output database (default: <input file name>.gwb, \
-        a.gwb if not available). Alphanumerics and -" );
+      "<file> Output database (default: <input file name>.gwb, a.gwb if not \
+       available). Alphanumerics and -" );
     ( "-particles",
       Arg.Set_string Db1link.particules_file,
       "<file> Particles file (default = predefined particles)" );
