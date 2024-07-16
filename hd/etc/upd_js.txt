@@ -1,5 +1,51 @@
+%base.name;
+
+%( Input datalists and function to populate all datalists %)
+%if;(b.datalist_aliases=1 and "IND" in e.m)<datalist id="datalist_aliases"></datalist>%end;
+%if;(b.datalist_fnames=1)<datalist id="datalist_fnames"></datalist>%end;
+%if;(b.datalist_places=1)<datalist id="datalist_places"></datalist>%end;
+%if;(b.datalist_qualifiers=1 and "IND" in e.m)<datalist id="datalist_qualifiers"></datalist>%end;
+%if;(b.datalist_snames=1)<datalist id="datalist_snames"></datalist>%end;
 <script>
-%( show/hide some inputs of witnesses/relationsparents/chirdren/fwitnesses depending of create/link value in selects %)
+function populateDatalist(datalistId, cacheFile) {
+    const dataList = document.getElementById(datalistId);
+    if (dataList) {
+        fetch(cacheFile)
+            .then(response => response.text())
+            .then(data => {
+                const lines = data.split("\n");
+                lines.forEach(line => {
+                    if (line.trim()) {
+                        const option = document.createElement("option");
+                        option.value = line.trim();
+                        dataList.appendChild(option);
+                    }
+                });
+            })
+            .catch(error => console.error(`Error loading ${cacheFile}:`, error));
+    }
+}
+
+function getBaseName() {
+    var pathname = window.location.pathname;
+    var match = pathname.match(/\/([^\/]+?)(?:_[wf])?(?:\/|$)/);
+    return match ? match[1] : '';
+}
+
+var baseName = getBaseName();
+
+var datalists = %[
+    { id: "datalist_aliases", file: baseName + "/cache/" + baseName + "_aliases.cache" },
+    { id: "datalist_fnames", file: baseName + "/cache/" + baseName + "_fnames.cache" },
+    { id: "datalist_places", file: baseName + "/cache/" + baseName + "_places.cache" },
+    { id: "datalist_qualifiers", file: baseName + "/cache/" + baseName + "_qualifiers.cache" },
+    { id: "datalist_snames", file: baseName + "/cache/" + baseName + "_snames.cache" }
+%];
+
+datalists.forEach(list => populateDatalist(list.id, list.file));
+</script>
+<script>
+%( show/hide some inputs of witnesses/relationsparents/children/fwitnesses depending of create/link value in selects %)
 $(document).ready(function() {
   $("[id$=_selct]").on('change', function() {
     var pre = this.id;
