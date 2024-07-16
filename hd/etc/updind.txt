@@ -25,8 +25,11 @@
 %( do not use %include;perso_header %)
 %include_perso_header;
 %let;datalist_aliases;%if;(b.datalist_aliases=1) list="datalist_aliases"%end;%in;
+%let;datalist_estates;%if;(b.datalist_estates=1) list="datalist_estates"%end;%in;
 %let;datalist_fnames;%if;(b.datalist_fnames=1) list="datalist_fnames"%end;%in;
+%let;datalist_occupations;%if;(b.datalist_occupations=1) list="datalist_occupations"%end;%in;
 %let;datalist_places;%if;(b.datalist_places=1) list="datalist_places"%end;%in;
+%let;datalist_pub_names;%if;(b.datalist_pub_names=1) list="datalist_pub_names"%end;%in;
 %let;datalist_qualifiers;%if;(b.datalist_qualifiers=1) list="datalist_qualifiers"%end;%in;
 %let;datalist_snames;%if;(b.datalist_snames=1) list="datalist_snames"%end;%in;
 %define;nav()
@@ -785,7 +788,7 @@
             <div class="row">
             <label for="public_name" class="col-sm-3 col-form-label">[*public name]</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" name="public_name" value="%public_name;" id="public_name" placeholder="[*public name]">
+              <input type="text" class="form-control" name="public_name" value="%public_name;" id="public_name" placeholder="[*public name]"%datalist_pub_names;>
             </div>
             <label for="image" class="col-sm-3 col-form-label mt-3">[*image/images]0</label>
             <div class="col-sm-9 mt-3">
@@ -920,7 +923,7 @@
           %if;(occupation!="")
             <textarea class="form-control" name="occu" rows="1" id="occu" placeholder="[*occupation/occupations]1" %l_on1s;>%occupation;</textarea>
           %else;
-            <input class="form-control" name="occu" id="occu" placeholder="[*occupation/occupations]1" value="%occupation;">
+            <input class="form-control" name="occu" id="occu" placeholder="[*occupation/occupations]1" value="%occupation;"%datalist_occupations;>
           %end;
         </div>
       </div>
@@ -1235,7 +1238,7 @@
       </div>
       <label for="t_placexcnt" class="col-form-label col-sm-2">[*estate]0</label>
       <div class="col-sm-4">
-        <input type="text" class="form-control" name="t_placexcnt" value="%title.t_estate;" id="t_placexcnt" placeholder="[*estate]0">
+        <input type="text" class="form-control" name="t_placexcnt" value="%title.t_estate;" id="t_placexcnt" placeholder="[*estate]0"%datalist_estates;>
       </div>
     </div>
     <div class="row">

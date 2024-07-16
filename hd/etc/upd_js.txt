@@ -1,21 +1,46 @@
 %( Input datalists and function to populate all datalists %)
-%if;(b.datalist_aliases=1 and "IND" in e.m)<datalist id="datalist_aliases"></datalist>%end;
-%if;(b.datalist_fnames=1)<datalist id="datalist_fnames"></datalist>%end;
-%if;(b.datalist_places=1)<datalist id="datalist_places"></datalist>%end;
-%if;(b.datalist_qualifiers=1 and "IND" in e.m)<datalist id="datalist_qualifiers"></datalist>%end;
-%if;(b.datalist_snames=1)<datalist id="datalist_snames"></datalist>%end;
+%define;dl(xx)%if;(b.datalist_xx=1)<datalist id="datalist_xx"></datalist>%end;%nn;%end;
+%if;("IND" in e.m)
+  %apply;dl("pub_names")
+  %apply;dl("qualifiers")
+  %apply;dl("aliases")
+  %apply;dl("occupations")
+  %apply;dl("estates")
+%end;
+%apply;dl("fnames")
+%apply;dl("snames")
+%apply;dl("places")
 <script>
 function populateDatalist(datalistId, cacheFile) {
     const dataList = document.getElementById(datalistId);
     if (dataList) {
         fetch(cacheFile)
+            .then(response => {
+                const reader = response.body.pipeThrough(new DecompressionStream('gzip')).getReader();
+                return new ReadableStream({
+                    start(controller) {
+                        return pump();
+                        function pump() {
+                            return reader.read().then(({ done, value }) => {
+                                if (done) {
+                                    controller.close();
+                                    return;
+                                }
+                                controller.enqueue(value);
+                                return pump();
+                            });
+                        }
+                    }
+                });
+            })
+            .then(stream => new Response(stream))
             .then(response => response.text())
-            .then(data => {
-                const lines = data.split("\n");
+            .then(text => {
+                const lines = text.split("\n");
                 lines.forEach(line => {
                     if (line.trim()) {
                         const option = document.createElement("option");
-                        option.value = line.trim();
+                        option.value = line.trim().replace("<option>", "");
                         dataList.appendChild(option);
                     }
                 });
@@ -31,13 +56,18 @@ function getBaseName() {
 }
 
 var baseName = getBaseName();
+%( TODO reorg case %)
+var path = baseName + "/cache/" + baseName;
 
 var datalists = %[
-    { id: "datalist_aliases", file: baseName + "/cache/" + baseName + "_aliases.cache" },
-    { id: "datalist_fnames", file: baseName + "/cache/" + baseName + "_fnames.cache" },
-    { id: "datalist_places", file: baseName + "/cache/" + baseName + "_places.cache" },
-    { id: "datalist_qualifiers", file: baseName + "/cache/" + baseName + "_qualifiers.cache" },
-    { id: "datalist_snames", file: baseName + "/cache/" + baseName + "_snames.cache" }
+    { id: "datalist_aliases", file: path + "_aliases.cache.gz" },
+    { id: "datalist_estates", file: path + "_estates.cache.gz" },
+    { id: "datalist_fnames", file: path + "_fnames.cache.gz" },
+    { id: "datalist_occupations", file: path + "_occupations.cache.gz" },
+    { id: "datalist_places", file: path + "_places.cache.gz" },
+    { id: "datalist_pub_names", file: path + "_pub_names.cache.gz" },
+    { id: "datalist_qualifiers", file: path + "_qualifiers.cache.gz" },
+    { id: "datalist_snames", file: path + "_snames.cache.gz" }
 %];
 
 datalists.forEach(list => populateDatalist(list.id, list.file));
