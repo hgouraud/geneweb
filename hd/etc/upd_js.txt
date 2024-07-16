@@ -1,5 +1,75 @@
+%( Input datalists and function to populate all datalists %)
+%define;dl(xx)%if;(b.datalist_xx=1)<datalist id="datalist_xx"></datalist>%end;%nn;%end;
+%if;("IND" in e.m)
+  %apply;dl("pub_names")
+  %apply;dl("qualifiers")
+  %apply;dl("aliases")
+  %apply;dl("titles")
+  %apply;dl("estates")
+%end;
+%apply;dl("fnames")
+%apply;dl("snames")
+%apply;dl("places")
+%apply;dl("occupations")
 <script>
-%( show/hide some inputs of witnesses/relationsparents/chirdren/fwitnesses depending of create/link value in selects %)
+function populateDatalist(datalistId, cacheFile) {
+    const dataList = document.getElementById(datalistId);
+    if (dataList) {
+        fetch(cacheFile)
+            .then(response => {
+                const reader = response.body.pipeThrough(new DecompressionStream('gzip')).getReader();
+                return new ReadableStream({
+                    start(controller) {
+                        return pump();
+                        function pump() {
+                            return reader.read().then(({ done, value }) => {
+                                if (done) {
+                                    controller.close();
+                                    return;
+                                }
+                                controller.enqueue(value);
+                                return pump();
+                            });
+                        }
+                    }
+                });
+            })
+            .then(stream => new Response(stream))
+            .then(response => response.text())
+            .then(text => {
+                const lines = text.split("\n");
+                lines.forEach(line => {
+                    if (line.trim()) {
+                        const option = document.createElement("option");
+                        option.value = line.trim().replace("<option>", "");
+                        dataList.appendChild(option);
+                    }
+                });
+            })
+            .catch(error => console.error(`Error loading ${cacheFile}:`, error));
+    }
+}
+
+var baseName = "%base.name;";
+%( TODO reorg case %)
+var path = baseName + "/cache/" + baseName;
+
+var datalists = %[
+%if;(b.datalist_aliases=1)    { id: "datalist_aliases", file: path + "_aliases.cache.gz" },%end;
+%if;(b.datalist_estates=1)    { id: "datalist_estates", file: path + "_estates.cache.gz" },%end;
+%if;(b.datalist_fnames=1)    { id: "datalist_fnames", file: path + "_fnames.cache.gz" },%end;
+%if;(b.datalist_occupations=1)    { id: "datalist_occupations", file: path + "_occupations.cache.gz" },%end;
+%if;(b.datalist_places=1)    { id: "datalist_places", file: path + "_places.cache.gz" },%end;
+%if;(b.datalist_pub_names=1)    { id: "datalist_pub_names", file: path + "_pub_names.cache.gz" },%end;
+%if;(b.datalist_qualifiers=1)    { id: "datalist_qualifiers", file: path + "_qualifiers.cache.gz" },%end;
+%if;(b.datalist_snames=1)    { id: "datalist_snames", file: path + "_snames.cache.gz" },%end;
+%if;(b.datalist_titles=1)    { id: "datalist_titles", file: path + "_titles.cache.gz" },%end;
+%];
+
+datalists.forEach(list => populateDatalist(list.id, list.file));
+</script>
+<script>
+%( show/hide some inputs of witnesses/relationsparents/children/fwitnesses depending of create/link value in selects %)
 $(document).ready(function() {
   $("[id$=_selct]").on('change', function() {
     var pre = this.id;
