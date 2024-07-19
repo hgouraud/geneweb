@@ -111,6 +111,11 @@
   %else;src%X;%base.name;%X;images%nn;
   %end;%nn;
 %in;
+%let;images_store;
+  %if;(bvar.reorg="on")%base.name;.gwb%X;documents%X;images%nn;
+  %else;src%X;%base.name;%X;images%nn;
+  %end;%nn;
+%in;
 %define;anc_name(lll)[cousin.lll.0]0%end;
 %if;(wizard)
   <div class="row mb-1">
