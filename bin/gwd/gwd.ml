@@ -478,6 +478,9 @@ let compatible_tokens check_from (addr1, base1_pw1) (addr2, base2_pw2) =
 
 let get_actlog check_from utm from_addr base_password =
   let fname = !GWPARAM.adm_file "actlog" in
+  if not (Sys.file_exists fname) then (
+    let oc = Secure.open_out fname in
+    close_out oc);
   try
     let ic = Secure.open_in fname in
       let tmout = float_of_int !login_timeout in

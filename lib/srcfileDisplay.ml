@@ -108,6 +108,8 @@ let set_wizard_and_friend_traces conf =
       update_wf_trace conf fname
 
 let incr_counter f conf =
+  if conf.bname = "" then None
+  else
   let _ = Util.test_cnt_d conf in
   let lname = !GWPARAM.adm_file (conf.bname ^ ".lck") in
   Lock.control lname true
