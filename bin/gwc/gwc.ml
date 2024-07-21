@@ -184,9 +184,6 @@ let main () =
     flush stderr;
     exit 2);
   let bname = Filename.remove_extension (Filename.basename !out_file) in
-  Printf.eprintf "Mode: %s, for base %s\n"
-    (if !Geneweb.GWPARAM.reorg then "reorg" else "classic")
-    (Filename.concat (!Geneweb.GWPARAM.bpath "") (bname ^ ".gwb"));
   Geneweb.GWPARAM.init bname;
   let gwo = ref [] in
   List.iter
@@ -203,6 +200,16 @@ let main () =
     (List.rev !files);
   if not !just_comp then (
     let bdir = !Geneweb.GWPARAM.bpath bname in
+    if
+      Sys.file_exists (Geneweb.GWPARAM.config_reorg bname)
+      && !Geneweb.GWPARAM.force
+    then (
+      Geneweb.GWPARAM.reorg := true;
+      Geneweb.GWPARAM.init_done := { status = false; bname };
+      Geneweb.GWPARAM.init bname);
+    Printf.eprintf "Mode: %s, for base %s\n"
+      (if !Geneweb.GWPARAM.reorg then "reorg" else "classic")
+      (Filename.concat (!Geneweb.GWPARAM.bpath "") (bname ^ ".gwb"));
     if (not !Geneweb.GWPARAM.force) && Sys.file_exists bdir then (
       Printf.eprintf
         "The database \"%s\" already exists. Use option -f to overwrite it."
