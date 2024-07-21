@@ -110,19 +110,19 @@ let set_wizard_and_friend_traces conf =
 let incr_counter f conf =
   if conf.bname = "" then None
   else
-  let _ = Util.test_cnt_d conf in
-  let lname = !GWPARAM.adm_file (conf.bname ^ ".lck") in
-  Lock.control lname true
-    ~onerror:(fun () -> None)
-    (fun () ->
-      let r = count conf in
-      f r;
-      if conf.wizard then r.wizard_cnt <- r.wizard_cnt + 1
-      else if conf.friend then r.friend_cnt <- r.friend_cnt + 1
-      else r.normal_cnt <- r.normal_cnt + 1;
-      write_counter conf r;
-      set_wizard_and_friend_traces conf;
-      Some (r.welcome_cnt, r.request_cnt, r.start_date))
+    let _ = Util.test_cnt_d conf in
+    let lname = !GWPARAM.adm_file (conf.bname ^ ".lck") in
+    Lock.control lname true
+      ~onerror:(fun () -> None)
+      (fun () ->
+        let r = count conf in
+        f r;
+        if conf.wizard then r.wizard_cnt <- r.wizard_cnt + 1
+        else if conf.friend then r.friend_cnt <- r.friend_cnt + 1
+        else r.normal_cnt <- r.normal_cnt + 1;
+        write_counter conf r;
+        set_wizard_and_friend_traces conf;
+        Some (r.welcome_cnt, r.request_cnt, r.start_date))
 
 let incr_welcome_counter =
   incr_counter (fun r -> r.welcome_cnt <- r.welcome_cnt + 1)

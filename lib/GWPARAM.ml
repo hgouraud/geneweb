@@ -15,6 +15,10 @@ let cnt_dir = ref ""
 let sock_dir = ref ""
 let bases = ref (Secure.base_dir ())
 
+type init_s = { status : bool; bname : string }
+
+let init_done : init_s ref = ref { status = false; bname = "" }
+
 type syslog_level =
   [ `LOG_ALERT
   | `LOG_CRIT
@@ -322,6 +326,8 @@ let init bname =
     images_d := Default.images_d)
 
 let init_etc bname =
+  if !init_done.status && bname = !init_done.bname then ()
+  else init_done := { status = true; bname };
   if !reorg then (
     (if not (Sys.file_exists (!bpath bname)) then
      try
@@ -349,6 +355,35 @@ let init_etc bname =
       with Unix.Unix_error (_, _, _) ->
         !syslog `LOG_WARNING
           (Printf.sprintf "Failure when creating cnt_dir: %s" (!cnt_d bname)))
+  else (
+    (if not (Sys.file_exists "etc") then
+     try
+       Unix.mkdir "etc" 0o755;
+       force := true
+     with Unix.Unix_error (_, _, _) ->
+       !syslog `LOG_WARNING (Printf.sprintf "Failure when creating etc"));
+
+    (if not (Sys.file_exists "lang") then
+     try
+       Unix.mkdir "lang" 0o755;
+       force := true
+     with Unix.Unix_error (_, _, _) ->
+       !syslog `LOG_WARNING (Printf.sprintf "Failure when creating lang"));
+
+    (if not (Sys.file_exists "cnt") then
+     try
+       Unix.mkdir "etc" 0o755;
+       force := true
+     with Unix.Unix_error (_, _, _) ->
+       !syslog `LOG_WARNING (Printf.sprintf "Failure when creating cnt"));
+
+    if not (Sys.file_exists (!etc_d bname)) then
+      try
+        Unix.mkdir (!etc_d bname) 0o755;
+        force := true
+      with Unix.Unix_error (_, _, _) ->
+        !syslog `LOG_WARNING
+          (Printf.sprintf "Failure when creating etc_dir: %s" (!etc_d bname)))
 
 let test_reorg bname =
   if !reorg || is_reorg_base bname then (
