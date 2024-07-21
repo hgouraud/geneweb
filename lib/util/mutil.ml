@@ -189,13 +189,7 @@ let mkdir_p ?(perm = 0o755) d =
   in
   loop d
 
-let lock_file bname =
-  let bname =
-    if Filename.check_suffix bname ".gwb" then
-      Filename.chop_suffix bname ".gwb"
-    else bname
-  in
-  bname ^ ".lck"
+let lock_file bname = (Filename.remove_extension bname) ^ ".lck"
 
 let initial n =
   let rec loop i =

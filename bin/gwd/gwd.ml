@@ -524,7 +524,7 @@ let get_actlog check_from utm from_addr base_password =
       in
       loop false ATnormal []
   with Sys_error e -> (
-      GwdLog.syslog `LOG_WARNING ("Error opening actlog: " ^ e);
+      GwdLog.syslog `LOG_WARNING ("Error opening (get) actlog: " ^ e);
     [], ATnormal, false)
 
 let set_actlog list =
@@ -539,7 +539,7 @@ let set_actlog list =
       list;
     close_out oc
   with Sys_error e -> (
-    GwdLog.syslog `LOG_WARNING ("Error opening actlog: " ^ e);
+    GwdLog.syslog `LOG_WARNING ("Error opening (set) actlog: " ^ e);
     ())
 
 let get_token check_from utm from_addr base_password =
@@ -1239,7 +1239,7 @@ let make_conf from_addr request script_name env =
          begin try List.assoc "no_note_for_visitor" base_env = "yes" with
            Not_found -> false
          end;
-     bname = base_file;
+     bname = Filename.remove_extension base_file;
      nb_of_persons = -1;
      nb_of_families = -1;
      env = env; senv = [];

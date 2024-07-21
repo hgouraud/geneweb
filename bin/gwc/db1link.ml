@@ -1621,6 +1621,7 @@ let output_wizard_notes bdir wiznotes =
   let wizdir = Filename.concat bdir "wiznotes" in
   if wiznotes <> [] then (
     (* FIXME ad hoc solution. wiznotes should be handled same as notes_d *)
+    (* not necessarily true! notes_d is part of base, wiznotes is not *)
     if not @@ Sys.file_exists wizdir then Unix.mkdir wizdir 0o755;
     List.iter
       (fun (wizid, text) ->
