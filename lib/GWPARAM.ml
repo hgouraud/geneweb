@@ -28,10 +28,12 @@ type syslog_level =
 module Reorg = struct
   (* Attention, ajuster is_reorg_base en conséquence *)
   let config bname =
+    let bname = Filename.remove_extension bname in
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "config"; bname ^ ".gwf" ]
 
   let cnt_d bname =
+    let bname = Filename.remove_extension bname in
     if !sock_dir = "" then
       cnt_dir :=
         if bname <> "" then
@@ -44,21 +46,26 @@ module Reorg = struct
   let adm_file file = Filename.concat !cnt_dir file
 
   let portraits_d bname =
+    let bname = Filename.remove_extension bname in
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "documents"; "portraits" ]
 
   let src_d bname =
+    let bname = Filename.remove_extension bname in
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "documents"; "src" ]
 
   let etc_d bname =
+    let bname = Filename.remove_extension bname in
     String.concat Filename.dir_sep [ Secure.base_dir (); bname ^ ".gwb"; "etc" ]
 
   let config_d bname =
+    let bname = Filename.remove_extension bname in
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "config" ]
 
   let lang_d bname lang =
+    let bname = Filename.remove_extension bname in
     if lang = "" then
       String.concat Filename.dir_sep
         [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "lang" ]
@@ -67,10 +74,12 @@ module Reorg = struct
         [ Secure.base_dir (); bname ^ ".gwb"; "etc"; "lang"; lang ]
 
   let images_d bname =
+    let bname = Filename.remove_extension bname in
     String.concat Filename.dir_sep
       [ Secure.base_dir (); bname ^ ".gwb"; "documents"; "images" ]
 
   let bpath bname =
+    let bname = Filename.remove_extension bname in
     if bname = "" then Secure.base_dir ()
     else Filename.concat (Secure.base_dir ()) (bname ^ ".gwb")
 end
@@ -78,6 +87,7 @@ end
 module Default = struct
   (* Attention, ajuster is_reorg_base en conséquence *)
   let config bname =
+    let bname = Filename.remove_extension bname in
     String.concat Filename.dir_sep [ Secure.base_dir (); bname ^ ".gwf" ]
 
   let cnt_d _bname =
@@ -90,27 +100,33 @@ module Default = struct
   let adm_file file = Filename.concat !cnt_dir file
 
   let portraits_d bname =
+    let bname = Filename.remove_extension bname in
     String.concat Filename.dir_sep [ Secure.base_dir (); "images"; bname ]
 
   let src_d bname =
+    let bname = Filename.remove_extension bname in
     String.concat Filename.dir_sep [ Secure.base_dir (); "src"; bname ]
 
   let etc_d bname =
+    let bname = Filename.remove_extension bname in
     String.concat Filename.dir_sep [ Secure.base_dir (); "etc"; bname ]
 
   let config_d _bname = Secure.base_dir ()
 
   let lang_d bname lang =
+    let bname = Filename.remove_extension bname in
     if lang = "" then
       String.concat Filename.dir_sep [ Secure.base_dir (); "lang"; bname ]
     else
       String.concat Filename.dir_sep [ Secure.base_dir (); "lang"; lang; bname ]
 
   let images_d bname =
+    let bname = Filename.remove_extension bname in
     String.concat Filename.dir_sep
       [ Secure.base_dir (); "src"; bname; "images" ]
 
   let bpath bname =
+    let bname = Filename.remove_extension bname in
     if bname = "" then Secure.base_dir ()
     else Filename.concat (Secure.base_dir ()) (bname ^ ".gwb")
 
@@ -269,6 +285,7 @@ let images_d = ref (Default.images_d : my_fun_2)
 
 (* attention; ne pas utiliser !config! *)
 let is_reorg_base bname =
+  let bname = Filename.remove_extension bname in
   Sys.file_exists
     (String.concat Filename.dir_sep
        [ Secure.base_dir (); bname ^ ".gwb"; "config"; bname ^ ".gwf" ])
