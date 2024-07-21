@@ -19,6 +19,11 @@ type init_s = { status : bool; bname : string }
 
 let init_done : init_s ref = ref { status = false; bname = "" }
 
+(** allows testing of reorg config in classic mode *)
+let config_reorg bname =
+  String.concat Filename.dir_sep
+    [ Secure.base_dir (); bname ^ ".gwb"; "config"; bname ^ ".gwf" ]
+
 type syslog_level =
   [ `LOG_ALERT
   | `LOG_CRIT
@@ -33,8 +38,7 @@ module Reorg = struct
   (* Attention, ajuster is_reorg_base en conséquence *)
   let config bname =
     let bname = Filename.remove_extension bname in
-    String.concat Filename.dir_sep
-      [ Secure.base_dir (); bname ^ ".gwb"; "config"; bname ^ ".gwf" ]
+    config_reorg bname
 
   let cnt_d bname =
     let bname = Filename.remove_extension bname in
