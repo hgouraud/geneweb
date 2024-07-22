@@ -14,14 +14,17 @@ let estates = ref false
 let titles = ref false
 let occupations = ref false
 let qualifiers = ref false
+let sources = ref false
 let all = ref false
 let prog = ref false
 let width = ref 50
 
+(* Attention: cache files are reorg independant *)
+let cache_dir = Filename.concat (Secure.base_dir ()) "etc"
+
 let write_cache_file bname fname list =
-  let cache = Filename.concat (!Geneweb.GWPARAM.etc_d bname) "cache" in
   let filename = bname ^ "_" ^ fname ^ ".cache" in
-  let file = Filename.concat cache filename in
+  let file = Filename.concat cache_dir filename in
   let gz_file = file ^ ".gz" in
   try
     let temp_file = Filename.temp_file "temp_" ".cache" in
@@ -113,8 +116,9 @@ let places_all base bname fname =
   in
   write_cache_file bname fname places_list;
   let stop = Unix.gettimeofday () in
-  let cache = Filename.concat (!Geneweb.GWPARAM.etc_d bname) "cache" in
-  let full_name = Filename.concat cache (bname ^ "_" ^ fname ^ ".cache.gz") in
+  let full_name =
+    Filename.concat cache_dir (bname ^ "_" ^ fname ^ ".cache.gz")
+  in
   Format.printf "@[<h>%-*s@ %8d@ %-14s@ %6.2f s@]@," !width full_name
     (List.length places_list) "places" (stop -. start);
   flush stderr
@@ -146,6 +150,12 @@ let names_all base bname fname alias =
             List.fold_left (fun acc t -> t.t_place :: acc) [] (get_titles p)
         | "titles" ->
             List.fold_left (fun acc t -> t.t_ident :: acc) [] (get_titles p)
+        | "sources" ->
+            let ifams = Array.to_list (get_family p) in
+            List.fold_left
+              (fun acc ifam -> get_fsources (foi base ifam) :: acc)
+              [ get_psources p ]
+              ifams
         | _ -> []
       in
       List.iter
@@ -178,8 +188,9 @@ let names_all base bname fname alias =
   let name_list = List.sort (fun v1 v2 -> compare v1 v2) name_list in
   write_cache_file bname fname name_list;
   let stop = Unix.gettimeofday () in
-  let cache = Filename.concat (!Geneweb.GWPARAM.etc_d bname) "cache" in
-  let full_name = Filename.concat cache (bname ^ "_" ^ fname ^ ".cache.gz") in
+  let full_name =
+    Filename.concat cache_dir (bname ^ "_" ^ fname ^ ".cache.gz")
+  in
   Format.printf "@[<h>%-*s@ %8d@ %-14s@ %6.2f s@]@," !width full_name
     (List.length name_list) fname (stop -. start);
   flush stderr
@@ -198,6 +209,7 @@ let speclist =
     ("-es", Arg.Set estates, " estates");
     ("-ti", Arg.Set titles, " titles");
     ("-oc", Arg.Set occupations, " occupations");
+    ("-so", Arg.Set sources, " sources");
     ("-all", Arg.Set all, " all");
     ("-prog", Arg.Set prog, " show progress bar");
   ]
@@ -218,12 +230,12 @@ let main () =
   let base = Gwdb.open_base (!Geneweb.GWPARAM.bpath !bname) in
   Geneweb.GWPARAM.init !bname;
   Geneweb.GWPARAM.init_etc !bname;
-  Mutil.mkdir_p (Filename.concat (!Geneweb.GWPARAM.etc_d !bname) "cache");
-  Printf.printf "Generating cache(s) compressed with gzip, %s mode\n"
-    (if !Geneweb.GWPARAM.reorg then "reorg" else "classic");
+  if not (Sys.file_exists cache_dir) then Mutil.mkdir_p cache_dir;
+  Printf.printf "Generating cache(s) compressed with gzip\n";
 
-  let cache = Filename.concat (!Geneweb.GWPARAM.etc_d !bname) "cache" in
-  let full_name = Filename.concat cache (!bname ^ "_occupations.cache.gz") in
+  let full_name =
+    Filename.concat cache_dir (!bname ^ "_occupations.cache.gz")
+  in
   width := String.length full_name + 2;
   Format.printf "@[<v>";
   let fn_alias = if !fname_alias then "fna" else "" in
@@ -234,10 +246,11 @@ let main () =
   if !snames then names_all base !bname "snames" sn_alias;
   if !alias then names_all base !bname "aliases" "";
   if !pub_names then names_all base !bname "pub_names" "";
-  if !qualifiers then names_all base !bname "qualifiers" "";
   if !estates then names_all base !bname "estates" "";
   if !titles then names_all base !bname "titles" "";
   if !occupations then names_all base !bname "occupations" "";
+  if !sources then names_all base !bname "sources" "";
+  if !qualifiers then names_all base !bname "qualifiers" "";
   if !all then (
     let fn_alias = "fna" in
     let sn_alias = "sna" in
@@ -249,6 +262,7 @@ let main () =
     names_all base !bname "estates" "";
     names_all base !bname "titles" "";
     names_all base !bname "occupations" "";
+    names_all base !bname "sources" "";
     names_all base !bname "qualifiers" "");
   Format.printf "@]";
   (* Ferme la boite verticale *)

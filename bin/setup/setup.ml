@@ -271,7 +271,10 @@ let parameters_3 =
         if k = "" then loop comm env
         else if k = "anon" && s <> "" then
           loop (comm ^ " " ^ stringify s) env
-        else loop (comm ^ " -" ^ stringify k) env
+        else if k = "bd" && s <> "" then
+          loop (comm ^ " -" ^ stringify k ^ " " ^ stringify s) env
+        else (
+          loop (comm ^ " -" ^ stringify k) env)
     | [] -> comm
   in
   loop ""
@@ -1053,7 +1056,7 @@ let cache_files ok_file conf =
   let rc =
     let comm =
       stringify (Filename.concat !bin_dir "cache_files") ^ " " in
-      exec_f (comm ^ (parameters_3 conf.env) ^ "> comm.log")
+      exec_f (comm ^ (parameters_3 conf.env) ^ " > comm.log")
     in
   flush stderr;
   if rc > 1 then print_file conf "bsi_err.htm" else print_file conf ok_file
