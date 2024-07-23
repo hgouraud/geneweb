@@ -29,10 +29,10 @@ let print_default_gwf_file bname =
       "p_mod=";
     ]
   in
-  let etc_d = !GWPARAM.etc_d bname in
+  let config_d = !GWPARAM.config_d bname in
   let fname = !GWPARAM.config bname in
   try
-    if not (Sys.file_exists etc_d) then Unix.mkdir etc_d 0o755;
+    if not (Sys.file_exists config_d) then Unix.mkdir config_d 0o755;
     if bname = "" || Sys.file_exists fname then ()
     else
       let oc = open_out fname in
@@ -40,7 +40,7 @@ let print_default_gwf_file bname =
       close_out oc
   with Unix.Unix_error (_, _, _) ->
     !GWPARAM.syslog `LOG_WARNING
-      (Printf.sprintf "Error while creating %s or %s\n" etc_d fname)
+      (Printf.sprintf "Error while creating %s or %s\n" config_d fname)
 
 let rec cut_at_equal i s =
   if i = String.length s then (s, "")
@@ -2030,13 +2030,18 @@ let find_sosa_ref conf base =
   | None -> default_sosa_ref conf base
 
 let write_default_sosa conf key =
-  let gwf = List.remove_assoc "default_sosa_ref" conf.base_env in
-  let gwf = List.rev (("default_sosa_ref", key) :: gwf) in
+  let gwf =
+    List.fold_left
+      (fun acc (k, v) ->
+        if k = "default_sosa_ref" then ("default_sosa_ref", key) :: acc
+        else (k, v) :: acc)
+      [] (List.rev conf.base_env)
+  in
   let fname = !GWPARAM.config conf.bname in
   let tmp_fname = fname ^ "2" in
   let oc =
     try Stdlib.open_out tmp_fname
-    with Sys_error _ -> failwith "the gwf database is not writable"
+    with Sys_error _ -> failwith "the gwf file is not writable"
   in
   List.iter (fun (k, v) -> Stdlib.output_string oc (k ^ "=" ^ v ^ "\n")) gwf;
   close_out oc;
@@ -2356,7 +2361,7 @@ type auth_user = { au_user : string; au_passwd : string; au_info : string }
 let read_gen_auth_file fname base_file =
   let fname =
     if GWPARAM.is_reorg_base base_file then
-      Filename.concat (!GWPARAM.bpath base_file) fname
+      Filename.concat (!GWPARAM.config_d base_file) fname
     else Filename.concat (Secure.base_dir ()) fname
   in
   try
