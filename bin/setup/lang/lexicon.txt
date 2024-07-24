@@ -92,6 +92,13 @@ fr: Sources
 en: Cache files computed
 fr: Fichiers cache calculés
 
+    Reorg mode.
+en: Reorg mode
+fr: Mode reorg
+
+    Kill .gwo files after base creation.
+en: Kill .gwo files after base creation.
+fr: Détruire les fichiers .gwo après création de la base
 
     "first names enclosed": the -fne option must be followed by a two characters string "be". When creating a person, if the GEDCOM first name part holds a part between 'b' (any character) and 'e' (any character), it is considered to be the usual first name: e.g. -fne "\\" or -fne "()".
 aa: ged2gwb.htm
