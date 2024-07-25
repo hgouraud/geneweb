@@ -200,22 +200,7 @@ let main () =
     (List.rev !files);
   if not !just_comp then (
     let bdir = !Geneweb.GWPARAM.bpath bname in
-    if
-      Sys.file_exists (Geneweb.GWPARAM.config_reorg bname)
-      && !Geneweb.GWPARAM.force
-    then (
-      Geneweb.GWPARAM.reorg := true;
-      Geneweb.GWPARAM.init_done := { status = false; bname };
-      Geneweb.GWPARAM.init bname);
-    Printf.eprintf "Mode: %s, for base %s\n"
-      (if !Geneweb.GWPARAM.reorg then "reorg" else "classic")
-      (Filename.concat (!Geneweb.GWPARAM.bpath "") (bname ^ ".gwb"));
-    if (not !Geneweb.GWPARAM.force) && Sys.file_exists bdir then (
-      Printf.eprintf
-        "The database \"%s\" already exists. Use option -f to overwrite it."
-        !out_file;
-      flush stderr;
-      exit 2);
+    Geneweb.GWPARAM.test_base bname;
     Geneweb.GWPARAM.init_etc bname;
     Lock.control (Mutil.lock_file bdir) false ~onerror:Lock.print_error_and_exit
       (fun () ->
