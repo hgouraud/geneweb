@@ -48,14 +48,6 @@ type syslog_level =
 
 (* S: Move it to gwd_lib?  *)
 
-val init : string -> unit
-(** Function called before gwd starts
-    e.g. inititialise assets folders in Secure module. *)
-
-val init_etc : string -> unit
-(** Function called before gwd starts
-    e.g. inititialise etc folders in reorg mode. *)
-
 val output_error :
   (?headers:string list ->
   ?content:Adef.safe_string ->
@@ -79,8 +71,22 @@ val wrap_output :
     Wrap the display of [title] and [content] in a defined template.
 *)
 
+val init : string -> unit
+(** Function called before gwd starts
+    e.g. inititialise assets folders in Secure module. *)
+
+val init_etc : string -> unit
+(** Function called before gwd starts
+    e.g. inititialise etc folders in reorg mode. *)
+
 val is_reorg_base : string -> bool
+(** returns true if mybase.gwb/config/mybase.gwf exists *)
+
 val test_reorg : string -> unit
+(** set reorg to true if !reorg of is_reorg_base; then calls init *)
+
+val test_base : string -> unit
+(** for gwc and ged2gwb, test_reorg, alert if base exists and force is not set *)
 
 module Reorg : sig
   val config : string -> string
