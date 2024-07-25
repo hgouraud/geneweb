@@ -171,11 +171,11 @@ let main () =
     if !in_file <> "" then
       Filename.remove_extension (Filename.basename !in_file)
     else !in_file;
-  if List.length !files > 1 && (not (Array.mem "-o" Sys.argv)) then (
+  if List.length !files > 1 && not (Array.mem "-o" Sys.argv) then (
     Printf.eprintf "The database name must be specified with -o\n";
     flush stdout;
     exit 2);
-  if !in_file <> "" && (not (Array.mem "-o" Sys.argv)) then out_file := !in_file;
+  if !in_file <> "" && not (Array.mem "-o" Sys.argv) then out_file := !in_file;
   if not (Mutil.good_name (Filename.basename !out_file)) then (
     (* Util.transl conf not available !*)
     Printf.eprintf "The database name \"%s\" contains a forbidden character.\n"
@@ -187,8 +187,7 @@ let main () =
   Geneweb.GWPARAM.init bname;
   let dist_etc_d = Filename.concat (Filename.dirname Sys.argv.(0)) "etc" in
   if !Db1link.particules_file = "" then
-    Db1link.particules_file :=
-      Filename.concat dist_etc_d "particles.txt";
+    Db1link.particules_file := Filename.concat dist_etc_d "particles.txt";
   let gwo = ref [] in
   List.iter
     (fun (x, separate, bnotes, shift) ->

@@ -1687,11 +1687,11 @@ let link next_family_fun bdir =
   let rec loop () =
     match next_family () with
     | Some fam ->
-       insert_syntax fi.f_curr_src_file gen fam;
-       loop ()
+        insert_syntax fi.f_curr_src_file gen fam;
+        loop ()
     | None -> ()
-    in
-    loop ();
+  in
+  loop ();
   close_out gen.g_per_index;
   close_out gen.g_per;
   close_out gen.g_fam_index;

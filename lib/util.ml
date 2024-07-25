@@ -31,7 +31,7 @@ let print_default_gwf_file bname =
   in
   let config_d = !GWPARAM.config_d bname in
   let fname = !GWPARAM.config bname in
-  if not (Sys.file_exists fname) then (
+  if not (Sys.file_exists fname) then
     try
       if not (Sys.file_exists config_d) then Unix.mkdir config_d 0o755;
       if bname = "" || Sys.file_exists fname then ()
@@ -41,7 +41,7 @@ let print_default_gwf_file bname =
         close_out oc
     with Unix.Unix_error (_, _, _) ->
       !GWPARAM.syslog `LOG_WARNING
-        (Printf.sprintf "Error while creating %s or %s\n" config_d fname))
+        (Printf.sprintf "Error while creating %s or %s\n" config_d fname)
 
 let rec cut_at_equal i s =
   if i = String.length s then (s, "")

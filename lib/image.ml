@@ -2,7 +2,6 @@ open Config
 open Gwdb
 
 let portrait_folder conf = !GWPARAM.portraits_d conf.bname
-
 let carrousel_folder conf = !GWPARAM.images_d conf.bname
 
 (** [default_portrait_filename_of_key fn sn occ] is the default filename
