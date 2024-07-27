@@ -395,22 +395,20 @@ let test_reorg bname =
     init bname)
 
 let test_base bname =
-    let bdir = !bpath bname in
-    if Sys.file_exists (config_reorg bname) && !force
-    then (
-      reorg := true;
-      init_done := { status = false; bname };
-      init bname);
-    Printf.eprintf "Mode: %s, for base %s\n"
-      (if !reorg then "reorg" else "classic")
-      (Filename.concat (!bpath "") (bname ^ ".gwb"));
-    if (not !force) && Sys.file_exists bdir then (
-      Printf.eprintf
-        "The database \"%s\" already exists. Use option -f to overwrite it."
-        bname;
-      flush stderr;
-      exit 2);
-    init_etc bname
+  let bdir = !bpath bname in
+  if Sys.file_exists (config_reorg bname) && !force then (
+    reorg := true;
+    init_done := { status = false; bname };
+    init bname);
+  Printf.eprintf "Mode: %s, for base %s\n"
+    (if !reorg then "reorg" else "classic")
+    (Filename.concat (!bpath "") (bname ^ ".gwb"));
+  if (not !force) && Sys.file_exists bdir then (
+    Printf.eprintf
+      "The database \"%s\" already exists. Use option -f to overwrite it." bname;
+    flush stderr;
+    exit 2);
+  init_etc bname
 
 (** [wrap_output conf title content]
     Plugins defining a page content but not a complete UI
