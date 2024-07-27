@@ -11,7 +11,8 @@
   %random.init;
   %apply;nth%with;one/two/three/four/five/six%and;%random.6;%end;
 %end;
-%let;random_index;%apply;get_random(nb_persons.v)%in;
+%let;nb_pers;%if;(nb_persons.v=0)1%else;%nb_persons.v;%end;%in;
+%let;random_index;%apply;get_random(nb_pers)%in;
 %if;(not cancel_links)
   <div class="d-flex flex-column fix_top fix_left home-xs">
     <a tabindex="1" role="button" class="btn btn-sm btn-link p-0 border-0" href="%prefix;" title="[*home]">
