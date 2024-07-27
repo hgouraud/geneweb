@@ -368,52 +368,41 @@ let get_blason_owner conf base p =
     loop p
   else None
 
-let rename_portrait_or_blason conf base mode p (nfn, nsn, noc) =
-  match
-    if mode = "portraits" then get_portrait conf base p
-    else get_blason conf base p true
-  with
-  | Some (`Path old_f) -> (
-      let new_s = default_image_filename_of_key mode nfn nsn noc in
-      let old_s = default_image_filename mode base p in
-      let f = Filename.concat (portrait_folder conf) new_s in
-      let old_ext = Filename.extension old_f in
-      let new_f = f ^ old_ext in
-      (try Sys.rename old_f new_f
-       with Sys_error e ->
-         !GWPARAM.syslog `LOG_ERR
-           (Format.sprintf
-              "Error renaming portrait/blasons: old_path=%s new_path=%s : %s"
-              old_f new_f e));
-      let new_s_f =
-        String.concat Filename.dir_sep [ portrait_folder conf; "saved"; new_s ]
+(* rename any folder or file based on fn, sn, oc *)
+let rename_portrait_or_blason conf base _mode p (nfn, nsn, noc) =
+  let key = Format.sprintf "%s.%d.%s"
+    (get_first_name p |> sou base) (get_occ p) (get_surname p |> sou base)
+    |> Name.lower
+  in
+  let key_l = String.length key in
+  let n_key = Format.sprintf "%s.%d.%s" nfn noc nsn |> Name.lower in
+  let rec loop f =
+    if not (f = "") then (
+      let dir = Filename.dirname f in
+      let fname = Filename.basename f in
+      let n_fname =
+        n_key ^ String.sub fname (key_l) (String.length fname - key_l)
       in
-      let old_s_f =
-        String.concat Filename.dir_sep [ portrait_folder conf; "saved"; old_s ]
-      in
-      (if Sys.file_exists (old_s_f ^ old_ext) then
-       try Sys.rename (old_s_f ^ old_ext) (new_s_f ^ old_ext)
-       with Sys_error e ->
-         !GWPARAM.syslog `LOG_ERR
-           (Format.sprintf
-              "Error renaming old portrait/blasons: old_path=%s new_path=%s : \
-               %s"
-              old_f new_f e));
-      let new_s_f =
-        String.concat Filename.dir_sep [ carrousel_folder conf; new_s ]
-      in
-      let old_s_f =
-        String.concat Filename.dir_sep [ carrousel_folder conf; old_s ]
-      in
-      if Sys.file_exists old_s_f then
-        try Sys.rename old_s_f new_s_f
-        with Sys_error e ->
-          !GWPARAM.syslog `LOG_ERR
-            (Format.sprintf
-               "Error renaming carrousel store: old_path=%s new_path=%s : %s"
-               old_f new_f e))
-  | Some (`Url _url) -> () (* old url still applies *)
-  | None -> ()
+      if Sys.file_exists f then (
+        Sys.rename f (Filename.concat dir n_fname);
+        loop f)
+      else ())
+  in
+  let p_dir = !GWPARAM.portraits_d conf.bname in
+  let i_dir = !GWPARAM.images_d conf.bname in
+  (* carrousel folder *)
+  if Sys.file_exists (Filename.concat i_dir key) then (
+    Sys.rename (Filename.concat i_dir key) (Filename.concat i_dir n_key));
+  let p_dir_s = Filename.concat p_dir "saved" in
+  (* saved portraits *)
+  let f = find_file_without_ext (Filename.concat p_dir_s key) in
+  loop f;
+  (* xxx.png/jpg/jpeg/gif/, xxx.txt, xxx.src, xxx.url, xxx.stop *)
+  let f = find_file_without_ext (Filename.concat p_dir key) in
+  loop f;
+  (* idem for blason files *)
+  let f = find_file_without_ext (Filename.concat p_dir key ^ ".blason") in
+  loop f
 
 let rename_portrait_and_blason conf base p (nfn, nsn, noc) =
   rename_portrait_or_blason conf base "portraits" p (nfn, nsn, noc);
