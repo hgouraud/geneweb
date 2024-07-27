@@ -476,22 +476,21 @@ let effective_send_c_ok conf base p file file_name =
           | _ -> (typ, content))
     else (GIF, content (* we dont care which type, content = "" *))
   in
-  let fname =
-    if mode = "portraits" then Image.default_image_filename "portraits" base p
-    else Image.default_image_filename "blasons" base p
-  in
+  let keydir = Image.default_image_filename "portraits" base p in
   let dir =
     if mode = "portraits" || mode = "blasons" then
       !GWPARAM.portraits_d conf.bname
-    else Filename.concat (!GWPARAM.images_d conf.bname) fname
+    else Filename.concat (!GWPARAM.images_d conf.bname) keydir
   in
-  File.create_dir ~parent:true dir;
+  if not (Sys.file_exists dir) then Mutil.mkdir_p dir;
+  (* fname = full name of the target file *)
   let fname =
     Filename.concat dir
       (if mode = "portraits" || mode = "blasons" then
-       fname ^ extension_of_type typ
+       keydir ^ extension_of_type typ
       else file_name)
   in
+  (* move pre-existing file to saved *)
   if mode = "portraits" || mode = "blasons" then
     match
       if mode = "portraits" then Image.get_portrait conf base p
