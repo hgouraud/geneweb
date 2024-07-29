@@ -201,6 +201,13 @@ let initial n =
   in
   loop 0
 
+let default_particles =
+  let upper =
+    [ "AF " ; "D'" ; "D’" ; "DAL " ; "DE " ; "DES " ; "DI " ; "DU " ; "OF "
+    ; "VAN " ; "VON UND ZU " ; "VON " ; "Y " ; "ZU " ; "ZUR " ]
+  in
+  List.rev_append (List.rev_map String.lowercase_ascii upper) upper
+
 let input_particles fname =
   try
     let ic = open_in fname in
@@ -215,7 +222,7 @@ let input_particles fname =
         List.rev (if len = 0 then list else Buff.get len :: list)
     in
     loop [] 0
-  with Sys_error _ -> []
+  with Sys_error _ -> default_particles
 
 let saints = ["saint"; "sainte"]
 
@@ -643,13 +650,6 @@ let array_except v a =
     else loop (i + 1)
   in
   loop 0
-
-let default_particles =
-  let upper =
-    [ "AF " ; "D'" ; "D’" ; "DAL " ; "DE " ; "DES " ; "DI " ; "DU " ; "OF "
-    ; "VAN " ; "VON UND ZU " ; "VON " ; "Y " ; "ZU " ; "ZUR " ]
-  in
-  List.rev_append (List.rev_map String.lowercase_ascii upper) upper
 
 let array_forall2 f a1 a2 =
   if Array.length a1 <> Array.length a2 then invalid_arg "array_forall2"

@@ -185,6 +185,10 @@ let main () =
     exit 2);
   let bname = Filename.remove_extension (Filename.basename !out_file) in
   Geneweb.GWPARAM.init bname;
+  let dist_etc_d = Filename.concat (Filename.dirname Sys.argv.(0)) "etc" in
+  if !Db1link.particules_file = "" then
+    Db1link.particules_file :=
+      Filename.concat dist_etc_d "particles.txt";
   let gwo = ref [] in
   List.iter
     (fun (x, separate, bnotes, shift) ->
