@@ -251,24 +251,30 @@ let source_note conf base p str =
 let source_note_with_env conf base env str =
   wiki_aux (function [ "<p>"; x; "</p>" ] -> [ x ] | x -> x) conf base env str
 
-(**/**)
-
-(* ((Gwdb.iper, Gwdb.ifam) Def.NLDB.page * ('a * (Def.NLDB.key * 'b) list)) list -> *)
-let links_to_ind conf base db key =
+let links_to_ind conf base db key typ =
   let l =
     List.fold_left
       (fun pgl (pg, (_, il)) ->
         let record_it =
-          match pg with
-          | Def.NLDB.PgInd ip -> authorized_age conf base (pget conf base ip)
-          | Def.NLDB.PgFam ifam ->
+          match (pg, typ) with
+          | Def.NLDB.PgInd ip, None ->
+              authorized_age conf base (pget conf base ip)
+          | Def.NLDB.PgFam ifam, None ->
               authorized_age conf base
                 (pget conf base (get_father @@ foi base ifam))
-          | Def.NLDB.PgNotes | Def.NLDB.PgMisc _ | Def.NLDB.PgWizard _ -> true
+          | Def.NLDB.PgMisc n, Some t -> 
+              let nenv, _ = read_notes base n in
+              let n_type =
+                try List.assoc "TYPE" nenv with Not_found -> ""
+              in
+              t = n_type
+          | Def.NLDB.PgMisc _, None -> true
+          | Def.NLDB.PgNotes, None | Def.NLDB.PgWizard _, None -> true
+          | _ -> false
         in
         if record_it then
           List.fold_left
-            (fun pgl (k, l) -> if k = key then (k, l) :: pgl else pgl)
+            (fun pgl (k, _) -> if k = key then pg :: pgl else pgl)
             pgl il
         else pgl)
       [] db
@@ -303,6 +309,28 @@ let write_cache_linked_pages conf cache_linked_pages =
   let oc = open_out_bin fname in
   output_value oc cache_linked_pages;
   close_out oc
+
+(* Spécifiquement pour le cache - retourne key * ind *)
+let links_to_cache_entries conf base db key =
+  let l =
+    List.fold_left
+      (fun pgl (pg, (_, il)) ->
+        let record_it =
+          match pg with
+          | Def.NLDB.PgInd ip -> authorized_age conf base (pget conf base ip)
+          | Def.NLDB.PgFam ifam ->
+              authorized_age conf base
+                (pget conf base (get_father @@ foi base ifam))
+          | Def.NLDB.PgNotes | Def.NLDB.PgMisc _ | Def.NLDB.PgWizard _ -> true
+        in
+        if record_it then
+          List.fold_left
+            (fun pgl (k, l) -> if k = key then (k, l) :: pgl else pgl)
+            pgl il
+        else pgl)
+      [] db
+  in
+  List.sort_uniq compare l
 
 let update_cache_linked_pages conf mode old_key new_key pgl =
   let ht = read_cache_linked_pages conf in
