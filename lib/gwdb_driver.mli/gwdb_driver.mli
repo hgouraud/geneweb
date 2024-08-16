@@ -378,6 +378,9 @@ val commit_patches : base -> unit
 val commit_notes : base -> string -> string -> unit
 (** [commit_notes fname s] Update content of the notes/extended page file [fname] if exists. *)
 
+val commit_wiznotes : base -> string -> string -> unit
+(** [commit_wiznotes fname s] Update content of the wizard notes page file [fname] if exists. *)
+
 val new_iper : base -> iper
 (** Retruns new unused person's id *)
 
@@ -524,6 +527,10 @@ val clear_families_array : base -> unit
 
 val base_notes_read : base -> string -> string
 (** [base_notes_read base fname] read and return content of [fname] note
+    (either database note either extended page). *)
+
+val base_wiznotes_read : base -> string -> string
+(** [base_wiznotes_read base fname] read and return content of [fname] note
     (either database note either extended page). *)
 
 val base_notes_read_first_line : base -> string -> string
