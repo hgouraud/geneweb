@@ -86,11 +86,7 @@ let compute base bdir =
            let file = files.(i) in
            if Filename.check_suffix file ".txt" then
              let wizid = Filename.chop_suffix file ".txt" in
-             let wfile =
-               List.fold_left Filename.concat bdir
-                 [ base_wiznotes_dir base; file ]
-             in
-             match notes_links (read_file_contents wfile) with
+             match notes_links (base_wiznotes_read base wizid) with
              | [], [] -> ()
              | (_list_nt, _list_ind) as list ->
                  Printf.eprintf "%s... " wizid;
