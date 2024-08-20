@@ -1158,10 +1158,12 @@ let print_mod ?prerr o_conf base =
     patch_person base p.key_index p;
     let new_key = Util.make_key base p in 
     if old_key <> new_key then
-      (* TODO CHECK THIS IS OK, key changed to old_key *)      
-      Notes.update_ind_key base pgl old_key new_key;
+      (* TODO CHECK THIS IS OK, key changed to old_key *)  
+      (* Needs the updates in this order in case of self-reference *)
       Notes.update_notes_links_person base p;
+      Notes.update_ind_key base pgl old_key new_key;
       Notes.update_cache_linked_pages conf Notes.Rename old_key new_key [];
+    Notes.update_ind_key conf base pgl key new_key;
     let wl =
       let a = poi base p.key_index in
       let a = { parents = get_parents a; consang = get_consang a } in
