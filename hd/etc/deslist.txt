@@ -132,6 +132,10 @@
   %end;
 %end;
 
+%define;havingchildren(cc)
+  [having as children %s:::cc]c%nn;
+%end;
+
 %define;descendants_by_list(xx, yy, curlev, maxlev, famlev, ctr)
   %if;(curlev = 0)<p>%nl;%end;
   <b id="person-%ctr;">
@@ -293,7 +297,7 @@
       %elseif;(family.desc_level > famlev)
         <i>, [see above]</i>.
         %apply;lazy_print%with;<br>%nl;%end;
-      %elseif;has_children;<p>... <i>[having as children]c</i></p>
+      %elseif;has_children;<p>... <i>%apply;havingchildren(nb_children)</i></p>
           %family.set_infinite_desc_level;
           %if;(curlev = 0)</p>%nl;%end;
           <ul>

@@ -43,14 +43,9 @@
     %end;
   %end;
 %end;
-%define;havingaschildren(xx)
-  [having as children:::xx]1%nn;
-%end;
+
 %define;havingchildren(cc)
-  %if;(cc>1)
-    %apply;havingaschildren%with;%apply;nth%with;[n (number)]%and;cc%end;%end;
-  %else;[having as children]0%nn;
-  %end;
+  [having as children %s:::cc]c%nn;
 %end;
 %( Copie des fonctions qui se trouvent dans perso.txt dont la SEULE
    modification est que la phrase NE commence PAS par une majuscule. %)
@@ -199,6 +194,7 @@
           </ul>
           %( On rétablie l'ancienne valeur de count %)
           %apply;init_count(prev_count)
+        %else;, %apply;havingchildren(2)
         %end;
         %if;(evar.opt = "from" and wizard)<em>(%origin_file;)</em><br>%nl;%end;
       </li>
@@ -243,6 +239,7 @@
             </li>
           </ul>
         %end;
+      %else;, %apply;havingchildren(2)
       %end;
     %end;
     %if;(count2>0)
@@ -338,6 +335,7 @@
               %end;
             </div>
             %apply;init_count(prev_count)%( on rétablie l'ancienne valeur de count %)
+          %else;, %apply;havingchildren(2)
           %end;
         </div>
         %if;has_witnesses;
@@ -428,6 +426,7 @@
           </ul>
           %( On rétablie l'ancienne valeur de count %)
           %apply;init_count(prev_count)
+        %else;, %apply;havingchildren(2)
         %end;
         %if;(evar.opt = "from" and wizard)<em>(%origin_file;)</em><br>%nl;%end;
       </li>
@@ -469,11 +468,8 @@
                 %apply;short_display_person("child")
                 %if;child.has_families;
                   %foreach;child.family;
-                    %if;(family_cnt!=1)
-                      <img width="13" height="13" src="%images_prefix;1pixel.png" alt="1px">
-                      <em>%child;%child.title;%child.dates;</em>%nn;
-                    %end;
-                    <em>, %apply;loc_long_married("child")</em>
+                    %if;(nb_families=1), %else;%if;(family_cnt=1)<br>%end;%end;
+                    <em>%apply;loc_long_married("child")</em>
                     %apply;short_display_person("spouse")
                     %if;has_children;
                       , %apply;havingchildren(nb_children)[:]
@@ -488,9 +484,9 @@
                                     <img width="10" height="10" src="%images_prefix;1pixel.png"  alt="1px">
                                     <em>%child;%child.title;%child.dates;</em>%nn;
                                   %end;
-                                  <em>&nbsp;%apply;loc_long_married("child")</em>
+                                  <em>, %apply;loc_long_married("child")</em>
                                   %apply;short_display_person("spouse")
-                                  %if;has_children; %apply;havingchildren(nb_children)[:]
+                                  %if;has_children;, %apply;havingchildren(nb_children)[:]
                                     <div style="font-size: 90%%">%nn;
                                       <ul>
                                         %foreach;child;
@@ -500,6 +496,7 @@
                                         %end;
                                       </ul>
                                     </div>
+                                  %else;, %apply;havingchildren(2)
                                   %end;
                                 %end;
                               %end;
@@ -508,7 +505,7 @@
                         </ul>
                       </div>
                     %else;
-                      <br>
+                      , %apply;havingchildren(2)<br>
                     %end;
                   %end;
                 %end;
@@ -517,6 +514,7 @@
           </ul>
           %( On rétablie l'ancienne valeur de count %)
           %apply;init_count(prev_count)
+        %else;, %apply;havingchildren(2)
         %end;
         %if;(evar.opt = "from" and wizard)<em>(%origin_file;)</em><br>%nl;%end;
       </li>
@@ -571,7 +569,7 @@
             </tr>
           </table>
         %end;%nn;
-        %if;has_children; %apply;havingchildren(nb_children)
+        %if;has_children;, %apply;havingchildren(nb_children)
           <ul>
             %foreach;child;
               %apply;li_SDC("child")
@@ -604,7 +602,7 @@
                     %apply;short_display_person_f("spouse")%nn;
                     %if;are_separated; [separated]0 %on_separation_date;%end;%nn;
                     %if;are_divorced; [divorced]0 %on_divorce_date;%end;%nn;
-                    %if;has_children; %apply;havingchildren(nb_children)
+                    %if;has_children;, %apply;havingchildren(nb_children)
                       %if;(child.has_image and family_cnt=1)</td></tr></table>%end;%nl;
                       <div style="font-size: 90%%">
                         <ul>
@@ -624,7 +622,7 @@
                                   %if;has_children;
                                     <table style="border-width: %border;"><tr>%nn;
                                       <td style="font-size: 80%%;padding-left: 18px">%nn;
-                                        %apply;havingchildren(nb_children)[:]
+                                        , %apply;havingchildren(nb_children)[:]
                                         %foreach;child;
                                           %if;(child_cnt!=1), %end;
                                           %apply;short_display_person_f("child")
@@ -652,6 +650,7 @@
               </li>
             %end;
           </ul>
+        %else;, %apply;havingchildren(2)
         %end;
         %if;(evar_opt="from" and wizard)<em>(%origin_file;)</em><br>%nl;%end;
       </li>

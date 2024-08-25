@@ -846,6 +846,10 @@
   %end;
 %end;
 
+%define;havingchildren(cc)
+  [having as children %s:::cc]c%nn;
+%end;
+
 %define;long_display_ancestor_families()
   %if;ancestor.is_male;
     ...
@@ -875,7 +879,7 @@
              %marriage_note;
            %end;)%nl;
         %end;
-        <i>[having as children]:</i>
+        <i>havingchildren(nb_children)[:]</i>
         <p>
           <ol style="list-style-type:lower-latin">
           %foreach;child;
@@ -891,7 +895,7 @@
       %( father's other children %)
       %foreach;ancestor.spouse.family;
         %if;(spouse.index != ancestor.index and nb_children > 0)
-          <i>... [having as children]%sp;</i>
+          <i>... havingchildren(nb_children)%sp;</i>
           <a href="#%family.father.sosa_in_list;
           "><b>%family.father.sosa_in_list;
           </b></a>-(X%family_cnt;):
@@ -905,7 +909,7 @@
       %( mother's other children %)
       %foreach;ancestor.family;
         %if;(spouse.index != ancestor.spouse.index and nb_children > 0)
-          <i>... [having as children]%sp;</i>
+          <i>... havingchildren(nb_children)%sp;</i>
           <a href="#%family.mother.sosa_in_list;
           "><b>%family.mother.sosa_in_list;
           </b></a>-(X%family_cnt;):

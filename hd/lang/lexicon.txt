@@ -9099,39 +9099,39 @@ ru: в браке
 sv: har en familj
 tr: eş ve çocuklar biliniyor
 
-    having as children
-af: met kind/met %s kinders
-ar: طفلهم / أطفالهم ٪S
-bg: c дете/c %s деца
-br: o bugel/o %s bugel
-ca: amb fill/amb %s fills
-co: cù figliolu(a)/cù %s figlioli
-cs: jejich dítě/jejich %s děti
-da: med barn/med %s børn
-de: ihr Kind/ihre %s Kinder
-en: with child/with %s children
-eo: havis idon/havis %s idojn
-es: con un niño/con %s hijos
-et: nende laps/nende %s last
-fi: heidän lapsensa/heidän %s lastaan
-fr: dont un enfant/dont %s enfants
-he: הילד שלהם / ילדיהם %S
-is: með barn/með %s börn
-it: con figlio/con %s figli
-lt: ar vienu bērnu/ar %s bērniem
-lv: su vaikais/su %s vaikais
-nl: hun kind/hun &s kinderen
-no: med barn/med %s barn
-oc: сæ фæллон/сæ %s фæсарæнтæ
-pl: ich dziecko/ich %s dzieci
-pt: com filho/com %s filhos
-ro: cu copil/cu %s copii
-ru: их ребенок/ %s их детей
-sk: ich dieťa/ich %s deti
-sl: z enim otrokom/s %s otroki
-sv: deras barn/deras %s barn
-tr: bir çocukla/%s çocuklu
-zh: 有孩子/有%s個孩子
+    having as children %s
+af: met kind/met %s kinders/without child
+ar: طفلهم / أطفالهم %s/without child
+bg: c дете/c %s деца/without child
+br: o bugel/o %s bugel/without child
+ca: amb fill/amb %s fills/without child
+co: cù figliolu(a)/cù %s figlioli/sans enfant
+cs: jejich dítě/jejich %s děti/without child
+da: med barn/med %s børn/without child
+de: ihr Kind/ihre %s Kinder/without child
+en: with child/with %s children/without child
+eo: havis idon/havis %s idojn/without child
+es: con un niño/con %s hijos/without child
+et: nende laps/nende %s last/without child
+fi: heidän lapsensa/heidän %s lastaan/without child
+fr: dont un enfant/dont %s enfants/sans enfant
+he: הילד שלהם / ילדיהם %s/without child
+is: með barn/með %s börn/without child
+it: con figlio/con %s figli/without child
+lt: ar vienu bērnu/ar %s bērniem/without child
+lv: su vaikais/su %s vaikais/without child
+nl: hun kind/hun &s kinderen/without child
+no: med barn/med %s barn/without child
+oc: сæ фæллон/сæ %s фæсарæнтæ/without child
+pl: ich dziecko/ich %s dzieci/without child
+pt: com filho/com %s filhos/without child
+ro: cu copil/cu %s copii/without child
+ru: их ребенок/ %s их детей/without child
+sk: ich dieťa/ich %s deti/without child
+sl: z enim otrokom/s %s otroki/without child
+sv: deras barn/deras %s barn/without child
+tr: bir çocukla/%s çocuklu/without child
+zh: 有孩子/有%s個孩子/without child
 
     having no family
 co: ùn avendu nisuna famiglia

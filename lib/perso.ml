@@ -4195,8 +4195,11 @@ let eval_transl conf base env upp s c =
         | "c" -> (
             (* child/children *)
             match get_env "fam" env with
-            | Vfam (_, fam, _, _) ->
-                if Array.length (get_children fam) <= 1 then 0 else 1
+            | Vfam (_, fam, _, _) -> (
+                match Array.length (get_children fam) with
+                | 0 -> 2
+                | 1 -> 0
+                | _ -> 1)
             | _ -> (
                 match get_env "p" env with
                 | Vind p ->
@@ -4206,7 +4209,10 @@ let eval_transl conf base env upp s c =
                           n + Array.length (get_children (foi base ifam)))
                         0 (get_family p)
                     in
-                    if n <= 1 then 0 else 1
+                    (match n with
+                    | 0 -> 2
+                    | 1 -> 0
+                    | _ -> 1)
                 | _ ->
                     Printf.sprintf "Children of unknown person"
                     |> !GWPARAM.syslog `LOG_WARNING;
