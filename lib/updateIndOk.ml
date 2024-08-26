@@ -809,7 +809,10 @@ let effective_mod ?prerr ?skip_conflict conf base sp =
   let ofn = p_first_name base op in
   let osn = p_surname base op in
   let oocc = get_occ op in
-  (if ofn <> sp.first_name || osn <> sp.surname || oocc <> sp.occ then
+  (if
+   (not (String.equal ofn sp.first_name && String.equal osn sp.surname))
+   || oocc <> sp.occ
+  then
    match Gwdb.person_of_key base sp.first_name sp.surname sp.occ with
    | Some p' when p' <> pi && Some p' <> skip_conflict ->
        Update.print_create_conflict conf base (poi base p') ""
@@ -988,7 +991,10 @@ let print_mod_ok conf base wl pgl p ofn osn oocc =
   let nfn = p_first_name base np in
   let nsn = p_surname base np in
   let nocc = get_occ np in
-  if pgl <> [] && (ofn <> nfn || osn <> nsn || oocc <> nocc) then (
+  if
+    pgl <> []
+    && ((not (String.equal ofn nfn && String.equal osn nsn)) || oocc <> nocc)
+  then (
     Output.print_sstring conf
       {|<div class="alert alert-danger mx-auto mt-1" role="alert">|};
     Output.print_sstring conf (transl conf "name changed. updated linked pages");
@@ -1161,9 +1167,8 @@ let print_mod ?prerr o_conf base =
       (* TODO CHECK THIS IS OK, key changed to old_key *)  
       (* Needs the updates in this order in case of self-reference *)
       Notes.update_notes_links_person base p;
-      Notes.update_ind_key base pgl old_key new_key;
+      Notes.update_ind_key conf base pgl old_key new_key;
       Notes.update_cache_linked_pages conf Notes.Rename old_key new_key [];
-    Notes.update_ind_key conf base pgl key new_key;
     let wl =
       let a = poi base p.key_index in
       let a = { parents = get_parents a; consang = get_consang a } in
