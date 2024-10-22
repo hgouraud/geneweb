@@ -139,6 +139,19 @@ let get_request_and_content strm =
     | "" -> ""
     | x -> String.init (int_of_string x) (fun _ -> Stream.next strm)
   in
+  let content_l = String.split_on_char '\n' content in
+  let content_l = List.map (fun l -> l ^ "\n") content_l in
+  let filename =
+    Mutil.extract_param "content-disposition: form-data; name=\"file\"; " '\n'
+      content_l
+  in
+  (* filename="xxx.yyy" *)
+  let parts = String.split_on_char '"' filename in
+  let filename = String.trim filename in
+  let filename =
+    if filename <> "" && List.length parts = 3 then List.nth parts 1 else ""
+  in
+  if !Mutil.saved_filename = "" then Mutil.saved_filename := filename;
   (request, Adef.encoded content)
 
 let string_of_sockaddr = function

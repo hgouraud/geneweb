@@ -1,5 +1,7 @@
 (* Copyright (c) 2006-2007 INRIA *)
 
+let saved_filename = ref ""
+
 let bench name fn =
   let pprint_gc gc =
     let open Gc in

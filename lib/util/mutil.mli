@@ -1,5 +1,7 @@
 (* Copyright (c) 2006-2007 INRIA *)
 
+val saved_filename : string ref
+
 val verbose : bool ref
 (** Global variable that indicates either
     servers should be in verbose mode. *)

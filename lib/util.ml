@@ -602,7 +602,8 @@ let safe_html_aux escape_text escape_attribute s =
   |> to_string
 
 let safe_html s =
-  Adef.safe (safe_html_aux (fun s -> (escape_html s :> string)) escape_attribute s)
+  Adef.safe
+    (safe_html_aux (fun s -> (escape_html s :> string)) escape_attribute s)
 
 (* Clean HTML tags from a string. Block tags are replaced by a space,
    and inline tags are replaced by an empty string. *)

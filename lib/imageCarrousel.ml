@@ -300,6 +300,7 @@ let effective_send_ok conf base p file =
   in
   let strm = Stream.of_string file in
   let request, content = Wserver.get_request_and_content strm in
+  Mutil.saved_filename := "";
   let content =
     let s =
       let rec loop len (strm__ : _ Stream.t) =
@@ -381,6 +382,11 @@ let effective_send_c_ok conf base p file file_name =
   in
   let strm = Stream.of_string file in
   let request, content = Wserver.get_request_and_content strm in
+  (* FIXME relying on Mutil.saved_filename is a hack!! *)
+  let file_name =
+    if !Mutil.saved_filename = "" then file_name else !Mutil.saved_filename
+  in
+  Mutil.saved_filename := "";
   let content =
     if mode = "note" || mode = "source" || image_url <> "" then ""
     else

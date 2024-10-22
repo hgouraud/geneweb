@@ -727,7 +727,7 @@ let treat_request =
 
         | "SND_IMAGE" -> w_wizard @@w_lock @@ w_base @@ ImageCarrousel.print
         | "SND_IMAGE_OK" ->
-           w_wizard @@ w_lock @@ w_base @@ ImageCarrousel.print_send_ok
+          w_wizard @@ w_lock @@ w_base @@ ImageCarrousel.print_send_ok
         | "SND_IMAGE_C" ->
           w_base @@ w_person @@ Perso.interp_templ "carrousel"
         | "SND_IMAGE_C_OK" ->
