@@ -1,8 +1,9 @@
 (* Copyright (c) 1998-2007 INRIA *)
 
 (* La liste des caractères interdits *)
-let forbidden_char = [ ':'; '@'; '#'; '='; '$' ]
-
+let forbidden_char = [ ':'; '@'; '#'; '='; '$']
+let no_question_mark = ref false
+let q_mark_error = "no ? in fn or sn. Changed to Nx or N"
 (* Name.lower *)
 
 let unaccent_utf_8 lower s i =

@@ -838,6 +838,10 @@ sl: nedelja/ponedeljek/torek/sreda/četrtek/petek/sobota
 sv: söndag/måndag/tisdag/onsdag/torsdag/fredag/lördag
 tr: Pazar/Pazartesi/Salı/Çarşamba/Perşembe/Cuma/Cumartesi
 
+    no ? in fn or sn. Changed to Nx or N
+en: <h3 class="error">? and ?? forbidden as first names or surnames.<br>Transformed into Nx or N</h3>
+fr: <h3 class="error">? et ?? interdits pour les prénoms et patronymes.<br>Transformés en Nx or N</h3>
+
     2nd cousins
 af: kleinneef/kleinniggie
 bg: втори братовчеди

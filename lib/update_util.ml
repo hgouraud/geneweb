@@ -36,14 +36,22 @@ let getn conf var key =
   | None -> failwith (var ^ "_" ^ key ^ " unbound")
 
 let get_purged_fn_sn removed_string first_name surname =
-  if
-    Name.contains_forbidden_char first_name
-    || Name.contains_forbidden_char surname
-  then (
-    removed_string :=
-      (Name.purge first_name ^ " " ^ Name.purge surname) :: !removed_string;
-    (Name.purge first_name, Name.purge surname))
-  else (first_name, surname)
+  let (fn, sn) =
+    if
+      Name.contains_forbidden_char first_name
+      || Name.contains_forbidden_char surname
+    then (
+      removed_string :=
+        (Name.purge first_name ^ " " ^ Name.purge surname) :: !removed_string;
+      (Name.purge first_name, Name.purge surname))
+    else (first_name, surname)
+  in
+  match fn, sn with
+  | fn, sn when (fn = "?" || fn = "??") && (sn = "?" || sn = "??") ->
+    (Name.no_question_mark := true; "Nx", "N")
+  | fn, sn when (fn = "?" || fn = "??") -> (Name.no_question_mark := true; "Nx", sn)
+  | fn, sn when (sn = "?" || sn = "??") -> (Name.no_question_mark := true; fn, "N")
+  | fn, sn -> fn, sn
 
 let getenv_sex conf var =
   match p_getenv conf.env (var ^ "_sex") with

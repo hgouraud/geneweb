@@ -958,6 +958,8 @@ let print_mod_ok conf base wl pgl p ofn osn oocc =
          " " Name.forbidden_char);
     Output.print_sstring conf "</h3>\n";
     List.iter (Output.printf conf "<p>%s</p>") !removed_string);
+  if !Name.no_question_mark then
+    Output.print_sstring conf (Util.transl conf Name.q_mark_error |> Utf8.capitalize_fst);
   (* Si on a supprimé des relations, on les mentionne *)
   (match !deleted_relation with
   | [] -> ()

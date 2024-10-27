@@ -293,9 +293,12 @@ let string_of_error conf =
       ^<^ transl conf ":" ^<^ " "
       ^<^ strong (fso f s o)
   | UERR_already_defined (base, p, var) ->
+      (if !Name.no_question_mark then
+        (Util.transl conf Name.q_mark_error |> Utf8.capitalize_fst) else "")
+      ^
       (Printf.sprintf
          (fcapitale (ftransl conf "name %s already used by %tthis person%t"))
-         ("\"" ^ (fso_p base p :> string) ^ "\"")
+         ("\"" ^ (Gutil.designation base p :> string) ^ "\"")
          (fun _ ->
            Printf.sprintf "<a href=\"%s%s\">"
              (commd conf : Adef.escaped_string :> string)

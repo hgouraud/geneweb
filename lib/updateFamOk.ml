@@ -1108,6 +1108,8 @@ let print_mod_ok conf base (wl, ml) cpl des =
          " " Name.forbidden_char);
     Output.print_sstring conf "</h3>\n";
     List.iter (Output.printf conf "<p>%s</p>") !removed_string);
+  if !Name.no_question_mark then
+    Output.print_sstring conf (Util.transl conf Name.q_mark_error |> Utf8.capitalize_fst);
   print_family conf base (wl, ml) cpl des;
   Hutil.trailer conf
 

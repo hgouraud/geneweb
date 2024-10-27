@@ -3,6 +3,9 @@
 val forbidden_char : char list
 (** List of forbidden to use characters *)
 
+val no_question_mark : bool ref
+val q_mark_error : string
+
 val unaccent_utf_8 : bool -> string -> int -> string * int
 (** [unaccent_utf_8 lower s i] checks UTF-8 characher that starts at position [i] inside [s]
     and returns couple (cs,np) where [cs] is ASCII representation of this character (characters
