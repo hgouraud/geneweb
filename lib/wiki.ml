@@ -207,7 +207,7 @@ let syntax_links conf wi s =
             else if exists then
               Printf.sprintf "<a id=\"p_%d\" href=\"%sp=%s;n=%s%s\" %s>%s</a>"
                 pos
-                (commd conf :> string)
+               (commd conf :> string)
                 (Mutil.encode fn :> string)
                 (Mutil.encode sn :> string)
                 (if oc = 0 then "" else ";oc=" ^ string_of_int oc)
