@@ -207,7 +207,7 @@ let syntax_links conf wi s =
             else if exists then
               Printf.sprintf "<a id=\"p_%d\" href=\"%sp=%s;n=%s%s\" %s>%s</a>"
                 pos
-               (commd conf :> string)
+                (commd conf :> string)
                 (Mutil.encode fn :> string)
                 (Mutil.encode sn :> string)
                 (if oc = 0 then "" else ";oc=" ^ string_of_int oc)
@@ -870,7 +870,7 @@ let print_ok conf wi edit_mode fname title_is_1st s =
 
 let print_mod_ok conf wi edit_mode fname read_string commit string_filter
     title_is_1st =
-  let new_fname = (Util.p_getenv conf.env "new_f") in
+  let new_fname = Util.p_getenv conf.env "new_f" in
   let fname =
     match new_fname with
     | Some f -> fname (Some f)
@@ -891,7 +891,8 @@ let print_mod_ok conf wi edit_mode fname read_string commit string_filter
         match Util.p_getenv conf.env "digest" with Some s -> s | None -> ""
       in
       (* TODO check if new_fname = None is sufficient condition *)
-      if digest <> Mutil.digest old_string && new_fname = None then Update.error_digest conf
+      if digest <> Mutil.digest old_string && new_fname = None then
+        Update.error_digest conf
       else
         let s =
           match Util.p_getint conf.env "v" with

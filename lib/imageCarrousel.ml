@@ -404,10 +404,12 @@ let effective_send_c_ok conf base p file file_name =
           dump_bad_image conf content;
           incorrect_content_type conf base p ct
       | Some (typ, content) -> (
-          match List.assoc_opt "max_images_size" conf.base_env with
-          | Some len when String.length content > int_of_string len ->
-              error_too_big_image conf base p (String.length content)
-                (int_of_string len)
+          match
+            Option.map int_of_string
+            @@ List.assoc_opt "max_images_size" conf.base_env
+          with
+          | Some len when String.length content > len ->
+              error_too_big_image conf base p (String.length content) len)
           | _ -> (typ, content))
     else (GIF, content (* we dont care which type, content = "" *))
   in

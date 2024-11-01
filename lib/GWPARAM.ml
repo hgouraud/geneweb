@@ -117,49 +117,44 @@ module Default = struct
       - Faux dans tous les autres cas *)
   let p_auth conf base p =
     let access = Gwdb.get_access p in
-    conf.Config.wizard
-    || access = Public
-    || conf.public_if_titles
-       && access = IfTitles
+    conf.Config.wizard || access = Public
+    || conf.public_if_titles && access = IfTitles
        && Gwdb.nobtitles base conf.allowed_titles conf.denied_titles p <> []
-    ||
-    begin
-      let death = Gwdb.get_death p in
-      if death = NotDead then conf.private_years < 1
-      else
-        let check_date d lim none =
-          match d with
-          | None -> none ()
-          | Some d ->
-            let a = Date.time_elapsed d conf.today in
-            if a.Def.year > lim then true
-            else if a.year < conf.private_years then false
-            else a.month > 0 || a.day > 0
-        in
-        check_date (Gwdb.get_birth p |> Date.cdate_to_dmy_opt) conf.private_years
-        @@ fun () ->
-        check_date
-          (Gwdb.get_baptism p |> Date.cdate_to_dmy_opt)
-          conf.private_years
-        @@ fun () ->
-        check_date
-          (Date.dmy_of_death death)
-          conf.private_years_death
-        @@ fun () ->
-        (access <> Def.Private && conf.public_if_no_date)
-        ||
-        let families = Gwdb.get_family p in
-        let len = Array.length families in
-        let rec loop i =
-          i < len
-          && check_date
-            (Array.get families i |> Gwdb.foi base |> Gwdb.get_marriage
-             |> Date.cdate_to_dmy_opt)
-            conf.private_years_marriage
-            (fun () -> loop (i + 1))
-        in
-        loop 0
-    end
+    || (let death = Gwdb.get_death p in
+        if death = NotDead then conf.private_years < 1
+        else
+          let check_date d lim none =
+            match d with
+            | None -> none ()
+            | Some d ->
+                let a = Date.time_elapsed d conf.today in
+                if a.Def.year > lim then true
+                else if a.year < conf.private_years then false
+                else a.month > 0 || a.day > 0
+          in
+          check_date
+            (Gwdb.get_birth p |> Date.cdate_to_dmy_opt)
+            conf.private_years
+          @@ fun () ->
+          check_date
+            (Gwdb.get_baptism p |> Date.cdate_to_dmy_opt)
+            conf.private_years
+          @@ fun () ->
+          check_date (Date.dmy_of_death death) conf.private_years_death
+          @@ fun () ->
+          (access <> Def.Private && conf.public_if_no_date)
+          ||
+          let families = Gwdb.get_family p in
+          let len = Array.length families in
+          let rec loop i =
+            i < len
+            && check_date
+                 (Array.get families i |> Gwdb.foi base |> Gwdb.get_marriage
+                |> Date.cdate_to_dmy_opt)
+                 conf.private_years_marriage
+                 (fun () -> loop (i + 1))
+          in
+          loop 0)
     (* is_semi_public takes into account ancestors and descendants *)
     || (conf.friend && is_semi_public conf base p)
 
@@ -169,27 +164,24 @@ module Default = struct
     mutable cbase : Gwdb.base option;
   }
 
-  let auth_cache = {
-    pmap = IperMap.empty;
-    cconf = Config.empty;
-    cbase = None;
-  }
+  let auth_cache = { pmap = IperMap.empty; cconf = Config.empty; cbase = None }
 
   let p_auth conf base p =
     let pi = Gwdb.get_iper p in
-    if not (conf == auth_cache.cconf
-            && (Option.fold ~none:false ~some:((==) base) auth_cache.cbase))
-    then begin
+    if
+      not
+        (conf == auth_cache.cconf
+        && Option.fold ~none:false ~some:(( == ) base) auth_cache.cbase)
+    then (
       auth_cache.pmap <- IperMap.empty;
       auth_cache.cconf <- conf;
-      auth_cache.cbase <- Some base;
-    end;
+      auth_cache.cbase <- Some base);
     match IperMap.find_opt pi auth_cache.pmap with
     | Some auth -> auth
     | None ->
-      let auth = p_auth conf base p in
-      auth_cache.pmap <- IperMap.add pi auth auth_cache.pmap;
-      auth
+        let auth = p_auth conf base p in
+        auth_cache.pmap <- IperMap.add pi auth auth_cache.pmap;
+        auth
 
   let syslog (level : syslog_level) msg =
     let tm = Unix.(time () |> localtime) in
