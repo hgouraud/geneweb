@@ -870,7 +870,12 @@ let print_ok conf wi edit_mode fname title_is_1st s =
 
 let print_mod_ok conf wi edit_mode fname read_string commit string_filter
     title_is_1st =
-  let fname = fname (Util.p_getenv conf.env "f") in
+  let new_fname = (Util.p_getenv conf.env "new_f") in
+  let fname =
+    match new_fname with
+    | Some f -> fname (Some f)
+    | None -> fname (Util.p_getenv conf.env "f")
+  in
   match edit_mode fname with
   | Some edit_mode ->
       let old_string =
@@ -885,7 +890,8 @@ let print_mod_ok conf wi edit_mode fname read_string commit string_filter
       let digest =
         match Util.p_getenv conf.env "digest" with Some s -> s | None -> ""
       in
-      if digest <> Mutil.digest old_string then Update.error_digest conf
+      (* TODO check if new_fname = None is sufficient condition *)
+      if digest <> Mutil.digest old_string && new_fname = None then Update.error_digest conf
       else
         let s =
           match Util.p_getint conf.env "v" with

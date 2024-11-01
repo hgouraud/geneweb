@@ -842,6 +842,10 @@ tr: Pazar/Pazartesi/Salı/Çarşamba/Perşembe/Cuma/Cumartesi
 en: <h3 class="error">? and ?? forbidden as first names or surnames.<br>Transformed into Nx or N</h3>
 fr: <h3 class="error">? et ?? interdits pour les prénoms et patronymes.<br>Transformés en Nx or N</h3>
 
+    new linked page name
+en: new linked page name
+fr: nouveau nom de la page liée
+
     2nd cousins
 af: kleinneef/kleinniggie
 bg: втори братовчеди
