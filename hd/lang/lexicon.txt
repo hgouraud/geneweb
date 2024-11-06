@@ -12081,6 +12081,10 @@ de: Notiz bearbeiten
 en: modify the note
 fr: modifier la note
 
+    modify gallery
+en: modify the image (gallery)
+fr: modifier l'image (gallerie)
+
     modify person event order
 co: intervertisce l’evenimenti individuali
 de: Ereignisreihenfolge der Person ändern
