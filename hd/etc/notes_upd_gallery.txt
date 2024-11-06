@@ -151,9 +151,6 @@
 %end;
 <script src="%etc_prefix;js/jquery.maphilight.js"></script>
 
-
-
-
 <script>
 function get( v ) {
   if( typeof v !== "undefined" ) {
@@ -173,6 +170,7 @@ var private_path = "%b.gallery_path_private;";
 var mouseIsNotOverLegend = true;
 
 var table;
+var groupsData = []; // Added to track group data
 
 // Selection
 var x1, y1, x2, y2;
@@ -214,14 +212,28 @@ function g_row ( name, label) {
   return str;
 }
 
+// Modified to track new groups
 function add_new_group() {
     var grp = ++global_grp;
     var new_row = table_grp.row.add( {
       "name": "",
       "label": ""
     }).draw(false);
-    //$("#grp_table").append(g_row( "", ""));
     new_row.node().id = "g_row" + grp;
+
+    // Add to groupsData array
+    groupsData[grp - 1] = {
+      name: "",
+      label: ""
+    };
+}
+
+// Added function to get current group data
+function getGroupsData() {
+  return table_grp.rows().data().toArray().map((row, index) => ({
+    name: row.name || '',
+    label: row.label || ''
+  }));
 }
 
 $(document).ready(function() {
@@ -288,13 +300,19 @@ $(document).ready(function() {
       "initComplete": function( settings, json) {
         json = json.r;
 
-        // Init group legend from JSON
+        // Init group legend and group data from JSON
         json.groups.forEach( function( r ) {
           var grp = ++global_grp;
           var name = get(r.name);
           var labl = get(r.label);
           //$("#grp_table").append(g_row(name, labl));
           table_grp.row(grp-1).node().id = "g" + grp;
+
+          // Initialize groupsData
+          groupsData[grp - 1] = {
+            name: name,
+            label: labl
+          };
         } );
 
        json.groups.forEach( function( r ) {
@@ -578,7 +596,27 @@ zh: Chinese
     }
   });
 
-  $(document).on( "change", ".update", function() {
+  // Modified update handler to track group changes
+  $(document).on("change", "#grp_table .update", function() {
+    let td = table_grp.cell(this.closest('td'));
+    let tr = $(this).closest('tr');
+    
+    // Update the cell
+    td.data($(this).val());
+
+    // Update groupsData array
+    let groupId = tr.attr('id').replace(/[a-z]/g, "");
+    groupsData[groupId - 1] = {
+      name: tr.find('input[type="number"]').val(),
+      label: tr.find('input[type="text"]').val()
+    };
+
+    // Redraw table
+    table_grp.draw(false);
+  });
+
+  // Existing update handler for other tables
+  $(document).on( "change", "#map_table .update", function() {
     let td = table.cell( this.closest('td') );
     let tr = $(this).closest('tr');
 
@@ -591,7 +629,19 @@ zh: Chinese
     }
   });
 
-  $(document).on( "click", ".remove", function (e) {
+  // Modified remove handler for groups to update groupsData
+  $(document).on("click", "#grp_table .remove", function(e) {
+    var tr = $(this).closest('tr');
+    var groupId = tr.attr('id').replace(/[a-z]/g, "");
+
+    // Remove from groupsData
+    groupsData.splice(groupId - 1, 1);
+
+    table_grp.row(tr).remove().draw();
+  });
+
+  // Existing remove handler for map table
+  $(document).on( "click", "#map_table .remove", function (e) {
     var tr = $(this).closest('tr');
     var n = tr.attr("id").replace(/[a-z]/g, "");
 
@@ -600,32 +650,7 @@ zh: Chinese
     table.row( tr ).remove().draw();
   });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  // Rest of the event handlers remain the same...
 
   $("#frame").mousedown( function(e) {
     // Start a new selection

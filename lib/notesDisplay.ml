@@ -352,7 +352,7 @@ let print_mod conf base =
   let typ = try List.assoc "TYPE" env with Not_found -> "" in
   let templ =
     let fname = "notes_upd_" ^ typ in
-    Util.open_etc_file conf fname
+    try Util.open_etc_file conf fname with _ -> None
   in
   let title _ =
     Output.printf conf "%s - %s%s"

@@ -42,6 +42,7 @@ let misc_notes_link s i =
       | _ -> wlnone (j + 1)
     else WLnone (slen, cut slen)
   in
+  Printf.eprintf "misc notes link: (%d), (%d) (%s)\n" slen i (String.sub s 0 (min (String.length s) 50));
   if i < slen - 2 && s.[i] = '[' && s.[i + 1] = '[' then
     if s.[i + 2] = '[' then
       let j =

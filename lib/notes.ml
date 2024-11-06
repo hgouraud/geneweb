@@ -348,6 +348,10 @@ let extract_pnoc json =
 let _print_key label (fn, sn, oc) =
   Printf.eprintf "Key: %s: %s.%d %s\n" label fn oc sn
 
+let _string_of_key k =
+  let fn, sn, oc = k in
+  Printf.sprintf "%s.%d %s" fn oc sn
+
 let lower_key (fn, sn, oc) = (Name.lower fn, Name.lower sn, oc)
 
 let replace_person person_json (new_fn, new_sn, new_oc) =
@@ -357,7 +361,7 @@ let replace_person person_json (new_fn, new_sn, new_oc) =
          | "fn", _ -> ("fn", `String new_fn)
          | "sn", _ -> ("sn", `String new_sn)
          | "oc", _ -> ("oc", `String (string_of_int new_oc))
-         | key, value -> (key, value) (* Preserve any other fields *))
+         | field -> field (* Preserve any other fields *))
        (Yojson.Basic.Util.to_assoc person_json))
 
 (* Processes the map to replace target person
@@ -396,19 +400,13 @@ let update_gallery s oldk newk =
   let json = Yojson.Basic.from_string json_part in
   match json with
   | `Assoc [] -> s
-  | _ -> title_part ^ Yojson.Basic.pretty_to_string (update_map json oldk newk)
+  | _ -> title_part ^ Yojson.Basic.pretty_to_string (update_map json oldk newk) ^ "\n"
 
-let rewrite_key s oldk newk file =
-  let ofn, osn, ooc = oldk in
-  let nfn, nsn, noc = newk in
-  Printf.eprintf "Rewrite key in file %s, oldk=%s.%d %s, newk=%s.%d %s\n" file
-    ofn ooc osn nfn noc nsn;
-  flush stderr;
+let rewrite_key s oldk newk _file =
   let slen = String.length s in
   let s =
-    if Mutil.contains s "TYPE=gallery" then update_gallery s oldk newk else s
+    if Mutil.contains s "TYPE=gallery" && false then update_gallery s oldk newk else s
   in
-
   let rec rebuild rs i =
     if i >= slen then rs
     else
