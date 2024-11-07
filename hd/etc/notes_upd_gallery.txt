@@ -440,40 +440,10 @@ $(document).ready(function() {
      "info": false,
      "scrollY": "25vh",
      "scrollCollapse": true,
-     "language": {
-       "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/[
-af: Afrikaans
-bg: Bulgarian
-br: FIXME
-ca: Catalan
-co: FIXME
-cs: Czech
-da: Danish
-de: German
-en: English
-eo: FIXME
-es: Spaicsh
-et: Estonian
-fi: Finnish
-fr: French
-he: Hebrew
-is: Icelandic
-it: Italian
-lv: Latvian
-nl: Dutch
-no: Norwegian-Nynorsk
-oc: FIXME
-pl: Polish
-pt: Portuguese
-pt-br: Portuguese-Brasil
-ro: Romanian
-ru: Russian
-sk: Slovak
-sl: Slovenian
-sv: Swedish
-zh: Chinese
-].json"
-     },
+     //"language": {
+     //  "url": "//cdn.datatables.net/plug-ins/2.1.8/i18n/fr-FR.json",
+     //   dataType: 'jsonp',
+     //},
     "initComplete": function( settings, json) {
        $("#digest").val( json.digest );
        json = json.r;
