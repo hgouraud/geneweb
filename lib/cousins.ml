@@ -351,8 +351,8 @@ let init_cousins_cnt conf base p =
                       build_tables key)
                 in
                 Sys.remove cous_cache_fname;
-                Mutil.read_or_create_value cous_cache_fname ~magic:key (fun () ->
-                    expand_tables key v1 max_a_l t' d_t')
+                Mutil.read_or_create_value cous_cache_fname ~magic:key
+                  (fun () -> expand_tables key v1 max_a_l t' d_t')
             | _ ->
                 Sys.remove cous_cache_fname;
                 Mutil.read_or_create_value cous_cache_fname (fun () ->
