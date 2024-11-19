@@ -378,7 +378,6 @@ let update_map json oldk newk =
         else person_json)
       map_data
   in
-
   `Assoc
     (List.map
        (function
@@ -388,7 +387,6 @@ let update_map json oldk newk =
 
 let update_gallery s oldk newk =
   (* assumes the json part starts at the first { *)
-  flush stderr;
   let title_part, json_part =
     try
       let json_start = String.index s '{' in
@@ -400,13 +398,15 @@ let update_gallery s oldk newk =
   let json = Yojson.Basic.from_string json_part in
   match json with
   | `Assoc [] -> s
-  | _ -> title_part ^ Yojson.Basic.pretty_to_string (update_map json oldk newk) ^ "\n"
+  | _ ->
+      let updated_json = update_map json oldk newk in
+      title_part ^ (Yojson.Basic.pretty_to_string updated_json) ^ "\n"
 
 let rewrite_key s oldk newk _file =
-  let slen = String.length s in
   let s =
-    if Mutil.contains s "TYPE=gallery" && false then update_gallery s oldk newk else s
+    if Mutil.contains s "TYPE=gallery" then update_gallery s oldk newk else s
   in
+  let slen = String.length s in
   let rec rebuild rs i =
     if i >= slen then rs
     else
@@ -445,7 +445,6 @@ let replace_ind_key_in_str base is oldk newk p =
   Gwdb.insert_string base s'
 
 let update_ind_key_pgind base p oldk newk =
-  flush stderr;
   let oldp = Gwdb.gen_person_of_person @@ poi base p in
   let replace is = replace_ind_key_in_str base is oldk newk (poi base p) in
   let notes = replace oldp.notes in
@@ -490,7 +489,6 @@ let update_ind_key_pgind base p oldk newk =
   update_notes_links_person base newp
 
 let update_ind_key_pgfam base f oldk newk =
-  flush stderr;
   let oldf = Gwdb.gen_family_of_family @@ foi base f in
   let cpl = foi base f in
   let fath = poi base (get_father cpl) in
@@ -520,13 +518,11 @@ let update_ind_key_pgfam base f oldk newk =
   update_notes_links_family base newf
 
 let update_ind_key_pgmisc conf base f oldk newk =
-  flush stderr;
   let oldn = base_notes_read base f in
   let newn = rewrite_key oldn oldk newk f in
   commit_notes conf base f newn
 
 let update_ind_key_pgwiz conf base f oldk newk =
-  flush stderr;
   let oldn = base_wiznotes_read base f in
   let newn = rewrite_key oldn oldk newk f in
   commit_wiznotes conf base f newn

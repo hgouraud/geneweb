@@ -191,6 +191,10 @@ var global_grp = 0;
 
 function add_new_row( x1, y1, x2, y2 ) {
   if( x2-x1 > 5 && y2-y1 > 5 ) {
+    x1 = parseFloat(x1.toFixed(2));
+    y1 = parseFloat(y1.toFixed(2));
+    x2 = parseFloat(x2.toFixed(2));
+    y2 = parseFloat(y2.toFixed(2));
     var cnt = ++global_cnt;
     var coords = "" + x1 + "," + y1 + "," + x2 + "," + y2;
     var new_row = table.row.add( {

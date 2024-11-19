@@ -28,6 +28,8 @@ type wiki_link =
   | WLwizard of int * string * string
   | WLnone of int * string
 
+(* search in a note (s) wiki references
+   to persons [[fn/sn/oc/txt]] or pages [[[page/text]]] *)
 let misc_notes_link s i =
   let slen = String.length s in
   let cut j = String.sub s i (j - i) in
@@ -42,7 +44,6 @@ let misc_notes_link s i =
       | _ -> wlnone (j + 1)
     else WLnone (slen, cut slen)
   in
-  Printf.eprintf "misc notes link: (%d), (%d) (%s)\n" slen i (String.sub s 0 (min (String.length s) 50));
   if i < slen - 2 && s.[i] = '[' && s.[i + 1] = '[' then
     if s.[i + 2] = '[' then
       let j =
