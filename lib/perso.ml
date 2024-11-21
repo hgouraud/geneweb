@@ -3604,6 +3604,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       (* TODO what do we want here? can we remove this? *)
       match Image.get_portrait_path conf base p with
       | Some (`Path s) -> str_val s
+      | Some (`Url u) -> str_val u
       | None -> null_val)
   | "birth_place" ->
       if p_auth then
