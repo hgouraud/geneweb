@@ -42,14 +42,15 @@ let find_img_opt f =
     [path] is a the full path of the file with file extension. *)
 let full_portrait_path conf base p =
   (* TODO why is extension not in filename..? *)
+  let img = get_image p in
   let s = default_portrait_filename base p in
   let f = Filename.concat (portrait_folder conf) s in
   match find_img_opt f with
   | Some (`Path _) as full_path -> full_path
-  | Some (`Url _)
+  | Some (`Url _) as url -> url
   (* should not happen, there is only ".url" file in carrousel folder *)
-  | None ->
-      None
+  | None when (not (is_empty_string img)) -> Some (`Url (sou base img))
+  | None -> None
 
 let source_filename conf src =
   let fname1 = Filename.concat (carrousel_folder conf) src in
@@ -318,7 +319,8 @@ let get_portrait_with_size conf base p =
     | `Empty -> (
         match full_portrait_path conf base p with
         | None -> None
-        | Some path -> Some (path, size_from_path path |> Result.to_option))
+        | Some (`Url s) -> Some ((`Url s), None)
+        | Some (`Path s) -> Some ((`Path s), size_from_path (`Path s) |> Result.to_option))
   else None
 
 (* For carrousel ************************************ *)

@@ -34,7 +34,7 @@ val src_to_string : [< `Path of string | `Url of string ] -> string
 (** [src_to_string src] is [src] as a string *)
 
 (* TODO this should be removed *)
-val get_portrait_path : config -> base -> person -> [> `Path of string ] option
+val get_portrait_path : config -> base -> person -> [> `Path of string | `Url of string ] option
 (** [get_portrait_path conf base p] is
     - [None] if we don't have access to [p]'s portrait or it doesn't exist.
     - [Some path] with [path] the full path with extension of [p]'s portrait.
