@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Éditeur d’image cliquable%( TODO: TRANSLATE ME%)</title>
+  <title>[*reactive image map editor]</title>
   <meta name="robots" content="none">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -37,7 +37,7 @@
 <div class="container-fluid">
 %include;home
 
-<h1 class="mt-1 ml-2">Éditeur d’image réactives%( TODO: TRANSLATE ME%)</h1>
+<h1 class="mt-1 ml-2">[*reactive image map editor]</h1>
 
 <div id="fd_error"></div>
 
