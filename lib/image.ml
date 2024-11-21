@@ -2,7 +2,6 @@ open Config
 open Gwdb
 
 let portrait_folder conf = !GWPARAM.portraits_d conf.bname
-
 let carrousel_folder conf = !GWPARAM.images_d conf.bname
 
 (** [default_portrait_filename_of_key fn sn occ] is the default filename
@@ -48,7 +47,7 @@ let full_portrait_path conf base p =
   | Some (`Path _) as full_path -> full_path
   | Some (`Url _) as url -> url
   (* should not happen, there is only ".url" file in carrousel folder *)
-  | None when (not (is_empty_string img)) -> Some (`Url (sou base img))
+  | None when not (is_empty_string img) -> Some (`Url (sou base img))
   | None -> None
 
 let path_of_filename conf fname =
@@ -247,7 +246,7 @@ let get_old_portrait conf base p =
   if has_access_to_portrait conf base p then
     let key = default_portrait_filename base p in
     let f =
-      Filename.concat (Filename.concat (portrait_folder conf) "old") key
+      Filename.concat (Filename.concat (portrait_folder conf) "saved") key
     in
     find_img_opt f
   else None
@@ -267,10 +266,10 @@ let rename_portrait conf base p (nfn, nsn, noc) =
               "Error renaming portrait: old_path=%s new_path=%s : %s" old_f
               new_f e));
       let new_s_f =
-        String.concat Filename.dir_sep [ portrait_folder conf; "old"; new_s ]
+        String.concat Filename.dir_sep [ portrait_folder conf; "saved"; new_s ]
       in
       let old_s_f =
-        String.concat Filename.dir_sep [ portrait_folder conf; "old"; old_s ]
+        String.concat Filename.dir_sep [ portrait_folder conf; "saved"; old_s ]
       in
       (if Sys.file_exists (old_s_f ^ old_ext) then
        try Sys.rename (old_s_f ^ old_ext) (new_s_f ^ old_ext)
@@ -310,8 +309,9 @@ let get_portrait_with_size conf base p =
     | `Empty -> (
         match full_portrait_path conf base p with
         | None -> None
-        | Some (`Url s) -> Some ((`Url s), None)
-        | Some (`Path s) -> Some ((`Path s), size_from_path (`Path s) |> Result.to_option))
+        | Some (`Url s) -> Some (`Url s, None)
+        | Some (`Path s) ->
+            Some (`Path s, size_from_path (`Path s) |> Result.to_option))
   else None
 
 (* For carrousel ************************************ *)
@@ -319,7 +319,7 @@ let get_portrait_with_size conf base p =
 let carrousel_file_path conf base p fname old =
   let dir =
     let dir = default_portrait_filename base p in
-    if old then Filename.concat dir "old" else dir
+    if old then Filename.concat dir "saved" else dir
   in
   String.concat Filename.dir_sep
     ([ carrousel_folder conf; dir ] @ if fname = "" then [] else [ fname ])
