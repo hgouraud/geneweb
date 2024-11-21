@@ -1238,9 +1238,6 @@ let string_of_witness_kind_raw witness_kind =
   in
   Adef.safe s
 
-let base_path pref bname =
-  List.fold_right Filename.concat (Secure.base_dir () :: pref) bname
-
 let bpath bname = !GWPARAM.bpath bname
 let copy_from_templ_ref = ref (fun _ _ _ -> assert false)
 let copy_from_templ conf env ic = !copy_from_templ_ref conf env ic
