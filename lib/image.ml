@@ -19,8 +19,9 @@ let default_image_filename_of_key mode first_name surname occ =
   else Format.sprintf "%s.%d.%s" f occ s
 
 let default_image_filename_aux mode base p saved =
-  let name = default_image_filename_of_key mode
-    (p_first_name base p) (p_surname base p) (get_occ p)
+  let name =
+    default_image_filename_of_key mode (p_first_name base p) (p_surname base p)
+      (get_occ p)
   in
   if saved then Filename.concat "saved" name else name
 
@@ -205,7 +206,8 @@ let has_access_to_image mode conf base p =
   (conf.wizard || conf.friend)
   || (not conf.no_image)
      && Util.authorized_age conf base p
-     && ((not (is_empty_string img)) || full_image_path mode conf base p false <> None)
+     && ((not (is_empty_string img))
+        || full_image_path mode conf base p false <> None)
      && is_not_private_img conf (sou base img)
 (* TODO: privacy settings should be in db not in url *)
 
@@ -280,7 +282,7 @@ let get_portrait_aux conf base p saved =
   let f =
     Filename.concat (portrait_folder conf)
       (default_image_filename_aux "portraits" base p saved)
-    in
+  in
   if has_access_to_image "portraits" conf base p then
     if not saved then
       match src_of_string conf (sou base (get_image p)) with
@@ -313,7 +315,8 @@ let get_blason_aux conf base p self saved =
   if has_access_to_image "blasons" conf base p then
     let rec loop p =
       match
-        src_of_string conf (path_str (full_image_path "blasons" conf base p saved))
+        src_of_string conf
+          (path_str (full_image_path "blasons" conf base p saved))
       with
       | `Src_with_size_info s when Filename.extension s = ".stop" -> None
       | `Src_with_size_info _s as s_info -> (
@@ -345,8 +348,8 @@ let get_blason_name_aux conf base p saved =
   | Some (`Url _u) -> name ^ ".url"
   | None -> ""
 
-let get_blason_name conf base p  = get_blason_name_aux conf base p false
-let get_old_blason_name conf base p  = get_blason_name_aux conf base p true
+let get_blason_name conf base p = get_blason_name_aux conf base p false
+let get_old_blason_name conf base p = get_blason_name_aux conf base p true
 
 let has_blason conf base p self =
   match get_blason conf base p self with
@@ -378,29 +381,32 @@ let get_blason_owner conf base p =
 
 (* rename any folder or file based on fn, sn, oc *)
 let rename_portrait_or_blason conf base _mode p (nfn, nsn, noc) =
-  let key = Format.sprintf "%s.%d.%s"
-    (get_first_name p |> sou base) (get_occ p) (get_surname p |> sou base)
+  let key =
+    Format.sprintf "%s.%d.%s"
+      (get_first_name p |> sou base)
+      (get_occ p)
+      (get_surname p |> sou base)
     |> Name.lower
   in
   let key_l = String.length key in
   let n_key = Format.sprintf "%s.%d.%s" nfn noc nsn |> Name.lower in
   let rec loop f =
-    if not (f = "") then (
+    if not (f = "") then
       let dir = Filename.dirname f in
       let fname = Filename.basename f in
       let n_fname =
-        n_key ^ String.sub fname (key_l) (String.length fname - key_l)
+        n_key ^ String.sub fname key_l (String.length fname - key_l)
       in
       if Sys.file_exists f then (
         Sys.rename f (Filename.concat dir n_fname);
         loop f)
-      else ())
+      else ()
   in
   let p_dir = !GWPARAM.portraits_d conf.bname in
   let i_dir = !GWPARAM.images_d conf.bname in
   (* carrousel folder *)
-  if Sys.file_exists (Filename.concat i_dir key) then (
-    Sys.rename (Filename.concat i_dir key) (Filename.concat i_dir n_key));
+  if Sys.file_exists (Filename.concat i_dir key) then
+    Sys.rename (Filename.concat i_dir key) (Filename.concat i_dir n_key);
   let p_dir_s = Filename.concat p_dir "saved" in
   (* saved portraits *)
   let f = find_file_without_ext (Filename.concat p_dir_s key) in
@@ -439,7 +445,8 @@ let get_blason_with_size conf base p self =
   if has_access_to_image "blasons" conf base p then
     let rec loop p =
       match
-        src_of_string conf (path_str (full_image_path "blasons" conf base p false))
+        src_of_string conf
+          (path_str (full_image_path "blasons" conf base p false))
       with
       | `Src_with_size_info _s as s_info -> (
           match parse_src_with_size_info conf s_info with
