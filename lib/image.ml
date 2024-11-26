@@ -49,7 +49,7 @@ let full_portrait_path conf base p =
   | Some (`Path _) as full_path -> full_path
   | Some (`Url _) as url -> url
   (* should not happen, there is only ".url" file in carrousel folder *)
-  | None when (not (is_empty_string img)) -> Some (`Url (sou base img))
+  | None when not (is_empty_string img) -> Some (`Url (sou base img))
   | None -> None
 
 let source_filename conf src =
@@ -319,8 +319,9 @@ let get_portrait_with_size conf base p =
     | `Empty -> (
         match full_portrait_path conf base p with
         | None -> None
-        | Some (`Url s) -> Some ((`Url s), None)
-        | Some (`Path s) -> Some ((`Path s), size_from_path (`Path s) |> Result.to_option))
+        | Some (`Url s) -> Some (`Url s, None)
+        | Some (`Path s) ->
+            Some (`Path s, size_from_path (`Path s) |> Result.to_option))
   else None
 
 (* For carrousel ************************************ *)
