@@ -91,10 +91,10 @@ let encode opts s =
   | Gwexport.Utf8 -> s
 
 let max_len = 78
-let br = "<br>"
-
+let br = "<xx$br>"
+(* TODO see ho to suppress this <br> hack *)
 let find_br s ini_i =
-  let ini = "<br" in
+  let ini = "<xx$br" in
   let rec loop i j =
     if i = String.length ini then
       let rec loop2 j =
