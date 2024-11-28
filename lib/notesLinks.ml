@@ -64,6 +64,8 @@ let misc_notes_link s i =
         | None -> WLnone
       else WLnone
     else
+      (* [[fn/sn/oc/text1;text2]]    text2 is used in lists (see ) *)
+      (* i                       j *)
       let j =
         let rec loop j =
           if j = slen then i
@@ -81,7 +83,7 @@ let misc_notes_link s i =
                 String.sub b (i + 1) (String.length b - i - 1) )
           | None -> (None, b)
         in
-        let b, text =
+        let b, text2 =
           match String.index_opt b ';' with
           | Some i ->
               ( String.sub b 0 i,
@@ -89,45 +91,57 @@ let misc_notes_link s i =
           | None -> (b, None)
         in
         if spe = Some "w" then
-          let wiz, name =
+          let wiz, text =
             match String.index_opt b '/' with
             | Some i ->
                 ( String.sub b 0 i,
                   String.sub b (i + 1) (String.length b - i - 1) )
-            | None -> (b, "")
+            | None -> (b, b)
           in
-          WLwizard (j, wiz, name)
+          WLwizard (j, wiz, text)
         else
           try
             let k = 0 in
             let l = String.index_from b k '/' in
             let fn = String.sub b k (l - k) in
             let k = l + 1 in
-            let fn, sn, oc, name =
+            let fn, sn, oc, text1 =
               try
                 let l = String.index_from b k '/' in
                 let sn = String.sub b k (l - k) in
-                let oc, name =
+                (* oct could be oc or text *)
+                let oct = String.sub b (l + 1) (String.length b - l - 1) in
+                let oc, text1 =
                   try
                     let k = l + 1 in
                     let l = String.index_from b k '/' in
                     let x = String.sub b k (l - k) in
-                    (x, String.sub b (l + 1) (String.length b - l - 1))
-                  with Not_found ->
-                    ("", String.sub b (l + 1) (String.length b - l - 1))
+                    let oc = try int_of_string x with Failure _ -> -1 in
+                    let text1 =
+                      String.sub b (l + 1) (String.length b - l - 1)
+                    in
+                    match (oc, text1) with
+                    | -1, "" -> ("0", fn ^ " " ^ sn)
+                    | oc, "" -> (string_of_int oc, fn ^ " " ^ sn)
+                    | -1, text1 -> ("0", text1)
+                    | oc, text1 -> (string_of_int oc, text1)
+                  with Not_found -> (
+                    try
+                      let _ = int_of_string oct in
+                      (oct, fn ^ " " ^ sn)
+                    with Failure _ -> ("0", oct))
                 in
-                let oc1 = try int_of_string name with Failure _ -> -1 in
                 let oc = try int_of_string oc with Failure _ -> 0 in
-                if oc1 = -1 then (fn, sn, oc, name)
-                else (fn, sn, oc1, fn ^ " " ^ sn)
+                let text1 = if text1 = "" then fn ^ " " ^ sn else text1 in
+                (fn, sn, oc, text1)
               with Not_found ->
                 let sn = String.sub b k (String.length b - k) in
-                let name = fn ^ " " ^ sn in
-                (fn, sn, 0, name)
+                let text1 = fn ^ " " ^ sn in
+                (fn, sn, 0, text1)
             in
             let fn = Name.lower fn in
             let sn = Name.lower sn in
-            WLperson (j, (fn, sn, oc), name, text)
+            WLperson (j, (fn, sn, oc), text1, text2)
           with Not_found -> WLnone
       else WLnone
   else WLnone

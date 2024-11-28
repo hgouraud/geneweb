@@ -34,6 +34,13 @@ let f s =
   in
   loop [] 0
 
+(* wiki syntax :
+   [[fn/sn/oc/text1;text2]]
+   should return:
+   WLperson (index of last ], ("fn", "sn", oc),
+      if text1 = "" then fn ^ " " ^ "sn" else text1,
+      if text2 = "" then None else Some text2);
+*)
 let l =
   [
     ( [
@@ -43,6 +50,20 @@ let l =
         WLnone;
       ],
       "[[[aaa/bbb]]], [[ccc/ddd]], http://site.com/eee#fff" );
+    ([ WLperson (11, ("aaa", "bbb", 0), "aaa bbb", None) ], "[[aaa/bbb]]");
+    ([ WLperson (15, ("aaa", "bbb", 0), "ccc", None) ], "[[aaa/bbb/ccc]]");
+    ([ WLperson (17, ("aaa", "bbb", 1), "ccc", None) ], "[[aaa/bbb/1/ccc]]");
+    ( [ WLperson (19, ("aaa", "bbb", 0), "ccc", Some "ddd") ],
+      "[[aaa/bbb/ccc;ddd]]" );
+    ( [ WLperson (16, ("aaa", "bbb", 0), "aaa bbb", Some "ddd") ],
+      "[[aaa/bbb/;ddd]]" );
+    ( [ WLperson (18, ("aaa", "bbb", 1), "aaa bbb", Some "ddd") ],
+      "[[aaa/bbb/1/;ddd]]" );
+    ([ WLperson (13, ("aaa", "bbb", 1), "aaa bbb", None) ], "[[aaa/bbb/1]]");
+    ([ WLperson (15, ("aaa", "bbb", 1), "1", None) ], "[[aaa/bbb/1/1]]");
+    ([ WLperson (17, ("aaa", "bbb", 1), "1", Some "2") ], "[[aaa/bbb/1/1;2]]");
+    ([ WLwizard (13, "aaa", "bbb") ], "[[w:aaa/bbb]]");
+    ([ WLwizard (9, "aaa", "aaa") ], "[[w:aaa]]");
     ( [
         WLnone;
         WLperson (12, ("aaa", "bbb", 0), "aaa bbb", None);
