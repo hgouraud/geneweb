@@ -1,4 +1,10 @@
-<!-- $Id: toolbar.txt v7.0 16/06/2019 00:03:14 $ -->
+<!-- $Id: toolbar.txt v7.0 01/12/2024 00:03:14 $ -->
+%if;(e.f="new_linked_page")
+  [*new linked page name][:]
+  <input type="input" name="new_f" id="new_f"
+      size="20" maxlength="50" style="padding-left:4px">
+%end;
+
 <script><!--
 function insertTags (tagOpen, tagClose, sampleText) {
   var t = document.getElementById("notes_comments")
