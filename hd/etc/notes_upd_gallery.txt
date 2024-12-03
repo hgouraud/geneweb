@@ -954,34 +954,54 @@ function initializeHandlers() {
             const $row = $input.closest('tr');
             const listId = this.getAttribute('list');
             const list = document.getElementById(listId);
+            
+            if (!listId) return;
 
-            if (listId) {
-                const selStart = this.selectionStart;
-                const selEnd = this.selectionEnd;
+            // Store current cursor position
+            const selStart = this.selectionStart;
+            const selEnd = this.selectionEnd;
+            const currentValue = this.value;
+            
+            // Filter options case-insensitively
+            DatalistManager.filterOptions(listId, currentValue);
 
-                DatalistManager.filterOptions(listId, this.value);
+            if (!list || !currentValue) return;
 
+            // Check for exact match (case-insensitive)
+            const option = Array.from(list.options).find(opt => 
+                opt.value.toLowerCase() === currentValue.toLowerCase()
+            );
+
+            if (option) {
+                const rowIndex = table.row($row).index();
+                const cellIndex = $cell.index();
+                
+                // Preserve the case the user typed
+                const finalValue = currentValue;
+                
+                requestAnimationFrame(() => {
+                    const $newRow = $(table.row(rowIndex).node());
+                    const $newCell = $newRow.find(`td:eq(${cellIndex})`);
+                    const $newInput = $newCell.find('input');
+                    
+                    if ($newInput.length) {
+                        if ($newInput.val() !== finalValue) {
+                            $newInput.val(finalValue);
+                        }
+                        $newInput.focus();
+                        // Only select if user has selected the whole content
+                        if (selStart === 0 && selEnd === currentValue.length) {
+                            $newInput[0].setSelectionRange(0, finalValue.length);
+                        } else {
+                            $newInput[0].setSelectionRange(selStart, selEnd);
+                        }
+                    }
+                });
+            } else {
+                // If no match, just maintain cursor position
                 requestAnimationFrame(() => {
                     this.setSelectionRange(selStart, selEnd);
                 });
-
-                if (list && this.value) {
-                    const option = Array.from(list.options).find(opt => opt.value === this.value);
-                    if (option) {
-                        const rowIndex = table.row($row).index();
-                        const cellIndex = $cell.index();
-
-                        setTimeout(() => {
-                            const $newRow = $(table.row(rowIndex).node());
-                            const $newCell = $newRow.find(`td:eq(${cellIndex})`);
-                            const $newInput = $newCell.find('input');
-                            if ($newInput.length) {
-                                $newInput.focus();
-                                $newInput[0].setSelectionRange(0, $newInput.val().length);
-                            }
-                        }, 0);
-                    }
-                }
             }
         })
         .on("mouseover", "tr", function(e) {
@@ -1483,7 +1503,6 @@ function initTables() {
           },
         %],
         rowCallback: function(row, data, index) {
-          data.rowNum = index + 1;
           const rowId = row.getAttribute('id')?.replace(/[a-z]/g, "") || "";
           if (!rowId) return;
 
@@ -1677,45 +1696,49 @@ function setupFormHandler() {
   $("#form").submit(function(event) {
     event.preventDefault();
 
-    var res = {
-      title: $("#page_title").val(),
-      desc: $("#page_desc").val(),
-      path: "doc",
-      img: $("#fname").val(),
-      map: table.rows().data().toArray(),
-      groups: groupTable.rows().data().toArray().map((group, index) => ({
-        name: index + 1,
-        label: group.label
-      }))
-    };
-
-    // Clean data before save
-    res.map = res.map.map(item => {
-      const clean = {...item};
-
+    // Create ordered map entries
+    const mapEntries = table.rows().data().toArray().map(item => {
+      const clean = {};
+      // Enforce property order for map entries
+      if (item.shape) clean.shape = item.shape;
+      if (item.coords) clean.coords = item.coords;
+      if (item.t) clean.t = item.t;
+      if (item.fn) clean.fn = item.fn;
+      if (item.sn) clean.sn = item.sn;
+      if (item.oc) clean.oc = item.oc;
+      if (item.href) clean.href = item.href;
+      if (item.alt) clean.alt = item.alt;
+      if (item.group) clean.group = item.group;
+      if (item.gw) clean.gw = item.gw;
+      
       // Clean based on type
-      if(clean.t === "p") {
+      if (clean.t === "p" || !clean.t) {
         delete clean.misc;
         delete clean.href;
-        if(clean.fn && clean.sn) {
+        if (clean.fn && clean.sn) {
           clean.gw = generateGwSyntax(clean);
         }
-      } else if(clean.t === "g" || clean.t === "e") {
+      } else if (clean.t === "g" || clean.t === "e") {
         delete clean.fn;
         delete clean.sn;
         delete clean.oc;
         delete clean.gw;
       }
-
-      // Remove empty fields
-      Object.keys(clean).forEach(key => {
-        if(clean[key] === "" || clean[key] === undefined) {
-          delete clean[key];
-        }
-      });
-
+      
       return clean;
     });
+
+    var res = {
+      title: $("#page_title").val(),
+      desc: $("#page_desc").val(),
+      path: "doc",
+      img: $("#fname").val(),
+      map: mapEntries,
+      groups: groupTable.rows().data().toArray().map((group, index) => ({
+        name: index + 1,
+        label: group.label
+      }))
+    };
 
     const title = $("#page_title").val() || "&hellip;";
     // Format JSON with proper spacing and line breaks
