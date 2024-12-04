@@ -1,4 +1,4 @@
-<!-- $Id: notes_gallery.txt v7.1 04/12/2024 05:51:09 $ -->
+<!-- $Id: notes_album.txt v7.1 25/11/2024 05:51:09 $ -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -25,11 +25,11 @@
     </div>
   %end;
   <div id="album-nav" class="d-flex justify-content-center">
-    <div class="p-2 bd-highlight"><a id="first" href="#" onclick="loadFirstImage(images_l); return false;"><i class="fa-solid fa-backward"></i></a></div>
-    <div class="p-2 bd-highlight"><a id="previous" href="#" onclick="loadPreviousImage(images_l); return false;"><i class="fa-solid fa-caret-left"></i></a> </div>
+    <div class="p-2 bd-highlight"><a id="first" href="#" onclick="loadFirstImage(); return false;"><i class="fa-solid fa-backward"></i></a></div>
+    <div class="p-2 bd-highlight"><a id="previous" href="#" onclick="loadPreviousImage(); return false;"><i class="fa-solid fa-caret-left"></i></a> </div>
     <div class="p-2 bd-highlight"><a id="current"></a> / <a id="imageCount"></a></div>
-    <div class="p-2 bd-highlight"><a id="next" href="#" onclick="loadNextImage(images_l); return false;"><i class="fa-solid fa-caret-right"></i></a></div>
-    <div class="p-2 bd-highlight"><a id="last" href="#" onclick="loadLastImage(images_l); return false;"><i class="fa-solid fa-forward"></i></a></div>
+    <div class="p-2 bd-highlight"><a id="next" href="#" onclick="loadNextImage(); return false;"><i class="fa-solid fa-caret-right"></i></a></div>
+    <div class="p-2 bd-highlight"><a id="last" href="#" onclick="loadLastImage(); return false;"><i class="fa-solid fa-forward"></i></a></div>
   </div>
   <div class="d-inline-flex ml-3">
   <map id="map" name="map"></map>
@@ -111,25 +111,6 @@ function extractLabels() {
     return labels;
 }
 
-function processImages(json) {
-    // Check if data is an object with 'img' property
-    if (json.images && Array.isArray(json.images)) {
-        console.log ("return arrray of images");
-        return json.images;
-    }
-    // Check for array of objects with 'img' property
-    if (json.img) {
-        console.log ("return single image");
-        const imageObj = {
-          img: json.img,
-          map: json.map
-        };
-        if (json.groups) { imageObj.groups = json.groups;}
-        return [imageObj];
-    }
-    return [];
-}
-
 var doc_path="%prefix;m=DOC&s=";
 var public_path="%b.gallery_path;";
 var private_path="%b.gallery_path_private;";
@@ -142,13 +123,12 @@ function displayLinks() {
   $("#imageCount").text(imagesCount);
 }
 
-function displayByGroup(images_l) {
-  console.log ("Display by Group");
+function displayByGroup() {
   var cnt = 1;
   var cnt_rlm = 1;
   var old_grp = 0;
   var labels2 = {};
-  var groups = [... new Set(images_l[current].groups)];
+  var groups = [... new Set(json.images[current].groups)];
   //alert (JSON.stringify(groups));
   // Populate the grp_table with group information
   groups.forEach(function(group) {
@@ -157,7 +137,7 @@ function displayByGroup(images_l) {
   });
 
   var labels = extractLabels();
-  var maps = images_l[current].map;
+  var maps = json.images[current].map;
 
   maps.forEach( function (r) {
     //highlight group
@@ -208,15 +188,14 @@ function displayByGroup(images_l) {
   });
 }
 
-function displayByIndi(images_l) {
-  console.log ("Display by Ind", current, images_l);
+function displayByIndi() {
   var cnt = 1;
   var cnt_rlm = 1;
-  var indis = [... new Set(images_l[current].map.flatMap(x=>x.gw))];
+  var indis = [... new Set(json.images[current].map.flatMap(x=>x.gw))];
   //alert( JSON.stringify(indis, null, 4));
   indis.forEach( function( gw ) {
     var mapFor = {fn: "", sn: "", map: [] };
-    var maps = images_l[current].map.filter( function (item) {
+    var maps = json.images[current].map.filter( function (item) {
       return item.gw == gw;
     });
 
@@ -243,35 +222,31 @@ function displayByIndi(images_l) {
   });
 }
 
-function loadFirstImage(images_l) {
+function loadFirstImage() {
   current = 0;
-  console.log("Loading first image: ", current);
   displayLinks();
-  loadCurrentImage(images_l); 
+  loadCurrentImage(); 
 }
 
-function loadLastImage(images_l) {
+function loadLastImage() {
   current = imagesCount - 1;
-  console.log("Loading last image: ", current);
   displayLinks();
-  loadCurrentImage(images_l); 
+  loadCurrentImage(); 
 }
 
-function loadNextImage(images_l) {
+function loadNextImage() {
   if(current < imagesCount - 1) {
     current = current + 1;
-    console.log("Loading next image: ", current);
     displayLinks();
-    loadCurrentImage(images_l); 
+    loadCurrentImage(); 
   }
 }
 
-function loadPreviousImage(images_l) {
+function loadPreviousImage() {
   if(current > 0) {
     current = current - 1;
-    console.log("Loading previous image: ", current);
     displayLinks();
-    loadCurrentImage(images_l);
+    loadCurrentImage();
   }
 }
 
@@ -281,33 +256,29 @@ function emptyArrays() {
   $("#map").empty();
 }
 
-function loadCurrentImage(images_l) {
-  console.log("loading current image", current);
-  console.log("images_l", images_l);
-  console.log("image 0", images_l[0]);
-  console.log("image 1", images_l[1]);
+function loadCurrentImage() {
   emptyArrays();
   $("#h1").html( json.title );
   $("#description").html( json.desc );
   if( json.path == "doc" ) {
-    $("#image").attr( "src", doc_path+images_l[current].img );
+    $("#image").attr( "src", doc_path+json.images[current].img );
   } else if( json.path == "private" ) {
-    $("#image").attr( "src", private_path+images_l[current].img );
+    $("#image").attr( "src", private_path+json.images[current].img );
   } else if ( json.path == "public" ) {
-    $("#image").attr( "src", public_path+images_l[current].img );
+    $("#image").attr( "src", public_path+json.images[current].img );
   } else {
-    $("#image").attr( "src", json.path+images_l[current].img );
+    $("#image").attr( "src", json.path+json.images[current].img );
   }
 
   var legendSearch = ' '; 
   var areaAttr = "";
 
-  if( get(images_l[current].groups) != "" ) {
-    displayByGroup(images_l);
+  if( get(json.images[current].groups) != "" ) {
+    displayByGroup();
     legendSearch = '#';
     areaAttr = "id";
   } else {
-    displayByIndi(images_l);
+    displayByIndi();
     legendSearch = '.';
     areaAttr = "class";
   }
@@ -349,17 +320,13 @@ $(document).ready(function() {
   $.ajax( "%url;&ajax=on" )
   .done( function(j) { 
     displayLinks();
-    json = j;
-    
-    var images_l = processImages(json);
-    imagesCount = images_l.length;
-    
+    json = j; 
+    imagesCount = json.images.length;
     if (imagesCount === 1) {
-        console.log("set album-nav to d-none");
-        $("#album-nav").addClass('d-none');
+      $("#album-nav").classList = ['d-none']; // does not work!!
     };
     document.title = json.title;
-    loadCurrentImage(images_l); 
+    loadCurrentImage(); 
     displayLinks();
   })
   .fail( function() {
