@@ -253,8 +253,9 @@ let print_linked_list_gallery conf base pgl =
           then
             let img_url, img_name = Notes.json_extract_img conf s in
             Wserver.printf
-              "<div class=\"item_gallery_vign\"><a href=\"%sm=NOTES&f=%s\"><img \
-               src=\"%s\" title=\"%s | %s\"></a>%s</div>\n"
+              "<div class=\"item_gallery_vign\"><a \
+               href=\"%sm=NOTES&f=%s\"><img src=\"%s\" title=\"%s | \
+               %s\"></a>%s</div>\n"
               (commd conf :> string)
               fnotes img_url fnotes img_name n_title
       | _ -> ())

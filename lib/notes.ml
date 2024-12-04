@@ -125,17 +125,32 @@ let notes_links_db conf base eliminate_unlinked =
     db2
 
 let json_extract_img conf s =
-  let extract l =
-    List.fold_left
-      (fun state e ->
-        match (state, e) with
-        | (None, img), ("path", `String s) -> (Some s, img)
-        | (path, None), ("img", `String s) -> (path, Some s)
-        | state, _ -> state)
-      (None, None) l
+  let extract_path json =
+    match json with
+    | `Assoc attrs -> (
+        match List.assoc "path" attrs with
+        | `String path -> Some path
+        | _ -> None)
+    | _ -> None
+  in
+  let extract_img l =
+    List.find_map (function "img", `String s -> Some s | _ -> None) l
   in
   let json = try Yojson.Basic.from_string s with _ -> `Null in
-  let path, img = match json with `Assoc l -> extract l | _ -> (None, None) in
+  let process_json json =
+    match json with
+    | `Assoc l when List.mem_assoc "images" l -> (
+        match List.assoc "images" l with
+        | `List images -> (
+            let first_image = List.hd images in
+            match first_image with
+            | `Assoc l -> (extract_path json, extract_img l)
+            | _ -> (None, None))
+        | _ -> (None, None))
+    | `Assoc l -> (extract_path json, extract_img l)
+    | _ -> (None, None)
+  in
+  let path, img = process_json json in
   match (path, img) with
   | Some path, Some img ->
       let full_path =
