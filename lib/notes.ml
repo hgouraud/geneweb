@@ -12,7 +12,8 @@ let file_path conf base fname =
 let path_of_fnotes fnotes =
   match NotesLinks.check_file_name fnotes with
   | Some (dl, f) -> List.fold_right Filename.concat dl f
-  | None -> ""
+  | None -> 
+      raise (Failure (Printf.sprintf "Invalid fnotes parameter: %s" fnotes))
 
 let read_notes base fnotes =
   let fnotes = path_of_fnotes fnotes in
@@ -489,12 +490,14 @@ let update_ind_key_pgfam base f oldk newk =
   update_notes_links_family base newf
 
 let update_ind_key_pgmisc conf base f oldk newk =
-  let oldn = base_notes_read base f in
+  let fname = path_of_fnotes f in
+  let oldn = base_notes_read base fname in
   let newn = rewrite_key oldn oldk newk f in
   commit_notes conf base f newn
 
 let update_ind_key_pgwiz conf base f oldk newk =
-  let oldn = base_wiznotes_read base f in
+  let fname = path_of_fnotes f in
+  let oldn = base_wiznotes_read base fname in
   let newn = rewrite_key oldn oldk newk f in
   commit_wiznotes conf base f newn
 
