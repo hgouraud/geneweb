@@ -545,13 +545,19 @@ let fold_linked_pages conf base db key type_filter transform =
         match pg, type_filter with
         | Def.NLDB.PgMisc n, Some typ ->
             let nenv = read_notes base n |> fst in
-            (try List.assoc "TYPE" nenv = typ with Not_found -> false)
+            let gallery =
+              (try List.assoc "TYPE" nenv = typ with Not_found -> false)
+            in
+            gallery
         | Def.NLDB.PgInd ip, None ->
             authorized_age conf base (pget conf base ip)
+            && (match type_filter with | Some "gallery" -> false | _ -> true)
         | Def.NLDB.PgFam ifam, None ->
             authorized_age conf base
               (pget conf base (get_father @@ foi base ifam))
+            && (match type_filter with | Some "gallery" -> false | _ -> true)
         | _, _ -> true
+            && (match type_filter with | Some "gallery" -> false | _ -> true)
       in
       if record_it then
         List.fold_left
