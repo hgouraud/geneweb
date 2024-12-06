@@ -321,7 +321,7 @@ let extract_pnoc json =
   in
   (fn, sn, oc)
 
-let print_key label (fn, sn, oc) =
+let _print_key label (fn, sn, oc) =
   Printf.eprintf "Key: %s: %s.%d %s\n" label fn oc sn
 
 let lower_key (fn, sn, oc) = (Name.lower fn, Name.lower sn, oc)
