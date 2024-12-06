@@ -260,11 +260,11 @@ let commit_notes conf base fnotes s =
       [ Util.bpath conf.bname; base_notes_dir base; fname ]
   in
   Mutil.mkdir_p (Filename.dirname fpath);
-  try Gwdb.commit_notes base fname s
-  with Sys_error m ->
-    Hutil.incorrect_request conf ~comment:("explication todo: " ^ m);
-    History.record conf base (Def.U_Notes (p_getint conf.env "v", fnotes)) "mn";
-    update_notes_links_db base pg s
+  (try Gwdb.commit_notes base fname s
+   with Sys_error m ->
+     Hutil.incorrect_request conf ~comment:("explication todo: " ^ m));
+  History.record conf base (Def.U_Notes (p_getint conf.env "v", fnotes)) "mn";
+  update_notes_links_db base pg s
 
 let commit_wiznotes conf base fnotes s =
   let pg = Def.NLDB.PgWizard fnotes in
@@ -542,39 +542,37 @@ let fold_linked_pages conf base db key type_filter transform =
   List.fold_left
     (fun acc (pg, (_, il)) ->
       let record_it =
-        match pg, type_filter with
+        match (pg, type_filter) with
         | Def.NLDB.PgMisc n, Some typ ->
             let nenv = read_notes base n |> fst in
             let gallery =
-              (try List.assoc "TYPE" nenv = typ with Not_found -> false)
+              try List.assoc "TYPE" nenv = typ with Not_found -> false
             in
             gallery
-        | Def.NLDB.PgInd ip, None ->
+        | Def.NLDB.PgInd ip, None -> (
             authorized_age conf base (pget conf base ip)
-            && (match type_filter with | Some "gallery" -> false | _ -> true)
-        | Def.NLDB.PgFam ifam, None ->
+            && match type_filter with Some "gallery" -> false | _ -> true)
+        | Def.NLDB.PgFam ifam, None -> (
             authorized_age conf base
               (pget conf base (get_father @@ foi base ifam))
-            && (match type_filter with | Some "gallery" -> false | _ -> true)
-        | _, _ -> true
-            && (match type_filter with | Some "gallery" -> false | _ -> true)
+            && match type_filter with Some "gallery" -> false | _ -> true)
+        | _, _ -> (
+            true && match type_filter with Some "gallery" -> false | _ -> true)
       in
       if record_it then
         List.fold_left
           (fun acc (k, ind) ->
-             if Def.NLDB.equal_key k key then transform pg k ind acc else acc)
+            if Def.NLDB.equal_key k key then transform pg k ind acc else acc)
           acc il
       else acc)
     [] db
-    |> List.sort_uniq compare
+  |> List.sort_uniq compare
 
 let links_to_cache_entries conf base db key =
-  fold_linked_pages conf base db key None 
-    (fun _pg k ind acc -> (k, ind) :: acc)
+  fold_linked_pages conf base db key None (fun _pg k ind acc -> (k, ind) :: acc)
 
 let links_to_ind conf base db key typ =
-  fold_linked_pages conf base db key typ
-    (fun pg _k _ind acc -> pg :: acc)
+  fold_linked_pages conf base db key typ (fun pg _k _ind acc -> pg :: acc)
 
 type mode = Delete | Rename | Merge
 
