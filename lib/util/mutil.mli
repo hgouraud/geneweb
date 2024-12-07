@@ -395,9 +395,10 @@ val eq_key : string * string * int -> string * string * int -> bool
     Tests if two persons would have the same key
 *)
 
-val ls_r : string list -> string list
+val ls_r : ?nodir:bool -> string list -> string list
 (** [ls_r dirs]
     List directories (and subdirectories) contents of [dirs], including [dirs] themselves.
+    Excludes dirs and sub_dirs names if nodir is true 
 *)
 
 val rm_rf : string -> unit

@@ -510,7 +510,44 @@ let print_misc_notes conf base =
             Output.print_string conf (Util.escape_html r);
             Output.printf conf " --&gt;</a></tt></li>")
       db;
-    Output.print_sstring conf "</ul>");
+
+  let list_of_linked_pages conf base pgl =
+    List.fold_left (fun acc pg ->
+      match pg with
+      | _, Some fnotes -> fnotes :: acc
+      | _ -> acc
+      ) [] pgl
+  in
+  
+  let files_listed = list_of_linked_pages conf base db in
+  let notes_d =
+    Filename.concat (!GWPARAM.bpath conf.bname) "notes_d"
+  in
+  let all_files = Mutil.ls_r ~nodir:true [notes_d] in
+  let all_files =
+    List.fold_left ( fun acc f ->
+      if (Filename.basename f).[0] = '.'
+        || f.[(String.length f - 1)] = '~'
+      then acc else f :: acc)
+    [] all_files
+  in
+  let len = String.length notes_d in
+  let all_files = List.map
+    (fun f ->
+      if String.length f > len
+      then String.sub f (len - 1) (String.length f - len) else f
+    ) all_files
+  in
+  let files_not_listed =
+    List.fold_left (fun acc f ->
+      let f = Filename.remove_extension f in
+      if List.mem f files_listed then acc else f :: acc)
+    [] all_files
+  in
+  Output.print_sstring conf "<b>files not linked</b><br>\n";
+  List.iter (fun f -> Output.print_sstring conf
+    (Format.sprintf "%s<br>\n" (f))) files_not_listed;
+  Output.print_sstring conf "</ul>");
   if d = "" then print_search_form conf None;
   Hutil.trailer conf
 
