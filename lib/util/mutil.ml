@@ -1124,7 +1124,7 @@ let eq_key (fn1, sn1, oc1) (fn2, sn2, oc2) =
   let s x = x |> nominative |> Name.lower in
   s fn1 = s fn2 && s sn1 = s sn2 && oc1 = oc2
 
-let ls_r dirs =
+let ls_r ?(nodir=false) dirs =
   let rec loop acc = function
     | [] -> List.rev acc
     | dir :: rest ->
@@ -1139,7 +1139,7 @@ let ls_r dirs =
                   (Printexc.to_string e);
                 []
             in
-            loop (dir :: acc) (contents @ rest)
+            loop (if nodir then acc else dir :: acc) (contents @ rest)
           else loop (dir :: acc) rest
         else (
           Printf.eprintf "Path does not exist: %s\n" dir;
