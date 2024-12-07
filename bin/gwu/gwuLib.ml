@@ -1704,7 +1704,7 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
              (add_linked_files gen (fun _ -> "wizard \"" ^ file ^ "\"") s []
                : _ list)
        done
-    with Sys_error _ -> ());
+     with Sys_error _ -> ());
     let rec loop = function
       | [] -> ()
       | (f, _) :: files ->
@@ -1722,7 +1722,7 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
           loop files
     in
     loop gen.ext_files;
-    
+
     let write_note_file oc f r =
       let fn =
         match NotesLinks.check_file_name f with
@@ -1730,50 +1730,102 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
         | None -> "bad"
       in
       let s = String.trim (base_notes_read base fn) in
+      let r = if !r = [ "" ] then [] else !r in
       if s <> "" then (
         if not !first then Printf.ksprintf oc "\n";
         first := false;
         Printf.ksprintf oc "# extended page \"%s\" %s\n" f
-          (if f <> "" then "used by:" else "");
+          (if r <> [] then "used by:" else "not referenced");
         List.iter
           (fun f -> Printf.ksprintf oc "#  - %s\n" f)
-          (List.sort compare !r);
+          (List.sort compare r);
         Printf.ksprintf oc "page-ext %s\n" f;
         rs_printf opts s;
         Printf.ksprintf oc "\nend page-ext\n")
     in
 
-    
     let files = List.sort compare gen.ext_files in
     List.iter
       (fun (f, r) ->
-          if not !first then Printf.ksprintf oc "\n";
-          first := false;
-          write_note_file oc f r)
+        if not !first then Printf.ksprintf oc "\n";
+        first := false;
+        write_note_file oc f r)
       files;
-      
     let close () =
       flush_all ();
       close ();
       Hashtbl.iter (fun _ (_, _, close) -> close ()) src_oc_ht
     in
+    let files_saved = List.map (fun (f, _r) -> f) files in
+    Printf.eprintf "Files saved (%d)\n" (List.length files);
+    List.iter (fun f -> Printf.eprintf "  %s\n" f) files_saved;
+    let all_files =
+      Mutil.ls_r ~nodir:true [ Filename.concat in_dir (base_notes_dir base) ]
+    in
+    let all_files =
+      List.map
+        (fun f -> Str.global_replace (Str.regexp Filename.dir_sep) ":" f)
+        all_files
+    in
+    (* ATTENTION check this if "notes_d" changes (REORG) *)
+    let all_files =
+      if all_files <> [] then
+        List.map
+          (fun f ->
+            try Str.replace_first (Str.regexp ".*notes_d:") "" f with _ -> f)
+          (List.tl all_files)
+      else all_files
+    in
+    Printf.eprintf "All files  (%d)\n" (List.length all_files);
+    List.iter (fun f -> Printf.eprintf "  %s\n" f) all_files;
+
+    let files_not_saved =
+      List.fold_left
+        (fun acc f ->
+          let f = Filename.remove_extension f in
+          if
+            List.mem f files_saved
+            || f.[0] = '.'
+            || f.[String.length f - 1] = '~'
+          then acc
+          else f :: acc)
+        [] all_files
+    in
+
+    Printf.eprintf "Files not saved (%d)\n" (List.length files_not_saved);
+    List.iter (fun f -> Printf.eprintf "  %s\n" f) files_not_saved;
+
     try
-      let files =
-        Sys.readdir (Filename.concat in_dir (base_wiznotes_dir base))
+      let dummy = ref [ "" ] in
+      let rec loop files =
+        match files with
+        | [] -> ()
+        | f :: files ->
+            write_note_file oc f dummy;
+            loop files
       in
-      Array.sort compare files;
-      for i = 0 to Array.length files - 1 do
-        let file = files.(i) in
-        if Filename.check_suffix file ".txt" then (
-          let wizid = Filename.chop_suffix file ".txt" in
-          let wfile =
-            List.fold_left Filename.concat in_dir
-              [ base_wiznotes_dir base; file ]
-          in
-          let s = String.trim (read_file_contents wfile) in
-          Printf.ksprintf oc "\nwizard-note %s\n" wizid;
-          rs_printf opts s;
-          Printf.ksprintf oc "\nend wizard-note\n")
-      done;
+      loop files_not_saved;
       close ()
-    with Sys_error _ -> close ())
+    with Sys_error _ -> (
+      close ();
+
+      try
+        let files =
+          Sys.readdir (Filename.concat in_dir (base_wiznotes_dir base))
+        in
+        Array.sort compare files;
+        for i = 0 to Array.length files - 1 do
+          let file = files.(i) in
+          if Filename.check_suffix file ".txt" then (
+            let wizid = Filename.chop_suffix file ".txt" in
+            let wfile =
+              List.fold_left Filename.concat in_dir
+                [ base_wiznotes_dir base; file ]
+            in
+            let s = String.trim (read_file_contents wfile) in
+            Printf.ksprintf oc "\nwizard-note %s\n" wizid;
+            rs_printf opts s;
+            Printf.ksprintf oc "\nend wizard-note\n")
+        done;
+        close ()
+      with Sys_error _ -> close ()))
