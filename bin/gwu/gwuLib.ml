@@ -1704,7 +1704,7 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
              (add_linked_files gen (fun _ -> "wizard \"" ^ file ^ "\"") s []
                : _ list)
        done
-     with Sys_error _ -> ());
+    with Sys_error _ -> ());
     let rec loop = function
       | [] -> ()
       | (f, _) :: files ->
@@ -1722,25 +1722,36 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
           loop files
     in
     loop gen.ext_files;
+    
+    let write_note_file oc f r =
+      let fn =
+        match NotesLinks.check_file_name f with
+        | Some (dl, f) -> List.fold_right Filename.concat dl f
+        | None -> "bad"
+      in
+      let s = String.trim (base_notes_read base fn) in
+      if s <> "" then (
+        if not !first then Printf.ksprintf oc "\n";
+        first := false;
+        Printf.ksprintf oc "# extended page \"%s\" %s\n" f
+          (if f <> "" then "used by:" else "");
+        List.iter
+          (fun f -> Printf.ksprintf oc "#  - %s\n" f)
+          (List.sort compare !r);
+        Printf.ksprintf oc "page-ext %s\n" f;
+        rs_printf opts s;
+        Printf.ksprintf oc "\nend page-ext\n")
+    in
+
+    
+    let files = List.sort compare gen.ext_files in
     List.iter
       (fun (f, r) ->
-        let fn =
-          match NotesLinks.check_file_name f with
-          | Some (dl, f) -> List.fold_right Filename.concat dl f
-          | None -> "bad"
-        in
-        let s = String.trim (base_notes_read base fn) in
-        if s <> "" then (
           if not !first then Printf.ksprintf oc "\n";
           first := false;
-          Printf.ksprintf oc "# extended page \"%s\" used by:\n" f;
-          List.iter
-            (fun f -> Printf.ksprintf oc "#  - %s\n" f)
-            (List.sort compare !r);
-          Printf.ksprintf oc "page-ext %s\n" f;
-          rs_printf opts s;
-          Printf.ksprintf oc "\nend page-ext\n"))
-      (List.sort compare gen.ext_files);
+          write_note_file oc f r)
+      files;
+      
     let close () =
       flush_all ();
       close ();
