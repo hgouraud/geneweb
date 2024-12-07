@@ -1727,20 +1727,20 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
         | None -> "bad"
       in
       let s = String.trim (base_notes_read base fn) in
+      let r = if !r = [""] then [] else !r in
       if s <> "" then (
         if not !first then Printf.ksprintf oc "\n";
         first := false;
         Printf.ksprintf oc "# extended page \"%s\" %s\n" f
-          (if f <> "" then "used by:" else "");
+          (if r <> [] then "used by:" else "not referenced");
         List.iter
           (fun f -> Printf.ksprintf oc "#  - %s\n" f)
-          (List.sort compare !r);
+          (List.sort compare r);
         Printf.ksprintf oc "page-ext %s\n" f;
         rs_printf opts s;
         Printf.ksprintf oc "\nend page-ext\n")
     in
 
-    
     let files = List.sort compare gen.ext_files in
     List.iter
       (fun (f, r) ->
@@ -1748,12 +1748,83 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
           first := false;
           write_note_file oc f r)
       files;
-      
     let close () =
       flush_all ();
       close ();
       Hashtbl.iter (fun _ (_, _, close) -> close ()) src_oc_ht
     in
+    
+    let files_saved = List.map (fun (f, _r) -> f) files in
+    Printf.eprintf "Files saved (%d)\n" (List.length files);
+    List.iter (fun f -> Printf.eprintf "  %s\n" f) files_saved;
+
+    (* Recursively list files in a directory *)
+    let rec list_files_recursively dir =
+      Printf.eprintf "List files rec in %s\n" dir;
+      let rec traverse acc path =
+        let full_path = Filename.concat dir path in
+        try 
+          let items = Sys.readdir full_path in
+          Printf.eprintf "Items %d\n" (Array.length items);
+          Array.fold_left (fun acc item ->
+            if item.[0] = '.'
+              || item.[String.length item - 1 ] = '~'
+            then acc
+            else 
+              let current_path = Filename.concat path item in
+              let full_current_path = Filename.concat dir current_path in
+              try 
+                let stats = Unix.stat full_current_path in
+                match stats.st_kind with
+                | S_DIR -> 
+                    (* Recursively add files from subdirectory *)
+                    traverse acc current_path
+                | S_REG -> 
+                    (* Add regular file to the list *)
+                    current_path :: acc
+                | _ -> acc
+              with Unix.Unix_error (_, _, _) -> acc
+          ) acc items
+        with | Sys_error _ -> acc
+      in
+      (traverse [] "")
+    in
+    
+    let all_files = list_files_recursively
+      (Filename.concat in_dir (base_notes_dir base))
+    in
+    let all_files =
+      List.map (fun f ->
+        Str.global_replace (Str.regexp Filename.dir_sep) ":" f)
+          all_files
+    in
+    Printf.eprintf "All files  (%d)\n" (List.length all_files);
+    List.iter (fun f -> Printf.eprintf "  %s\n" f) all_files;
+
+    let files_not_saved =
+      List.fold_left (fun acc f ->
+        let f = Filename.remove_extension f in
+        if List.mem f files_saved
+          || f.[0] = '.'
+          || f.[String.length f - 1] = '~'
+        then acc else f :: acc)
+        [] all_files
+    in
+    
+    Printf.eprintf "Files not saved (%d)\n" (List.length files_not_saved);
+    List.iter (fun f -> Printf.eprintf "  %s\n" f) files_not_saved;
+
+    try
+      let dummy = ref [""] in
+      let rec loop files =
+        match files with
+        | [] -> ()
+        | f :: files -> write_note_file oc f dummy; loop files
+      in
+      loop files_not_saved;
+      close ();
+    with Sys_error _ -> close ();
+
     try
       let files =
         Sys.readdir (Filename.concat in_dir (base_wiznotes_dir base))
