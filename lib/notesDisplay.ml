@@ -206,9 +206,9 @@ let linked_page_rows conf base pg =
                (Util.uri_encode fnotes)
                (Utf8.capitalize_fst
                   (transl conf
-                     (if n_type = "gallery" then "modify gallery"
+                     (if n_type = "gallery" || n_type = "album" then "modify gallery"
                      else "modify note")))
-               (if n_type = "gallery" then "far fa-image"
+               (if n_type = "gallery" || n_type = "album" then "far fa-image"
                else "far fa-file-lines"));
         Output.print_sstring conf
           (Format.sprintf
@@ -256,7 +256,8 @@ let print_linked_list_gallery conf base pgl =
     (function
       | Def.NLDB.PgMisc fnotes ->
           let nenv, s = read_notes base fnotes in
-          if (try List.assoc "TYPE" nenv with Not_found -> "") = "gallery"
+          let typ = try List.assoc "TYPE" nenv with Not_found -> "" in
+          if typ = "gallery" || typ = "album"
           then Wserver.printf "%s" (create_gallery_item conf fnotes nenv s)
       | _ -> ())
     pgl;
@@ -276,6 +277,7 @@ let print_linked_list_standard conf base pgl =
 let print_linked_list conf base pgl =
   match p_getenv conf.env "type" with
   | Some "gallery" -> print_linked_list_gallery conf base pgl
+  | Some "album" -> print_linked_list_gallery conf base pgl
   | _ -> print_linked_list_standard conf base pgl
 
 let print_what_links conf base fnotes =
@@ -310,12 +312,13 @@ let print conf base =
   | Some "on" -> print_what_links conf base fnotes
   | _ -> (
       let nenv, s = read_notes base fnotes in
+      let typ = try List.assoc "TYPE" nenv with Not_found -> "" in
       let templ, typ =
-        try
-          let typ = List.assoc "TYPE" nenv in
-          let fname = "notes_" ^ typ in
-          (Util.open_etc_file conf fname, typ)
-        with Not_found -> (None, "")
+        if typ = "" then (None, "")
+        else if typ = "album" || typ = "gallery" then
+          try (Util.open_etc_file conf "notes_gallery", typ)
+          with Not_found -> (None, "")
+        else (None, "")
       in
       match templ with
       | Some (ic, _fname) -> (
@@ -330,6 +333,7 @@ let print conf base =
               Wserver.printf "%s"
                 (match typ with
                 | "gallery" -> Notes.safe_gallery conf s
+                | "album" -> Notes.safe_gallery conf s
                 | _ -> s)
           | _ -> Templ.copy_from_templ conf [] ic)
       | None -> (
@@ -345,8 +349,12 @@ let print_mod conf base =
     | Some f -> if NotesLinks.check_file_name f <> None then f else ""
     | None -> ""
   in
-  let env, s = read_notes base fnotes in
-  let typ = try List.assoc "TYPE" env with Not_found -> "" in
+  let nenv, s = read_notes base fnotes in
+  let typ = try List.assoc "TYPE" nenv with Not_found -> "" in
+  (* TODO gallery of one image displays ok but fails on update *)
+  let alb = Mutil.contains s {|"images"|} in
+  let typ = if alb && typ = "gallery" then "album" else typ in
+  (* TODO remove this hack hen album and gallery are fully merged *)
   let templ =
     let fname = "notes_upd_" ^ typ in
     Util.open_etc_file conf fname
