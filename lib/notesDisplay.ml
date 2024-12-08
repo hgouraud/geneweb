@@ -367,13 +367,13 @@ let print_mod conf base =
   in
   match (templ, p_getenv conf.env "notmpl") with
   | Some _, Some "on" ->
-      Wiki.print_mod_view_page conf true (Adef.encoded "NOTES") fnotes title env
+      Wiki.print_mod_view_page conf true (Adef.encoded "NOTES") fnotes title nenv
         s
   | Some (ic, _fname), _ -> (
       match p_getenv conf.env "ajax" with
       | Some "on" ->
           let s_digest =
-            List.fold_left (fun s (k, v) -> s ^ k ^ "=" ^ v ^ "\n") "" env ^ s
+            List.fold_left (fun s (k, v) -> s ^ k ^ "=" ^ v ^ "\n") "" nenv ^ s
           in
           let digest = Mutil.digest s_digest in
           let charset = if conf.charset = "" then "utf-8" else conf.charset in
@@ -382,7 +382,7 @@ let print_mod conf base =
           Wserver.printf "{\"digest\":\"%s\",\"r\":%s}" digest s
       | _ -> Templ.copy_from_templ conf [] ic)
   | _ ->
-      Wiki.print_mod_view_page conf true (Adef.encoded "NOTES") fnotes title env
+      Wiki.print_mod_view_page conf true (Adef.encoded "NOTES") fnotes title nenv
         s
 
 let print_mod_ok conf base =
