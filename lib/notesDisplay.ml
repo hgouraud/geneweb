@@ -258,8 +258,8 @@ let print_linked_list_gallery conf base pgl =
       | Def.NLDB.PgMisc fnotes ->
           let nenv, s = read_notes base fnotes in
           let typ = try List.assoc "TYPE" nenv with Not_found -> "" in
-          if typ = "gallery" || typ = "album"
-          then Wserver.printf "%s" (create_gallery_item conf fnotes nenv s)
+          if typ = "gallery" || typ = "album" then
+            Wserver.printf "%s" (create_gallery_item conf fnotes nenv s)
       | _ -> ())
     pgl;
   Wserver.printf "</div>\n"
@@ -366,8 +366,8 @@ let print_mod conf base =
   in
   match (templ, p_getenv conf.env "notmpl") with
   | Some _, Some "on" ->
-      Wiki.print_mod_view_page conf true (Adef.encoded "NOTES") fnotes title nenv
-        s
+      Wiki.print_mod_view_page conf true (Adef.encoded "NOTES") fnotes title
+        nenv s
   | Some (ic, _fname), _ -> (
       match p_getenv conf.env "ajax" with
       | Some "on" ->
@@ -381,8 +381,8 @@ let print_mod conf base =
           Wserver.printf "{\"digest\":\"%s\",\"r\":%s}" digest s
       | _ -> Templ.copy_from_templ conf [] ic)
   | _ ->
-      Wiki.print_mod_view_page conf true (Adef.encoded "NOTES") fnotes title nenv
-        s
+      Wiki.print_mod_view_page conf true (Adef.encoded "NOTES") fnotes title
+        nenv s
 
 let print_mod_ok conf base =
   let fname = function
