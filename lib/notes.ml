@@ -149,7 +149,7 @@ let json_extract_img conf s =
       (None, None) l
   in
   let json = try Yojson.Basic.from_string s with _ -> `Null in
-  let (_, img) = match json with `Assoc l -> extract l | _ -> (None, None) in
+  let _, img = match json with `Assoc l -> extract l | _ -> (None, None) in
   match img with
   | Some img -> ((Util.commd conf :> string) ^ "m=DOC&s=" ^ img, img)
   | None -> ("", "")
@@ -173,18 +173,22 @@ let safe_gallery conf s =
         | key, `String s when key = "title" -> (key, `String (html s))
         | key, `String s when key = "desc" -> (key, `String (html s))
         | "map", `List lmap -> ("map", `List (List.map safe_map lmap))
-        | "images", `List images_l -> 
-            ("images", `List (List.map 
-              (function
-                | `Assoc img_l -> `Assoc (
-                    List.map 
-                      (function 
-                        | "map", `List lmap -> ("map", `List (List.map safe_map lmap))
-                        | "img", `String s -> ("img", `String s)
-                        | e -> e)
-                      img_l)
-                | e -> e)
-              images_l))
+        | "images", `List images_l ->
+            ( "images",
+              `List
+                (List.map
+                   (function
+                     | `Assoc img_l ->
+                         `Assoc
+                           (List.map
+                              (function
+                                | "map", `List lmap ->
+                                    ("map", `List (List.map safe_map lmap))
+                                | "img", `String s -> ("img", `String s)
+                                | e -> e)
+                              img_l)
+                     | e -> e)
+                   images_l) )
         | e -> e)
       l
   in
@@ -575,13 +579,23 @@ let fold_linked_pages conf base db key type_filter transform =
             gallery
         | Def.NLDB.PgInd ip, None -> (
             authorized_age conf base (pget conf base ip)
-            && match type_filter with Some "gallery" | Some "album" -> false | _ -> true)
+            &&
+            match type_filter with
+            | Some "gallery" | Some "album" -> false
+            | _ -> true)
         | Def.NLDB.PgFam ifam, None -> (
             authorized_age conf base
               (pget conf base (get_father @@ foi base ifam))
-            && match type_filter with Some "gallery" | Some "album" -> false | _ -> true)
+            &&
+            match type_filter with
+            | Some "gallery" | Some "album" -> false
+            | _ -> true)
         | _, _ -> (
-            true && match type_filter with Some "gallery" | Some "album" -> false | _ -> true)
+            true
+            &&
+            match type_filter with
+            | Some "gallery" | Some "album" -> false
+            | _ -> true)
       in
       if record_it then
         List.fold_left
