@@ -696,45 +696,6 @@ let format_simple_filename d f =
   else f
 
 let print_misc_notes conf base =
-  let d = match p_getenv conf.env "d" with Some d -> d | None -> "" in
-  Hutil.header conf (fun _ -> ());
-
-  Format.sprintf
-    {|<h1 class="mb-3"><i class="far fa-clipboard fa-sm mr-3"></i>%s</h1>|}
-    (if d <> "" then d
-    else
-      transl conf "miscellaneous notes"
-      |> Util.translate_eval |> Utf8.capitalize_fst)
-  |> Output.print_sstring conf;
-
-  if d <> "" then format_back_button conf d |> Output.print_sstring conf;
-
-  let db = notes_links_db conf base true in
-  let db =
-    List.fold_right
-      (fun (f, _) list ->
-        if String.length f >= String.length d then
-          if String.sub f 0 (String.length d) = d then
-            let r =
-              String.sub f (String.length d) (String.length f - String.length d)
-            in
-            if d = "" || (r <> "" && r.[0] = NotesLinks.char_dir_sep) then
-              let r =
-                if d = "" then r else String.sub r 1 (String.length r - 1)
-              in
-              try
-                let i = String.index r NotesLinks.char_dir_sep in
-                let r = String.sub r 0 i in
-                match list with
-                | (r', None) :: _ when r = r' -> list
-                | _ -> (r, None) :: list
-              with Not_found -> (r, Some f) :: list
-            else list
-          else list
-        else list)
-      db []
-  in
-  Hutil.header conf title;
 
   let output_one_file f r =
     let txt =
@@ -743,12 +704,12 @@ let print_misc_notes conf base =
       if t <> "" then Util.escape_html t
       else if s = "" then Adef.escaped ""
       else
-        "<em>"
-        ^<^ (begin_text_without_html_tags 50 s |> Util.escape_html)
-        ^>^ "</em>"
+        Adef.escaped ("<em>"
+        ^ (begin_text_without_html_tags 50 s |> Util.escape_html :> string)
+        ^ "</em>") 
     in
     let c =
-      let f = file_path conf base (path_of_fnotes f) in
+      let f = file_path conf base (Notes.path_of_fnotes f) in
       if Sys.file_exists f then "" else " style=\"color:red\""
     in
     Output.print_sstring conf {|<li class="file"><a href="|};
@@ -767,7 +728,7 @@ let print_misc_notes conf base =
     Output.print_sstring conf "</li>"
   in
 
-  let output_one_dir r =
+  let output_one_dir d r =
     Output.print_sstring conf {|<li class="folder"><tt><a href="|};
     Output.print_string conf (commd conf);
     Output.print_sstring conf "m=MISC_NOTES&d=";
@@ -781,8 +742,50 @@ let print_misc_notes conf base =
     Output.printf conf " --&gt;</a></tt></li>"
   in
 
+  let d = match p_getenv conf.env "d" with Some d -> d | None -> "" in
+  Hutil.header conf (fun _ -> ());
+
+  Format.sprintf
+    {|<h1 class="mb-3"><i class="far fa-clipboard fa-sm mr-3"></i>%s</h1>|}
+    (if d <> "" then d
+    else
+      transl conf "miscellaneous notes"
+      |> Util.translate_eval |> Utf8.capitalize_fst)
+  |> Output.print_sstring conf;
+
+  if d <> "" then format_back_button conf d |> Output.print_sstring conf;
+
+  let db = Notes.notes_links_db conf base false in
+  let db =
+    List.fold_right
+      (fun (f, _) list ->
+        if String.length f >= String.length d then
+          if String.sub f 0 (String.length d) = d then
+            let r =
+              String.sub f (String.length d) (String.length f - String.length d)
+            in
+            if d = "" || (r <> "" && r.[0] = NotesLinks.char_dir_sep) then
+              let r =
+                if d = "" then r else String.sub r 1 (String.length r - 1)
+              in
+              try
+                let i = String.index r NotesLinks.char_dir_sep in
+                let r = String.sub r 0 i in
+                Printf.eprintf "Building db 1: r = %s\n" r;
+                match list with
+                | (r', None) :: _ when r = r' -> list
+                | _ -> (r, None) :: list
+              with Not_found -> 
+                  Printf.eprintf "Building db 2: r = %s\n" r;
+                  (r, Some f) :: list
+            else list
+          else list
+        else list)
+      db []
+  in
+
   if db <> [] then (
-    Output.print_sstring conf {|<div class="px-1">|};
+    Output.print_sstring conf {|<div class="px-1"><ul>|};
 
     if d <> "" then
       format_folder_entry conf 0 ".." "" false true |> Output.print_sstring conf;
@@ -796,89 +799,88 @@ let print_misc_notes conf base =
           |> Output.print_sstring conf)
         (build_path_hierarchy d);
 
-    let current_depth =
+    let _current_depth =
       if d = "" then 0
       else List.length (String.split_on_char NotesLinks.char_dir_sep d) + 1
     in
 
     List.iter
       (function
-        | r, Some f -> output_one_file f r | r, None -> output_one_dir r)
+        | r, Some f -> output_one_file f r | r, None -> output_one_dir d r)
       db;
-    Output.print_sstring conf "</ul>");
-
+    Output.print_sstring conf "</ul></div>");
 
   (* TODO expand to nested sub-dirs *)
   (* currently works for one level only *)
-  let list_of_linked_pages conf base pgl =
-    List.fold_left
-      (fun acc pg -> match pg with _, Some fnotes -> fnotes :: acc | _ -> acc)
-      [] pgl
-  in
-
-  let files_listed = list_of_linked_pages conf base db in
-
-  let files_listed =
-    if files_listed <> [] && d <> "" then
-      let reg_exp_string = d ^ ":" in
-      List.map
-        (fun f ->
-          try Str.replace_first (Str.regexp reg_exp_string) "" f with _ -> f)
-        files_listed
-    else files_listed
-  in
-
-  let notes_d = Filename.concat (!GWPARAM.bpath conf.bname) "notes_d" in
-  let all_files = Mutil.ls_r ~nodir:true [ Filename.concat notes_d d ] in
-  let all_files =
-    List.fold_left
-      (fun acc f ->
-        if (Filename.basename f).[0] = '.' || f.[String.length f - 1] = '~' then
-          acc
-        else f :: acc)
-      [] all_files
-  in
-
   (* ATTENTION check this if "notes_d" changes (REORG) *)
-  let all_files =
-    let reg_exp_string =
-      String.concat Filename.dir_sep
-        (if d = "" then [ ".*notes_d"; "" ] else [ ".*notes_d"; d; "" ])
-    in
-    if all_files <> [] then
-      List.map
-        (fun f ->
-          try Str.replace_first (Str.regexp reg_exp_string) "" f with _ -> f)
-        all_files
-    else all_files
-  in
+  let notes_d = Filename.concat (!GWPARAM.bpath conf.bname) "notes_d" in
+  let notes_d = if d = "" then notes_d else Filename.concat notes_d d in
+  Printf.eprintf "Ls notes_d\n";
+  flush stderr;
 
-  let files_not_listed =
-    List.fold_left
-      (fun acc f ->
-        let f = Filename.remove_extension f in
-        let f' = Str.replace_first (Str.regexp ":") Filename.dir_sep f in
-        if List.mem f' files_listed then acc else f :: acc)
-      [] all_files
-    |> List.sort compare
+  let db2 =
+    let ls = Sys.readdir notes_d |> Array.to_list in
+    List.fold_left (fun acc f ->
+        let fname = Filename.concat notes_d f in
+        let stats = Unix.stat fname in
+        match stats.st_kind with
+        | S_DIR when f.[0] <> '.' -> (
+            Printf.eprintf "Dir 1: %s\n" f;
+            (f, None) :: acc)
+        | S_REG -> (
+            if f.[String.length f - 1] <> '~'
+                && f.[0] <> '.'
+            then (
+              Printf.eprintf "File 1: %s\n" f;
+              let f = Filename.remove_extension f in
+              let f1 = file_path conf base (Notes.path_of_fnotes f) in
+              Printf.eprintf "File 2: %s\n" f1;
+              flush stderr;
+              (f, Some f) :: acc)
+            else acc)
+              
+        | _ -> acc)
+        [] ls
   in
-  let dirs = ref [] in
-  if files_not_listed <> [] then (
-    Output.print_sstring conf "<br><b>files not linked</b><br>\n";
-    Output.print_sstring conf "<ul>";
+  let db2 = List.sort (fun (r1, _) (r2, _) ->
+    compare (Name.lower r1) (Name.lower r2)) db2 in
+  
+  Output.print_sstring conf {|<div class="px-1">Ls notes_d (db2)</div><div class="px-1"><ul>|};
+  List.iter
+  (function
+    | r, Some f -> output_one_file f r | r, None -> output_one_dir d r)
+  db2;
+  Output.print_sstring conf "</ul></div>";
+
+  let db3 =
+    List.fold_left ( fun acc entry ->
+      if List.mem entry db then acc else entry :: acc)
+    []  db2
+    |> List.rev
+  in
+  let db4 =
+    List.fold_left ( fun acc entry ->
+      if List.mem entry db2 then acc else entry :: acc)
+    []  db
+    |> List.rev
+  in
+  if db3 <> [] then (
+    Output.print_sstring conf 
+    {|<div class="px-1"><b>files in ls notes_d (db2), not in db (db3)</b></div><div class="px-1"><ul>|};
     List.iter
-      (fun f ->
-        let i =
-          try String.index_from f 0 Filename.dir_sep.[0] with Not_found -> -1
-        in
-        if i = -1 then output_one_file f f
-        else
-          let dir = String.sub f 0 i in
-          if not (List.mem dir !dirs) then (
-            output_one_dir dir;
-            dirs := dir :: !dirs))
-      files_not_listed;
-    Output.print_sstring conf "</ul>");
+    (function
+      | r, Some f -> output_one_file f r | r, None -> output_one_dir d r)
+    db3;
+    Output.print_sstring conf "</ul></div>");
+
+  if db4 <> [] then (
+    Output.print_sstring conf 
+    {|<div class="px-1"><b>files in db, not in ls notes_d (db4)</b></div><div class="px-1"><ul>|};
+    List.iter
+    (function
+      | r, Some f -> output_one_file f r | r, None -> output_one_dir d r)
+    db4;
+    Output.print_sstring conf "</ul></div>");
 
   if d = "" then print_search_form conf None;
   Hutil.trailer conf
