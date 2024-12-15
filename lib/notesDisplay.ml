@@ -529,7 +529,8 @@ let print_misc_notes conf base =
 
   if d <> "" then format_back_button conf d |> Output.print_sstring conf;
 
-  let db = notes_links_db conf base true in
+  (* last parameter to true eliminates unlinked_pages *)
+  let db = notes_links_db conf base false in
   let db =
     List.fold_right
       (fun (f, _) list ->
@@ -613,7 +614,7 @@ let search_text conf base s =
   let s = if s = "" then " " else s in
   let case_sens = p_getenv conf.env "c" = Some "on" in
   let db =
-    let db = notes_links_db conf base true in
+    let db = notes_links_db conf base false in
     let db = "" :: List.map fst db in
     match p_getenv conf.env "z" with
     | None -> db

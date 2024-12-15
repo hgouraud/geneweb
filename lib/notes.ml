@@ -65,7 +65,7 @@ let notes_links_db conf base eliminate_unlinked =
   let db = merge_possible_aliases conf db in
   let db2 =
     List.fold_left
-      (fun db2 (pg, (sl, _il)) ->
+      (fun db2 (pg, (sl, il)) ->
         let record_it =
           let open Def.NLDB in
           match pg with
@@ -75,14 +75,22 @@ let notes_links_db conf base eliminate_unlinked =
               |> authorized_age conf base
           | PgNotes | PgMisc _ | PgWizard _ -> true
         in
-        if record_it then
-          List.fold_left
-            (fun db2 s ->
-              try
-                let list = List.assoc s db2 in
-                (s, pg :: list) :: List.remove_assoc s db2
-              with Not_found -> (s, [ pg ]) :: db2)
-            db2 sl
+        if record_it then (
+          let db2 =
+             List.fold_left
+               (fun db2 s ->
+                 try
+                   let list = List.assoc s db2 in
+                   (s, pg :: list) :: List.remove_assoc s db2
+                 with Not_found -> (s, [ pg ]) :: db2)
+            db2 sl;
+          in
+          let db2 =
+            match pg with
+            | PgMisc f when List.length il > 0 -> (f, [ pg ]) :: db2
+            | _ -> db2
+          in
+          db2)
         else db2)
       [] db
   in
@@ -113,7 +121,7 @@ let notes_links_db conf base eliminate_unlinked =
    loop (StrSet.elements set));
   let is_referenced s = Hashtbl.mem mark s in
   let db2 =
-    if eliminate_unlinked then
+    if eliminate_unlinked && false then
       List.fold_right
         (fun (s, list) db2 -> if is_referenced s then (s, list) :: db2 else db2)
         db2 []
