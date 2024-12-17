@@ -1673,6 +1673,7 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
                 print_isolated_relations opts base gen p)
       (Gwdb.ipers base);
   if !Mutil.verbose then ProgrBar.finish ();
+
   if opts.no_notes = `none then (
     let s = base_notes_read base "" in
     let oc, first, _ = origin_file (base_notes_origin_file base) in
@@ -1703,6 +1704,21 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
                : _ list)
        done
      with Sys_error _ -> ());
+    let write_note_file fn r =
+      (* convert aa/bb/cc to aa:bb:cc *)
+      let fn1 = Str.global_replace (Str.regexp Filename.dir_sep) ":" fn in
+      let s = String.trim (base_notes_read base fn) in
+      if s <> "" then (
+        if not !first then Printf.ksprintf oc "\n";
+        first := false;
+        Printf.ksprintf oc "# extended page \"%s\" used by:\n" fn1;
+        List.iter
+          (fun f -> Printf.ksprintf oc "#  - %s\n" f)
+          (List.sort compare r);
+        Printf.ksprintf oc "page-ext %s\n" fn1;
+        rs_printf opts s;
+        Printf.ksprintf oc "\nend page-ext\n")
+    in
     let rec loop = function
       | [] -> ()
       | (f, _) :: files ->
@@ -1725,42 +1741,73 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
         let fn =
           match NotesLinks.check_file_name f with
           | Some (dl, f) -> List.fold_right Filename.concat dl f
-          | None -> "bad"
+          | None -> "bad_gwu"
         in
-        let s = String.trim (base_notes_read base fn) in
-        if s <> "" then (
-          if not !first then Printf.ksprintf oc "\n";
-          first := false;
-          Printf.ksprintf oc "# extended page \"%s\" used by:\n" f;
-          List.iter
-            (fun f -> Printf.ksprintf oc "#  - %s\n" f)
-            (List.sort compare !r);
-          Printf.ksprintf oc "page-ext %s\n" f;
-          rs_printf opts s;
-          Printf.ksprintf oc "\nend page-ext\n"))
+        write_note_file fn !r)
       (List.sort compare gen.ext_files);
     let close () =
       flush_all ();
       close ();
       Hashtbl.iter (fun _ (_, _, close) -> close ()) src_oc_ht
     in
+    (try
+       let files =
+         Sys.readdir (Filename.concat in_dir (base_wiznotes_dir base))
+       in
+       Array.sort compare files;
+       for i = 0 to Array.length files - 1 do
+         let file = files.(i) in
+         if Filename.check_suffix file ".txt" then (
+           let wizid = Filename.chop_suffix file ".txt" in
+           let wfile =
+             List.fold_left Filename.concat in_dir
+               [ base_wiznotes_dir base; file ]
+           in
+           let s = String.trim (read_file_contents wfile) in
+           Printf.ksprintf oc "\nwizard-note %s\n" wizid;
+           rs_printf opts s;
+           Printf.ksprintf oc "\nend wizard-note\n")
+       done
+     with Sys_error _ -> close ());
+    let files_saved = List.map (fun (f, _r) -> f) gen.ext_files in
+    let all_files =
+      Mutil.ls_r [ Filename.concat in_dir (base_notes_dir base) ]
+    in
+    let _dirs, all_files = List.partition Sys.is_directory all_files in
+
+    (* ATTENTION check this if "notes_d" changes (REORG) *)
+    let is_valid fn =
+      let fn = Filename.basename fn in
+      Filename.check_suffix (Filename.basename fn) ".txt"
+      && Notes.read_notes base (Filename.remove_extension fn)
+         |> fst |> List.assoc_opt "TITLE" |> Option.is_some
+    in
+    let all_valid_files =
+      List.fold_left
+        (fun acc f ->
+          if is_valid f then
+            (Str.replace_first
+               (Str.regexp (".*notes_d" ^ Filename.dir_sep))
+               "" f
+            |> Str.global_replace (Str.regexp Filename.dir_sep) ":"
+            |> Filename.remove_extension)
+            :: acc
+          else acc)
+        [] all_files
+    in
+    let files_not_saved =
+      List.fold_left
+        (fun acc f -> if List.mem f files_saved then acc else f :: acc)
+        [] all_valid_files
+    in
     try
-      let files =
-        Sys.readdir (Filename.concat in_dir (base_wiznotes_dir base))
-      in
-      Array.sort compare files;
-      for i = 0 to Array.length files - 1 do
-        let file = files.(i) in
-        if Filename.check_suffix file ".txt" then (
-          let wizid = Filename.chop_suffix file ".txt" in
-          let wfile =
-            List.fold_left Filename.concat in_dir
-              [ base_wiznotes_dir base; file ]
-          in
-          let s = String.trim (read_file_contents wfile) in
-          Printf.ksprintf oc "\nwizard-note %s\n" wizid;
-          rs_printf opts s;
-          Printf.ksprintf oc "\nend wizard-note\n")
-      done;
+      let dummy = ref [ "" ] in
+      List.iter
+        (fun f ->
+          (* write_note_file needs to read the actual file *)
+          let f = Str.global_replace (Str.regexp ":") Filename.dir_sep f in
+          write_note_file f !dummy)
+        files_not_saved;
       close ()
-    with Sys_error _ -> close ())
+    with Sys_error _ -> close ());
+  (* last ) to close "if opts.no_notes = `none then (", line 1679 *)

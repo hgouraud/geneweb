@@ -75,22 +75,22 @@ let notes_links_db conf base eliminate_unlinked =
               |> authorized_age conf base
           | PgNotes | PgMisc _ | PgWizard _ -> true
         in
-        if record_it then (
+        if record_it then
           let db2 =
-             List.fold_left
-               (fun db2 s ->
-                 try
-                   let list = List.assoc s db2 in
-                   (s, pg :: list) :: List.remove_assoc s db2
-                 with Not_found -> (s, [ pg ]) :: db2)
-            db2 sl;
+            List.fold_left
+              (fun db2 s ->
+                try
+                  let list = List.assoc s db2 in
+                  (s, pg :: list) :: List.remove_assoc s db2
+                with Not_found -> (s, [ pg ]) :: db2)
+              db2 sl
           in
           let db2 =
             match pg with
             | PgMisc f when List.length il > 0 -> (f, [ pg ]) :: db2
             | _ -> db2
           in
-          db2)
+          db2
         else db2)
       [] db
   in
