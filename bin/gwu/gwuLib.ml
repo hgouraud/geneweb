@@ -1706,6 +1706,7 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
      with Sys_error _ -> ());
     let write_note_file fn r =
       (* convert aa/bb/cc to aa:bb:cc *)
+      (* TODO convert : into NoteLinks.char_dir_sep *)
       let fn1 = Str.global_replace (Str.regexp Filename.dir_sep) ":" fn in
       let s = String.trim (base_notes_read base fn) in
       if s <> "" then (
@@ -1809,5 +1810,5 @@ let gwu opts isolated base in_dir out_dir src_oc_ht (per_sel, fam_sel) =
           write_note_file f !dummy)
         files_not_saved;
       close ()
-    with Sys_error _ -> close ());
-  (* last ) to close "if opts.no_notes = `none then (", line 1679 *)
+    with Sys_error _ -> close ())
+(* last ) to close "if opts.no_notes = `none then (", line 1679 *)

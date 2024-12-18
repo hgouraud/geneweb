@@ -557,11 +557,17 @@ let print_misc_notes conf base =
   in
   let db = sort_entries db in
 
+  let current_depth =
+    if d = "" then 0
+    else List.length (String.split_on_char NotesLinks.char_dir_sep d) + 1
+  in
+
   if db <> [] then (
     Output.print_sstring conf {|<div class="px-1">|};
 
     if d <> "" then
       format_folder_entry conf 0 ".." "" false true |> Output.print_sstring conf;
+
 
     if d <> "" then
       List.iteri
@@ -572,10 +578,6 @@ let print_misc_notes conf base =
           |> Output.print_sstring conf)
         (build_path_hierarchy d);
 
-    let current_depth =
-      if d = "" then 0
-      else List.length (String.split_on_char NotesLinks.char_dir_sep d) + 1
-    in
 
     List.iter
       (function
@@ -604,6 +606,36 @@ let print_misc_notes conf base =
             |> Output.print_sstring conf)
       db;
     Output.print_sstring conf "</div>");
+
+  let notes_dir = Filename.concat (!GWPARAM.bpath conf.bname) "notes_d" in
+  let notes_dir =
+    if d = "" then notes_dir
+    else Filename.concat notes_dir d
+  in
+  let listed_files =
+    List.fold_left (fun acc e ->
+      match e with
+      | _, Some f -> f :: acc
+      | r, None -> r :: acc)
+    [] db
+  in
+
+  let extra_files = Sys.readdir notes_dir
+    |> Array.fold_left (fun acc f ->
+      if (String.length f > 0 && f.[ String.length f - 1] = '~')
+        || (Filename.check_suffix f ".txt" &&
+           (List.mem (let f = Filename.remove_extension f in
+           if d = "" then f else (d ^ ":" ^ f)) listed_files ))
+      then acc
+      else f :: acc) []
+  in
+  Output.print_sstring conf {|<div class="px-1">|};
+  Output.print_sstring conf "Extra files<br>\n";
+  List.iter (fun f ->
+    format_file_entry conf current_depth d f "" ""
+      |> Output.print_sstring conf
+    ) extra_files;
+  Output.print_sstring conf "</div>";
 
   if d = "" then print_search_form conf None;
   Hutil.trailer conf
