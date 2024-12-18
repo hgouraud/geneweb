@@ -1872,6 +1872,10 @@ sl: dodaj slika
 sv: lägg till bild
 tr: resim ekle
 
+    extra files
+en: other files
+fr: autre fichiers
+
     must use MOD_IND
 co: u ritrattu hè un indirizzu web. Impiegà MOD_IND per mudificallu o squassallu.
 en: portrait is a url. Use MOD_IND to delete or update.

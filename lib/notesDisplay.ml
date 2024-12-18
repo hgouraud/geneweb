@@ -607,6 +607,14 @@ let print_misc_notes conf base =
       db;
     Output.print_sstring conf "</div>");
 
+ if (match List.assoc_opt "extra_files" conf.base_env with
+    | Some "yes" -> true
+    | _ -> false
+    ||
+    match List.assoc_opt "extra_files" conf.env with
+    | Some s -> (s :> string) = "yes"
+    | _ -> false)
+ then (
   let notes_dir = Filename.concat (!GWPARAM.bpath conf.bname) "notes_d" in
   let notes_dir =
     if d = "" then notes_dir
@@ -630,12 +638,14 @@ let print_misc_notes conf base =
       else f :: acc) []
   in
   Output.print_sstring conf {|<div class="px-1">|};
-  Output.print_sstring conf "Extra files<br>\n";
+  Output.print_sstring conf
+    (Format.sprintf "<b>%s</b><br>\n"
+      (Util.transl conf "extra_files") |> Utf8.capitalize_fst);
   List.iter (fun f ->
     format_file_entry conf current_depth d f "" ""
       |> Output.print_sstring conf
     ) extra_files;
-  Output.print_sstring conf "</div>";
+  Output.print_sstring conf "</div>");
 
   if d = "" then print_search_form conf None;
   Hutil.trailer conf
