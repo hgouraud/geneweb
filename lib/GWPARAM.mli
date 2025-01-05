@@ -120,22 +120,24 @@ module Legacy : sig
   val bpath : string -> string
   (** [Filename.concat (Secure.base_dir ())] *)
 
+end
+
   val output_error :
-    ?headers:string list ->
+    (?headers:string list ->
     ?content:Adef.safe_string ->
     Config.config ->
     Def.httpStatus ->
-    unit
+    unit) ref
   (** If [?content] is not set, sends page content from [/etc/<status-code>-<lang>.html].
       If the current lang is not available, use `en` *)
 
-  val is_semi_public : Config.config -> Gwdb.base -> Gwdb.person -> bool
+  val is_semi_public : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
   (** determines if the person is a descendant or an ancestor of conf.userkey
       conf.userkey is the person visiting the base
       the search for asc or desc is limited to 4 generations
   *)
 
-  val p_auth : Config.config -> Gwdb.base -> Gwdb.person -> bool
+  val p_auth : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
   (** Calculate the access rights to the person's information in
       according to his age.
       Returns (in the order of the tests) :
@@ -155,9 +157,8 @@ module Legacy : sig
       - `false` otherwise
   *)
 
-  val syslog : syslog_level -> string -> unit
+  val syslog : (syslog_level -> string -> unit) ref
   (** Prints on stderr using `"[date]: level message"` format. *)
 
-  val wrap_output : Config.config -> Adef.safe_string -> (unit -> unit) -> unit
+  val wrap_output : (Config.config -> Adef.safe_string -> (unit -> unit) -> unit) ref
   (** Display in a very basic HTML doc, with no CSS or JavaScript. *)
-end

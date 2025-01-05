@@ -2052,18 +2052,14 @@ let find_person_in_env_pref conf base pref =
     (pref ^ "oc")
 
 let person_exists conf base (fn, sn, oc) =
-  let auth, fn, sn =
+  let auth =
     match person_of_key base fn sn oc with
-    | Some ip ->
-        if authorized_age conf base (pget conf base ip) then
-          let p = poi base ip in
-          (true, sou base (get_first_name p), sou base (get_surname p))
-        else (false, "x", "x")
-    | None -> (false, fn, sn)
+    | Some ip -> authorized_age conf base (pget conf base ip)
+    | None -> false
   in
   match List.assoc_opt "red_if_not_exist" conf.base_env with
-  | Some "off" -> (true, fn, sn)
-  | Some _ | None -> (auth, fn, sn)
+  | Some "off" -> (true)
+  | Some _ | None -> (auth)
 
 let mark_if_not_public conf base (fn, sn, oc) =
   Printf.eprintf "mark_if_not_public %s %s\n" fn sn;

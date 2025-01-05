@@ -213,7 +213,7 @@ let syntax_links conf wi s =
       | NotesLinks.WLperson (j, (fn, sn, oc), name, _) ->
           let name =
             if wi.wi_person_exists (fn, sn, oc) || conf.friend || conf.wizard
-            then name
+            then Option.value ~default:"?" name
             else "x x"
           in
           let color = " style=\"color:red\"" in
