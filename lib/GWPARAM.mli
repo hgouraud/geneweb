@@ -48,31 +48,6 @@ type syslog_level =
 
 (* S: Move it to gwd_lib?  *)
 
-val output_error :
-  (?headers:string list ->
-  ?content:Adef.safe_string ->
-  Config.config ->
-  Def.httpStatus ->
-  unit)
-  ref
-(** [!output_error ?headers ?content conf status] default function that send the http status [status].
-    Also send [headers] and use [content] (typically a HTML string describing the error) if provided.
-*)
-
-val is_semi_public : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
-(** Check if a person is an asc or desc of conf.userkey *)
-
-val p_auth : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
-(** Check if a person should be displayed or not *)
-
-val syslog : (syslog_level -> string -> unit) ref
-(** [!syslog level log] log message [log] with gravity level [level] on stderr. *)
-
-val wrap_output :
-  (Config.config -> Adef.safe_string -> (unit -> unit) -> unit) ref
-(** [wrap_output conf title content]
-    Wrap the display of [title] and [content] in a defined template.
-*)
 
 val init : string -> unit
 (** Function called before gwd starts
@@ -122,43 +97,47 @@ module Legacy : sig
 
 end
 
-  val output_error :
-    (?headers:string list ->
-    ?content:Adef.safe_string ->
-    Config.config ->
-    Def.httpStatus ->
-    unit) ref
-  (** If [?content] is not set, sends page content from [/etc/<status-code>-<lang>.html].
-      If the current lang is not available, use `en` *)
+val output_error :
+  (?headers:string list ->
+  ?content:Adef.safe_string ->
+  Config.config ->
+  Def.httpStatus ->
+  unit) ref
+(** If [?content] is not set, sends page content from [/etc/<status-code>-<lang>.html].
+    If the current lang is not available, use `en` *)
 
-  val is_semi_public : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
-  (** determines if the person is a descendant or an ancestor of conf.userkey
-      conf.userkey is the person visiting the base
-      the search for asc or desc is limited to 4 generations
-  *)
+val is_semi_public : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
+(** determines if the person has SemiPublic status   *)
 
-  val p_auth : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
-  (** Calculate the access rights to the person's information in
-      according to his age.
-      Returns (in the order of the tests) :
-      - `true` if requester is wizard or friend or person is public
-      - `true` if person has at least one title and {i public_if_title}
-        is set to {i yes} in gwf config file
-      - `false` if person is alive and {i private_years} > 0
-      - `true` if person is older (depending on the date of
-        birth or baptism date) then {i privates_years}
-      - `false` if person is younger (depending on the date of
-        birth or baptism date) then {i privates_years}
-      - `true` if person has been deceased for more than {i privates_years}
-      - `false` if person has been deceased for less than {i privates_years}
-      - `true` if person is between 80 and 120 years old and he is not beeing
-        private and  {i public_if_no_date} is set to {i yes} in gwf config file
-      - `true` if person has been married for more than {i private_years}
-      - `false` otherwise
-  *)
+val is_related : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
+(** determines if the person is a descendant a sibling or an ancestor
+    of conf.userkey.
+    conf.userkey is the person visiting the base
+    the search for ancestors is limited to 3 generations
+*)
 
-  val syslog : (syslog_level -> string -> unit) ref
-  (** Prints on stderr using `"[date]: level message"` format. *)
+val p_auth : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
+(** Calculate the access rights to the person's information in
+    according to his age.
+    Returns (in the order of the tests) :
+    - `true` if requester is wizard or friend or person is public
+    - `true` if person has at least one title and {i public_if_title}
+      is set to {i yes} in gwf config file
+    - `false` if person is alive and {i private_years} > 0
+    - `true` if person is older (depending on the date of
+      birth or baptism date) then {i privates_years}
+    - `false` if person is younger (depending on the date of
+      birth or baptism date) then {i privates_years}
+    - `true` if person has been deceased for more than {i privates_years}
+    - `false` if person has been deceased for less than {i privates_years}
+    - `true` if person is between 80 and 120 years old and he is not beeing
+      private and  {i public_if_no_date} is set to {i yes} in gwf config file
+    - `true` if person has been married for more than {i private_years}
+    - `false` otherwise
+*)
 
-  val wrap_output : (Config.config -> Adef.safe_string -> (unit -> unit) -> unit) ref
-  (** Display in a very basic HTML doc, with no CSS or JavaScript. *)
+val syslog : (syslog_level -> string -> unit) ref
+(** Prints on stderr using `"[date]: level message"` format. *)
+
+val wrap_output : (Config.config -> Adef.safe_string -> (unit -> unit) -> unit) ref
+(** Display in a very basic HTML doc, with no CSS or JavaScript. *)

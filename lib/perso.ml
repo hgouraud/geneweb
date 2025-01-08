@@ -3584,6 +3584,7 @@ and eval_bool_person_field conf base env (p, p_auth) = function
   | "is_private" -> get_access p = Private
   | "is_public" -> Util.is_public conf base p
   | "is_semi_public" -> !GWPARAM.is_semi_public conf base p
+  | "is_related" -> !GWPARAM.is_related conf base p
   | "is_restricted" -> is_hidden p
   | _ -> raise Not_found
 
