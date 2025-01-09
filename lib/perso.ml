@@ -3329,7 +3329,7 @@ and eval_bool_person_field conf base env (p, p_auth) = function
       p_auth
       && (snd (Util.get_approx_death_date_place conf base p) :> string) <> ""
   | "has_aliases" ->
-      if (not p_auth) && is_hide_names conf p then false
+      if (not p_auth) || is_hide_names conf p then false
       else get_aliases p <> []
   | "has_baptism_date" -> p_auth && get_baptism p <> Date.cdate_None
   | "has_baptism_place" -> p_auth && sou base (get_baptism_place p) <> ""
@@ -3470,7 +3470,7 @@ and eval_bool_person_field conf base env (p, p_auth) = function
       Array.length (get_family p) > 0
       || !GWPARAM_ITL.has_family_correspondance conf.command (get_iper p)
   | "has_first_names_aliases" ->
-      if (not p_auth) && is_hide_names conf p then false
+      if (not p_auth) || is_hide_names conf p then false
       else get_first_names_aliases p <> []
   | "has_history" -> has_history conf base p p_auth
   | "has_image" | "has_portrait" ->
@@ -3504,13 +3504,13 @@ and eval_bool_person_field conf base env (p, p_auth) = function
       !GWPARAM_ITL.has_parents_link conf.command (get_iper p)
   | "has_possible_duplications" -> has_possible_duplications conf base p
   | "has_psources" ->
-      if is_hide_names conf p && not p_auth then false
+      if (not p_auth) || is_hide_names conf p then false
       else sou base (get_psources p) <> ""
   | "has_public_name" ->
-      if (not p_auth) && is_hide_names conf p then false
+      if (not p_auth) || is_hide_names conf p then false
       else sou base (get_public_name p) <> ""
   | "has_qualifiers" ->
-      if (not p_auth) && is_hide_names conf p then false
+      if (not p_auth) || is_hide_names conf p then false
       else get_qualifiers p <> []
   | "has_relations" ->
       if p_auth && conf.use_restrict then
@@ -3552,7 +3552,7 @@ and eval_bool_person_field conf base env (p, p_auth) = function
                    || sou base (get_fsources fam) <> ""))
               (get_family p))
   | "has_surnames_aliases" ->
-      if (not p_auth) && is_hide_names conf p then false
+      if (not p_auth) || is_hide_names conf p then false
       else get_surnames_aliases p <> []
   | "is_buried" -> (
       match get_burial p with
@@ -3600,7 +3600,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
   | "alias" -> (
       match get_aliases p with
       | nn :: _ ->
-          if (not p_auth) && is_hide_names conf p then null_val
+          if (not p_auth) || is_hide_names conf p then null_val
           else sou base nn |> Util.escape_html |> safe_val
       | _ -> null_val)
   | "approx_birth_place" ->
@@ -3655,7 +3655,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
             foi base ifam |> get_father |> pget conf base |> p_surname base
             |> ( <> ) (p_surname base p)
       in
-      if (not p_auth) && is_hide_names conf p then str_val "x x"
+      if (not p_auth) || is_hide_names conf p then str_val "Privé 2"
       else if force_surname then gen_person_text conf base p |> safe_val
       else gen_person_text ~sn:false ~chk:false conf base p |> safe_val
   | "consanguinity" ->
@@ -3706,16 +3706,16 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
   | "father_age_at_birth" ->
       string_of_parent_age conf base ep get_father |> safe_val
   | "first_name" ->
-      if (not p_auth) && is_hide_names conf p then str_val "x"
+      if (not p_auth) || is_hide_names conf p then str_val "x 1"
       else p_first_name base p |> Util.escape_html |> safe_val
   | "first_name_key" ->
-      if is_hide_names conf p && not p_auth then null_val
+      if (not p_auth) || is_hide_names conf p then null_val
       else p_first_name base p |> Name.lower |> Mutil.encode |> safe_val
   | "first_name_key_val" ->
-      if is_hide_names conf p && not p_auth then null_val
+      if (not p_auth) || is_hide_names conf p then null_val
       else p_first_name base p |> Name.lower |> str_val
   | "first_name_key_strip" ->
-      if is_hide_names conf p && not p_auth then null_val
+      if (not p_auth) || is_hide_names conf p then null_val
       else Name.strip_c (p_first_name base p) '"' |> str_val
   | "history_file" ->
       if not p_auth then null_val
@@ -3776,7 +3776,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       | None -> null_val)
   | "X" -> str_val Filename.dir_sep (* end carrousel functions *)
   | "key" ->
-      if is_hide_names conf p && not p_auth then null_val
+      if (not p_auth) || is_hide_names conf p then null_val
       else
         Format.sprintf "%s.%d %s"
           (p_first_name base p |> Name.lower)
@@ -3890,7 +3890,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
   | "notes" | "pnotes" ->
       get_notes p |> get_note_or_source conf base ~p p_auth conf.no_note
   | "occ" ->
-      if is_hide_names conf p && not p_auth then null_val
+      if (not p_auth) || is_hide_names conf p then null_val
       else get_occ p |> string_of_int |> str_val
   | "occupation" ->
       get_occupation p |> get_note_or_source conf base ~p p_auth false
@@ -3971,7 +3971,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
           string_of_iper imoth |> Mutil.encode |> safe_val
       | _ -> raise Not_found)
   | "public_name" ->
-      if (not p_auth) && is_hide_names conf p then null_val
+      if (not p_auth) || is_hide_names conf p then null_val
       else get_public_name p |> sou base |> Util.escape_html |> safe_val
   | "qualifier" -> (
       match get_qualifiers p with
@@ -4022,27 +4022,27 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
           string_with_macros conf env s |> str_val
       | _ -> null_val)
   | "surname" ->
-      if (not p_auth) && is_hide_names conf p then str_val "x"
+      if (not p_auth) || is_hide_names conf p then str_val "x 2"
       else p_surname base p |> Util.escape_html |> safe_val
   | "surname_begin" ->
-      if (not p_auth) && is_hide_names conf p then null_val
+      if (not p_auth) || is_hide_names conf p then null_val
       else
         p_surname base p |> surname_particle base |> Util.escape_html
         |> safe_val
   | "surname_end" ->
-      if (not p_auth) && is_hide_names conf p then str_val "x"
+      if (not p_auth) || is_hide_names conf p then str_val "x 3"
       else
         p_surname base p
         |> surname_without_particle base
         |> Util.escape_html |> safe_val
   | "surname_key" ->
-      if is_hide_names conf p && not p_auth then null_val
+      if (not p_auth) || is_hide_names conf p then null_val
       else p_surname base p |> Name.lower |> Mutil.encode |> safe_val
   | "surname_key_val" ->
-      if is_hide_names conf p && not p_auth then null_val
+      if (not p_auth) || is_hide_names conf p then null_val
       else p_surname base p |> Name.lower |> str_val
   | "surname_key_strip" ->
-      if is_hide_names conf p && not p_auth then null_val
+      if (not p_auth) || is_hide_names conf p then null_val
       else Name.strip_c (p_surname base p) '"' |> str_val
   | "title" -> person_title conf base p |> safe_val
   | "p_auth" -> Format.sprintf "p_auth %s\n" (if p_auth then "true" else "false") |> str_val
@@ -4145,9 +4145,9 @@ and simple_person_text conf base p p_auth : Adef.safe_string =
   if p_auth then
     match main_title conf base p with
     | Some t -> titled_person_text conf base p t
-    | None -> gen_person_text conf base p
-  else if is_hide_names conf p then Adef.safe "x x"
-  else gen_person_text conf base p
+    | None -> (gen_person_text conf base p)
+  else if is_hide_names conf p then Adef.safe "Privé 3"
+  else (gen_person_text conf base p)
 
 and string_of_died conf p p_auth =
   Adef.safe
@@ -4304,7 +4304,7 @@ let print_foreach conf base print_ast eval_expr =
   in
 
   let print_foreach_alias env al ((p, p_auth) as ep) =
-    if (not p_auth) && is_hide_names conf p then ()
+    if (not p_auth) || is_hide_names conf p then ()
     else
       Mutil.list_iter_first
         (fun first a ->
@@ -4871,7 +4871,7 @@ let print_foreach conf base print_ast eval_expr =
   in
 
   let print_foreach_first_name_alias env al ((p, p_auth) as ep) =
-    if (not p_auth) && is_hide_names conf p then ()
+    if (not p_auth) || is_hide_names conf p then ()
     else
       Mutil.list_iter_first
         (fun first s ->
@@ -4974,7 +4974,7 @@ let print_foreach conf base print_ast eval_expr =
     | None -> ()
   in
   let print_foreach_qualifier env al ((p, p_auth) as ep) =
-    if (not p_auth) && is_hide_names conf p then ()
+    if (not p_auth) || is_hide_names conf p then ()
     else
       Mutil.list_iter_first
         (fun first nn ->
@@ -5135,7 +5135,7 @@ let print_foreach conf base print_ast eval_expr =
     loop true srcl
   in
   let print_foreach_surname_alias env al ((p, p_auth) as ep) =
-    if (not p_auth) && is_hide_names conf p then ()
+    if (not p_auth) || is_hide_names conf p then ()
     else
       Mutil.list_iter_first
         (fun first s ->
