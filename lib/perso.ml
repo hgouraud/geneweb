@@ -3026,6 +3026,9 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc = function
           eval_person_field_var conf base env ep loc sl
       | _ -> raise Not_found)
   | [ "var" ] -> VVother (eval_person_field_var conf base env ep loc)
+  | [ "p_auth" ] -> VVbool (p_auth)
+  | [ "is_semi_public" ] -> VVbool (get_access p = SemiPublic)
+  | [ "is_related" ] -> VVbool false
   | [ s ] -> (
       try bool_val (eval_bool_person_field conf base env ep s)
       with Not_found -> eval_str_person_field conf base env ep s)
