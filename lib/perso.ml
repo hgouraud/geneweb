@@ -4045,6 +4045,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       if is_hide_names conf p && not p_auth then null_val
       else Name.strip_c (p_surname base p) '"' |> str_val
   | "title" -> person_title conf base p |> safe_val
+  | "p_auth" -> Format.sprintf "p_auth %s\n" (if p_auth then "true" else "false") |> str_val
   | _ -> raise Not_found
 
 and eval_witness_relation_var conf base env

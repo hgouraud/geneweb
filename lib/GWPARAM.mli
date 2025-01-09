@@ -109,6 +109,8 @@ val output_error :
 val is_semi_public : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
 (** determines if the person has SemiPublic status   *)
 
+val split_key : string -> string * string * string
+
 val is_related : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
 (** determines if the person is a descendant a sibling or an ancestor
     of conf.userkey.
