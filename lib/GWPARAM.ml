@@ -217,7 +217,7 @@ let rec descendants conf base set ip =
    and p is one of its descendant or ancesstor
 *)
 
-let is_semi_public conf base p =
+let is_semi_public p =
   Gwdb.get_access p = SemiPublic
 
 let split_key key =
@@ -318,7 +318,7 @@ let is_related conf base p =
 let p_auth conf base p =
   conf.Config.wizard
   || (conf.Config.friend && conf.Config.semi_public
-    && (is_semi_public conf base p || is_related conf base p))
+    && (is_semi_public p || is_related conf base p))
   || conf.Config.public_if_titles
      && Gwdb.get_access p = IfTitles
      && Gwdb.nobtitles base conf.allowed_titles conf.denied_titles p <> []

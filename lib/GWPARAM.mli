@@ -106,7 +106,7 @@ val output_error :
 (** If [?content] is not set, sends page content from [/etc/<status-code>-<lang>.html].
     If the current lang is not available, use `en` *)
 
-val is_semi_public : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
+val is_semi_public : (Gwdb.person -> bool) ref
 (** determines if the person has SemiPublic status   *)
 
 val split_key : string -> string * string * string
