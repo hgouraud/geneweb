@@ -48,7 +48,6 @@ type syslog_level =
 
 (* S: Move it to gwd_lib?  *)
 
-
 val init : string -> unit
 (** Function called before gwd starts
     e.g. inititialise assets folders in Secure module. *)
@@ -94,7 +93,6 @@ module Legacy : sig
 
   val bpath : string -> string
   (** [Filename.concat (Secure.base_dir ())] *)
-
 end
 
 val output_error :
@@ -102,7 +100,8 @@ val output_error :
   ?content:Adef.safe_string ->
   Config.config ->
   Def.httpStatus ->
-  unit) ref
+  unit)
+  ref
 (** If [?content] is not set, sends page content from [/etc/<status-code>-<lang>.html].
     If the current lang is not available, use `en` *)
 
@@ -141,5 +140,6 @@ val p_auth : (Config.config -> Gwdb.base -> Gwdb.person -> bool) ref
 val syslog : (syslog_level -> string -> unit) ref
 (** Prints on stderr using `"[date]: level message"` format. *)
 
-val wrap_output : (Config.config -> Adef.safe_string -> (unit -> unit) -> unit) ref
+val wrap_output :
+  (Config.config -> Adef.safe_string -> (unit -> unit) -> unit) ref
 (** Display in a very basic HTML doc, with no CSS or JavaScript. *)

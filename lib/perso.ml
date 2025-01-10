@@ -2860,44 +2860,44 @@ and eval_person_field_var conf base env ((p, p_auth) as ep) loc = function
               eval_person_field_var conf base env ep loc sl
           | None -> warning_use_has_parents_before_parent loc "father" null_val)
       )
-  | [ "has_linked_page"; s ] -> (
+  | [ "has_linked_page"; s ] ->
       if p_auth then
-      match get_env "nldb" env with
-      | Vnldb db ->
-          let key =
-            let fn = Name.lower (sou base (get_first_name p)) in
-            let sn = Name.lower (sou base (get_surname p)) in
-            (fn, sn, get_occ p)
-          in
-          let r =
-            List.exists
-              (fun (pg, (_, il)) ->
-                match pg with
-                | Def.NLDB.PgMisc pg ->
-                    if List.mem_assoc key il then
-                      let nenv, _ = Notes.read_notes base pg in
-                      List.mem_assoc s nenv
-                    else false
-                | _ -> false)
-              db
-          in
-          VVbool r
-      | _ -> raise Not_found
-      else VVbool false)
+        match get_env "nldb" env with
+        | Vnldb db ->
+            let key =
+              let fn = Name.lower (sou base (get_first_name p)) in
+              let sn = Name.lower (sou base (get_surname p)) in
+              (fn, sn, get_occ p)
+            in
+            let r =
+              List.exists
+                (fun (pg, (_, il)) ->
+                  match pg with
+                  | Def.NLDB.PgMisc pg ->
+                      if List.mem_assoc key il then
+                        let nenv, _ = Notes.read_notes base pg in
+                        List.mem_assoc s nenv
+                      else false
+                  | _ -> false)
+                db
+            in
+            VVbool r
+        | _ -> raise Not_found
+      else VVbool false
   (* TODO exclude TYPE gallery and album ?? *)
   (* TODO fold link_to_ind and Notes.link_to_ind !! *)
-  | [ "has_linked_pages" ] -> (
+  | [ "has_linked_pages" ] ->
       if p_auth then
-      match get_env "nldb" env with
-      | Vnldb db ->
-          let key =
-            let fn = Name.lower (sou base (get_first_name p)) in
-            let sn = Name.lower (sou base (get_surname p)) in
-            (fn, sn, get_occ p)
-          in
-          VVbool (Notes.links_to_ind conf base db key None <> [])
-      | _ -> raise Not_found
-      else VVbool false)
+        match get_env "nldb" env with
+        | Vnldb db ->
+            let key =
+              let fn = Name.lower (sou base (get_first_name p)) in
+              let sn = Name.lower (sou base (get_surname p)) in
+              (fn, sn, get_occ p)
+            in
+            VVbool (Notes.links_to_ind conf base db key None <> [])
+        | _ -> raise Not_found
+      else VVbool false
   | [ "has_linked_pages_2" ] ->
       VVbool (p_auth && Notes.linked_pages_nbr conf base (get_iper p) > 0)
   | [ "linked_pages_nbr" ] -> (
@@ -3711,7 +3711,8 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
   | "father_age_at_birth" ->
       string_of_parent_age conf base ep get_father |> safe_val
   | "first_name" ->
-      if (not p_auth) || is_hide_names conf p then str_val (Util.private_txt conf)
+      if (not p_auth) || is_hide_names conf p then
+        str_val (Util.private_txt conf)
       else p_first_name base p |> Util.escape_html |> safe_val
   | "first_name_key" ->
       if (not p_auth) || is_hide_names conf p then null_val
@@ -3729,11 +3730,12 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
         let sn = sou base (get_surname p) in
         let occ = get_occ p in
         HistoryDiff.history_file fn sn occ |> str_val
-  | "image" -> (if p_auth then
-      match Image.get_portrait conf base p with
-      | Some src -> Image.src_to_string src |> str_val
-      | None -> null_val
-      else null_val)
+  | "image" ->
+      if p_auth then
+        match Image.get_portrait conf base p with
+        | Some src -> Image.src_to_string src |> str_val
+        | None -> null_val
+      else null_val
   | "image_html_url" -> string_of_image_url conf base ep true |> safe_val
   | "image_size" -> string_of_image_size conf base ep |> str_val
   | "image_medium_size" -> string_of_image_medium_size conf base ep |> str_val
@@ -4028,7 +4030,8 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
           string_with_macros conf env s |> str_val
       | _ -> null_val)
   | "surname" ->
-      if (not p_auth) || is_hide_names conf p then str_val (Util.private_txt conf)
+      if (not p_auth) || is_hide_names conf p then
+        str_val (Util.private_txt conf)
       else p_surname base p |> Util.escape_html |> safe_val
   | "surname_begin" ->
       if (not p_auth) || is_hide_names conf p then null_val
@@ -4036,7 +4039,8 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
         p_surname base p |> surname_particle base |> Util.escape_html
         |> safe_val
   | "surname_end" ->
-      if (not p_auth) || is_hide_names conf p then str_val (Util.private_txt conf)
+      if (not p_auth) || is_hide_names conf p then
+        str_val (Util.private_txt conf)
       else
         p_surname base p
         |> surname_without_particle base
@@ -4151,9 +4155,9 @@ and simple_person_text conf base p p_auth : Adef.safe_string =
   if p_auth then
     match main_title conf base p with
     | Some t -> titled_person_text conf base p t
-    | None -> (gen_person_text conf base p)
+    | None -> gen_person_text conf base p
   else if is_hide_names conf p then Adef.safe "Privé 3"
-  else (gen_person_text conf base p)
+  else gen_person_text conf base p
 
 and string_of_died conf p p_auth =
   Adef.safe

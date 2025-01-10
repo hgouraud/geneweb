@@ -2056,8 +2056,8 @@ let person_exists conf base (fn, sn, oc) =
     | None -> false
   in
   match List.assoc_opt "red_if_not_exist" conf.base_env with
-  | Some "off" -> (true)
-  | Some _ | None -> (auth)
+  | Some "off" -> true
+  | Some _ | None -> auth
 
 let mark_if_not_public conf base (fn, sn, oc) =
   match p_getenv conf.env "red_if_not_public" with
