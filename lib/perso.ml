@@ -3662,7 +3662,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       in
       if (not p_auth) || is_hide_names conf p then str_val "Privé 2"
       else if force_surname then gen_person_text conf base p |> safe_val
-      else gen_person_text ~sn:false ~chk:false conf base p |> safe_val
+      else gen_person_text ~sn:false conf base p |> safe_val
   | "consanguinity" ->
       if p_auth then
         string_of_decimal_num conf

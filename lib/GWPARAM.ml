@@ -257,12 +257,32 @@ let is_related conf base p =
             in
             let max = if max = "" then 2 else int_of_string max in
             let family = ancestors conf base (max + 1) family ip in
+            (* siblings
             let family =
                   (match Gwdb.get_parents (Gwdb.poi base ip) with
                   | Some ifam -> Gwdb.get_children (Gwdb.foi base ifam) |> Array.to_list
-                  | None -> (Printf.eprintf "no siblings\n"; []))
+                  | None -> [])
                   @ family
+            in *)
+            (* spouses *)
+            let family =
+              (let ifams = Gwdb.get_family (Gwdb.poi base ip) in
+              Array.fold_left (fun acc ifam ->
+                let sp =
+                  let f = Gwdb.foi base ifam in
+                  if ip = Gwdb.get_father f then Gwdb.get_mother f
+                  else Gwdb.get_father f
+                in
+                if (Gwdb.sou base
+                   (Gwdb.get_first_name (Gwdb.poi base sp))) <> "?"
+                  && (Gwdb.sou base 
+                     (Gwdb.get_surname (Gwdb.poi base sp))) <> "?"
+                then sp :: acc
+                else acc
+                ) [] ifams)
+              @ family
             in
+            (* relations ? *)
             let family = descendants conf base family ip in
             List.sort_uniq compare family
         | _ -> [])
