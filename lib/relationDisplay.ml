@@ -373,7 +373,7 @@ let print_link_name conf base n p1 p2 sol =
   let pp1, pp2, (x1, x2, list), reltab = sol in
   let info = (reltab, list) in
   if is_hide_names conf p2 && not (authorized_age conf base p2) then
-    Output.print_sstring conf "x x"
+    Output.print_sstring conf (Util.private_txt conf)
   else Output.print_string conf @@ person_title_text conf base p2;
   Output.print_sstring conf " ";
   Output.print_sstring conf (transl conf "is");
@@ -469,7 +469,7 @@ let print_link_name conf base n p1 p2 sol =
   let s1 = "<strong>" ^<^ std_color conf s ^>^ "</strong>" in
   let s2 =
     if is_hide_names conf p1 && not (authorized_age conf base p1) then
-      Adef.safe "x x"
+      Adef.safe (Util.private_txt conf)
     else gen_person_title_text no_reference conf base p1
   in
   let s =

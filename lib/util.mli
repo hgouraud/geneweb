@@ -128,6 +128,8 @@ val is_restricted : config -> base -> iper -> bool
 (** Tells if person is restrited to acccess. If mode `use_restrict` is
     disabled returns always [false]. *)
 
+val private_txt : config -> string
+
 val is_hidden : person -> bool
 (** Tells if person is hiden (if his surname is empty) *)
 
