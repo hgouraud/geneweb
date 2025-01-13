@@ -347,7 +347,6 @@ let p_auth conf base p =
       | None -> none ()
       | Some d ->
           let a = Date.time_elapsed d conf.today in
-          Printf.eprintf "  Check_date %d > %d \n" a.Def.year lim;
           if a.Def.year > lim then true
           else if a.Def.year = 0 then a.month > 0 || a.day > 0
           else false
