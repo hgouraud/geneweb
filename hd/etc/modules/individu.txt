@@ -1,4 +1,4 @@
-<!-- $Id: modules/individu.txt v7.1 27/03/2024 07:42:02 $ -->
+<!-- $Id: modules/individu.txt v7.1 13/01/2025 07:42:02 $ -->
 %( options
 0: skip
 1: standard
@@ -397,7 +397,7 @@
 %let;evm;%if;(e.m="F")m=F;%end;%in;
 %let;prefx;%if;(e.m="F")%prefix_set.pmod;%else;%prefix;%end;%in;
 %if;(e.m!="MOD_IND")
-  <div class="col-12">
+  <div class="col-12 mb-3">
   <h1 class="%if;(op_m=2)text-center%else;text-xs-center text-md-left%end; ml-1 ml-md-3">
     %if;has_public_name;
       %if;has_qualifiers;%public_name; <em>%qualifier;</em>
@@ -414,7 +414,79 @@
     %end;
     <span class="font-weight-light small">%dates;</span>
   </h1>
-  </div> %( closing div just before h1 %)
+  <span class="h5">
+  %apply;image_MF("self")
+  %if;(wizard or friend)
+    &nbsp;
+    %let;userid;%if;(user.key != "")%user.key;%else;%user.name;%end;%in;
+    <a href="%prefix;&em=R;ei=%index;&m=NG;select=input;n=%user.key;&t=PN;spouse=on&long=on&et=S"
+       title="Chemin le plus court entre moi et cette personne">
+    <i class="fa fa-arrows"></i>%nn;
+    </a>
+  %end;
+  %if;(bvar.show_invisible = "on")
+    <a href="%prefix;m=H&v=visibility" title="[*visibility]">
+      %if;is_private;
+        <i class="fa fa-person text-danger"></i>%nn;
+      %elseif;is_semi_public;
+        <i class="fa fa-person text-warning"></i>%nn;
+      %elseif;(is_public or has_titles)
+        <i class="fa fa-person text-success"></i>%nn;
+      %else;
+        <i class="fa fa-person text-muted"></i>%nn;
+      %end;
+    </a>
+  %end;
+  %if;(wizard) %( à revoir %)
+    %if;(base.name = "wizard")
+      <a href="%if;(bvar.http_mode="https" and cgi)%bvar.commd;?b=wizard;w=%user.passwd;&%else;%prefix;%end;%nn;
+        &m=MOD_IND;i=%index;"
+        title="Modify person">
+    %else;
+      <a href="%if;(bvar.http_mode="https" and cgi)%bvar.commd;?b=wizard;w=%user.passwd;&%else;%bvar.Base_Wiz;_w?%end;%nn;
+        &lang=%evar.lang;&%if;(evar.templ!="")templ=%evar.templ;%end;
+        &m=MOD_IND&i=%index;&o=%occ;"
+        title="Modify person">
+    %end;
+      <i class="fa fa-wrench"></i></a>%sp;
+  %end;
+  %if;(wizard and birth_date.year>1870 and death_date="")
+      <a href="https://deces.matchid.io/search?advanced=true&ln=%surname;&fn=%first_name;%nn;
+        &bd=%slash_birth_date;"%nn;
+        style="font-size:16pt;font-weight:bold;color:#41610c;"
+        title="Decès match_id"><i class="fa fa-person-x"><b>†</b></i></a>
+  %end;
+  </span>
+  <input type=text size="48" value="%[%[%first_name_key_val;/%surname_key_val;/%occ;/%first_name; %surname;%]%]">
+  %sp;
+  
+  <span class="h5">
+  <!-- VaetVient roglo -->
+  %if;wizard;
+    <a href="%bvar.Base_Wiz;_w
+      ?lang=%evar.lang;%nn;
+      %if;(evar.templ!="");templ=%evar.templ;%end;%nn;
+      ;p=%first_name_key_val;%nn;
+      ;n=%surname_key_val;%nn;
+      %if;(occ!="");oc=%occ;%end;"
+      title="Go to base_wiz">
+      <span style="font-size:16pt;font-weight:bold;color:#41610c;">W</span></a>%sp;
+    <a href="http://roglo.eu:2317/roglo_w
+      ?lang=%evar.lang;%nn;
+      %if;(evar.templ!="");templ=%evar.templ;%end;%nn;
+      ;p=%first_name_key_val;%nn;
+      ;n=%surname_key_val;%nn;
+      ;oc=%occ;"
+      style="font-size:16pt;font-weight:bold;color:#41610c;"
+      title="Go to base test">T</a>
+  %end;
+
+  <a href="https://www.geneanet.org/fonds/individus/?nom=%surname;&prenom=%first_name;&prenom_operateur=and"
+     title="Query geneanet">
+    <img src="https://img.roglo.eu/G.jpg">
+  </a>
+  </span>
+  </div>
 
   %if;((p_mod="zz" or p_mod="") and e.m!="F")
     <div class="col-lg-8">
