@@ -98,7 +98,6 @@ val create_all_keys : bool ref
     Enabled for gwplus format. *)
 
 val verbose : bool ref
-
 val out_file : string ref
 
 val comp_families : string -> unit

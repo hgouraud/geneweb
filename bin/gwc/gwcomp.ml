@@ -21,12 +21,11 @@ let no_fail = ref false
 (** Save path to the images *)
 let no_picture = ref false
 
-
 (** Fonctionnement RGPD *)
 let rgpd_files = ref "None"
+
 let auth_file_name = None
 let consent_list = None
-
 let rgpd = ref false
 let verbose = ref false
 let verbose_friends = ref false
@@ -563,59 +562,59 @@ let auth_access fn sn oc l =
     match auth_file_name with
     | Some file -> Some file
     | None -> (
-      match try Some (Secure.open_in gwf_file) with Sys_error _ -> None with
-      | Some ic -> (
-          try
-            let rec loop () =
-              let line = input_line ic in
-              if Util.start_with line 0 "friend_passwd_file" then (
-                let parts = String.split_on_char '=' line in
-                close_in ic;
-                if List.length parts = 2 then Some (List.nth parts 1)
-                else Some "")
-              else loop ()
-            in
-            loop ()
-          with End_of_file ->
-            close_in ic;
-            Some "")
-      | None -> Some "")
+        match try Some (Secure.open_in gwf_file) with Sys_error _ -> None with
+        | Some ic -> (
+            try
+              let rec loop () =
+                let line = input_line ic in
+                if Util.start_with line 0 "friend_passwd_file" then (
+                  let parts = String.split_on_char '=' line in
+                  close_in ic;
+                  if List.length parts = 2 then Some (List.nth parts 1)
+                  else Some "")
+                else loop ()
+              in
+              loop ()
+            with End_of_file ->
+              close_in ic;
+              Some "")
+        | None -> Some "")
   in
   let consent_list =
     match consent_list with
     | Some list -> list
     | None -> (
-      match auth_file_name with
-      | Some file when file <> "" -> (
-        let friend_passwd_file =
-          Filename.concat (Secure.base_dir ()) file
-        in
-        match
-          try Some (Secure.open_in friend_passwd_file) with Sys_error _ -> None
-        with
-        | Some ic -> (
-            let acc = ref [] in
-            try
-              let rec loop () =
-                let line = input_line ic |> name_unaccent_lower in
-                let parts = String.split_on_char ':' line in
-                let username =
-                  try List.nth parts 2 with Failure _ -> ""
-                in
-                let parts = String.split_on_char '|' username in
-                let key =
-                  try List.nth parts 1 with Failure _ -> ""
-                in
-                if key <> "" && Mutil.contains line "%%%consent%%%" then (
-                  acc := key :: !acc;
-                  loop ())
-                else loop ()
-              in loop ()
-            with End_of_file ->
-              close_in ic;
-              !acc)
-        | None -> [])
-      | _ -> [])
+        match auth_file_name with
+        | Some file when file <> "" -> (
+            let friend_passwd_file =
+              Filename.concat (Secure.base_dir ()) file
+            in
+            match
+              try Some (Secure.open_in friend_passwd_file)
+              with Sys_error _ -> None
+            with
+            | Some ic -> (
+                let acc = ref [] in
+                try
+                  let rec loop () =
+                    let line = input_line ic |> name_unaccent_lower in
+                    let parts = String.split_on_char ':' line in
+                    let username =
+                      try List.nth parts 2 with Failure _ -> ""
+                    in
+                    let parts = String.split_on_char '|' username in
+                    let key = try List.nth parts 1 with Failure _ -> "" in
+                    if key <> "" && Mutil.contains line "%%%consent%%%" then (
+                      acc := key :: !acc;
+                      loop ())
+                    else loop ()
+                  in
+                  loop ()
+                with End_of_file ->
+                  close_in ic;
+                  !acc)
+            | None -> [])
+        | _ -> [])
   in
   let is_consent =
     List.mem (Format.sprintf "%s.%d+%s" fns oc sns) consent_list
@@ -624,7 +623,8 @@ let auth_access fn sn oc l =
   else if is_consent then (
     incr semi_pub_cnt;
     if !verbose then Printf.eprintf "Set to %s %s.%d %s\n" frs fns oc sns;
-    if !verbose_friends then Printf.eprintf "Set to %s %s.%d %s\n" frs fns oc sns;
+    if !verbose_friends then
+      Printf.eprintf "Set to %s %s.%d %s\n" frs fns oc sns;
     (SemiPublic, l))
   else (access, l)
 
