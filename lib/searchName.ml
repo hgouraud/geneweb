@@ -36,7 +36,7 @@ let select_approx_key conf base pl k =
       else pl)
     pl []
 
-let split_normalize s = cut_words (Name.abbrev (Name.lower s))
+let split_normalize case s = cut_words (Name.abbrev (if case then s else (Name.lower s)))
 
 (* search functions *)
 
@@ -60,7 +60,7 @@ let search_reject_p conf base p =
   || (Util.is_hide_names conf p && not (Util.authorized_age conf base p))
 
 let search_by_name conf base n =
-  (* TODO use split_normalize here? why only split on the first ' '? *)
+  (* TODO use f here? why only split on the first ' '? *)
   let n1 = Name.abbrev (Name.lower n) in
   match String.index_opt n1 ' ' with
   | None -> []
@@ -79,8 +79,8 @@ let search_by_name conf base n =
               match Util.pget_opt conf base ip with
               | None -> pl
               | Some p ->
-                  let fn1_l = split_normalize (sou base (get_first_name p)) in
-                  let fn2_l = split_normalize (sou base (get_public_name p)) in
+                  let fn1_l = split_normalize true (sou base (get_first_name p)) in
+                  let fn2_l = split_normalize true (sou base (get_public_name p)) in
                   if List.mem fn fn1_l || List.mem fn fn2_l then p :: pl else pl)
             pl ipl)
         [] p_of_sn_l
@@ -120,21 +120,53 @@ type search_type =
   | PartialKey
   | DefaultSurname
 
-let search_for_fn_or_pn conf base fn pl =
+let search_for_multiple_fn conf base fn pl =
+  let test label = p_getenv conf.env label = Some "on" in
+  let exact = test  "exact" in
+  let case = test "case" in
+  let order = test "order" in
+  let all = test "all" in
+  let is_same_or_substr x xx =
+    if exact then x = xx else Mutil.contains xx x
+  in
+  let is_sublist l1 l2 =
+    let rec check_from_pos l1 l2_remaining =
+      match (l1, l2_remaining) with
+      | [], _ -> true    (* Empty list is a sublist *)
+      | _, [] -> false   (* Ran out of l2 before finding match *)
+      | h1::t1, h2::t2 ->
+          if is_same_or_substr h1 h2 then
+            (* First element matches *)
+            check_from_pos t1 t2
+          else
+            false
+    in
+    let rec try_all_positions l1 = function
+      | [] -> false
+      | _::t2 as l2 ->
+          check_from_pos l1 l2 || try_all_positions l1 t2
+    in
+    match l1 with
+    | [] -> true
+    | _ -> try_all_positions l1 l2
+  in
+  let ok fn_l fn1_l=
+    if all && order then is_sublist fn_l fn1_l
+    else if all then
+      List.for_all (fun fn ->
+        List.exists (fun fn1 -> is_same_or_substr fn fn1 ) fn1_l) fn_l
+    else List.exists (fun fn ->
+      List.exists (fun fn1 -> is_same_or_substr fn fn1 ) fn1_l) fn_l
+  in
   let fn_l = cut_words fn in
+  let fn_l = List.map (fun fn -> if case then fn else Name.lower fn) fn_l in
   List.fold_left
     (fun pl p ->
       if search_reject_p conf base p then pl
       else
-        let fn1_l = get_first_name p |> sou base |> split_normalize in
-        let fn2_l = get_public_name p |> sou base |> split_normalize in
-        let exact = false in
-        (* TODO manage exact options according to mode *)
-        if
-          if exact then fn_l = fn1_l || fn_l = fn2_l
-          else List.mem fn fn1_l || List.mem fn fn2_l
-        then p :: pl
-        else pl)
+        let fn1_l = get_first_name p |> sou base |> split_normalize case in
+        let fn2_l = get_public_name p |> sou base |> split_normalize case in
+        if ok fn_l fn1_l || ok fn_l fn2_l then p :: pl else pl)
     [] pl
 
 let search conf base an search_order specify unknown =
@@ -177,6 +209,9 @@ let search conf base an search_order specify unknown =
         let fn, sn =
           if fn = "" then
             (* we assume fn1 fn2 sn. For other cases, use fn, sn explicitely *)
+            (* TODO check for particles and cut before particle *)
+            (* see if    Name.abbrev (Name.lower sn)    is Ok *)
+            (* or use split_normalize here? *)
             match String.rindex_opt sn ' ' with
             | Some i ->
                 ( String.sub sn 0 i,
@@ -196,7 +231,7 @@ let search conf base an search_order specify unknown =
             Perso.print conf base p
         | pl -> (
             (* check first_names or public_names in list of persons *)
-            let pl = search_for_fn_or_pn conf base fn pl in
+            let pl = search_for_multiple_fn conf base fn pl in
             match pl with
             | [] -> loop l
             | [ p ] ->
@@ -237,7 +272,7 @@ let search conf base an search_order specify unknown =
                 record_visited conf (get_iper p);
                 Perso.print conf base p
             | pl -> (
-                let pl = search_for_fn_or_pn conf base fn pl in
+                let pl = search_for_multiple_fn conf base fn pl in
                 match pl with
                 | [] -> loop l
                 | [ p ] ->

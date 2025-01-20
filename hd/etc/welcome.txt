@@ -188,6 +188,7 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
         <input type="hidden" name="m" value="S" class="has_validation">
         <div class="d-flex justify-content-center">
           <div class="d-flex flex-column justify-content-center w-100">
+
             <div class="d-flex%if;(b.fn_sn_order!="" and b.fn_sn_switch="on") order-2%end;">
               <div class="btn-group-vertical mr-2">
                 <a role="button" href="%prefix;m=N&tri=A"
@@ -200,6 +201,7 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
               <input type="search" id="surname" class="form-control form-control-lg border border-top-0" autofocus tabindex="1"
                 name="n" placeholder="[*surname/surnames]0%txt;" title="[*search/case sensitive]0 [surname/surnames]0 %txt;" %datalist_snames;>
             </div>
+            
             <div class="d-flex mt-2">
               <div class="btn-group-vertical mr-2">
                 <a role="button" href="%prefix;m=P&tri=A"
@@ -212,6 +214,20 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
                 class="form-control form-control-lg border-top-0"
                 name="p" placeholder="[*first name/first names]2"
                 title="[*search/case sensitive]0 [first name/first names]2" tabindex="2" %datalist_fnames;>
+            </div>
+            <div class="ml-4">
+              <input title="[*all-hlp]"
+                   type="checkbox" name="all" id="all" value="on">
+              <label for="all" class="col-form-label col-sm-2">[*all]</label>
+              <input title="[*case-hlp]"
+                  type="checkbox" name="case" id="case" value="on">
+              <label for="case" class="col-form-label col-sm-2">[*case]</label>
+              <input title="[*order-hlp]"
+                  type="checkbox" name="order" id="order" value="on">
+              <label for="order" class="col-form-label col-sm-2">[*order]</label>
+              <input title="[*exact-hlp]"
+                  type="checkbox" name="exact" id="exact" value="on">
+              <label for="exact" class="col-form-label col-sm-2">[*exact]</label>
             </div>
           </div>
         </div>
