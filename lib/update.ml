@@ -903,15 +903,16 @@ let reconstitute_date_dmy2 conf var =
           | Some d ->
               let dmy2 = { day2 = d; month2 = m; year2 = y; delta2 = 0 } in
               if
-                dmy2.day2 >= 1 && dmy2.day2 <= 31 && dmy2.month2 >= 1
-                && dmy2.month2 <= 13
+                dmy2.day2 >= 1
+                && dmy2.day2 <= Date.nb_days_in_month dmy2.month2 dmy2.year2
+                && dmy2.month2 >= 1 && dmy2.month2 <= 12
               then dmy2
               else
                 let d = Date.dmy_of_dmy2 dmy2 in
                 bad_date conf d
           | None ->
               let dmy2 = { day2 = 0; month2 = m; year2 = y; delta2 = 0 } in
-              if dmy2.month2 >= 1 && dmy2.month2 <= 13 then dmy2
+              if dmy2.month2 >= 1 && dmy2.month2 <= 12 then dmy2
               else
                 let d = Date.dmy_of_dmy2 dmy2 in
                 bad_date conf d)
@@ -980,12 +981,14 @@ let reconstitute_date_dmy conf var =
             match get_number var "dd" conf.env with
             | Some d ->
                 let d = { day = d; month = m; year = y; prec; delta = 0 } in
-                if d.day >= 1 && d.day <= 31 && d.month >= 1 && d.month <= 13
+                if d.day >= 1 && d.day <= Date.nb_days_in_month d.month d.year
+                   && d.month >= 1 && d.month <= 12
                 then Some d
                 else bad_date conf d
             | None ->
                 let d = { day = 0; month = m; year = y; prec; delta = 0 } in
-                if d.month >= 1 && d.month <= 13 then Some d
+                if d.month >= 1 && d.month <= 12
+                then Some d
                 else bad_date conf d)
         | None -> Some { day = 0; month = 0; year = y; prec; delta = 0 })
     | None -> None
