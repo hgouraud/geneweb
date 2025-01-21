@@ -14178,6 +14178,14 @@ sl: po želji
 sv: valfritt
 tr: isteğe bağlı
 
+    visibility
+en: visibility
+fr: visibilité
+
+    visibility-hlp
+en: visibility: green=Public, yellow=SemiPublic, red=Private, grey=IfTitle
+fr: visibilité : vert=Public, jaune=SemiPublic, rouge=Privé, gris=SiTitre
+
     options
 co: ozzioni
 de: Optionen
@@ -15893,11 +15901,33 @@ pt: selamento ao cônjuge LDS
 sv: besegling med syskon (LDS)
 tr: mühürlü Eş (LDS)
 
+    path to me
+en: path to me
+fr: chemin vers moi
+
+    path to me hlp
+en: shortest path between me and this person
+fr: chemin le plus court entre moi et cette personne
+
+    reset related cache
+en: reset "related" cache
+fr: reset le cache "related"
+
+    reset related cache hlp
+en: reset the cache extending SemiPublic visibility to family
+fr: reset le cache étendant la visibilité SemiPublic à la famille
+
     search %s on Geneanet
 co: ricercà %s nant’à Geneanet
 de: suche %s auf Geneanet
 en: search %s on Geneanet
 fr: rechercher %s sur Geneanet
+
+    search %s on INSEE
+co: ricercà %s nant’à INSEE
+de: suche %s auf INSEE
+en: search %s on INSEE
+fr: rechercher %s sur INSEE
 
     search/case sensitive
 bg: търсене/с различаване на главни и малки букви

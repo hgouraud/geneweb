@@ -17,6 +17,7 @@
 %let;datalist_fnames; list="datalist_fnames" data-book="fn"%in;
 %let;datalist_titles; list="datalist_titles" data-book="title"%in;
 %let;datalist_estates; list="datalist_estates" data-book="domain"%in;
+%let;roglo;%if;(b.roglo="yes")1%else;0%end;%in;
 %define;book_of(xx)[book of %s:::xx]%end;
 %define;display_sosa_ref(xx)
   [*sosa reference][:]
@@ -51,10 +52,10 @@
     <span class="text-nowrap ml-2">[*yyy]1</span>
   </a>
 %end;
-<div class="d-flex flex-column flex-md-row justify-content-lg-around mt-1 mt-lg-%if;(b.roglo=1)1%else;3%end;">
+<div class="d-flex flex-column flex-md-row justify-content-lg-around mt-1 mt-lg-%if;(roglo=1)1%else;3%end;">
   <div class="col-md-3 order-md-1 align-self-center">
     <div class="d-flex justify-content-center">
-      %if;(b.roglo=1)
+      %if;(roglo=1)
         <img src="%images_prefix;logo-roglo.png" alt="logo Roglo" width="150">
       %elseif;(b.welcome_logo!="")
         <img src="%prefix;m=IM;s=%b.welcome_logo;" alt="logo"
@@ -127,7 +128,7 @@
     <h1 class="font-weight-bolder">%apply;capitalize%with;[database]%end; %base.name;</h1>
     %if;(b.visitor_access!="no" or wizard or friend)
       <div class="d-flex justify-content-center">
-        <span class="%if;(b.roglo=1)h5">%nn;
+        <span class="%if;(roglo=1)h5">%nn;
 [
 en: contains
 fr: contient
@@ -216,6 +217,7 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
                 title="[*search/case sensitive]0 [first name/first names]2" tabindex="2" %datalist_fnames;>
             </div>
             <div class="ml-4">
+              <span class="mr-4">[*options][:]</span>
               <input title="[*all-hlp]"
                    type="checkbox" name="all" id="all" value="on">
               <label for="all" class="col-form-label col-sm-2">[*all]</label>
@@ -269,7 +271,7 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
 %end;
 <div class="d-flex flex-column justify-items-lg-center mt-2 mt-md-3 mt-lg-4">
   <div class="h4 text-lg-center"><i class="fas fa-screwdriver-wrench fa-sm fa-fw text-secondary"></i>
-    %if;(b.roglo=1)[
+    %if;(roglo=1)[
 en: Around the tree
 fr: Autour de l'arbre
 ]
@@ -288,10 +290,10 @@ fr: Autour de l'arbre
     %end;
     %if;has_misc_notes;
       <a role="button" class="btn btn-outline-primary mr-1" href="%prefix;m=%nn;
-      %if;(b.roglo=1)NOTES&f=0_Sommaire_des_notes_diverses">%nn;
+      %if;(roglo=1)NOTES&f=0_Sommaire_des_notes_diverses">%nn;
       %else;MISC_NOTES">%end;
       <i class="fas fa-align-justify fa-fw mr-1" aria-hidden="true"></i>
-      %if;(b.roglo=1)Encyclopædia Roglo%else;[*base index notes]%end;</a>
+      %if;(roglo=1)Encyclopædia Roglo%else;[*base index notes]%end;</a>
     %end;
     %if;((wizard or friend) and
         (b.wizard_passwd_file!="" or b.wizard_descr_file!=""))
@@ -338,7 +340,7 @@ fr: Autour de l'arbre
     %end;
   </div>
 </div>
-%if;(b.roglo=1)
+%if;(roglo=1)
   <div class="d-flex flex-column justify-items-lg-center mt-md-1 mt-lg-2">
     <div class="h4 text-lg-center">
       <img src="%images_prefix;logo-roglo.png" alt="Roglo" title="Roglo" style="width:30px">
@@ -371,7 +373,7 @@ fr: Mon compte associatif
     </div>
   </div>
 %end;
-%if;(b.roglo=1 and wizard or base.name="wizard")
+%if;(roglo=1 and wizard or base.name="wizard")
   <div class="d-flex flex-column justify-items-lg-center mt-2 mt-lg-4">
     <div class="h4 text-lg-center text-success">
       <i class="fas fa-hat-wizard text-success mr-2" aria-hidden="true"></i>[*wizard/wizards/friend/friends/exterior]1
@@ -393,7 +395,7 @@ fr: Mon compte associatif
     </div>
   </div>
 %end;
-%if;(((b.roglo!=1 and wizard) or (b.roglo=1 and user.name in b.superwizard)) and nb_persons.v!=0)
+%if;(((b.roglo!=1 and wizard) or (roglo=1 and user.name in b.superwizard)) and nb_persons.v!=0)
   <div class="d-flex flex-column justify-content-lg-center mt-2 mt-lg-4">
     <div class="h4 align-self-lg-center mr-lg-2 text-success">
       <i class="fas fa-book fa-sm fa-fw text-success mr-1"></i>[*book/books]1%nn;

@@ -190,6 +190,7 @@
               %( Visibility button %)
               %if;(roglo=1)
                 <a class="dropdown-item"
+                  title="[*visibility-hlp]"
                   href="%prefix;m=H&v=visibility" title="[*visibility]">
                   %if;is_private;
                     <i class="fa fa-person fa-fw text-danger mr-2"></i>%nn;
@@ -299,7 +300,7 @@
               %end;
               <a class="dropdown-item"
                 href="%url;&related=reset"
-                title="[*reset related cache]">%nn;
+                title="[*reset related cache hlp]">%nn;
                 <i class="fa fa-wrench fa-fw mr-2"></i>%nn;
                 [*reset related cache]%nn;
               </a>
@@ -451,7 +452,8 @@
             <a id="load_once_rlm_builder" class="nav-link dropdown-toggle text-secondary%if;(e.m="R" or e.m="F" or (e.m="C" and e.t="AN")) active%end;" data-toggle="dropdown" role="button" href="#" aria-haspopup="true" aria-expanded="false" title="[*relationship]"><span class="fa fa-user-group"></span></a>
             <div class="dropdown-menu dropdown-menu-transl">
               %let;userid;%if;(user.key != "")%user.key;%else;%user.name;%end;%in;
-              <a class="dropdown-item" 
+              <a class="dropdown-item"
+                 title="[*path to me hlp]"
                  href="%prefix;&em=R;ei=%index;&m=NG;select=input;n=%user.key;&t=PN;spouse=on&long=on&et=S">
                  <i class="fa fa-arrows fa-fw mr-2"></i>[*path to me]</a>
               %if;(iswiz=1 and roglo=1)
