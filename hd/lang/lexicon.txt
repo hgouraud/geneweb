@@ -4209,17 +4209,22 @@ de: Karussell
 en: carrousel
 fr: carrousel
 
+    case
+de: de: Groß/Klein
+en: case
+fr: maj/min
+
+    case-hlp
+co: tene contu di e maiuscule è alette
+de: Beim Titel muss auf Groß- und Kleinschreibung geachtet werden
+en: dont ignore case and accents
+fr: tenir compte des majuscules et accents
+
     case sensitive
 co: maiuscule è alette
 de: Groß-/Kleinschreibung
 en: case sensitive
 fr: capitales et accents
-
-    case sensitive title
-co: tene contu di e maiuscule è alette
-de: Beim Titel muss auf Groß- und Kleinschreibung geachtet werden
-en: dont ignore case and accents
-fr: tenir compte des majuscules et accents
 
     celebrities
 bg: знаменити хора

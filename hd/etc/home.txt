@@ -89,21 +89,6 @@
               </div>
               <button class="btn btn-outline-primary mx-3 mx-md-0 mt-4 my-2 mt-md-0" type="submit" title="[*search/case sensitive]0"><i class="fa fa-magnifying-glass fa-lg mt-2 mt-md-0 mx-4 mx-md-2"></i> [*search/case sensitive]0</button>
             </div>
-            <div class="ml-4">
-              <span class="mr-4">[*options][:]</span>
-              <input title="[*all-hlp]"
-                   type="checkbox" name="all" id="all" value="on">
-              <label for="all" class="col-form-label col-sm-2">[*all]</label>
-              <input title="[*case-hlp]"
-                  type="checkbox" name="case" id="case" value="on">
-              <label for="case" class="col-form-label col-sm-2">[*case]</label>
-              <input title="[*order-hlp]"
-                  type="checkbox" name="order" id="order" value="on">
-              <label for="order" class="col-form-label col-sm-2">[*order]</label>
-              <input title="[*exact-hlp]"
-                  type="checkbox" name="exact" id="exact" value="on">
-              <label for="exact" class="col-form-label col-sm-2">[*exact]</label>
-            </div>
           </form>
         </div>
       </div>
