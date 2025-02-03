@@ -482,6 +482,12 @@ let init bname =
 let init_etc bname =
   if !init_done.status && bname = !init_done.bname then ()
   else init_done := { status = true; bname };
+  let fname = Filename.concat (!bpath bname) "caches" in
+  if not (Sys.file_exists fname) then
+  try Unix.mkdir fname 0o755
+    with Unix.Unix_error (_, _, _) -> 
+      !syslog `LOG_WARNING
+        (Printf.sprintf "Error when creating %s" fname);
   if !reorg then (
     (if not (Sys.file_exists (!bpath bname)) then
      try
