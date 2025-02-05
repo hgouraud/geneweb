@@ -146,30 +146,17 @@
           %( WIZARD | MOD_IND button %)
           %( pour Roglo, aller sur base Wizard! pb authentification %)
           %if;(iswiz=1)
-            %if;(roglo=1)
-              <li class="nav-item">
-                %if;(b.name = "wizard")
-                    <a class="nav-link %if;(e.m="MOD_IND" or e.m="MOD_IND_OK")active%end;"
-                     href="%if;(b.http_mode="https" and cgi)%b.commd;?b=wizard;w=%user.passwd;&%else;%prefix;%end;%nn;
-                     &m=MOD_IND;i=%index;"
-                     title="Modify person">
-                     <span class="fa fa-user-pen fa-fw %sexcolor;" aria-hidden="true"></span>%nn;
-                     <span class="sr-only">[*modify::person/persons]0 (P)</span></a>
-                %else;
-                  <a class="nav-link %if;(e.m="MOD_IND" or e.m="MOD_IND_OK")active%end;"
-                     href="%if;(b.http_mode="https" and cgi)%b.commd;?b=wizard;w=%user.passwd;&%else;%b.Base_Wiz;_w?%end;%nn;
-                     &lang=%e.lang;&%if;(evar.templ!="")templ=%evar.templ;%end;
-                     &m=MOD_IND&i=%index;&o=%occ;"
-                     title="Modify person on wizard base">
-                     <span class="fa fa-user-pen fa-fw %sexcolor;" aria-hidden="true"></span>%nn;
-                     <span class="sr-only">[*modify::person/persons]0 on wizard base(P)</span></a>
-                %end;
-              </li>
-            %end;
             <li class="nav-item">
+            %if;(roglo=1 and b.name = "wizard")
+                  <a class="nav-link %if;(e.m="MOD_IND" or e.m="MOD_IND_OK")active%end;"
+                   href="%prefix;m=MOD_IND;i=%index;" title="Modify person">
+                   <span class="fa fa-user-pen fa-fw %sexcolor;" aria-hidden="true"></span>%nn;
+                   <span class="sr-only">[*modify::person/persons]0 (P)</span></a>
+            %else;
               <a class="nav-link %if;(e.m="MOD_IND" or e.m="MOD_IND_OK")active%end;" id="mod_ind" href="%prefix;m=MOD_IND&i=%index;" %laP;>%nn;
                 <span class="fa fa-user-pen fa-fw %sexcolor;" aria-hidden="true"></span>%nn;
                 <span class="sr-only">[*modify::person/persons]0 (P)</span></a>
+            %end;
             </li>
           %end;
           %( IND dropdown menu %)
@@ -194,6 +181,12 @@
                     <i class="fa fa-person fa-fw text-muted mr-2"></i>%nn;
                   %end;
                   [*visibility]
+                </a>
+                <a class="dropdown-item"
+                  title="[*family mode hlp]"
+                  href="%if;(e.familymode="on")%url_set.familymode;%else;%url;&familymode=on%end;">
+                  <span class="fa fa-people-group mr-1"></span>
+                  [*family mode]
                 </a>
               %end;
               %( SOSA_REF / CGL buttons %)
