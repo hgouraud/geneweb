@@ -38,7 +38,7 @@
       <script src="%etc_prefix;js/select2-maximize-height.min.js?version=1.0.4"></script>
     %end;
     %if;(e.m="MOD_DATA" and e.s="")
-      <script src="%etc_prefix;js/regex.js?version=4.4.0"></script>
+      <script src="%etc_prefix;js/regex.min.js?version=4.4.0"></script>
     %end;
   %end;
   %if;(e.m="A" and e.t="T" and e.t1="CT")
@@ -517,9 +517,10 @@ function setupModalAutofocus() {
 %if;(e.m!="MOD_DATA")
 // Floating placeholders for all textual inputs
 function setupFloatingPlaceholders() {
-  const inputs = document.querySelectorAll('input[type="text"][placeholder], input[type="search"][placeholder]');
+  const inputs = document.querySelectorAll('input[type="text"][placeholder], input[type="search"][placeholder], textarea[placeholder]');
   
   inputs.forEach(input => {
+    if (input.placeholder.trim() === '') return; // Ignore placeholders that are only non-breaking spaces
     const hadFocus = document.activeElement === input;
     
     const wrapper = document.createElement('div');
@@ -544,6 +545,7 @@ function setupFloatingPlaceholders() {
   });
 }
 %end;
+%if;(e.templ="")
 %if;(e.m="NOTES" or e.m="WIZNOTES")
 // TOC toggle for NOTES and WIZNOTES
 function setupTocToggle() {
@@ -772,3 +774,4 @@ document.addEventListener('DOMContentLoaded', () => {
 %end;
 });
 </script>
+%end;
