@@ -48,14 +48,6 @@ let l =
 (*
     TODO tests suppressed pending fix in wiki.ml fir wiki_syntax
     following Keryan's modification for automatic pnoc update
-    ( [
-        WLnone (1, "[");
-        WLperson (12, ("aaa", "bbb", 0), None, None);
-        WLnone (14, ", ");
-        WLperson (25, ("ccc", "ddd", 0), Some "Ccc Ddd", None);
-        WLnone (50, ", http://site.com/eee#fff");
-      ],
-      "[[[aaa/bbb]], [[ccc/ddd/Ccc Ddd]], http://site.com/eee#fff" );
     ([ WLnone (7, "[[[aaa/") ], "[[[aaa/");
     ([ WLnone (4, "[[[w") ], "[[[w");
     *)
