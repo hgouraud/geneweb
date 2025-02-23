@@ -33,6 +33,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="nav nav-tabs">
           %( P_MOD SELECT dropdown menu %)
+          %if;(roglo and user.ident in b.superwizard)
           <li class="nav-item dropdown">
             <a id="load_once_p_mod" class="nav-link dropdown-toggle text-secondary dropdown-toggle-split" data-toggle="dropdown"
               href="#" role="button" aria-haspopup="true" aria-expanded="false" title="[*module]1">%nn;
@@ -100,6 +101,7 @@
               </div>
             </div>
           </li>
+          %end;
           %( SOSA NAV sosa_prev/sosa_next < > buttons  %)
           %if;has_sosa;
             %if;(sosa_prev.index!="")
