@@ -4167,6 +4167,7 @@ and simple_person_text conf base p p_auth : Adef.safe_string =
   else gen_person_text conf base p
 
 and string_of_died conf p p_auth =
+  let roglo = List.assoc_opt "roglo" conf.base_env = Some "yes" in
   Adef.safe
   @@
   if p_auth then
@@ -4174,13 +4175,15 @@ and string_of_died conf p p_auth =
     match get_death p with
     | Death (dr, _) -> (
         match dr with
-        | Unspecified -> transl_nth conf "died" is
+        | Unspecified -> transl_nth conf (if roglo then "died-r" else "died") is
         | Murdered -> transl_nth conf "murdered" is
         | Killed -> transl_nth conf "killed (in action)" is
         | Executed -> transl_nth conf "executed (legally killed)" is
         | Disappeared -> transl_nth conf "disappeared" is)
-    | DeadYoung -> transl_nth conf "died young" is
-    | DeadDontKnowWhen -> transl_nth conf "died" is
+    | DeadYoung ->
+        transl_nth conf (if roglo then "died-r young" else "died young") is
+    | DeadDontKnowWhen ->
+        transl_nth conf (if roglo then "died-r" else "died") is
     | NotDead | DontKnowIfDead | OfCourseDead -> ""
   else ""
 

@@ -7084,6 +7084,39 @@ sl: opis
 sv: beskrivning
 tr: açıklama
 
+    died-r
+af: oorlede
+ar: توفي
+bg: починал/починала/починал(а)
+br: marvet
+ca: mort/morta/mort(a)
+co: mortu/morta/mortu(a)/morti
+cs: zemřel/zemřela/zemřeli
+da: død
+de: verstorben
+en: died/died/died/dead·s
+eo: mortinta
+es: fallecido/fallecida/fallecido(a)
+et: surnud
+fi: kuollut
+fr: décédé/décédée/décédé(e)/décédé·s
+he:   נפטר/ נפטרה
+is: dó
+it: deceduto/deceduta/deceduto(a)
+lt: mirė
+lv: miršanas
+nl: overleden
+no: død
+oc: mòrt/mòrta/mòrt(a)
+pl: zmarł/zmarła/zgon
+pt: falecido/falecida/falecido(a)
+ro: a decedat
+ru: умер/умерла
+sk: zomrel/zomrela
+sl: umrl/umrla
+sv: död
+tr: ölü
+zh: 死
 
     died
 af: oorlede
@@ -7134,6 +7167,38 @@ pt: faleceu com uma idade avançada
 ru: умер в пожилом возрасте/умерла в пожилом возрасте/умер(ла) в пожилом возрасте
 sv: dog vid en hög ålder
 tr: yaşlılıkta ölen
+
+    died-r young
+af: jonk oorlede
+bg: починал млад/починала млада/починал(а) млад(а)
+br: marvet ent-yaouank
+ca: mort jove/morta jove/mort(a) jove
+co: mortu ghjovanu/morta ghjovana/mortu(a) ghjovanu(a)
+cs: zemřel mladý/zemřela mladá/zemřeli mladí
+da: død som ung
+de: jung gestorben
+en: dead as an infant
+eo: june mortinta
+es: muerto joven/muerta joven/muerto(a) joven
+et: suri noorelt
+fi: kuollut nuorena
+fr: décédé jeune/décédée jeune/décédé(e) jeune
+he:    נפטר בגיל צעיר/ נפטרה בגיל צעיר
+is: dó ung(ur)
+it: morto giovane
+lt: mirė jaunas
+lv: miris jauns
+nl: jong gestorven
+no: død ung
+oc: mòrt jove/mòrta jova/mòrt(a) jove(a)
+pl: zmarł młodo/zmarła młodo/zm.młodo
+pt: morreu jovem
+ro: a decedat tinar
+ru: умер во младенчестве/умерла во младенчестве/умер(ла) во младенчестве
+sk: zomrel mladý/zomrela mladá
+sl: umrl mlad/umrla mlada/umrl(a) mlad(a)
+sv: dog ung
+tr: bebeklikte ölen
 
     died young
 af: jonk oorlede
