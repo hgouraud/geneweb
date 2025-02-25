@@ -294,13 +294,15 @@ let is_related conf base p =
             Gwdb.get_access (Gwdb.poi base ip) = SemiPublic
             && List.mem (Gwdb.get_iper p) family
         | _ -> false)
-    | _ -> (
-        try
-          Sys.remove fname;
-          false
-        with Sys_error _ ->
-          Printf.eprintf "Error when removing %s\n" fname;
-          false)
+    | _ ->
+        if Sys.file_exists fname then (
+          try
+            Sys.remove fname;
+            false
+          with Sys_error _ ->
+            Printf.eprintf "Error when removing %s\n" fname;
+            false)
+        else false
   else false
 
 (** Calcul les droits de visualisation d'une personne en
