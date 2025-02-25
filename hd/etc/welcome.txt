@@ -431,17 +431,24 @@ fr: Mon compte associatif
     <div class="h4 text-md-center">
       <i class="fas fa-book fa-sm fa-fw text-success mr-1"></i>[*book/books]1%nn;
     </div>
-    <div class="d-flex flex-wrap justify-content-md-center">
-      %apply;book_button("fn","first name/first names","child")
-      %apply;book_button("sn","surname/surnames","signature")
-      %apply;book_button("pubn","public name/public names","pen")
-      %apply;book_button("qual","qualifier/qualifiers","comment")
-      %apply;book_button("alias","alias/aliases","mask")
-      %apply;book_button("occu","occupation/occupations","user-doctor")
-      %apply;book_button("place","place/places","map-location-dot")
-      %apply;book_button("src","source/sources","box-archive")
-      %apply;book_button("title","title/titles","crown")
-      %apply;book_button("domain","domain/domains","chess-rook")
+    <div class="d-flex flex-column">
+      <div class="d-inline-flex justify-content-lg-center">
+        %apply;book_button("fn","first name/first names","child")
+        %apply;book_button("sn","surname/surnames","signature")
+        %apply;book_button("pubn","public name/public names","pen")
+        %apply;book_button("qual","qualifier/qualifiers","comment")
+        %apply;book_button("alias","alias/aliases","mask")
+      </div>
+      <div class="d-inline-flex justify-content-lg-center mt-2">
+        %apply;book_button("occu","occupation/occupations","user-doctor")
+        %apply;book_button("place","place/places","map-location-dot")
+        %apply;book_button("src","source/sources","box-archive")
+        %apply;book_button("title","title/titles","crown")
+        %apply;book_button("domain","domain/domains","chess-rook")
+        <a href="%prefix;m=CHK_DATA" class="btn btn-outline-success ml-2"
+          title="[*data typographic checker]"><i class="fas fa-spell-check"></i>
+        </a>
+      </div>
     </div>
   </div>
 %end;
