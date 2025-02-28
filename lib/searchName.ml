@@ -127,39 +127,47 @@ type search_type =
 
 let search_for_multiple_fn conf base fn pl =
   let test label = p_getenv conf.env label = Some "on" in
-  let exact = test "exact" in
-  let case = test "case" in
-  let order = test "order" in
-  let all = test "all" in
-  let is_same_or_substr x xx = if exact then x = xx else Mutil.contains xx x in
+  let exact = test "p_exact" in
+  let case = test "p_case" in
+  let order = test "p_order" in
+  let all = test "p_all" in
+
+  (* Check if l1 is a contiguous sublist of l2 *)
   let is_sublist l1 l2 =
-    let rec check_from_pos l1 l2_remaining =
-      match (l1, l2_remaining) with
-      | [], _ -> true (* Empty list is a sublist *)
-      | _, [] -> false (* Ran out of l2 before finding match *)
-      | h1 :: t1, h2 :: t2 ->
-          if is_same_or_substr h1 h2 then
-            (* First element matches *)
-            check_from_pos t1 t2
-          else false
+    let rec is_prefix l1 l2 =
+      match (l1, l2) with
+      | [], _ -> true (* Empty list is a prefix of any list *)
+      | _, [] -> false (* Non-empty list can't be a prefix of empty list *)
+      | h1 :: t1, h2 :: t2 -> h1 = h2 && is_prefix t1 t2
     in
-    let rec try_all_positions l1 = function
-      | [] -> false
-      | _ :: t2 as l2 -> check_from_pos l1 l2 || try_all_positions l1 t2
+    let rec find l1 l2 =
+      match l2 with [] -> false | _ :: t -> is_prefix l1 l2 || find l1 t
     in
-    match l1 with [] -> true | _ -> try_all_positions l1 l2
+    find l1 l2
   in
+
+  let is_equal_or_substr string sub =
+    if exact then string = sub else Mutil.contains string sub
+  in
+
   let ok fn_l fn1_l =
-    if all && order then is_sublist fn_l fn1_l
-    else if all then
-      List.for_all
-        (fun fn -> List.exists (fun fn1 -> is_same_or_substr fn fn1) fn1_l)
-        fn_l
-    else
-      List.exists
-        (fun fn -> List.exists (fun fn1 -> is_same_or_substr fn fn1) fn1_l)
-        fn_l
+    match (fn_l, all, order) with
+    | [], _, _ ->
+        true (* Empty list is always a sublist and all elements exist *)
+    | _, false, false when fn1_l <> [] ->
+        is_equal_or_substr (List.hd fn_l) (List.hd fn1_l)
+        (* Quick check for common case *)
+    | _, true, true -> is_sublist fn_l fn1_l (* ab does not match xaybz *)
+    | _, true, false ->
+        List.for_all
+          (fun fn -> List.exists (fun fn1 -> is_equal_or_substr fn1 fn) fn1_l)
+          fn_l
+    | _, false, _ ->
+        List.exists
+          (fun fn -> List.exists (fun fn1 -> is_equal_or_substr fn1 fn) fn1_l)
+          fn_l
   in
+
   let fn_l = cut_words fn in
   let fn_l = List.map (fun fn -> if case then fn else Name.lower fn) fn_l in
   List.fold_left
@@ -208,17 +216,20 @@ let search conf base an search_order specify unknown =
           | Some sn -> Name.lower sn
           | None -> ""
         in
+        let an = Name.lower an in
         let fn, sn =
           if fn = "" then
             (* we assume fn1 fn2 sn. For other cases, use fn, sn explicitely *)
             (* TODO check for particles and cut before particle *)
             (* see if    Name.abbrev (Name.lower sn)    is Ok *)
             (* or use split_normalize here? *)
-            match String.rindex_opt sn ' ' with
-            | Some i ->
-                ( String.sub sn 0 i,
-                  String.sub sn (i + 1) (String.length sn - i - 1) )
-            | _ -> ("", sn)
+            if sn = "" then
+              match String.rindex_opt an ' ' with
+              | Some i ->
+                  ( String.sub an 0 i,
+                    String.sub an (i + 1) (String.length an - i - 1) )
+              | _ -> ("", an)
+            else (fn, sn)
           else (fn, sn)
         in
         let conf =
@@ -308,22 +319,26 @@ let print conf base specify unknown =
     | Some s -> if s = "" then None else Some s
     | None -> None
   in
-  match (real_input "p", real_input "n") with
-  | Some fn, Some sn ->
+  match (real_input "pn", real_input "p", real_input "n") with
+  | None, Some fn, Some sn ->
       let order = [ Key; FullName ] in
       search conf base (fn ^ " " ^ sn) order specify unknown
-  | Some fn, None ->
+  | None, Some fn, None ->
       let fn =
         match String.rindex_opt fn '.' with
         | Some i -> String.sub fn 0 i
         | None -> fn
       in
       let order = [ FirstName ] in
+      Printf.eprintf "Fn: %s\n" fn;
+      flush stderr;
       search conf base fn order specify unknown
-  | None, Some sn ->
+  | Some pn, None, None ->
       let order =
         [ Sosa; Key; FullName; Surname; ApproxKey; PartialKey; DefaultSurname ]
       in
+      search conf base pn order specify unknown
+  | None, None, Some sn ->
+      let order = [ Surname; ApproxKey; DefaultSurname ] in
       search conf base sn order specify unknown
-  | None, None ->
-      Hutil.incorrect_request conf ~comment:"Missing first_name and surname"
+  | _ -> Hutil.incorrect_request conf ~comment:"Missing first_name and surname"
