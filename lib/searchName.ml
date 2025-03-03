@@ -330,14 +330,35 @@ let print conf base specify unknown =
         | None -> fn
       in
       let order = [ FirstName ] in
-      Printf.eprintf "Fn: %s\n" fn;
       flush stderr;
       search conf base fn order specify unknown
   | Some pn, None, None ->
       let order =
         [ Sosa; Key; FullName; Surname; ApproxKey; PartialKey; DefaultSurname ]
       in
-      search conf base pn order specify unknown
+      let i = try String.index pn '.'  with Not_found -> -1 in
+      if i = -1 then (
+        search conf base pn order specify unknown)
+      else (
+        let j = try String.index_from pn i ' '  with Not_found -> -1 in
+        if j <> -1 then (
+          let oc = String.sub pn (i + 1) (j - i - 1) in
+          if oc = "" then (
+            let env =
+              List.map (fun (k, v) ->
+                match k with
+                | "p" -> k, Adef.encoded (String.sub pn 0 i)
+                | "n" -> k, Adef.encoded (String.sub pn (j + 1) (String.length pn - j - 1))
+                | _ -> k, v ) conf.env
+            in
+            let conf = {(conf) with env = env} in
+            let order = [ Key; FullName ] in
+            search conf base
+              ((String.sub pn 0 i) ^ String.sub pn j (String.length pn - j))
+              order specify unknown)
+          else (
+            search conf base pn order specify unknown))
+        else search conf base pn order specify unknown)
   | None, None, Some sn ->
       let order = [ Surname; ApproxKey; DefaultSurname ] in
       search conf base sn order specify unknown
