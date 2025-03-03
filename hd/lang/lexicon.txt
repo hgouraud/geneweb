@@ -14295,6 +14295,10 @@ no: annen/annen/annen
 pt: outro/outra/outro
 sv: annat/annat/annat
 
+    other possibilities
+en: other possibilities
+fr: autres possibilités
+
     ou
 co: o
 de: oder

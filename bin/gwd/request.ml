@@ -63,10 +63,10 @@ let relation_print conf base p =
   in
   RelationDisplay.print conf base p p1
 
-let specify conf base n pl =
+let specify conf base n pl1 pl2 =
   let title _ = Output.printf conf "%s : %s" n (transl conf "specify") in
   let n = Name.crush_lower n in
-  let ptll =
+  let ptll pl =
     List.map
       (fun p ->
          let tl = ref [] in
@@ -104,23 +104,37 @@ let specify conf base n pl =
          p, !tl)
       pl
   in
+  let ptll1 = ptll pl1 in
+  let ptll2 = ptll pl2 in
 
   Hutil.header conf title;
   (* Si on est dans un calcul de parenté, on affiche *)
   (* l'aide sur la sélection d'un individu.          *)
   Util.print_tips_relationship conf;
   (* TODO set possible limit to number of persons displayed (ptll) *)
-  Output.print_sstring conf "<ul>\n";
   (* Construction de la table des sosa de la base *)
   let () = SosaCache.build_sosa_ht conf base in
+  Output.print_sstring conf "<ul>\n";
   List.iter
     (fun (p, _tl) ->
        Output.print_sstring conf "<li>\n";
        SosaCache.print_sosa conf base p true;
        Update.print_person_parents_and_spouses conf base p;
        Output.print_sstring conf "</li>\n"
-    ) ptll;
+    ) ptll1;
   Output.print_sstring conf "</ul>\n";
+  if ptll2 <> [] then (
+    Output.print_sstring conf (transl conf "other possibilities" |> Utf8.capitalize_fst);
+    Output.print_sstring conf "<ul>\n";
+    List.iter
+      (fun (p, _tl) ->
+         Output.print_sstring conf "<li>\n";
+         SosaCache.print_sosa conf base p true;
+         Update.print_person_parents_and_spouses conf base p;
+         Output.print_sstring conf "</li>\n"
+      ) ptll2;
+    Output.print_sstring conf "</ul>\n");
+
   Hutil.trailer conf
 
 let this_request_updates_database conf =
@@ -701,8 +715,8 @@ let treat_request =
                   || Gutil.person_of_string_key base n <> None
                   || person_is_std_key conf base p n
                   then person_selected_with_redirect conf base p
-                  else specify conf base n pl
-                | pl -> specify conf base n pl
+                  else specify conf base n pl []
+                | pl -> specify conf base n pl []
               in
               begin match real_input "v" with
                 | Some n -> search n

@@ -125,13 +125,7 @@ type search_type =
   | PartialKey
   | DefaultSurname
 
-let search_for_multiple_fn conf base fn pl =
-  let test label = p_getenv conf.env label = Some "on" in
-  let exact = test "p_exact" in
-  let case = test "p_case" in
-  let order = test "p_order" in
-  let all = test "p_all" in
-
+let search_for_multiple_fn conf base fn pl exact case order all all_only=
   (* Check if l1 is a contiguous sublist of l2 *)
   let is_sublist l1 l2 =
     let rec is_prefix l1 l2 =
@@ -151,21 +145,25 @@ let search_for_multiple_fn conf base fn pl =
   in
 
   let ok fn_l fn1_l =
-    match (fn_l, all, order) with
-    | [], _, _ ->
-        true (* Empty list is always a sublist and all elements exist *)
-    | _, false, false when fn1_l <> [] ->
-        is_equal_or_substr (List.hd fn_l) (List.hd fn1_l)
-        (* Quick check for common case *)
-    | _, true, true -> is_sublist fn_l fn1_l (* ab does not match xaybz *)
-    | _, true, false ->
-        List.for_all
-          (fun fn -> List.exists (fun fn1 -> is_equal_or_substr fn1 fn) fn1_l)
-          fn_l
-    | _, false, _ ->
-        List.exists
-          (fun fn -> List.exists (fun fn1 -> is_equal_or_substr fn1 fn) fn1_l)
-          fn_l
+    if all_only then
+      if case then fn_l = fn1_l
+      else (List.map Name.lower fn_l) = (List.map Name.lower fn1_l)
+    else
+      match (fn_l, all, order) with
+      | [], _, _ ->
+          true (* Empty list is always a sublist and all elements exist *)
+      | _, false, false when fn1_l <> [] ->
+          is_equal_or_substr (List.hd fn_l) (List.hd fn1_l)
+          (* Quick check for common case *)
+      | _, true, true -> is_sublist fn_l fn1_l (* ab does not match xaybz *)
+      | _, true, false ->
+          List.for_all
+            (fun fn -> List.exists (fun fn1 -> is_equal_or_substr fn1 fn) fn1_l)
+            fn_l
+      | _, false, _ ->
+          List.exists
+            (fun fn -> List.exists (fun fn1 -> is_equal_or_substr fn1 fn) fn1_l)
+            fn_l
   in
 
   let fn_l = cut_words fn in
@@ -180,6 +178,11 @@ let search_for_multiple_fn conf base fn pl =
     [] pl
 
 let search conf base an search_order specify unknown =
+  let test label = p_getenv conf.env label = Some "on" in
+  let exact = test "p_exact" in
+  let case = test "p_case" in
+  let order = test "p_order" in
+  let all = test "p_all" in
   let rec loop l =
     match l with
     | [] -> unknown conf an
@@ -244,13 +247,17 @@ let search conf base an search_order specify unknown =
             Perso.print conf base p
         | pl -> (
             (* check first_names or public_names in list of persons *)
-            let pl = search_for_multiple_fn conf base fn pl in
-            match pl with
+            let pl1 = search_for_multiple_fn conf base fn pl exact case order true true in
+            let pl2 = search_for_multiple_fn conf base fn pl exact case order all false in
+            let pl2 = List.fold_left
+                (fun acc p -> if List.mem p pl1 then acc else p :: acc) [] pl2
+            in
+            match pl1 with
             | [] -> loop l
             | [ p ] ->
                 record_visited conf (get_iper p);
                 Perso.print conf base p
-            | pl -> specify conf base an pl))
+            | pl1 -> specify conf base an pl1 pl2))
     | ApproxKey :: l -> (
         let pl = search_approx_key conf base an in
         match pl with
@@ -258,7 +265,7 @@ let search conf base an search_order specify unknown =
         | [ p ] ->
             record_visited conf (get_iper p);
             Perso.print conf base p
-        | pl -> specify conf base an pl)
+        | pl -> specify conf base an pl [])
     | PartialKey :: l -> (
         let pl = search_by_name conf base an in
         match pl with
@@ -285,17 +292,21 @@ let search conf base an search_order specify unknown =
                 record_visited conf (get_iper p);
                 Perso.print conf base p
             | pl -> (
-                let pl = search_for_multiple_fn conf base fn pl in
-                match pl with
+                let pl1 = search_for_multiple_fn conf base fn pl exact case order true true in
+                let pl2 = search_for_multiple_fn conf base fn pl exact case order all false in
+                let pl2 = List.fold_left
+                    (fun acc p -> if List.mem p pl1 then acc else p :: acc) [] pl2
+                in
+                match pl1 with
                 | [] -> loop l
                 | [ p ] ->
                     record_visited conf (get_iper p);
                     Perso.print conf base p
-                | pl -> specify conf base an pl))
+                | pl1 -> specify conf base an pl1 pl2))
         | [ p ] ->
             record_visited conf (get_iper p);
             Perso.print conf base p
-        | pl -> specify conf base an pl)
+        | pl -> specify conf base an pl [])
     | DefaultSurname :: _ -> Some.search_surname_print conf base unknown an
   in
   loop search_order
