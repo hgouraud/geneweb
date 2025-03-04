@@ -1,4 +1,4 @@
-<!-- $Id: upddata.txt %version; 24/06/2024 01:38:06 $ -->
+<!-- $Id: upddata.txt %version; 04/03/2025 20:41:08 $ -->
 <!-- Copyright (c) 2006-2007 INRIA -->
 <!DOCTYPE html>
 <html lang="%lang;" id="book">
@@ -25,14 +25,15 @@
   %if;(ini!="" and ini!=e.s)
     <a tabindex="%expr(5+z)" href="%prefix;m=MOD_DATA&data=%e.data;&s=%ini;"
       class="list-group-item list-group-item-action list-group-item-info w-auto sub-char d-flex align-items-center"
-      title="[*search/case sensitive]0 “%ini;”">%ini;</a>
+      title="[*search/case sensitive]0 “%ini;”" data-toggle="tooltip" data-placement="bottom">%ini;</a>
   %end;
 %end;
 <div class="container">
 %define;list_of(xx,yy,zz)
-  <div%if;("xx"!="fn" or e.data!="") class="mt-2"%end;>
+  <div%if;("xx"!="fn" or e.data!="") class="my-1"%end;>
     %if;(e.data!="xx")
-      <a href="%prefix;m=MOD_DATA&data=xx" class="sub-char" title="[*book of %s:::yy]">
+      <a href="%prefix;m=MOD_DATA&data=xx" class="sub-char pt-1 pr-1" title="[*book of %s:::yy]"
+        data-toggle="tooltip" data-placement="right">
     %end;
     %if;(e.data="")<div class="d-inline-flex align-self-center">%end;
     <i class="fa fa-zz fa-2x fa-fw %if;(e.data="xx")text-success%end;"></i>
@@ -60,21 +61,22 @@
   <a tabindex="4" class="sr-only sr-only-focusable" href="#main-content">[*skip to main content]</a>
   %let;len_s;%if;(e.s!="")%e.length.s;%else;0%end;%in;
   %let;nb_max;%if;(b.book_max_results!="" and b.book_max_results>0)%b.book_max_results;%else;1000%end;%in;
-  <nav class="navbar sticky-top justify-content-start py-1 mt-1 mb-0 px-1 mx-0" aria-labelledby="sub-caracter-selection-heading" id="fixed-nav">
+  <nav class="navbar bg-light sticky-top justify-content-start py-1 mt-1 mb-0 px-1 mx-0" aria-labelledby="sub-caracter-selection-heading" id="fixed-nav">
     <h2 id="sub-caracter-selection-heading" class="sr-only">
       %if;(e.s="")[*select a letter]%else;[*hierarchical navigation]%end;
     </h2>
     <div class="btn-group" role="toolbar" aria-label="sub-caracter-selection-heading" id="book-navigation">
       <div class="d-flex flex-column flex-sm-row list-group list-group-horizontal user-select-none font-weight-bold user-select-none ml-2">
-        <div class="d-inline-flex flex-wrap align-self-center mt-2 mt-sm-0 order-3 text-monospace">
+        <div%if;(e.s!="") id="book-sup-char-list"%end; class="d-inline-flex flex-wrap align-self-center mt-1 mt-sm-0 order-3 text-monospace">
           %if;(nb_results>=1)
             %reset_count;
             %foreach;entry;
               %if;(entry_ini!=e.s)
                 %incr_count;
-                <div class="list-group-item list-group-item-action list-group-item-info w-auto px-3 position-relative sup-char-div" tabindex="%expr(len_s+(2*cnt)+5)">
-                  <a class="stretched-link sup-char" href="%prefix;m=MOD_DATA&data=%e.data;&s=%html_encode.entry_ini;"
-                      title="[*search/case sensitive]0 “%entry_ini;”" >%entry_ini;</a>
+                <div class="list-group-item list-group-item-action list-group-item-info w-auto px-3 sup-char-div" tabindex="%expr(len_s+(2*cnt)+5)"
+                  title="[*search/case sensitive]0 “%entry_ini;”" data-toggle="tooltip" data-placement="bottom">
+                  <a class="stretched-link sup-char" href="%prefix;m=MOD_DATA&data=%e.data;&s=%uri_encode.entry_ini;" 
+                    >%escape.entry_ini;</a>
                     %if;(max>0 and nb_results<nb_max)%nn;
                       <span class="bottom-book-arrow">
                         <a href="#_%entry_ini;" title="%apply;subsection%with;“%entry_ini;”%end;"
@@ -93,13 +95,13 @@
             %if;(e.s="")%apply;other_books()%end;
             %if;(e.data!="" and e.s="")
               <div class="align-self-center text-center mx-3">
-                <h1 class="h3 mt-0 ">[*book/books]0</h1>
+                <h1 class="h3 mt-0">[*book/books]0</h1>
                 <h2 class="h4 mt-0 text-nowrap">%subtitle;</h2>
               </div>
             %end;
           </div>
           %if;(e.s!="")<a tabindex="5" role="button" class="btn-link border-0 align-self-center mt-1 mb-2 sub-char"
-            href="%prefix;m=MOD_DATA&data=%e.data;" title="[*back to index and books]">
+            href="%prefix;m=MOD_DATA&data=%e.data;" title="[*back to index and books]" data-toggle="tooltip" data-placement="bottom">
               <span class="fa-stack mb-1">
                 <i class="fa fa-a fa-stack-2x pr-3"></i>
                 <i class="fa-solid fa-z fa-2x fa-stack-1x text-success pt-2 pl-3"></i>
@@ -114,9 +116,9 @@
               %end;
               %(%foreach;substr.s;
                 <a class="d-flex flex-column flex-sm-row list-group-item list-group-item-action"
-                  href="%prefix;m=MOD_DATA&data=%e.data;&s=%substr;">%substr;</a>
+                  href="%prefix;m=MOD_DATA&data=%e.data;&s=%uri_encode.substr;">%escape.substr;</a>
               %end; not used because full print is too long when len_s increases, but the function is working %)
-              <div class="list-group-item list-group-item-success user-select-all%if;(len_s>1) ml-1%end;">%e.s;</div>
+              <div class="list-group-item list-group-item-success text-nowrap user-select-all%if;(len_s>1) ml-1%end;">%e.s;</div>
             %end;
           </div>
           <div class="d-flex flex-fill align-self-center order-2 d-xs-none">
@@ -148,21 +150,24 @@
           <label class="user-select-none mb-0 mb-sm-1 ml-1 ml-sm-3" for="search_s" title="[*search/case sensitive]0 (R)">[*search/case sensitive]0</label>
           <input type="search" accesskey="R" class="form-control ml-2 ml-sm-3" name="s" id="search_s">
         </div>
-        <button type="submit" class="btn btn-primary ml-2 align-self-end" title="[*validate/delete]0" aria-label="[*validate/delete]0 [search/case sensitive]0">Ok</button>
+        <button type="submit" class="btn btn-primary ml-2 align-self-end" title="[*search/case sensitive]0" aria-label="[*validate/delete]0 [search/case sensitive]0" data-toggle="tooltip" data-placement="right">OK</button>
       </form>
     </div>
+  %end;
+  %if;(e.data="place" and "[" in e.s or "]" in e.s)
+    <div class="alert alert-warning my-3">[*subplace help]</div>
   %end;
   %( liste des entrées et formulaire d'édition %)
   %if;(nb_results<nb_max)
     <ul class="list-group mt-1 mt-sm-2" id="main-content">
       %foreach;entry;
-        <li class="list-group-item list-group-action d-flex p-0 mt-1 align-items-center border-0"  id="_%entry_ini;">
-          <div class="d-flex align-items-center justify-content-center position-relative top-book-arrow w-10 h-100 border-0 justify-content-center">
-            <a role="button" class="stretched-link w-100 mx-3" href="#top" title="[*return to top]" tabindex="-1" title="^"><i class="fa-solid fa-sort-up ml-sm-1 mt-1"></i></a>%nn;
+        <li class="list-group-item-info list-group-action d-flex p-0 mt-1 align-items-center border-0" id="_%entry_ini;">
+          <div class="d-flex align-items-center justify-content-center position-relative top-book-arrow w-10 h-100 border border-bottom-0 border-top-0 border-left-0 border-light">
+            <a role="button" class="stretched-link w-100 mx-3" href="#top" title="[*return to top]" data-toggle="tooltip" data-placement="top" tabindex="-1"><i class="fa-solid fa-sort-up ml-sm-1 mt-1"></i></a>%nn;
           </div>
           <div class="list-group-item-%if;(entry_ini=e.s)success%else;info%end; position-relative w-100 border font-weight-bold text-monospace">
             %if;(entry_ini!=e.s)
-            <a class="stretched-link ml-3" href="%prefix;m=MOD_DATA&data=%e.data;&s=%html_encode.entry_ini;" title="[*search/case sensitive]0 “%entry_ini;”">%else;<span class="ml-3">%end;%entry_ini;%nn;
+            <a class="stretched-link ml-3" href="%prefix;m=MOD_DATA&data=%e.data;&s=%uri_encode.entry_ini;" title="[*search/case sensitive]0 “%entry_ini;”">%else;<span class="ml-3">%end;%escape.entry_ini;%nn;
             %if;(entry_ini!=e.s)</a>%else;</span>%end;
           </div>
         </li>
@@ -172,20 +177,19 @@
               <li class="list-unstyled ml-sm-1 pl-0" id="k%entry_key;">
                 <div class="d-flex%if;(is_modified) my-2 my-sm-0%end; mx-2">
                   %if;(e.data!="src")
-                    %(TODO: Fix URL encoding for escape.printable.suburb/other ! %)
                     <div class="d-flex flex-column justify-content-center">
                       <a href="https://www.wikidata.org/w/index.php?search=%nn;
-                        %if;(e.data!="place")%encode.escape.entry_value;%nn;
+                        %if;(e.data!="place")%uri_encode.entry_value;%nn;
                         %else;
-                          %if;(not first and suburb!="")%encode.escape.printable.suburb;%else;%encode.other;%end;
+                          %if;(not first and suburb!="")(uri_encode.printable.suburb;%else;%uri_encode.other;%end;
                         %end;"
                         role="button" class="btn btn-link p-0 ml-1"
                         title="%apply;wikidata%with;%if;(e.data!="place")%escape.entry_value;%else;%if;(not first and suburb!="")%escape.printable.suburb;%else;%escape.printable.other;%end;%end;%end;"
                         target="_blank" rel="noreferrer, noopener" tabindex="-1">
                         <i class="fab fa-wikipedia-w fa-sm"></i>
-                      </a>%if;(suburb!="")</span>%end;
+                      </a>
                       %if;(first and suburb!="")
-                        <a href="https://www.wikidata.org/w/index.php?search=%encode.escape.printable.suburb;"
+                        <a href="https://www.wikidata.org/w/index.php?search=%uri_encode.printable.suburb;"
                           role="button" class="btn btn-link p-0 ml-1"
                           title="%apply;wikidata(escape.printable.suburb)"
                           target="_blank" rel="noreferrer, noopener" tabindex="-1">
@@ -206,10 +210,10 @@
                   <div class="d-flex d-sm-inline-flex flex-column flex-sm-row px-2 px-sm-1%if;(e.data!="place" and e.data!="src") ml-3%end;">
                     <div class="flex-column flex-sm-row ml-sm-2%if;is_modified; my-2%end;">
                       %if;is_modified;
-                        <div class="pl-2 pr-sm-2 text-muted">
+                        <div class="pl-2 pr-sm-2 text-muted book-input-text">
                       %else;
-                        <a role="button" class="ml-1"
-                           href="%prefix;m=MOD_DATA&data=%e.data;&key=%entry_key;&s=%encode.e.s;" data-entry="%escape.printable.entry_value_unsort;">%if;(e.data="src")<i class="fa fa-pen-to-square mr-2"></i></a>%end;
+                        <a role="button" class="ml-1" title="[*modify]" data-toggle="tooltip" data-placement="bottom"
+                           href="%prefix;m=MOD_DATA&data=%e.data;&key=%entry_key;&s=%uri_encode.e.s;" data-entry="%escape.printable.entry_value_unsort;">%if;(e.data="src")<i class="fa fa-pen-to-square mr-2"></i></a>%end;
                       %end;
                       %if;(e.data="place" and suburb!="")
                         %if;is_modified;%escape.entry_value;
@@ -223,12 +227,13 @@
                           %end;
                         %end;
                       %else;
+                        %( escape both ? %)
                         %if;(e.data!="src")%escape.entry_value;%else;%entry_value;
                         %if;(e.key!="" and is_modified and entry_value!=escape.entry_value)<hr class="my-0">%escape.entry_value;%end;%end;
                       %end;
                       %if;is_modified;</div>%else;%if;(e.data!="src")</a>%end;%end;
                       %if;is_modified;
-                        <form class="mt-1 needs-validation" method="post" action="%action;" novalidate>
+                        <form class="needs-validation mt-1" method="post" action="%action;" novalidate>
                           %hidden;
                           <input type="hidden" name="key" value="%entry_key;">
                           <input type="hidden" name="m" value="MOD_DATA_OK">
@@ -271,7 +276,7 @@
                           </div>
                           <div class="valid-feedback">must be different!</div>
                         </div>
-                        <button type="submit" class="btn btn-primary ml-3 my-sm-2" title="[*modify]">OK</button>
+                        <button type="submit" class="btn btn-primary ml-3 my-sm-2" title="[*validate/delete]0" data-toggle="tooltip" data-placement="bottom">OK</button>
                       </form>
                       </div>
                     %end;
@@ -293,61 +298,65 @@
 </div>
 %include;js
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var navbarHeight = document.getElementById('fixed-nav').offsetHeight;
-    var scrollPaddingTop = navbarHeight + 4;
-    document.getElementById('book').style.scrollPaddingTop = scrollPaddingTop + 'px';
-    
-    const linkTrm = document.querySelectorAll('.sub-char');
-    const linkAdd = document.querySelectorAll('.sup-char');
-    let iTrm = -1;
-    let iAdd = -1;
-    document.addEventListener('keydown', (event) => {
-      if (event.altKey && event.key === 't' || event.key === 't' && !['input', 'textarea'].includes(event.target.tagName.toLowerCase())) {
-        event.preventDefault();
-        let len = linkTrm.length;
-        if (iTrm === -1) {
-          iTrm = len - 1;
-          linkTrm[iTrm].focus();
-        } else {
+// Function for navigation and keyboard shortcuts
+function setupNavigation() {
+  var navbarHeight = document.getElementById('fixed-nav').offsetHeight;
+  var scrollPaddingTop = navbarHeight + 4;
+  document.getElementById('book').style.scrollPaddingTop = scrollPaddingTop + 'px';
+  
+  const linkTrm = document.querySelectorAll('.sub-char');
+  const linkAdd = document.querySelectorAll('.sup-char');
+  let iTrm = -1;
+  let iAdd = -1;
+  
+  document.addEventListener('keydown', (event) => {
+    if (event.altKey && event.key === 't' || event.key === 't' && !['input', 'textarea'].includes(event.target.tagName.toLowerCase())) {
+      event.preventDefault();
+      let len = linkTrm.length;
+      if (iTrm === -1) {
+        iTrm = len - 1;
+        linkTrm[iTrm].focus();
+      } else {
         linkTrm[iTrm].blur();
         iTrm = (iTrm + len - 1) % len;
         linkTrm[iTrm].focus();
+      }
+    }
+    if (event.altKey && event.key === 'd' || event.key === 'd' && !['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
+      event.preventDefault();
+      if (iAdd === -1) {
+        iAdd = 0;
+        linkAdd[iAdd].parentNode.focus();
+      } else {
+        linkAdd[iAdd].parentNode.blur();
+        iAdd = (iAdd + 1) % linkAdd.length;
+        linkAdd[iAdd].parentNode.focus();
+      }
+    }
+  });
+  
+  document.querySelectorAll('.sup-char-div').forEach((div) => {
+    div.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        const hyperlink = div.querySelector('a:first-child');
+        if (hyperlink) {
+          hyperlink.click();
         }
       }
-      if (event.altKey && event.key === 'd' || event.key === 'd' && !['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
-        event.preventDefault();
-        if (iAdd === -1) {
-          iAdd = 0;
-          linkAdd[iAdd].parentNode.focus();
-        } else {
-          linkAdd[iAdd].parentNode.blur();
-          iAdd = (iAdd + 1) % linkAdd.length;
-          linkAdd[iAdd].parentNode.focus();
-        }
-      }
-    });
-    document.querySelectorAll('.sup-char-div').forEach((div) => {
-      div.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-          const hyperlink = div.querySelector('a:first-child');
-          if (hyperlink) {
-            hyperlink.click();
-          }
-        }
-      });
     });
   });
+}
 
-// Removing overlay when “key̛” parameter is present
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('key') || (!urlParams.has('s1'))) {
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay) { overlay.style.display = 'none'; }
-    }
-});
+// Function to remove loading overlay
+function removeLoadingOverlay() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('key') || (!urlParams.has('s1'))) {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) { overlay.style.display = 'none'; }
+  }
+}
 
+// Function to auto-select link based on URL parameters
 function autoSelectLink() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('key') || (!urlParams.has('s1') && !urlParams.has('s2'))) return;
@@ -364,6 +373,7 @@ function autoSelectLink() {
     }
 }
 
+// Function to update input field
 function updateInputField() {
     const s2 = localStorage.getItem('s2Tmp');
     if (s2 && window.location.href.includes('key=')) {
@@ -374,13 +384,43 @@ function updateInputField() {
         }
     }
 }
-
-window.addEventListener('load', autoSelectLink);
-window.addEventListener('DOMContentLoaded', updateInputField);
-</script>
-%if;(e.s="")
-<script>
-// Highlight greek and cyrillic initials to avoid confusion with similar latin letters
+%if;(e.s!="")
+// Function to shorten the text in sup-char elements
+function shortenSupCharTexts() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const sParam = urlParams.get('s');
+  
+  if (!sParam) return;
+  
+  const supCharLinks = document.querySelectorAll('.sup-char');
+  const entryCount = supCharLinks.length;
+  
+  if (sParam.length > 6 && entryCount > 4 || sParam.length > 4 && entryCount > 10) {
+    const supCharLinks = document.querySelectorAll('.sup-char');
+    
+    supCharLinks.forEach(link => {
+      const fullText = link.textContent.trim();
+      
+      if (fullText.startsWith(sParam)) {
+        const suffix = fullText.substring(sParam.length);
+        
+        if (suffix) {
+          const secondLastLetter = sParam.charAt(sParam.length - 2);
+          const lastLetter = sParam.charAt(sParam.length - 1);
+          link.textContent = '…' + secondLastLetter + lastLetter + suffix;
+          
+          if (link.title) {
+            link.title = link.title + ' (' + fullText + ')';
+          } else {
+            link.title = fullText;
+          }
+        }
+      }
+    });
+  }
+}
+%else;
+// Function to highlight non-Latin characters
 const {regex} = Regex;
 const scripts = ['Arabic', 'Armenian', 'Cyrillic', 'Ethiopic', 'Georgian', 'Greek', 'Hebrew', 'Khmer'];
 
@@ -402,8 +442,29 @@ function highlightNonLatinChars() {
     });
   });
 }
-document.addEventListener('DOMContentLoaded', highlightNonLatinChars);
-</script>
 %end;
+function setupStableTooltips() {
+  // Configure tooltips with more stability options
+  $('[data-toggle="tooltip"]').tooltip({
+    trigger: 'hover focus',
+    delay: { "show": 100, "hide": 100 },
+    container: 'body', // This is important - moves tooltips to body
+    animation: false,  // Disable animations
+    boundary: 'window' // Uses window as positioning boundary
+  });
+}
+document.addEventListener('DOMContentLoaded', function() {
+  setupNavigation();
+  setupStableTooltips()
+  %if;(e.s!="")
+    shortenSupCharTexts();
+  %else;
+    highlightNonLatinChars();
+  %end;
+  removeLoadingOverlay();
+  autoSelectLink();
+  updateInputField();
+});
+</script>
 </body>
 </html>

@@ -241,13 +241,16 @@ and eval_simple_var conf base env xx = function
         in
         loop 0 "" p_list
       in
-      let tail =
+      let title =
         Printf.sprintf
-          "\" title=\"%s\">%d<i class=\"fa fa-user fa-xs ml-1\"></i></a>"
+          "\" title=\"%s\" data-toggle=\"tooltip\" data-placement=\"top\">%d"
           (Utf8.capitalize (transl conf "list of linked persons"))
           (List.length p_list)
       in
-      head ^ body ^ tail |> str_val
+      let tail =
+        Printf.sprintf "<i class=\"fa fa-user fa-xs ml-1\"></i></a>"
+      in
+      head ^ body ^ title ^tail |> str_val
   | [ s ] -> (
       try bool_val (eval_simple_bool_var conf base env xx s)
       with Not_found -> str_val (eval_simple_str_var conf base env xx s))
@@ -357,11 +360,16 @@ and eval_compound_var conf base env xx sl =
         | None -> "")
     | [ "evar"; s ] | [ "e"; s ] ->
         Option.value ~default:"" (p_getenv conf.env s)
-    | "encode" :: sl -> (Mutil.encode (loop sl) :> string) (* FIXME? *)
+    | "encode" :: sl ->
+        let encoded = Mutil.encode (loop sl) in
+        (encoded :> string)
     | ("escape" | "html_encode") :: sl ->
-        (Util.escape_html (loop sl) :> string) (* FIXME? *)
-    | [ "uri_encode"; s ] -> Util.uri_encode s
-    | "safe" :: sl -> (Util.safe_html (loop sl) :> string) (* FIXME? *)
+        let escaped = Util.escape_html (loop sl) in
+        (escaped :> string)
+    | "uri_encode" :: sl -> Util.uri_encode (loop sl)
+    | "safe" :: sl ->
+        let safe = Util.safe_html (loop sl) in
+        (safe :> string)
     | [ "subs"; n; s ] -> (
         match int_of_string_opt n with
         | Some n ->
