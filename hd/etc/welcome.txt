@@ -229,10 +229,10 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
               <input type="search" id="fullname" class="form-control form-control-lg py-0 border border-top-0" autofocus tabindex="1"
                 name="pn" placeholder="[*search/case sensitive]0 [person/persons]0, [surname/surnames]0, [public name], [alias]%if;browsing_with_sosa_ref;, [n° Sosa]%end; [or] [key]0"
                  data-toggle="tooltip" data-placement="top" data-html="true"
-                 title="[person/persons]0[:] [first name/first names]2 [surname/surnames]0 ¹,<br>
+                 title="<p class='text-left'>[person/persons]0[:] [first name/first names]2/[surname/surnames]0 ¹/[occ]1 ²,<br>
                         [surname/surnames]0 ¹, [public name], [alias],<br>
-                        [key]0[:] [first name/first names]2.[occ]1 [surname/surnames]0 ²<br><br>
-                        ¹ [word/words]0<br>² [word/words]1%nn;
+                        [key]0[:] [first name/first names]2.[occ]1 ³ [surname/surnames]0 ¹<br><br>
+                        ¹ [word/words]1<br>² [optionnal]1<br>³ [mandatory]1%nn;
                         %if;browsing_with_sosa_ref;<br><br>[*n° Sosa][:] %apply;a_of_b%with;[ancestor]%and;%sosa_ref;%end; [number]%end;">
             </div>
 

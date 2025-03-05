@@ -271,14 +271,18 @@ let search conf base an search_order specify unknown =
             in
             (* find bearers of surname *)
             let pl3 =
-              if List.assoc_opt "public_name_as_fn" conf.base_env = Some "yes" then
-                Some.search_surname conf base sn
+              if List.assoc_opt "public_name_as_fn" conf.base_env = Some "yes"
+              then Some.search_surname conf base sn
               else []
             in
-            let pl3 = List.fold_left (fun acc ip ->
-              Array.fold_left (fun acc ifam -> (get_spouse ip ifam) :: acc
-                ) acc (get_family (poi base ip))
-              ) [] pl3
+            let pl3 =
+              List.fold_left
+                (fun acc ip ->
+                  Array.fold_left
+                    (fun acc ifam -> get_spouse ip ifam :: acc)
+                    acc
+                    (get_family (poi base ip)))
+                [] pl3
             in
             let pl3 =
               search_for_multiple_fn conf base fn pl3 exact case order all false
