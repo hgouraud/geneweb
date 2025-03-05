@@ -264,12 +264,31 @@ let search conf base an search_order specify unknown =
                 (fun acc p -> if List.mem p pl1 then acc else p :: acc)
                 [] pl2
             in
+            let get_spouse iper ifam =
+              let f = foi base ifam in
+              if iper = get_father f then poi base (get_mother f)
+              else poi base (get_father f)
+            in
+            (* find bearers of surname *)
+            let pl3 =
+              if List.assoc_opt "public_name_as_fn" conf.base_env = Some "yes" then
+                Some.search_surname conf base sn
+              else []
+            in
+            let pl3 = List.fold_left (fun acc ip ->
+              Array.fold_left (fun acc ifam -> (get_spouse ip ifam) :: acc
+                ) acc (get_family (poi base ip))
+              ) [] pl3
+            in
+            let pl3 =
+              search_for_multiple_fn conf base fn pl3 exact case order all false
+            in
             match pl1 with
             | [] -> loop l
-            | [ p ] ->
+            | [ p ] when List.length pl2 = 0 ->
                 record_visited conf (get_iper p);
                 Perso.print conf base p
-            | pl1 -> specify conf base an pl1 pl2))
+            | pl1 -> specify conf base an pl1 (pl2 @ pl3)))
     | ApproxKey :: l -> (
         let pl = search_approx_key conf base an in
         match pl with
