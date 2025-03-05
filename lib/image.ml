@@ -252,10 +252,10 @@ let get_old_portrait conf base p =
   else None
 
 let rename_portrait conf base p (nfn, nsn, noc) =
+  let new_s = default_portrait_filename_of_key nfn nsn noc in
+  let old_s = default_portrait_filename base p in
   match get_portrait conf base p with
   | Some (`Path old_f) -> (
-      let new_s = default_portrait_filename_of_key nfn nsn noc in
-      let old_s = default_portrait_filename base p in
       let f = Filename.concat (portrait_folder conf) new_s in
       let old_ext = Filename.extension old_f in
       let new_f = f ^ old_ext in
@@ -277,22 +277,23 @@ let rename_portrait conf base p (nfn, nsn, noc) =
          !GWPARAM.syslog `LOG_ERR
            (Format.sprintf
               "Error renaming old portrait: old_path=%s new_path=%s : %s" old_f
-              new_f e));
-      let new_s_f =
-        String.concat Filename.dir_sep [ carrousel_folder conf; new_s ]
-      in
-      let old_s_f =
-        String.concat Filename.dir_sep [ carrousel_folder conf; old_s ]
-      in
-      if Sys.file_exists old_s_f then
-        try Sys.rename old_s_f new_s_f
-        with Sys_error e ->
-          !GWPARAM.syslog `LOG_ERR
-            (Format.sprintf
-               "Error renaming carrousel store: old_path=%s new_path=%s : %s"
-               old_f new_f e))
+              new_f e)))
   | Some (`Url _url) -> () (* old url still applies *)
-  | None -> ()
+  | None -> ();
+  (* in all cases, rename carrousel *)
+  let new_c_f =
+    String.concat Filename.dir_sep [ carrousel_folder conf; new_s ]
+  in
+  let old_c_f =
+    String.concat Filename.dir_sep [ carrousel_folder conf; old_s ]
+  in
+  if Sys.file_exists old_c_f then
+    try Sys.rename old_c_f new_c_f
+    with Sys_error e ->
+      !GWPARAM.syslog `LOG_ERR
+        (Format.sprintf
+           "Error renaming carrousel store: old_path=%s new_path=%s : %s"
+           old_c_f new_c_f e)
 
 let get_portrait_with_size conf base p =
   if has_access_to_portrait conf base p then
