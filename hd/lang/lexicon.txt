@@ -14299,6 +14299,10 @@ sv: annat/annat/annat
 en: other possibilities
 fr: autres possibilités
 
+    with spouse name
+en: with spouse name
+fr: avec son nom d'épouse
+
     ou
 co: o
 de: oder

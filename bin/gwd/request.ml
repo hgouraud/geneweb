@@ -63,7 +63,7 @@ let relation_print conf base p =
   in
   RelationDisplay.print conf base p p1
 
-let specify conf base n pl1 pl2 =
+let specify conf base n pl1 pl2 pl3 =
   let title _ = Output.printf conf "%s : %s" n (transl conf "specify") in
   let n = Name.crush_lower n in
   let ptll pl =
@@ -106,6 +106,7 @@ let specify conf base n pl1 pl2 =
   in
   let ptll1 = ptll pl1 in
   let ptll2 = ptll pl2 in
+  let ptll3 = ptll pl3 in
 
   Hutil.header conf title;
   (* Si on est dans un calcul de parenté, on affiche *)
@@ -133,6 +134,17 @@ let specify conf base n pl1 pl2 =
          Update.print_person_parents_and_spouses conf base p;
          Output.print_sstring conf "</li>\n"
       ) ptll2;
+    Output.print_sstring conf "</ul>\n");
+  if ptll3 <> [] then (
+    Output.print_sstring conf (transl conf "with spouse name" |> Utf8.capitalize_fst);
+    Output.print_sstring conf "<ul>\n";
+    List.iter
+      (fun (p, _tl) ->
+         Output.print_sstring conf "<li>\n";
+         SosaCache.print_sosa conf base p true;
+         Update.print_person_parents_and_spouses conf base p;
+         Output.print_sstring conf "</li>\n"
+      ) ptll3;
     Output.print_sstring conf "</ul>\n");
 
   Hutil.trailer conf
@@ -715,8 +727,8 @@ let treat_request =
                   || Gutil.person_of_string_key base n <> None
                   || person_is_std_key conf base p n
                   then person_selected_with_redirect conf base p
-                  else specify conf base n pl []
-                | pl -> specify conf base n pl []
+                  else specify conf base n pl [] []
+                | pl -> specify conf base n pl [] []
               in
               begin match real_input "v" with
                 | Some n -> search n

@@ -270,10 +270,11 @@ let search conf base an search_order specify unknown =
               else poi base (get_father f)
             in
             (* find bearers of surname *)
+            let find_pl3 =
+              List.assoc_opt "public_name_as_fn" conf.base_env = Some "yes"
+            in
             let pl3 =
-              if List.assoc_opt "public_name_as_fn" conf.base_env = Some "yes"
-              then Some.search_surname conf base sn
-              else []
+              if find_pl3 then Some.search_surname conf base sn else []
             in
             let pl3 =
               List.fold_left
@@ -287,12 +288,15 @@ let search conf base an search_order specify unknown =
             let pl3 =
               search_for_multiple_fn conf base fn pl3 exact case order all false
             in
-            match pl1 with
-            | [] -> loop l
-            | [ p ] when List.length pl2 = 0 ->
+            match pl1, pl2, pl3 with
+            | [], [], [] -> loop l
+            | [p], [], [] | [], [p], [] | [], [], [p] ->
                 record_visited conf (get_iper p);
                 Perso.print conf base p
-            | pl1 -> specify conf base an pl1 (pl2 @ pl3)))
+            | _, _, [p] when find_pl3 ->
+                record_visited conf (get_iper p);
+                Perso.print conf base p
+            | _ -> specify conf base an pl1 pl2 pl3))
     | ApproxKey :: l -> (
         let pl = search_approx_key conf base an in
         match pl with
@@ -300,7 +304,7 @@ let search conf base an search_order specify unknown =
         | [ p ] ->
             record_visited conf (get_iper p);
             Perso.print conf base p
-        | pl -> specify conf base an pl [])
+        | pl -> specify conf base an pl [] [])
     | PartialKey :: l -> (
         let pl = search_by_name conf base an in
         match pl with
@@ -345,11 +349,11 @@ let search conf base an search_order specify unknown =
                 | [ p ] ->
                     record_visited conf (get_iper p);
                     Perso.print conf base p
-                | pl1 -> specify conf base an pl1 pl2))
+                | pl1 -> specify conf base an pl1 pl2 []))
         | [ p ] ->
             record_visited conf (get_iper p);
             Perso.print conf base p
-        | pl -> specify conf base an pl [])
+        | pl -> specify conf base an pl [] [])
     | DefaultSurname :: _ -> Some.search_surname_print conf base unknown an
   in
   loop search_order
