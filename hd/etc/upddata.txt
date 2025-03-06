@@ -1,4 +1,4 @@
-<!-- $Id: upddata.txt %version; 04/03/2025 20:41:08 $ -->
+<!-- $Id: upddata.txt %version; 07/03/2025 04:45:21 $ -->
 <!-- Copyright (c) 2006-2007 INRIA -->
 <!DOCTYPE html>
 <html lang="%lang;" id="book">
@@ -20,28 +20,18 @@
 %define;wikidata(x)
   [*wikidata:::x]%nn;
 %end;
-%define;subinit(z)
-  %let;ini;%if;(z!="")%substr_start_e.z.s;%end;%in;
-  %if;(ini!="" and ini!=e.s)
-    <a tabindex="%expr(5+z)" href="%prefix;m=MOD_DATA&data=%e.data;&s=%ini;"
-      class="list-group-item list-group-item-action list-group-item-info w-auto sub-char d-flex align-items-center"
-      title="[*search/case sensitive]0 “%ini;”" data-toggle="tooltip" data-placement="bottom">%ini;</a>
-  %end;
-%end;
-<div class="container">
 %define;list_of(xx,yy,zz)
   <div%if;("xx"!="fn" or e.data!="") class="my-1"%end;>
     %if;(e.data!="xx")
-      <a href="%prefix;m=MOD_DATA&data=xx" class="sub-char pt-1 pr-1" title="[*book of %s:::yy]"
+      <a href="%prefix;m=MOD_DATA&data=xx" class="sub-char d-flex align-items-center" title="[*book of %s:::yy]"
         data-toggle="tooltip" data-placement="right">
     %end;
-    %if;(e.data="")<div class="d-inline-flex align-self-center">%end;
+    %if;(e.data="")<div class="d-flex align-self-center">%end;
     <i class="fa fa-zz fa-2x fa-fw %if;(e.data="xx")text-success%end;"></i>
-    %if;(e.data="")<span class="h4 d-flex ml-3">[*book of %s:::yy]</span></div>%end;
+    %if;(e.data="")<span class="h4 ml-3">[*book of %s:::yy]</span></div>%end;
     %if;(e.data!="xx")</a>%end;
   </div>
 %end;
-
 %define;other_books()
   %if;(e.data="")<div class="h3 mb-3">[*book/books]1</div>%end;
   <div class="d-flex flex-column mr-2">
@@ -58,6 +48,7 @@
     %apply;list_of("domain",[domain/domains]1,"chess-rook")
   </div>
 %end;
+<div class="container">
   <a tabindex="4" class="sr-only sr-only-focusable" href="#main-content">[*skip to main content]</a>
   %let;len_s;%if;(e.s!="")%e.length.s;%else;0%end;%in;
   %let;nb_max;%if;(b.book_max_results!="" and b.book_max_results>0)%b.book_max_results;%else;1000%end;%in;
@@ -74,8 +65,8 @@
               %if;(entry_ini!=e.s)
                 %incr_count;
                 <div class="list-group-item list-group-item-action list-group-item-info w-auto px-3 sup-char-div" tabindex="%expr(len_s+(2*cnt)+5)"
-                  title="[*search/case sensitive]0 “%entry_ini;”" data-toggle="tooltip" data-placement="bottom">
-                  <a class="stretched-link sup-char" href="%prefix;m=MOD_DATA&data=%e.data;&s=%uri_encode.entry_ini;" 
+                  title="[*search/case sensitive]0 “%escape.entry_ini;”" data-toggle="tooltip">
+                  <a class="stretched-link sup-char" href="%prefix;m=MOD_DATA&data=%e.data;&s=%encode.entry_ini;"
                     >%escape.entry_ini;</a>
                     %if;(max>0 and nb_results<nb_max)%nn;
                       <span class="bottom-book-arrow">
@@ -108,19 +99,17 @@
               </span>
             </a>
           %end;
-          <div class="d-flex flex-grow align-self-sm-center%if;(e.s!="") ml-2%end;" id="subinit">
-            %if;(e.s!="")
-              %for;z;1;6;%apply;subinit(z)%end; %(5 first entries %)
-              %if;(len_s>7)<i class="fa-solid fa-ellipsis align-self-center ml-1"></i>
-              %(%elseif;(len_s<5)<i class="fa-solid fa-caret-right align-self-center ml-1"></i>%)
+          %if;(e.s!="")
+            <div class="d-flex flex-grow align-self-sm-center ml-2" id="subinit">
+              %foreach;substring.s.6;
+                <a tabindex="%expr(5+cnt)" href="%prefix;m=MOD_DATA&data=%e.data;&s=%encode.substr;"
+                  class="list-group-item list-group-item-action list-group-item-info w-auto sub-char d-flex align-items-center"
+                  title="[*search/case sensitive]0 “%escape.substr;”" data-toggle="tooltip">%escape.substr;</a>
               %end;
-              %(%foreach;substr.s;
-                <a class="d-flex flex-column flex-sm-row list-group-item list-group-item-action"
-                  href="%prefix;m=MOD_DATA&data=%e.data;&s=%uri_encode.substr;">%escape.substr;</a>
-              %end; not used because full print is too long when len_s increases, but the function is working %)
-              <div class="list-group-item list-group-item-success text-nowrap user-select-all%if;(len_s>1) ml-1%end;">%e.s;</div>
-            %end;
-          </div>
+              %if;(len_s>6)<i class="fa-solid fa-ellipsis align-self-center ml-1"></i>%end;
+              <div class="list-group-item list-group-item-success text-nowrap user-select-all%if;(len_s>1) ml-1%end;">%escape.e.s;</div>
+            </div>
+          %end;
           <div class="d-flex flex-fill align-self-center order-2 d-xs-none">
             %if;(e.s!="" and count!=0)
               <i class="fa-solid fa-caret-right align-self-center mx-1"></i>
@@ -163,25 +152,25 @@
       %foreach;entry;
         <li class="list-group-item-info list-group-action d-flex p-0 mt-1 align-items-center border-0" id="_%entry_ini;">
           <div class="d-flex align-items-center justify-content-center position-relative top-book-arrow w-10 h-100 border border-bottom-0 border-top-0 border-left-0 border-light">
-            <a role="button" class="stretched-link w-100 mx-3" href="#top" title="[*return to top]" data-toggle="tooltip" data-placement="top" tabindex="-1"><i class="fa-solid fa-sort-up ml-sm-1 mt-1"></i></a>%nn;
+            <a role="button" class="stretched-link w-100 mx-3" href="#top" title="[*return to top]" data-toggle="tooltip" data-placement="top" tabindex="-1"><i class="fa-solid fa-sort-up ml-sm-1 mt-1"></i></a>
           </div>
           <div class="list-group-item-%if;(entry_ini=e.s)success%else;info%end; position-relative w-100 border font-weight-bold text-monospace">
-            %if;(entry_ini!=e.s)
-            <a class="stretched-link ml-3" href="%prefix;m=MOD_DATA&data=%e.data;&s=%uri_encode.entry_ini;" title="[*search/case sensitive]0 “%entry_ini;”">%else;<span class="ml-3">%end;%escape.entry_ini;%nn;
-            %if;(entry_ini!=e.s)</a>%else;</span>%end;
+            %if;(entry_ini!=e.s)<a class="stretched-link ml-1" href="%prefix;m=MOD_DATA&data=%e.data;&s=%encode.entry_ini;" title="[*search/case sensitive]0 “%escape.entry_ini;”">%end;
+            <span class="ml-3">%escape.entry_ini;</span>
+            %if;(entry_ini!=e.s)</a>%end;
           </div>
         </li>
         <li class="list-unstyled mt-1 pl-0">
           <ul class="list-group src-list-bg my-1">
             %foreach;value;
               <li class="list-unstyled ml-sm-1 pl-0" id="k%entry_key;">
-                <div class="d-flex%if;(is_modified) my-2 my-sm-0%end; mx-2">
+                <div class="d-flex%if;(is_modified) my-2 my-sm-0 pl-0%end; %if;(e.data!="src")mx-2%else;mr-2%end;">
                   %if;(e.data!="src")
                     <div class="d-flex flex-column justify-content-center">
                       <a href="https://www.wikidata.org/w/index.php?search=%nn;
-                        %if;(e.data!="place")%uri_encode.entry_value;%nn;
+                        %if;(e.data!="place")%encode.entry_value;%nn;
                         %else;
-                          %if;(not first and suburb!="")(uri_encode.printable.suburb;%else;%uri_encode.other;%end;
+                          %if;(not first and suburb!="")(uri_encode.printable.suburb;%else;%encode.other;%end;
                         %end;"
                         role="button" class="btn btn-link p-0 ml-1"
                         title="%apply;wikidata%with;%if;(e.data!="place")%escape.entry_value;%else;%if;(not first and suburb!="")%escape.printable.suburb;%else;%escape.printable.other;%end;%end;%end;"
@@ -189,7 +178,7 @@
                         <i class="fab fa-wikipedia-w fa-sm"></i>
                       </a>
                       %if;(first and suburb!="")
-                        <a href="https://www.wikidata.org/w/index.php?search=%uri_encode.printable.suburb;"
+                        <a href="https://www.wikidata.org/w/index.php?search=%encode.printable.suburb;"
                           role="button" class="btn btn-link p-0 ml-1"
                           title="%apply;wikidata(escape.printable.suburb)"
                           target="_blank" rel="noreferrer, noopener" tabindex="-1">
@@ -197,90 +186,87 @@
                         </a>
                       %end;
                     </div>
-                  %else;
-                    <div class="px-3 mx-0"> </div>
                   %end;
                   %if;is_modified;
-                    <div class="d-flex d-sm-inline-flex flex-column flex-sm-row px-0%if;(e.data!="place") ml-sm-1%end;">
-                      <div class="d-flex d-sm-inline-flex flex-row flex-sm-column align-self-start align-self-sm-center ml-5 ml-sm-4 mb-0 ">
+                    <div class="d-flex d-sm-inline-flex flex-column flex-sm-row px-0%if;(e.data="src") ml-5%elseif;(e.data!="place") ml-sm-1%end;">
+                      <div class="d-flex d-sm-inline-flex flex-row flex-sm-column align-self-start align-self-sm-center ml-5 ml-sm-4">
                         <div class="font-weight-bold">[*modify]</div>
                         <div class="text-nowrap align-self-sm-center ml-2 ml-sm-0">%p_list;</div>
                       </div>
                   %end;
                   <div class="d-flex d-sm-inline-flex flex-column flex-sm-row px-2 px-sm-1%if;(e.data!="place" and e.data!="src") ml-3%end;">
-                    <div class="flex-column flex-sm-row ml-sm-2%if;is_modified; my-2%end;">
+                    <div class="flex-column flex-sm-row ml-sm-2%if;is_modified; mb-2%end;">
                       %if;is_modified;
-                        <div class="pl-2 pr-sm-2 text-muted book-input-text">
-                      %else;
-                        <a role="button" class="ml-1" title="[*modify]" data-toggle="tooltip" data-placement="bottom"
-                           href="%prefix;m=MOD_DATA&data=%e.data;&key=%entry_key;&s=%uri_encode.e.s;" data-entry="%escape.printable.entry_value_unsort;">%if;(e.data="src")<i class="fa fa-pen-to-square mr-2"></i></a>%end;
-                      %end;
-                      %if;(e.data="place" and suburb!="")
-                        %if;is_modified;%escape.entry_value;
-                        %else;
-                          %if;(first)
-                            %escape.other;<br><span class="ml-4">%escape.suburb;</span>
-                          %else;
-                            <span class="sr-only">%escape.printable.other (</span>
-                            <span class="ml-4">%escape.suburb;</span>
-                            <span class="sr-only">)</span>
-                          %end;
-                        %end;
-                      %else;
-                        %( escape both ? %)
-                        %if;(e.data!="src")%escape.entry_value;%else;%entry_value;
-                        %if;(e.key!="" and is_modified and entry_value!=escape.entry_value)<hr class="my-0">%escape.entry_value;%end;%end;
-                      %end;
-                      %if;is_modified;</div>%else;%if;(e.data!="src")</a>%end;%end;
-                      %if;is_modified;
-                        <form class="needs-validation mt-1" method="post" action="%action;" novalidate>
+                        <form class="needs-validation d-flex flex-row" method="post" action="%action;" novalidate>
                           %hidden;
                           <input type="hidden" name="key" value="%entry_key;">
                           <input type="hidden" name="m" value="MOD_DATA_OK">
                           <input type="hidden" name="data" value="%e.data;">
                           <input type="hidden" name="s" value="%e.s;">
                           <input type="hidden" name="k" value="kkk">
-                          <div class="d-flex flex-column px-0">
-                            %if;(b.notextarea!="yes" or e.data="src" or e.data="place")
-                              <textarea class="form-control pl-2 pr-1" id="nx_input" name="nx_input" rows="1"
-                                        maxlength="%if;(e.data="src" or e.data="occu" or e.data="place")1000%else;200%end;"
-                                        placeholder="%escape.printable.entry_value;"%if;(e.data!="fn" or e.data!="sn") autofocus%end; required>%escape.printable.entry_value;</textarea>
-                            %else;
-                              <input type="text" class="form-control flex-grow-1 pl-2 pr-1" id="nx_input" name="nx_input"
-                                     maxlength="%if;(e.data="src" or e.data="occu" or e.data="place")1000%else;200%end;"
-                                     value="%escape.printable.entry_value_unsort;" placeholder="%escape.printable.entry_value_unsort;"
-                                     %if;(e.data!="fn" or e.data!="sn") autofocus%end; aria-label="Recipient's username" required>
-                            %end;
-                            %(%if;(e.data="place" and suburb="")
-                              <div class="custom-control custom-checkbox mx-md-2 pr-3">
-                                %( TODO: wip rename all places %)
-                                <input type="checkbox" class="custom-control-input ml-3" name="all" id="all" value="on" checked>
-                                <label class="custom-control-label my-2" title="!! [*apply to same places with suburb] (WIP) !!"
-                                       for="all">[*all]</label>
-                              </div>
-                            %end;%)
-                            %if;(e.data="fn")
-                              <div class="form-check form-check-inline ml-sm-2">
-                                <label class="form-check-label">
-                                  <input class="form-check-input w-auto" type="checkbox" id="first_name_aliases" name="first_name_aliases" value="yes"> [*add the previous name as a first name alias]
-                                </label>
-                              </div>
-                            %end;
-                            %if;(e.data="sn")
-                              <div class="form-check form-check-inline mt-2 mt-sm-0 ml-sm-2">
-                                <label class="form-check-label">
-                                  <input class="form-check-input w-auto" type="checkbox" id="surname_aliases" name="surname_aliases" value="yes"> [*add the previous name as a surname alias]
-                                </label>
-                              </div>
-                            %end;
+                          <div class="flex-grow-1">
+                            <div class="pl-2 pr-sm-2 text-muted book-input-text">
+                              %if;(e.data="place" and suburb!="")
+                                %escape.entry_value;
+                              %else;
+                                %if;(e.data!="src")%escape.entry_value;%else;%entry_value;
+                                %if;(e.key!="" and is_modified and "<a" in entry_value)<hr class="my-0">%escape.entry_value;%end;%end;
+                              %end;
+                            </div>
+                            <div class="mt-1">
+                              %if;(b.notextarea!="yes" or e.data="src" or e.data="place")
+                                <textarea class="form-control pl-2 pr-1" id="nx_input" name="nx_input" rows="1"
+                                         maxlength="%if;(e.data="src" or e.data="occu" or e.data="place")1000%else;200%end;"
+                                         placeholder="%escape.printable.entry_value;"%if;(e.data!="fn" or e.data!="sn") autofocus%end; required>%escape.printable.entry_value;</textarea>
+                              %else;
+                                <input type="text" class="form-control flex-grow-1 pl-2 pr-1" id="nx_input" name="nx_input"
+                                      maxlength="%if;(e.data="src" or e.data="occu" or e.data="place")1000%else;200%end;"
+                                      value="%escape.printable.entry_value_unsort;" placeholder="%escape.printable.entry_value_unsort;"
+                                      %if;(e.data!="fn" or e.data!="sn") autofocus%end; aria-label="Recipient's username" required>
+                              %end;
+                              %if;(e.data="fn")
+                                <div class="form-check form-check-inline ml-sm-2">
+                                  <label class="form-check-label">
+                                    <input class="form-check-input w-auto" type="checkbox" id="first_name_aliases" name="first_name_aliases" value="yes"> [*add the previous name as a first name alias]
+                                  </label>
+                                </div>
+                              %end;
+                              %if;(e.data="sn")
+                                <div class="form-check form-check-inline mt-2 mt-sm-0 ml-sm-2">
+                                  <label class="form-check-label">
+                                    <input class="form-check-input w-auto" type="checkbox" id="surname_aliases" name="surname_aliases" value="yes"> [*add the previous name as a surname alias]
+                                  </label>
+                                </div>
+                              %end;
+                              <div class="valid-feedback">must be different!</div>
+                            </div>
                           </div>
-                          <div class="valid-feedback">must be different!</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary ml-3 my-sm-2" title="[*validate/delete]0" data-toggle="tooltip" data-placement="bottom">OK</button>
-                      </form>
-                      </div>
-                    %end;
+                          <div class="d-flex pt-2">
+                            <button type="submit" class="btn btn-primary ml-3 align-self-center h-100"
+                              title="[*validate/delete]0" data-toggle="tooltip" data-placement="bottom">OK</button>
+                          </div>
+                        </form>
+                      %else;
+                        <a role="button" class=" btn-link ml-1 mr-3"
+                           title="[*modify]" data-toggle="tooltip" data-placement="bottom"
+                           href="%prefix;m=MOD_DATA&data=%e.data;&key=%entry_key;&s=%encode.e.s;" data-entry="%escape.printable.entry_value_unsort;">
+                           %if;(e.data="src")<i class="fa fa-pen-to-square"></i></a>%end;
+                           %if;(e.data="place" and suburb!="")
+                            %if;(first)
+                              %escape.other;<br><span class="ml-4">%escape.suburb;</span>
+                            %else;
+                              <span class="sr-only">%escape.printable.other (</span>
+                              <span class="ml-4">%escape.suburb;</span>
+                              <span class="sr-only">)</span>
+                            %end;
+                          %else;
+                            %if;(e.data!="src")%escape.entry_value;%else;<span class="ml-3">%entry_value;</span>%end;
+                          %end;
+                          %if;(e.data!="src")</a>%end;
+                      %end;
+                    </div>
                   </div>
+                  %if;is_modified;</div>%end;
                 </div>
               </li>
             %end;
@@ -303,12 +289,12 @@ function setupNavigation() {
   var navbarHeight = document.getElementById('fixed-nav').offsetHeight;
   var scrollPaddingTop = navbarHeight + 4;
   document.getElementById('book').style.scrollPaddingTop = scrollPaddingTop + 'px';
-  
+
   const linkTrm = document.querySelectorAll('.sub-char');
   const linkAdd = document.querySelectorAll('.sup-char');
   let iTrm = -1;
   let iAdd = -1;
-  
+
   document.addEventListener('keydown', (event) => {
     if (event.altKey && event.key === 't' || event.key === 't' && !['input', 'textarea'].includes(event.target.tagName.toLowerCase())) {
       event.preventDefault();
@@ -334,7 +320,7 @@ function setupNavigation() {
       }
     }
   });
-  
+
   document.querySelectorAll('.sup-char-div').forEach((div) => {
     div.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
@@ -389,26 +375,26 @@ function updateInputField() {
 function shortenSupCharTexts() {
   const urlParams = new URLSearchParams(window.location.search);
   const sParam = urlParams.get('s');
-  
+
   if (!sParam) return;
-  
+
   const supCharLinks = document.querySelectorAll('.sup-char');
   const entryCount = supCharLinks.length;
-  
+
   if (sParam.length > 6 && entryCount > 4 || sParam.length > 4 && entryCount > 10) {
     const supCharLinks = document.querySelectorAll('.sup-char');
-    
+
     supCharLinks.forEach(link => {
       const fullText = link.textContent.trim();
-      
+
       if (fullText.startsWith(sParam)) {
         const suffix = fullText.substring(sParam.length);
-        
+
         if (suffix) {
           const secondLastLetter = sParam.charAt(sParam.length - 2);
           const lastLetter = sParam.charAt(sParam.length - 1);
           link.textContent = '…' + secondLastLetter + lastLetter + suffix;
-          
+
           if (link.title) {
             link.title = link.title + ' (' + fullText + ')';
           } else {

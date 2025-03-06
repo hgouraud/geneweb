@@ -732,7 +732,6 @@ const initTooltips = () => {
       trigger: 'hover',
       delay: { show: 200, hide: 50 },
       container: 'body',
-      html: true
     });
   }
 };

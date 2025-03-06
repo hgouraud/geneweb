@@ -76,6 +76,10 @@
   background: #ffe69c;
 }
 
+.hl-book {
+  background: #6cb2fd59;
+}
+
 .ch a:hover {
   background: #e9ecef;
   transform: scale(1.1);
