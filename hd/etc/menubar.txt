@@ -417,6 +417,11 @@
             <a id="load_once_rlm_builder" class="nav-link dropdown-toggle text-secondary%if;(e.m="R" or e.m="F" or (e.m="C" and e.t="AN")) active%end;" data-toggle="dropdown" role="button" href="#" aria-haspopup="true" aria-expanded="false" title="[*relationship]">
               <span class="fa fa-user-group"></span></a>
             <div class="dropdown-menu dropdown-menu-transl">
+              %if;(user.index!="")
+                <a class="dropdown-item" title="[*path to me]"
+                  href="%prefix;&em=R&et=S&ei=%index;&i=%user.index;&spouse=on&long=on">
+                  <i class="fa fa-chain fa-fw mr-2"></i>[*path to]0</a>
+              %end;
               <a class="dropdown-item" href="%prefix;%access;&m=R" %laR;>
                 <span class="fa fa-gear fa-fw mr-2"></span>[*relationship computing]</a>
               <div class="dropdown-divider"></div>
@@ -424,12 +429,7 @@
                 <a class="dropdown-item" title="[*path to Sosa 1]"
                   href="%prefix;&em=R&t=PN&et=S&ei=%index;&i=%sosa_ref.index;&spouse=on&long=on">
                   <i class="fa fa-arrows fa-fw mr-2"></i>[*path to]1</a>
-                %if;(user.index!="" and  user.index!=sosa_ref.index)
-                  <a class="dropdown-item" title="[*path to me]"
-                    href="%prefix;&em=R&t=PN&et=S&ei=%index;&i=%user.index;&spouse=on&long=on">
-                    <i class="fa fa-arrows fa-fw mr-2"></i>[*path to]0</a>
-                 %end;
-                 <div class="dropdown-divider"></div>
+              <div class="dropdown-divider"></div>
               %end;
               <a class="dropdown-item" href="%prefix;m=C&%access;&v=5"
                 title="[*relationship link/relationship links]0 [with] [close family]"><span class="fa fa-elevator fa-fw mr-2"></span>[*relationship]</a>
