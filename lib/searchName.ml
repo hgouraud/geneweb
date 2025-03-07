@@ -219,13 +219,13 @@ let search conf base an search_order specify unknown =
           | Some sn -> Name.lower sn
           | None -> ""
         in
-        let an = Name.lower an in
         let fn, sn =
           if fn = "" then
             (* we assume fn1 fn2 sn. For other cases, use fn, sn explicitely *)
             (* TODO check for particles and cut before particle *)
             (* see if    Name.abbrev (Name.lower sn)    is Ok *)
             (* or use split_normalize here? *)
+            let an = Name.lower an in
             if sn = "" then
               match String.rindex_opt an ' ' with
               | Some i ->

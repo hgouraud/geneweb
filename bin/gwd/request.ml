@@ -104,10 +104,24 @@ let specify conf base n pl1 pl2 pl3 =
          p, !tl)
       pl
   in
-  let ptll1 = ptll pl1 in
-  let ptll2 = ptll pl2 in
-  let ptll3 = ptll pl3 in
-
+  let sort_ptll ptll =
+    List.sort (fun (p1, _) (p2, _) ->
+      let bi1 = get_birth p1 in
+      let bi2 = get_birth p2 in
+      let ba1 = get_baptism p1 in
+      let ba2 = get_baptism p2 in
+      let bi1 = if bi1 = Date.cdate_None then ba1 else bi1 in
+      let bi2 = if bi2 = Date.cdate_None then ba2 else bi2 in
+      let dmy1 = Date.cdate_to_dmy_opt bi1 in
+      let dmy2 = Date.cdate_to_dmy_opt bi2 in
+      match dmy1, dmy2 with
+      | Some dmy1, Some dmy2 -> Date.compare_dmy dmy1 dmy2
+      | _ -> 0
+    ) ptll
+  in
+  let ptll1 = ptll pl1 |> sort_ptll in
+  let ptll2 = ptll pl2 |> sort_ptll in
+  let ptll3 = ptll pl3 |> sort_ptll in
   Hutil.header conf title;
   (* Si on est dans un calcul de parenté, on affiche *)
   (* l'aide sur la sélection d'un individu.          *)
