@@ -179,10 +179,11 @@ let search_for_multiple_fn conf base fn pl exact case order all all_only =
 
 let search conf base an search_order specify unknown =
   let test label = p_getenv conf.env label = Some "on" in
-  let exact = test "p_exact" in
+  let test_not label = p_getenv conf.env label = Some "off" in
+  let exact = not (test_not "p_exact") in
   let case = test "p_case" in
   let order = test "p_order" in
-  let all = test "p_all" in
+  let all = not (test_not "p_all") in
   let rec loop l =
     match l with
     | [] -> unknown conf an
@@ -271,7 +272,7 @@ let search conf base an search_order specify unknown =
             in
             (* find bearers of surname *)
             let find_pl3 =
-              List.assoc_opt "public_name_as_fn" conf.base_env = Some "yes"
+              not (List.assoc_opt "public_name_as_fn" conf.base_env = Some "no")
             in
             let pl3 =
               if find_pl3 then Some.search_surname conf base sn else []
@@ -291,9 +292,6 @@ let search conf base an search_order specify unknown =
             match pl1, pl2, pl3 with
             | [], [], [] -> loop l
             | [p], [], [] | [], [p], [] | [], [], [p] ->
-                record_visited conf (get_iper p);
-                Perso.print conf base p
-            | _, _, [p] when find_pl3 ->
                 record_visited conf (get_iper p);
                 Perso.print conf base p
             | _ -> specify conf base an pl1 pl2 pl3))

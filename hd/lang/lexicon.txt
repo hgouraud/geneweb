@@ -16006,21 +16006,37 @@ fr: mode famille
 en: extend the SemiPublic status to family members (on/off toggle)
 fr: étendre le statut SemiPublic aux membres de la famille (deuxième click désactive)
 
-    exact-hlp
-en: exact match (word level)
-fr: comparaison exacte mot par mot
+    not exact hlp
+en: entry can be a substring of the first name otherwise exact match
+fr: recherche d'une sous-chaine dans le prénom sinon comparaison exacte
+
+    not exact
+en: substring
+fr: partiel
 
     order
 en: order
 fr: ordre
 
-    order-hlp
+    order hlp
 en: test firstnames in the same order
 fr: tester les prénoms dans le même ordre
   
-    all-hlp
-en: all firstnames must be present
-fr: tous les prénoms doivent être présents
+    not all
+en: at least one
+fr: au moins un
+
+    not all hlp
+en: at least one first name must be present otherwise all
+fr: au moins un prénom doit être présent sinon tous
+
+    mandatory
+en: mandatory
+fr: obligatoire
+
+    optionnal
+en: optionnal
+fr: optionnel
 
     search_exact_fn
 co: ricerca esatta

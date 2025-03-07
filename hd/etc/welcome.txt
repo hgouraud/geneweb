@@ -229,10 +229,10 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
               <input type="search" id="fullname" class="form-control form-control-lg py-0 border border-top-0" autofocus tabindex="1"
                 name="pn" placeholder="[*search/case sensitive]0 [person/persons]0, [surname/surnames]0, [public name], [alias]%if;browsing_with_sosa_ref;, [n° Sosa]%end; [or] [key]0"
                  data-toggle="tooltip" data-placement="top" data-html="true"
-                 title="<p class='text-left'>[person/persons]0[:] [first name/first names]2/[surname/surnames]0 ¹/[occ]1 ²,<br>
-                        [surname/surnames]0 ¹, [public name], [alias],<br>
-                        [key]0[:] [first name/first names]2.[occ]1 ³ [surname/surnames]0 ¹<br><br>
-                        ¹ [word/words]1<br>² [optionnal]1<br>³ [mandatory]1%nn;
+                 title="<p class='text-left'>[person/persons]0[:] [first name/first names]2/[surname/surnames]0 ¹/[occ]1 ³,<br>
+                        [surname/surnames]0 ², [public name], [alias],<br>
+                        [key]0[:] [first name/first names]2.[occ]1 [surname/surnames]0 ¹<br><br>
+                        ¹ [word/words]1<br>² [word/words]0<br>³ [optionnal]1%nn;
                         %if;browsing_with_sosa_ref;<br><br>[*n° Sosa][:] %apply;a_of_b%with;[ancestor]%and;%sosa_ref;%end; [number]%end;">
             </div>
 
@@ -254,17 +254,17 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
                 </div>
                 <div class="d-flex align-items-center mx-2">
                   <div class="d-flex flex-column justify-content-around h-100">
-                    <div class="custom-control custom-checkbox" data-toggle="tooltip" data-placement="bottom" title="[*all-hlp]">
-                      <input class="custom-control-input" type="checkbox" name="p_all" id="p_all" value="on" checked>
-                      <label class="custom-control-label d-flex align-items-center" for="p_all">[*all]</label>
+                    <div class="custom-control custom-checkbox" data-toggle="tooltip" data-placement="bottom" title="[*not all hlp]">
+                      <input class="custom-control-input" type="checkbox" name="p_all" id="p_all" value="off">
+                      <label class="custom-control-label d-flex align-items-center" for="p_all">[*not all]</label>
                     </div>
-                    <div class="custom-control custom-checkbox" data-toggle="tooltip" data-placement="bottom" title="[*order-hlp]">
+                    <div class="custom-control custom-checkbox" data-toggle="tooltip" data-placement="bottom" title="[*order hlp]">
                       <input class="custom-control-input" type="checkbox" name="p_order" id="p_order" value="on">
                       <label class="custom-control-label small d-flex align-items-center" for="p_order">[*order]</label>
                     </div>
-                    <div class="custom-control custom-checkbox" data-toggle="tooltip" data-placement="bottom" title="[*exact-hlp]">
-                      <input class="custom-control-input" type="checkbox" name="p_exact" id="p_exact" value="on" checked>
-                      <label class="custom-control-label small d-flex align-items-center" for="p_exact">[*exact]</label>
+                    <div class="custom-control custom-checkbox" data-toggle="tooltip" data-placement="bottom" title="[*not exact hlp]">
+                      <input class="custom-control-input" type="checkbox" name="p_exact" id="p_exact" value="off">
+                      <label class="custom-control-label small d-flex align-items-center" for="p_exact">[*not exact]</label>
                     </div>
                   </div>
                 </div>
