@@ -2283,7 +2283,6 @@ sl: alias
 sv: alias
 tr: takma ad
 
-
     search type
 co: tipu di ricerca
 de: Suchmodus
@@ -15936,6 +15935,10 @@ fr: chemin le plus court entre cet individu et moi
 en: shortest path between this individual and the Sosa nº 1
 fr: chemin le plus court entre cet individu et le Sosa nº 1
 
+    search format
+en: search formats
+fr: formats de recherche
+
     search %s on Geneanet
 co: ricercà %s nant’à Geneanet
 de: suche %s auf Geneanet
@@ -16006,37 +16009,33 @@ fr: mode famille
 en: extend the SemiPublic status to family members (on/off toggle)
 fr: étendre le statut SemiPublic aux membres de la famille (deuxième click désactive)
 
-    not exact hlp
-en: entry can be a substring of the first name otherwise exact match
-fr: recherche d'une sous-chaine dans le prénom sinon comparaison exacte
-
     not exact
-en: substring
+en: partial
 fr: partiel
 
+    not exact hlp
+en: partial matching (exact matching by default)
+fr: correspondance partielle (correspondance exacte par défaut)
+
     order
-en: order
-fr: ordre
+en: same order
+fr: même ordre
 
     order hlp
-en: test firstnames in the same order
-fr: tester les prénoms dans le même ordre
-  
+en: keep the same order
+fr: conserver le même ordre
+
     not all
-en: at least one
-fr: au moins un
+en: one first name
+fr: un prénom
 
     not all hlp
-en: at least one first name must be present otherwise all
-fr: au moins un prénom doit être présent sinon tous
+en: contains only one first name (contains all first names by default)
+fr: contient un seul prénom (contient tous les prénoms par défaut)
 
-    mandatory
-en: mandatory
-fr: obligatoire
-
-    optionnal
-en: optionnal
-fr: optionnel
+    optional/mandatory
+en: optional/mandatory
+fr: facultatif/obligatoire
 
     search_exact_fn
 co: ricerca esatta
@@ -20201,8 +20200,8 @@ sv: administratör/administratörer/vän/vän/extern
 tr: yönetici/yöneticiler/arkadaş/arkadaşlar/dış
 
     word/words
-en: only one name (particle excluded)/full surname (many words)
-fr: un seul nom (particule exclue)/patronyme complet (plusieurs mots)
+en: only one word particle excluded/full surname
+fr: un seul mot particule exclue/patronyme complet
 
     word match
 co: parolla sana
