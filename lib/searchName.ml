@@ -386,7 +386,6 @@ let print conf base specify unknown =
         | None -> fn
       in
       let order = [ FirstName ] in
-      flush stderr;
       search conf base fn order specify unknown
   | Some pn, None, None ->
       let order =
@@ -400,29 +399,40 @@ let print conf base specify unknown =
           if j = -1 then "" else String.sub pn (j + 1) (String.length pn - j - 1)
         in
         let j = if j = -1 then 0 else String.length pn - j in
-        let env =
-          List.map
-            (fun (k, v) ->
-              match k with
-              | "p" -> (k, Adef.encoded (String.sub pn 0 i))
-              | "n" ->
-                  ( k,
-                    Adef.encoded
-                      (String.sub pn (i + 1) (String.length pn - i - 1 - j)) )
-              | "oc" -> (k, Adef.encoded oc)
-              | _ -> (k, v))
-            conf.env
-        in
-        let env =
-          if List.mem_assoc "oc" env && oc <> "" then env
-          else ("oc", Adef.encoded oc) :: env
-        in
-        let conf = { conf with env } in
-        search conf base
-          (String.sub pn 0 i
-          ^ (if oc = "" then " " else "." ^ oc ^ " ")
-          ^ String.sub pn (i + 1) (String.length pn - i - 1 - j))
-          order specify unknown
+        let fn = String.sub pn 0 i in
+        let sn = String.sub pn (i + 1) (String.length pn - i - 1 - j) in
+        begin match fn, sn, oc with
+        | fn, "", "" when fn <> ""->
+          let order = [ FirstName ] in
+          search conf base fn order specify unknown
+        | "", sn, "" when sn <> "" ->
+          let order = [ Surname; ApproxKey; DefaultSurname ] in
+          search conf base sn order specify unknown
+        | _ ->
+          let order =
+            [ Sosa; Key; FullName; ApproxKey; PartialKey; DefaultSurname ]
+          in
+          let env =
+            List.map
+              (fun (k, v) ->
+                match k with
+                | "p" -> (k, Adef.encoded fn)
+                | "n" -> ( k, Adef.encoded sn)
+                | "oc" -> (k, Adef.encoded oc)
+                | _ -> (k, v))
+              conf.env
+          in
+          let env =
+            if List.mem_assoc "oc" env && oc <> "" then env
+            else ("oc", Adef.encoded oc) :: env
+          in
+          let conf = { conf with env } in
+          search conf base
+            (String.sub pn 0 i
+            ^ (if oc = "" then " " else "." ^ oc ^ " ")
+            ^ String.sub pn (i + 1) (String.length pn - i - 1 - j))
+            order specify unknown
+        end
   | None, None, Some sn ->
       let order = [ Surname; ApproxKey; DefaultSurname ] in
       search conf base sn order specify unknown
