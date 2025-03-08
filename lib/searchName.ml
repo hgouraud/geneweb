@@ -205,10 +205,41 @@ let search conf base an search_order specify unknown =
         | [] -> loop l
         | _ -> Some.search_surname_print conf base unknown an)
     | FirstName :: l -> (
-        let pl = Some.search_first_name conf base an in
-        match pl with
-        | [] -> loop l
-        | _ -> Some.search_first_name_print conf base an)
+        let save_env = conf.env in
+        let _pl = Some.search_first_name conf base an in
+        let conf =
+          {
+            conf with
+            env =
+              ("first_name", Adef.encoded an)
+              :: ("exact_first_name", Adef.encoded "on")
+              :: save_env;
+          }
+        in
+        (* find all bearers of sn using advanced_search *)
+        let pl1, _len = AdvSearchOk.advanced_search conf base max_int in
+        let conf =
+          {
+            conf with
+            env =
+              ("first_name", Adef.encoded an)
+              :: ("exact_first_name", Adef.encoded "off")
+              :: save_env;
+          }
+        in
+        (* find all bearers of sn using advanced_search *)
+        let pl2, _len = AdvSearchOk.advanced_search conf base max_int in
+        let pl2 =
+          List.fold_left
+            (fun acc p -> if List.mem p pl1 then acc else p :: acc)
+            [] pl2
+        in
+        match pl1, pl2 with
+        | [], [] -> loop l
+        | [ p ], [] | [], [ p ] ->
+            record_visited conf (get_iper p);
+            Perso.print conf base p
+        | _ -> specify conf base an pl1 pl2 [])
     | FullName :: l -> (
         let fn =
           match p_getenv conf.env "p" with
