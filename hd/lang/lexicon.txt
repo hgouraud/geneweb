@@ -8155,6 +8155,14 @@ ru: семейная история
 sv: utöver släktträdet
 tr: aile öyküsü
 
+    family mode
+en: family mode
+fr: mode famille
+
+    family mode-hlp
+en: extend the SemiPublic status to family members (on/off toggle)
+fr: étendre le statut SemiPublic aux membres de la famille (deuxième click désactive)
+
     family modified
 af: familie verander
 bg: данните за cемейството са променени
@@ -14238,6 +14246,14 @@ sl: ali
 sv: eller
 tr: veya
 
+    order
+en: same order
+fr: même ordre
+
+    order hlp
+en: keep the same order
+fr: conserver le même ordre
+
     ordination
 co: ordinazione
 de: Ordination
@@ -14297,10 +14313,6 @@ sv: annat/annat/annat
     other possibilities
 en: other possibilities
 fr: autres possibilités
-
-    with spouse name
-en: with spouse name
-fr: avec son nom d'épouse
 
     ou
 co: o
@@ -16001,13 +16013,13 @@ fr: patronyme masqué
 en: hidden person
 fr: personne masquée
 
-    family mode
-en: family mode
-fr: mode famille
+    not all
+en: one first name
+fr: un prénom
 
-    family mode-hlp
-en: extend the SemiPublic status to family members (on/off toggle)
-fr: étendre le statut SemiPublic aux membres de la famille (deuxième click désactive)
+    not all hlp
+en: contains only one first name (contains all first names by default)
+fr: contient un seul prénom (contient tous les prénoms par défaut)
 
     not exact
 en: partial
@@ -16016,22 +16028,6 @@ fr: partiel
     not exact hlp
 en: partial matching (exact matching by default)
 fr: correspondance partielle (correspondance exacte par défaut)
-
-    order
-en: same order
-fr: même ordre
-
-    order hlp
-en: keep the same order
-fr: conserver le même ordre
-
-    not all
-en: one first name
-fr: un prénom
-
-    not all hlp
-en: contains only one first name (contains all first names by default)
-fr: contient un seul prénom (contient tous les prénoms par défaut)
 
     optional/mandatory
 en: optional/mandatory
@@ -20044,6 +20040,10 @@ fr: avec l’ancêtre racine, les conjoints et les inconnus
 pt: com o antepassado raiz, cônjuges e desconhecidos 
 sv: med rot, partners och okända
 tr: kök atası, eşler ve bilinmeyenler ile
+
+    with spouse name
+en: with spouse's name
+fr: avec le nom de son conjoint
 
     without implex display
 co: senza affissà l’implessi
