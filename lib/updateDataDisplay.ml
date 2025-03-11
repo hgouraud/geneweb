@@ -235,10 +235,8 @@ and eval_simple_var conf base env xx = function
           (Utf8.capitalize (transl conf "list of linked persons"))
           (List.length p_list)
       in
-      let tail =
-        Printf.sprintf "<i class=\"fa fa-user fa-xs ml-1\"></i></a>"
-      in
-      head ^ body ^ title ^tail |> str_val
+      let tail = Printf.sprintf "<i class=\"fa fa-user fa-xs ml-1\"></i></a>" in
+      head ^ body ^ title ^ tail |> str_val
   | [ s ] -> (
       try bool_val (eval_simple_bool_var conf base env xx s)
       with Not_found -> str_val (eval_simple_str_var conf base env xx s))
@@ -330,7 +328,7 @@ and eval_simple_str_var conf _base env _xx = function
             let fmt_str = ftransl conf "%s %s starting with %s" in
             let escaped_ini =
               Printf.sprintf "<span class=\"hl-book\">%s</span>"
-              ((Util.escape_html ini :> string))
+                (Util.escape_html ini :> string)
             in
             Printf.sprintf fmt_str len2 book_name escaped_ini
       | None -> Printf.sprintf "%s %s" len2 book_name)
@@ -412,8 +410,7 @@ let print_foreach conf print_ast _eval_expr =
       else if i > limit then List.rev acc
       else
         let rec get_substr j pos =
-          if j >= i then pos
-          else get_substr (j + 1) (Utf8.next evar pos)
+          if j >= i then pos else get_substr (j + 1) (Utf8.next evar pos)
         in
         let substr = String.sub evar 0 (get_substr 0 0) in
         build_substrings (i + 1) (substr :: acc)
@@ -427,10 +424,8 @@ let print_foreach conf print_ast _eval_expr =
       | [] -> ()
       | s :: tail ->
           let env =
-            ("substr", Vstring s) ::
-            ("max", Vint max) ::
-            ("cnt", Vint idx) ::
-            env
+            ("substr", Vstring s) :: ("max", Vint max) :: ("cnt", Vint idx)
+            :: env
           in
           List.iter (print_ast env xx) al;
           process_items (idx + 1) tail

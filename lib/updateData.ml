@@ -561,7 +561,7 @@ let build_list conf base =
       list
   else
     List.filter_map
-      (fun istr -> 
+      (fun istr ->
         let str = sou base istr in
         if is_name_type && str = "?" then None
         else

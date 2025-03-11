@@ -289,9 +289,9 @@ let search conf base an search_order specify unknown =
             let pl3 =
               search_for_multiple_fn conf base fn pl3 exact case order all false
             in
-            match pl1, pl2, pl3 with
+            match (pl1, pl2, pl3) with
             | [], [], [] -> loop l
-            | [p], [], [] | [], [p], [] | [], [], [p] ->
+            | [ p ], [], [] | [], [ p ], [] | [], [], [ p ] ->
                 record_visited conf (get_iper p);
                 Perso.print conf base p
             | _ -> specify conf base an pl1 pl2 pl3))
