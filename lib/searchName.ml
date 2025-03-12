@@ -4,6 +4,15 @@ open Config
 open Gwdb
 open Util
 
+type opts = {
+  order : bool;
+  all : bool;
+  case : bool;
+  exact : bool;
+  all_in : bool;
+}
+
+
 (* TODO use function from Util instead? *)
 let empty_sn_or_fn base p =
   is_empty_string (get_surname p)
@@ -135,47 +144,54 @@ let is_sublist l1 l2 =
     | _, [] -> false (* Non-empty list can't be a prefix of empty list *)
     | h1 :: t1, h2 :: t2 -> h1 = h2 && is_prefix t1 t2
   in
-  let rec find l1 l2 =
-    match l2 with [] -> false | _ :: t -> is_prefix l1 l2 || find l1 t
+
+let match_fn_l fn_l fn1_l opts =
+  let lower fn_l = 
+    List.map (fun fn -> if opts.case then fn else Name.lower fn) fn_l
   in
-  find l1 l2
-
-let ok fn_l fn1_l exact case order all all_only =
-  if all_only then
-    if case then fn_l = fn1_l
-    else List.map Name.lower fn_l = List.map Name.lower fn1_l
-  else
-    match (fn_l, all, order) with
-    | [], _, _ ->
-        true (* Empty list is always a sublist and all elements exist *)
-    | _, false, false when fn1_l <> [] ->
-        is_equal_or_substr exact (List.hd fn_l) (List.hd fn1_l)
-        (* Quick check for common case *)
-    | _, true, true -> is_sublist fn_l fn1_l (* ab does not match xaybz *)
-    | _, true, false ->
-        List.for_all
+  let equal fn1 fn2 =
+    if opts.exact then fn1 = fn2 else Mutil.contains fn2 fn1
+  in
+  let _list_equal equal fn1_l fn2_l =
+    try
+      List.length fn1_l = List.length fn2_l &&
+      List.for_all2 equal fn1_l fn2_l
+    with Invalid_argument _ -> false
+  in
+  let rec is_subsequence l1 l2 =
+    match l1, l2 with
+    | [], _ -> true
+    | _, [] -> false
+    | x :: xs, y :: ys ->
+        if equal x y then
+          is_subsequence xs ys
+        else 
+          is_subsequence l1 ys
+  in
+  let fn_l = lower fn_l in
+  let fn1_l = lower fn1_l in
+  match (fn_l, opts.all, opts.order) with
+  | [], _, _ -> true
+  | [fn], _, _ when List.length fn1_l = 1 -> equal fn (List.hd fn1_l)
+  | _, true, true -> is_subsequence fn_l fn1_l
+  | _, true, false -> List.for_all (fun fn -> List.mem fn fn1_l) fn_l
+  | _, false, _ -> List.exists
           (fun fn ->
-            List.exists (fun fn1 -> is_equal_or_substr exact fn1 fn) fn1_l)
-          fn_l
-    | _, false, _ ->
-        List.exists
-          (fun fn ->
-            List.exists (fun fn1 -> is_equal_or_substr exact fn1 fn) fn1_l)
+            List.exists (fun fn1 -> equal fn fn1) fn1_l)
           fn_l
 
-let search_for_multiple_fn conf base fn pl exact case order all all_only =
+let search_for_multiple_fn conf base fn pl opts =
   (* Check if l1 is a contiguous sublist of l2 *)
   let fn_l = cut_words fn in
-  let fn_l = List.map (fun fn -> if case then fn else Name.lower fn) fn_l in
   List.fold_left
     (fun pl p ->
       if search_reject_p conf base p then pl
       else
-        let fn1_l = get_first_name p |> sou base |> split_normalize case in
-        let fn2_l = get_public_name p |> sou base |> split_normalize case in
+        let fn1_l = get_first_name p |> sou base |> split_normalize opts.case in
+        let fn2_l = get_public_name p |> sou base |> split_normalize opts.case in
         if
-          ok fn_l fn1_l exact case order all all_only
-          || ok fn_l fn2_l exact case order all all_only
+          match_fn_l fn_l fn1_l opts
+          || match_fn_l fn_l fn2_l opts
         then p :: pl
         else pl)
     [] pl
@@ -183,10 +199,14 @@ let search_for_multiple_fn conf base fn pl exact case order all all_only =
 let search conf base an search_order specify unknown =
   let test label = p_getenv conf.env label = Some "on" in
   let test_not label = p_getenv conf.env label = Some "off" in
-  let exact = not (test_not "p_exact") in
-  let case = test "p_case" in
-  let order = test "p_order" in
-  let all = not (test_not "p_all") in
+  let opts = {
+    exact = not (test_not "p_exact");
+    case = test "p_case";
+    order = test "p_order";
+    all = not (test_not "p_all");
+    all_in = false;
+  }
+  in
   let rec loop l =
     match l with
     | [] -> unknown conf an
@@ -209,7 +229,7 @@ let search conf base an search_order specify unknown =
         | _ -> Some.search_surname_print conf base unknown an)
     | FirstName :: l -> (
         let save_env = conf.env in
-        let _pl = Some.search_first_name conf base an in
+        (* was let _pl = Some.search_first_name conf base an in *)
         let conf =
           {
             conf with
@@ -219,8 +239,18 @@ let search conf base an search_order specify unknown =
               :: save_env;
           }
         in
-        (* find all bearers of sn using advanced_search *)
+        (* find all bearers of sn with all fn using advanced_search *)
         let pl1, _len = AdvSearchOk.advanced_search conf base max_int in
+        let pl1 =
+          List.fold_left
+            (fun acc p ->
+              let fn_l = cut_words an in
+              let fn1 = sou base (get_first_name p) in
+              let fn1_l = cut_words fn1 in
+              if fn1 = "" then acc
+              else if match_fn_l fn_l fn1_l opts then p :: acc
+              else acc) [] pl1
+        in
         let conf =
           {
             conf with
@@ -230,14 +260,23 @@ let search conf base an search_order specify unknown =
               :: save_env;
           }
         in
-        (* find all bearers of sn using advanced_search *)
+        (* find additional bearers of sn with some fn using advanced_search *)
         let pl2, _len = AdvSearchOk.advanced_search conf base max_int in
         let pl2 =
           List.fold_left
             (fun acc p -> if List.mem p pl1 then acc else p :: acc)
             [] pl2
         in
-        Printf.eprintf "Order: %s\n" (if order then "yes" else "false");
+        let pl2 =
+          List.fold_left
+            (fun acc p ->
+              let fn_l = cut_words an in
+              let fn1 = sou base (get_first_name p) in
+              let fn1_l = cut_words fn1 in
+              if fn1 = "" then acc
+              else if match_fn_l fn_l fn1_l opts then p :: acc
+              else acc) [] pl2
+        in
         let pl1, pl3 =
           List.fold_left
             (fun (acc1, acc3) p ->
@@ -245,8 +284,7 @@ let search conf base an search_order specify unknown =
               let fn1 = sou base (get_public_name p) in
               let fn1_l = cut_words fn1 in
               if fn1 = "" then (p :: acc1, acc3)
-              else if ok fn_l fn1_l exact case order true false then
-                (acc1, p :: acc3)
+              else if match_fn_l fn_l fn1_l opts then (acc1, p :: acc3)
               else (p :: acc1, acc3))
             ([], []) pl1
         in
@@ -301,11 +339,13 @@ let search conf base an search_order specify unknown =
             Perso.print conf base p
         | pl -> (
             (* check first_names or public_names in list of persons *)
+            let opts1 = {opts with all_in=true} in
             let pl1 =
-              search_for_multiple_fn conf base fn pl exact case order true true
+              search_for_multiple_fn conf base fn pl opts1
             in
+            let opts1 = {opts with all_in=true} in
             let pl2 =
-              search_for_multiple_fn conf base fn pl exact case order all false
+              search_for_multiple_fn conf base fn pl opts1
             in
             let pl2 =
               List.fold_left
@@ -334,7 +374,7 @@ let search conf base an search_order specify unknown =
                 [] pl3
             in
             let pl3 =
-              search_for_multiple_fn conf base fn pl3 exact case order all false
+              search_for_multiple_fn conf base fn pl3 opts
             in
             match (pl1, pl2, pl3) with
             | [], [], [] -> loop l
@@ -376,13 +416,13 @@ let search conf base an search_order specify unknown =
                 record_visited conf (get_iper p);
                 Perso.print conf base p
             | pl -> (
+                let opts1 = { opts with all_in=true} in
                 let pl1 =
-                  search_for_multiple_fn conf base fn pl exact case order true
-                    true
+                  search_for_multiple_fn conf base fn pl opts1
                 in
+                let opts1 = { opts with all_in=false} in
                 let pl2 =
-                  search_for_multiple_fn conf base fn pl exact case order all
-                    false
+                  search_for_multiple_fn conf base fn pl opts1
                 in
                 let pl2 =
                   List.fold_left
@@ -446,8 +486,8 @@ let print conf base specify unknown =
           if j = -1 then "" else String.sub pn (j + 1) (String.length pn - j - 1)
         in
         let j = if j = -1 then 0 else String.length pn - j in
-        let fn = String.sub pn 0 i in
-        let sn = String.sub pn (i + 1) (String.length pn - i - 1 - j) in
+        let fn = String.sub pn 0 i |> String.trim in
+        let sn = String.sub pn (i + 1) (String.length pn - i - 1 - j) |> String.trim in
         match (fn, sn, oc) with
         | fn, "", "" when fn <> "" ->
             let order = [ FirstName ] in
