@@ -253,21 +253,11 @@ let first_name_print_list conf base x1 xl listes =
   (* Si on est dans un calcul de parenté, on affiche *)
   (* l'aide sur la sélection d'un individu.          *)
   Util.print_tips_relationship conf;
-
-  List.iter
-    (fun (str, liste) ->
-      if liste <> [] then (
-        let list = surnames_liste liste in
-        let list =
-          List.map
-            (fun (sn, ipl) ->
-              let txt =
-                Util.surname_without_particle base sn
-                ^ Util.surname_particle base sn
-              in
-              let ord = name_unaccent txt in
-              (ord, txt, ipl))
-            list
+  let list =
+    List.rev_map
+      (fun (sn, ipl) ->
+        let txt =
+          Util.surname_without_particle base sn ^ Util.surname_particle base sn
         in
         let list = List.sort compare list in
         if str <> "" then (
@@ -867,14 +857,14 @@ let search_first_name_print conf base x =
   | [] -> first_name_not_found conf x
   | [ (_, (strl, iperl)) ] ->
       let iperl = List.sort_uniq compare iperl in
-      let pl = List.map (pget conf base) iperl in
+      let rev_pl = List.rev_map (pget conf base) iperl in
       let pl =
-        List.fold_right
-          (fun p pl ->
+        List.fold_left
+          (fun pl p ->
             if (not (is_hide_names conf p)) || authorized_age conf base p then
               p :: pl
             else pl)
-          pl []
+          rev_pl []
       in
       first_name_print_list conf base x strl [ ("", pl) ]
   | _ -> select_first_name conf x list
