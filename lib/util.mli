@@ -442,7 +442,7 @@ val end_centered : config -> unit
 (** Prints on the socket end of the column and table opened by [begin_centered] *)
 
 val print_alphab_list :
-  config -> ('a -> string) -> ('a -> unit) -> 'a list -> unit
+  config -> base -> ('a -> string) -> ('a -> unit) -> 'a list -> unit
 
 val short_f_month : int -> string
 

@@ -110,7 +110,7 @@ let display_descendants_level conf base max_level ancestor =
       (Util.translate_eval ("@(c)" ^ transl_nth conf "person/persons" 1));
     Output.print_sstring conf ")");
   Output.print_sstring conf ".<p>";
-  print_alphab_list conf
+  print_alphab_list conf base
     (fun (p, _) ->
       if is_hidden p then "?"
       else String.sub (p_surname base p) (Mutil.initial (p_surname base p)) 1)
