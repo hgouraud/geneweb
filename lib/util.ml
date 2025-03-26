@@ -1771,12 +1771,19 @@ let sort_by_date base pl =
 let print_alphab_list conf base crit print_elem liste =
   let print_sub_list base len sub_l print_e index =
     if sub_l <> [] then (
-      (*let sub_l = sort_by_date base sub_l in*)
+      (* quelle est la structure des éléments de sub_l ?? *)
+      (* à priori, ce sont des éléments e utilisés par peint_elem *)
+      (* sauf erreur de ma aprt, print_elem attend (string * iper list) *)
+      let _sub_pl =
+        List.fold_left (fun acc e ->
+          e :: acc
+        ) [] sub_l
+      in
       if len > menu_threshold then (
         Output.print_sstring conf "<li>\n";
         Output.printf conf "<a id=\"ai%s\">%s</a>\n" (hexa_string index) index;
         Output.print_sstring conf "<ul>\n");
-      List.iter (fun e -> 
+      List.iter (fun e ->
         Output.print_sstring conf "<li>\n  ";
         print_e e;
         Output.print_sstring conf "</li>\n"

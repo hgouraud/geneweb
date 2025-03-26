@@ -515,7 +515,6 @@ and eval_special_var conf base = function
       | Some i ->
           let has_base_loop =
             try
-              let _ = Util.create_topological_sort conf base in
               false
             with Consang.TopologicalSortError _ -> true
           in

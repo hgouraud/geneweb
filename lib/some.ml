@@ -675,7 +675,7 @@ let print_family_alphabetic x conf base liste =
       print_alphabetic_to_branch conf x;
       print_alphab_list conf base
         (fun (p, _) -> first_char p)
-        (print_elem conf base false)
+        (fun (p, xl) -> print_elem conf base false (p, xl))
         liste;
       Hutil.trailer conf
 
