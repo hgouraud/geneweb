@@ -9,6 +9,8 @@ Need to properly set 'hardcoded vars' in script header.
 Options:
 -c  to test as cgi and not local port.
 -d  print out some debug traces
+-t  run diff of html output against reference
+-r  record html output for future reference
 -f  file to be sourced in to overwrite hardcoded vars
 -h  To display this help.
 Use Cases:
@@ -81,12 +83,17 @@ PLACE="Australie" # one specific place
 
 #===  main ====================
 cmd=$(basename $0)
+test_dir=$(dirname $0)
+nodiff=1 # to avoid diff crl output for specific crl call.
+
 echo "starting $0 $@"
-while getopts "cdf:h" Option
+while getopts "cdtrf:h" Option
 do
 case $Option in
     c ) cgitest=1;;
     d ) debug=1;;
+    t ) test_diff=1;;
+    r ) set_ref=1;;
     f ) setenv_file=$OPTARG
         test -f "$setenv_file" || \
             { echo "invalid -f $setenv_file  option file"; exit 1; }
@@ -123,10 +130,14 @@ if test -n "$TAGS"; then
     test -f "$TAGS" || { echo "invalid TAGS $TAGS file"; exit 1; }
     gwdopt="$gwdopt --allowed_tags $TAGS"
 fi
+if test "$test_diff" || test "$set_ref"; then
+    gwdopt="$gwdopt -predictable_mode"
+fi
 
 pgrep gwd >/dev/null && \
     { killall gwd || { echo "unable to kill previous gwd process"; exit 1; }; }
 
+# force lang to en. The galichet ref run is in english
 OCAMLRUNPARAM=b $SUDOPRFX $BIN_DIR/gwd \
   -setup_link \
   -bd $BASES_DIR \
@@ -135,34 +146,42 @@ OCAMLRUNPARAM=b $SUDOPRFX $BIN_DIR/gwd \
   -trace_failed_passwd \
   -robot_xcl 10000,1 \
   -conn_tmout 3600 \
-  -blang \
+  -lang en \
   -log "<stderr>" \
   -plugins -unsafe $BIN_DIR/plugins \
-  -predictable_mode \
   -n_workers 0 \
   2>> $GWDLOG &
-
-# give some time for gwd to start
-sleep 3
+# when predictable mode will be active
+# -predictable_mode \
+# -n_worker 0 \
 fi
 
-if test -z "$cgitest"; then
-  pgrep -a gwd >/dev/null || { echo "gwd not running, potential traces in $GWDLOG"; exit 1; }
+if test "$test_diff" || test "$set_ref"; then
+  for xx in run new; do
+    test -d /tmp/$xx && rm -R /tmp/$xx
+    mkdir /tmp/$xx
+  done
 fi
 
 RC=0
 curlopt="-sS -m $CRLMAXTIME -o /tmp/tmp.txt"
 crl () {
   local cmd=$1
-  curlstr="${urlprfix}w=$PWD&$cmd"
+  local flag_nodiff=$2
+  curlstr="${urlprfix}w=$PWD&norandom=yes&$cmd"
   if test -n "$debug"; then
     test -n "$tstmsg" && echo "$tstmsg"
     echo "curl $curlstr"
   fi
   curl $curlopt $curlstr
-  if [ $? -ne 0 ]; then
-    echo "Failed to execute: $cmd"
-    test -n "$first_request" && exit 1
+  curlrc=$?
+  if [ $curlrc -ne 0 ]; then
+    test $curlrc -eq 28 && exit 1 # stop if curl timeout
+    if [ "$cmd" != "" ];then
+      echo "Failed to execute $cmd."
+    else
+      return 1
+    fi
   # TODO: Is there a need for test in different languages ?
   elif grep $GREPOPT "<h1>Incorrect request</h1>" /tmp/tmp.txt; then
     if grep $GREPOPT "<h1>404 Not Found</h1>" /tmp/tmp.txt; then
@@ -187,7 +206,11 @@ crl () {
       RC=$(($RC+1))
     fi
   fi
-  unset first_request tstmsg
+  unset tstmsg
+  if test -z "$flag_nodiff" && (test "$test_diff" || test "$set_ref"); then
+    fn=$(echo "$cmd" | sed -e 's/=/_/g; s/&/_/g')
+    mv /tmp/tmp.txt /tmp/run/$fn.txt
+  fi
 }
 
 gwf_file=$BASES_DIR/$DBNAME.gwb/config/$DBNAME.gwf
@@ -236,14 +259,40 @@ update_gwf () {
     fi
 }
 
-first_request=1
-crl "" # first call to verify DBNAME access, that will exit here.
+test -n "$debug" && set -x
+if test -z "$cgitest"; then
+#!/bin/bash
+
+# Script to monitor a process using the 'crl ""' command
+# The script will exit once the process is detected as alive
+# Maximum 10 attempts before giving up
+
+MAX_ATTEMPTS=10
+attempt=0
+
+# first call to verify DBNAME access, that will exit here.
+while [ $attempt -lt $MAX_ATTEMPTS ]; do
+  crl "" >/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    break
+  else
+    sleep 1
+  fi
+  attempt=$((attempt + 1))
+done
+if [ $attempt -eq $MAX_ATTEMPTS ]; then
+  echo "gwd does not seem to be running after $attempt trys"
+  exit 1
+else
+  echo "gwd start after $attempt trys"
+fi
+fi
+
 crl "m=S&n=$FN+$SN&p="
 crl "p=$FN&n=$SN&oc=$OC"
 crl "p=$FN1&n=$SN1&oc=$OC1"
 crl "p=$FN2&n=$SN2&oc=$OC2"
 crl "p=xxx&n=yyy"
-
 #--- based on hd/etc/menubar.txt
 #--- based on hd/etc/anctree.txt
 crl "m=A&i=$ID"
@@ -271,7 +320,7 @@ crl "m=AS"
 crl "m=C&i=$ID&v=3"
 crl "m=C&i=$ID&t=AN"
 crl "m=C&i=$ID"
-crl "m=CAL"
+crl "m=CAL" $nodiff
 crl "m=CHG_CHN&ip=$FID"
 crl "m=CHG_EVT_FAM_ORD&i=$FID&ip=$ID"
 crl "m=CHG_EVT_IND_ORD&i=$ID"
@@ -279,13 +328,12 @@ crl "m=CHG_FAM_ORD&f=$FID&i=$ID&n=2"
 crl "m=D&i=$ID"
 crl "m=D&i=$ID&t=V&v=3"
 crl "m=D&i=$ID&t=TV&v=3"
-crl "m=D&i=$ID&t=V&v=3"
 crl "m=D&i=$ID&t=I&v=3&num=on&birth=on&birth_place=on&marr=on&marr_date=on&marr_place=on&child=on&death=on&death_place=on&age=on&occu=on&gen=1&ns=1&hl=1"
 crl "m=D&i=$ID&t=L&v=3&maxv=3&siblings=on&alias=on&parents=on&rel=on&witn=on&notes=on&src=on&hide=on"
 crl "m=D&i=$ID&t=A&num=on&v=3"
 crl "m=DEL_FAM&i=$FID&ip=$ID"
 crl "m=DEL_IND&i=$ID"
-crl "m=DOC&s=$IMG_SRC"
+crl "m=DOC&s=$IMG_SRC" $nodiff
 crl "m=DOCH&s=$IMG_SRC"
 crl "m=F&i=$ID"
 if check_gwf 'disable_forum=yes'; then
@@ -295,7 +343,7 @@ crl "m=FORUM"
 #crl "m=FORUM&p=939" # too base specific
 crl "m=FORUM_ADD"
 fi
-crl "m=H&v=conf"
+crl "m=H&v=conf" $nodiff
 crl "m=H&v=$TXT_SRC"
 crl "m=HIST&k=20"
 crl "m=HIST_CLEAN&i=$ID&f=$FN.$OC.$SN"
@@ -306,19 +354,19 @@ else
     echo "three history_diff related commands are not tested."
 fi
 crl "m=HIST_SEARCH&i=$ID"
-crl "m=IM&s=$IMG_SRC"
+crl "m=IM&s=$IMG_SRC" $nodiff
 crl "m=IMH&s=$IMG_SRC"
 # ATTENTION, Test only a subset of carrousel (m=IM_C*)
 # ATTENTION, les autres fonctions du carrousel (_OK) ont une action immédiate!!
-crl "m=IM_C&i=$ID"
-crl "m=IM_C_S&i=$ID" # TODO voir comportement si pas d'image sauvée
-crl "m=IM_C&i=$ID&s=$IMG_C"
-crl "m=IM_C_S&i=$ID&s=$IMG_C_S"
-crl "m=INV_FAM&i=$ID&f=$FID" # f=family_id is base specific!
+crl "m=IM_C&i=$ID" $nodiff
+crl "m=IM_C_S&i=$ID" $nodiff
+crl "m=IM_C&i=$ID&s=$IMG_C" $nodiff
+crl "m=IM_C_S&i=$ID&s=$IMG_C_S" $nodiff
+crl "m=INV_FAM&i=$ID&f=$FID"
 crl "m=L"
 crl "m=L&data=place&bi=on&ba=on&de=on&bu=on&ma=on&k=$PLACE&nb=1&i0=$ID&p0=$PLACE"
 crl "m=LB&k=30"
-crl "m=LD&k=30"
+crl "m=LD&k=30" $nodiff #uses today's date!
 crl "m=LL&k=30"
 crl "m=LM&k=30"
 crl "m=MISC_NOTES"
@@ -327,8 +375,8 @@ crl "m=MOD_DATA&data=sn"
 crl "m=MOD_DATA&data=place"
 crl "m=MOD_DATA&data=occu"
 crl "m=MOD_DATA&data=src"
-crl "m=MOD_NOTES&f=$NOTE"
-crl "m=MOD_IND&i=$ID"
+crl "m=MOD_NOTES&f"
+crl "m=MOD_IND&i=$ID" $nodiff
 crl "m=MRG&i=$ID"
 #crl "m=MRG_DUP"
 #crl "m=MRG_DUP_IND_Y_N"
@@ -338,7 +386,7 @@ crl "m=MRG_IND"
 crl "m=N&tri=A"
 crl "m=N&tri=F"
 crl "m=NOTES"
-crl "m=NOTES&f=$NOTE"
+crl "m=NOTES&f=$NOTE" $nodiff
 crl "m=OA&k=30"
 crl "m=OE&k=30"
 crl "m=P&tri=A"
@@ -348,11 +396,11 @@ crl "m=PS"
 crl "m=PPS&bi=on&ba=on&ma=on&de=on&bu=on"
 crl "m=PPS&k=$PLACE&bi=on&ba=on&ma=on&de=on&bu=on&all=on&any=on&max_rlm_nbr="
 crl "m=R&i=$ID"
-crl "m=REFRESH&i=$ID"
+crl "m=REFRESH&i=$ID" $nodiff
 #crl "m=RL&i=$ID&i1" # m=RL&i=5316&l1=3&i1=1711&l2=2&i2=6223&dag=on
 crl "m=RLM&i1=$ID&p2=$FN2&n2=$SN2&oc2=$OC2"
 crl "m=SND_IMAGE&i=$ID"
-crl "m=SND_IMAGE_C&i=$ID"
+crl "m=SND_IMAGE_C&i=$ID" $nodiff
 crl "m=SRC&v=$TXT_SRC"
 crl "m=STAT"
 crl "m=TT"
@@ -391,14 +439,33 @@ for xx in $modules; do
     done
 done
 
+if test "$test_diff"; then
+    echo "Running diff on run versus ref"
+    for xx in $(ls /tmp/run); do
+      diff $test_dir/ref/$xx /tmp/run/$xx > /dev/null 2>&1
+      ret=$?
+      if test $ret -ne 0; then
+          RC=$(($RC+1))
+          echo "*** diff $test_dir/ref/$xx /tmp/run/$xx"
+          diff $test_dir/ref/$xx /tmp/run/$xx
+          mv /tmp/run/$xx /tmp/new/$xx
+      fi
+    done
+fi
+
+if test "$set_ref"; then
+    echo "Saving /tmp/new files into $test_dir/ref for further tests"
+    cp /tmp/new/*.txt $test_dir/ref
+fi
+
 if test -f "$GWDLOG"; then
 echo "$GWDLOG reported traces (empty if no failure):"
-grep -E "$WARNING_CONDITIONS" $GWDLOG
+grep -vw "Predictable mode must not be" $GWDLOG | grep -E "$WARNING_CONDITIONS"
 grep -B1 -E "$FAILING_CONDITIONS" $GWDLOG && RC=$(($RC+1))
 fi
 if test "$RC" != 0; then
-    echo "at least $RC detected error(s)."
+    echo "$0 failed, at least $RC detected error(s)."
     exit 1
 else
-    echo "No detected error."
+    echo "$0 completed, No detected error."
 fi
