@@ -58,6 +58,7 @@ let debug = ref false
 let use_auth_digest_scheme = ref false
 let wizard_just_friend = ref false
 let wizard_passwd = ref ""
+let predictable_mode = ref false
 
 let is_multipart_form =
   let s = "multipart/form-data" in
@@ -1062,11 +1063,16 @@ let string_to_char_list s =
     if i < 0 then l else exp (i - 1) (s.[i] :: l) in
   exp (String.length s - 1) []
 
+let retrieve_secret_salt () =
+  match Unix.getenv "SECRET_SALT" with
+  | exception Not_found ->
+      Logs.err (fun k -> k "Secret salt missing, the worker %d cannot \
+        continue its job." (Unix.getpid ()));
+      exit 1
+  | s -> Some s
+
 let make_conf from_addr request script_name env =
-  let secret_salt =
-    try Some (Unix.getenv "SECRET_SALT")
-    with Not_found -> Some "100"
-  in
+  let secret_salt = retrieve_secret_salt () in
   if !allowed_tags_file <> "" && not (Sys.file_exists !allowed_tags_file) then (
     let str =
      Printf.sprintf
@@ -1328,6 +1334,7 @@ let make_conf from_addr request script_name env =
      forced_plugins = !forced_plugins;
      plugins = !plugins;
      secret_salt;
+     predictable_mode = !predictable_mode;
     }
   in
   GWPARAM.cnt_dir := !GWPARAM.cnt_d conf.bname;
@@ -1840,8 +1847,12 @@ let geneweb_server () =
           Logs.syslog `LOG_CRIT (Format.sprintf "failure creating %s (%s)\n"
             !GWPARAM.cnt_dir e);
     end;
-  Wserver.start ?addr:!selected_addr ~port:!selected_port ~timeout:!conn_timeout
-    ~max_pending_requests:!max_pending_requests ~n_workers:!n_workers connection
+  let with_salt = not !predictable_mode in
+  Wserver.start
+    ~with_salt ?addr:!selected_addr ~port:!selected_port
+    ~timeout:!conn_timeout
+    ~max_pending_requests:!max_pending_requests
+    ~n_workers:!n_workers connection
 
 let cgi_timeout conf tmout _ =
   Output.header conf "Content-type: text/html; charset=iso-8859-1";
@@ -2008,6 +2019,11 @@ let set_debug_flag () =
 let set_verbosity_level lvl =
   Logs.verbosity_level := lvl
 
+let set_predictable_mode () =
+  Logs.warn (fun k -> k "Predictable mode must not be enabled in production. \
+    It disables security enhancements.");
+  predictable_mode := true
+
 let main () =
 #ifdef WINDOWS
   Wserver.sock_in := "gwd.sin";
@@ -2067,6 +2083,7 @@ let main () =
         else
           failwith "-cache-in-memory option unavailable for this build."
       ), "<DATABASE> Preload this database in memory")
+    ; ("-predictable_mode", Arg.Unit set_predictable_mode, " Turn on the predictable mode. In this mode, the behavior of the server is predictable, which is helpful for debugging or testing. (default: false)")
 #endif
     ]
   in
