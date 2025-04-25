@@ -330,16 +330,26 @@ let generate_secret_salt with_salt =
     Random.self_init ();
     string_of_int @@ Random.bits ())
   else
-    ""
+    "100"
 
 let start ?(with_salt = true) ?addr ~port ?timeout ~max_pending_requests ~n_workers callback =
+  Printf.eprintf "Start\n";
   let timeout = match timeout with None -> 0 | Some t -> t in
   match Sys.getenv "WSERVER" with
   | exception Not_found ->
+      Printf.eprintf "WSERVER Not_found\n";
       (* A secret salt is added to the environment to ensure that workers
          use the same salt for digests on both Unix and Windows platforms. *)
-      Unix.putenv "SECRET_SALT" @@ generate_secret_salt with_salt;
+      let salt = generate_secret_salt with_salt in
+      Unix.putenv "SECRET_SALT" salt;
       check_stopping ();
+      Printf.eprintf "SECRET_SALT (%s) defined for pid %d\n" salt (Unix.getpid ());
+      let oc = Secure.open_out
+        (Filename.concat ("/tmp") "salt.tmp")
+      in
+      Printf.eprintf "Creating /tmp/salt.tmp file with (%s) for %d\n" salt (Unix.getpid ());
+      Stdlib.output_string oc salt;
+      close_out oc;
       let addr =
         match addr with
         | None ->

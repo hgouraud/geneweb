@@ -1066,10 +1066,21 @@ let string_to_char_list s =
 let retrieve_secret_salt () =
   match Unix.getenv "SECRET_SALT" with
   | exception Not_found ->
+      (try
+      let ic = Secure.open_in
+        (Filename.concat ("/tmp") "salt.tmp")
+      in
+      let salt = input_line ic in
+      Printf.eprintf "Reading SALT (%s) from /tmp/salt.tmp for %d\n" salt (Unix.getpid ());
+      close_in ic; Some salt
+      with
+      _ -> (
       Logs.err (fun k -> k "Secret salt missing, the worker %d cannot \
         continue its job." (Unix.getpid ()));
-      exit 1
-  | s -> Some s
+      exit 1))
+  | s ->
+      Printf.eprintf "Reading SALT (%s) from SECRET_SALT for %d\n" s (Unix.getpid ());
+      Some s
 
 let make_conf from_addr request script_name env =
   let secret_salt = retrieve_secret_salt () in
