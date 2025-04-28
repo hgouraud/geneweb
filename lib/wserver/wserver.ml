@@ -339,7 +339,8 @@ let start ?(with_salt = true) ?addr ~port ?timeout ~max_pending_requests ~n_work
       Printf.eprintf "WSERVER Not_found\n";
       (* A secret salt is added to the environment to ensure that workers
          use the same salt for digests on both Unix and Windows platforms. *)
-      Unix.putenv "SECRET_SALT" @@ generate_secret_salt with_salt;
+      let salt = generate_secret_salt with_salt in
+      Unix.putenv "SECRET_SALT" salt;
       check_stopping ();
       let oc = Secure.open_out
         (Filename.concat ("/tmp") "salt.tmp")
