@@ -329,10 +329,10 @@ let generate_secret_salt with_salt =
   if with_salt then (
     Random.self_init ();
     string_of_int @@ Random.bits ())
-  else
-    ""
+  else ""
 
-let start ?(with_salt = true) ?addr ~port ?timeout ~max_pending_requests ~n_workers callback =
+let start ?(with_salt = true) ?addr ~port ?timeout ~max_pending_requests
+    ~n_workers callback =
   let timeout = match timeout with None -> 0 | Some t -> t in
   match Sys.getenv "WSERVER" with
   | exception Not_found ->
