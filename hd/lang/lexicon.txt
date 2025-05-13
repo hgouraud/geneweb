@@ -16069,6 +16069,10 @@ fr: partiel
 en: partial matching (exact matching by default)
 fr: correspondance partielle (correspondance exacte par défaut)
 
+    note is restricted
+en: access to this page is restricted
+fr: l'accès à cette page est restreint
+
     optional/mandatory
 en: optional/mandatory
 fr: facultatif/obligatoire
