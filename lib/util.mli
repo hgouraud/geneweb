@@ -507,7 +507,7 @@ val array_mem_witn :
 *)
 
 val make_key :
-  Gwdb.base -> (iper, iper, istr) Def.gen_person -> string * string * int
+  Gwdb.base -> (iper, iper, istr) Def.gen_person -> Def.NLDB.key
 (** make a tuple (first_name, surname, occ) apply Name.lower *)
 
 val name_key : Gwdb.base -> string -> string

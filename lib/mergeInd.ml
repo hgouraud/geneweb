@@ -192,7 +192,7 @@ let effective_merge_ind conf base (warning : CheckItem.base_warning -> unit) p1
   let pgl =
     let db = Gwdb.read_nldb base in
     let db = Notes.merge_possible_aliases conf db in
-    Notes.links_to_cache_entries conf base db key
+    Notes.links_to_cache_entries conf base db (Some key)
   in
   Notes.update_cache_linked_pages conf Notes.Merge key key (List.length pgl)
 
