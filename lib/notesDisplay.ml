@@ -708,24 +708,21 @@ let print_misc_notes conf base =
         ^ (begin_text_without_html_tags 50 s |> Util.escape_html :> string)
         ^ "</em>") 
     in
-    let c =
-      let f = file_path conf base (Notes.path_of_fnotes f) in
-      if Sys.file_exists f then "" else " style=\"color:red\""
-    in
-    Output.print_sstring conf {|<li class="file"><a href="|};
-    Output.print_string conf (commd conf);
-    Output.print_sstring conf {|m=NOTES&f=|};
-    Output.print_string conf (Mutil.encode f);
-    Output.print_sstring conf {|"|};
-    Output.print_sstring conf c;
-    Output.print_sstring conf ">";
-    Output.print_string conf (Util.escape_html r);
-    Output.print_sstring conf "</a>";
-    if (txt :> string) <> "" then (
-      Output.print_sstring conf (transl conf ":");
-      Output.print_sstring conf " ";
-      Output.print_string conf txt);
-    Output.print_sstring conf "</li>"
+    let f = file_path conf base (Notes.path_of_fnotes f) in
+    if Sys.file_exists f then (
+      Output.print_sstring conf {|<li class="file"><a href="|};
+      Output.print_string conf (commd conf);
+      Output.print_sstring conf {|m=NOTES&f=|};
+      Output.print_string conf (Mutil.encode f);
+      Output.print_sstring conf {|"|};
+      Output.print_sstring conf ">";
+      Output.print_string conf (Util.escape_html r);
+      Output.print_sstring conf "</a>";
+      if (txt :> string) <> "" then (
+        Output.print_sstring conf (transl conf ":");
+        Output.print_sstring conf " ";
+        Output.print_string conf txt);
+      Output.print_sstring conf "</li>")
   in
 
   let output_one_dir d r =
@@ -815,8 +812,6 @@ let print_misc_notes conf base =
   (* ATTENTION check this if "notes_d" changes (REORG) *)
   let notes_d = Filename.concat (!GWPARAM.bpath conf.bname) "notes_d" in
   let notes_d = if d = "" then notes_d else Filename.concat notes_d d in
-  Printf.eprintf "Ls notes_d\n";
-  flush stderr;
 
   let db2 =
     let ls = Sys.readdir notes_d |> Array.to_list in
@@ -844,14 +839,14 @@ let print_misc_notes conf base =
   in
   let db2 = List.sort (fun (r1, _) (r2, _) ->
     compare (Name.lower r1) (Name.lower r2)) db2 in
-  
+(*
   Output.print_sstring conf {|<div class="px-1">Ls notes_d (db2)</div><div class="px-1"><ul>|};
   List.iter
   (function
     | r, Some f -> output_one_file f r | r, None -> output_one_dir d r)
   db2;
   Output.print_sstring conf "</ul></div>";
-
+*)
   let db3 =
     List.fold_left ( fun acc entry ->
       if List.mem entry db then acc else entry :: acc)
