@@ -602,7 +602,7 @@ let begin_text_without_html_tags lim s =
   loop 0 0 0
 
 (* Sorting directories first then files alphabetically *)
-let sort_entries db =
+let _sort_entries db =
   List.sort
     (fun (r1, opt1) (r2, opt2) ->
       match (opt1, opt2) with
@@ -656,7 +656,7 @@ let format_folder_entry conf depth r path_to is_current is_path =
         (Util.escape_html r :> string))
 
 (* Format file entry with proper indentation level *)
-let format_file_entry conf depth d f n_type title =
+let _format_file_entry conf depth d f n_type title =
   let icon = match n_type with "gallery" -> "image" | _ -> "file-lines" in
   Format.sprintf
     {|<div class="py-1" style="margin-left: %.1fem;">
@@ -688,7 +688,7 @@ let format_back_button conf d =
     (Utf8.capitalize_fst (transl conf "back"))
 
 (* Format simple filename by removing parent directory *)
-let format_simple_filename d f =
+let _format_simple_filename d f =
   let prefix = d ^ String.make 1 NotesLinks.char_dir_sep in
   let prefix_len = String.length prefix in
   if String.length f > prefix_len && String.sub f 0 prefix_len = prefix then

@@ -626,7 +626,7 @@ let fold_linked_pages conf base db key type_filter transform =
         List.fold_left
           (fun acc (k, ind) ->
             match key with
-            | Some key 
+            | Some key ->
               if Def.NLDB.equal_key k key then transform pg k ind acc else acc
             | None ->
               transform pg k ind acc)
@@ -640,12 +640,6 @@ let links_to_cache_entries conf base db key =
 
 let links_to_ind conf base db key typ =
   fold_linked_pages conf base db (Some key) typ (fun pg _k _ind acc -> pg :: acc)
-
-let links_to_ind conf base db key typ =
-  fold_linked_pages conf base db (Some key) typ (fun pg _k _ind acc -> pg :: acc)
-
-let notes_link_db_2 conf base db =
-  fold_linked_pages conf base db None None (fun pg _k _ind acc -> pg :: acc)
 
 type mode = Delete | Rename | Merge
 type cache_linked_pages_t = (Def.NLDB.key, int) Hashtbl.t

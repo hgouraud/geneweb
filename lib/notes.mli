@@ -92,7 +92,7 @@ val links_to_cache_entries :
   ((Gwdb.iper, Gwdb.ifam) Def.NLDB.page
   * (string list * (Def.NLDB.key * Def.NLDB.ind) list))
   list ->
-  Def.NLDB.key ->
+  Def.NLDB.key option ->
   (Def.NLDB.key * Def.NLDB.ind) list
 
 val has_linked_pages : Config.config -> Gwdb.base -> Gwdb.iper -> bool
