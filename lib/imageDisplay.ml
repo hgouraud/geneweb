@@ -65,8 +65,7 @@ let print_image_file conf fname =
         (Format.sprintf "Could not find mime type from extension for file: %s"
            fname)
   | Some (_suff, ctype) -> (
-      try
-        let ic = Secure.open_in_bin fname in
+      Secure.with_open_in_bin fname @@ fun ic ->
         let buf = Bytes.create 1024 in
         let len = in_channel_length ic in
         content conf ctype len fname;
@@ -79,13 +78,7 @@ let print_image_file conf fname =
             loop (len - olen)
         in
         loop len;
-        close_in ic;
-        Ok ()
-      with Sys_error e ->
-        Logs.syslog `LOG_ERR
-          (Format.sprintf "Error printing image file content for %s : %s" fname
-             e);
-        Error e)
+        Ok ())
 
 (* ************************************************************************** *)
 (*  [Fonc] print_portrait : Config.config -> Gwdb.base -> Gwdb.person -> unit *)

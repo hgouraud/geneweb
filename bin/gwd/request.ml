@@ -455,17 +455,25 @@ let w_person ~none fn conf base =
 
 let w_wizard fn conf base =
   if conf.wizard then fn conf base
-  else if conf.just_friend_wizard then GWPARAM.output_error conf Def.Forbidden
+  else if conf.just_friend_wizard then GWPARAM.output_error conf  Def.Forbidden
+    ~content:(Adef.safe (Printf.sprintf "Wizard just friend (%d)"
+      (Def.httpStatus_to_int Def.Forbidden)))
   else
     (* FIXME: send authentification headers *)
     GWPARAM.output_error conf Def.Unauthorized
+      ~content:(Adef.safe (Printf.sprintf "Access unauthorized (%d)"
+        (Def.httpStatus_to_int Def.Unauthorized)))
 
 let treat_request =
   let w_lock = w_lock ~onerror:(fun conf _ -> Update.error_locked conf) in
   let w_base =
     let none conf =
       if conf.bname = "" then GWPARAM.output_error conf Def.Bad_Request
+        ~content:(Adef.safe (Printf.sprintf "Base name empty (%d)"
+          (Def.httpStatus_to_int Def.Bad_Request)))
       else GWPARAM.output_error conf Def.Not_Found
+        ~content:(Adef.safe (Printf.sprintf "Base not found (%s) (%d)"
+          (conf.bname) (Def.httpStatus_to_int Def.Not_Found)))
     in
     w_base ~none
   in

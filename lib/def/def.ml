@@ -12,6 +12,18 @@ type httpStatus =
   | Internal_Server_Error (* 500 *)
   | Service_Unavailable (* 503 *)
 
+let httpStatus_to_int status =
+  match status with
+  | OK -> 200
+  | Moved_Temporarily -> 302
+  | Bad_Request -> 400
+  | Unauthorized -> 401
+  | Forbidden -> 403
+  | Not_Found -> 404
+  | Conflict -> 409
+  | Internal_Server_Error -> 500
+  | Service_Unavailable -> 503
+
 exception HttpExn of httpStatus * string
 
 (* TODO OCaml 4.12 : use Either *)

@@ -148,7 +148,7 @@ let output_error =
     with _ -> ( try close_in ic with _ -> ())
   in
   fun ?(headers = []) ?(content : Adef.safe_string option) conf code ->
-    Output.status conf code;
+
     List.iter (Output.header conf "%s") headers;
     Output.print_string conf (Adef.encoded "<h1>Incorrect request</h1>");
     match content with

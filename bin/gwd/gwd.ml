@@ -1618,7 +1618,9 @@ let conf_and_connection =
             | Exit -> ()
             | Def.HttpExn (code, _) as exn ->
                 let bt = Printexc.get_backtrace () in
-                GWPARAM.output_error conf code;
+                GWPARAM.output_error conf
+                  ~content:(Adef.safe (Printf.sprintf "HTTP error %d"
+                    (Def.httpStatus_to_int code))) code;
                 printexc bt exn
             | exn ->
                 let bt = Printexc.get_backtrace () in

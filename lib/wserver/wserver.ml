@@ -300,7 +300,7 @@ let with_timeout ~timeout handler f =
 
 let accept_connection_unix ~timeout callback socket pid =
   let client_socket, client_addr = My_unix.accept_noeintr socket in
-  Logs.debug (fun k -> k "Worker %d got a job" pid);
+  Logs.debug (fun k -> k "Worker %d  " pid);
   Unix.setsockopt client_socket Unix.SO_KEEPALIVE true;
   connection_closed := false;
   wserver_sock := client_socket;
@@ -315,11 +315,10 @@ let accept_connections_unix ~timeout ~n_workers callback socket =
   else
     (* We avoid forking in the case, which is helpful for debugging. *)
     while true do
-      try accept_connection_unix ~timeout callback socket (Unix.getpid ()) with
-      | Unix.Unix_error (Unix.ECONNRESET, "accept", _) as e ->
-          Logs.info (fun k -> k "%s" (Printexc.to_string e))
-      | Sys_error msg as e when msg = "Broken pipe" ->
-          Logs.info (fun k -> k "%s" (Printexc.to_string e))
+     try accept_connection_unix ~timeout callback socket (Unix.getpid ())
+      with e ->
+        let bt = Printexc.get_raw_backtrace () in
+        Logs.info (fun k -> k "%a" Util.pp_exception (e, bt))
     done
 
 let accept_connections ~timeout ~n_workers callback socket =
