@@ -209,7 +209,7 @@ let fmt_fnote_title conf base fnotes =
     if String.trim fnote_title = "" then no_title else fnote_title
   with Not_found -> no_title
 
-let linked_page_rows conf base pg =
+let linked_page_rows conf base pg pgl =
   let typ = p_getenv conf.env "type" in
   match (pg, typ) with
   | Def.NLDB.PgInd ip, _ ->
@@ -303,11 +303,19 @@ let linked_page_rows conf base pg =
           (Format.sprintf
              {|
 <td><a href="%sm=NOTES&f=%s">%s</a></td>
-<td>%s</td>|}
+<td>%s</td>%s|}
              (commd conf :> string)
              (Util.uri_encode fnotes)
              (fnotes :> string)
-             (Util.safe_html fnote_title :> string)))
+             (Util.safe_html fnote_title :> string)
+             (if pgl then ""
+             else
+              Format.sprintf
+                {|<td><a href="%sm=NOTES&f=%s&ref=on"
+       title="%s"><-</a></td>|}
+                (commd conf :> string)
+                (fnotes :> string)
+                (Utf8.capitalize_fst (transl conf "pages where page appears")))))
   | Def.NLDB.PgWizard wizname, _ ->
       if conf.wizard then
         Output.print_sstring conf
@@ -376,11 +384,17 @@ let print_linked_list_standard conf base pgl =
           in
           if restrict_l = [] || not (is_restricted conf base restrict_l) then (
             Output.print_sstring conf "\n<tr>";
-            linked_page_rows conf base pg;
+          let db = notes_links_db conf base false in
+          let pgl =
+              match List.assoc_opt fnotes db with
+              | Some _ -> false
+              | None -> true
+            in
+            linked_page_rows conf base pg pgl;
             Output.print_sstring conf "</tr>\n")
       | _ ->
           Output.print_sstring conf "\n<tr>";
-          linked_page_rows conf base pg;
+          linked_page_rows conf base pg false;
           Output.print_sstring conf "</tr>\n")
     pgl;
   Output.print_sstring conf "</table>"
