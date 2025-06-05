@@ -1520,7 +1520,7 @@ let auth_err request auth_file =
 
 let no_access conf =
   let title _ = Output.print_sstring conf "Error" in
-  Hutil.rheader conf title;
+  Hutil.header_with_title ~error:true conf title;
   Output.print_sstring conf "No access to this database in CGI mode\n";
   Hutil.trailer conf
 

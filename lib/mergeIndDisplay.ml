@@ -247,7 +247,7 @@ let error_loop conf base p =
   let title _ =
     transl conf "error" |> Utf8.capitalize_fst |> Output.print_sstring conf
   in
-  Hutil.rheader conf title;
+  Hutil.header_with_title ~error:true conf title;
   Output.print_sstring conf "<strong>";
   Output.print_string conf (p_first_name base p |> escape_html);
   if get_occ p <> 0 then (
@@ -291,7 +291,7 @@ let not_found_or_incorrect conf =
   let title _ =
     transl conf "error" |> Utf8.capitalize_fst |> Output.print_sstring conf
   in
-  Hutil.rheader conf title;
+  Hutil.header_with_title ~error:true conf title;
   Output.print_sstring conf (Utf8.capitalize_fst (transl conf "not found"));
   Output.print_sstring conf " ";
   Output.print_sstring conf (transl conf "or");
@@ -307,7 +307,7 @@ let same_person conf =
   let title _ =
     Output.print_sstring conf (Utf8.capitalize_fst (transl conf "error"))
   in
-  Hutil.rheader conf title;
+  Hutil.header_with_title ~error:true conf title;
   Output.print_sstring conf
     (Utf8.capitalize_fst (transl conf "it is the same person!"));
   Hutil.trailer conf
@@ -316,7 +316,7 @@ let different_sexes conf base p1 p2 =
   let title _ =
     Output.print_sstring conf (Utf8.capitalize_fst (transl conf "error"))
   in
-  Hutil.rheader conf title;
+  Hutil.header_with_title ~error:true conf title;
   Output.print_sstring conf
     (Utf8.capitalize_fst (transl conf "incompatible sexes"));
   Output.print_sstring conf (transl conf ":");

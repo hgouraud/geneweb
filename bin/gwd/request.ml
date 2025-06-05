@@ -906,7 +906,7 @@ let treat_request =
             (transl conf "reserved to friends or wizards")
           |> Output.print_sstring conf
         in
-        Hutil.rheader conf title;
+        Hutil.header_with_title ~error:true conf title;
         let base_name =
           if conf.cgi then Printf.sprintf "b=%s&" conf.bname else ""
         in

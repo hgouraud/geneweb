@@ -258,7 +258,7 @@ let prerr conf _err fn =
     let title _ =
       Output.print_sstring conf (Utf8.capitalize_fst (transl conf "error"))
     in
-    Hutil.rheader conf title;
+    Hutil.header_with_title ~error:true conf title;
     fn ();
     Hutil.trailer conf;
     Output.flush conf);

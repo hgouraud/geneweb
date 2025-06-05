@@ -29,17 +29,11 @@ val header_without_title : config -> unit
     HTML page header, and opens a <div> container. Useful when you need to handle
     title display separately. *)
 
-val header_without_home : config -> (bool -> unit) -> unit
-(** calls header_with_title, but gets its <h1> title from conf.env "p_title" *)
-
 val header : ?error:bool -> ?fluid:bool -> config -> (bool -> unit) -> unit
 (** [header conf title] calls for [header_with_title] to print HTTP header and HTML page header.
     Additionaly prints page title with [title true] (false to print browser tab title).
     - error : select a red color
     - fluid : open a container-fluid  *)
-
-val rheader : config -> (bool -> unit) -> unit
-(** Same as [header] except page's title informs about an occured error (red title). *)
 
 val trailer : config -> unit
 (** [trailer conf] prints HTML page trailer in the body of the current response on the socket.

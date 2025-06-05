@@ -162,7 +162,7 @@ let error_person conf err =
   let title _ =
     transl conf "error" |> Utf8.capitalize_fst |> Output.print_sstring conf
   in
-  Hutil.rheader conf title;
+  Hutil.header_with_title ~error:true conf title;
   Output.printf conf "%s\n" (Utf8.capitalize_fst err);
   Hutil.trailer conf;
   raise

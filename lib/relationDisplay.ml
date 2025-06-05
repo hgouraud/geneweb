@@ -1041,7 +1041,7 @@ let print_base_loop conf base p =
   let title _ =
     transl conf "error" |> Utf8.capitalize_fst |> Output.print_sstring conf
   in
-  Hutil.rheader conf title;
+  Hutil.header_with_title ~error:true conf title;
   Output.printf conf
     (fcapitale (ftransl conf "loop in database: %s is his/her own ancestor"))
     (Util.update_family_loop conf base p

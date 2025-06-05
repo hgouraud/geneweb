@@ -12,28 +12,6 @@ let set_vother x = Vother x
 let incorrect_request ?(comment = "") conf =
   GWPARAM.output_error conf Def.Bad_Request ~content:(Adef.safe comment)
 
-let error_cannot_access conf fname =
-  GWPARAM.output_error conf Def.Not_Found
-    ~content:
-      ("Cannot access file \""
-      ^<^ (Util.escape_html fname : Adef.escaped_string :> Adef.safe_string)
-      ^>^ ".txt\".")
-
-let include_home_template conf =
-  let ifun =
-    Templ.
-      {
-        eval_var = (fun _ -> raise Not_found);
-        eval_transl = (fun _ -> Templ.eval_transl conf);
-        eval_predefined_apply = (fun _ -> raise Not_found);
-        get_vother;
-        set_vother;
-        print_foreach = (fun _ -> raise Not_found);
-      }
-  in
-  try Templ.output conf ifun Templ.Env.empty () "home"
-  with _ -> error_cannot_access conf "home"
-
 let link_to_referer conf =
   let referer = Util.get_referer conf in
   let back = Utf8.capitalize_fst (Util.transl conf "back") in
@@ -47,6 +25,7 @@ let link_to_referer conf =
 (* S: use Util.include_template for "hed"? *)
 
 let header_without_http_nor_home conf title =
+  Util.html conf;
   let robot = List.assoc_opt "robot_index" conf.base_env = Some "yes" in
   let str1 =
     Printf.sprintf {|<!DOCTYPE html>
@@ -81,6 +60,7 @@ let header_without_http_nor_home conf title =
   let s = s ^ Util.body_prop conf in
   Output.printf conf "<body%s>\n" s;
   Templ.output_builtin conf Templ.Env.empty "hed";
+  Templ.output_builtin conf Templ.Env.empty "home";
   Util.message_to_wizard conf
 
 let is_fluid conf =
@@ -89,18 +69,14 @@ let is_fluid conf =
 
 let header_without_title conf =
   let fluid = is_fluid conf in
-  Util.html conf;
   header_without_http_nor_home conf (fun _ -> ());
-  include_home_template conf;
   Output.print_sstring conf
     (if fluid then "<div class=\"container-fluid\">"
     else "<div class=\"container\">")
 
 let header_with_title ?(error = false) ?(fluid = false) conf title =
   let fluid = fluid || is_fluid conf in
-  Util.html conf;
   header_without_http_nor_home conf title;
-  include_home_template conf;
   (* balancing </div> in gen_trailer *)
   Output.print_sstring conf
     (if fluid then "<div class=\"container-fluid\">"
@@ -110,19 +86,6 @@ let header_with_title ?(error = false) ?(fluid = false) conf title =
   Output.print_sstring conf "</h1>\n"
 
 let header_fluid conf title = header_with_title ~fluid:true conf title
-
-(* when the use of home.txt is not available *)
-let header_without_home conf title =
-  let fluid = is_fluid conf in
-  Util.html conf;
-  header_without_http_nor_home conf title;
-  (* balancing </div> in gen_trailer *)
-  Output.print_sstring conf
-    (if fluid then "<div class=\"container-fluid\">"
-    else "<div class=\"container\">");
-  Output.print_sstring conf "<h1>";
-  title false;
-  Output.print_sstring conf "</h1>\n"
 
 let header_with_conf_title conf _title =
   (* title is supplied bt conf.env *)
@@ -135,9 +98,6 @@ let header_with_conf_title conf _title =
 
 let header ?(error = false) ?(fluid = false) conf title =
   header_with_title ~error ~fluid conf title
-
-(* TODO replace rheader by header ~error:true *)
-let rheader conf title = header_with_title ~error:true conf title
 
 let trailer conf =
   let conf = { conf with is_printed_by_template = false } in

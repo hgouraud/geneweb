@@ -712,7 +712,7 @@ let error_person conf err =
     let title _ =
       Output.print_sstring conf (Utf8.capitalize_fst (transl conf "error"))
     in
-    Hutil.rheader conf title;
+    Hutil.header_with_title ~error:true conf title;
     Output.print_sstring conf
       (Utf8.capitalize_fst
          (Update.string_of_error conf err : Adef.safe_string :> string));
