@@ -111,19 +111,6 @@ let header_with_title ?(error = false) ?(fluid = false) conf title =
 
 let header_fluid conf title = header_with_title ~fluid:true conf title
 
-(* when the use of home.txt is not available *)
-let header_without_home conf title =
-  let fluid = is_fluid conf in
-  Util.html conf;
-  header_without_http_nor_home conf title;
-  (* balancing </div> in gen_trailer *)
-  Output.print_sstring conf
-    (if fluid then "<div class=\"container-fluid\">"
-    else "<div class=\"container\">");
-  Output.print_sstring conf "<h1>";
-  title false;
-  Output.print_sstring conf "</h1>\n"
-
 let header_with_conf_title conf _title =
   (* title is supplied bt conf.env *)
   let title _ =

@@ -29,9 +29,6 @@ val header_without_title : config -> unit
     HTML page header, and opens a <div> container. Useful when you need to handle
     title display separately. *)
 
-val header_without_home : config -> (bool -> unit) -> unit
-(** calls header_with_title, but gets its <h1> title from conf.env "p_title" *)
-
 val header : ?error:bool -> ?fluid:bool -> config -> (bool -> unit) -> unit
 (** [header conf title] calls for [header_with_title] to print HTTP header and HTML page header.
     Additionaly prints page title with [title true] (false to print browser tab title).

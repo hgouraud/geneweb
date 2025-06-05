@@ -277,7 +277,7 @@ let print_main conf base auth_file =
     else list
   in
   let wddir = dir conf base in
-  Hutil.header_without_home conf title;
+  Hutil.header conf title;
   (* mouais... *)
   let list =
     List.map
@@ -357,7 +357,7 @@ let print_whole_wiznote conf base auth_file wz wfile (s, date) ho =
     if title = "" then wizard_page_title conf @@ Util.escape_html wizname
     else wizard_page_title conf @@ Util.escape_html title
   in
-  Hutil.header_without_home conf title;
+  Hutil.header conf title;
   Output.print_sstring conf {|<table border="0" width="100%"><tr><td>|};
   let s = string_with_macros conf [] s in
   let s =
@@ -405,7 +405,7 @@ let print_whole_wiznote conf base auth_file wz wfile (s, date) ho =
 
 let print_part_wiznote conf base wz s cnt0 =
   let title = Util.escape_html wz in
-  Hutil.header_without_home conf (fun _ -> Output.print_string conf title);
+  Hutil.header conf (fun _ -> Output.print_string conf title);
   let s = Util.safe_html @@ string_with_macros conf [] s in
   let lines = Wiki.extract_sub_part (s : Adef.safe_string :> string) cnt0 in
   let lines =
@@ -435,7 +435,7 @@ let wizard_auth_file_name conf =
 
 let print conf base =
   let auth_file = wizard_auth_file_name conf in
-  if auth_file = "" then Hutil.incorrect_request conf
+  if auth_file = "" then Hutil.incorrect_request conf ~comment:"no auth file"
   else
     let f =
       (* backward compatibility *)
@@ -454,11 +454,11 @@ let print conf base =
 
 let print_aux conf fn =
   let auth_file = wizard_auth_file_name conf in
-  if auth_file = "" then Hutil.incorrect_request conf
+  if auth_file = "" then Hutil.incorrect_request conf ~comment:"no auth file"
   else
     match p_getenv conf.env "f" with
     | Some wz -> fn wz
-    | None -> Hutil.incorrect_request conf
+    | None -> Hutil.incorrect_request conf ~comment:"no file provided"
 
 let print_mod conf base =
   print_aux conf (fun wz ->
@@ -470,7 +470,9 @@ let print_mod conf base =
         let s, _ = read_wizard_notes wfile in
         Wiki.print_mod_view_page conf true (Adef.encoded "WIZNOTES") wz title []
           s
-      else Hutil.incorrect_request conf)
+      else
+        Hutil.incorrect_request conf
+          ~comment:(Printf.sprintf "only wizard %s can modify his note" wz))
 
 let print_view conf base =
   print_aux conf (fun wz ->
@@ -491,7 +493,7 @@ let commit_wiznotes conf base wz s =
 
 let print_mod_ok conf base =
   let auth_file = wizard_auth_file_name conf in
-  if auth_file = "" then Hutil.incorrect_request conf
+  if auth_file = "" then Hutil.incorrect_request conf ~comment:"no auth file"
   else
     let fname = function Some f -> f | None -> "nobody" in
     let edit_mode wz =
@@ -564,7 +566,7 @@ let do_connected_wizards conf base (_, _, _, wl) =
     transl_nth conf "wizard/wizards/friend/friends/exterior" 1
     |> Utf8.capitalize_fst |> Output.print_sstring conf
   in
-  Hutil.header_without_home conf title;
+  Hutil.header conf title;
   let wddir = dir conf base in
   let denying = wizard_denying wddir in
   let wl =
@@ -617,7 +619,7 @@ let do_connected_wizards conf base (_, _, _, wl) =
 let connected_wizards conf base =
   match conf.n_connect with
   | Some x -> do_connected_wizards conf base x
-  | None -> Hutil.incorrect_request conf
+  | None -> Hutil.incorrect_request conf ~comment:"no connected wizards"
 
 let do_change_wizard_visibility conf base x set_vis =
   let wddir = dir conf base in
@@ -647,7 +649,7 @@ let do_change_wizard_visibility conf base x set_vis =
 let change_wizard_visibility conf base =
   match (conf.n_connect, p_getint conf.env "v") with
   | Some x, Some vis -> do_change_wizard_visibility conf base x (vis <> 0)
-  | _ -> Hutil.incorrect_request conf
+  | _ -> Hutil.incorrect_request conf ~comment:"no connected wizards"
 
 (* searching *)
 
