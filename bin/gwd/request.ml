@@ -461,10 +461,14 @@ let treat_request =
     in
     w_base ~none
   in
-  let w_person = w_person ~none:SrcfileDisplay.print_welcome in
+  let w_person =
+    w_person ~none:(SrcfileDisplay.print_welcome
+            ~comment:"Person not found")
+  in
   let print_page conf l =
     w_base
       (if only_special_env conf.env then SrcfileDisplay.print_welcome
+        ~comment:""
       else
         w_person @@ fun conf base p ->
         match p_getenv conf.env "ptempl" with

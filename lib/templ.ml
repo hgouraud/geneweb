@@ -912,6 +912,7 @@ let print_body_prop (conf : Config.config) =
 type 'a vother =
   | Vdef of (string * Ast.t option) list * Ast.t list
   | Vval of 'a expr_val
+  | Vstring of string
   | Vbind of string * Adef.encoded_string
 
 module Env = Map.Make (String)
@@ -1136,6 +1137,10 @@ let eval_var conf ifun env ep loc sl =
   try
     match sl with
     | [ "reorg" ] -> VVbool !GWPARAM.reorg
+    | [ "comment" ] -> (
+        match ifun.get_vother (Env.find "comment" env) with
+        | Some (Vstring s) -> VVstring s
+        | _ -> VVstring "")
     | [ "env"; "key" ] -> (
         match ifun.get_vother (Env.find "binding" env) with
         | Some (Vbind (k, _)) -> VVstring k

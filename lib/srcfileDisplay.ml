@@ -476,7 +476,11 @@ let print_source = gen_print Source
 
 (* welcome page *)
 
-type 'a env = Vsosa_ref of person option Lazy.t | Vother of 'a | Vnone
+type 'a env = 
+  |Vsosa_ref of person option Lazy.t
+  | Vstring of string
+  | Vother of 'a 
+  | Vnone
 
 let get_env v env = try Templ.Env.find v env with Not_found -> Vnone
 let get_vother = function Vother x -> Some x | _ -> None
@@ -553,15 +557,18 @@ let eval_predefined_apply conf _env f vl =
   | "uri_decode", [ s ] -> Util.uri_decode s
   | _ -> raise Not_found
 
-let print_welcome conf base =
+let print_welcome ?(comment="") conf base =
   Util.is_welcome := true;
+  let comment = comment ^"test" in
   Fun.protect ~finally:(fun () -> Util.is_welcome := false) @@ fun () ->
   let env =
     let sosa_ref_l =
       let sosa_ref () = Util.find_sosa_ref conf base in
       Lazy.from_fun sosa_ref
     in
-    Templ.Env.(add "sosa_ref" (Vsosa_ref sosa_ref_l) empty)
+    Templ.Env.(empty
+      |> add "sosa_ref" (Vsosa_ref sosa_ref_l)
+      |> add "comment" (Vstring comment))
   in
   let ifun =
     Templ.

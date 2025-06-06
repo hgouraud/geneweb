@@ -17,6 +17,7 @@ type 'a expr_val =
 type 'a vother =
   | Vdef of (string * Ast.t option) list * Ast.t list
   | Vval of 'a expr_val
+  | Vstring of string
   | Vbind of string * Adef.encoded_string
 
 type ('a, 'b) interp_fun = {

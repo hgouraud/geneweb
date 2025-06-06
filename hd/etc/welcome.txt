@@ -227,6 +227,7 @@ fr: Les <strong>droits des magiciens</strong> sont actuellement <strong>suspendu
           <div class="d-flex flex-column justify-content-center w-100">
             <div class="d-flex flex-column flex-md-row">
               <div class="w-100 w-md-auto flex-md-grow-1">
+                %if;(comment!="")<span class="text-warning">%comment;</span>%end;
                 <div class="d-flex flex-grow-1">
                   <input type="search" id="fullname" class="form-control form-control-lg py-0 border border-top-0" autofocus tabindex="1"
                     name="pn" placeholder="[*search/case sensitive]0 [person/persons]0, [surname/surnames]0, [public name], [alias], [key]0%if;browsing_with_sosa_ref;, [n° Sosa]%end;"
