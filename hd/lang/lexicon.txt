@@ -15991,12 +15991,12 @@ en: saved image/saved images
 fr: sauvegarde/sauvegardes
 
     save help
-en: files not referenced as [[[filename]]]; Will nonetheless be saved by gwu
-fr: fichiers non référencés au format [[[fichier]]]; Seront néanmoins sauvegardés par gwu
+en: files not referenced as [[[filename]]] or referenced by persons not visible; Will nonetheless be saved by gwu
+fr: fichiers non référencés au format [[[fichier]]] ou référencés par des personnes non visibles; Seront néanmoins sauvegardés par gwu
 
     files not in db
-en: files not present in nldb
-fr: fichiers absents de nldb
+en: files not refenced
+fr: fichiers non référencés 
 
     scale
 co: anni à a generazione
