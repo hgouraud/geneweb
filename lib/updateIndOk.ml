@@ -257,6 +257,10 @@ let rec reconstitute_pevents conf ext cnt =
         in
         loop 1 ext
       in
+      let witnesses =
+        Update_util.witnesses_with_inferred_death_from_event ~conf ~base
+          ~date:epers_date witnesses
+      in
       let witnesses, ext =
         let evt_ins = "e" ^ string_of_int cnt ^ "_ins_witn0" in
         match p_getenv conf.env evt_ins with
@@ -292,7 +296,7 @@ let rec reconstitute_pevents conf ext cnt =
           epers_witnesses = Array.of_list witnesses;
         }
       in
-      let el, ext = reconstitute_pevents conf ext (cnt + 1) in
+      let el, ext = reconstitute_pevents ~base conf ext (cnt + 1) in
       let el, ext = reconstitute_insert_pevent conf ext (cnt + 1) el in
       (e :: el, ext)
 
@@ -542,7 +546,7 @@ let reconstitute_from_pevents pevents ext bi bp de bu =
   let bu = if not !found_burial then (UnknownBurial, "", "", "") else bu in
   (bi, bp, de, bu, pevents)
 
-let reconstitute_person conf =
+let reconstitute_person ~base conf =
   let ext = false in
   let key_index =
     match p_getenv conf.env "i" with
@@ -629,7 +633,7 @@ let reconstitute_person conf =
         | UnknownBurial -> death)
     | Death _ | DeadYoung | DeadDontKnowWhen | OfCourseDead -> death
   in
-  let pevents, ext = reconstitute_pevents conf ext 1 in
+  let pevents, ext = reconstitute_pevents ~base conf ext 1 in
   let pevents, ext = reconstitute_insert_pevent conf ext 0 pevents in
   let notes =
     if first_name = "?" || surname = "?" then ""
@@ -1108,7 +1112,7 @@ let print_add o_conf base =
   (* zéro pour la détection des caractères interdits *)
   let () = removed_string := [] in
   let conf = Update.update_conf o_conf in
-  let sp, ext = reconstitute_person conf in
+  let sp, ext = reconstitute_person ~base conf in
   let redisp = Option.is_some (p_getenv conf.env "return") in
   if ext || redisp then UpdateInd.print_update_ind conf base sp ""
   else
@@ -1134,7 +1138,7 @@ let print_del conf base =
   | None -> Hutil.incorrect_request conf
 
 let print_mod_aux conf base callback =
-  let p, ext = reconstitute_person conf in
+  let p, ext = reconstitute_person ~base conf in
   let redisp = Option.is_some (p_getenv conf.env "return") in
   let ini_ps = UpdateInd.string_person_of base (Driver.poi base p.key_index) in
   let salt = Option.get conf.secret_salt in

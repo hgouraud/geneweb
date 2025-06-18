@@ -45,6 +45,13 @@ val infer_death_from_parents :
   config -> Geneweb_db.Driver.base -> Geneweb_db.Driver.family -> death
 (** [infer_death_from_parents conf base fam] infer death status for a new children in this family *)
 
+val infer_witness_death_from_event :
+  conf:Config.config ->
+  base:Geneweb_db.Driver.base ->
+  date:Date.date option ->
+  existing_witnesses:Geneweb_db.Driver.iper list ->
+  Def.death
+
 val print_same_name :
   config -> Geneweb_db.Driver.base -> Geneweb_db.Driver.person -> unit
 
