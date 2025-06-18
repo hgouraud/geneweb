@@ -2734,6 +2734,12 @@ fr: Remarque : cette opération peut s’effectuer en un clin d’oeil ou pren
 it: Nota: questa operazione si può fare in un batter d'occhio, in qualche secondo o qualche minuto, secondo i casi. Siate pazienti.
 sv: Obs: denna operation kan gå blixtsnabbt eller ta tiotalet sekunder eller flera minuter, beroende på fallet. Ha tålamod.
 
+
+    remove double spaces
+aa: gwc.htm
+en: Replace double spaces by single space in src fields.
+fr: Remplace les espaces doubles par un simple dans les sources.
+
     Rename
 aa: rename.htm
 co: Rinuminà

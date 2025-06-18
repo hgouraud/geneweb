@@ -143,6 +143,9 @@ let speclist =
     ("-reorg", Arg.Set Geneweb.GWPARAM.reorg, " Mode reorg");
     ("-rgpd", Arg.String (fun s -> Gwcomp.rgpd_dir := s), "<dir> Rgpd directory");
     ("-sep", Arg.Set separate, " Separate all persons in next file");
+    ( "-dbl",
+      Arg.Set Gwcomp.dbl_spaces,
+      " Remove double spaces in src, #bs, ... fields" );
     ("-sh", Arg.Set_int shift, "<int> Shift all persons numbers in next files");
     ("-stats", Arg.Set Db1link.pr_stats, " Print statistics");
     ("-v", Arg.Set Gwcomp.verbose, " Verbose");

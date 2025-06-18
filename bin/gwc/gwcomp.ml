@@ -14,6 +14,7 @@ let no_picture = ref false
 let rgpd_dir = ref "None"
 let rgpd = ref false
 let verbose = ref false
+let dbl_spaces = ref false
 let semi_pub_cnt = ref 0
 let out_file = ref (Filename.concat Filename.current_dir_name "a")
 
@@ -110,6 +111,7 @@ let copy_decode s i1 i2 =
     else
       let c, i =
         match s.[i] with
+        | '_' when !dbl_spaces && i < i2 - 1 && s.[i + 1] = '_' -> (' ', i + 1)
         | '_' -> (' ', i)
         | '\\' -> (s.[i + 1], i + 1)
         | x -> (x, i)
@@ -117,7 +119,7 @@ let copy_decode s i1 i2 =
       Bytes.set t j c;
       loop_copy t (succ i) (succ j)
   in
-  loop_copy (Bytes.create len) i1 0
+  loop_copy (Bytes.create len) i1 0 |> String.trim
 
 (** Return list of words inside the [str] *)
 let fields str =

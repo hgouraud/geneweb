@@ -11,6 +11,9 @@ val rgpd : bool ref
 val semi_pub_cnt : int ref
 (** count the number of person registered as SemiPublic *)
 
+val dbl_spaces : bool ref
+(** remove double spaces in src, #bs, #ds, ... fields *)
+
 type key = { pk_first_name : string; pk_surname : string; pk_occ : int }
 (** Key to refer a person's definition *)
 
