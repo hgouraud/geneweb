@@ -1469,7 +1469,11 @@ and print_simple_variable conf = function
         !GWPARAM.errors_other !GWPARAM.set_vars
   | "src_images_list" ->
       let dir = !GWPARAM.images_d conf.bname in
-      let f_list = Sys.readdir dir |> Array.to_list |> List.sort compare in
+      let f_list =
+        if Sys.file_exists dir then
+          Sys.readdir dir |> Array.to_list |> List.sort compare
+        else []
+      in
       let res =
         List.fold_left
           (fun acc f ->
