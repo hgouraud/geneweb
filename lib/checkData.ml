@@ -178,7 +178,10 @@ let has_legitimate_mixed_case dict s =
   | _ -> false
 
 let has_bad_capitalization dict s =
-  has_bad_capitalization_pattern s && not (has_legitimate_mixed_case dict s)
+  match dict with
+  | Sources -> false
+  | _ ->
+      has_bad_capitalization_pattern s && not (has_legitimate_mixed_case dict s)
 
 let find_bad_capitalization_positions s =
   let re = Str.regexp "\\([A-Z]\\{2,\\}\\|[a-z][A-Z]\\|[A-Z][a-z][A-Z]\\)" in
@@ -421,7 +424,9 @@ let make_error_html conf data entry error_type =
   let highlighted = make_highlight_html entry positions error_type conf in
 
   let url =
-    Printf.sprintf "?m=MOD_DATA&data=%s&s=%s&s1=%s&s2=%s" data
+    Printf.sprintf "%sm=MOD_DATA&data=%s&s=%s&s1=%s&s2=%s"
+      (Util.commd conf :> string)
+      data
       (Mutil.encode s :> string)
       (Mutil.encode s1 :> string)
       (Mutil.encode s2 :> string)
