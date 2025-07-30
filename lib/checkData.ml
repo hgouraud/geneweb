@@ -247,7 +247,12 @@ let invisible_chars =
   |]
 
 let is_zero_width hex =
-  match hex with "200B" | "200C" | "200D" | "FEFF" -> true | _ -> false
+  match hex with
+  | "00AD" | "034F" | "200B" | "200C" | "200D" | "200E" | "200F" | "2060"
+  | "2061" | "2062" | "2063" | "2064" | "206A" | "206B" | "206C" | "206D"
+  | "206E" | "206F" | "FEFF" ->
+      true
+  | _ -> false
 
 let get_unicode_info code =
   let hex = Printf.sprintf "%04X" code in
@@ -370,9 +375,6 @@ let get_highlight_style error_type conf =
                 (Option.value code ~default:"")
                 (Option.value name ~default:"")
             in
-            let () =
-              Printf.printf "code: %s\n" (Option.value code ~default:"")
-            in
             if is_zero_width (Option.value code ~default:"") then
               Some
                 (Printf.sprintf "%s (%s)" base
@@ -407,8 +409,7 @@ let make_highlight_html s positions error_type conf =
         in
         let original = String.sub s i size in
         Printf.bprintf buf "<span class=\"hl-check-data%s\"%s>%s</span>"
-          (style.make_class original)
-          title_attr original;
+          (style.make_class hex) title_attr original;
         process_char (i + size) false)
       else (
         Buffer.add_char buf s.[i];
@@ -531,12 +532,21 @@ let collect_dict_strings base = function
   | Estates -> fun p -> List.map (fun t -> t.t_place) (Driver.get_titles p)
   | Sources -> collect_sources base
 
-let collect_all_errors base dict =
+exception Max_results_reached
+
+let collect_all_errors ?(max_results = None) base dict =
   let strings_with_errors = Hashtbl.create 1024 in
+  let total_entries = ref 0 in
   let add_error s err =
     match Hashtbl.find_opt strings_with_errors s with
     | Some errs -> Hashtbl.replace strings_with_errors s (err :: errs)
-    | None -> Hashtbl.add strings_with_errors s [ err ]
+    | None -> (
+        Hashtbl.add strings_with_errors s [ err ];
+        incr total_entries;
+        (* Vérifier la limite après chaque nouvelle entrée avec erreur *)
+        match max_results with
+        | Some max when !total_entries >= max -> raise Max_results_reached
+        | _ -> ())
   in
 
   let check_string s =
@@ -548,15 +558,17 @@ let collect_all_errors base dict =
 
   let collect_strings = collect_dict_strings base dict in
 
-  Collection.iter
-    (fun i ->
-      let p = Driver.poi base i in
-      List.iter
-        (fun istr ->
-          let s = Driver.sou base istr in
-          if s <> "" then check_string s)
-        (collect_strings p))
-    (Driver.ipers base);
+  (try
+     Collection.iter
+       (fun i ->
+         let p = Driver.poi base i in
+         List.iter
+           (fun istr ->
+             let s = Driver.sou base istr in
+             if s <> "" then check_string s)
+           (collect_strings p))
+       (Driver.ipers base)
+   with Max_results_reached -> ());
 
   let result = ref [] in
   Hashtbl.iter

@@ -21,4 +21,7 @@ val fix_error : error_type -> string -> string
 val make_error_html : Config.config -> string -> string -> error_type -> string
 
 val collect_all_errors :
-  Geneweb_db.Driver.base -> dict_type -> (string * error_type list) list
+  ?max_results:int option ->
+  Geneweb_db.Driver.base ->
+  dict_type ->
+  (string * error_type list) list

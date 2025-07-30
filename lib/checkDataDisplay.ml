@@ -48,7 +48,12 @@ let display_error_section conf data entries error_type error_title =
 
 let print conf base =
   let data = Util.p_getenv conf.env "data" |> Option.value ~default:"" in
-
+  let max_results =
+    match List.assoc_opt "checkbooks_max_results" conf.base_env with
+    | Some "" -> None
+    | Some n -> ( try Some (int_of_string n) with Failure _ -> Some 150)
+    | None -> Some 150
+  in
   let dict =
     match data with
     | "fn" -> Some CheckData.Fnames
@@ -63,19 +68,23 @@ let print conf base =
     | "src" -> Some CheckData.Sources
     | _ -> None
   in
-
   let entries =
     match dict with
-    | Some dict_type -> CheckData.collect_all_errors base dict_type
+    | Some dict_type -> CheckData.collect_all_errors ~max_results base dict_type
     | None -> []
   in
-
   let title _ =
     Output.print_sstring conf (Util.transl conf "data typographic checker")
   in
   Hutil.header conf title;
   Util.print_loading_overlay conf ();
   print_nav_buttons conf data;
+  (match max_results with
+  | Some max when List.length entries >= max ->
+      let limit = Util.ftransl conf "checkbooks limited to %d first entries" in
+      Output.printf conf "<div class=\"alert alert-info mt-3\">%s</div>"
+        (Utf8.capitalize_fst (Printf.sprintf limit max))
+  | _ -> ());
   let total_errors =
     let count1 =
       display_error_section conf data entries CheckData.InvisibleCharacters
