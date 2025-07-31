@@ -25,3 +25,12 @@ val collect_all_errors :
   Geneweb_db.Driver.base ->
   dict_type ->
   (string * error_type list) list
+
+val collect_all_errors_with_cache :
+  ?max_results:int option ->
+  Config.config ->
+  Geneweb_db.Driver.base ->
+  dict_type ->
+  (string * error_type list) list
+
+val cache_file_exists : Config.config -> dict_type -> bool

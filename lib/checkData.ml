@@ -1,6 +1,8 @@
 open Def
+open Config
 module Driver = Geneweb_db.Driver
 module Collection = Geneweb_db.Collection
+module GzReader = My_gzip
 
 (* Basic types *)
 type dict_type =
@@ -67,33 +69,39 @@ let has_roman_after_nbsp s i =
     in
     is_roman_numeral next_word
 
+let nbsp_regex = Str.regexp "\xC2\xA0\\|\xE2\x80\xAF"
+let multiple_spaces_regex = Str.regexp "  +"
+
 let find_multiple_spaces_positions s =
-  let rec aux acc i =
-    if i >= String.length s then List.rev acc
-    else if s.[i] = ' ' then
-      let rec count_spaces pos positions =
-        if pos >= String.length s || s.[pos] <> ' ' then (pos, positions)
-        else count_spaces (pos + 1) (pos :: positions)
-      in
-      let next_pos, spaces = count_spaces i [] in
-      if List.length spaces > 1 then aux (spaces @ acc) next_pos
-      else aux acc (i + 1)
-    else aux acc (i + 1)
+  let positions = ref [] in
+  let rec find_all pos =
+    try
+      let pos = Str.search_forward multiple_spaces_regex s pos in
+      let matched = Str.matched_string s in
+      for i = 0 to String.length matched - 1 do
+        positions := (pos + i) :: !positions
+      done;
+      find_all (pos + String.length matched)
+    with Not_found -> ()
   in
-  aux [] 0
+  find_all 0;
+  List.rev !positions
 
 let fix_multiple_spaces s =
-  let rec aux acc i =
-    if i >= String.length s then String.concat "" (List.rev acc)
-    else if s.[i] = ' ' then
-      let rec skip_spaces j =
-        if j >= String.length s || s.[j] != ' ' then j else skip_spaces (j + 1)
-      in
-      let next = skip_spaces (i + 1) in
-      aux (" " :: acc) next
-    else aux (String.make 1 s.[i] :: acc) (i + 1)
+  let buf = Buffer.create (String.length s) in
+  let len = String.length s in
+  let rec loop i last_was_space =
+    if i >= len then Buffer.contents buf
+    else
+      let c = s.[i] in
+      if c = ' ' then (
+        if not last_was_space then Buffer.add_char buf c;
+        loop (i + 1) true)
+      else (
+        Buffer.add_char buf c;
+        loop (i + 1) false)
   in
-  aux [] 0
+  loop 0 false
 
 (* Non-breaking spaces functions *)
 let has_regular_nbsp s i =
@@ -117,17 +125,16 @@ let has_non_breaking_space s =
   aux 0
 
 let find_non_breaking_space_positions s =
-  let rec aux acc i =
-    if i >= String.length s - 1 then List.rev acc
-    else if has_regular_nbsp s i then
-      if has_roman_after_nbsp s i then aux acc (i + 2)
-      else aux (i :: (i + 1) :: acc) (i + 2)
-    else if has_narrow_nbsp s i then
-      if has_roman_after_nbsp s i then aux acc (i + 3)
-      else aux (i :: (i + 1) :: (i + 2) :: acc) (i + 3)
-    else aux acc (i + 1)
+  let positions = ref [] in
+  let rec find_all pos =
+    try
+      let pos = Str.search_forward nbsp_regex s pos in
+      positions := pos :: !positions;
+      find_all (pos + 1)
+    with Not_found -> ()
   in
-  aux [] 0
+  find_all 0;
+  List.rev !positions
 
 (* Detect if a word starts with Irish name prefixes Mac/Mc/Fitz *)
 let is_irish_prefix s =
@@ -288,15 +295,20 @@ let get_unicode_point s i =
 
 let hex_to_int hex = int_of_string ("0x" ^ hex)
 
+let invisible_chars_set =
+  let tbl = Hashtbl.create 17 in
+  Array.iter (fun (h, _) -> Hashtbl.add tbl (hex_to_int h) ()) invisible_chars;
+  tbl
+
+let is_invisible_char code = Hashtbl.mem invisible_chars_set code
+
 let has_invisible_chars s =
   let len = String.length s in
   let rec aux i =
     if i >= len then false
     else
       let code, size = get_unicode_point s i in
-      if Array.exists (fun (h, _) -> hex_to_int h = code) invisible_chars then
-        true
-      else aux (i + size)
+      if is_invisible_char code then true else aux (i + size)
   in
   aux 0
 
@@ -575,3 +587,191 @@ let collect_all_errors ?(max_results = None) base dict =
     (fun s errs -> result := (s, errs) :: !result)
     strings_with_errors;
   !result
+
+(* Cache file utilities *)
+let cache_file_path conf dict_type =
+  let bname = Filename.remove_extension conf.bname in
+  let cache_dir =
+    Filename.concat (Secure.base_dir ())
+      (Filename.concat "etc" (Filename.concat bname "cache"))
+  in
+  let fname =
+    match dict_type with
+    | Fnames -> "fnames"
+    | Snames -> "snames"
+    | Places -> "places"
+    | PubNames -> "pub_names"
+    | Qualifiers -> "qualifiers"
+    | Aliases -> "aliases"
+    | Occupation -> "occupations"
+    | Titles -> "titles"
+    | Estates -> "estates"
+    | Sources -> "sources"
+  in
+  Filename.concat cache_dir (bname ^ "_" ^ fname ^ ".cache.gz")
+
+let cache_file_exists conf dict_type =
+  let cache_file = cache_file_path conf dict_type in
+  Sys.file_exists cache_file
+
+let read_cache_file conf dict_type =
+  let cache_file = cache_file_path conf dict_type in
+  try
+    Some
+      (GzReader.with_open cache_file (fun ic ->
+           let rec read_lines acc =
+             try
+               let line = My_gzip.input_line ic in
+               read_lines (line :: acc)
+             with End_of_file -> List.rev acc
+           in
+           read_lines []))
+  with
+  | Sys_error _ -> None
+  | Gzip.Error _ -> None
+
+(* Collect errors from cache entries with a single pass *)
+let collect_all_errors_from_cache dict entries =
+  let errors_by_string = Hashtbl.create 1024 in
+
+  List.iter
+    (fun s ->
+      if s <> "" then (
+        let errors = ref [] in
+        if has_invisible_chars s then errors := InvisibleCharacters :: !errors;
+        if has_bad_capitalization dict s then
+          errors := BadCapitalization :: !errors;
+        if has_multiple_spaces s then errors := MultipleSpaces :: !errors;
+        if has_non_breaking_space s then errors := NonBreakingSpace :: !errors;
+        if !errors <> [] then Hashtbl.add errors_by_string s (List.rev !errors)))
+    entries;
+
+  (* Convert to list *)
+  Hashtbl.fold (fun s errs acc -> (s, errs) :: acc) errors_by_string []
+
+(* Optimized function to verify if specific entries still exist in database *)
+let verify_entries_exist base dict entries_to_check =
+  if entries_to_check = [] then []
+  else
+    (* Build a set for O(1) lookups *)
+    let entries_set = Hashtbl.create (List.length entries_to_check) in
+    List.iter (fun s -> Hashtbl.add entries_set s ()) entries_to_check;
+    
+    let found_entries = Hashtbl.create (List.length entries_to_check) in
+    let collect_strings = collect_dict_strings base dict in
+
+    (* Early exit counter *)
+    let total_to_find = Hashtbl.length entries_set in
+    let found_count = ref 0 in
+    
+    (try
+       Collection.iter
+         (fun i ->
+           (* Exit as soon as we found everything *)
+           if !found_count >= total_to_find then raise Exit;
+           
+           let p = Driver.poi base i in
+           List.iter
+             (fun istr ->
+               let s = Driver.sou base istr in
+               if s <> "" && Hashtbl.mem entries_set s && not (Hashtbl.mem found_entries s) then (
+                 Hashtbl.add found_entries s ();
+                 incr found_count;
+                 (* Check if we found everything *)
+                 if !found_count >= total_to_find then raise Exit))
+             (collect_strings p))
+         (Driver.ipers base);
+       
+       (* For Sources dict, also check family sources if needed *)
+       if dict = Sources && !found_count < total_to_find then
+         Collection.iter
+           (fun ifam ->
+             if !found_count >= total_to_find then raise Exit;
+             let fam = Driver.foi base ifam in
+             let src = Driver.get_fsources fam in
+             if not (Driver.Istr.is_empty src) then
+               let s = Driver.sou base src in
+               if s <> "" && Hashtbl.mem entries_set s && not (Hashtbl.mem found_entries s) then (
+                 Hashtbl.add found_entries s ();
+                 incr found_count))
+           (Driver.ifams base)
+     with Exit -> ());
+    
+    (* Return sorted list of found entries *)
+    let result = ref [] in
+    Hashtbl.iter (fun s () -> result := s :: !result) found_entries;
+    List.sort compare !result
+
+(* Main function, always try cached gziped data first *)
+let collect_all_errors_with_cache ?(max_results = None) conf base dict =
+  (* Check if we should use cache (default: yes) *)
+  let use_cache =
+    match Util.p_getenv conf.env "nocache" with
+    | Some "1" -> false
+    | _ -> true
+  in
+  
+  if use_cache then
+    match read_cache_file conf dict with
+    | Some entries ->
+        (* Process cache entries to find errors *)
+        let all_errors_with_strings =
+          collect_all_errors_from_cache dict entries
+        in
+        
+        (* Apply max_results early if noverify is set *)
+        let errors_to_process =
+          match Util.p_getenv conf.env "noverify" with
+          | Some "1" ->
+              (* No verification: return immediately with limit applied *)
+              (match max_results with
+              | Some max ->
+                  let rec take n = function
+                    | [] -> []
+                    | _ when n <= 0 -> []
+                    | h :: t -> h :: take (n - 1) t
+                  in
+                  take max all_errors_with_strings
+              | None -> all_errors_with_strings)
+          | _ ->
+              (* Need to verify entries exist in database *)
+              if all_errors_with_strings = [] then []
+              else
+                (* Extract unique strings to verify *)
+                let entries_to_verify =
+                  all_errors_with_strings
+                  |> List.map fst
+                  |> List.sort_uniq compare
+                in
+                
+                (* PERFORMANCE: Only verify the specific entries, not scan whole DB *)
+                let valid_entries = verify_entries_exist base dict entries_to_verify in
+                
+                (* Build set for O(1) lookup *)
+                let valid_set = Hashtbl.create (List.length valid_entries) in
+                List.iter (fun s -> Hashtbl.add valid_set s ()) valid_entries;
+                
+                (* Filter results and apply limit *)
+                let filtered =
+                  List.filter
+                    (fun (s, _) -> Hashtbl.mem valid_set s)
+                    all_errors_with_strings
+                in
+                
+                match max_results with
+                | Some max ->
+                    let rec take n = function
+                      | [] -> []
+                      | _ when n <= 0 -> []
+                      | h :: t -> h :: take (n - 1) t
+                    in
+                    take max filtered
+                | None -> filtered
+        in
+        errors_to_process
+    | None ->
+        (* No cache file: fallback to database scan *)
+        collect_all_errors ~max_results base dict
+  else
+    (* Force database scan when nocache=1 *)
+    collect_all_errors ~max_results base dict

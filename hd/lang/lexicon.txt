@@ -4424,37 +4424,89 @@ ru: порядок личных событий был изменён
 sv: ändrade ordningen för personhändelser
 tr: bireysel etkinliklerin sırasını değiştir
 
-    checkbooks limited to %d first entries
-de: Anzeige ist auf die ersten <abbr title=".gwf-Konfigurationsvariable `checkbooks_max_result`">%d Einträge begrenzt</abbr>.
-en: display is limited to the first <abbr title=".gwf configuration variable `checkbooks_max_result`">%d entries</abbr>.
-fr: l’affichage est limité aux <abbr title="Variable de configuration .gwf `checkbooks_max_result`">%d premières entrées</abbr>.
-nl: weergave is beperkt tot de eerste <abbr title=".gwf configuratievariabele `checkbooks_max_result`">%d items</abbr>.
-es: la visualización está limitada a las primeras <abbr title="Variable de configuración .gwf `checkbooks_max_result`">%d entradas</abbr>.
+    chk_data %d errors found
+en: %d errors found
+fr: %d erreurs détectées
 
-    chk_data invisible characters
+    chk_data books to check
+en: books to check
+fr: dictionnaires à vérifier
+
+    chk_data cache file not found, using database
+en: cache file not found, using database directly. To generate cache files, run:
+fr: fichier cache introuvable, utilisation directe de la base. Pour générer les fichiers cache, exécutez :
+
+    chk_data check data
+en: check data
+fr: vérifier les données
+
+    chk_data entries deleted from database may still appear
+en: entries deleted from database may still appear in results
+fr: les entrées supprimées de la base peuvent encore apparaître dans les résultats
+
+    chk_data error invisible characters
 de: Unsichtbare Zeichen
 en: Invisible characters
 fr: Caractères invisibles
 
-    chk_data bad capitalization
+    chk_data error bad capitalization
 de: Fehlerhafte Großschreibung
 en: Bad capitalization
 fr: Capitalisation erronée
 
-    chk_data multiple spaces
+    chk_data error multiple spaces
 de: Mehrere Leerzeichen
 en: Multiple spaces
 fr: Espaces multiples
 
-    chk_data mutiples characters
+    chk_data error mutiples characters
 de: Mehrere Zeichen
 en: Multiple characters
 fr: Caractères multiples
 
-    chk_data non-breaking spaces
+    chk_data error non-breaking spaces
 de: Geschützte Leerzeichen
 en: Non-breaking spaces
 fr: Espaces insécables
+
+    chk_data error types
+en: error types
+fr: types d’erreur
+
+    chk_data limit reached
+en: limit reached
+fr: limite atteinte
+
+    chk_data limited to %d first entries
+de: Anzeige ist auf die ersten <abbr title=".gwf-Konfigurationsvariable `chk_data_max_result`">%d Einträge begrenzt</abbr>.
+en: display is limited to the first <abbr title=".gwf configuration variable `chk_data_max_result`">%d entries</abbr>.
+fr: l’affichage est limité aux <abbr title="Variable de configuration .gwf `chk_data_max_result`">%d premières entrées</abbr>.
+nl: weergave is beperkt tot de eerste <abbr title=".gwf configuratievariabele `chk_data_max_result`">%d items</abbr>.
+es: la visualización está limitada a las primeras <abbr title="Variable de configuración .gwf `chk_data_max_result`">%d entradas</abbr>.
+
+    chk_data maximum results
+en: maximum number of results
+fr: nombre de résultats maximum
+
+    chk_data skip cache verification
+en: skip cache verification
+fr: ignorer la vérification du cache
+
+    chk_data using cached data
+en: using cached data (faster)
+fr: utilisation des données en cache (plus rapide)
+
+    chk_data use database
+en: use database
+fr: utiliser la base de données
+
+    chk_data verification disabled
+en: database verification disabled (may show outdated entries)
+fr: vérification de la base de données désactivée (peut afficher des entrées obsolètes)
+
+    chk_data verify cache entries
+en: verify cache entries
+fr: vérifier les entrées du cache
 
     child/children
 af: kind/kinders
@@ -19763,6 +19815,10 @@ sk: dnes
 sl: danes
 sv: i dag
 tr: bugün
+
+    toggle all
+en: toggle all
+fr: tout cocher
 
     tomorrow
 af: môre

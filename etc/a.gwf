@@ -334,9 +334,9 @@
 # Default value if not specified is 500.
 # If specified as empty string, no limit will be applied.
 # Examples:
-#   checkbooks_max_result=1500    # Limit to 1500 entries
-#   checkbooks_max_result=        # No limit (may cause timeout on large bases)
-#checkbooks_max_result=500
+#   chk_data_max_results=1500    # Limit to 1 500 entries
+#   chk_data_max_results=        # No limit (may cause timeout on large bases)
+#chk_data_max_results=500
 
 # This variable allows to set up the maximum number of updates
 # that can be done at a single time.
