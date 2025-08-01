@@ -4432,9 +4432,9 @@ fr: %d erreurs détectées
 en: books to check
 fr: dictionnaires à vérifier
 
-    chk_data cache file not found, using database
-en: cache file not found, using database directly. To generate cache files, run:
-fr: fichier cache introuvable, utilisation directe de la base. Pour générer les fichiers cache, exécutez :
+    chk_data cache file not found
+en: cache file(s) not found/to generate missing caches, use gwsetup or run
+fr: fichier(s) cache absent(s)/pour générer les caches manquants, utiliser gwsetup ou exécutez
 
     chk_data check data
 en: check data
@@ -4477,36 +4477,17 @@ fr: types d’erreur
 en: limit reached
 fr: limite atteinte
 
-    chk_data limited to %d first entries
-de: Anzeige ist auf die ersten <abbr title=".gwf-Konfigurationsvariable `chk_data_max_result`">%d Einträge begrenzt</abbr>.
-en: display is limited to the first <abbr title=".gwf configuration variable `chk_data_max_result`">%d entries</abbr>.
-fr: l’affichage est limité aux <abbr title="Variable de configuration .gwf `chk_data_max_result`">%d premières entrées</abbr>.
-nl: weergave is beperkt tot de eerste <abbr title=".gwf configuratievariabele `chk_data_max_result`">%d items</abbr>.
-es: la visualización está limitada a las primeras <abbr title="Variable de configuración .gwf `chk_data_max_result`">%d entradas</abbr>.
+    chk_data limited to %d results
+en: limited to <abbr title="gwf variable chk_data_max_results">%d results</abbr>.
+fr: limité à <abbr title="Variable gwf chk_data_max_results">%d résultats</abbr>.
 
-    chk_data maximum results
+    chk_data max results
 en: maximum number of results
 fr: nombre de résultats maximum
 
-    chk_data skip cache verification
-en: skip cache verification
-fr: ignorer la vérification du cache
-
-    chk_data using cached data
-en: using cached data (faster)
-fr: utilisation des données en cache (plus rapide)
-
-    chk_data use database
-en: use database
-fr: utiliser la base de données
-
-    chk_data verification disabled
-en: database verification disabled (may show outdated entries)
-fr: vérification de la base de données désactivée (peut afficher des entrées obsolètes)
-
-    chk_data verify cache entries
-en: verify cache entries
-fr: vérifier les entrées du cache
+    chk_data use database/cache
+en: use database/using <b>database</b> (very slow)/using <b>cached data</b> (very fast but may show entries that have been corrected or deleted)
+fr: utiliser la base de données/utilisation de la <b>base de données</b> (très lent)/utilisation des <b>données en cache</b> (très rapide mais peut afficher des entrées déjà corrigées ou supprimées)
 
     child/children
 af: kind/kinders

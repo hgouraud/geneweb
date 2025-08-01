@@ -34,3 +34,4 @@ val collect_all_errors_with_cache :
   (string * error_type list) list
 
 val cache_file_exists : Config.config -> dict_type -> bool
+val dict_to_cache_name : dict_type -> string

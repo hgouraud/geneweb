@@ -2,9 +2,7 @@ open Def
 open Config
 module Driver = Geneweb_db.Driver
 module Collection = Geneweb_db.Collection
-module GzReader = My_gzip
 
-(* Basic types *)
 type dict_type =
   | Fnames
   | Snames
@@ -156,7 +154,7 @@ let is_allowed_word s = is_roman_numeral s || is_irish_prefix s
    - Lowercase followed by uppercase
    - Uppercase, lowercase, uppercase sequence *)
 
-(* Bad Capitalization functions *)
+(* Bad capitalization functions *)
 let has_bad_capitalization_pattern s =
   let re = Str.regexp "\\([A-Z]\\{2,\\}\\|[a-z][A-Z]\\|[A-Z][a-z][A-Z]\\)" in
   try
@@ -452,7 +450,6 @@ let make_error_html conf data entry error_type =
   in
   Printf.sprintf "<a href=\"%s\">%s</a>" url highlighted
 
-(* Error collection *)
 (* Event accessors *)
 let get_epers_place evt = evt.epers_place
 let get_epers_src evt = evt.epers_src
@@ -549,36 +546,37 @@ exception Max_results_reached
 let collect_all_errors ?(max_results = None) base dict =
   let strings_with_errors = Hashtbl.create 1024 in
   let total_entries = ref 0 in
+  let collect_strings = collect_dict_strings base dict in
+
   let add_error s err =
     match Hashtbl.find_opt strings_with_errors s with
-    | Some errs -> Hashtbl.replace strings_with_errors s (err :: errs)
+    | Some errs ->
+        if not (List.mem err errs) then
+          Hashtbl.replace strings_with_errors s (err :: errs)
     | None -> (
         Hashtbl.add strings_with_errors s [ err ];
         incr total_entries;
-        (* Vérifier la limite après chaque nouvelle entrée avec erreur *)
         match max_results with
         | Some max when !total_entries >= max -> raise Max_results_reached
         | _ -> ())
   in
 
-  let check_string s =
-    if has_invisible_chars s then add_error s InvisibleCharacters;
-    if has_bad_capitalization dict s then add_error s BadCapitalization;
-    if has_multiple_spaces s then add_error s MultipleSpaces;
-    if has_non_breaking_space s then add_error s NonBreakingSpace
-  in
-
-  let collect_strings = collect_dict_strings base dict in
-
   (try
      Collection.iter
        (fun i ->
          let p = Driver.poi base i in
+         let istrs = collect_strings p in
          List.iter
            (fun istr ->
-             let s = Driver.sou base istr in
-             if s <> "" then check_string s)
-           (collect_strings p))
+             if not (Driver.Istr.is_empty istr) then
+               let s = Driver.sou base istr in
+               if s <> "" then (
+                 if has_invisible_chars s then add_error s InvisibleCharacters;
+                 if has_bad_capitalization dict s then
+                   add_error s BadCapitalization;
+                 if has_multiple_spaces s then add_error s MultipleSpaces;
+                 if has_non_breaking_space s then add_error s NonBreakingSpace))
+           istrs)
        (Driver.ipers base)
    with Max_results_reached -> ());
 
@@ -588,190 +586,113 @@ let collect_all_errors ?(max_results = None) base dict =
     strings_with_errors;
   !result
 
-(* Cache file utilities *)
+let dict_to_cache_name dict_type =
+  match dict_type with
+  | Fnames -> "fnames"
+  | Snames -> "snames"
+  | Places -> "places"
+  | PubNames -> "pub_names"
+  | Qualifiers -> "qualifiers"
+  | Aliases -> "aliases"
+  | Occupation -> "occupations"
+  | Titles -> "titles"
+  | Estates -> "estates"
+  | Sources -> "sources"
+
 let cache_file_path conf dict_type =
   let bname = Filename.remove_extension conf.bname in
   let cache_dir =
     Filename.concat (Secure.base_dir ())
       (Filename.concat "etc" (Filename.concat bname "cache"))
   in
-  let fname =
-    match dict_type with
-    | Fnames -> "fnames"
-    | Snames -> "snames"
-    | Places -> "places"
-    | PubNames -> "pub_names"
-    | Qualifiers -> "qualifiers"
-    | Aliases -> "aliases"
-    | Occupation -> "occupations"
-    | Titles -> "titles"
-    | Estates -> "estates"
-    | Sources -> "sources"
-  in
+  let fname = dict_to_cache_name dict_type in
   Filename.concat cache_dir (bname ^ "_" ^ fname ^ ".cache.gz")
 
 let cache_file_exists conf dict_type =
   let cache_file = cache_file_path conf dict_type in
   Sys.file_exists cache_file
 
-let read_cache_file conf dict_type =
+let collect_all_errors_from_cache conf dict_type max_results =
   let cache_file = cache_file_path conf dict_type in
-  try
-    Some
-      (GzReader.with_open cache_file (fun ic ->
-           let rec read_lines acc =
-             try
-               let line = My_gzip.input_line ic in
-               read_lines (line :: acc)
-             with End_of_file -> List.rev acc
-           in
-           read_lines []))
-  with
-  | Sys_error _ -> None
-  | Gzip.Error _ -> None
-
-(* Collect errors from cache entries with a single pass *)
-let collect_all_errors_from_cache dict entries =
-  let errors_by_string = Hashtbl.create 1024 in
-
-  List.iter
-    (fun s ->
-      if s <> "" then (
-        let errors = ref [] in
-        if has_invisible_chars s then errors := InvisibleCharacters :: !errors;
-        if has_bad_capitalization dict s then
-          errors := BadCapitalization :: !errors;
-        if has_multiple_spaces s then errors := MultipleSpaces :: !errors;
-        if has_non_breaking_space s then errors := NonBreakingSpace :: !errors;
-        if !errors <> [] then Hashtbl.add errors_by_string s (List.rev !errors)))
-    entries;
-
-  (* Convert to list *)
-  Hashtbl.fold (fun s errs acc -> (s, errs) :: acc) errors_by_string []
-
-(* Optimized function to verify if specific entries still exist in database *)
-let verify_entries_exist base dict entries_to_check =
-  if entries_to_check = [] then []
-  else
-    (* Build a set for O(1) lookups *)
-    let entries_set = Hashtbl.create (List.length entries_to_check) in
-    List.iter (fun s -> Hashtbl.add entries_set s ()) entries_to_check;
-    
-    let found_entries = Hashtbl.create (List.length entries_to_check) in
-    let collect_strings = collect_dict_strings base dict in
-
-    (* Early exit counter *)
-    let total_to_find = Hashtbl.length entries_set in
-    let found_count = ref 0 in
-    
-    (try
-       Collection.iter
-         (fun i ->
-           (* Exit as soon as we found everything *)
-           if !found_count >= total_to_find then raise Exit;
-           
-           let p = Driver.poi base i in
-           List.iter
-             (fun istr ->
-               let s = Driver.sou base istr in
-               if s <> "" && Hashtbl.mem entries_set s && not (Hashtbl.mem found_entries s) then (
-                 Hashtbl.add found_entries s ();
-                 incr found_count;
-                 (* Check if we found everything *)
-                 if !found_count >= total_to_find then raise Exit))
-             (collect_strings p))
-         (Driver.ipers base);
-       
-       (* For Sources dict, also check family sources if needed *)
-       if dict = Sources && !found_count < total_to_find then
-         Collection.iter
-           (fun ifam ->
-             if !found_count >= total_to_find then raise Exit;
-             let fam = Driver.foi base ifam in
-             let src = Driver.get_fsources fam in
-             if not (Driver.Istr.is_empty src) then
-               let s = Driver.sou base src in
-               if s <> "" && Hashtbl.mem entries_set s && not (Hashtbl.mem found_entries s) then (
-                 Hashtbl.add found_entries s ();
-                 incr found_count))
-           (Driver.ifams base)
-     with Exit -> ());
-    
-    (* Return sorted list of found entries *)
-    let result = ref [] in
-    Hashtbl.iter (fun s () -> result := s :: !result) found_entries;
-    List.sort compare !result
-
-(* Main function, always try cached gziped data first *)
-let collect_all_errors_with_cache ?(max_results = None) conf base dict =
-  (* Check if we should use cache (default: yes) *)
-  let use_cache =
-    match Util.p_getenv conf.env "nocache" with
-    | Some "1" -> false
-    | _ -> true
-  in
+  let is_compressed = Filename.check_suffix cache_file ".gz" in
   
-  if use_cache then
-    match read_cache_file conf dict with
-    | Some entries ->
-        (* Process cache entries to find errors *)
-        let all_errors_with_strings =
-          collect_all_errors_from_cache dict entries
-        in
-        
-        (* Apply max_results early if noverify is set *)
-        let errors_to_process =
-          match Util.p_getenv conf.env "noverify" with
-          | Some "1" ->
-              (* No verification: return immediately with limit applied *)
-              (match max_results with
-              | Some max ->
-                  let rec take n = function
-                    | [] -> []
-                    | _ when n <= 0 -> []
-                    | h :: t -> h :: take (n - 1) t
-                  in
-                  take max all_errors_with_strings
-              | None -> all_errors_with_strings)
-          | _ ->
-              (* Need to verify entries exist in database *)
-              if all_errors_with_strings = [] then []
-              else
-                (* Extract unique strings to verify *)
-                let entries_to_verify =
-                  all_errors_with_strings
-                  |> List.map fst
-                  |> List.sort_uniq compare
-                in
-                
-                (* PERFORMANCE: Only verify the specific entries, not scan whole DB *)
-                let valid_entries = verify_entries_exist base dict entries_to_verify in
-                
-                (* Build set for O(1) lookup *)
-                let valid_set = Hashtbl.create (List.length valid_entries) in
-                List.iter (fun s -> Hashtbl.add valid_set s ()) valid_entries;
-                
-                (* Filter results and apply limit *)
-                let filtered =
-                  List.filter
-                    (fun (s, _) -> Hashtbl.mem valid_set s)
-                    all_errors_with_strings
-                in
-                
+  try
+    if is_compressed then
+      My_gzip.with_open cache_file (fun ic ->
+        let results = ref [] in
+        let count = ref 0 in
+        let continue = ref true in
+
+        while !continue do
+          match try Some (My_gzip.input_line ic) with End_of_file -> None with
+          | Some line when line <> "" ->
+              let errors = ref [] in
+              if has_invisible_chars line then
+                errors := InvisibleCharacters :: !errors;
+              if has_bad_capitalization dict_type line then
+                errors := BadCapitalization :: !errors;
+              if has_multiple_spaces line then
+                errors := MultipleSpaces :: !errors;
+              if has_non_breaking_space line then
+                errors := NonBreakingSpace :: !errors;
+
+              if !errors <> [] then (
+                results := (line, List.rev !errors) :: !results;
+                incr count;
                 match max_results with
-                | Some max ->
-                    let rec take n = function
-                      | [] -> []
-                      | _ when n <= 0 -> []
-                      | h :: t -> h :: take (n - 1) t
-                    in
-                    take max filtered
-                | None -> filtered
-        in
-        errors_to_process
-    | None ->
-        (* No cache file: fallback to database scan *)
-        collect_all_errors ~max_results base dict
+                | Some max when !count >= max -> continue := false
+                | _ -> ())
+          | Some _ -> () (* Empty line *)
+          | None -> continue := false
+        done;
+        List.rev !results)
+    else
+      let ic = open_in cache_file in
+      try
+        let results = ref [] in
+        let count = ref 0 in
+        let continue = ref true in
+
+        while !continue do
+          match try Some (input_line ic) with End_of_file -> None with
+          | Some line when line <> "" ->
+              let errors = ref [] in
+              if has_invisible_chars line then
+                errors := InvisibleCharacters :: !errors;
+              if has_bad_capitalization dict_type line then
+                errors := BadCapitalization :: !errors;
+              if has_multiple_spaces line then
+                errors := MultipleSpaces :: !errors;
+              if has_non_breaking_space line then
+                errors := NonBreakingSpace :: !errors;
+
+              if !errors <> [] then (
+                results := (line, List.rev !errors) :: !results;
+                incr count;
+                match max_results with
+                | Some max when !count >= max -> continue := false
+                | _ -> ())
+          | Some _ -> () (* Empty line *)
+          | None -> continue := false
+        done;
+        close_in ic;
+        List.rev !results
+      with e -> close_in ic; raise e
+  with
+  | Sys_error _ -> []
+  | Gzip.Error _ -> []
+
+(* Main function *)
+let collect_all_errors_with_cache ?(max_results = None) conf base dict =
+  let use_cache =
+    match Util.p_getenv conf.env "nocache" with Some "1" -> false | _ -> true
+  in
+  if use_cache then
+    if cache_file_exists conf dict then
+      collect_all_errors_from_cache conf dict max_results
+    else []
   else
-    (* Force database scan when nocache=1 *)
-    collect_all_errors ~max_results base dict
+    let is_roglo =
+      try List.assoc "roglo" conf.base_env = "yes" with Not_found -> false
+    in
+    if is_roglo then [] else collect_all_errors ~max_results base dict

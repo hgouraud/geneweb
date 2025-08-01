@@ -80,7 +80,18 @@
 .zero-width-char {
   display: inline-block;
   min-width: 0.5em;
-  border: 1px dashed #FF5722;
+  border: 1px dashed #E1B0A0;
+  max-height: 1.4em;
+}
+
+#cd a {
+  padding: 0.75rem 1rem;
+  background-color: #fff;
+  border: 1px solid #00000020;
+}
+
+#cd a:hover {
+  background-color: #f8f9fa;
 }
 
 /* Toolbar and characters panel */
