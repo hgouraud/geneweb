@@ -543,48 +543,41 @@ let collect_dict_strings base = function
 
 exception Max_results_reached
 
-let collect_all_errors ?(max_results = None) base dict =
-  let strings_with_errors = Hashtbl.create 1024 in
-  let total_entries = ref 0 in
-  let collect_strings = collect_dict_strings base dict in
+(* Fonction commune pour analyser les erreurs dans une chaîne *)
+let analyze_string_errors dict_type s =
+  let errors = ref [] in
+  if has_invisible_chars s then errors := InvisibleCharacters :: !errors;
+  if has_bad_capitalization dict_type s then
+    errors := BadCapitalization :: !errors;
+  if has_multiple_spaces s then errors := MultipleSpaces :: !errors;
+  if has_non_breaking_space s then errors := NonBreakingSpace :: !errors;
+  List.rev !errors
 
-  let add_error s err =
-    match Hashtbl.find_opt strings_with_errors s with
-    | Some errs ->
-        if not (List.mem err errs) then
-          Hashtbl.replace strings_with_errors s (err :: errs)
-    | None -> (
-        Hashtbl.add strings_with_errors s [ err ];
-        incr total_entries;
-        match max_results with
-        | Some max when !total_entries >= max -> raise Max_results_reached
-        | _ -> ())
-  in
+(* Fonction commune pour gérer l'accumulation avec limite *)
+let should_continue max_results current_count =
+  match max_results with
+  | Some max when current_count >= max -> false
+  | _ -> true
 
-  (try
-     Collection.iter
-       (fun i ->
-         let p = Driver.poi base i in
-         let istrs = collect_strings p in
-         List.iter
-           (fun istr ->
-             if not (Driver.Istr.is_empty istr) then
-               let s = Driver.sou base istr in
-               if s <> "" then (
-                 if has_invisible_chars s then add_error s InvisibleCharacters;
-                 if has_bad_capitalization dict s then
-                   add_error s BadCapitalization;
-                 if has_multiple_spaces s then add_error s MultipleSpaces;
-                 if has_non_breaking_space s then add_error s NonBreakingSpace))
-           istrs)
-       (Driver.ipers base)
-   with Max_results_reached -> ());
-
-  let result = ref [] in
-  Hashtbl.iter
-    (fun s errs -> result := (s, errs) :: !result)
-    strings_with_errors;
-  !result
+(* Fonction générique pour traiter les lignes avec n'importe quel lecteur *)
+let process_lines_with_reader dict_type max_results read_line_fn =
+  let results = ref [] in
+  let count = ref 0 in
+  let continue = ref true in
+  
+  while !continue do
+    match read_line_fn () with
+    | Some line when line <> "" ->
+        let errors = analyze_string_errors dict_type line in
+        if errors <> [] then (
+          results := (line, errors) :: !results;
+          incr count;
+          if not (should_continue max_results !count) then
+            continue := false)
+    | Some _ -> () (* Empty line *)
+    | None -> continue := false
+  done;
+  List.rev !results
 
 let dict_to_cache_name dict_type =
   match dict_type with
@@ -612,87 +605,128 @@ let cache_file_exists conf dict_type =
   let cache_file = cache_file_path conf dict_type in
   Sys.file_exists cache_file
 
-let collect_all_errors_from_cache conf dict_type max_results =
+let collect_all_errors_from_cache conf dict_type max_results ?(selected_error_types = []) () =
   let cache_file = cache_file_path conf dict_type in
   let is_compressed = Filename.check_suffix cache_file ".gz" in
   
   try
-    if is_compressed then
-      My_gzip.with_open cache_file (fun ic ->
-        let results = ref [] in
-        let count = ref 0 in
-        let continue = ref true in
-
-        while !continue do
-          match try Some (My_gzip.input_line ic) with End_of_file -> None with
-          | Some line when line <> "" ->
-              let errors = ref [] in
-              if has_invisible_chars line then
-                errors := InvisibleCharacters :: !errors;
-              if has_bad_capitalization dict_type line then
-                errors := BadCapitalization :: !errors;
-              if has_multiple_spaces line then
-                errors := MultipleSpaces :: !errors;
-              if has_non_breaking_space line then
-                errors := NonBreakingSpace :: !errors;
-
-              if !errors <> [] then (
-                results := (line, List.rev !errors) :: !results;
-                incr count;
-                match max_results with
-                | Some max when !count >= max -> continue := false
-                | _ -> ())
-          | Some _ -> () (* Empty line *)
-          | None -> continue := false
-        done;
-        List.rev !results)
-    else
-      let ic = open_in cache_file in
-      try
-        let results = ref [] in
-        let count = ref 0 in
-        let continue = ref true in
-
-        while !continue do
-          match try Some (input_line ic) with End_of_file -> None with
-          | Some line when line <> "" ->
-              let errors = ref [] in
-              if has_invisible_chars line then
-                errors := InvisibleCharacters :: !errors;
-              if has_bad_capitalization dict_type line then
-                errors := BadCapitalization :: !errors;
-              if has_multiple_spaces line then
-                errors := MultipleSpaces :: !errors;
-              if has_non_breaking_space line then
-                errors := NonBreakingSpace :: !errors;
-
-              if !errors <> [] then (
-                results := (line, List.rev !errors) :: !results;
-                incr count;
-                match max_results with
-                | Some max when !count >= max -> continue := false
-                | _ -> ())
-          | Some _ -> () (* Empty line *)
-          | None -> continue := false
-        done;
-        close_in ic;
-        List.rev !results
-      with e -> close_in ic; raise e
+    (* 1. Lire TOUT le cache d'abord *)
+    let all_entries = 
+      if is_compressed then
+        My_gzip.with_open cache_file (fun ic ->
+          let read_line () = 
+            try Some (My_gzip.input_line ic) with End_of_file -> None 
+          in
+          process_lines_with_reader dict_type None read_line)
+      else
+        let ic = open_in cache_file in
+        try
+          let read_line () = 
+            try Some (input_line ic) with End_of_file -> None 
+          in
+          let results = process_lines_with_reader dict_type None read_line in
+          close_in ic;
+          results
+        with e -> close_in ic; raise e
+    in
+    
+    (* 2. Puis filtrer par types sélectionnés ET appliquer la limite *)
+    let check_error_types = 
+      if selected_error_types = [] then
+        [InvisibleCharacters; BadCapitalization; MultipleSpaces; NonBreakingSpace]
+      else selected_error_types
+    in
+    
+    let filtered_entries = ref [] in
+    let count = ref 0 in
+    
+    (try
+      List.iter
+        (fun (s, errors) ->
+          let selected_errors = List.filter (fun e -> List.mem e check_error_types) errors in
+          if selected_errors <> [] then (
+            filtered_entries := (s, selected_errors) :: !filtered_entries;
+            count := !count + List.length selected_errors;
+            match max_results with
+            | Some max when !count >= max -> raise Exit
+            | _ -> ()))
+        all_entries
+    with Exit -> ());
+        
+    List.rev !filtered_entries
   with
   | Sys_error _ -> []
   | Gzip.Error _ -> []
 
+let collect_all_errors ?(max_results = None) ?(selected_error_types = []) base dict =
+  let strings_with_errors = Hashtbl.create 1024 in
+  let total_errors = ref 0 in
+  let collect_strings = collect_dict_strings base dict in
+  
+  (* Si aucun type sélectionné, prendre tous les types *)
+  let check_error_types = 
+    if selected_error_types = [] then
+      [InvisibleCharacters; BadCapitalization; MultipleSpaces; NonBreakingSpace]
+    else selected_error_types
+  in
+
+  let add_error s err =
+    (* Ne compter que si le type d'erreur est sélectionné *)
+    if List.mem err check_error_types then (
+      let is_new_error = 
+        match Hashtbl.find_opt strings_with_errors s with
+        | Some errs -> 
+            if not (List.mem err errs) then (
+              Hashtbl.replace strings_with_errors s (err :: errs);
+              true
+            ) else false
+        | None -> 
+            Hashtbl.add strings_with_errors s [ err ];
+            true
+      in
+      if is_new_error then (
+        incr total_errors;
+        if not (should_continue max_results !total_errors) then
+          raise Max_results_reached))
+  in
+
+  (try
+     Collection.iter
+       (fun i ->
+         let p = Driver.poi base i in
+         let istrs = collect_strings p in
+         List.iter
+           (fun istr ->
+             if not (Driver.Istr.is_empty istr) then
+               let s = Driver.sou base istr in
+               if s <> "" then (
+                 if has_invisible_chars s then add_error s InvisibleCharacters;
+                 if has_bad_capitalization dict s then
+                   add_error s BadCapitalization;
+                 if has_multiple_spaces s then add_error s MultipleSpaces;
+                 if has_non_breaking_space s then add_error s NonBreakingSpace))
+           istrs)
+       (Driver.ipers base)
+   with Max_results_reached -> ());
+
+  let result = ref [] in
+  Hashtbl.iter
+    (fun s errs -> result := (s, errs) :: !result)
+    strings_with_errors;
+  !result
+
 (* Main function *)
-let collect_all_errors_with_cache ?(max_results = None) conf base dict =
+let collect_all_errors_with_cache ?(max_results = None) ?(selected_error_types = []) conf base dict =
   let use_cache =
     match Util.p_getenv conf.env "nocache" with Some "1" -> false | _ -> true
   in
   if use_cache then
     if cache_file_exists conf dict then
-      collect_all_errors_from_cache conf dict max_results
+      collect_all_errors_from_cache conf dict max_results ~selected_error_types ()
     else []
   else
     let is_roglo =
       try List.assoc "roglo" conf.base_env = "yes" with Not_found -> false
     in
-    if is_roglo then [] else collect_all_errors ~max_results base dict
+    if is_roglo then [] 
+    else collect_all_errors ~max_results ~selected_error_types base dict

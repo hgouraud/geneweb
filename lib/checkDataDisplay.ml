@@ -114,47 +114,40 @@ let error_type_name conf = function
   | CheckData.NonBreakingSpace -> t conf "chk_data error non-breaking spaces"
 
 (* Display results grouped by dictionary and error type *)
-(* Dans checkDataDisplay.ml - remplacer display_results *)
 let display_results conf base dicts selected_error_types max_results =
   let use_cache = Util.p_getenv conf.env "nocache" <> Some "1" in
-  let total_found = ref 0 in
-  let hit_limit = ref false in
+  let total_errors_found = ref 0 in
   let missing_caches = ref [] in
 
   List.iter
     (fun dict ->
-      if not !hit_limit then (
-        (* Toujours récupérer TOUT le cache *)
+      let remaining_needed = 
+        match max_results with
+        | Some max -> 
+            let still_needed = max - !total_errors_found in
+            if still_needed <= 0 then Some 0 else Some still_needed
+        | None -> None
+      in
+      
+      if remaining_needed <> Some 0 then (
         let entries =
-          CheckData.collect_all_errors_with_cache ~max_results:None
-            conf base dict
+          CheckData.collect_all_errors_with_cache ~max_results:remaining_needed
+            ~selected_error_types conf base dict
         in
 
         (* Check if cache file exists *)
         if use_cache && not (CheckData.cache_file_exists conf dict) then
           missing_caches := dict :: !missing_caches;
 
-        (* Filter and limit results *)
-        let filtered_entries = ref [] in
-        
-        List.iter
-          (fun (s, errors) ->
-            if not !hit_limit then (
-              let selected_errors =
-                List.filter (fun e -> List.mem e selected_error_types) errors
-              in
-              if selected_errors <> [] then (
-                match max_results with
-                | Some max_val when !total_found >= max_val ->
-                    hit_limit := true
-                | _ ->
-                    filtered_entries := (s, selected_errors) :: !filtered_entries;
-                    incr total_found)))
-          entries;
-
-        let filtered_entries = List.rev !filtered_entries in
+        (* Les erreurs sont déjà filtrées par type dans collect_all_errors *)
+        let filtered_entries = entries in
 
         if filtered_entries <> [] then (
+          (* Compter les erreurs trouvées *)
+          List.iter
+            (fun (_, errors) ->
+              total_errors_found := !total_errors_found + List.length errors)
+            filtered_entries;
           Output.printf conf "<div id=\"cd\" class=\"card mt-3\">";
           Output.printf conf "<div class=\"card-header\">";
           Output.printf conf "<h3 class=\"font-weight bold mb-0\">%s</h3>"
@@ -162,7 +155,7 @@ let display_results conf base dicts selected_error_types max_results =
           Output.printf conf "</div>";
           Output.printf conf "<div class=\"card-body\">";
 
-          (* Group by error type *)
+          (* Grouper par type d'erreur *)
           List.iter
             (fun error_type ->
               let entries_for_error =
@@ -213,18 +206,23 @@ let display_results conf base dicts selected_error_types max_results =
 
   (* Summary message *)
   if dicts <> [] then
-    if !total_found = 0 then
+    if !total_errors_found = 0 then
       Output.printf conf "<div class=\"alert alert-info mt-3\">%s</div>"
         (t conf "no match")
     else
       let errors_msg = Util.ftransl conf "chk_data %d errors found" in
+      let limit_reached = 
+        match max_results with
+        | Some max -> !total_errors_found >= max
+        | None -> false
+      in
       let limit_msg =
-        if !hit_limit then " (" ^ t ~c:0 conf "chk_data limit reached" ^ ")"
+        if limit_reached then " (" ^ t ~c:0 conf "chk_data limit reached" ^ ")"
         else ""
       in
       Output.printf conf
         "<div class=\"alert alert-success mt-3\"><strong>%s</strong>%s</div>"
-        (Printf.sprintf errors_msg !total_found)
+        (Printf.sprintf errors_msg !total_errors_found)
         limit_msg
 
 (* Main print function *)
@@ -398,7 +396,7 @@ let print conf base =
   if is_roglo then ()
   else
     Output.printf conf
-      {|<div class="form-check">
+      {|<div class="form-check mb-3">
          <input class="form-check-input" type="checkbox" name="nocache"
                 id="use-db" value="1"%s>
          <label class="form-check-label" for="use-db">
@@ -412,7 +410,7 @@ let print conf base =
     {|<div class="form-group">
        <label for="max-results">%s%s</label>
        <input type="number" class="form-control" name="max" id="max-results"
-              step="10" value="%s" %s>%s</div>|}
+              step="1" value="%s" %s>%s</div>|}
     (t conf "chk_data max results")
     (t conf ":")
     (match form_max with Some n -> string_of_int n | None -> "")
