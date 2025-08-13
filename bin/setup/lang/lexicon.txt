@@ -2777,6 +2777,26 @@ fi: korvaa "<tt>esimerkki.jpg</tt>" oikealla kuvalla.
 fr: en remplaçant "<tt>toto.jpg</tt>" par le vrai nom de votre fichier image.
 it: rimpiazzando "<tt>pippo.jpg</tt>" col vero nome del vostro file immagine.
 
+    Faster. Uses more memory.
+aa: consang.htm
+en: Faster. Uses more memory
+fr: Rapide. Utilise plus de mémoire
+
+    Quiet.
+aa: consang.htm
+en: Quiet.
+fr: Silencieux.
+
+    Super quiet.
+aa: consang.htm
+en: Super quiet.
+fr: Très silencieux.
+
+    Log.
+aa: consang.htm
+en: Send some log to stdout.
+fr: Enregistrer quelques log dans stdout.
+
     Restart the computing from scratch.
 aa: consang.htm
 co: Riprincipià u calculu nant’à a basa sana.

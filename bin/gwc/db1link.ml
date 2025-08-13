@@ -1701,7 +1701,7 @@ let link next_family_fun bdir =
     Check.check_base base (set_error base gen) (set_warning base) ignore;
     if !pr_stats then Stats.(print_stats base @@ stat_base base));
   if not gen.g_errored then (
-    if !do_consang then ignore @@ ConsangAll.compute base true;
+    if !do_consang then ignore @@ ConsangAll.compute base false true;
     Driver.sync base;
     output_wizard_notes bdir gen.g_wiznotes;
     output_command_line bdir;

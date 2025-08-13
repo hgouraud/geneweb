@@ -22,7 +22,7 @@ let relationship base tab ip1 ip2 =
 
 let trace verbosity cnt max_cnt =
   if verbosity >= 2 then (
-    Printf.eprintf "%7d\008\008\008\008\008\008\008" cnt;
+    Printf.eprintf "%8d\008\008\008\008\008\008\008\008" cnt;
     flush stderr)
   else if verbosity >= 1 then ProgrBar.run (max_cnt - cnt) max_cnt
 
@@ -38,7 +38,7 @@ let consang_array base =
   in
   (fget, cget, cset, patched)
 
-let compute ?(verbosity = 2) base from_scratch =
+let compute ?(verbosity = 2) base from_scratch log =
   Driver.load_ascends_array base;
   Driver.load_couples_array base;
   let fget, cget, cset, patched = consang_array base in
@@ -76,12 +76,14 @@ let compute ?(verbosity = 2) base from_scratch =
      (* number of persons which need consanguinity to be computed *)
      let max_cnt = !cnt in
      let most = ref None in
+     if log then Printf.printf "To do: %d persons\n" max_cnt;
      if verbosity >= 1 then Printf.eprintf "To do: %d persons\n" max_cnt;
-     if max_cnt <> 0 then
+     if max_cnt <> 0 then (
+       if log then Printf.printf "Computing consanguinity...  -> ";
        if verbosity >= 2 then (
-         Printf.eprintf "Computing consanguinity...";
+         Printf.eprintf "Computing consanguinity...  -> ";
          flush stderr)
-       else if verbosity >= 1 then ProgrBar.start ();
+       else if verbosity >= 1 then ProgrBar.start ());
      let running = ref true in
      while !running do
        running := false;
@@ -109,15 +111,23 @@ let compute ?(verbosity = 2) base from_scratch =
                      let cg = Adef.fix_of_float consang in
                      cset i cg;
                      Collection.Marker.set consang_tab ifam cg;
-                     if verbosity >= 2 then
+                     if verbosity >= 2 || log then
                        if
                          match !most with Some m -> cg > cget m | None -> true
                        then (
-                         Printf.eprintf "\nMax consanguinity %g for %s... "
-                           consang
-                           (Gutil.designation base (Driver.poi base i));
-                         flush stderr;
-                         most := Some i)
+                         if log then (
+                           Printf.printf
+                             "\nMax consanguinity %g for %s ... %d -> " consang
+                             (Gutil.designation base (Driver.poi base i))
+                             !cnt;
+                           most := Some i);
+                         if verbosity >= 2 then (
+                           Printf.eprintf
+                             "\nMax consanguinity %g for %s ... %d -> " consang
+                             (Gutil.designation base (Driver.poi base i))
+                             !cnt;
+                           flush stderr;
+                           most := Some i))
                      (* if it wasn't makes further another run over persons *))
                    else running := true
                    (* if it was then set to person his family's consanguinity *)
@@ -132,11 +142,12 @@ let compute ?(verbosity = 2) base from_scratch =
                  cset i (Adef.fix_of_float 0.0))
          persons
      done;
-     if max_cnt <> 0 then
+     if max_cnt <> 0 then (
+       if log then Printf.printf "\ndone   \n";
        if verbosity >= 2 then (
-         Printf.eprintf " done   \n";
+         Printf.eprintf "\ndone   \n";
          flush stderr)
-       else if verbosity >= 1 then ProgrBar.finish ()
+       else if verbosity >= 1 then ProgrBar.finish ())
    with Sys.Break when verbosity > 0 ->
      Printf.eprintf "\n";
      flush stderr;

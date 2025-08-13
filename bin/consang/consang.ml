@@ -6,6 +6,7 @@ module Gutil = Geneweb_db.Gutil
 
 let fname = ref ""
 let scratch = ref false
+let log = ref false
 let verbosity = ref 2
 let fast = ref false
 let errmsg = "usage: " ^ Sys.argv.(0) ^ " [options] <file_name>"
@@ -16,6 +17,7 @@ let speclist =
     ("-qq", Arg.Unit (fun () -> verbosity := 0), " very quiet mode");
     ("-fast", Arg.Set fast, " faster, but use more memory");
     ("-scratch", Arg.Set scratch, " from scratch");
+    ("-log", Arg.Set log, " send log to stdout");
     ( "-mem",
       Arg.Set Geneweb_db.Outbase.save_mem,
       " Save memory, but slower when rewritting database" );
@@ -52,7 +54,7 @@ let () =
         Driver.load_strings_array base);
       try
         Sys.catch_break true;
-        if ConsangAll.compute ~verbosity:!verbosity base !scratch then
+        if ConsangAll.compute ~verbosity:!verbosity base !scratch !log then
           Driver.sync base
       with Consang.TopologicalSortError p ->
         Printf.printf "\nError: loop in database, %s is his/her own ancestor.\n"
