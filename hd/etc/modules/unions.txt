@@ -89,6 +89,16 @@
              %end;">
   %if;not cancel_links;</a>%end;
 %end;
+%define;note_link(fam_count)
+  %if;(not cancel_links)
+     <a href="#note-wed-fam_count" id="wed-callnote-fam_count" title="[see] [note/notes]0 fam_count">%nn;
+      <sup>fam_count</sup>%nn;
+    </a>%nn;
+  %else;
+     <sup>fam_count</sup>%nn;
+      %end;
+%end;
+
 %( ATTENTION: on n'utilise pas max_desc_level parce que c'est extremement
    gourmand sur les gros arbre puisqu'on calcule toute la descendance.
    or on n’a besoin de seulement savoir s’il y a des arrière-petits-
@@ -162,10 +172,10 @@
     %reset_count;
     %foreach;family;
       %incr_count;
+      %let;fam_count;%count;%in;
       %apply;li_SD("spouse")
         <span %apply;getvar%with;ns[marriage event]%count;%end;>%apply;married_to("self", 1)</span>%sp;
         %apply;short_display_person("spouse")
-        %let;prev_count;%count;%in;
         %if;(has_witnesses)
           %sp;([witness/witnesses]w[:]
           %foreach;witness;
@@ -180,21 +190,15 @@
             <img class="ml-1 mb-1" src="%images_prefix;gui_create.png" height="16" alt="tree">%nn;
           %end;)%nn;
         %end;%nn;
-        %apply;init_count(prev_count)
+        %if;((wizard or friend or bvar.no_note_for_visitor!="yes") and has_marriage_note)
+          %sp;(%marriage_note;)%nn;
+        %end;
         %if;((wizard or friend or bvar.no_note_for_visitor!="yes") and has_comment)
-          %if;(not cancel_links)
-             <a href="#note-wed-%count;" id="wed-callnote-%count;" title="[*see] [note/notes]0 %count">%nn;
-              <sup>%count;</sup>%nn;
-            </a>%nn;
-          %else;
-             <sup>%count;</sup>
-          %end;
+          %apply;note_link(fam_count)
         %end;
         %if;are_separated;, [separated] %on_separation_date;%end;
         %if;are_divorced;, [divorced] %on_divorce_date;%end;
         %if;has_children;, %apply;havingchildren(nb_children)[:]
-          %( On sauvegarde l'ancienne valeur de count %)
-          %let;prev_count;%count;%in;
           <ul>
             %foreach;child;
               %apply;li_SDC("child")
@@ -206,17 +210,17 @@
               </li>
             %end;
           </ul>
-          %( On rétablie l'ancienne valeur de count %)
-          %apply;init_count(prev_count)
         %end;
         %if;(evar.opt = "from" and wizard)<em>(%origin_file;)</em><br>%nl;%end;
       </li>
+      %apply;init_count(fam_count)%( on rétablie l'ancienne valeur de count %)
     %end;
   </ul>
 %elseif;(op_m=2 and has_families)
   %reset_count;%reset_count2;
   %foreach;family;
     %incr_count;
+    %let;fam_count;%count;%in;
     %if;(spouse.has_image)%incr_count2;%end;
     %foreach;child;
       %if;(child.has_image)%incr_count2;%end;
@@ -230,14 +234,11 @@
     %end;
     <span %apply;getvar%with;ns[marriage event]%count;%end;>%apply;married_to("self", 1)</span>%sp;
     %apply;short_display_person("spouse")
+    %if;((wizard or friend or bvar.no_note_for_visitor!="yes") and has_marriage_note)
+      %sp;(%marriage_note;)%nn;
+    %end;
     %if;((wizard or friend or bvar.no_note_for_visitor!="yes") and has_comment)
-      %if;(not cancel_links)
-         <a href="#note-wed-%count;" id="wed-callnote-%count;" title="[see] [note/notes]0 %count">%nn;
-          <sup>%count;</sup>%nn;
-        </a>%nn;
-      %else;
-         <sup>%count;</sup>%nn;
-      %end;
+      %apply;note_link(fam_count)
     %end;
     %if;(count2=0)
       %if;(spouse.has_parents)
@@ -309,7 +310,6 @@
             </div>
           </div>
           %if;has_children;
-          %let;prev_count;%count;%in;%( on garde la précédente valeur de count %)
             <div class="d-flex flex-column align-content-start ml-2 mt-1">
               <div class="w-100">%apply;havingchildren(nb_children)[:]</div>
               %reset_count1;
@@ -335,7 +335,6 @@
                 </div>
               %end;
             </div>
-            %apply;init_count(prev_count)%( on rétablie l'ancienne valeur de count %)
           %end;
         </div>
         %if;has_witnesses;
@@ -366,7 +365,6 @@
       </div>
       %if;(evar.opt = "from" and wizard)<em>(%origin_file;)</em><br>%nl;%end;
     %end;
-    
     %if;(are_divorced or are_separated)
       <div class="mb-1 text-muted">
         %if;are_separated;[*separated]%if;(on_separation_date!="") %on_separation_date;%end;.%end;
@@ -375,6 +373,7 @@
     %end;
     </li></ul>
     %reset_count2;
+    %apply;init_count(fam_count)%( on rétablie l'ancienne valeur de count %)
   %end;
 %elseif;(op_m=3 and has_families)
   <ul class="marriage_perso">
@@ -382,6 +381,7 @@
     %reset_count;
     %foreach;family;
       %incr_count;
+      %let;fam_count;%count;%in;
       %apply;li_SD("spouse")
         <span %apply;getvar%with;ns[marriage event]%count;%end;>%apply;married_to("self", 1)</span>%sp;
         %apply;short_display_person("spouse")
@@ -396,14 +396,15 @@
             %apply;short_display_person("witness")%if;(witness_kind!="") (%witness_kind;)%end;
           %end;)%nn;
         %end;
+        %if;((wizard or friend or bvar.no_note_for_visitor!="yes") and has_marriage_note)
+          %sp;(%marriage_note;)%nn;
+        %end;
         %if;((wizard or friend or bvar.no_note_for_visitor!="yes") and has_comment)
-          <a href="#note-wed-%count;" id="wed-callnote-%count;" title="[*see] [note/notes]0 %count"><sup>%count;</sup></a>%nn;
+          %apply;note_link(fam_count)
         %end;%nn;
         %if;are_separated;, [separated]0 %on_separation_date;%end;
         %if;are_divorced;, [divorced]0 %on_divorce_date;%end;
         %if;has_children;, %apply;havingchildren(nb_children)[:]
-          %( On sauvegarde l'ancienne valeur de count %)
-          %let;prev_count;%count;%in;
           <ul>
             %foreach;child;
               %apply;li_SDC("child")
@@ -414,22 +415,19 @@
                 %end;
                 %if;child.has_families;
                   %foreach;child.family;
-                    %if;(family_cnt!=1)
-                      <img width="13" height="13"%sp; src="%images_prefix;1pixel.png" alt="1px">%sp;
-                      <em>%child;%child.title;%child.dates;</em>
-                    %end;%nn;
-                    , %apply;loc_long_married("child")%sp;
-                    %apply;short_display_person("spouse")<br>
+                    %if;(nb_families>1 and family_cnt=1)<br>%end;
+                    %if;(nb_families>1)-%end;
+                    %sp;%apply;married_to("child", 0)
+                    %sp;%apply;short_display_person("spouse")<br>
                   %end;
                 %end;
               </li>
             %end;
           </ul>
-          %( On rétablie l'ancienne valeur de count %)
-          %apply;init_count(prev_count)
         %end;
         %if;(evar.opt = "from" and wizard)<em>(%origin_file;)</em><br>%nl;%end;
       </li>
+      %apply;init_count(fam_count)%( on rétablie l'ancienne valeur de count %)
     %end;
   </ul>
 %elseif;(op_m=4 and has_families)
@@ -438,6 +436,7 @@
     %reset_count;
     %foreach;family;
       %incr_count;
+      %let;fam_count;%count;%in;
       %apply;li_SD("spouse")
         <span %apply;getvar%with;ns[marriage event]%count;%end;>%apply;married_to("self", 1)</span>%sp;
         %apply;long_display_person("spouse")
@@ -454,26 +453,25 @@
             %apply;short_display_person("witness")%if;(witness_kind!="") (%witness_kind;)%end;
           %end;)%nn;
         %end;%nn;
+        %if;((wizard or friend or bvar.no_note_for_visitor!="yes") and has_marriage_note)
+          %sp;(%marriage_note;)%nn;
+        %end;
         %if;((wizard or friend or bvar.no_note_for_visitor!="yes") and has_comment)%nn;
-          <a href="#note-wed-%count;" id="wed-callnote-%count;" title="[*see] [note/notes]0 %count"><sup>%count;</sup></a>%nn;
+          %apply;note_link(fam_count)
         %end;
         %if;are_separated;, [separated]0 %on_separation_date;%end;
         %if;are_divorced;, [divorced]0 %on_divorce_date;%end;
         %if;has_children;, %apply;havingchildren(nb_children)[:]
-          %( On sauvegarde l'ancienne valeur de count %)
-          %let;prev_count;%count;%in;
           <ul>
             %foreach;child;
               %apply;li_SDC("child")
                 %apply;short_display_person("child")
                 %if;child.has_families;
                   %foreach;child.family;
-                    %if;(family_cnt!=1)
-                      <img width="13" height="13" src="%images_prefix;1pixel.png" alt="1px">
-                      <em>%child;%child.title;%child.dates;</em>%nn;
-                    %end;
-                    <em>, %apply;loc_long_married("child")</em>
-                    %apply;short_display_person("spouse")
+                    %if;(nb_families>1 and family_cnt=1)<br>%end;
+                    %if;(nb_families>1)-%end;
+                    %sp;%apply;married_to("child", 0)
+                    %sp;%apply;short_display_person("spouse")
                     %if;has_children;
                       , %apply;havingchildren(nb_children)[:]
                       <div style="font-size: 90%%">
@@ -483,12 +481,10 @@
                               %apply;short_display_person("child")
                               %if;child.has_families;
                                 %foreach;child.family;
-                                  %if;(family_cnt!=1)
-                                    <img width="10" height="10" src="%images_prefix;1pixel.png"  alt="1px">
-                                    <em>%child;%child.title;%child.dates;</em>%nn;
-                                  %end;
-                                  <em>&nbsp;%apply;loc_long_married("child")</em>
-                                  %apply;short_display_person("spouse")
+                                  %if;(nb_families>1 and family_cnt=1)<br>%end;
+                                  %if;(nb_families>1)-%end;
+                                  %sp;%apply;married_to("child", 0)
+                                  %sp;%apply;short_display_person("spouse")
                                   %if;has_children; %apply;havingchildren(nb_children)[:]
                                     <div style="font-size: 90%%">%nn;
                                       <ul>
@@ -514,11 +510,10 @@
               </li>
             %end;
           </ul>
-          %( On rétablie l'ancienne valeur de count %)
-          %apply;init_count(prev_count)
         %end;
         %if;(evar.opt = "from" and wizard)<em>(%origin_file;)</em><br>%nl;%end;
       </li>
+      %apply;init_count(fam_count)%( on rétablie l'ancienne valeur de count %)
     %end;
   </ul>
 %elseif;(op_m=5 and has_families)
@@ -526,6 +521,7 @@
     %reset_count;
     %foreach;family;
       %incr_count;
+      %let;fam_count;%count;%in;
       %apply;li_SD("spouse")
         %if;spouse.has_image;
           <table style="border-width:%border;">
@@ -543,6 +539,7 @@
                     alt="" title="[image/images]0">
                 %end;
               </td>
+              <td>%sp;</td>
               <td style="vertical-align: middle">
         %end;
         <span %apply;getvar%with;ns[marriage event]%count;%end;>%apply;married_to("self", 1)</span>%sp;
@@ -560,8 +557,11 @@
             %apply;short_display_person("witness")%if;(witness_kind!="") (%witness_kind;)%end;
           %end;)%nn;
         %end;%nn;
+        %if;((wizard or friend or bvar.no_note_for_visitor!="yes") and has_marriage_note)
+          %sp;(%marriage_note;)%nn;
+        %end;
         %if;((wizard or friend or bvar.no_note_for_visitor!="yes") and has_comment)%nn;
-          <a href="#note-wed-%count;" id="wed-callnote-%count;" title="[*see] [note/notes]0 %count"><sup>%count;</sup></a>%nn;
+          %apply;note_link(fam_count)
         %end;
         %if;are_separated;, [separated]0 %on_separation_date;%end;
         %if;are_divorced;, [divorced]0 %on_divorce_date;%end;
@@ -590,17 +590,17 @@
                           alt="" title="[image/images]0">
                         %end;
                       </td>
+                      <td>%sp;</td>
                       <td style="vertical-align: middle">
                 %end;
                 %apply;short_display_person_f("child")
                 %if;child.has_families;
                   %foreach;child.family;
-                    %if;(family_cnt!=1)
-                      <img width="13" height="13"%sp;
-                        src="%images_prefix;1pixel.png" alt="1px">%sp;
-                      <em>%child;%child.title;%child.dates;</em>%end;
-                    <em>&nbsp;%apply;married_to("child", 0)</em>
-                    %apply;short_display_person_f("spouse")%nn;
+                    %if;(nb_families>1 and family_cnt=1)<br>%end;
+                    %if;(nb_families>1 and family_cnt>1)<img %child.image_small_size; src="%child.image_url;">%end;
+                    %if;(nb_families>1) -%end;
+                    %sp;%apply;married_to("child", 0)
+                    %sp;%apply;short_display_person_f("spouse")%nn;
                     %if;are_separated; [separated]0 %on_separation_date;%end;%nn;
                     %if;are_divorced; [divorced]0 %on_divorce_date;%end;%nn;
                     %if;has_children; %apply;havingchildren(nb_children)
@@ -629,7 +629,6 @@
                                           %apply;short_display_person_f("child")
                                           %if;(child_cnt=nb_children).%end;
                                         %end;
-
                                       </td>
                                     </tr></table>
                                   %end;
@@ -654,6 +653,7 @@
         %end;
         %if;(evar_opt="from" and wizard)<em>(%origin_file;)</em><br>%nl;%end;
       </li>
+      %apply;init_count(fam_count)%( on rétablie l'ancienne valeur de count %)
     %end;
   </ul>
 %end;
