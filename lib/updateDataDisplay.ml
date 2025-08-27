@@ -267,11 +267,14 @@ and eval_simple_str_var conf _base env _xx = function
             let part =
               if
                 part.[String.length part - 1] = '\''
-                || String.length part >= 3
+                || String.length part >= 3 (* Apostrophe typographique *)
                    && Char.code part.[String.length part - 3] = 0xE2
                    && Char.code part.[String.length part - 2] = 0x80
-                   && (Char.code part.[String.length part - 1] = 0x98
-                      || Char.code part.[String.length part - 1] = 0x99)
+                   && Char.code part.[String.length part - 1] = 0x99
+                || String.length part >= 3 (* Okina *)
+                   && Char.code part.[String.length part - 3] = 0xE0
+                   && Char.code part.[String.length part - 2] = 0x8A
+                   && Char.code part.[String.length part - 1] = 0xBB
               then part
               else part ^ " "
             in

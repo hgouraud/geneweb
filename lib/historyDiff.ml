@@ -13,12 +13,16 @@ type gen_record = {
   gen_c : Driver.iper array list;
 }
 
+let safe_dir_char c =
+  if Char.code c <= 127 && c <> '/' && c <> '\\' then c else '_'
+
 (* Le nom du fichier historique (à partir de la clé personne). *)
 let history_file fn sn occ =
   let space_to_unders = Mutil.tr ' ' '_' in
   let f = space_to_unders (Name.lower fn) in
   let s = space_to_unders (Name.lower sn) in
-  f ^ "." ^ string_of_int occ ^ "." ^ s
+  let fname = f ^ "." ^ string_of_int occ ^ "." ^ s in
+  String.map safe_dir_char fname
 
 (* history directory path *)
 let history_d conf =
