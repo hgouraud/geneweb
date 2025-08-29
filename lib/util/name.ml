@@ -38,7 +38,7 @@ let lower s =
     if i = String.length s then Buff.get len
     else if Char.code s.[i] < 0x80 then
       match s.[i] with
-      | ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '.') as c ->
+      | ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '.'| '\'' | '-') as c ->
           let len = if special then Buff.store len ' ' else len in
           let c = Char.lowercase_ascii c in
           copy false (i + 1) (Buff.store len c)
