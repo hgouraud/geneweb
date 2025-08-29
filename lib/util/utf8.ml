@@ -12,6 +12,18 @@ let nbc c =
 
 let next s i = i + nbc s.[i]
 
+let next_utf8 s i =
+  let rec loop n j =
+    if n = i then j + nbc s.[j] else loop (n + 1) (j + nbc s.[j])
+  in
+  loop 0 0
+
+let char s i =
+  let rec loop s j n =
+    if n = i then String.sub s j (nbc s.[j]) else loop s (next s j) (n + 1)
+  in
+  loop s 0 0
+
 let get s i =
   let rec loop i k = if k = 0 then i else loop (next s i) (pred k) in
   loop 0 i

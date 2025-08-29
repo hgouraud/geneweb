@@ -13,12 +13,15 @@ type gen_record = {
   gen_c : Driver.iper array list;
 }
 
+let _safe_dir_char c =
+  if Char.code c <= 127 && c <> '/' && c <> '\\' then c else '_'
+
 (* Le nom du fichier historique (à partir de la clé personne). *)
 let history_file fn sn occ =
   let space_to_unders = Mutil.tr ' ' '_' in
-  let f = space_to_unders (Name.lower fn) in
-  let s = space_to_unders (Name.lower sn) in
-  f ^ "." ^ string_of_int occ ^ "." ^ s
+  let fn = space_to_unders (Name.lower fn) in
+  let sn = space_to_unders (Name.lower sn) in
+  fn ^ "." ^ string_of_int occ ^ "." ^ sn
 
 (* history directory path *)
 let history_d conf =
@@ -39,7 +42,7 @@ let history_d conf =
 let history_path conf fname =
   if String.length fname >= 6 then
     let dirs =
-      [ history_d conf; String.make 1 fname.[0]; String.make 1 fname.[1] ]
+      [ history_d conf; Utf8.char fname 0; Utf8.char fname (Utf8.next fname 0) ]
     in
     List.fold_right Filename.concat dirs fname
   else Filename.concat (history_d conf) fname
@@ -48,7 +51,7 @@ let history_path conf fname =
 let create_history_dirs conf fname =
   if String.length fname >= 6 then
     let dirs =
-      [ history_d conf; String.make 1 fname.[0]; String.make 1 fname.[1] ]
+      [ history_d conf; Utf8.char fname 0; Utf8.char fname (Utf8.next fname 0) ]
     in
     Filesystem.create_dir ~parent:true (List.fold_left Filename.concat "" dirs)
 
@@ -63,18 +66,20 @@ let create_history_dirs conf fname =
       clair hors de ce module. *)
 let write_history_file conf person_file fname gr =
   (* On créé toujours les dossiers nécessaires (changement de clé ...). *)
-  let () = create_history_dirs conf person_file in
-  let ext_flags =
-    [ Open_wronly; Open_append; Open_creat; Open_binary; Open_nonblock ]
-  in
-  match
-    try Some (Secure.open_out_gen ext_flags 0o644 fname)
-    with Sys_error _ -> None
-  with
-  | Some oc ->
-      output_value oc (gr : gen_record);
-      close_out oc
-  | None -> ()
+  if person_file = ".0." then ()
+  else
+    let () = create_history_dirs conf person_file in
+    let ext_flags =
+      [ Open_wronly; Open_append; Open_creat; Open_binary; Open_nonblock ]
+    in
+    match
+      try Some (Secure.open_out_gen ext_flags 0o644 fname)
+      with Sys_error _ -> None
+    with
+    | Some oc ->
+        output_value oc (gr : gen_record);
+        close_out oc
+    | None -> ()
 
 (* ************************************************************************ *)
 (* [Fonc] make_gen_record :
