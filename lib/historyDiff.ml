@@ -43,7 +43,7 @@ let history_d conf =
 let history_path conf fname =
   if String.length fname >= 6 then
     let dirs =
-      [ history_d conf; String.make 1 fname.[0]; String.make 1 fname.[1] ]
+      [ history_d conf; Utf8.char fname 0; Utf8.char fname (Utf8.next fname 0) ]
     in
     List.fold_right Filename.concat dirs fname
   else Filename.concat (history_d conf) fname
@@ -52,7 +52,7 @@ let history_path conf fname =
 let create_history_dirs conf fname =
   if String.length fname >= 6 then
     let dirs =
-      [ history_d conf; String.make 1 fname.[0]; String.make 1 fname.[1] ]
+      [ history_d conf; Utf8.char fname 0; Utf8.char fname (Utf8.next fname 0) ]
     in
     Filesystem.create_dir ~parent:true (List.fold_left Filename.concat "" dirs)
 

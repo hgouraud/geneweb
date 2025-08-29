@@ -12,6 +12,8 @@ let nbc c =
 
 let next s i = i + nbc s.[i]
 
+let char s i = String.sub s i (Unidecode.nbc s.[i])
+
 let get s i =
   let rec loop i k = if k = 0 then i else loop (next s i) (pred k) in
   loop 0 i
