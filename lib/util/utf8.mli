@@ -5,8 +5,11 @@ val next : string -> int -> int
 (** [Utf8.next s i] returns the index of the character comming after the one
     which starts at [i]. *)
 
+val next_utf8 : string -> int -> int
+(** returns the index of the character following the n-th character *)
+
 val char : string -> int -> string
-(* returns as a string the character starting at [i] *)
+(* returns as a string the character starting of the i-th character *)
 
 val get : string -> int -> int
 (** [Utf8.get s n] returns the index where the [n]-th character starts in string
