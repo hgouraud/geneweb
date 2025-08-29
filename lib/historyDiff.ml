@@ -67,18 +67,20 @@ let create_history_dirs conf fname =
       clair hors de ce module. *)
 let write_history_file conf person_file fname gr =
   (* On créé toujours les dossiers nécessaires (changement de clé ...). *)
-  let () = create_history_dirs conf person_file in
-  let ext_flags =
-    [ Open_wronly; Open_append; Open_creat; Open_binary; Open_nonblock ]
-  in
-  match
-    try Some (Secure.open_out_gen ext_flags 0o644 fname)
-    with Sys_error _ -> None
-  with
-  | Some oc ->
-      output_value oc (gr : gen_record);
-      close_out oc
-  | None -> ()
+  if person_file = ".0." then ()
+  else
+    let () = create_history_dirs conf person_file in
+    let ext_flags =
+      [ Open_wronly; Open_append; Open_creat; Open_binary; Open_nonblock ]
+    in
+    match
+      try Some (Secure.open_out_gen ext_flags 0o644 fname)
+      with Sys_error _ -> None
+    with
+    | Some oc ->
+        output_value oc (gr : gen_record);
+        close_out oc
+    | None -> ()
 
 (* ************************************************************************ *)
 (* [Fonc] make_gen_record :
