@@ -127,7 +127,7 @@ let print_matrix_table conf base persons =
     print_matrix_row conf base tstab persons i cell_storage n
   done;
   Output.print_sstring conf {|</tbody></table></div>|};
-  let json_data = 
+  let json_data =
     RelationMatrix.matrix_to_json conf base persons cell_storage n
   in
   let json_string = Yojson.Safe.to_string json_data in
