@@ -18,11 +18,7 @@ let _safe_dir_char c =
 
 (* Le nom du fichier historique (à partir de la clé personne). *)
 let history_file fn sn occ =
-  let _space_to_unders = Mutil.tr ' ' '_' in
-  let f =  (Name.lower fn) in
-  let s =  (Name.lower sn) in
-  let fname = f ^ "." ^ string_of_int occ ^ "." ^ s in
-  fname
+  fn ^ "." ^ string_of_int occ ^ "." ^ sn
 
 (* history directory path *)
 let history_d conf =
