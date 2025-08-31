@@ -20,8 +20,7 @@ let next_utf8 s i =
 
 let char s i =
   let rec loop s j n =
-    if n = i then String.sub s j (nbc s.[j])
-    else loop s (next s j) (n + 1)
+    if n = i then String.sub s j (nbc s.[j]) else loop s (next s j) (n + 1)
   in
   loop s 0 0
 

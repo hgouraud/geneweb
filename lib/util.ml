@@ -739,10 +739,13 @@ let clean_html_tags s =
   s
 
 let clean_comment_tags s = Str.global_replace (Str.regexp "<!--.*-->") "" s
-let uri_encode s = Uri.pct_encode ~component:`Query s 
+
+let uri_encode s =
+  Uri.pct_encode ~component:`Query s
   |> Str.global_replace (Str.regexp "'") "%27"
-let uri_decode s = try Uri.pct_decode s
-  |> Str.global_replace (Str.regexp "%27") "'"
+
+let uri_decode s =
+  try Uri.pct_decode s |> Str.global_replace (Str.regexp "%27") "'"
   with _ -> Str.global_replace (Str.regexp "%27") "'" s
 
 let hidden_textarea conf k v =
@@ -2102,7 +2105,7 @@ let string_of_decimal_num conf f =
   in
   loop 0
 
-let find_person_in_env_aux conf base env_i env_p env_n env_occ =
+let find_person_in_env_aux conf base env_i env_p env_n env_occ pn =
   match p_getenv conf.env env_i with
   | Some i when i <> "" ->
       let i = Geneweb_db.Driver.Iper.of_string i in
@@ -2111,8 +2114,10 @@ let find_person_in_env_aux conf base env_i env_p env_n env_occ =
         if is_hidden p then None else Some p
       else None
   | _ -> (
-      match (p_getenv conf.env env_p, p_getenv conf.env env_n) with
-      | None, Some n -> (
+      match
+        (p_getenv conf.env env_p, p_getenv conf.env env_n, p_getenv conf.env pn)
+      with
+      | None, Some n, None -> (
           match Gutil.person_of_string_key base n with
           | Some ip ->
               let p = pget conf base ip in
@@ -2121,9 +2126,37 @@ let find_person_in_env_aux conf base env_i env_p env_n env_occ =
               then Some p
               else None
           | None -> None)
-      | Some p, Some n -> (
+      | Some p, Some n, None -> (
           let occ = Option.value ~default:0 (p_getint conf.env env_occ) in
           match Driver.person_of_key base p n occ with
+          | Some ip ->
+              let p = pget conf base ip in
+              if is_hidden p then None
+              else if (not (is_hide_names conf p)) || authorized_age conf base p
+              then Some p
+              else None
+          | None -> None)
+      | None, None, Some pn -> (
+          (* fn sn separator may be space or /! if space, last one *)
+          let j = try String.index pn '/' with Not_found -> -1 in
+          let k = try String.rindex pn ' ' with Not_found -> -1 in
+          let i = match (j, k) with -1, k -> k | j, -1 -> j | _ -> -1 in
+          let fn, sn =
+            if i <> -1 then
+              ( String.sub pn 0 i,
+                String.sub pn (i + 1) (String.length pn - i - 1) )
+            else (pn, "")
+          in
+          let i = try String.index fn '.' with Not_found -> -1 in
+
+          let fn, occ =
+            if i <> -1 then
+              ( String.sub fn 0 i,
+                int_of_string (String.sub fn (i + 1) (String.length fn - i - 1))
+              )
+            else (fn, 0)
+          in
+          match Driver.person_of_key base fn sn occ with
           | Some ip ->
               let p = pget conf base ip in
               if is_hidden p then None
@@ -2135,11 +2168,11 @@ let find_person_in_env_aux conf base env_i env_p env_n env_occ =
 
 let find_person_in_env conf base suff =
   find_person_in_env_aux conf base ("i" ^ suff) ("p" ^ suff) ("n" ^ suff)
-    ("oc" ^ suff)
+    ("oc" ^ suff) "pn"
 
 let find_person_in_env_pref conf base pref =
   find_person_in_env_aux conf base (pref ^ "i") (pref ^ "p") (pref ^ "n")
-    (pref ^ "oc")
+    (pref ^ "oc") "pn"
 
 let person_exists conf base (fn, sn, oc) =
   let auth =

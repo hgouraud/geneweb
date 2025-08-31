@@ -3806,10 +3806,12 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       (string_of_image_url conf base ep false true :> string)
       |> Str.global_replace (Str.regexp "'") "%27"
       |> str_val
-  | "blason_url" -> (string_of_blason_url conf base ep false false :> string)
+  | "blason_url" ->
+      (string_of_blason_url conf base ep false false :> string)
       |> Str.global_replace (Str.regexp "'") "%27"
       |> str_val
-  | "old_blason_url" -> (string_of_blason_url conf base ep false true :> string)
+  | "old_blason_url" ->
+      (string_of_blason_url conf base ep false true :> string)
       |> Str.global_replace (Str.regexp "'") "%27"
       |> str_val
   | "index" ->

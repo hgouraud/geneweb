@@ -31,7 +31,7 @@ let chars () =
   (check string) "2" "8" (string_of_int (Utf8.next_utf8 "’ab’cd" 3));
   (check string) "3" "a" (Utf8.char "’ab" 1);
   ()
-  
+
 let v =
   [
     ("Lower", [ test_case "Lower" `Quick lower ]);

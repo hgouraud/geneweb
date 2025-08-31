@@ -17,8 +17,7 @@ let _safe_dir_char c =
   if Char.code c <= 127 && c <> '/' && c <> '\\' then c else '_'
 
 (* Le nom du fichier historique (à partir de la clé personne). *)
-let history_file fn sn occ =
-  fn ^ "." ^ string_of_int occ ^ "." ^ sn
+let history_file fn sn occ = fn ^ "." ^ string_of_int occ ^ "." ^ sn
 
 (* history directory path *)
 let history_d conf =
