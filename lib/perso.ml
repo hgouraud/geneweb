@@ -1800,7 +1800,11 @@ and eval_simple_str_var conf base env (p, p_auth) = function
       | _ -> VVstring "")
   | "carrousel_img" -> (
       match get_env "carrousel_img" env with
-      | Vstring s -> str_val (Util.uri_encode s)
+      | Vstring s -> str_val s
+      | _ -> null_val)
+  | "carrousel_img_url" -> (
+      match get_env "carrousel_img" env with
+      | Vstring s -> Str.global_replace (Str.regexp "'") "%27" s |> str_val
       | _ -> null_val)
   | "carrousel_img_raw" -> (
       match get_env "carrousel_img" env with
@@ -3795,11 +3799,19 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
   | "blason_extra_small_size" ->
       string_of_blason_extra_small_size conf base ep |> str_val
   | "image_url" | "portrait_url" ->
-      string_of_image_url conf base ep false false |> safe_val
+      (string_of_image_url conf base ep false false :> string)
+      |> Str.global_replace (Str.regexp "'") "%27"
+      |> str_val
   | "old_image_url" | "old_portrait_url" ->
-      string_of_image_url conf base ep false true |> safe_val
-  | "blason_url" -> string_of_blason_url conf base ep false false |> safe_val
-  | "old_blason_url" -> string_of_blason_url conf base ep false true |> safe_val
+      (string_of_image_url conf base ep false true :> string)
+      |> Str.global_replace (Str.regexp "'") "%27"
+      |> str_val
+  | "blason_url" -> (string_of_blason_url conf base ep false false :> string)
+      |> Str.global_replace (Str.regexp "'") "%27"
+      |> str_val
+  | "old_blason_url" -> (string_of_blason_url conf base ep false true :> string)
+      |> Str.global_replace (Str.regexp "'") "%27"
+      |> str_val
   | "index" ->
       Driver.get_iper p |> Driver.Iper.to_string |> Mutil.encode |> safe_val
   | "carrousel" -> Image.default_image_filename "portraits" base p |> str_val
