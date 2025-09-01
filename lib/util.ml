@@ -2161,7 +2161,7 @@ let find_person_in_env_aux conf base env_i env_p env_n env_occ pn =
       | _ -> None)
 
 let find_person_in_env conf base suff =
-  find_person_in_env_aux conf base ("i" ^ suff) ("p" ^ suff) ("n" ^ suff) 
+  find_person_in_env_aux conf base ("i" ^ suff) ("p" ^ suff) ("n" ^ suff)
     ("oc" ^ suff) "pn"
 
 let find_person_in_env_pref conf base pref =
