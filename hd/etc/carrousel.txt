@@ -237,8 +237,8 @@
             <a role="button"
               href="%old_portrait_url;" target="_blank" rel="noopener"%sp;
               data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<strong>[*see portrait]</strong><br><span class="small">%old_portrait;</span><br>
-                <img class="rounded my-1" src="%old_portrait_url;" width="185px">'>
+              title="<strong>[*see portrait]</strong><br><span class='small'>%old_portrait;</span><br>
+                <img class='rounded my-1' src='%old_portrait_url;' width='185px'>">
               <i class="far fa-file-image fa-fw text-primary"></i></a>
             <a role="button" href="%prefix;m=RESET_IMAGE_C_OK&i=%index;&mode=portraits&file_name=%portrait;"
               title="[*restore portrait saved]">
@@ -248,8 +248,8 @@
             <a role="button" class="ml-auto"
               href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=portraits&delete=on&file_name=%old_portrait_name;"
               data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<i class="far fa-trash-can text-danger mr-1"></i><strong>[*delete saved portrait]0</strong><br><span class="small">%old_portrait;</span><br>
-                <img class="rounded my-1" src="%old_portrait_url;" width="185px">'>
+              title="<i class='far fa-trash-can text-danger mr-1'></i><strong>[*delete saved portrait]0</strong><br><span class='small'>%old_portrait;</span><br>
+                <img class='rounded my-1' src='%old_portrait_url;' width='185px'>">
               <i class="far fa-trash-can text-danger"></i></a>
           </div>
         %end;
@@ -296,15 +296,15 @@
           <div class="d-flex align-self-center mt-1">
             <a role="button" href="%blason_url;" target="_blank" rel="noopener"
               data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<strong>[*see coat of arms]</strong><br><span class="small">%blason_url;</span><br>
-                <img class="rounded my-1" src="%blason_url;" width="185px">'>
+              title="<strong>[*see coat of arms]</strong><br><span class='small'>%blason_url;</span><br>
+                <img class='rounded my-1' src='%blason_url;' width='185px'>">
               <i class="far fa-file-image fa-fw text-primary"></i></a>
             <strong><samp class="text-truncate">%portraits_store;%X;</samp></strong><samp>%blason_name;</samp>
             <a role="button" class="ml-auto col-1"
               href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=blasons&file_name=%blason_name;"
               data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<i class="far fa-trash-can text-warning mr-1"></i><strong>[*delete coat of arms]</strong><br><span class="small">%blason;</span><br>
-                <img class="rounded my-1" src="%blason_url;" width="185px">'>
+              title="<i class='far fa-trash-can text-warning mr-1'></i><strong>[*delete coat of arms]</strong><br><span class='small'>%blason;</span><br>
+                <img class='rounded my-1' src='%blason_url;' width='185px'>">
               <i class="far fa-trash-can text-warning"></i></a>
           </div>
         %elseif;has_blason_stop;
@@ -318,9 +318,9 @@
           <div class="d-flex mt-1">
             <a role="button" href="%blason_url;"
               target="_blank" rel="noopener" data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<strong>[*see coat of arms]</strong><br><span class="small">
-                %blason_name;</span><br><img class="rounded my-1"%sp;
-                src="%blason_url;" width="185px">'>
+              title="<strong>[*see coat of arms]</strong><br><span class='small'>
+                %blason_name;</span><br><img class='rounded my-1'%sp;
+                src='%blason_url;' width='185px'>">
               <i class="far fa-file-image fa-fw text-primary"></i></a>
             <span>[*use coat of arms of]0%sp;<a href="%prefix;%blason_owner.access;">%blason_owner;</a></span>
             <a role="button" class="ml-auto" href="%prefix;m=BLASON_STOP&i=%index;&mode=blasons" title="[*stop using the coat of arms of]0 %blason_owner;"
@@ -333,8 +333,8 @@
             <a role="button" href="%old_blason_url;"
               target="_blank" rel="noopener"
               data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<strong>[*see coat of arms]</strong><br><span class="small">%blason;</span><br>
-                <img class="rounded my-1" width="185px" src="%old_blason_url;">'>
+              title="<strong>[*see coat of arms]</strong><br><span class='small'>%blason;</span><br>
+                <img class='rounded my-1' width='185px' src='%old_blason_url;'>">
               <i class="far fa-file-image fa-fw text-primary"></i></a>
             <a role="button" href="%prefix;m=RESET_IMAGE_C_OK&i=%index;&mode=blasons&file_name=%portrait;"
               title="[*restore coat of arms saved]">
@@ -342,8 +342,8 @@
             <strong><samp class="text-truncate">%old_portraits_store;%X;</samp></strong><samp>%old_blason_name;</samp>
             <a role="button" class="ml-auto col-1" href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=blasons&delete=on&file_name=%old_blason_name;"
               data-toggle="tooltip" data-html="true" data-placement="left"%sp;
-              title='<strong>[*delete saved coat of arms]0</strong><br><span class="small">%old_blason;</span><br>
-                <img class="rounded my-1" src="%old_blason_url;" width="185px">'>
+              title="<strong>[*delete saved coat of arms]0</strong><br><span class='small'>%old_blason;</span><br>
+                <img class='rounded my-1' src='%old_blason_url;' width='185px'>">
               <i class="far fa-trash-can text-danger"></i></a>
           </div>
         %end;
