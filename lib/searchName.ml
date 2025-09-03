@@ -241,18 +241,18 @@ let search conf base an search_order specify unknown =
   (* Generate apostrophe variants BEFORE any processing *)
   let fn =
     match p_getenv conf.env "p" with
+    | Some "" | None -> None
     | Some fn -> Some (Name.lower fn)
-    | None -> None
   in
   let sn =
     match p_getenv conf.env "n" with
+    | Some "" | None -> None
     | Some sn -> Some (Name.lower sn)
-    | None -> None
   in
   let pn =
     match p_getenv conf.env "pn" with
+    | Some "" | None -> None
     | Some pn -> Some (Name.lower pn)
-    | None -> None
   in
   let search_variants = generate_apostrophe_variants an in
   let surname_groups = Hashtbl.create 10 in
@@ -690,8 +690,53 @@ let search conf base an search_order specify unknown =
       | None, Some _sn, None -> (
           match surnames with
           | [(surname, _persons)] ->
-              Some.search_surname_print conf base unknown surname 
-          | _ -> specify conf base an pl1 pl2 pl3)
+              Some.search_surname_print conf base unknown surname
+          | multiple_surnames ->
+              let title _ =
+                Output.printf conf {|%s %s|}
+                  (Util.escape_html an :> string)
+                  (transl conf "specify")
+              in
+              Hutil.header conf title;
+              let sorted_surnames =
+                List.sort
+                  (fun (sn1, _) (sn2, _) -> String.compare sn1 sn2)
+                  multiple_surnames
+              in
+              List.iter
+                (fun (sn, persons) ->
+                  Output.printf conf
+                    {|<h3 class="mt-3"><a href="%sm=N&v=%s"><strong>%s</strong></a> (%d)</h3>|}
+                    (commd conf :> string)
+                    (Mutil.encode sn :> string)
+                    (Util.escape_html sn :> string)
+                    (List.length persons);
+                  Output.print_sstring conf "<ul>\n";
+                  let sorted_persons =
+                    List.sort
+                      (fun p1 p2 ->
+                        match
+                          ( Date.od_of_cdate (Driver.get_birth p1),
+                            Date.od_of_cdate (Driver.get_birth p2) )
+                        with
+                        | Some d1, Some d2 -> Date.compare_date d1 d2
+                        | None, Some _ -> 1
+                        | Some _, None -> -1
+                        | None, None ->
+                            Gutil.alphabetic_order
+                              (Driver.p_first_name base p1)
+                              (Driver.p_first_name base p2))
+                      persons
+                  in
+                  List.iter
+                    (fun p ->
+                      Output.print_sstring conf "<li>";
+                      Update.print_person_parents_and_spouses conf base p;
+                      Output.print_sstring conf "</li>\n")
+                    sorted_persons;
+                  Output.print_sstring conf "</ul>\n")
+                sorted_surnames;
+              Hutil.trailer conf)
       | _ -> specify conf base an pl1 pl2 pl3 (* do the right thing !! *)
 
 (* ************************************************************************ *)
