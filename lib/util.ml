@@ -2864,8 +2864,7 @@ let dispatch_in_columns ncol list order =
   (len_list, ini_list)
 
 let print_in_columns conf ncols len_list list wprint_elem =
-  begin_centered conf;
-  Output.printf conf "<table width=\"95%%\" border=\"%d\">\n" conf.border;
+  Output.printf conf "<table class=\"w-auto\">\n";
   Output.printf conf "<tr align=\"%s\" valign=\"top\">\n" conf.left;
   (let _ =
      List.fold_left
@@ -2878,11 +2877,19 @@ let print_in_columns conf ncols len_list list wprint_elem =
              match list with
              | (kind, ord, elem) :: list ->
                  if n = len then
-                   Output.printf conf "<td width=\"%d\">\n" (100 / ncols)
+                   Output.printf conf "<td width=\"%d%%\">\n" (100 / ncols)
                  else if !kind <> Elem then Output.print_sstring conf "</ul>\n";
                  if !kind <> Elem then (
-                   Output.printf conf "<h3 class=\"subtitle mx-3\">%s%s</h3>\n"
-                     (if ord = "" then "..." else String.make 1 ord.[0])
+                   let letter =
+                     if ord = "" then "…" else String.make 1 ord.[0]
+                   in
+                   let id_attr =
+                     if !kind = HeadElem then Printf.sprintf " id=\"%s\"" letter
+                     else ""
+                   in
+                   Output.printf conf
+                     "<h3%s class=\"subtitle pb-1 mx-3\">%s%s</h3>\n" id_attr
+                     letter
                      (if !kind = HeadElem then ""
                       else " (" ^ transl conf "continued" ^ ")");
                    Output.print_sstring conf "<ul>\n");
@@ -2906,10 +2913,12 @@ let wprint_in_columns conf order wprint_elem list =
     | Some n -> max 1 n
     | None ->
         let len_list = List.length list in
-        if len_list < 10 then 1
-        else if len_list < 100 then 2
-        else if len_list < 200 then 3
-        else 4
+        if len_list < 40 then 1
+        else if len_list < 80 then 2
+        else if len_list < 120 then 3
+        else if len_list < 160 then 4
+        else if len_list < 200 then 5
+        else 6
   in
   let len_list, list = dispatch_in_columns ncols list order in
   print_in_columns conf ncols len_list list wprint_elem

@@ -18107,6 +18107,10 @@ sl: drug priimek
 sv: efternamnalias
 tr: alternatif soyadı
 
+    surname details
+en: detailed view/view details/show the liste of all individuals for those surnames
+fr: vue détaillée/voir détails/afficher la liste de tous les individus pour ces patronymes
+
     surname missing
 af: van ontbreek
 bg: фамилното име липсва

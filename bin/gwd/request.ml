@@ -151,11 +151,15 @@ let specify conf base n pl1 pl2 pl3 =
   in
   let n = Name.lower n in
   let split_pl n pl =
-    List.fold_left (fun (acc1, acc2) p ->
-      let aliases = Driver.get_aliases p
-        |> List.map (Driver.sou base) |> List.map Name.lower in
-      if List.mem n aliases then (p :: acc1, acc2) else (acc1, p :: acc2)
-    ) ([], []) pl
+    List.fold_left
+      (fun (acc1, acc2) p ->
+        let aliases =
+          Driver.get_aliases p
+          |> List.map (Driver.sou base)
+          |> List.map Name.lower
+        in
+        if List.mem n aliases then (p :: acc1, acc2) else (acc1, p :: acc2))
+      ([], []) pl
   in
   Hutil.header conf title;
   Util.print_tips_relationship conf;
@@ -173,18 +177,18 @@ let specify conf base n pl1 pl2 pl3 =
     let ptll12 = process_list pl12 in
     let title = transl conf "alias" |> Utf8.capitalize_fst in
     print_person_list conf base (Some title) ptll11;
-    let title = transl_nth conf "surname/surnames" 0|> Utf8.capitalize_fst in
+    let title = transl_nth conf "surname/surnames" 0 |> Utf8.capitalize_fst in
     print_person_list conf base (Some title) ptll12)
   else
     let ptll1 = process_list pl1 in
     print_person_list conf base None ptll1;
-  (if ptll2 <> [] then
-     let title = transl conf "other possibilities" |> Utf8.capitalize_fst in
-     print_person_list conf base (Some title) ptll2);
-  (if ptll3 <> [] then
-     let title = transl conf "with spouse name" |> Utf8.capitalize_fst in
-     print_person_list conf base (Some title) ptll3);
-  Hutil.trailer conf
+    (if ptll2 <> [] then
+       let title = transl conf "other possibilities" |> Utf8.capitalize_fst in
+       print_person_list conf base (Some title) ptll2);
+    (if ptll3 <> [] then
+       let title = transl conf "with spouse name" |> Utf8.capitalize_fst in
+       print_person_list conf base (Some title) ptll3);
+    Hutil.trailer conf
 
 let this_request_updates_database conf =
   match p_getenv conf.env "m" with
@@ -845,7 +849,7 @@ let treat_request =
              | "RL" -> w_base @@ RelationLink.print
              | "RM" -> w_base @@ RelationMatrixDisplay.print
              | "RLM" -> w_base @@ RelationDisplay.print_multi
-             | "S" ->
+             | "S" | "SN" ->
                  w_base @@ fun conf base ->
                  SearchName.print conf base specify unknown
              | "SND_IMAGE" ->
