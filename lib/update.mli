@@ -50,9 +50,10 @@ val print_same_name :
   config -> Geneweb_db.Driver.base -> Geneweb_db.Driver.person -> unit
 
 val print_person_parents_and_spouses :
-  config ->
+  Config.config ->
   Geneweb_db.Driver.base ->
   ?alias:string option ->
+  ?snalias:string option ->
   Geneweb_db.Driver.person ->
   unit
 

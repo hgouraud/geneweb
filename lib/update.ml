@@ -165,7 +165,8 @@ let add_escaped_string buf (s : Adef.escaped_string) =
     - conf : configuration of the base
     - base : base
     - p : person [Retour] : unit [Rem] : Not visible. *)
-let print_person_parents_and_spouses conf base ?(alias = None) p =
+let print_person_parents_and_spouses conf base ?(alias = None) ?(snalias = None)
+    p =
   if not (GWPARAM.p_auth conf base p) then ()
   else
     let buf = Buffer.create 256 in
@@ -181,6 +182,10 @@ let print_person_parents_and_spouses conf base ?(alias = None) p =
     Buffer.add_char buf ' ';
     Buffer.add_string buf surname;
     Buffer.add_string buf "</a>";
+    (match snalias with
+    | Some sn_a ->
+        Buffer.add_string buf (" [" ^ (escape_html sn_a :> string) ^ "]")
+    | None -> ());
     add_safe_string buf (DateDisplay.short_dates_text conf base p);
     (match alias with
     | Some alias ->
