@@ -117,7 +117,22 @@ let sort_by_birth_date persons_with_titles =
     with_dates
   |> List.rev_map (fun (p, tl, _) -> (p, tl))
 
+let sort_by_first_name base persons_with_titles =
+  let with_fn =
+    List.rev_map
+      (fun (p, tl) ->
+        let fn = Driver.get_first_name p in
+        (p, tl, fn))
+      persons_with_titles
+  in
+  List.sort (fun (_, _, fn1) (_, _, fn2) ->
+    Geneweb_db.Dutil.compare_fnames
+      (Some.name_unaccent (Driver.sou base fn1))
+      (Some.name_unaccent (Driver.sou base fn2))) with_fn
+  |> List.map (fun (p, tl, _) -> (p, tl))
+
 let print_person_list conf base title_opt persons_with_titles =
+  Logs.debug (fun k -> k "Print_person_list: %d" (List.length persons_with_titles));
   match persons_with_titles with
   | [] -> ()
   | _ ->
@@ -163,32 +178,39 @@ let specify conf base n pl1 pl2 pl3 =
   in
   Hutil.header conf title;
   Util.print_tips_relationship conf;
+  let with_fn = p_getenv conf.env "sort_fn" = Some "on" in
   SosaCache.build_sosa_ht conf base;
   let process_list pl =
     pl
     |> List.map (fun p -> (p, process_titles conf base n p))
-    |> sort_by_birth_date
+    |> if with_fn then sort_by_first_name base else sort_by_birth_date
   in
+  ( * identify alias matches in pl1 and pl2 *)
   let pl11, pl12 = split_pl n pl1 in
-  let ptll2 = process_list pl2 in
-  let ptll3 = process_list pl3 in
-  if pl11 <> [] then (
+  let pl21, pl22 = split_pl n pl2 in
+  if pl11 @ pl21 <> [] then (
     let ptll11 = process_list pl11 in
     let ptll12 = process_list pl12 in
+    let ptll21 = process_list pl21 in
     let title = transl conf "alias" |> Utf8.capitalize_fst in
-    print_person_list conf base (Some title) ptll11;
+    print_person_list conf base (Some title) (ptll11 @ ptll21);
     let title = transl_nth conf "surname/surnames" 0 |> Utf8.capitalize_fst in
     print_person_list conf base (Some title) ptll12)
-  else
+  else (
     let ptll1 = process_list pl1 in
-    print_person_list conf base None ptll1;
-    (if ptll2 <> [] then
-       let title = transl conf "other possibilities" |> Utf8.capitalize_fst in
-       print_person_list conf base (Some title) ptll2);
-    (if ptll3 <> [] then
-       let title = transl conf "with spouse name" |> Utf8.capitalize_fst in
-       print_person_list conf base (Some title) ptll3);
-    Hutil.trailer conf
+    print_person_list conf base None ptll1);
+  if pl22 <> [] then
+     let ptll22 = process_list pl22 in
+     let title = transl conf "other possibilities" |> Utf8.capitalize_fst in
+     print_person_list conf base (Some title) ptll22
+  else ();
+  let ptll3 = process_list pl3 in
+  if ptll3 <> [] then
+     let title = transl conf "with spouse name" |> Utf8.capitalize_fst in
+     print_person_list conf base (Some title) ptll3
+  else ();
+  (* FIXME why are those else () needed ? *)
+  Hutil.trailer conf
 
 let this_request_updates_database conf =
   match p_getenv conf.env "m" with
