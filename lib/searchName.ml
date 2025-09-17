@@ -765,6 +765,82 @@ module ApostropheCache = struct
       variants
 end
 
+type cas =
+  | Zero0 (* 0 *)
+  | PnOnly1 (* 10 *)
+  | Fn_space_Sn (* 11 *)
+  | Sn_slash_from_Pn (* 12 *)
+  | Fn_slash_from_Pn (* 13 *)
+  | Fn_slash_Sn (* 14 *)
+  | Fn_dot_Oc_Sn (* 15 *)
+  | Fn_dot_Sn (* 16 *)
+  | Zero17 (* 17 *)
+  | SnOnly (* 2 *)
+  | PnOnly3 (* 3 *)
+  | FnOnly (* 4 *)
+  | PnOnly5 (* 5 *)
+  | FnSn (* 6 *)
+  | PnOnly7 (* 7 *)
+  
+  
+let get_fn_sn_from_env conf =
+  let fn =
+    match p_getenv conf.env "p" with
+    | Some "" | None -> None
+    | Some s -> Some s
+  in
+  let sn =
+    match p_getenv conf.env "n" with
+    | Some "" | None -> None
+    | Some s -> Some s
+  in
+  let pn =
+    match p_getenv conf.env "pn" with
+    | Some "" | None -> None
+    | Some s -> Some s
+  in
+  match fn, sn, pn with
+  | None, None, None -> (None, None, None, None, Zero0)
+  | None, None, Some pn -> (
+    let i = try String.index pn '/' with Not_found -> -1 in
+    let j = try String.index pn '.' with Not_found -> -1 in
+    let k = try String.index pn ' ' with Not_found -> -1 in
+    match i, j, k with
+    | -1, -1, -1 -> None, None, None, Some pn, PnOnly1
+    | -1, -1, k -> (* premier espace sépare fn de sn *)
+        Some (String.sub pn 0 k), 
+        Some (String.sub pn (k + 1) (String.length pn - k - 1) |> String.trim),
+        None, None, Fn_space_Sn
+    | i, -1, _ -> ( (* / sépare fn de sn *)
+        let fn = String.sub pn 0 i in
+        let sn =
+          String.sub pn (i + 1) (String.length pn - i - 1) |> String.trim
+        in
+        match fn, sn with
+        | "", sn -> (None, Some sn, None, None, Sn_slash_from_Pn)
+        | fn, "" -> (Some fn, None, None, None, Fn_slash_from_Pn)
+        | _ -> Some fn, Some sn, None, None, Fn_slash_Sn)
+    | -1, j, _ -> ( (* . définit oc et sépare fn de sn *)
+        let l = try String.index_from pn j ' ' with Not_found -> -1 in
+        if l <> -1 then
+          (Some (String.sub pn 0 j),
+          Some (String.sub pn (l + 1) (String.length pn - l - 1) |> String.trim),
+          Some (String.sub pn (j + 1) (l - j - 1)),
+          None, Fn_dot_Oc_Sn)
+        else
+          (Some (String.sub pn 0 j),
+          Some (String.sub pn (j + 1) (String.length pn - j - 1) |> String.trim),
+          None, None, Fn_dot_Sn))
+    | _ -> (* les autres cas n'ont pas de sens *)
+          (None, None, None, Some pn, Zero17))
+  | None, Some sn, None -> None, Some sn, None, None, SnOnly
+  | None, Some _sn, Some pn -> None, None, None, Some pn, PnOnly3 (* ignore sn *)
+  | Some fn, None, None -> Some fn, None, None, None, FnOnly
+  | Some _fn, None, Some pn -> None, None, None, Some pn, PnOnly5 (* ignore fn *)
+  | Some fn, Some sn, None -> Some fn, Some sn, None, None, FnSn
+  | Some _fn, Some _sn, Some pn -> None, None, None, Some pn, PnOnly7 (* ignore fn, sn *)
+
+
 let dispatch_search_methods conf base query search_order =
   let results = ref { exact = []; partial = []; spouse = [] } in
   let firstname_variants = ref Mutil.StrSet.empty in
@@ -816,14 +892,9 @@ let dispatch_search_methods conf base query search_order =
             }
       | FullName ->
           let fn, sn =
-            match (p_getenv conf.env "p", p_getenv conf.env "n") with
-            | Some fn, Some sn when fn <> "" && sn <> "" -> (fn, sn)
-            | _ -> (
-                match String.rindex_opt query ' ' with
-                | Some i ->
-                    ( String.sub query 0 i,
-                      String.sub query (i + 1) (String.length query - i - 1) )
-                | _ -> ("", query))
+            match get_fn_sn_from_env conf with
+            | Some fn, Some sn, _, _, _ -> (fn, sn)
+            | _ -> ("", query)
           in
           let r = search_fullname conf base fn sn in
           Logs.debug (fun k ->
@@ -1055,25 +1126,10 @@ let search conf base query search_order specify unknown =
       let pl3 = List.map (Driver.poi base) final_results.spouse in
       let surname_groups = lazy (group_by_surname base all_ips) in
       let get_surname_groups () = Lazy.force surname_groups in
-      let fn =
-        match p_getenv conf.env "p" with
-        | Some "" | None -> None
-        | Some s -> Some s
-      in
-      let sn =
-        match p_getenv conf.env "n" with
-        | Some "" | None -> None
-        | Some s -> Some s
-      in
-      let pn =
-        match p_getenv conf.env "pn" with
-        | Some "" | None -> None
-        | Some s -> Some s
-      in
-
-      match (fn, sn, pn) with
-      (* CAS 1: PRÉNOM seul *)
-      | Some _, None, None ->
+      let _fn, sn, _oc, _pn, cas = get_fn_sn_from_env conf in
+      match cas with
+      (* CAS 4: PRÉNOM seul *)
+      | FnOnly -> (
           Logs.debug (fun k -> k "  Case: Some fn, None, None");
           SosaCache.build_sosa_ht conf base;
           let str =
@@ -1097,10 +1153,10 @@ let search conf base query search_order specify unknown =
             else ""
           in
           Some.first_name_print_list conf base query str
-            [ ("", pl1); (tit2, pl2); (tit3, pl3) ]
-      (* CAS 2: NOM DE FAMILLE seul *)
-      | None, Some sn, None -> (
+            [ ("", pl1); (tit2, pl2); (tit3, pl3) ])
+      | SnOnly -> ( (* CAS 2: NOM DE FAMILLE seul *)
           Logs.debug (fun k -> k "Case: None, Some sn, None ");
+          let sn = Option.value ~default:"" sn in
           debug_surname_index conf base sn;
           let surname_groups = get_surname_groups () in
           match surname_groups with
@@ -1114,33 +1170,16 @@ let search conf base query search_order specify unknown =
                   Some.print_several_possible_surnames sn conf base
                     ([], multiple)))
       (* CAS 3: Recherche avec PN (format prénom/nom/occ) *)
-      | None, None, Some pn_value -> (
-          let i = try String.index pn_value '/' with Not_found -> -1 in
-          if i = -1 then (
-            Logs.debug (fun k -> k "  Case: None, None, Some pn, no /");
+      | Fn_space_Sn | Sn_slash_from_Pn | Fn_slash_from_Pn
+      | Fn_slash_Sn | Fn_dot_Oc_Sn | Fn_dot_Sn | Zero17 -> (
+          match cas with
+          | Fn_space_Sn -> (
             match (pl1, pl2, pl3) with
             | [ p ], _, _ ->
                 record_visited conf (Driver.get_iper p);
                 Perso.print conf base p
             | _ -> specify conf base query pl1 pl2 pl3)
-          else (
-            Logs.debug (fun k -> k "  Case: None, None, Some pn");
-            let j =
-              try String.index_from pn_value (i + 1) '/' with Not_found -> -1
-            in
-            let oc =
-              if j = -1 then ""
-              else String.sub pn_value (j + 1) (String.length pn_value - j - 1)
-            in
-            let j = if j = -1 then 0 else String.length pn_value - j in
-            let fn_part = String.sub pn_value 0 i |> String.trim in
-            let sn_part =
-              String.sub pn_value (i + 1) (String.length pn_value - i - 1 - j)
-              |> String.trim
-            in
-            match (fn_part, sn_part, oc) with
-            (* Prénom seul via pn *)
-            | fn, "", "" when fn <> "" -> (
+          | Fn_slash_Sn -> ( (* Prénom seul via pn *)
                 Logs.debug (fun k -> k "    Prénom seul avec pn");
                 let str =
                   List.fold_left
@@ -1162,8 +1201,7 @@ let search conf base query search_order specify unknown =
                 in
                 Some.first_name_print_list conf base query str
                   [ ("", pl1); (tit2, pl2); (tit3, pl3) ])
-            (* Nom seul via pn *)
-            | "", sn, "" when sn <> "" -> (
+          | Sn_slash_from_Pn -> ( (* Nom seul via pn *)
                 Logs.debug (fun k -> k "    Non seul avec pn");
                 let surname_groups = get_surname_groups () in
                 match surname_groups with
@@ -1179,19 +1217,17 @@ let search conf base query search_order specify unknown =
                     else (
                       Logs.debug (fun k -> k "      Multiple sn, no variants");
                       specify conf base query pl1 pl2 pl3))
-            (* Autres cas avec pn *)
-            | _ -> (
+           | _ -> ( (* Autres cas avec pn *)
                 Logs.debug (fun k -> k "    Autres cas avec pn");
-                specify conf base query pl1 pl2 pl3)))
-      (* CAS 4: Recherche PRÉNOM + NOM *)
-      | Some _, Some _, None ->
+                specify conf base query pl1 pl2 pl3))
+      | FnSn -> ( (* CAS 6: Recherche PRÉNOM + NOM *)
           if conf.wizard then
             Logs.debug (fun k -> k "Case: First name + Surname\n");
-          specify conf base query pl1 pl2 pl3
-      (* CAS PAR DÉFAUT *)
-      | _ ->
-          if conf.wizard then Logs.debug (fun k -> k "Case: Default\n");
           specify conf base query pl1 pl2 pl3)
+      (* CAS PAR DÉFAUT *)
+      | _ -> (
+          Logs.debug (fun k -> k "Case: Default\n");
+          specify conf base query pl1 pl2 pl3))
 
 (* ************************************************************************ *)
 (*  [Fonc] print : conf -> string -> unit                                   *)
