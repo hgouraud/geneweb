@@ -7,6 +7,8 @@ end
 
 val surname_not_found : Config.config -> string -> unit
 
+val name_unaccent : string -> string
+
 val persons_of_fsname :
   Config.config ->
   Geneweb_db.Driver.base ->

@@ -117,6 +117,20 @@ let sort_by_birth_date persons_with_titles =
     with_dates
   |> List.rev_map (fun (p, tl, _) -> (p, tl))
 
+let sort_by_first_name base persons_with_titles =
+  let with_fn =
+    List.rev_map
+      (fun (p, tl) ->
+        let fn = Driver.get_first_name p in
+        (p, tl, fn))
+      persons_with_titles
+  in
+  List.sort (fun (_, _, fn1) (_, _, fn2) ->
+    Geneweb_db.Dutil.compare_fnames
+      (Some.name_unaccent (Driver.sou base fn1))
+      (Some.name_unaccent (Driver.sou base fn2))) with_fn
+  |> List.map (fun (p, tl, _) -> (p, tl))
+
 let print_person_list conf base title_opt persons_with_titles =
   match persons_with_titles with
   | [] -> ()
@@ -163,11 +177,12 @@ let specify conf base n pl1 pl2 pl3 =
   in
   Hutil.header conf title;
   Util.print_tips_relationship conf;
+  let with_fn = p_getenv conf.env "sort_fn" = Some "on" in
   SosaCache.build_sosa_ht conf base;
   let process_list pl =
     pl
     |> List.map (fun p -> (p, process_titles conf base n p))
-    |> sort_by_birth_date
+    |> if with_fn then sort_by_first_name base else sort_by_birth_date
   in
   let pl11, pl12 = split_pl n pl1 in
   let ptll2 = process_list pl2 in
