@@ -952,7 +952,9 @@ let print_surname_details conf base query_string surnames_groups =
   in
   let include_aliases = p_getenv conf.env "sna" <> None in
   Hutil.header_without_title conf;
-  evar_button conf query_string "sna" "surname alias" title_text;
+  evar_buttons conf query_string 
+    [{evar = "sna"; text = "surname alias"};
+     {evar = "other"; text = "other text"} ] title_text;
   SosaCache.build_sosa_ht conf base;
   let find_surname_aliases =
     if not include_aliases then fun _ -> []

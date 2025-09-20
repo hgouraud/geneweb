@@ -3436,28 +3436,61 @@ document.addEventListener('DOMContentLoaded', hideOverlay);
 let print_loading_overlay_js conf =
   Output.print_sstring conf loading_overlay_js_content
 
-let evar_button conf query_string evar evar_text title_text =
-  let include_evar = p_getenv conf.env evar <> None in
-  let sna_param = if include_evar then "" else "&" ^ evar in
-  let toggle_url =
-    Printf.sprintf "%sm=SN&n=%s%s"
-      (commd conf :> string)
-      (Mutil.encode query_string :> string)
-      sna_param
+type evar_button = {
+  evar : string;
+  text : string;
+}
+
+(*
+  let evars =
+    List.fold_left ( fun acc {evar; _} ->
+      let include_evar = p_getenv conf.env evar <> None in
+      if include_evar then acc else acc ^ "&" ^ evar) "" evar_l
   in
-  let verb = if include_evar then "delete" else "add" in
-  let button_text =
-    transl_nth conf evar_text 0
-    |> transl_decline conf verb |> Utf8.capitalize_fst
+
+*)
+
+let evar_buttons conf query_string evar_l title_text =
+  let remove evar evar_l =
+    List.fold_left (fun acc e -> if e = evar then acc else e :: acc) [] evar_l
   in
+  let existing_evars =
+    List.fold_left ( fun acc {evar; _} ->
+      let include_evar = p_getenv conf.env evar <> None in
+      if include_evar then evar :: acc else acc) [] evar_l
+  in
+  let buttons =
+    List.fold_left ( fun acc {evar; text} ->
+      let include_evar = p_getenv conf.env evar <> None in
+      let evar_l =
+        if include_evar then (remove evar existing_evars)
+        else evar :: existing_evars
+      in
+      let toggle_url =
+        Printf.sprintf "%sm=SN&n=%s%s"
+          (commd conf :> string)
+          (Mutil.encode query_string :> string)
+          (if evar_l <> [] then "&" ^ (String.concat "&" evar_l) else "")
+      in
+      let verb = if include_evar then "delete" else "add" in
+      let button_text =
+        transl_nth conf text 0
+        |> transl_decline conf verb |> Utf8.capitalize_fst
+      in
+      acc ^
+          (Printf.sprintf {|<a href="%s"
+            class="btn btn-outline-secondary btn-sm ml-auto">
+            <i class="fa fa-%s mr-1"></i>%s</a>|}
+            toggle_url
+            (if include_evar then "minus" else "plus")
+            button_text)
+    ) "" evar_l
+  in
+
   Output.printf conf
     {|<div class="d-flex align-items-center mb-3">
         <h1 class="h2 mb-0">%s</h1>
-        <a href="%s" class="btn btn-outline-secondary btn-sm ml-auto">
-          <i class="fa fa-%s mr-1"></i>%s
-        </a>
+        %s
       </div>|}
-    title_text toggle_url
-    (if include_evar then "minus" else "plus")
-    button_text;
+    title_text buttons;
 
