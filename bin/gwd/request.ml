@@ -131,7 +131,7 @@ let sort_by_first_name base persons_with_titles =
       (Some.name_unaccent (Driver.sou base fn2))) with_fn
   |> List.map (fun (p, tl, _) -> (p, tl))
 
-let print_person_list conf base title_opt persons_with_titles =
+let print_person_list conf base query title_opt persons_with_titles =
   Logs.debug (fun k -> k "Print_person_list: %d" (List.length persons_with_titles));
   match persons_with_titles with
   | [] -> ()
@@ -153,7 +153,15 @@ let print_person_list conf base title_opt persons_with_titles =
           else Output.print_sstring conf {|<span class="bullet">•</span>|};
           Output.print_sstring conf "</span>";
           let alias = Some.AliasCache.get_alias (Driver.get_iper p) in
-          Update.print_person_parents_and_spouses conf base ~alias p;
+          let snalias = Driver.get_surnames_aliases p
+            |> List.map (Driver.sou base)
+          in
+          let snalias =
+            if snalias = [] then None
+            else try Some (List.find (fun al -> Name.lower al = query) snalias) with
+            | Not_found -> None
+          in
+          Update.print_person_parents_and_spouses conf base ~alias ~snalias p;
           Output.print_sstring conf "</li>\n")
         persons_with_titles;
       Output.print_sstring conf "</ul>\n"
@@ -185,7 +193,7 @@ let specify conf base n pl1 pl2 pl3 =
     |> List.map (fun p -> (p, process_titles conf base n p))
     |> if with_fn then sort_by_first_name base else sort_by_birth_date
   in
-  ( * identify alias matches in pl1 and pl2 *)
+  (* identify alias matches in pl1 and pl2 *)
   let pl11, pl12 = split_pl n pl1 in
   let pl21, pl22 = split_pl n pl2 in
   if pl11 @ pl21 <> [] then (
@@ -193,21 +201,21 @@ let specify conf base n pl1 pl2 pl3 =
     let ptll12 = process_list pl12 in
     let ptll21 = process_list pl21 in
     let title = transl conf "alias" |> Utf8.capitalize_fst in
-    print_person_list conf base (Some title) (ptll11 @ ptll21);
+    print_person_list conf base n (Some title) (ptll11 @ ptll21);
     let title = transl_nth conf "surname/surnames" 0 |> Utf8.capitalize_fst in
-    print_person_list conf base (Some title) ptll12)
+    print_person_list conf base n (Some title) ptll12)
   else (
     let ptll1 = process_list pl1 in
-    print_person_list conf base None ptll1);
+    print_person_list conf base n None ptll1);
   if pl22 <> [] then
      let ptll22 = process_list pl22 in
      let title = transl conf "other possibilities" |> Utf8.capitalize_fst in
-     print_person_list conf base (Some title) ptll22
+     print_person_list conf base n (Some title) ptll22
   else ();
   let ptll3 = process_list pl3 in
   if ptll3 <> [] then
      let title = transl conf "with spouse name" |> Utf8.capitalize_fst in
-     print_person_list conf base (Some title) ptll3
+     print_person_list conf base n (Some title) ptll3
   else ();
   (* FIXME why are those else () needed ? *)
   Hutil.trailer conf

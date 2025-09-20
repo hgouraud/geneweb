@@ -3435,3 +3435,29 @@ document.addEventListener('DOMContentLoaded', hideOverlay);
 
 let print_loading_overlay_js conf =
   Output.print_sstring conf loading_overlay_js_content
+
+let evar_button conf query_string evar evar_text title_text =
+  let include_evar = p_getenv conf.env evar <> None in
+  let sna_param = if include_evar then "" else "&" ^ evar in
+  let toggle_url =
+    Printf.sprintf "%sm=SN&n=%s%s"
+      (commd conf :> string)
+      (Mutil.encode query_string :> string)
+      sna_param
+  in
+  let verb = if include_evar then "delete" else "add" in
+  let button_text =
+    transl_nth conf evar_text 0
+    |> transl_decline conf verb |> Utf8.capitalize_fst
+  in
+  Output.printf conf
+    {|<div class="d-flex align-items-center mb-3">
+        <h1 class="h2 mb-0">%s</h1>
+        <a href="%s" class="btn btn-outline-secondary btn-sm ml-auto">
+          <i class="fa fa-%s mr-1"></i>%s
+        </a>
+      </div>|}
+    title_text toggle_url
+    (if include_evar then "minus" else "plus")
+    button_text;
+

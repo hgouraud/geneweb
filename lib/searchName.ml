@@ -1050,6 +1050,9 @@ let execute_search_method conf base query method_ fn_options =
       let exact, partial = search_surname conf base query in
       Logs.debug (fun k -> k "    Method Surname: %d + %d exact/partial"
         (List.length exact) (List.length partial));
+      List.iter (fun ip ->
+        Printf.eprintf "  %s\n" (Gutil.designation base (Driver.poi base ip)))
+          partial;
       { exact; partial; spouse = [] }
   | FirstName ->
       let exact, partial, _variants = search_firstname_with_cache conf base query fn_options in
@@ -1148,10 +1151,10 @@ and display_surname_results conf base _query surname all_persons =
   match surname_groups with
   | [(single_surname, _)] ->
       Some.search_surname_print conf base (fun _conf _x -> ()) single_surname
-  | multiple_surnames ->
+  | multiple_surnames -> (
       match p_getenv conf.env "m" with
       | Some "SN" -> Some.print_surname_details conf base surname multiple_surnames
-      | _ -> Some.print_several_possible_surnames surname conf base ([], multiple_surnames)
+      | _ -> Some.print_several_possible_surnames surname conf base ([], multiple_surnames))
 
 (* Main search entry point *)
 let search conf base query search_order fn_options specify _unknown =

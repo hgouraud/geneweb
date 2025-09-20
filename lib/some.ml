@@ -950,30 +950,9 @@ let print_surname_details conf base query_string surnames_groups =
       (escape_html query_string :> string)
       (transl conf "specify")
   in
-  Hutil.header_without_title conf;
   let include_aliases = p_getenv conf.env "sna" <> None in
-  let sna_param = if include_aliases then "" else "&sna" in
-  let toggle_url =
-    Printf.sprintf "%sm=SN&n=%s%s"
-      (commd conf :> string)
-      (Mutil.encode query_string :> string)
-      sna_param
-  in
-  let verb = if include_aliases then "delete" else "add" in
-  let button_text =
-    transl_nth conf "surname alias" 0
-    |> transl_decline conf verb |> Utf8.capitalize_fst
-  in
-  Output.printf conf
-    {|<div class="d-flex align-items-center mb-3">
-        <h1 class="h2 mb-0">%s</h1>
-        <a href="%s" class="btn btn-outline-secondary btn-sm ml-auto">
-          <i class="fa fa-%s mr-1"></i>%s
-        </a>
-      </div>|}
-    title_text toggle_url
-    (if include_aliases then "minus" else "plus")
-    button_text;
+  Hutil.header_without_title conf;
+  evar_button conf query_string "sna" "surname alias" title_text;
   SosaCache.build_sosa_ht conf base;
   let find_surname_aliases =
     if not include_aliases then fun _ -> []
