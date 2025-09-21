@@ -167,11 +167,13 @@ let print_person_list conf base query title_opt persons_with_titles =
       Output.print_sstring conf "</ul>\n"
 
 let specify conf base n pl1 pl2 pl3 =
-  let title _ =
-    Output.printf conf "%s%s %s"
-      (Util.escape_html n :> string)
-      (transl conf ":") (transl conf "specify")
+  let title_text =
+    Printf.sprintf "\"%s\"%s %s"
+      (escape_html n :> string)
+      (transl conf ":")
+      (transl conf "specify")
   in
+  Hutil.header_without_title conf;
   let n = Name.lower n in
   let split_pl n pl =
     List.fold_left
@@ -184,9 +186,11 @@ let specify conf base n pl1 pl2 pl3 =
         if List.mem n aliases then (p :: acc1, acc2) else (acc1, p :: acc2))
       ([], []) pl
   in
-  Hutil.header conf title;
   Util.print_tips_relationship conf;
-  let with_fn = p_getenv conf.env "sort_fn" = Some "on" in
+  Util.evar_buttons conf n
+    [{evar = "sna"; text = "surname alias"};
+     {evar = "sort_fn"; text = "fn sort"} ] title_text;
+  let with_fn = p_getenv conf.env "sort_fn" <> None in
   SosaCache.build_sosa_ht conf base;
   let process_list pl =
     pl

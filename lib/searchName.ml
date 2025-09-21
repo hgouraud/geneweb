@@ -888,132 +888,6 @@ let _debug_surname_index conf base query =
   Printf.eprintf "=== FIN DEBUG ===\n\n";
   flush stderr
 
-(* Refined types for better clarity *)
-type search_case =
-  | NoInput                    (* 0 - No parameters provided *)
-  | PersonName of string       (* 1, 3, 5, 7 - Various person name formats *)
-  | SurnameOnly of string      (* 2 - Surname only *)
-  | FirstNameOnly of string    (* 4 - First name only *)
-  | FirstNameSurname of string * string  (* 6 - Both first and surname *)
-  | ParsedName of {            (* 11-16 - Structured name parsing *)
-      first_name: string option;
-      surname: string option;
-      oc: string option;
-      original: string;
-      format: [`Space | `Slash | `Dot | `SlashSurname | `SlashFirstName | `DotOc];
-    }
-  | InvalidFormat of string    (* 17 - Unparseable format *)
-
-type name_components = {
-  first_name: string option;
-  surname: string option;
-  oc: string option;
-  person_name: string option;
-  case: search_case;
-}
-
-(* Extract name components from environment with cleaner logic *)
-let rec extract_name_components conf =
-  let get_param key =
-    match p_getenv conf.env key with
-    | Some "" | None -> None
-    | Some s -> Some s
-  in
-  let fn = get_param "p" in
-  let sn = get_param "n" in
-  let pn = get_param "pn" in
-  match fn, sn, pn with
-  | None, None, None ->
-      { first_name = None; surname = None; oc = None;
-        person_name = None; case = NoInput }
-  | None, None, Some pn -> parse_person_name pn
-  | None, Some sn, None ->
-      { first_name = None; surname = Some sn; oc = None;
-        person_name = None; case = SurnameOnly sn }
-  | None, Some _, Some pn ->
-      { first_name = None; surname = None; oc = None;
-        person_name = Some pn; case = PersonName pn }
-  | Some fn, None, None ->
-      { first_name = Some fn; surname = None; oc = None;
-        person_name = None; case = FirstNameOnly fn }
-  | Some _, None, Some pn ->
-      { first_name = None; surname = None; oc = None;
-        person_name = Some pn; case = PersonName pn }
-  | Some fn, Some sn, None ->
-      { first_name = Some fn; surname = Some sn; oc = None;
-        person_name = None; case = FirstNameSurname (fn, sn) }
-  | Some _, Some _, Some pn ->
-      { first_name = None; surname = None; oc = None;
-        person_name = Some pn; case = PersonName pn }
-
-(* Parse person name string into structured components *)
-and parse_person_name pn =
-  let find_char c = try Some (String.index pn c) with Not_found -> None in
-  let slash_pos = find_char '/' in
-  let dot_pos = find_char '.' in
-  let space_pos = find_char ' ' in
-  match slash_pos, dot_pos, space_pos with
-  | None, None, None ->
-      { first_name = None; surname = None; oc = None;
-        person_name = Some pn; case = PersonName pn }
-  | None, None, Some k ->
-      let fn = String.sub pn 0 k in
-      let sn = String.sub pn (k + 1) (String.length pn - k - 1) |> String.trim in
-      { first_name = Some fn; surname = Some sn; oc = None;
-        person_name = None; case = ParsedName {
-          first_name = Some fn; surname = Some sn; oc = None;
-          original = pn; format = `Space } }
-  | Some i, None, _ ->
-      parse_slash_separated pn i
-  | None, Some j, _ ->
-      parse_dot_separated pn j
-  | _ ->
-      { first_name = None; surname = None; oc = None;
-        person_name = Some pn; case = InvalidFormat pn }
-
-(* Handle slash-separated names (fn/sn or /sn or fn/) *)
-and parse_slash_separated pn slash_pos =
-  let fn_part = String.sub pn 0 slash_pos in
-  let sn_part = String.sub pn (slash_pos + 1)
-    (String.length pn - slash_pos - 1) |> String.trim
-  in
-  match fn_part, sn_part with
-  | "", sn ->
-      { first_name = None; surname = Some sn; oc = None;
-        person_name = None; case = ParsedName {
-          first_name = None; surname = Some sn; oc = None;
-          original = pn; format = `SlashSurname } }
-  | fn, "" ->
-      { first_name = Some fn; surname = None; oc = None;
-        person_name = None; case = ParsedName {
-          first_name = Some fn; surname = None; oc = None;
-          original = pn; format = `SlashFirstName } }
-  | fn, sn ->
-      { first_name = Some fn; surname = Some sn; oc = None;
-        person_name = None; case = ParsedName {
-          first_name = Some fn; surname = Some sn; oc = None;
-          original = pn; format = `Slash } }
-
-(* Handle dot-separated names with optional oc *)
-and parse_dot_separated pn dot_pos =
-  let fn_part = String.sub pn 0 dot_pos in
-  let rest = String.sub pn (dot_pos + 1) (String.length pn - dot_pos - 1) in
-  match String.index_opt rest ' ' with
-  | Some space_pos ->
-      let oc = String.sub rest 0 space_pos in
-      let sn_part = String.sub rest (space_pos + 1)
-        (String.length rest - space_pos - 1) |> String.trim
-      in
-      { first_name = Some fn_part; surname = Some sn_part; oc = Some oc;
-        person_name = None; case = ParsedName {
-          first_name = Some fn_part; surname = Some sn_part; oc = Some oc;
-          original = pn; format = `DotOc } }
-  | None ->
-      { first_name = Some fn_part; surname = Some rest; oc = None;
-        person_name = None; case = ParsedName {
-          first_name = Some fn_part; surname = Some rest; oc = None;
-          original = pn; format = `Dot } }
-
 (* remove from partial list persons present in exact list *)
 (* Using Set for all three lists (most efficient for large datasets) *)
 let remove_duplicates results =
@@ -1060,9 +934,9 @@ let execute_search_method conf base query method_ fn_options =
         (List.length exact) (List.length partial));
       { exact; partial; spouse = [] }
   | FullName ->
-      let components = extract_name_components conf in
-      let fn = Option.value components.first_name ~default:"" in
-      let sn = Option.value components.surname ~default:query in
+      let components = Util.extract_name_components conf in
+      let fn = Option.value components.first_n ~default:"" in
+      let sn = Option.value components.surn ~default:query in
       let oc = Option.value components.oc ~default:"" in
       let results = search_fullname conf base
         (if oc <> "" then fn ^ "." ^ oc else fn) sn in
@@ -1102,6 +976,7 @@ let dispatch_search_methods conf base query search_order fn_options =
   let deduplicated = remove_duplicates results in
   (deduplicated, !firstname_variants)
 
+
 (* Cleaner search result handling *)
 let rec handle_search_results conf base query fn_options components specify results =
   let { exact; partial; spouse } = results in
@@ -1116,21 +991,23 @@ let rec handle_search_results conf base query fn_options components specify resu
       let exact_persons = List.map (Driver.poi base) exact in
       let partial_persons = List.map (Driver.poi base) partial in
       let spouse_persons = List.map (Driver.poi base) spouse in
-      match components.case with
-      | FirstNameOnly fn ->
+      match components.Util.case with
+      | Util.FirstNameOnly fn ->
           display_firstname_results conf base query fn exact_persons partial_persons spouse_persons
-      | SurnameOnly sn ->
+      | Util.SurnameOnly sn ->
           display_surname_results conf base query sn all_persons
-      | FirstNameSurname (_fn, _sn) ->
+      | Util.FirstNameSurname (_fn, _sn) ->
           specify conf base query exact_persons partial_persons spouse_persons
-      | ParsedName { format = `Space; _ }
+      | Util.ParsedName { format = `Space; _ }
           when fn_options.exact1 && fn_options.all && List.length exact_persons = 1 ->
           let person = List.hd exact_persons in
           record_visited conf (Driver.get_iper person);
           Perso.print conf base person
       (* FIXME are there other situations where a single person should be shown *)
-      | _ ->
-          specify conf base query exact_persons partial_persons spouse_persons
+      | _ -> (
+          Logs.debug (fun k -> k "Handle_search_results %s, %s"
+            query (case_str components.case));
+          specify conf base query exact_persons partial_persons spouse_persons)
 
 (* Helper functions for displaying results *)
 and display_firstname_results conf base query _firstname exact partial spouse =
@@ -1145,8 +1022,9 @@ and display_firstname_results conf base query _firstname exact partial spouse =
   ] in
   Some.first_name_print_list conf base query firstname_set sections
 
-and display_surname_results conf base _query surname all_persons =
+and display_surname_results conf base query surname all_persons =
   (* debug_surname_index conf base surname; *)
+  Logs.debug (fun k -> k "Display_surname_results %s, %s" query surname);
   let surname_groups = group_by_surname base all_persons in
   match surname_groups with
   | [(single_surname, _)] ->
@@ -1179,30 +1057,11 @@ let search conf base query search_order fn_options specify _unknown =
   ) { exact = []; partial = []; spouse = [] } variants in
   (* Final deduplication *)
   let deduplicated = remove_duplicates final_results in
-  let components = extract_name_components conf in
+  let components = Util.extract_name_components conf in
   handle_search_results conf base query fn_options components specify deduplicated
 
 (* ************************************************************************ *)
 (*  [Fonc] print : conf -> string -> unit                                   *)
-
-let format_str format =
-  match format with
-  | `Dot -> "Dot"
-  | `DotOc -> "DotOc"
-  | `Space -> "Space"
-  | `Slash -> "Slash"
-  | `SlashSurname -> "SlashSurname"
-  | `SlashFirstName -> "SlashFirstName"
-
-let case_str case =
-  match case with
-  | FirstNameSurname _ -> "FirstNameSurname"
-  | PersonName _ -> "PersonName"
-  | FirstNameOnly _ -> "FirstNameOnly"
-  | SurnameOnly _ -> "SurnameOnly"
-  | ParsedName _ -> "ParsedName"
-  | NoInput -> "NoInput"
-  |InvalidFormat _ -> "InvalidFormat"
 
 (** [Description] : Recherche qui n'utilise que 2 inputs. On essai donc de
     trouver la meilleure combinaison de résultat pour afficher la réponse la
@@ -1211,7 +1070,7 @@ let case_str case =
     - base : base [Retour] : Néant [Rem] : Exporté en clair hors de ce module.
 *)
 let print conf base specify unknown =
-  let components = extract_name_components conf in
+  let components = Util.extract_name_components conf in
   let fn_options = {
     order = p_getenv conf.env "p_order" = Some "on";
     all = p_getenv conf.env "p_all" <> Some "off";
@@ -1237,7 +1096,7 @@ let print conf base specify unknown =
       let order = [ Surname ] in
       search conf base sn order fn_options specify unknown;
       Logs.debug (fun k -> k "Print case SurnameOnly (%s)" sn))
-  | ParsedName {first_name = fn; surname = sn; oc; format; _} -> (
+  | ParsedName {first_n = fn; surn = sn; oc; format; _} -> (
       match fn, sn with
       | Some fn, None when fn <> "" -> (
           let order = [ FirstName ] in

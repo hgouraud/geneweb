@@ -3450,7 +3450,148 @@ type evar_button = {
 
 *)
 
-let evar_buttons conf query_string evar_l title_text =
+
+(* Refined types for better clarity *)
+type search_case =
+  | NoInput                    (* 0 - No parameters provided *)
+  | PersonName of string       (* 1, 3, 5, 7 - Various person name formats *)
+  | SurnameOnly of string      (* 2 - Surname only *)
+  | FirstNameOnly of string    (* 4 - First name only *)
+  | FirstNameSurname of string * string  (* 6 - Both first and surname *)
+  | ParsedName of {            (* 11-16 - Structured name parsing *)
+      first_n: string option;
+      surn: string option;
+      oc: string option;
+      original: string;
+      format: [`Space | `Slash | `Dot | `SlashSurname | `SlashFirstName | `DotOc];
+    }
+  | InvalidFormat of string    (* 17 - Unparseable format *)
+
+let case_str case =
+  match case with
+  | FirstNameSurname _ -> "FirstNameSurname"
+  | PersonName _ -> "PersonName"
+  | FirstNameOnly _ -> "FirstNameOnly"
+  | SurnameOnly _ -> "SurnameOnly"
+  | ParsedName _ -> "ParsedName"
+  | NoInput -> "NoInput"
+  | InvalidFormat _ -> "InvalidFormat"
+
+
+let format_str format =
+  match format with
+  | `Dot -> "Dot"
+  | `DotOc -> "DotOc"
+  | `Space -> "Space"
+  | `Slash -> "Slash"
+  | `SlashSurname -> "SlashSurname"
+  | `SlashFirstName -> "SlashFirstName"
+
+type name_components = {
+  first_n: string option;
+  surn: string option;
+  oc: string option;
+  person_name: string option;
+  case: search_case;
+}
+
+(* Extract name components from environment with cleaner logic *)
+let rec extract_name_components conf =
+  let get_param key =
+    match p_getenv conf.env key with
+    | Some "" | None -> None
+    | Some s -> Some s
+  in
+  let fn = get_param "p" in
+  let sn = get_param "n" in
+  let pn = get_param "pn" in
+  match fn, sn, pn with
+  | None, None, None ->
+      { first_n = None; surn = None; oc = None;
+        person_name = None; case = NoInput }
+  | None, None, Some pn -> parse_person_name pn
+  | None, Some sn, None ->
+      { first_n = None; surn = Some sn; oc = None;
+        person_name = None; case = SurnameOnly sn }
+  | None, Some _, Some pn -> parse_person_name pn
+  | Some fn, None, None ->
+      { first_n = Some fn; surn = None; oc = None;
+        person_name = None; case = FirstNameOnly fn }
+  | Some _, None, Some pn -> parse_person_name pn
+  | Some fn, Some sn, None ->
+      { first_n = Some fn; surn = Some sn; oc = None;
+        person_name = None; case = FirstNameSurname (fn, sn) }
+  | Some _, Some _, Some pn -> parse_person_name pn
+
+(* Parse person name string into structured components *)
+and parse_person_name pn =
+  let find_char c = try Some (String.index pn c) with Not_found -> None in
+  let slash_pos = find_char '/' in
+  let dot_pos = find_char '.' in
+  let space_pos = find_char ' ' in
+  match slash_pos, dot_pos, space_pos with
+  | None, None, None ->
+      { first_n = None; surn = None; oc = None;
+        person_name = Some pn; case = PersonName pn }
+  | None, None, Some k ->
+      let fn = String.sub pn 0 k in
+      let sn = String.sub pn (k + 1) (String.length pn - k - 1) |> String.trim in
+      { first_n = Some fn; surn = Some sn; oc = None;
+        person_name = None; case = ParsedName {
+          first_n = Some fn; surn = Some sn; oc = None;
+          original = pn; format = `Space } }
+  | Some i, None, _ ->
+      parse_slash_separated pn i
+  | None, Some j, _ ->
+      parse_dot_separated pn j
+  | _ ->
+      { first_n = None; surn = None; oc = None;
+        person_name = Some pn; case = InvalidFormat pn }
+
+(* Handle slash-separated names (fn/sn or /sn or fn/) *)
+and parse_slash_separated pn slash_pos =
+  let fn_part = String.sub pn 0 slash_pos in
+  let sn_part = String.sub pn (slash_pos + 1)
+    (String.length pn - slash_pos - 1) |> String.trim
+  in
+  match fn_part, sn_part with
+  | "", sn ->
+      { first_n = None; surn = Some sn; oc = None;
+        person_name = None; case = ParsedName {
+          first_n = None; surn = Some sn; oc = None;
+          original = pn; format = `SlashSurname } }
+  | fn, "" ->
+      { first_n = Some fn; surn = None; oc = None;
+        person_name = None; case = ParsedName {
+          first_n = Some fn; surn = None; oc = None;
+          original = pn; format = `SlashFirstName } }
+  | fn, sn ->
+      { first_n = Some fn; surn = Some sn; oc = None;
+        person_name = None; case = ParsedName {
+          first_n = Some fn; surn = Some sn; oc = None;
+          original = pn; format = `Slash } }
+
+(* Handle dot-separated names with optional oc *)
+and parse_dot_separated pn dot_pos =
+  let fn_part = String.sub pn 0 dot_pos in
+  let rest = String.sub pn (dot_pos + 1) (String.length pn - dot_pos - 1) in
+  match String.index_opt rest ' ' with
+  | Some space_pos ->
+      let oc = String.sub rest 0 space_pos in
+      let sn_part = String.sub rest (space_pos + 1)
+        (String.length rest - space_pos - 1) |> String.trim
+      in
+      { first_n = Some fn_part; surn = Some sn_part; oc = Some oc;
+        person_name = None; case = ParsedName {
+          first_n = Some fn_part; surn = Some sn_part; oc = Some oc;
+          original = pn; format = `DotOc } }
+  | None ->
+      { first_n = Some fn_part; surn = Some rest; oc = None;
+        person_name = None; case = ParsedName {
+          first_n = Some fn_part; surn = Some rest; oc = None;
+          original = pn; format = `Dot } }
+
+let evar_buttons conf _query_string evar_l title_text =
   let remove evar evar_l =
     List.fold_left (fun acc e -> if e = evar then acc else e :: acc) [] evar_l
   in
@@ -3461,15 +3602,21 @@ let evar_buttons conf query_string evar_l title_text =
   in
   let buttons =
     List.fold_left ( fun acc {evar; text} ->
+      let url =
+        List.fold_left (fun acc (k, v) ->
+          if k = evar then acc
+          else (acc ^ (Format.sprintf "&%s=%s" k (v : Adef.encoded_string :> string)))
+        ) "" conf.env
+      in
       let include_evar = p_getenv conf.env evar <> None in
       let evar_l =
         if include_evar then (remove evar existing_evars)
         else evar :: existing_evars
       in
+      (* reconstruct the url with its m, pn, p and n components *)
       let toggle_url =
-        Printf.sprintf "%sm=SN&n=%s%s"
-          (commd conf :> string)
-          (Mutil.encode query_string :> string)
+        Printf.sprintf "%s%s%s"
+          (commd conf :> string) url
           (if evar_l <> [] then "&" ^ (String.concat "&" evar_l) else "")
       in
       let verb = if include_evar then "delete" else "add" in
@@ -3486,7 +3633,6 @@ let evar_buttons conf query_string evar_l title_text =
             button_text)
     ) "" evar_l
   in
-
   Output.printf conf
     {|<div class="d-flex align-items-center mb-3">
         <h1 class="h2 mb-0">%s</h1>

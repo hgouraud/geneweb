@@ -899,3 +899,50 @@ type evar_button = {
 val evar_buttons : config -> string -> evar_button list -> string -> unit
 (** evar_button conf query_string evar evar_text title_text
     creates a button to toggle evar *)
+
+(** Type representing different search cases for name parsing *)
+type search_case =
+  | NoInput                    (* No parameters provided *)
+  | PersonName of string       (* Various person name formats *)
+  | SurnameOnly of string      (* Surname only *)
+  | FirstNameOnly of string    (* First name only *)
+  | FirstNameSurname of string * string  (** Both first and surname *)
+  | ParsedName of {            (* Structured name parsing *)
+      first_n: string option;
+      surn: string option;
+      oc: string option;
+      original: string;
+      format: [`Space | `Slash | `Dot | `SlashSurname | `SlashFirstName | `DotOc];
+    }
+  | InvalidFormat of string    (* Unparseable format *)
+
+(** Convert search case to string representation *)
+val case_str : search_case -> string
+
+(** Convert format variant to string representation *)
+val format_str : [`Space | `Slash | `Dot | `SlashSurname | `SlashFirstName | `DotOc] -> string
+
+(** Type for structured name components *)
+type name_components = {
+  first_n: string option;
+  surn: string option;
+  oc: string option;
+  person_name: string option;
+  case: search_case;
+}
+
+(** Extract name components from configuration environment.
+    Analyzes URL parameters 'p' (first name), 'n' (surname), and 'pn' (person name)
+    to determine the appropriate search case and extract name components.
+    
+    @param conf Configuration object with environment containing URL parameters
+    @return name_components record with extracted information *)
+val extract_name_components : config -> name_components
+
+(** Parse a person name string into structured components.
+    Handles various formats including space-separated, slash-separated, 
+    and dot-separated names with optional occurrence codes.
+    
+    @param pn Person name string to parse
+    @return name_components record with parsed information *)
+val parse_person_name : string -> name_components
