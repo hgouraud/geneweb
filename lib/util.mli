@@ -849,6 +849,15 @@ val url_has_pnoc_params : (string * 'a) list -> bool
     starting with 'p' or 'n' followed by digits (e.g., p1, n2, p34). Used to
     detect persons accessed by key in URL parameters. *)
 
+val normalize_person_pool_env :
+  Config.config ->
+  Geneweb_db.Driver.base ->
+  string ->
+  (Geneweb_db.Driver.iper, string) Hashtbl.t option ->
+  Config.config
+(** same as normalize_person_pool_url, but works directly in env
+  returns conf with updated env *)
+
 val normalize_person_pool_url :
   Config.config ->
   Geneweb_db.Driver.base ->

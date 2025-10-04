@@ -3441,6 +3441,78 @@ let normalize_person_pool_url conf base target_module assoc_txt_opt =
     target_module
     (String.concat "&" (List.rev !converted_params))
 
+let normalize_person_pool_env conf base target_module assoc_txt_opt =
+  let preserve_text = target_module = "RLM" in
+  let new_index = ref 1 in
+  let new_params = ref [] in
+  let processed_indices = ref [] in
+  Logs.debug (fun k -> k "Normalize env with %s" target_module);
+  let rec loop i =
+    let k = string_of_int i in
+    let has_i = p_getenv conf.env ("i" ^ k) <> None in
+    let has_p = p_getenv conf.env ("p" ^ k) <> None in
+    
+    if has_i || has_p then (
+      (if has_i then (
+         (* Already in i format, just renumber *)
+         let id = Option.get (p_getenv conf.env ("i" ^ k)) in
+         new_params := ("i" ^ string_of_int !new_index, Adef.encoded id) :: !new_params;
+         processed_indices := i :: !processed_indices;
+         
+         (* Preserve text parameter if in RLM mode *)
+         if preserve_text then
+           match p_getenv conf.env ("t" ^ k) with
+           | Some txt when txt <> "" ->
+               new_params := ("t" ^ string_of_int !new_index, Adef.encoded txt) :: !new_params
+           | _ -> ();
+         
+         incr new_index)
+       else
+         (* Convert p/n/oc format to i format *)
+         match find_person_in_env conf base k with
+         | Some p ->
+             let id = Driver.Iper.to_string (Driver.get_iper p) in
+             let id_encoded = (Adef.encoded id) in
+             new_params := ("i" ^ string_of_int !new_index, id_encoded) :: !new_params;
+             processed_indices := i :: !processed_indices;
+             
+             (* Preserve text parameter if in RLM mode *)
+             if preserve_text then (
+               match p_getenv conf.env ("t" ^ k) with
+               | Some txt when txt <> "" ->
+                   (match assoc_txt_opt with
+                   | Some assoc_txt ->
+                       Hashtbl.add assoc_txt (Driver.get_iper p) txt
+                   | None -> ());
+                   new_params := ("t" ^ string_of_int !new_index, Adef.encoded txt) :: !new_params
+               | _ -> ());
+             
+             incr new_index
+         | _ -> ());
+      loop (i + 1))
+  in
+  loop 1;
+  
+  (* Remove old indexed parameters from env *)
+  let env_without_indexed = 
+    List.filter (fun (key, _) ->
+      not (Str.string_match (Str.regexp "^\\([pntoic]\\)[0-9]+$") key 0)
+      || key = "m"
+    ) conf.env
+  in
+  
+  (* Add new parameters *)
+  new_params := ("m", Adef.encoded target_module) :: !new_params;
+  let updated_env = List.rev_append !new_params env_without_indexed in
+  
+  let env_str =
+    List.map (fun (k, v) -> Printf.sprintf "  %s=%s\n" k (Mutil.decode v)) updated_env
+  in
+  let env_str = String.concat "" env_str in
+  Logs.debug (fun k -> k "New env \n%s" env_str);
+  
+  { conf with env = updated_env }
+
 (* Génère un overlay de chargement avec traduction possible *)
 let print_loading_overlay conf ?custom_translation_key () =
   let translation_key =

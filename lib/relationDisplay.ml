@@ -5,6 +5,7 @@ open Def
 open Util
 open Dag2html
 open Relation
+module Logs = Geneweb_logs.Logs
 module Sosa = Geneweb_sosa
 module Driver = Geneweb_db.Driver
 
@@ -1087,24 +1088,28 @@ let print_multi conf base =
   let assoc_txt : (Geneweb_db.Driver.iper, string) Hashtbl.t =
     Hashtbl.create 53
   in
-  if Util.url_has_pnoc_params conf.env then
-    let clean_url =
-      Util.normalize_person_pool_url conf base "RLM" (Some assoc_txt)
+  let conf =
+    Util.normalize_person_pool_env conf base "RLM" (Some assoc_txt)
+  in
+  
+  let env_str =
+    List.map (fun (k, v) -> Printf.sprintf "  %s=%s\n" k (Mutil.decode v)) conf.env
+  in
+  let env_str = String.concat "" env_str in
+  Logs.debug (fun k -> k "New env 2\n%s" env_str);
+
+  let pl =
+    let rec loop pl i =
+      let k = string_of_int i in
+      match find_person_in_env conf base k with
+      | Some p ->
+          (match p_getenv conf.env ("t" ^ k) with
+          | Some x -> Hashtbl.add assoc_txt (Driver.get_iper p) x
+          | None -> ());
+          loop (p :: pl) (i + 1)
+      | None -> List.rev pl
     in
-    Wserver.http_redirect_temporarily clean_url
-  else
-    let pl =
-      let rec loop pl i =
-        let k = string_of_int i in
-        match find_person_in_env conf base k with
-        | Some p ->
-            (match p_getenv conf.env ("t" ^ k) with
-            | Some x -> Hashtbl.add assoc_txt (Driver.get_iper p) x
-            | None -> ());
-            loop (p :: pl) (i + 1)
-        | None -> List.rev pl
-      in
-      loop [] 1
-    in
-    let lim = Option.value ~default:0 (p_getint conf.env "lim") in
-    print_multi_relation conf base pl lim assoc_txt
+    loop [] 1
+  in
+  let lim = Option.value ~default:0 (p_getint conf.env "lim") in
+  print_multi_relation conf base pl lim assoc_txt
