@@ -1,6 +1,9 @@
 val save_mem : bool ref
 (** Flag that enables memory saving by calling gc sometimes *)
 
+val collect_ngram_stats : bool ref
+(** Flag to enable bigram/trigram statistics collection during rebuild *)
+
 val output : Dbdisk.dsk_base -> unit
 (** [output base] uses data section of the [base] to store database on the disk
     in the files:

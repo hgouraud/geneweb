@@ -9,6 +9,7 @@ let load_descends_array base = base.data.descends.load_array ()
 let load_strings_array base = base.data.strings.load_array ()
 let save_mem = ref false
 let verbose = Mutil.verbose
+let collect_ngram_stats = ref false
 
 let trace s =
   if !verbose then (
@@ -50,7 +51,156 @@ module IntSet = Set.Make (struct
   let compare = compare
 end)
 
-let make_strings_of_fsname_aux split get base =
+module BigramStats = struct
+  type stats = {
+    mutable total_bigrams : int;
+    mutable total_trigrams : int;
+    bigram_counts : (string, int) Hashtbl.t;
+    trigram_counts : (string, int) Hashtbl.t;
+  }
+
+  let create () =
+    {
+      total_bigrams = 0;
+      total_trigrams = 0;
+      bigram_counts = Hashtbl.create 1_200_000;
+      trigram_counts = Hashtbl.create 600_000;
+    }
+
+  let is_valid_ngram s =
+    if String.length s = 0 then false
+    else
+      let c = s.[0] in
+      not (c >= '0' && c <= '9')
+
+  let incr_bigram stats bg =
+    stats.total_bigrams <- stats.total_bigrams + 1;
+    let cnt = try Hashtbl.find stats.bigram_counts bg with _ -> 0 in
+    Hashtbl.replace stats.bigram_counts bg (cnt + 1)
+
+  let incr_trigram stats tg =
+    stats.total_trigrams <- stats.total_trigrams + 1;
+    let cnt = try Hashtbl.find stats.trigram_counts tg with _ -> 0 in
+    Hashtbl.replace stats.trigram_counts tg (cnt + 1)
+
+  let save_to_file stats bdir =
+    (* Séparer valides et invalides pour bigrams *)
+    let all_bi =
+      Hashtbl.fold (fun k v acc -> (k, v) :: acc) stats.bigram_counts []
+    in
+    let valid_bi = List.filter (fun (k, _) -> is_valid_ngram k) all_bi in
+    let invalid_bi =
+      List.filter (fun (k, _) -> not (is_valid_ngram k)) all_bi
+    in
+
+    (* Sauvegarder bigrams valides *)
+    let fname_bi = Filename.concat bdir "bigrams_stats.txt" in
+    let oc_bi = open_out fname_bi in
+    let sorted_bi =
+      List.sort
+        (fun (k1, v1) (k2, v2) ->
+          let cmp = compare v2 v1 in
+          if cmp = 0 then compare k1 k2 else cmp)
+        valid_bi
+    in
+    List.iter
+      (fun (bg, cnt) -> Printf.fprintf oc_bi "%s\t%d\n" bg cnt)
+      sorted_bi;
+    close_out oc_bi;
+
+    (* Sauvegarder bigrams invalides *)
+    let fname_inv = Filename.concat bdir "invalid_bigrams.txt" in
+    let oc_inv = open_out fname_inv in
+    let sorted_inv =
+      List.sort
+        (fun (k1, v1) (k2, v2) ->
+          let cmp = compare v2 v1 in
+          if cmp = 0 then compare k1 k2 else cmp)
+        invalid_bi
+    in
+    List.iter
+      (fun (bg, cnt) -> Printf.fprintf oc_inv "%s\t%d\n" bg cnt)
+      sorted_inv;
+    close_out oc_inv;
+
+    trace
+      (Printf.sprintf "Bigram stats saved: %s (%d unique)" fname_bi
+         (List.length sorted_bi));
+    trace
+      (Printf.sprintf "Invalid bigrams saved: %s (%d unique)" fname_inv
+         (List.length sorted_inv));
+
+    (* Séparer valides et invalides pour trigrams *)
+    let all_tri =
+      Hashtbl.fold (fun k v acc -> (k, v) :: acc) stats.trigram_counts []
+    in
+    let valid_tri = List.filter (fun (k, _) -> is_valid_ngram k) all_tri in
+    let invalid_tri =
+      List.filter (fun (k, _) -> not (is_valid_ngram k)) all_tri
+    in
+
+    (* Sauvegarder trigrams valides *)
+    let fname_tri = Filename.concat bdir "trigrams_stats.txt" in
+    let oc_tri = open_out fname_tri in
+    let sorted_tri =
+      List.sort
+        (fun (k1, v1) (k2, v2) ->
+          let cmp = compare v2 v1 in
+          if cmp = 0 then compare k1 k2 else cmp)
+        valid_tri
+    in
+    List.iter
+      (fun (tg, cnt) -> Printf.fprintf oc_tri "%s\t%d\n" tg cnt)
+      sorted_tri;
+    close_out oc_tri;
+
+    (* Sauvegarder trigrams invalides *)
+    let fname_tri_inv = Filename.concat bdir "invalid_trigrams.txt" in
+    let oc_tri_inv = open_out fname_tri_inv in
+    let sorted_tri_inv =
+      List.sort
+        (fun (k1, v1) (k2, v2) ->
+          let cmp = compare v2 v1 in
+          if cmp = 0 then compare k1 k2 else cmp)
+        invalid_tri
+    in
+    List.iter
+      (fun (tg, cnt) -> Printf.fprintf oc_tri_inv "%s\t%d\n" tg cnt)
+      sorted_tri_inv;
+    close_out oc_tri_inv;
+
+    trace
+      (Printf.sprintf "Trigram stats saved: %s (%d unique)" fname_tri
+         (List.length sorted_tri));
+    trace
+      (Printf.sprintf "Invalid trigrams saved: %s (%d unique)" fname_tri_inv
+         (List.length sorted_tri_inv))
+
+  let print_summary stats =
+    let uniq_bi = Hashtbl.length stats.bigram_counts in
+    let uniq_tri = Hashtbl.length stats.trigram_counts in
+    trace "";
+    trace "=== Bigram/Trigram Statistics ===";
+    trace (Printf.sprintf "Total bigrams: %d" stats.total_bigrams);
+    trace (Printf.sprintf "Unique bigrams: %d" uniq_bi);
+    trace (Printf.sprintf "Total trigrams: %d" stats.total_trigrams);
+    trace (Printf.sprintf "Unique trigrams: %d" uniq_tri);
+    let top10 =
+      Hashtbl.fold (fun k v acc -> (k, v) :: acc) stats.bigram_counts []
+      |> List.sort (fun (_, a) (_, b) -> compare b a)
+      |> fun l ->
+      if List.length l > 10 then List.filteri (fun i _ -> i < 10) l else l
+    in
+    trace "";
+    trace "Top 10 bigrams:";
+    List.iteri
+      (fun i (bg, cnt) ->
+        trace (Printf.sprintf "  %2d. %-30s : %7d" (i + 1) bg cnt))
+      top10;
+    trace ""
+end
+
+let make_strings_of_fsname_aux split get base ?collect_stats:(cs = None) () =
   let t = Array.make Dutil.table_size IntSet.empty in
   let add_name (key : string) (value : int) =
     let key = Dutil.name_index key in
@@ -63,14 +213,37 @@ let make_strings_of_fsname_aux split get base =
     let aux istr =
       if istr <> 1 then (
         let s = base.data.strings.get istr in
-        let s_normalized = String.map (fun c -> if c = '-' then ' ' else c) s in
-        add_name s_normalized istr;
-        split
-          (fun i j -> add_name (String.sub s_normalized i j) istr)
-          s_normalized)
+        add_name s istr;
+        split (fun i j -> add_name (String.sub s i j) istr) s;
+        match cs with
+        | None -> ()
+        | Some stats ->
+            let s_norm = String.map (fun c -> if c = '-' then ' ' else c) s in
+            let words = Name.split_fname s_norm in
+            let nb = List.length words in
+            if nb >= 2 then
+              for j = 0 to nb - 2 do
+                let w1 = List.nth words j in
+                let w2 = List.nth words (j + 1) in
+                let bigram = w1 ^ w2 in
+                let bigram_normalized = Name.crush_lower bigram in
+                BigramStats.incr_bigram stats bigram_normalized
+              done;
+            if nb >= 3 then
+              let w1 = List.nth words 0 in
+              let w2 = List.nth words 1 in
+              let w3 = List.nth words 2 in
+              let trigram = w1 ^ w2 ^ w3 in
+              let trigram_normalized = Name.crush_lower trigram in
+              BigramStats.incr_trigram stats trigram_normalized)
     in
     aux (get p)
   done;
+  (match cs with
+  | None -> ()
+  | Some stats ->
+      BigramStats.save_to_file stats base.data.bdir;
+      BigramStats.print_summary stats);
   Array.map
     (fun set ->
       let a = Array.make (IntSet.cardinal set) 0 in
@@ -113,8 +286,13 @@ let make_strings_of_sname_with_pieces base =
       a)
     t
 
-let make_strings_of_fname =
-  make_strings_of_fsname_aux Name.split_fname_callback (fun p -> p.first_name)
+let make_strings_of_fname base =
+  let cs =
+    if !collect_ngram_stats then Some (BigramStats.create ()) else None
+  in
+  make_strings_of_fsname_aux Name.split_fname_callback
+    (fun p -> p.first_name)
+    base ~collect_stats:cs ()
 
 let make_strings_of_sname = make_strings_of_sname_with_pieces
 

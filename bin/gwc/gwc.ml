@@ -219,6 +219,7 @@ let main () =
     in
     Lock.control ~on_exn ~wait:false ~lock_file (fun () ->
         let next_family_fun = next_family_fun_templ (List.rev !gwo) in
+        Geneweb_db.Outbase.collect_ngram_stats := true;
         if Db1link.link ~no_warn:!no_warn next_family_fun bdir then (
           if !kill_gwo then
             List.iter
