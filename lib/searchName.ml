@@ -1196,7 +1196,7 @@ and display_firstname_results conf base query _firstname exact partial spouse =
       (sections_partial, true, partial_firstnames_set);
     ]
   in
-  Some.first_name_print_list_multi conf base query firstname_set sections_groups
+  Some.first_name_print_list_multi conf base query firstname_set None sections_groups
 
 and display_surname_results conf base _query surname all_persons =
   let surname_groups = group_by_surname base all_persons in

@@ -293,7 +293,7 @@ let first_name_print_sections conf base listes ~rev =
           list))
     listes
 
-let print_firstname_variants conf variants_set =
+let print_firstname_variants conf query variants_set =
   if not (StrSet.is_empty variants_set) then (
     Output.print_sstring conf {|<div class="font-weight-bold mb-3">|};
     Mutil.list_iter_first
@@ -303,13 +303,15 @@ let print_firstname_variants conf variants_set =
         Output.print_string conf (commd conf);
         Output.print_sstring conf "m=P&v=";
         Output.print_string conf (Mutil.encode fn);
+        Output.print_sstring conf "&filter_alias=";
+        Output.print_string conf (Mutil.encode query);
         Output.print_sstring conf {|">|};
         Output.print_string conf (escape_html fn);
         Output.print_sstring conf "</a>")
       (StrSet.elements variants_set);
     Output.print_sstring conf "</div>\n")
 
-let first_name_print_list_multi conf base x1 xl sections_groups =
+let first_name_print_list_multi conf base x1 xl filter sections_groups =
   let title _ =
     Output.print_sstring conf
       (Utf8.capitalize_fst (transl conf "search_exact_fn"));
@@ -318,7 +320,14 @@ let first_name_print_list_multi conf base x1 xl sections_groups =
     Output.print_string conf (escape_html x1)
   in
   Hutil.header conf title;
-  if not (StrSet.is_empty xl) then print_firstname_variants conf xl;
+  (match filter with
+  | Some query ->
+      Output.print_sstring conf (Printf.sprintf "%s %s%s [%s]"
+        (Util.transl conf "filter by")
+        (Util.transl_nth conf "first name alias" 0)
+        (Util.transl conf ":") query)
+  | None -> ());
+  if not (StrSet.is_empty xl) then print_firstname_variants conf x1 xl;
   List.iter
     (fun (sections, rev, variants_set) ->
       if not (StrSet.is_empty variants_set) then (
@@ -328,13 +337,13 @@ let first_name_print_list_multi conf base x1 xl sections_groups =
         Output.print_sstring conf " (";
         Output.print_sstring conf (transl conf "phonetic variants");
         Output.print_sstring conf ")</h3>\n";
-        print_firstname_variants conf variants_set);
+        print_firstname_variants conf x1 variants_set);
       first_name_print_sections conf base sections ~rev)
     sections_groups;
   Hutil.trailer conf
 
-let first_name_print_list conf base x1 xl listes ~rev =
-  first_name_print_list_multi conf base x1 xl
+let first_name_print_list conf base x1 xl filter listes ~rev =
+  first_name_print_list_multi conf base x1 xl filter
     [ (listes, rev, Mutil.StrSet.empty) ]
 
 let mk_specify_title conf kw n _ =
@@ -1234,6 +1243,11 @@ let search_first_name_print conf base x =
   | [ (_, (strl, iperl)) ] ->
       let iperl = List.sort_uniq compare iperl in
       let rev_pl = List.rev_map (pget conf base) iperl in
+      let filter =
+        match p_getenv conf.env "filter_alias" with
+        | Some s when s <> "" -> Some s
+        | _ -> None
+      in
       let pl =
         List.fold_left
           (fun pl p ->
@@ -1242,5 +1256,18 @@ let search_first_name_print conf base x =
             else pl)
           rev_pl []
       in
-      first_name_print_list conf base x strl [ ("", pl) ] ~rev:false
+      let pl =
+        match filter with
+        | Some query ->
+            List.fold_left (fun acc p ->
+              let fn_aliases =
+                Driver.get_first_names_aliases p
+                |> List.map (Driver.sou base)
+                |> List.map Name.lower
+              in
+              if List.mem query fn_aliases then p :: acc else acc
+            ) [] pl
+        | None -> pl
+      in
+      first_name_print_list conf base x strl filter [ ("", pl) ] ~rev:false
   | _ -> select_first_name conf x list
