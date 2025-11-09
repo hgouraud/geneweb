@@ -1069,14 +1069,19 @@ let rec extract_name_components conf =
         person_name = None;
         case = SurnameOnly sn;
       }
-  | None, Some _, Some pn ->
-      {
-        first_name = None;
-        surname = None;
-        oc = None;
-        person_name = Some pn;
-        case = PersonName pn;
-      }
+  (* When both n and pn exist, parse pn to see if it contains structured data *)
+  | None, Some sn, Some pn ->
+      let parsed = parse_person_name pn in
+      (match parsed.case with
+       | ParsedName _ -> parsed  (* Use parsed structure from pn *)
+       | _ -> (* Fall back to using n parameter *)
+          {
+            first_name = None;
+            surname = Some sn;
+            oc = None;
+            person_name = None;
+            case = SurnameOnly sn;
+          })
   | Some fn, None, None ->
       {
         first_name = Some fn;
@@ -1085,14 +1090,19 @@ let rec extract_name_components conf =
         person_name = None;
         case = FirstNameOnly fn;
       }
-  | Some _, None, Some pn ->
-      {
-        first_name = None;
-        surname = None;
-        oc = None;
-        person_name = Some pn;
-        case = PersonName pn;
-      }
+  (* When both p and pn exist, parse pn to see if it contains structured data *)
+  | Some fn, None, Some pn ->
+      let parsed = parse_person_name pn in
+      (match parsed.case with
+       | ParsedName _ -> parsed  (* Use parsed structure from pn *)
+       | _ -> (* Fall back to using p parameter *)
+          {
+            first_name = Some fn;
+            surname = None;
+            oc = None;
+            person_name = None;
+            case = FirstNameOnly fn;
+          })
   | Some fn, Some sn, None ->
       {
         first_name = Some fn;
@@ -1101,14 +1111,19 @@ let rec extract_name_components conf =
         person_name = None;
         case = FirstNameSurname (fn, sn);
       }
-  | Some _, Some _, Some pn ->
-      {
-        first_name = None;
-        surname = None;
-        oc = None;
-        person_name = Some pn;
-        case = PersonName pn;
-      }
+  (* When all three exist, parse pn to see if it contains structured data *)
+  | Some fn, Some sn, Some pn ->
+      let parsed = parse_person_name pn in
+      (match parsed.case with
+       | ParsedName _ -> parsed  (* Use parsed structure from pn *)
+       | _ -> (* Fall back to using p and n parameters *)
+          {
+            first_name = Some fn;
+            surname = Some sn;
+            oc = None;
+            person_name = None;
+            case = FirstNameSurname (fn, sn);
+          })
 
 and parse_person_name pn =
   let find_char c = try Some (String.index pn c) with Not_found -> None in
@@ -1322,6 +1337,7 @@ let dispatch_search_methods conf base query search_order fn_options =
 
 let rec handle_search_results conf base query fn_options components specify
     results =
+  Logs.debug (fun k -> k "Handle search results");
   let { exact; partial; spouse } = results in
   match exact with
   | [ single_exact ] ->
@@ -1400,18 +1416,66 @@ and display_firstname_results conf base query results =
   in
   Some.first_name_print_list_multi conf base query sections_groups
 
-and display_surname_results conf base _query surname all_persons =
-  let surname_groups = group_by_surname base all_persons in
-  match surname_groups with
-  | [ (single_surname, _) ] ->
+and display_surname_results conf base query surname all_persons =
+  let query_lower = Name.lower query in
+  let query_stripped = Name.strip_lower query in
+  
+  (* Separate persons into exact surname matches and alias matches *)
+  let exact_matches = ref [] in
+  let alias_matches = ref [] in
+  let surname_alias_matches = ref [] in
+ 
+  (* Helper function to check if a string matches the query *)
+  let matches_query str =
+    let str_lower = Name.lower str in
+    let str_stripped = Name.strip_lower str in
+    str_lower = query_lower || str_stripped = query_stripped
+  in
+  
+  (* Helper function to check if any alias matches the query *)
+  let has_matching_alias aliases =
+    List.exists (fun alias_istr ->
+      let alias_str = Driver.sou base alias_istr in
+      matches_query alias_str
+    ) aliases
+  in
+
+  List.iter (fun ip ->
+    let p = Driver.poi base ip in
+    let actual_sn = Driver.sou base (Driver.get_surname p) in
+
+    if matches_query actual_sn then
+      exact_matches := ip :: !exact_matches
+    (* Priority 2: alias match *)
+    else if has_matching_alias (Driver.get_aliases p) then
+      alias_matches := ip :: !alias_matches
+    (* Priority 3: Surname alias match *)
+    else if has_matching_alias (Driver.get_surnames_aliases p) then
+      surname_alias_matches := ip :: !surname_alias_matches
+    else
+      exact_matches := ip :: !exact_matches) all_persons;
+  (* FIXME should we have a phonetic_groups ?? *)
+  
+  let exact_groups = group_by_surname base !exact_matches in
+  let alias_groups = group_by_surname base !alias_matches in
+  let surname_alias_groups = group_by_surname base !surname_alias_matches in
+  
+  match (exact_groups, alias_groups) with
+  | [ (single_surname, persons) ], [] when List.length persons = List.length all_persons ->
+      (* All results match exactly one surname *)
       Some.search_surname_print conf base (fun _conf _x -> ()) single_surname
-  | multiple_surnames -> (
-      match p_getenv conf.env "m" with
-      | Some "SN" ->
-          Some.print_surname_details conf base surname multiple_surnames
-      | _ ->
-          Some.print_several_possible_surnames surname conf base
-            ([], multiple_surnames))
+  | _, [ (single_surname, persons) ] when List.length persons = List.length all_persons ->
+      (* All results match exactly one surname_alias *)
+      (* FIXME is this correct ??  shouldn't we display the person itself *)
+      Some.search_surname_print conf base (fun _conf _x -> ()) single_surname
+  | _, _ ->
+      (* Multiple surnames or mix of exact and alias matches *)
+      (match p_getenv conf.env "m" with
+       | Some "SN" ->
+           Some.print_surname_details conf base surname (exact_groups @ alias_groups)
+       | _ ->
+           Some.print_several_possible_surnames surname conf base
+             (alias_groups, surname_alias_groups, exact_groups))
 
 let search conf base query search_order fn_options specify =
   Some.AliasCache.clear ();
@@ -1490,14 +1554,14 @@ let print conf base specify =
       display_firstname_results conf base fn results
   | SurnameOnly sn ->
       Logs.debug (fun k -> k "Search n=SurnameOnly '%s'" sn);
-      let order = [ Surname ] in
+      let order = [ Surname; ApproxKey ] in
       search conf base sn order fn_options specify
   | ParsedName { first_name = fn; surname = sn; oc; format; _ } -> (
       match (fn, sn) with
       | Some fn, None when fn <> "" ->
           Logs.debug (fun k -> k "Print case ParsedName (fn = %s)" fn);
-          let order = [ FirstName ] in
-          search conf base fn order fn_options specify
+          let results = search_firstname_with_cache conf base fn fn_options in
+          display_firstname_results conf base fn results
       | None, Some sn when sn <> "" ->
           Logs.debug (fun k -> k "Print case ParsedName (sn = %s)" sn);
           let order = [ Surname; ApproxKey ] in
@@ -1534,8 +1598,8 @@ let print conf base specify =
               search conf base sn order fn_options specify
           | `SlashFirstName ->
               Logs.debug (fun k -> k "Print format %s" (format_str format));
-              let order = [ FirstName ] in
-              search conf base fn order fn_options specify))
+              let results = search_firstname_with_cache conf base fn fn_options in
+              display_firstname_results conf base fn results))
   | _ ->
       Logs.debug (fun k -> k "Print case default (%s)" (case_str case));
       SrcfileDisplay.print_welcome conf base

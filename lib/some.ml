@@ -3,6 +3,7 @@
 open Config
 open Def
 open Util
+module Logs = Geneweb_logs.Logs
 module StrSet = Mutil.StrSet
 module Driver = Geneweb_db.Driver
 module Gutil = Geneweb_db.Gutil
@@ -856,104 +857,62 @@ let print_alphabetic_index conf list extract_name count_persons threshold =
     true)
   else false
 
-let print_several_possible_surnames x conf base (_, surname_groups) =
+let print_several_possible_surnames x conf base
+  (alias_groups, surname_alias_groups, surname_groups) =
+  Logs.debug (fun k -> k "Print several surnames (direct: %d), (alias: %d), (s-alias: %d)"
+    (List.length surname_groups) (List.length alias_groups)
+    (List.length surname_alias_groups));
   let fx = x in
   let title = mk_specify_title conf (transl_nth conf "surname/surnames" 0) fx in
   let surname_count = List.length surname_groups in
   Hutil.header_with_title ~fluid:(surname_count > 160) conf title;
-
   (* TODO: implement Sosa for surnames | SosaCache.build_sosa_ht conf base; *)
-
-  (* Recherche locale des alias pour éviter la dépendance circulaire *)
-  let search_surname_aliases query =
-    let query_lower = Name.lower query in
-    let all_misc = Gutil.person_not_a_key_find_all base query in
-    List.fold_left
-      (fun acc ip ->
-        let p = Driver.poi base ip in
-        if
-          Driver.Istr.is_empty (Driver.get_surname p)
-          || Driver.Istr.is_empty (Driver.get_first_name p)
-          || (Util.is_hide_names conf p && not (Util.authorized_age conf base p))
-        then acc
-        else
-          let aliases = Driver.get_surnames_aliases p in
-          match
-            List.find_opt
-              (fun alias_istr ->
-                let alias_str = Driver.sou base alias_istr in
-                Name.lower alias_str = query_lower)
-              aliases
-          with
-          | Some alias_istr ->
-              let alias_str = Driver.sou base alias_istr in
-              (ip, alias_str) :: acc
-          | None -> acc)
-      [] all_misc
-  in
-
-  (* Collecter et grouper les alias *)
-  let alias_matches = search_surname_aliases x in
-  let alias_groups =
-    List.fold_left
-      (fun acc (ip, alias) ->
-        let p = Driver.poi base ip in
-        try
-          let existing = List.assoc alias acc in
-          (alias, p :: existing) :: List.remove_assoc alias acc
-        with Not_found -> (alias, [ p ]) :: acc)
-      [] alias_matches
-  in
-
-  let process_surname (sn, persons) =
+  
+  (* Generic processor for all group types *)
+  let process_group (sn, persons) =
     let txt =
       Util.surname_without_particle base sn ^ Util.surname_particle base sn
     in
     let ord = name_unaccent txt in
     let count = List.length persons in
-    (ord, txt, sn, count, false)
-    (* false = pas un alias *)
+    (ord, txt, sn, count)
   in
-
-  let process_alias (alias, persons) =
-    let txt =
-      Util.surname_without_particle base alias
-      ^ Util.surname_particle base alias
-    in
-    let ord = name_unaccent txt in
-    let count = List.length persons in
-    (ord, txt ^ " [alias]", alias, count, true)
-    (* true = alias *)
+  
+  let sort_by_ord = List.sort (fun (ord1, _, _, _) (ord2, _, _, _) ->
+    String.compare ord1 ord2)
   in
-
-  let surname_list =
-    List.map process_surname surname_groups
-    @ List.map process_alias alias_groups
-    |> List.sort (fun (ord1, _, _, _, _) (ord2, _, _, _, _) ->
-           String.compare ord1 ord2)
-  in
-
+  
+  let surname_list = List.map (process_group) surname_groups |> sort_by_ord in
+  let alias_list = List.map (process_group) alias_groups |> sort_by_ord in
+  let surname_alias_list = List.map (process_group) surname_alias_groups |> sort_by_ord in
+  
   ignore
     (print_alphabetic_index conf surname_list
-       (fun (ord, _, _, _, _) -> ord)
-       (fun (_, _, _, count, _) -> count)
+       (fun (ord, _, _, _) -> ord)
+       (fun (_, _, _, count) -> count)
        2);
-
-  let order (ord, _, _, _, _) = ord in
-  let wprint_elem (_, txt, sn, count, is_alias) =
-    if is_alias then
-      Output.printf conf "<em class='text-muted'>%s</em> [%d]"
-        (escape_html txt :> string)
-        count
-    else
-      Output.printf conf "<a href=\"%sm=N&v=%s&t=N\">%s</a> [%d]"
-        (commd conf :> string)
-        (Mutil.encode sn :> string)
-        (escape_html txt :> string)
-        count
+  
+  let order (ord, _, _, _) = ord in
+  let wprint_elem (_, txt, sn, count) =
+    Output.printf conf "<a href=\"%sm=N&v=%s&t=N\">%s</a> [%d]"
+      (commd conf :> string)
+      (Mutil.encode sn :> string)
+      (escape_html txt :> string)
+      count
   in
+  
   wprint_in_columns conf order wprint_elem surname_list;
-
+  
+  if alias_list <> [] then begin
+    Output.printf conf "<br>----------<br>Aliases<br>\n";
+    wprint_in_columns conf order wprint_elem alias_list
+  end;
+  
+  if surname_alias_list <> [] then begin
+    Output.printf conf "<br>----------<br>Surname aliases<br>\n";
+    wprint_in_columns conf order wprint_elem surname_alias_list
+  end;
+  
   Output.printf conf
     {|
   <div class="d-flex justify-content-center">

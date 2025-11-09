@@ -86,5 +86,7 @@ val print_several_possible_surnames :
   string ->
   Config.config ->
   Geneweb_db.Driver.base ->
-  'a * (string * Geneweb_db.Driver.person list) list ->
+  (string * Geneweb_db.Driver.person list) list *
+  (string * Geneweb_db.Driver.person list) list *
+  (string * Geneweb_db.Driver.person list) list ->
   unit
