@@ -167,6 +167,9 @@ let speclist =
     ("-sh", Arg.Set_int shift, "<int> Shift all persons numbers in next files");
     ("-stats", Arg.Set Db1link.pr_stats, " Print statistics");
     ("-v", Arg.Set Gwcomp.verbose, " Verbose");
+    ( "-roglo_special",
+      Arg.Set Gwcomp.roglo_special,
+      " Spesial treatment for Roglo" );
   ]
   |> List.sort compare |> Arg.align
 
@@ -188,6 +191,7 @@ let errmsg =
    and [options] are:"
 
 let main () =
+  let start_time = Unix.gettimeofday () in
   Arg.parse speclist anonfun errmsg;
   if not (Array.mem "-bd" Sys.argv) then Secure.set_base_dir ".";
   if Array.mem "-rgpd" Sys.argv then (
@@ -239,6 +243,14 @@ let main () =
       Format.eprintf "%a@." Lock.pp_exception (exn, bt);
       exit 2
     in
+    let print_duration () =
+      flush stderr; flush stdout;
+      let time_elapsed = Unix.gettimeofday () -. start_time in
+      Printf.printf "Duration: %d min %d sec\n"
+        (int_of_float (time_elapsed /. 60.0))
+        (int_of_float time_elapsed mod 60)
+    in
+
     Lock.control ~on_exn ~wait:false ~lock_file (fun () ->
         let next_family_fun = next_family_fun_templ (List.rev !gwo) in
         (match !ngrams_arg with
@@ -253,9 +265,11 @@ let main () =
             List.iter
               (fun (x, _separate, _bnotes, _shift) ->
                 if Sys.file_exists (x ^ "o") then Mutil.rm (x ^ "o"))
-              (List.rev !files))
+              (List.rev !files);
+          print_duration ())
         else (
           Printf.eprintf "*** database NOT created!\n";
+          print_duration ();
           flush stderr;
           exit 2))
 
