@@ -18,7 +18,9 @@ module IperSet = Set.Make (struct
   let compare = compare
 end)
 
-type opts = { order : bool; exact1 : bool; incl_aliases : bool }
+type fn_opts = { fn_order : bool; exact1 : bool; incl_aliases : bool }
+
+type sn_opts = { exact : bool; incl_aliases : bool }
 
 type search_results = {
   exact : Driver.Iper.t list;
@@ -361,12 +363,12 @@ let search_key_opt conf base query =
   | None -> []
   | Some p -> [ Driver.get_iper p ]
 
-let match_fn_lists fn_l fn1_l opts =
+let match_fn_lists fn_l fn1_l fn_options =
   let normalize s = Name.lower s in
   let word_matches query_word person_word =
     let q = normalize query_word in
     let p = normalize person_word in
-    if opts.exact1 then q = p else Mutil.contains p q
+    if fn_options.exact1 then q = p else Mutil.contains p q
   in
   let passes_basic_test =
     List.for_all
@@ -374,7 +376,7 @@ let match_fn_lists fn_l fn1_l opts =
       fn_l
   in
   let passes_order_test =
-    if opts.order then
+    if fn_options.fn_order then
       let rec check_in_order remaining_queries remaining_persons =
         match remaining_queries with
         | [] -> true
@@ -393,13 +395,13 @@ let match_fn_lists fn_l fn1_l opts =
   in
   passes_basic_test && passes_order_test
 
-let search_for_multiple_fn conf base fn pl opts batch_size =
+let search_for_multiple_fn conf base fn pl fn_options batch_size =
   Logs.debug (fun k -> k "        search_for_multiple_fn: %s" fn);
   let bool_to_string b = if b then "true" else "false" in
   Logs.debug (fun k ->
       k "          order: %s, exact: %s"
-        (bool_to_string opts.order)
-        (bool_to_string opts.exact1));
+        (bool_to_string fn_options.fn_order)
+        (bool_to_string fn_options.exact1));
   let fn_l = cut_words fn in
   let result =
     let rec process_batch acc remaining =
@@ -422,8 +424,8 @@ let search_for_multiple_fn conf base fn pl opts batch_size =
                   let fn2 = StringCache.get_cached base fn2_istr in
                   let fn2_l = split_normalize false fn2 in
                   if
-                    match_fn_lists fn_l fn1_l opts
-                    || match_fn_lists fn_l fn2_l opts
+                    match_fn_lists fn_l fn1_l fn_options
+                    || match_fn_lists fn_l fn2_l fn_options
                   then p :: acc_batch
                   else acc_batch)
               [] batch
@@ -435,17 +437,56 @@ let search_for_multiple_fn conf base fn pl opts batch_size =
   Logs.debug (fun k -> k "          result: %d" (List.length result));
   result
 
-let rec search_surname conf base x =
+(* ========================================================================= *)
+(* Surname Aliases Search                                                    *)
+(* ========================================================================= *)
+
+let search_surname_aliases conf base query =
+  let query_lower = Name.lower query in
+  let all_misc_matches = Gutil.person_not_a_key_find_all base query in
+  List.fold_left
+    (fun acc ip ->
+      let p = Driver.poi base ip in
+      if
+        empty_sn_or_fn base p
+        || (Util.is_hide_names conf p && not (Util.authorized_age conf base p))
+      then acc
+      else
+        (* Check surname aliases using Driver.get_surnames_aliases *)
+        let aliases = Driver.get_surnames_aliases p in
+        match
+          List.find_opt
+            (fun alias_istr ->
+              let alias_str = Driver.sou base alias_istr in
+              Name.lower alias_str = query_lower)
+            aliases
+        with
+        | Some alias_istr ->
+            let alias_str = Driver.sou base alias_istr in
+            Some.AliasCache.add_alias ip alias_str;
+            (ip, alias_str) :: acc
+        | None -> acc)
+    [] all_misc_matches
+
+let rec search_surname conf base x sn_options =
   let has_apostrophe = has_apostrophe x in
   match has_apostrophe with
   | false ->
       let exact_results = search_exact conf base [ x ] in
-      if exact_results <> [] then (
+      let alias_results =
+        if sn_options.incl_aliases then
+          let aliases = search_surname_aliases conf base x in
+          List.iter (fun (ip, alias) -> Some.AliasCache.add_alias ip alias) aliases;
+          List.map fst aliases
+        else []
+      in
+      if exact_results <> [] || alias_results <> [] then (
         Logs.debug (fun k ->
-            k "  → %d results (%d exact, 0 phonetic)"
+            k "  → %d results (%d exact, %d alias, 0 phonetic)"
+              (List.length exact_results + List.length alias_results)
               (List.length exact_results)
-              (List.length exact_results));
-        (exact_results, []))
+              (List.length alias_results));
+        (exact_results @ alias_results, []))
       else
         let phonetic_results = search_phonetic conf base x in
         Logs.debug (fun k ->
@@ -456,20 +497,28 @@ let rec search_surname conf base x =
   | true ->
       let variants = generate_apostrophe_variants x in
       let exact_results = search_exact conf base variants in
-      if exact_results <> [] then (
+      let alias_results =
+        if sn_options.incl_aliases then
+          let aliases = search_surname_aliases conf base x in
+          List.iter (fun (ip, alias) -> Some.AliasCache.add_alias ip alias) aliases;
+          List.map fst aliases
+        else []
+      in
+      if exact_results <> [] || alias_results <> [] then (
         Logs.debug (fun k ->
-            k "  → %d results (%d exact, 0 phonetic)"
+            k "  → %d results (%d exact, %d alias, 0 phonetic)"
+              (List.length (exact_results @ alias_results))
               (List.length exact_results)
-              (List.length exact_results));
-        (exact_results, []))
-      else
+              (List.length alias_results));
+        (exact_results @ alias_results, []))
+      else (
         let fallback_query = List.hd variants in
         let phonetic_results = search_phonetic conf base fallback_query in
         Logs.debug (fun k ->
             k "  → %d results (0 exact, %d phonetic)"
               (List.length phonetic_results)
               (List.length phonetic_results));
-        ([], phonetic_results)
+        ([], phonetic_results))
 
 and search_exact conf base variants =
   let exact_iperl = ref IperSet.empty in
@@ -580,6 +629,7 @@ let search_firstname_aliases conf base query =
             (ip, alias_str) :: acc
         | None -> acc)
     [] all_misc_matches
+
 
 let normalize_for_phonetic s =
   let buf = Buffer.create (String.length s) in
@@ -765,14 +815,14 @@ let search_firstname_with_aliases_and_ngrams conf base query =
         (List.length !phonetic_results));
   (alias_results, !phonetic_results)
 
-let search_firstname_with_cache conf base query opts =
+let search_firstname_with_cache conf base query (fn_options1 : fn_opts) =
   let query_lower = Name.lower query in
   let query_norm = normalize_for_phonetic query_lower in
   let query_words = cut_words query in
   let nb_words = List.length query_words in
   Logs.debug (fun k ->
       k "Search p=%s FirstNameOnly [aliases=%b, order=%b, exact=%b]" query
-        opts.incl_aliases opts.order opts.exact1);
+       fn_options1.incl_aliases fn_options1.fn_order fn_options1.exact1);
   let direct_results = search_firstname_direct conf base query in
   List.iter (fun ip -> Some.AliasCache.add_direct ip) direct_results;
   let direct_exact = ref [] in
@@ -796,7 +846,7 @@ let search_firstname_with_cache conf base query opts =
       Mutil.StrSet.empty direct_exact_results
   in
   let alias_results, alias_variants =
-    if opts.incl_aliases then (
+    if fn_options1.incl_aliases then (
       let aliases = search_firstname_aliases conf base query in
       List.iter (fun (ip, alias) -> Some.AliasCache.add_alias ip alias) aliases;
       let variants =
@@ -811,14 +861,14 @@ let search_firstname_with_cache conf base query opts =
     else ([], Mutil.StrSet.empty)
   in
   let permuted_persons, permuted_variants =
-    if opts.order && nb_words > 1 && nb_words < 5 then
+    if fn_options1.fn_order && nb_words > 1 && nb_words < 5 then
       let permutations = generate_permutations query in
       List.fold_left
         (fun (acc_persons, acc_vars) perm_query ->
           let perm_direct = search_firstname_direct conf base perm_query in
           List.iter (fun ip -> Some.AliasCache.add_direct ip) perm_direct;
           let perm_alias =
-            if opts.incl_aliases then
+            if fn_options1.incl_aliases then
               search_firstname_aliases conf base perm_query
             else []
           in
@@ -839,15 +889,15 @@ let search_firstname_with_cache conf base query opts =
     else ([], Mutil.StrSet.empty)
   in
   let included_iper, included_variants, phonetic_iper, phonetic_variants =
-    if not opts.exact1 then (
+    if not fn_options1.exact1 then (
       let direct_included_results = List.rev !direct_included in
       let phonetic_ngrams =
-        if opts.incl_aliases then
+        if fn_options1.incl_aliases then
           snd (search_firstname_with_aliases_and_ngrams conf base query)
         else []
       in
       let exact_phonetic, partial_phonetic, _ =
-        if not opts.incl_aliases then
+        if not fn_options1.incl_aliases then
           search_firstname_phonetic_split conf base query
         else ([], [], Mutil.StrSet.empty)
       in
@@ -928,7 +978,7 @@ let group_by_surname base ipers =
     ipers;
   Hashtbl.fold (fun sn persons acc -> (sn, List.rev persons) :: acc) groups []
 
-let search_fullname conf base fn sn =
+let search_fullname conf base fn sn sn_options =
   let fn = String.map (fun c -> if c = '-' then ' ' else c) fn in
   let conf_sn =
     {
@@ -946,14 +996,14 @@ let search_fullname conf base fn sn =
   | [] -> { exact = []; partial = []; spouse = [] }
   | [ p ] -> { exact = [ Driver.get_iper p ]; partial = []; spouse = [] }
   | pl ->
-      let opts = { order = false; exact1 = true; incl_aliases = false } in
-      let exact = search_for_multiple_fn conf base fn pl opts 1000 in
-      let opts_partial = { opts with exact1 = false } in
-      let partial = search_for_multiple_fn conf base fn pl opts_partial 1000 in
+      let fn_options_tmp = { fn_order = false; exact1 = true; incl_aliases = false } in
+      let exact = search_for_multiple_fn conf base fn pl fn_options_tmp 1000 in
+      let fn_opts_partial = { fn_order = false; exact1 = false; incl_aliases = false } in
+      let partial = search_for_multiple_fn conf base fn pl fn_opts_partial 1000 in
       Logs.debug (fun k -> k "        spouses:");
       let spouse =
         if List.assoc_opt "public_name_as_fn" conf.base_env <> Some "no" then
-          let sn_bearers_exact, sn_bearers_phon = search_surname conf base sn in
+          let sn_bearers_exact, sn_bearers_phon = search_surname conf base sn sn_options in
           let spouses =
             List.fold_left
               (fun acc ip ->
@@ -970,7 +1020,7 @@ let search_fullname conf base fn sn =
               []
               (sn_bearers_exact @ sn_bearers_phon)
           in
-          search_for_multiple_fn conf base fn spouses opts_partial 1000
+          search_for_multiple_fn conf base fn spouses fn_opts_partial 1000
         else []
       in
       {
@@ -996,14 +1046,13 @@ let search_partial_key conf base query =
       let persons, _ = AdvSearchOk.advanced_search conf base max_int in
       if persons = [] then { exact = []; partial = []; spouse = [] }
       else
-        let opts = { order = false; exact1 = false; incl_aliases = false } in
-        let opts_exact = { opts with exact1 = true } in
-        let opts_partial = { opts with exact1 = false } in
+        let fn_opts_exact = { fn_order = false; exact1 = true; incl_aliases = false } in
+        let fn_opts_partial = { fn_order = false; exact1 = false; incl_aliases = false } in
         let exact =
-          search_for_multiple_fn conf base fn persons opts_exact 1000
+          search_for_multiple_fn conf base fn persons fn_opts_exact 1000
         in
         let partial =
-          search_for_multiple_fn conf base fn persons opts_partial 1000
+          search_for_multiple_fn conf base fn persons fn_opts_partial 1000
         in
         {
           exact = persons_to_ipers exact;
@@ -1197,7 +1246,7 @@ let remove_duplicates (results : search_results) =
     spouse = spouse_filtered;
   }
 
-let execute_search_method conf base query method_ fn_options =
+let execute_search_method conf base query method_ fn_options sn_options =
   match method_ with
   | Sosa ->
       let results = search_sosa_opt conf base query in
@@ -1209,8 +1258,8 @@ let execute_search_method conf base query method_ fn_options =
       Logs.debug (fun k -> k "    Method Key: %d results" (List.length results));
       { exact = results; partial = []; spouse = [] }
   | Surname ->
-      let exact, partial = search_surname conf base query in
-      { exact; partial; spouse = [] }
+      let exact, partial = search_surname conf base query sn_options in
+       { exact; partial; spouse = [] }
   | FirstName ->
       let fn_results = search_firstname_with_cache conf base query fn_options in
       {
@@ -1227,6 +1276,7 @@ let execute_search_method conf base query method_ fn_options =
       let oc = Option.value components.oc ~default:"" in
       let results =
         search_fullname conf base (if oc <> "" then fn ^ "." ^ oc else fn) sn
+          sn_options
       in
       Logs.debug (fun k ->
           k "    Method FullName: %d+%d+%d results"
@@ -1261,7 +1311,7 @@ let execute_search_method conf base query method_ fn_options =
             (List.length results.spouse));
       results
 
-let dispatch_search_methods conf base query search_order fn_options =
+let dispatch_search_methods conf base query search_order fn_options sn_options =
   StringCache.maintenance ();
   let all_results = { exact = []; partial = []; spouse = [] } in
   let firstname_variants = ref Mutil.StrSet.empty in
@@ -1269,7 +1319,7 @@ let dispatch_search_methods conf base query search_order fn_options =
     List.fold_left
       (fun acc method_ ->
         let (results : search_results) =
-          execute_search_method conf base query method_ fn_options
+          execute_search_method conf base query method_ fn_options sn_options
         in
         ({
            exact = acc.exact @ results.exact;
@@ -1293,7 +1343,7 @@ let dispatch_search_methods conf base query search_order fn_options =
 (* Section 6: Result Handling and Display                                   *)
 (* ========================================================================= *)
 
-let rec handle_search_results conf base query fn_options components specify
+let rec handle_search_results conf base query fn_options sn_options components specify
     results =
   let { exact; partial; spouse } = results in
   match exact with
@@ -1313,9 +1363,9 @@ let rec handle_search_results conf base query fn_options components specify
           let spouse_persons = List.map (Driver.poi base) spouse in
           match components.case with
           | SurnameOnly sn ->
-              display_surname_results conf base query sn all_persons
+              display_surname_results conf base query sn all_persons sn_options
           | ParsedName { first_name = None; surname = Some sn; _ } ->
-              display_surname_results conf base query sn all_persons
+              display_surname_results conf base query sn all_persons sn_options
           | ParsedName { first_name = Some fn; surname = None; _ } ->
               display_firstname_results conf base fn fn_options
                 (search_firstname_with_cache conf base fn fn_options)
@@ -1377,7 +1427,7 @@ and display_firstname_results conf base query fn_options results =
   in
   Some.first_name_print_list_multi conf base query sections_groups
 
-and display_surname_results conf base _query surname all_persons =
+and display_surname_results conf base _query surname all_persons _sn_options =
   let surname_groups = group_by_surname base all_persons in
   match surname_groups with
   | [ (single_surname, _) ] ->
@@ -1390,7 +1440,7 @@ and display_surname_results conf base _query surname all_persons =
           Some.print_several_possible_surnames surname conf base
             ([], multiple_surnames))
 
-let search conf base query search_order fn_options specify =
+let search conf base query search_order fn_options sn_options specify =
   Some.AliasCache.clear ();
   let variants =
     if List.mem FirstName search_order && has_apostrophe query then
@@ -1405,7 +1455,7 @@ let search conf base query search_order fn_options specify =
     List.fold_left
       (fun acc variant ->
         let results, _fn_variants =
-          dispatch_search_methods conf base variant search_order fn_options
+          dispatch_search_methods conf base variant search_order fn_options sn_options
         in
         {
           exact = acc.exact @ results.exact;
@@ -1417,7 +1467,7 @@ let search conf base query search_order fn_options specify =
   in
   let deduplicated = remove_duplicates final_results in
   let components = extract_name_components conf in
-  handle_search_results conf base query fn_options components specify
+  handle_search_results conf base query fn_options sn_options components specify
     deduplicated
 
 (* ========================================================================= *)
@@ -1447,38 +1497,45 @@ let print conf base specify =
   let components = extract_name_components conf in
   let fn_options =
     {
-      order = p_getenv conf.env "p_order" = Some "on";
+      fn_order = p_getenv conf.env "p_order" = Some "on";
       exact1 = p_getenv conf.env "p_exact" <> Some "off";
       incl_aliases = p_getenv conf.env "fna" <> None;
     }
   in
+  let sn_options =
+    {
+      incl_aliases = p_getenv conf.env "sna" <> None;
+      exact = true;
+    }
+  in
+
   let case = components.case in
   match case with
   | FirstNameSurname (fn, sn) ->
       Logs.debug (fun k -> k "Print case FirstNameSurname (%s, %s)" fn sn);
       let order = [ Key; FullName; ApproxKey; PartialKey; Surname ] in
-      search conf base (fn ^ " " ^ sn) order fn_options specify
+      search conf base (fn ^ " " ^ sn) order fn_options sn_options specify
   | PersonName pn ->
       Logs.debug (fun k -> k "Print case PersonName (%s)" pn);
       let order = [ Key; FullName; ApproxKey; PartialKey; Surname ] in
-      search conf base pn order fn_options specify
+      search conf base pn order fn_options sn_options specify
   | FirstNameOnly fn ->
       let results = search_firstname_with_cache conf base fn fn_options in
       display_firstname_results conf base fn fn_options results
   | SurnameOnly sn ->
       Logs.debug (fun k -> k "Search n=SurnameOnly '%s'" sn);
       let order = [ Surname ] in
-      search conf base sn order fn_options specify
+      search conf base sn order fn_options sn_options specify
   | ParsedName { first_name = fn; surname = sn; oc; format; _ } -> (
       match (fn, sn) with
       | Some fn, None when fn <> "" ->
           Logs.debug (fun k -> k "Print case ParsedName (fn = %s)" fn);
           let order = [ FirstName ] in
-          search conf base fn order fn_options specify
+          search conf base fn order fn_options sn_options specify
       | None, Some sn when sn <> "" ->
           Logs.debug (fun k -> k "Print case ParsedName (sn = %s)" sn);
           let order = [ Surname ] in
-          search conf base sn order fn_options specify
+          search conf base sn order fn_options sn_options specify
       | _ -> (
           let order = [ Sosa; Key; FullName; ApproxKey; PartialKey; Surname ] in
           let fn = Option.value fn ~default:"" in
@@ -1489,30 +1546,30 @@ let print conf base specify =
               Logs.debug (fun k -> k "Print format %s" (format_str format));
               search conf base
                 (Printf.sprintf "%s %s" fn sn)
-                order fn_options specify
+                order fn_options sn_options specify
           | `DotOc ->
               Logs.debug (fun k -> k "Print format %s" (format_str format));
               search conf base
                 (Printf.sprintf "%s.%s %s" fn oc sn)
-                order fn_options specify
+                order fn_options sn_options specify
           | `Space ->
               Logs.debug (fun k -> k "Print format %s" (format_str format));
               search conf base
                 (Printf.sprintf "%s %s" fn sn)
-                order fn_options specify
+                order fn_options sn_options specify
           | `Slash ->
               Logs.debug (fun k -> k "Print format %s" (format_str format));
               search conf base
                 (Printf.sprintf "%s %s" fn sn)
-                order fn_options specify
+                order fn_options sn_options specify
           | `SlashSurname ->
               Logs.debug (fun k -> k "Print format %s" (format_str format));
               let order = [ Surname; ApproxKey ] in
-              search conf base sn order fn_options specify
+              search conf base sn order fn_options sn_options specify
           | `SlashFirstName ->
               Logs.debug (fun k -> k "Print format %s" (format_str format));
               let order = [ FirstName ] in
-              search conf base fn order fn_options specify))
+              search conf base fn order fn_options sn_options specify))
   | _ ->
       Logs.debug (fun k -> k "Print case default (%s)" (case_str case));
       SrcfileDisplay.print_welcome conf base

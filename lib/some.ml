@@ -30,6 +30,20 @@ let name_unaccent s =
   in
   copy 0 0
 
+(* Helper function for creating option toggle buttons *)
+let evar_buttons conf _query_string buttons title_text =
+  Output.printf conf {|<h1>%s</h1>|} title_text;
+  Output.print_sstring conf {|<div class="mb-3">|};
+  List.iter (fun { evar; text } ->
+    let is_active = p_getenv conf.env evar <> None in
+    let url = Util.url_set_aux conf (Util.commd conf :> string) [evar] [(if is_active then "" else "1")] in
+    Output.printf conf {|<a href="%s" class="btn btn-%sprimary btn-sm"><i class="fa fa-%s mr-1"></i>%s</a> |}
+      url (if is_active then "" else "outline-")
+      (if is_active then "xmark" else "check")
+      (Utf8.capitalize_fst (transl_nth conf text 1) :> string)
+  ) buttons;
+  Output.print_sstring conf {|</div>|}
+
 let not_found conf txt x =
   let title _ =
     Output.print_sstring conf (Utf8.capitalize_fst txt);
@@ -856,9 +870,9 @@ let print_alphabetic_index conf list extract_name count_persons threshold =
 
 let print_several_possible_surnames x conf base (_, surname_groups) =
   let fx = x in
-  let title = mk_specify_title conf (transl_nth conf "surname/surnames" 0) fx in
-  let surname_count = List.length surname_groups in
-  Hutil.header_with_title ~fluid:(surname_count > 160) conf title;
+  let _title_text = mk_specify_title conf (transl_nth conf "surname/surnames" 0) fx in
+  let _surname_count = List.length surname_groups in
+  Hutil.header_without_title conf;
 
   (* TODO: implement Sosa for surnames | SosaCache.build_sosa_ht conf base; *)
 
@@ -889,6 +903,13 @@ let print_several_possible_surnames x conf base (_, surname_groups) =
           | None -> acc)
       [] all_misc
   in
+
+  (* Display title with option button *)
+  let title_text = Printf.sprintf "%s \"%s\": %s"
+    (Utf8.capitalize_fst (transl_nth conf "surname/surnames" 0))
+    (fx |> Util.escape_html :> string)
+    (transl conf "specify") in
+  evar_buttons conf fx [{ evar = "sna"; text = "surname alias" }] title_text;
 
   (* Collecter et grouper les alias *)
   let alias_matches = search_surname_aliases x in
@@ -1171,9 +1192,7 @@ let print_surname_details conf base query_string surnames_groups =
   in
   let include_aliases = p_getenv conf.env "sna" <> None in
   Hutil.header_without_title conf;
-  evar_buttons conf query_string
-    [ { evar = "sna"; text = "surname alias" } ]
-    title_text;
+  evar_buttons conf query_string [{ evar = "sna"; text = "surname alias" }] title_text;
   SosaCache.build_sosa_ht conf base;
   let find_surname_aliases =
     if not include_aliases then fun _ -> []
