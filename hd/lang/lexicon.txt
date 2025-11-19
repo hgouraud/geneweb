@@ -14360,6 +14360,10 @@ ru: номер в системе Sosa
 sv: annummer
 tr: Sosa No.
 
+    no
+en: no
+fr: pas de
+
     n° Sosa relative to
 af: Sosa nommer relatief tot
 bg: число на Соса относно

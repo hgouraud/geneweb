@@ -271,21 +271,33 @@ let print_firstname_variants conf ?(filter = true) variants_set =
       Output.print_sstring conf "</div>\n")
 
 let first_name_print_list_multi conf base x1 sections_groups =
-  let make_anchor_button anchor label =
-    Printf.sprintf
-      {|<a href="#%s" class="btn btn-outline-secondary btn-sm">
-          <i class="fa fa-arrow-down mr-1"></i>%s
-        </a>|}
-      anchor label
+  let include_aliases = p_getenv conf.env "fna" <> None in
+  let p_exact_on = p_getenv conf.env "p_exact" <> Some "off" in
+  let p_order_on = p_getenv conf.env "p_order" = Some "on" in
+  let has_section_length section_id =
+    List.exists (fun (id, sections, _, _) ->
+      id = section_id && List.length sections > 0
+      ) sections_groups
+  in
+  let make_anchor_button conf id anchor label =
+    if has_section_length id then
+      Printf.sprintf
+        {|<a href="#%s" class="btn btn-outline-secondary btn-sm">
+            <i class="fa fa-arrow-down mr-1"></i>%s
+          </a>|}
+        anchor label
+    else if (include_aliases && id = 1)
+         || ((not p_exact_on) && id = 2) (* permuted *)
+         || ((not p_exact_on) && id = 3) (* phonetic *)
+         || (p_order_on && id = 4)
+         then
+      Printf.sprintf "%s %s" 
+        (Util.transl conf "no" |> Utf8.capitalize_fst) label
+    else ""
   in
   let print_section_header id title count =
     Output.printf conf {|<h2 class="h3 mt-4 mb-2" id="%s">%s (%d)</h2>|} id
       title count
-  in
-  let has_section section_id =
-    List.exists (fun (id, sections, _, _) ->
-      id = section_id && List.length sections > 0
-      ) sections_groups
   in
   let main_count =
     match List.find_opt (fun (id, _, _, _) -> id = 0) sections_groups with
@@ -298,9 +310,6 @@ let first_name_print_list_multi conf base x1 sections_groups =
   let query_words = Util.cut_words (Name.lower x1) in
   let nb_words = List.length query_words in
   let can_permute = nb_words > 1 && nb_words < 5 in
-  let include_aliases = p_getenv conf.env "fna" <> None in
-  let p_exact_on = p_getenv conf.env "p_exact" <> Some "off" in
-  let p_order_on = p_getenv conf.env "p_order" = Some "on" in
   Hutil.header_without_title conf;
   Output.printf conf {|<h1>%s%s “%s”</h1>|}
     (Utf8.capitalize_fst (transl conf "search_by_firstnames"))
@@ -309,26 +318,23 @@ let first_name_print_list_multi conf base x1 sections_groups =
   let anchor_buttons =
     List.filter_map
       (fun (id, anchor, label_fn) ->
-        if has_section id then Some (make_anchor_button anchor (label_fn ()))
+        if true then Some (make_anchor_button conf id anchor (label_fn ()))
         else None)
       [
         ( 1,
           "alias",
-          fun () -> transl_nth conf "first name alias" 1 |> Utf8.capitalize_fst
-        );
+          fun () -> transl_nth conf "first name alias" 1);
         ( 4,
           "permuted-variants",
           fun () ->
-            transl_nth conf "first names exact/included/permuted" 2
-            |> Utf8.capitalize_fst );
+            transl_nth conf "first names exact/included/permuted" 2);
         ( 2,
           "included-variants",
           fun () ->
-            transl_nth conf "first names exact/included/permuted" 1
-            |> Utf8.capitalize_fst );
+            transl_nth conf "first names exact/included/permuted" 1);
         ( 3,
           "phonetic-variants",
-          fun () -> transl conf "phonetic variants" |> Utf8.capitalize_fst );
+          fun () -> transl conf "phonetic variants");
       ]
   in
   let option_buttons =
@@ -399,10 +405,15 @@ let first_name_print_list_multi conf base x1 sections_groups =
       </div>|}
     (String.concat "\n" option_buttons)
     (String.concat "\n" anchor_buttons);
-  Output.printf conf {|<h2 class="h3 my-2">%s (%d)</h2>|}
-    (transl_nth conf "first names exact/included/permuted" 0
-    |> Utf8.capitalize_fst)
-    main_count;
+  if main_count <> 0 then
+    Output.printf conf {|<h2 class="h3 my-2">%s (%d)</h2>|}
+      (transl_nth conf "first names exact/included/permuted" 0
+      |> Utf8.capitalize_fst)
+      main_count
+  else
+    Output.printf conf {|<h2 class="h3 my-2">%s %s</h2>|}
+      (transl conf "no" |> Utf8.capitalize_fst)
+      (transl_nth conf "first names exact/included/permuted" 0);
   List.iter
     (fun (section_id, sections, rev, variants_set) ->
       let section_count =
