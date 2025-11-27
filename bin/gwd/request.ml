@@ -671,7 +671,7 @@ let treat_request =
                  doc_aux conf base (fun conf _base ->
                      ImageDisplay.print_html conf)
              | "F" -> w_base @@ w_person @@ Perso.interp_templ "family"
-             | "FIM" -> w_base @@ ImageDisplay.print_blason
+             | "FIM" -> w_base @@ w_person @@ ImageDisplay.print_blason
              | "H" -> (
                  w_base @@ fun conf base ->
                  match p_getenv conf.env "v" with

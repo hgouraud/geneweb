@@ -70,7 +70,7 @@ let image_txt conf base p =
         let max_w, max_h = (100, 75) in
         let w, h =
           match size_opt with
-          | Some (w, h) -> Image.scale_to_fit ~max_w ~max_h ~w ~h
+          | Some (w, h) -> Image.scale_to_fit ~max_w ~max_h (w, h)
           | None -> (0, max_h)
         in
         Printf.sprintf

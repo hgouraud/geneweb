@@ -1320,7 +1320,7 @@ let gen_string_of_img_sz max_w max_h conf base (p, p_auth) =
   if p_auth then
     match Image.get_portrait_with_size conf base p with
     | Some (_, Some (w, h)) ->
-        let w, h = Image.scale_to_fit ~max_w ~max_h ~w ~h in
+        let w, h = Image.scale_to_fit ~max_w ~max_h (w, h) in
         Format.sprintf " width=\"%d\" height=\"%d\"" w h
     | Some (_, None) -> Format.sprintf " height=\"%d\"" max_h
     | None -> ""
@@ -1330,7 +1330,7 @@ let gen_string_of_fimg_sz max_w max_h conf base (p, p_auth) =
   if p_auth then
     match Image.get_blason_with_size conf base p false with
     | Some (_, Some (w, h)) ->
-        let w, h = Image.scale_to_fit ~max_w ~max_h ~w ~h in
+        let w, h = Image.scale_to_fit ~max_w ~max_h (w, h) in
         Format.sprintf " width=\"%d\" height=\"%d\"" w h
     | Some (_, None) | None -> Format.sprintf " height=\"%d\"" max_h
   else ""
@@ -4388,17 +4388,16 @@ and string_of_image_url conf base (p, p_auth) html saved : Adef.escaped_string =
     | None -> Adef.escaped ""
   else Adef.escaped ""
 
-and string_of_blason_url conf base (p, p_auth) html saved : Adef.escaped_string
+and string_of_blason_url conf base (p, p_auth) html _saved : Adef.escaped_string
     =
   if p_auth then
-    match Image.get_blason_aux conf base p false saved with
-    | Some (`Path fname) when Filename.extension fname = ".url" -> (
+    match Image.get_blason_name conf base p with
+    | fname when Filename.extension fname = ".url" -> (
         match Some (Secure.open_in fname) with
         | Some ic -> Adef.escaped (input_line ic)
         | None -> Adef.escaped "")
-    | Some (`Path fname) ->
+    | fname when fname <> "" ->
         (* p is not the blason owner *)
-        let s = Unix.stat fname in
         let k = Filename.basename fname |> Filename.chop_extension in
         (* k is first_name.occ.surname.blason *)
         let parts = String.split_on_char '.' k in
@@ -4406,15 +4405,14 @@ and string_of_blason_url conf base (p, p_auth) html saved : Adef.escaped_string
           Format.sprintf "p=%s&n=%s&oc=%s" (List.nth parts 0) (List.nth parts 2)
             (List.nth parts 1)
         in
-        Format.sprintf "%sm=FIM%s&d=%d&%s&k=/%s"
+        Format.sprintf "%sm=FIM%s&d=%s&%s&k=/%s"
           (commd conf :> string)
           (if html then "H" else "")
-          (int_of_float (mod_float s.Unix.st_mtime (float_of_int max_int)))
+          ("xxyy")
           access k
         |> Adef.escaped
-    | Some (`Url url) -> Adef.escaped url (* FIXME *)
-    | None -> Adef.escaped ""
-  else Adef.escaped "xz"
+    | _ -> Adef.escaped ""
+  else Adef.escaped ""
 
 and string_of_parent_age conf base (p, p_auth) parent : Adef.safe_string =
   match Driver.get_parents p with
