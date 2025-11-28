@@ -4484,10 +4484,21 @@ const FanchartApp = {
         const person = this.getEffectivePerson(sosa);
         if (!person) continue;
 
-        // prépare la position de ce secteur
+        const isPaternal = this.isInPaternalBranch(sosa);
+
+        let adjustedAngle = angle;
+        if (isPaternal && !isCircularMode && gen >= 3) {
+          // Effet miroir pour la branche paternelle
+          const paternalCount = Math.pow(2, gen - 2);
+          const posInPaternal = sosa - firstSosa;
+          const mirrorPos = paternalCount - 1 - posInPaternal;
+          const startAngle = -90 - current_angle / 2 + delta / 2;
+          adjustedAngle = startAngle + mirrorPos * delta;
+        }
+
         const pos = {
           r1: innerR, r2: outerR,
-          a1: angle - delta/2, a2: angle + delta/2,
+          a1: adjustedAngle - delta/2, a2: adjustedAngle + delta/2,
           generation: gen, delta: delta
         };
 
@@ -4496,6 +4507,14 @@ const FanchartApp = {
     }
 
     this.updateButtonStates();
+  },
+
+  isInPaternalBranch: function(sosa) {
+    let currentSosa = sosa;
+    while (currentSosa >= 4) {
+      currentSosa = Math.floor(currentSosa / 2);
+    }
+    return currentSosa === 2;
   },
 
   initializeAngleEvents: function() {
@@ -4632,7 +4651,9 @@ const FanchartApp = {
 
       // Créer d'abord le secteur de mariage
       if (sosa % 2 === 0) { // Seul l'époux crée le mariage
-        this.renderMarriageSector(familyGroup, sosa, position, person);
+        const isPaternal = this.isInPaternalBranch(sosa);
+        const isMirrored = isPaternal && !isCircularMode && position.generation >= 3;
+        this.renderMarriageSector(familyGroup, sosa, position, person, isMirrored);
       }
     }
 
@@ -4682,8 +4703,8 @@ const FanchartApp = {
   /**
    * Rendu du secteur de mariage dans une couronne interne
    */
-  renderMarriageSector: function(familyGroup, fatherSosa, position, person) {
-    // Créer le groupe mariage en premier dans l’ordre DOM
+  renderMarriageSector: function(familyGroup, fatherSosa, position, person, isMirrored = false) {
+    // Créer le groupe mariage en premier dans l'ordre DOM
     const marriageGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
     marriageGroup.setAttribute("id", contextualId("M" + fatherSosa));
 
@@ -4693,7 +4714,19 @@ const FanchartApp = {
       familyGroup.appendChild(marriageGroup);
     }
 
-    const marriageGeometry = SVGGeometry.getMarriageGeometry(position);
+    // Calculer la géométrie du mariage selon le mode
+    let marriageGeometry;
+    if (isMirrored) {
+      // Mode miroir : la mère est à gauche, le père à droite
+      marriageGeometry = {
+        startAngle: position.a1 - position.delta,
+        endAngle: position.a2,
+        innerRadius: position.r1,
+        outerRadius: position.r1 + 10
+      };
+    } else {
+      marriageGeometry = SVGGeometry.getMarriageGeometry(position);
+    }
 
     // Secteur de fond
     SVGRenderer.drawPie(marriageGroup, marriageGeometry.innerRadius, marriageGeometry.outerRadius,
@@ -4717,7 +4750,8 @@ const FanchartApp = {
       marriageGeometry.startAngle, marriageGeometry.endAngle);
 
     // Ligne de séparation entre père et mère
-    SVGRenderer.drawRadialLine(marriageGroup, marriageGeometry.outerRadius, position.r2, position.a2);
+    const separatorAngle = isMirrored ? position.a1 : position.a2;
+    SVGRenderer.drawRadialLine(marriageGroup, marriageGeometry.outerRadius, position.r2, separatorAngle);
 
     // Secteur interactif du mariage dans sa couronne exclusive
     SVGRenderer.drawPie(marriageGroup, marriageGeometry.innerRadius, marriageGeometry.outerRadius,
