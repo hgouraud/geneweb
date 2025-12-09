@@ -1,15 +1,21 @@
 (* Copyright (c) 1998-2007 INRIA *)
-(* Copyright (c) 2025 - Refactored *)
+(* Copyright (c) 2025 - Refactored with ImageUtil *)
 
 (** HTTP response generation for serving images.
     This module handles the HTTP layer for image delivery:
     - Content-type headers and caching
     - Serving files from disk
     - Redirecting to URLs
-    - Placeholder images *)
+    - Placeholder images
+    
+    PHASE 1-2 CHANGES:
+    - Uses ImageUtil.PathSecurity for safe path operations
+    - Uses ImageUtil.Constants.HTTP for cache settings
+    - Uses ImageUtil.Streaming for efficient file streaming *)
 
 open Config
 open ImageTypes
+open ImageUtil
 
 module Logs = Geneweb_logs.Logs
 module Driver = Geneweb_db.Driver
@@ -36,7 +42,9 @@ let print_placeholder_gendered_portrait conf p size =
 (* ========================================================================== *)
 
 (** [send_content_headers conf ~content_type ~length ~filename] sends HTTP
-    headers for file content with caching enabled *)
+    headers for file content with caching enabled.
+    
+    IMPROVED: Uses Constants.HTTP for cache duration. *)
 let send_content_headers conf ~content_type ~length ~filename =
   Output.status conf Def.OK;
   Output.header conf "Content-type: %s" content_type;
@@ -44,7 +52,8 @@ let send_content_headers conf ~content_type ~length ~filename =
   Output.header conf "Content-disposition: inline; filename=%s"
     (Filename.basename filename);
   (* Cache for one year - images rarely change *)
-  Output.header conf "Cache-control: private, max-age=%d" (60 * 60 * 24 * 365);
+  Output.header conf "Cache-control: private, max-age=%d"
+    Constants.HTTP.cache_max_age_seconds;
   Output.flush conf
 
 (** [send_redirect conf url] sends an HTTP redirect to a URL *)
@@ -58,6 +67,8 @@ let send_redirect conf url =
 (* ========================================================================== *)
 
 (** [serve_file conf path] serves a file with appropriate content-type.
+    
+    IMPROVED: Uses Streaming module for efficient file transfer.
     
     @param conf Request configuration
     @param path Full path to the file
@@ -77,16 +88,8 @@ let serve_file conf path =
           (fun () ->
             let len = in_channel_length ic in
             send_content_headers conf ~content_type ~length:len ~filename:path;
-            (* Stream file in chunks *)
-            let buf = Bytes.create 4096 in
-            let rec stream remaining =
-              if remaining > 0 then (
-                let to_read = min (Bytes.length buf) remaining in
-                really_input ic buf 0 to_read;
-                Output.print_sstring conf (Bytes.sub_string buf 0 to_read);
-                stream (remaining - to_read))
-            in
-            stream len;
+            (* Stream file efficiently using utility *)
+            Streaming.stream_channel ic (Output.print_sstring conf) len;
             Ok ())
       with Sys_error msg ->
         Logs.syslog `LOG_ERR
@@ -142,24 +145,29 @@ let print_blason conf base p =
 (* ========================================================================== *)
 
 (** [print_source conf filename] serves an image from the images directory.
+    
+    IMPROVED: Uses PathSecurity for safe path joining to prevent traversal attacks.
+    
     Respects privacy settings for non-wizard/friend users. *)
 let print_source conf filename =
-  (* Remove leading slash if present *)
-  let filename =
-    if filename <> "" && filename.[0] = '/' then
-      String.sub filename 1 (String.length filename - 1)
-    else filename
-  in
-  let path = Filename.concat (ImagePath.carrousel_dir conf) filename in
-  (* Check access permissions *)
-  if
-    conf.wizard || conf.friend
-    || not (ImageAccess.is_private_path path)
-  then
-    match serve_file conf path with
-    | Ok () -> ()
-    | Error _ -> Hutil.incorrect_request conf ~comment:"print_source failed"
-  else Hutil.incorrect_request conf ~comment:"access denied to private image"
+  (* Safely join paths with traversal protection *)
+  match PathSecurity.safe_join (ImagePath.carrousel_dir conf) filename with
+  | Error msg ->
+      Logs.syslog `LOG_WARNING
+        (Format.sprintf "Path security violation: %s (filename: %s)" msg filename);
+      Hutil.incorrect_request conf ~comment:"Invalid path"
+  | Ok path ->
+      (* Check access permissions *)
+      if
+        conf.wizard || conf.friend
+        || not (ImageAccess.is_private_path path)
+      then
+        match serve_file conf path with
+        | Ok () -> ()
+        | Error _ ->
+            Hutil.incorrect_request conf ~comment:"print_source failed"
+      else
+        Hutil.incorrect_request conf ~comment:"access denied to private image"
 
 (* ========================================================================== *)
 (* Main entry points                                                          *)

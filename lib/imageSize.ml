@@ -1,11 +1,17 @@
 (* Copyright (c) 1998-2007 INRIA *)
-(* Copyright (c) 2025 - Refactored *)
+(* Copyright (c) 2025 - Refactored with ImageUtil *)
 
 (** Image dimension detection from binary headers.
     This module reads image file headers to extract dimensions
-    without loading the full image into memory. *)
+    without loading the full image into memory.
+    
+    PHASE 1-2 CHANGES:
+    - Uses ImageUtil.StringUtil.find_substring (eliminates duplication)
+    - Uses ImageUtil.Constants for magic numbers
+    - Uses ImageUtil.StringUtil.safe_sub for bounds checking *)
 
 open ImageTypes
+open ImageUtil
 
 (* ========================================================================== *)
 (* Format detection from binary content                                       *)
@@ -18,16 +24,20 @@ open ImageTypes
     @return Some format if recognized, None otherwise *)
 let detect_format content =
   let len = String.length content in
-  if len < 4 then None
-  else if String.sub content 0 4 = "\137PNG" then Some PNG
-  else if String.sub content 0 4 = "GIF8" then Some GIF
+  if len < Constants.PNG.magic_size then None
   else if
-    len >= 10
-    && Char.code content.[0] = 0xff
-    && Char.code content.[1] = 0xd8
-  then
-    (* JPEG magic: FF D8 *)
-    Some JPEG
+    len >= Constants.PNG.magic_size
+    && String.sub content 0 Constants.PNG.magic_size = Constants.PNG.magic
+  then Some PNG
+  else if
+    len >= Constants.GIF.magic_size
+    && String.sub content 0 Constants.GIF.magic_size = Constants.GIF.magic
+  then Some GIF
+  else if
+    len >= Constants.JPEG.min_header_size
+    && Char.code content.[0] = Constants.JPEG.magic_byte1
+    && Char.code content.[1] = Constants.JPEG.magic_byte2
+  then Some JPEG
   else None
 
 (** [detect_format_lenient content] tries harder to find image data
@@ -37,22 +47,16 @@ let detect_format_lenient content =
   match detect_format content with
   | Some _ as result -> result
   | None ->
-      (* Try to find JFIF marker for JPEG *)
-      let rec find_substring s pattern i =
-        if i + String.length pattern > String.length s then None
-        else if String.sub s i (String.length pattern) = pattern then Some i
-        else find_substring s pattern (i + 1)
-      in
-      (* Look for JFIF marker *)
-      (match find_substring content "JFIF" 0 with
-      | Some i when i >= 6 -> Some JPEG
+      (* Look for JFIF marker for JPEG - using utility function *)
+      (match StringUtil.find_substring content Constants.JPEG.jfif_marker with
+      | Some i when i >= Constants.JPEG.jfif_offset -> Some JPEG
       | _ -> (
           (* Look for PNG signature *)
-          match find_substring content "\137PNG" 0 with
+          match StringUtil.find_substring content Constants.PNG.magic with
           | Some _ -> Some PNG
           | None -> (
               (* Look for GIF signature *)
-              match find_substring content "GIF8" 0 with
+              match StringUtil.find_substring content Constants.GIF.magic with
               | Some _ -> Some GIF
               | None -> None)))
 
@@ -60,27 +64,34 @@ let detect_format_lenient content =
     starting from the detected format signature. Used to clean up
     malformed uploads. *)
 let extract_content_from_offset content format =
-  let find_substring s pattern =
-    let rec loop i =
-      if i + String.length pattern > String.length s then None
-      else if String.sub s i (String.length pattern) = pattern then Some i
-      else loop (i + 1)
-    in
-    loop 0
-  in
   match format with
   | JPEG -> (
-      match find_substring content "JFIF" with
-      | Some i when i >= 6 ->
-          Some (String.sub content (i - 6) (String.length content - i + 6))
+      match StringUtil.find_substring content Constants.JPEG.jfif_marker with
+      | Some i when i >= Constants.JPEG.jfif_offset -> (
+          match
+            StringUtil.safe_sub content (i - Constants.JPEG.jfif_offset)
+              (String.length content - i + Constants.JPEG.jfif_offset)
+          with
+          | Ok result -> Some result
+          | Error _ -> Some content)
       | _ -> Some content)
   | PNG -> (
-      match find_substring content "\137PNG" with
-      | Some i -> Some (String.sub content i (String.length content - i))
+      match StringUtil.find_substring content Constants.PNG.magic with
+      | Some i -> (
+          match
+            StringUtil.safe_sub content i (String.length content - i)
+          with
+          | Ok result -> Some result
+          | Error _ -> Some content)
       | None -> Some content)
   | GIF -> (
-      match find_substring content "GIF8" with
-      | Some i -> Some (String.sub content i (String.length content - i))
+      match StringUtil.find_substring content Constants.GIF.magic with
+      | Some i -> (
+          match
+            StringUtil.safe_sub content i (String.length content - i)
+          with
+          | Ok result -> Some result
+          | Error _ -> Some content)
       | None -> Some content)
 
 (* ========================================================================== *)
@@ -91,9 +102,9 @@ let extract_content_from_offset content format =
     PNG stores dimensions at bytes 16-23 as 32-bit big-endian integers. *)
 let read_png_size ic =
   try
-    let magic = really_input_string ic 4 in
-    if magic = "\137PNG" then (
-      seek_in ic 16;
+    let magic = really_input_string ic Constants.PNG.magic_size in
+    if magic = Constants.PNG.magic then (
+      seek_in ic Constants.PNG.dimensions_offset;
       let w = input_binary_int ic in
       let h = input_binary_int ic in
       Some (w, h))
@@ -104,9 +115,9 @@ let read_png_size ic =
     GIF stores dimensions at bytes 6-9 as 16-bit little-endian integers. *)
 let read_gif_size ic =
   try
-    let magic = really_input_string ic 4 in
-    if magic = "GIF8" then (
-      seek_in ic 6;
+    let magic = really_input_string ic Constants.GIF.magic_size in
+    if magic = Constants.GIF.magic then (
+      seek_in ic Constants.GIF.dimensions_offset;
       let w =
         let lo = input_byte ic in
         let hi = input_byte ic in
@@ -125,30 +136,37 @@ let read_gif_size ic =
     JPEG is more complex - dimensions are in SOF0 or SOF3 markers. *)
 let read_jpeg_size ic =
   try
-    let magic = really_input_string ic 10 in
+    let magic = really_input_string ic Constants.JPEG.min_header_size in
     (* Check JPEG magic: FF D8 and JFIF or Exif marker *)
     if
-      Char.code magic.[0] = 0xff
-      && Char.code magic.[1] = 0xd8
+      Char.code magic.[0] = Constants.JPEG.magic_byte1
+      && Char.code magic.[1] = Constants.JPEG.magic_byte2
       &&
-      let marker = String.sub magic 6 4 in
-      marker = "JFIF" || marker = "Exif"
+      let marker = String.sub magic Constants.JPEG.jfif_offset 4 in
+      marker = Constants.JPEG.jfif_marker
+      || marker = Constants.JPEG.exif_marker
     then
-      let is_exif = String.sub magic 6 4 = "Exif" in
+      let is_exif =
+        String.sub magic Constants.JPEG.jfif_offset 4
+        = Constants.JPEG.exif_marker
+      in
       (* Skip through markers looking for SOF0 (0xC0) or SOF3 (0xC3) *)
       let rec find_sof found =
         (* Skip to next FF marker *)
-        while Char.code (input_char ic) <> 0xff do
+        while Char.code (input_char ic) <> Constants.JPEG.magic_byte1 do
           ()
         done;
         (* Skip any padding FF bytes *)
         let rec skip_ff () =
           let ch = input_char ic in
-          if Char.code ch = 0xff then skip_ff () else ch
+          if Char.code ch = Constants.JPEG.magic_byte1 then skip_ff () else ch
         in
         let marker = skip_ff () in
         let marker_code = Char.code marker in
-        if marker_code = 0xc0 || marker_code = 0xc3 then
+        if
+          marker_code = Constants.JPEG.sof0_marker
+          || marker_code = Constants.JPEG.sof3_marker
+        then
           (* For Exif, skip first SOF marker *)
           if is_exif && not found then find_sof true
           else (
@@ -163,7 +181,7 @@ let read_jpeg_size ic =
             let w = (Char.code w_hi lsl 8) lor Char.code w_lo in
             let h = (Char.code h_hi lsl 8) lor Char.code h_lo in
             Some (w, h))
-        else if marker_code = 0xda then
+        else if marker_code = Constants.JPEG.sos_marker then
           (* Start of scan - give up *)
           None
         else

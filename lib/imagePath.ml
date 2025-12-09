@@ -1,28 +1,23 @@
 (* Copyright (c) 1998-2007 INRIA *)
-(* Copyright (c) 2025 - Refactored *)
+(* Copyright (c) 2025 - Refactored with ImageUtil *)
 
 (** Path resolution and filename construction for images.
     This module handles all path-related operations including:
     - Directory location lookups
     - Person key generation for filenames
     - File extension resolution
-    - URL detection and parsing *)
+    - URL detection and parsing
+    
+    PHASE 1-2 CHANGES:
+    - Uses ImageUtil.StringUtil.find_substring (eliminates duplication)
+    - Uses ImageUtil.PathSecurity for safe path operations
+    - Uses ImageUtil.StringUtil.safe_sub for bounds checking *)
 
 open Config
 open ImageTypes
+open ImageUtil
 
 module Driver = Geneweb_db.Driver
-
-(** [find_substring s pattern] finds the first occurrence of pattern in s *)
-let find_substring s pattern =
-  let plen = String.length pattern in
-  let slen = String.length s in
-  let rec loop i =
-    if i + plen > slen then None
-    else if String.sub s i plen = pattern then Some i
-    else loop (i + 1)
-  in
-  loop 0
 
 (* ========================================================================== *)
 (* Directory accessors                                                        *)
@@ -40,8 +35,7 @@ let carrousel_dir conf = !GWPARAM.images_d conf.bname
 
 (** [normalize_name name] converts a name to filesystem-safe format:
     lowercase with spaces replaced by underscores *)
-let normalize_name name =
-  name |> Name.lower |> Mutil.tr ' ' '_'
+let normalize_name name = name |> Name.lower |> Mutil.tr ' ' '_'
 
 (** [person_key_of_strings first_name surname occ] generates the canonical
     filename key for a person from their name components.
@@ -65,8 +59,7 @@ let blason_key_of_strings first_name surname occ =
 
 (** [blason_key base p] generates the blason filename key for a person.
     Example: "jean_claude.3.dupond.blason" *)
-let blason_key base p =
-  person_key base p ^ ".blason"
+let blason_key base p = person_key base p ^ ".blason"
 
 (** [key_for_mode base p mode] generates the appropriate key for the given mode *)
 let key_for_mode base p = function
@@ -152,7 +145,7 @@ let find_with_extension base_path =
       match try_ext ".stop" with
       | Some stop_path -> Found (Path stop_path)
       | None -> (
-          (* Try image extensions *)
+          (* Try image extensions - using optimized extension checking *)
           match Mutil.array_find_map try_ext image_extensions with
           | Some path -> Found (Path path)
           | None -> NotFound))
@@ -162,14 +155,14 @@ let find_with_extension base_path =
 let find_file_with_extension base_path =
   let ext = Filename.extension base_path in
   (* If base_path already has a valid extension, return it if it exists *)
-  if Array.mem ext all_extensions then
+  if Extensions.is_managed_extension ext then
     if Sys.file_exists base_path then base_path else ""
   else
     let try_ext ext =
       let path = base_path ^ ext in
       if Sys.file_exists path then Some path else None
     in
-    match Mutil.array_find_map try_ext all_extensions with
+    match Mutil.array_find_map try_ext Extensions.all_extensions with
     | Some path -> path
     | None -> ""
 
@@ -179,7 +172,8 @@ let find_file_with_extension base_path =
 let get_extension_for_file conf ~keydir ~mode ~saved filename =
   let temp_ext = Filename.extension filename in
   let filename =
-    if Array.mem temp_ext all_extensions then Filename.remove_extension filename
+    if Extensions.is_managed_extension temp_ext then
+      Filename.remove_extension filename
     else filename
   in
   let dir =
@@ -192,13 +186,10 @@ let get_extension_for_file conf ~keydir ~mode ~saved filename =
     else Filename.concat dir filename
   in
   (* Try each extension *)
-  let extensions_to_try =
-    [| ".jpg"; ".jpeg"; ".png"; ".gif"; ".url"; ".stop" |]
-  in
   let rec try_extensions i =
-    if i >= Array.length extensions_to_try then "."
+    if i >= Array.length Extensions.all_extensions then "."
     else
-      let ext = extensions_to_try.(i) in
+      let ext = Extensions.all_extensions.(i) in
       if Sys.file_exists (base_path ^ ext) then ext else try_extensions (i + 1)
   in
   try_extensions 0
@@ -229,10 +220,15 @@ let parse_url_or_path conf s =
     Falls back to a timestamped name if extraction fails. *)
 let extract_filename_from_url url =
   try
-    (* Remove protocol *)
+    (* Remove protocol using utility function *)
     let without_protocol =
-      match find_substring url "://" with
-      | Some pos -> String.sub url (pos + 3) (String.length url - pos - 3)
+      match StringUtil.find_substring url "://" with
+      | Some pos -> (
+          match
+            StringUtil.safe_sub url (pos + 3) (String.length url - pos - 3)
+          with
+          | Ok s -> s
+          | Error _ -> url)
       | None -> url
     in
     (* Remove query parameters *)
@@ -242,8 +238,8 @@ let extract_filename_from_url url =
       | None -> without_protocol
     in
     let filename = Filename.basename without_params in
-    if filename = "" || filename = "/" || not (String.contains filename '.')
-    then "image_" ^ string_of_int (int_of_float (Unix.time ()))
+    if filename = "" || filename = "/" || not (String.contains filename '.') then
+      "image_" ^ string_of_int (int_of_float (Unix.time ()))
     else filename
   with _ -> "image_" ^ string_of_int (int_of_float (Unix.time ()))
 
@@ -259,11 +255,23 @@ let parse_size_info conf s =
     try
       let pos1 = String.index s '(' in
       let pos2 = String.index_from s pos1 'x' in
-      let w = String.sub s (pos1 + 1) (pos2 - pos1 - 1) |> int_of_string in
-      let h = String.sub s (pos2 + 1) (len - pos2 - 2) |> int_of_string in
+      (* Use safe_sub for bounds checking *)
+      let w_str =
+        match StringUtil.safe_sub s (pos1 + 1) (pos2 - pos1 - 1) with
+        | Ok s -> s
+        | Error msg -> failwith msg
+      in
+      let h_str =
+        match StringUtil.safe_sub s (pos2 + 1) (len - pos2 - 2) with
+        | Ok s -> s
+        | Error msg -> failwith msg
+      in
+      let w = int_of_string w_str in
+      let h = int_of_string h_str in
       let path_str = String.sub s 0 pos1 in
       Ok (parse_url_or_path conf path_str, (w, h))
-    with Not_found | Failure _ -> Error "Failed to parse size info"
+    with Not_found | Failure _ | Invalid_argument _ ->
+      Error "Failed to parse size info"
   else Error "Not a size-info string"
 
 (** [has_size_info s] checks if string ends with size info format "(WxH)" *)

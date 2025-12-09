@@ -1,15 +1,22 @@
 (* Copyright (c) 1998-2007 INRIA *)
-(* Copyright (c) 2025 - Refactored *)
+(* Copyright (c) 2025 - Refactored with ImageUtil *)
 
 (** File operations for image management.
     This module handles all filesystem operations for images:
     - Creating, moving, and deleting files
     - Managing the "saved" archive directory
     - Renaming images when person keys change
-    - Swapping current and saved versions *)
+    - Swapping current and saved versions
+    
+    PHASE 1-2 CHANGES:
+    - Uses ImageUtil.StringUtil.find_substring (eliminates duplication)
+    - Uses ImageUtil.MetadataFiles for consistent metadata handling
+    - Uses ImageUtil.Constants for magic numbers
+    - Uses ImageUtil.StringUtil.safe_sub for bounds checking *)
 
 open Config
 open ImageTypes
+open ImageUtil
 
 module Logs = Geneweb_logs.Logs
 module Driver = Geneweb_db.Driver
@@ -29,8 +36,7 @@ let write_file path content =
 
 (** [safe_rename src dst] renames a file, logging errors instead of raising *)
 let safe_rename src dst =
-  try
-    if Sys.file_exists src then Sys.rename src dst
+  try if Sys.file_exists src then Sys.rename src dst
   with Failure msg ->
     Logs.syslog `LOG_ERR
       (Format.sprintf "Rename failed: %s to %s: %s" src dst msg)
@@ -46,7 +52,7 @@ let ensure_dir path = Filesystem.create_dir ~parent:true path
     
     @param dir The directory containing the file
     @param filename The filename (basename) to move
-    @return true if successful, false otherwise *)
+    @param return true if successful, false otherwise *)
 let move_to_saved dir filename =
   try
     let save_dir = Filename.concat dir "saved" in
@@ -71,7 +77,7 @@ let move_to_saved dir filename =
           if Sys.file_exists meta_src then (
             if Sys.file_exists meta_dst then Mutil.rm meta_dst;
             Sys.rename meta_src meta_dst))
-        [ ".txt"; ".src" ];
+        Constants.metadata_extensions;
       true
   with
   | Sys_error msg ->
@@ -79,30 +85,84 @@ let move_to_saved dir filename =
       false
   | _ -> false
 
-(** [restore_from_saved dir filename] moves a file from saved/ back to main directory *)
+(** [restore_from_saved dir filename] moves a file from saved/ back to main directory.
+    
+    Handles two cases:
+    1. dir = person_directory (e.g., "src_d/person_key")
+    2. dir = saved_directory (e.g., "src_d/person_key/saved") - strips /saved *)
 let restore_from_saved dir filename =
+  Logs.syslog `LOG_INFO
+    (Format.sprintf "[RESTORE_DEBUG] Called with dir='%s' filename='%s'" dir filename);
+  
+  (* Handle case where dir already points to saved/ directory *)
+  let dir, is_already_saved =
+    if Filename.basename dir = "saved" then
+      (Filename.dirname dir, true)
+    else
+      (dir, false)
+  in
+  
+  if is_already_saved then
+    Logs.syslog `LOG_INFO
+      (Format.sprintf "[RESTORE_DEBUG] Detected saved dir, adjusted to: '%s'" dir);
+  
   try
     let save_dir = Filename.concat dir "saved" in
     let src = Filename.concat save_dir filename in
     let dst = Filename.concat dir filename in
-    if not (Sys.file_exists src) then false
+    Logs.syslog `LOG_INFO
+      (Format.sprintf "[RESTORE_DEBUG] Computed paths: save_dir='%s' src='%s' dst='%s'" 
+         save_dir src dst);
+    Logs.syslog `LOG_INFO
+      (Format.sprintf "[RESTORE_DEBUG] src exists=%b dst exists=%b" 
+         (Sys.file_exists src) (Sys.file_exists dst));
+    
+    if not (Sys.file_exists src) then (
+      Logs.syslog `LOG_WARNING
+        (Format.sprintf "[RESTORE_DEBUG] Source file not found: %s" src);
+      false)
     else (
-      if Sys.file_exists dst then Mutil.rm dst;
+      if Sys.file_exists dst then (
+        Logs.syslog `LOG_INFO
+          (Format.sprintf "[RESTORE_DEBUG] Removing existing dst: %s" dst);
+        Mutil.rm dst);
+      
+      Logs.syslog `LOG_INFO
+        (Format.sprintf "[RESTORE_DEBUG] Renaming %s -> %s" src dst);
       Sys.rename src dst;
+      
       (* Also restore metadata files *)
       let base_src = Filename.remove_extension src in
       let base_dst = Filename.remove_extension dst in
+      Logs.syslog `LOG_INFO
+        (Format.sprintf "[RESTORE_DEBUG] Processing metadata: base_src='%s' base_dst='%s'"
+           base_src base_dst);
+      
       List.iter
         (fun ext ->
           let meta_src = base_src ^ ext in
           let meta_dst = base_dst ^ ext in
           if Sys.file_exists meta_src then (
+            Logs.syslog `LOG_INFO
+              (Format.sprintf "[RESTORE_DEBUG] Moving metadata %s -> %s" meta_src meta_dst);
             if Sys.file_exists meta_dst then Mutil.rm meta_dst;
-            Sys.rename meta_src meta_dst))
-        [ ".txt"; ".src" ];
+            Sys.rename meta_src meta_dst)
+          else
+            Logs.syslog `LOG_INFO
+              (Format.sprintf "[RESTORE_DEBUG] Metadata not found: %s" meta_src))
+        Constants.metadata_extensions;
+      
+      Logs.syslog `LOG_INFO
+        (Format.sprintf "[RESTORE_DEBUG] Success! dst now exists=%b" (Sys.file_exists dst));
       true)
   with Sys_error msg ->
-    Logs.syslog `LOG_ERR (Format.sprintf "restore_from_saved error: %s" msg);
+    Logs.syslog `LOG_ERR 
+      (Format.sprintf "[RESTORE_DEBUG] Sys_error: %s" msg);
+    false
+  | exn ->
+    Logs.syslog `LOG_ERR
+      (Format.sprintf "[RESTORE_DEBUG] Unexpected exception: %s" 
+         (Printexc.to_string exn));
     false
 
 (** [delete_from_saved dir filename] permanently deletes a file from saved/ *)
@@ -118,7 +178,7 @@ let delete_from_saved dir filename =
         (fun ext ->
           let meta = base ^ ext in
           if Sys.file_exists meta then Mutil.rm meta)
-        [ ".txt"; ".src" ];
+        Constants.metadata_extensions;
       true)
     else false
   with Sys_error msg ->
@@ -150,21 +210,21 @@ let swap_files_aux dir file old_file =
     safe_rename tmp_file old_file)
 
 (** [swap_with_saved dir filename] exchanges current and saved versions of a file.
-    Also swaps associated .txt and .src metadata files. *)
+    
+    IMPROVED: Uses Constants for metadata extensions. *)
 let swap_with_saved dir filename =
   let current = Filename.concat dir filename in
   let saved = String.concat Filename.dir_sep [ dir; "saved"; filename ] in
   if Sys.file_exists current && Sys.file_exists saved then (
     swap_files_aux dir current saved;
-    (* Swap metadata files too *)
-    let swap_meta ext =
-      let current_meta = Filename.remove_extension current ^ ext in
-      let saved_meta = Filename.remove_extension saved ^ ext in
-      if Sys.file_exists current_meta || Sys.file_exists saved_meta then
-        swap_files_aux dir current_meta saved_meta
-    in
-    swap_meta ".txt";
-    swap_meta ".src";
+    (* Swap metadata files using constants *)
+    List.iter
+      (fun ext ->
+        let current_meta = Filename.remove_extension current ^ ext in
+        let saved_meta = Filename.remove_extension saved ^ ext in
+        if Sys.file_exists current_meta || Sys.file_exists saved_meta then
+          swap_files_aux dir current_meta saved_meta)
+      Constants.metadata_extensions;
     true)
   else false
 
@@ -173,61 +233,78 @@ let swap_with_saved dir filename =
 (* ========================================================================== *)
 
 (** [detect_image_type content] detects the image format from binary content.
-    More lenient than ImageSize.detect_format - tries to find magic bytes
-    even if not at the start (for malformed uploads). *)
+    
+    IMPROVED: Uses StringUtil and Constants for safer operations. *)
 let detect_image_type content =
   let len = String.length content in
-  (* Check standard positions first *)
-  if len > 10 && Char.code content.[0] = 0xff && Char.code content.[1] = 0xd8
+  (* Check standard positions first using constants *)
+  if
+    len > Constants.JPEG.min_header_size
+    && Char.code content.[0] = Constants.JPEG.magic_byte1
+    && Char.code content.[1] = Constants.JPEG.magic_byte2
   then Some JPEG
-  else if len > 4 && String.sub content 0 4 = "\137PNG" then Some PNG
-  else if len > 4 && String.sub content 0 4 = "GIF8" then Some GIF
+  else if
+    len > Constants.PNG.magic_size
+    && String.sub content 0 Constants.PNG.magic_size = Constants.PNG.magic
+  then Some PNG
+  else if
+    len > Constants.GIF.magic_size
+    && String.sub content 0 Constants.GIF.magic_size = Constants.GIF.magic
+  then Some GIF
   else
-    (* Try to find markers within content (handles spurious headers) *)
-    let find_substring s pattern =
-      let plen = String.length pattern in
-      let rec loop i =
-        if i + plen > String.length s then None
-        else if String.sub s i plen = pattern then Some i
-        else loop (i + 1)
-      in
-      loop 0
-    in
-    match find_substring content "JFIF" with
-    | Some i when i > 6 -> Some JPEG
+    (* Try to find markers within content using utility function *)
+    match StringUtil.find_substring content Constants.JPEG.jfif_marker with
+    | Some i when i > Constants.JPEG.jfif_offset -> Some JPEG
     | _ -> (
-        match find_substring content "\137PNG" with
+        match StringUtil.find_substring content Constants.PNG.magic with
         | Some _ -> Some PNG
         | None -> (
-            match find_substring content "GIF8" with
+            match StringUtil.find_substring content Constants.GIF.magic with
             | Some _ -> Some GIF
             | None -> None))
 
 (** [extract_clean_content content format] extracts clean image data from
-    potentially malformed content by finding the actual start of image data *)
+    potentially malformed content by finding the actual start of image data.
+    
+    IMPROVED: Uses StringUtil.safe_sub for safer string operations. *)
 let extract_clean_content content format =
-  let find_substring s pattern =
-    let plen = String.length pattern in
-    let rec loop i =
-      if i + plen > String.length s then None
-      else if String.sub s i plen = pattern then Some i
-      else loop (i + 1)
-    in
-    loop 0
-  in
   match format with
   | JPEG -> (
-      match find_substring content "JFIF" with
-      | Some i when i >= 6 ->
-          String.sub content (i - 6) (String.length content - i + 6)
+      match StringUtil.find_substring content Constants.JPEG.jfif_marker with
+      | Some i when i >= Constants.JPEG.jfif_offset -> (
+          match
+            StringUtil.safe_sub content (i - Constants.JPEG.jfif_offset)
+              (String.length content - i + Constants.JPEG.jfif_offset)
+          with
+          | Ok result -> result
+          | Error msg ->
+              Logs.syslog `LOG_WARNING
+                (Format.sprintf "Failed to extract JPEG content: %s" msg);
+              content)
       | _ -> content)
   | PNG -> (
-      match find_substring content "\137PNG" with
-      | Some i -> String.sub content i (String.length content - i)
+      match StringUtil.find_substring content Constants.PNG.magic with
+      | Some i -> (
+          match
+            StringUtil.safe_sub content i (String.length content - i)
+          with
+          | Ok result -> result
+          | Error msg ->
+              Logs.syslog `LOG_WARNING
+                (Format.sprintf "Failed to extract PNG content: %s" msg);
+              content)
       | None -> content)
   | GIF -> (
-      match find_substring content "GIF8" with
-      | Some i -> String.sub content i (String.length content - i)
+      match StringUtil.find_substring content Constants.GIF.magic with
+      | Some i -> (
+          match
+            StringUtil.safe_sub content i (String.length content - i)
+          with
+          | Ok result -> result
+          | Error msg ->
+              Logs.syslog `LOG_WARNING
+                (Format.sprintf "Failed to extract GIF content: %s" msg);
+              content)
       | None -> content)
 
 (* ========================================================================== *)
@@ -319,7 +396,9 @@ let move_blason_file conf base src dst =
       dst_path)
     else ""
 
-(** [copy_portrait_to_blason conf base p] copies portrait to blason position *)
+(** [copy_portrait_to_blason conf base p] copies portrait to blason position.
+    
+    IMPROVED: Uses MetadataFiles for copying metadata. *)
 let copy_portrait_to_blason conf base p =
   let dir = ImagePath.portrait_dir conf in
   let portrait_key = ImagePath.person_key base p in
@@ -345,11 +424,18 @@ let copy_portrait_to_blason conf base p =
           (* Move existing blason to saved *)
           let _ = move_to_saved dir (Filename.basename dst) in
           ());
+        (* Copy main file *)
         Filesystem.copy_file ~perm:0o666 src dst;
+        (* Copy metadata files using utility *)
+        let src_base = Filename.remove_extension src in
+        let dst_base = Filename.remove_extension dst in
+        MetadataFiles.copy_metadata_files src_base dst_base;
         dst
 
 (** [copy_carrousel_image_to_blason conf base p filename] copies a carrousel
-    image to the blason position *)
+    image to the blason position.
+    
+    IMPROVED: Uses MetadataFiles for copying metadata. *)
 let copy_carrousel_image_to_blason conf base p filename =
   let portrait_dir = ImagePath.portrait_dir conf in
   let carrousel_dir = ImagePath.carrousel_dir conf in
@@ -363,7 +449,12 @@ let copy_carrousel_image_to_blason conf base p filename =
     if ImageAccess.has_blason conf base p ~self:true then (
       let _ = move_to_saved portrait_dir (Filename.basename dst) in
       ());
+    (* Copy main file *)
     Filesystem.copy_file ~perm:0o666 src dst;
+    (* Copy metadata files using utility *)
+    let src_base = Filename.remove_extension src in
+    let dst_base = Filename.remove_extension dst in
+    MetadataFiles.copy_metadata_files src_base dst_base;
     dst
 
 (* ========================================================================== *)
@@ -395,6 +486,5 @@ let save_url_to_file conf mode base p url =
     if enabled in base configuration *)
 let dump_bad_image conf content =
   match List.assoc_opt "dump_bad_images" conf.base_env with
-  | Some "yes" -> (
-      try write_file "bad-image" content with Sys_error _ -> ())
+  | Some "yes" -> (try write_file "bad-image" content with Sys_error _ -> ())
   | _ -> ()
