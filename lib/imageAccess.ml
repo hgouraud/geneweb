@@ -350,24 +350,24 @@ let get_carrousel_images conf base p ~saved =
                      let note =
                        Option.value ~default:""
                          (get_carrousel_file_content conf base p ~filename
-                            ~kind:".txt" ~saved:false)
+                            ~kind:".txt" ~saved)
                      in
                      let source =
                        Option.value ~default:""
                          (get_carrousel_file_content conf base p ~filename
-                            ~kind:".src" ~saved:false)
+                            ~kind:".src" ~saved)
                      in
                      { path; url = ""; source; note } :: acc
                  | Found (Url url) ->
                      let note =
                        Option.value ~default:""
                          (get_carrousel_file_content conf base p ~filename
-                            ~kind:".txt" ~saved:false)
+                            ~kind:".txt" ~saved)
                      in
                      let source =
                        Option.value ~default:""
                          (get_carrousel_file_content conf base p ~filename
-                            ~kind:".src" ~saved:false)
+                            ~kind:".src" ~saved)
                      in
                      let path =
                        Filename.chop_extension (Filename.basename filename)

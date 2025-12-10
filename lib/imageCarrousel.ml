@@ -461,13 +461,76 @@ let effective_delete_c_ok conf base ?(f_name = "") p =
 (* Effective operations - Reset (swap current/saved)                          *)
 (* ========================================================================== *)
 
+(* CORRECT FIX - Handles person key format properly *)
+(* Person keys like "henri.0.gouraud" are BASE filenames, not filename.extension *)
+
 let effective_reset_c_ok conf base p =
   let mode = get_mode conf in
   let mode_typed = get_mode_typed conf in
   let keydir = ImagePath.person_key base p in
-  let file_name = get_filename conf in
-  let file_name_no_ext = Filename.remove_extension file_name in
+  let file_name_raw = get_filename conf in
+  
+  Logs.syslog `LOG_INFO
+    (Format.sprintf "[RESET_DEBUG] Raw input: file_name='%s' keydir='%s' mode='%s'"
+      file_name_raw keydir mode);
+  
+  (* Step 1: If file_name is empty, derive it from person data *)
+  let file_name =
+    if file_name_raw = "" then
+      Image.default_image_filename mode base p
+    else
+      file_name_raw
+  in
+  
+  (* Step 2: If file_name contains a path, extract just the basename *)
+  let file_name =
+    if String.contains file_name '/' then (
+      let basename = Filename.basename file_name in
+      Logs.syslog `LOG_INFO
+        (Format.sprintf "[RESET_DEBUG] Extracted basename from path: '%s' -> '%s'"
+          file_name basename);
+      basename
+    ) else
+      file_name
+  in
+  
+  (* Step 3: For blasons, ensure the filename has .blason in it *)
+  let file_name =
+    match mode_typed with
+    | Blason ->
+        (* Check if filename contains "blason" *)
+        let has_blason =
+          match ImageUtil.StringUtil.find_substring file_name "blason" with
+          | Some _ -> true
+          | None -> false
+        in
+        if not has_blason then (
+          let blason_name = Image.default_image_filename "blasons" base p in
+          Logs.syslog `LOG_INFO
+            (Format.sprintf "[RESET_DEBUG] Deriving blason filename: '%s' -> '%s'"
+              file_name blason_name);
+          blason_name
+        ) else
+          file_name
+    | _ -> file_name
+  in
+  
+  Logs.syslog `LOG_INFO
+    (Format.sprintf "[RESET_DEBUG] After cleanup: file_name='%s'" file_name);
+  
+  (* Determine directory *)
+  let dir =
+    match mode_typed with
+    | Portrait | Blason -> ImagePath.portrait_dir conf
+    | Carrousel -> Filename.concat (ImagePath.carrousel_dir conf) keydir
+  in
+  
+  Logs.syslog `LOG_INFO
+    (Format.sprintf "[RESET_DEBUG] Base dir='%s'" dir);
+  
   (* Determine extensions for current and saved files *)
+  (* IMPORTANT: Pass file_name directly to get_extension_for_file *)
+  (* It will handle removing extensions if needed *)
   let ext =
     ImagePath.get_extension_for_file conf ~keydir ~mode:mode_typed ~saved:false
       file_name
@@ -476,41 +539,121 @@ let effective_reset_c_ok conf base p =
     ImagePath.get_extension_for_file conf ~keydir ~mode:mode_typed ~saved:true
       file_name
   in
+  
+  Logs.syslog `LOG_INFO
+    (Format.sprintf "[RESET_DEBUG] Extensions: ext='%s' old_ext='%s'" ext old_ext);
+  
   (* Handle blason .stop files *)
   let ext =
     match mode_typed with
     | Blason when ext = ".stop" -> old_ext
     | _ -> ext
   in
-  let dir =
-    match mode_typed with
-    | Portrait | Blason -> ImagePath.portrait_dir conf
-    | Carrousel -> Filename.concat (ImagePath.carrousel_dir conf) keydir
-  in
-  let current_file =
-    if ext <> "." then Filename.concat dir (file_name_no_ext ^ ext)
-    else Filename.concat dir (file_name_no_ext ^ old_ext)
-  in
-  let _saved_file =
+  
+  (* Determine the actual filename to restore from saved *)
+  (* Use the file_name as base (it's already correct: "henri.0.gouraud") *)
+  (* BUT: if file_name already has the extension, don't add it again! *)
+  let filename_to_restore =
+    let current_ext = Filename.extension file_name in
     if old_ext <> "." then
-      String.concat Filename.dir_sep [ dir; "saved"; file_name_no_ext ^ old_ext ]
+      (* If file_name already ends with old_ext, use it as-is *)
+      if current_ext = old_ext then
+        file_name
+      else
+        file_name ^ old_ext
+    else if ext <> "." then
+      if current_ext = ext then
+        file_name
+      else
+        file_name ^ ext
     else
-      String.concat Filename.dir_sep [ dir; "saved"; file_name_no_ext ^ ext ]
+      file_name
   in
-  ImageOps.swap_with_saved dir (Filename.basename current_file)
-  |> ignore;
-  let changed =
-    U_Send_image (string_gen_person base (Driver.gen_person_of_person p))
-  in
-  let history_code =
-    match mode with
-    | "portraits" -> "rp"
-    | "blasons" -> "rb"
-    | "carrousel" -> "rc"
-    | _ -> "r?"
-  in
-  History.record conf base changed history_code;
-  file_name
+  
+  Logs.syslog `LOG_INFO
+    (Format.sprintf "[RESET_DEBUG] filename_to_restore='%s'" filename_to_restore);
+  
+  let saved_file = String.concat Filename.dir_sep [ dir; "saved"; filename_to_restore ] in
+  
+  Logs.syslog `LOG_INFO
+    (Format.sprintf "[RESET_DEBUG] saved_file='%s' exists=%b" 
+      saved_file (Sys.file_exists saved_file));
+  
+  (* Check if saved file actually exists *)
+  if not (Sys.file_exists saved_file) then (
+    Logs.syslog `LOG_ERR
+      (Format.sprintf "[RESET_DEBUG] ERROR: No saved file found at: %s" saved_file);
+    incorrect conf "No saved version to restore")
+  else (
+    (* Check if a current file exists - must be an actual file, not a directory *)
+    let current_file_path =
+      if ext <> "." then Filename.concat dir (file_name ^ ext)
+      else Filename.concat dir filename_to_restore
+    in
+    let current_exists = 
+      Sys.file_exists current_file_path && 
+      not (Sys.is_directory current_file_path)
+    in
+    
+    Logs.syslog `LOG_INFO
+      (Format.sprintf "[RESET_DEBUG] current_file_path='%s' exists=%b is_file=%b" 
+        current_file_path 
+        (Sys.file_exists current_file_path)
+        current_exists);
+    
+    (* Step 1: ONLY if current FILE actually exists, move it to saved first *)
+    if current_exists then (
+      let current_basename = Filename.basename current_file_path in
+      
+      Logs.syslog `LOG_INFO
+        (Format.sprintf "[RESET_DEBUG] Current file exists, will move to saved: basename='%s'"
+          current_basename);
+      
+      ImageOps.ensure_dir (Filename.concat dir "saved");
+      
+      let move_result = ImageOps.move_to_saved dir current_basename in
+      
+      Logs.syslog `LOG_INFO
+        (Format.sprintf "[RESET_DEBUG] move_to_saved result=%b" move_result);
+      
+      if not move_result then
+        incorrect conf "Failed to save current version before restore"
+    ) else (
+      Logs.syslog `LOG_INFO
+        "[RESET_DEBUG] No current file exists, skipping move to saved"
+    );
+    
+    (* Step 2: Now restore from saved *)
+    let basename_to_restore = Filename.basename saved_file in
+    
+    Logs.syslog `LOG_INFO
+      (Format.sprintf "[RESET_DEBUG] About to restore: dir='%s' basename='%s'"
+        dir basename_to_restore);
+    
+    let restore_result = ImageOps.restore_from_saved dir basename_to_restore in
+    
+    Logs.syslog `LOG_INFO
+      (Format.sprintf "[RESET_DEBUG] restore_from_saved result=%b" restore_result);
+    
+    if not restore_result then
+      incorrect conf "Failed to restore from saved";
+    
+    Logs.syslog `LOG_INFO
+      "[RESET_DEBUG] Reset completed successfully";
+    
+    let changed =
+      U_Send_image (string_gen_person base (Driver.gen_person_of_person p))
+    in
+    let history_code =
+      match mode with
+      | "portraits" -> "rp"
+      | "blasons" -> "rb"
+      | "carrousel" -> "rc"
+      | _ -> "r?"
+    in
+    History.record conf base changed history_code;
+    file_name
+  )
 
 (* ========================================================================== *)
 (* Effective operations - Blason special                                      *)

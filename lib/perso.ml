@@ -4388,14 +4388,26 @@ and string_of_image_url conf base (p, p_auth) html saved : Adef.escaped_string =
     | None -> Adef.escaped ""
   else Adef.escaped ""
 
-and string_of_blason_url conf base (p, p_auth) html _saved : Adef.escaped_string
-    =
+(* Fixed string_of_blason_url function for perso.ml *)
+(* Replaces lines 4391-4419 *)
+
+and string_of_blason_url conf base (p, p_auth) html _saved : Adef.escaped_string =
   if p_auth then
     match Image.get_blason_name conf base p with
     | fname when Filename.extension fname = ".url" -> (
-        match Some (Secure.open_in fname) with
-        | Some ic -> Adef.escaped (input_line ic)
-        | None -> Adef.escaped "")
+        (* Build full path to blason file *)
+        let dir = !GWPARAM.portraits_d conf.bname in
+        let full_path = Filename.concat dir fname in
+        (* Check if file exists before opening *)
+        if Sys.file_exists full_path then
+          try
+            let ic = Secure.open_in full_path in
+            Fun.protect
+              ~finally:(fun () -> close_in ic)
+              (fun () -> Adef.escaped (input_line ic))
+          with Sys_error _ -> Adef.escaped ""
+        else
+          Adef.escaped "")
     | fname when fname <> "" ->
         (* p is not the blason owner *)
         let k = Filename.basename fname |> Filename.chop_extension in
@@ -4408,8 +4420,9 @@ and string_of_blason_url conf base (p, p_auth) html _saved : Adef.escaped_string
         Format.sprintf "%sm=FIM%s&d=%s&%s&k=/%s"
           (commd conf :> string)
           (if html then "H" else "")
-          ("xxyy")
-          access k
+          "0"
+          access
+          k
         |> Adef.escaped
     | _ -> Adef.escaped ""
   else Adef.escaped ""
