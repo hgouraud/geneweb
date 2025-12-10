@@ -7,7 +7,7 @@
     - Deleting images
     - Swapping current/saved versions
     - Blason operations (copy, move, stop)
-    
+
     File operations are delegated to ImageOps module.
     Access control is delegated to ImageAccess module. *)
 
@@ -392,70 +392,132 @@ let effective_send_c_ok conf base p file file_name =
 (* Effective operations - Delete                                              *)
 (* ========================================================================== *)
 
-let effective_delete_ok conf base p =
-  let _mode = get_mode conf in
-  let key = ImagePath.person_key base p in
-  let ext =
-    ImagePath.get_extension_for_file conf ~keydir:key ~mode:Portrait ~saved:false
-      key
-  in
-  let dir = ImagePath.portrait_dir conf in
-  let filename = key ^ ext in
-  if not (ImageOps.move_to_saved dir filename) then
-    incorrect conf "effective delete (ok)";
-  let changed =
-    U_Delete_image (string_gen_person base (Driver.gen_person_of_person p))
-  in
-  History.record conf base changed "di";
-  print_deleted conf base p
+(* Refactored image deletion functions for imageCarrousel.ml *)
+(* Replaces effective_delete_ok (lines 395-410) and effective_delete_c_ok (lines 412-458) *)
 
-let effective_delete_c_ok conf base ?(f_name = "") p =
+(** [do_delete_image conf base p] performs the actual image deletion/move.
+    This is the core deletion logic shared by both old and new interfaces.
+
+    @return the filename that was deleted/moved *)
+let do_delete_image conf base p =
   let keydir = ImagePath.person_key base p in
   let mode = get_mode conf in
   let mode_typed = get_mode_typed conf in
-  let delete_permanently = get_delete_flag conf in
-  let filename = if f_name = "" then get_filename conf else f_name in
+  let file_name_raw = get_filename conf in
+
+  (* Step 1: Derive filename if empty *)
+  let file_name =
+    if file_name_raw = "" then
+      Image.default_image_filename mode base p
+    else
+      file_name_raw
+  in
+
+  (* Step 2: Extract basename if full path *)
+  let file_name =
+    if String.contains file_name '/' then (
+      Filename.basename file_name
+    ) else
+      file_name
+  in
+
+  (* Step 3: For blasons, ensure .blason is in filename *)
+  let file_name =
+    match mode_typed with
+    | Blason ->
+        let has_blason =
+          match ImageUtil.StringUtil.find_substring file_name "blason" with
+          | Some _ -> true
+          | None -> false
+        in
+        if not has_blason then (
+          let blason_name = Image.default_image_filename "blasons" base p in
+          blason_name
+        ) else
+          file_name
+    | _ -> file_name
+  in
+
+  (* Step 4: Determine directory *)
   let dir =
     match mode_typed with
     | Portrait | Blason -> ImagePath.portrait_dir conf
     | Carrousel -> Filename.concat (ImagePath.carrousel_dir conf) keydir
   in
-  ImageOps.ensure_dir dir;
-  (* Resolve actual file path *)
-  let target_file =
-    if delete_permanently then
-      String.concat Filename.dir_sep [ dir; "saved"; filename ]
-    else Filename.concat dir filename
+
+  (* Step 5: Get file extension *)
+  let ext =
+    ImagePath.get_extension_for_file conf ~keydir ~mode:mode_typed ~saved:false
+      file_name
   in
-  let target_file =
-    if
-      Filename.extension target_file = ".url" && Sys.file_exists target_file
-    then target_file
+
+  (* Step 6: Build final filename (handle double extension) *)
+  let current_ext = Filename.extension file_name in
+  let filename =
+    if ext <> "." then
+      if current_ext = ext then
+        file_name  (* Already has extension *)
+      else
+        file_name ^ ext  (* Add extension *)
     else
-      ImagePath.find_file_with_extension (Filename.remove_extension target_file)
+      file_name
   in
-  let basename = Filename.basename target_file in
-  if target_file = "" then incorrect conf "empty file name"
-  else if delete_permanently then (
-    Mutil.rm target_file;
+
+  (* Step 7: Perform deletion or move *)
+  let delete_permanent = get_delete_flag conf in
+
+  if delete_permanent then (
+    (* Permanent delete *)
+    let file_path = Filename.concat dir filename in
+    Mutil.rm file_path;
     (* Also remove metadata *)
-    let base_path = Filename.remove_extension target_file in
+    let base_path = Filename.remove_extension file_path in
     Mutil.rm (base_path ^ ".txt");
-    Mutil.rm (base_path ^ ".src"))
-  else if not (ImageOps.move_to_saved dir basename) then
-    incorrect conf "effective delete (c_ok)";
+    Mutil.rm (base_path ^ ".src");
+  ) else (
+    (* Move to saved *)
+    if not (ImageOps.move_to_saved dir filename) then
+      incorrect conf "Failed to move file to saved"
+  );
+
+  (* Step 8: Record in history *)
   let changed =
     U_Delete_image (string_gen_person base (Driver.gen_person_of_person p))
   in
   let history_code =
     match mode with
-    | "portraits" -> "dq"
-    | "blasons" -> "db"
-    | "carrousel" -> "dc"
-    | _ -> "d?"
+    | "portraits" -> if delete_permanent then "dpp" else "dp"
+    | "blasons" -> if delete_permanent then "dbp" else "db"
+    | "carrousel" -> if delete_permanent then "dcp" else "dc"
+    | _ -> if delete_permanent then "dip" else "di"
   in
   History.record conf base changed history_code;
+
+  (* Return filename for caller *)
   filename
+
+
+(** [effective_delete_ok conf base p] handles old-style deletion (DEL_IMAGE_OK).
+    Uses core deletion logic, then displays success page.
+    This maintains backward compatibility with old interface. *)
+let effective_delete_ok conf base p =
+  let _filename = do_delete_image conf base p in
+  (* Display success page (old interface expects this) *)
+  print_deleted conf base p
+
+
+(** [effective_delete_c_ok conf base p] handles new-style deletion (DEL_IMAGE_C_OK).
+    Uses core deletion logic, then redirects to carrousel page.
+
+    @param f_name Optional filename parameter (for compatibility)
+    @return the filename that was deleted *)
+let effective_delete_c_ok conf base ?(_f_name = "") p =
+  (* Ignore f_name parameter - do_delete_image gets it from env *)
+  let file_name = do_delete_image conf base p in
+
+  (* The new interface returns the filename for redirect/display *)
+  file_name
+
 
 (* ========================================================================== *)
 (* Effective operations - Reset (swap current/saved)                          *)
@@ -464,41 +526,41 @@ let effective_delete_c_ok conf base ?(f_name = "") p =
 (* CORRECT FIX - Handles person key format properly *)
 (* Person keys like "henri.0.gouraud" are BASE filenames, not filename.extension *)
 
-let effective_reset_c_ok conf base p =
+(* Refactored image reset/restore functions for imageCarrousel.ml *)
+(* For consistency with deletion refactoring *)
+
+(** [do_reset_image conf base p] performs the actual image restoration.
+    This is the core reset logic that can be shared if we add an old-style
+    reset interface in the future.
+
+    @return the filename that was restored *)
+let do_reset_image conf base p =
   let mode = get_mode conf in
   let mode_typed = get_mode_typed conf in
   let keydir = ImagePath.person_key base p in
   let file_name_raw = get_filename conf in
-  
-  Logs.syslog `LOG_INFO
-    (Format.sprintf "[RESET_DEBUG] Raw input: file_name='%s' keydir='%s' mode='%s'"
-      file_name_raw keydir mode);
-  
-  (* Step 1: If file_name is empty, derive it from person data *)
+
+  (* Step 1: Derive filename if empty *)
   let file_name =
     if file_name_raw = "" then
       Image.default_image_filename mode base p
     else
       file_name_raw
   in
-  
-  (* Step 2: If file_name contains a path, extract just the basename *)
+
+  (* Step 2: Extract basename if full path *)
   let file_name =
     if String.contains file_name '/' then (
       let basename = Filename.basename file_name in
-      Logs.syslog `LOG_INFO
-        (Format.sprintf "[RESET_DEBUG] Extracted basename from path: '%s' -> '%s'"
-          file_name basename);
       basename
     ) else
       file_name
   in
-  
-  (* Step 3: For blasons, ensure the filename has .blason in it *)
+
+  (* Step 3: For blasons, ensure .blason is in filename *)
   let file_name =
     match mode_typed with
     | Blason ->
-        (* Check if filename contains "blason" *)
         let has_blason =
           match ImageUtil.StringUtil.find_substring file_name "blason" with
           | Some _ -> true
@@ -506,31 +568,20 @@ let effective_reset_c_ok conf base p =
         in
         if not has_blason then (
           let blason_name = Image.default_image_filename "blasons" base p in
-          Logs.syslog `LOG_INFO
-            (Format.sprintf "[RESET_DEBUG] Deriving blason filename: '%s' -> '%s'"
-              file_name blason_name);
           blason_name
         ) else
           file_name
     | _ -> file_name
   in
-  
-  Logs.syslog `LOG_INFO
-    (Format.sprintf "[RESET_DEBUG] After cleanup: file_name='%s'" file_name);
-  
-  (* Determine directory *)
+
+  (* Step 4: Determine directory *)
   let dir =
     match mode_typed with
     | Portrait | Blason -> ImagePath.portrait_dir conf
     | Carrousel -> Filename.concat (ImagePath.carrousel_dir conf) keydir
   in
-  
-  Logs.syslog `LOG_INFO
-    (Format.sprintf "[RESET_DEBUG] Base dir='%s'" dir);
-  
-  (* Determine extensions for current and saved files *)
-  (* IMPORTANT: Pass file_name directly to get_extension_for_file *)
-  (* It will handle removing extensions if needed *)
+
+  (* Step 5: Determine extensions for current and saved files *)
   let ext =
     ImagePath.get_extension_for_file conf ~keydir ~mode:mode_typed ~saved:false
       file_name
@@ -539,28 +590,22 @@ let effective_reset_c_ok conf base p =
     ImagePath.get_extension_for_file conf ~keydir ~mode:mode_typed ~saved:true
       file_name
   in
-  
-  Logs.syslog `LOG_INFO
-    (Format.sprintf "[RESET_DEBUG] Extensions: ext='%s' old_ext='%s'" ext old_ext);
-  
-  (* Handle blason .stop files *)
+
+  (* Step 6: Handle blason .stop files *)
   let ext =
     match mode_typed with
     | Blason when ext = ".stop" -> old_ext
     | _ -> ext
   in
-  
-  (* Determine the actual filename to restore from saved *)
-  (* Use the file_name as base (it's already correct: "henri.0.gouraud") *)
-  (* BUT: if file_name already has the extension, don't add it again! *)
+
+  (* Step 7: Build filename to restore (handle double extension) *)
+  let current_ext = Filename.extension file_name in
   let filename_to_restore =
-    let current_ext = Filename.extension file_name in
     if old_ext <> "." then
-      (* If file_name already ends with old_ext, use it as-is *)
       if current_ext = old_ext then
-        file_name
+        file_name  (* Already has extension *)
       else
-        file_name ^ old_ext
+        file_name ^ old_ext  (* Add extension *)
     else if ext <> "." then
       if current_ext = ext then
         file_name
@@ -569,78 +614,46 @@ let effective_reset_c_ok conf base p =
     else
       file_name
   in
-  
-  Logs.syslog `LOG_INFO
-    (Format.sprintf "[RESET_DEBUG] filename_to_restore='%s'" filename_to_restore);
-  
+
   let saved_file = String.concat Filename.dir_sep [ dir; "saved"; filename_to_restore ] in
-  
-  Logs.syslog `LOG_INFO
-    (Format.sprintf "[RESET_DEBUG] saved_file='%s' exists=%b" 
-      saved_file (Sys.file_exists saved_file));
-  
-  (* Check if saved file actually exists *)
+
+  (* Step 8: Check if saved file exists *)
   if not (Sys.file_exists saved_file) then (
-    Logs.syslog `LOG_ERR
-      (Format.sprintf "[RESET_DEBUG] ERROR: No saved file found at: %s" saved_file);
     incorrect conf "No saved version to restore")
   else (
-    (* Check if a current file exists - must be an actual file, not a directory *)
+    (* Step 9: If current file exists, move it to saved first *)
     let current_file_path =
       if ext <> "." then Filename.concat dir (file_name ^ ext)
       else Filename.concat dir filename_to_restore
     in
-    let current_exists = 
-      Sys.file_exists current_file_path && 
+    let current_exists =
+      Sys.file_exists current_file_path &&
       not (Sys.is_directory current_file_path)
     in
-    
-    Logs.syslog `LOG_INFO
-      (Format.sprintf "[RESET_DEBUG] current_file_path='%s' exists=%b is_file=%b" 
-        current_file_path 
-        (Sys.file_exists current_file_path)
-        current_exists);
-    
-    (* Step 1: ONLY if current FILE actually exists, move it to saved first *)
+
+
     if current_exists then (
       let current_basename = Filename.basename current_file_path in
-      
-      Logs.syslog `LOG_INFO
-        (Format.sprintf "[RESET_DEBUG] Current file exists, will move to saved: basename='%s'"
-          current_basename);
-      
+
       ImageOps.ensure_dir (Filename.concat dir "saved");
-      
+
       let move_result = ImageOps.move_to_saved dir current_basename in
-      
-      Logs.syslog `LOG_INFO
-        (Format.sprintf "[RESET_DEBUG] move_to_saved result=%b" move_result);
-      
+
       if not move_result then
         incorrect conf "Failed to save current version before restore"
     ) else (
       Logs.syslog `LOG_INFO
-        "[RESET_DEBUG] No current file exists, skipping move to saved"
+        "No current file exists, skipping move to saved"
     );
-    
-    (* Step 2: Now restore from saved *)
+
+    (* Step 10: Restore from saved *)
     let basename_to_restore = Filename.basename saved_file in
-    
-    Logs.syslog `LOG_INFO
-      (Format.sprintf "[RESET_DEBUG] About to restore: dir='%s' basename='%s'"
-        dir basename_to_restore);
-    
+
     let restore_result = ImageOps.restore_from_saved dir basename_to_restore in
-    
-    Logs.syslog `LOG_INFO
-      (Format.sprintf "[RESET_DEBUG] restore_from_saved result=%b" restore_result);
-    
     if not restore_result then
       incorrect conf "Failed to restore from saved";
-    
-    Logs.syslog `LOG_INFO
-      "[RESET_DEBUG] Reset completed successfully";
-    
+
+    (* Step 11: Record in history *)
     let changed =
       U_Send_image (string_gen_person base (Driver.gen_person_of_person p))
     in
@@ -652,8 +665,17 @@ let effective_reset_c_ok conf base p =
       | _ -> "r?"
     in
     History.record conf base changed history_code;
-    file_name
+
+    (* Return filename for caller *)
+    filename_to_restore
   )
+
+(** [effective_reset_c_ok conf base p] handles image restoration (RESET_IMAGE_C_OK).
+    Uses core reset logic, then returns the filename.
+
+    @return the filename that was restored *)
+let effective_reset_c_ok conf base p =
+  do_reset_image conf base p
 
 (* ========================================================================== *)
 (* Effective operations - Blason special                                      *)
