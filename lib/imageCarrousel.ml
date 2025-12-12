@@ -15,6 +15,7 @@ open Config
 open Def
 open Util
 open ImageTypes
+open ImageUtil
 
 module Logs = Geneweb_logs.Logs
 module Driver = Geneweb_db.Driver
@@ -469,11 +470,7 @@ let do_delete_image conf base p =
   if delete_permanent then (
     (* Permanent delete *)
     let file_path = Filename.concat dir filename in
-    Mutil.rm file_path;
-    (* Also remove metadata *)
-    let base_path = Filename.remove_extension file_path in
-    Mutil.rm (base_path ^ ".txt");
-    Mutil.rm (base_path ^ ".src");
+    MetadataFiles.delete_with_metadata file_path;
   ) else (
     (* Move to saved *)
     if not (ImageOps.move_to_saved dir filename) then

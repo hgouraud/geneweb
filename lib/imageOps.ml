@@ -171,14 +171,7 @@ let delete_from_saved dir filename =
     let save_dir = Filename.concat dir "saved" in
     let path = Filename.concat save_dir filename in
     if Sys.file_exists path then (
-      Mutil.rm path;
-      (* Also delete metadata *)
-      let base = Filename.remove_extension path in
-      List.iter
-        (fun ext ->
-          let meta = base ^ ext in
-          if Sys.file_exists meta then Mutil.rm meta)
-        Constants.metadata_extensions;
+      MetadataFiles.delete_with_metadata path;
       true)
     else false
   with Sys_error msg ->
