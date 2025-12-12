@@ -382,3 +382,186 @@ let get_carrousel_imgs conf base p = get_carrousel_images conf base p ~saved:fal
 
 (** [get_carrousel_old_imgs conf base p] retrieves saved carrousel images *)
 let get_carrousel_old_imgs conf base p = get_carrousel_images conf base p ~saved:true
+
+(* Functions to list ALL saved versions for imageAccess.ml *)
+(* Add these functions to the ImageAccess module *)
+
+(** [list_all_saved_portraits conf base p] returns a list of ALL saved portrait files.
+    
+    Unlike get_old_portrait which returns only the first match, this function
+    returns all portrait files with different extensions that exist in saved/.
+    
+    @return List of (filename, source) pairs where source is Path or Url *)
+let list_all_saved_portraits conf base p =
+  if not (can_view_image conf base p ~mode:Portrait) then []
+  else
+    let key = ImagePath.person_key base p in
+    let dir = ImagePath.portrait_dir conf in
+    let saved_dir = Filename.concat dir "saved" in
+    
+    if not (Sys.file_exists saved_dir && Sys.is_directory saved_dir) then []
+    else (
+      let results = ref [] in
+      
+      (* Check each possible extension *)
+      Array.iter (fun ext ->
+        let filename = key ^ ext in
+        let filepath = Filename.concat saved_dir filename in
+        
+        if Sys.file_exists filepath && not (Sys.is_directory filepath) then
+          let source =
+            if ext = ".url" then
+              try
+                let ic = open_in filepath in
+                let url = input_line ic in
+                close_in ic;
+                url
+              with _ -> ""
+            else
+              ""
+          in
+          let src =
+            let filepath = (Filename.remove_extension filepath) ^ ".src" in
+            if Sys.file_exists filepath && not (Sys.is_directory filepath) then
+            	let ic = open_in filepath in
+  						let n = in_channel_length ic in
+  						really_input_string ic n
+  					else ""
+          in
+          let note =
+            let filepath = (Filename.remove_extension filepath) ^ ".txt" in
+            if Sys.file_exists filepath && not (Sys.is_directory filepath) then
+							let ic = open_in filepath in
+							let n = in_channel_length ic in
+							really_input_string ic n
+						else ""
+          in
+          let (res : ImageTypes.carrousel_entry) =
+            {path = filename; url = source; source = src; note = note}
+          in
+          results := res :: !results
+      ) ImageTypes.image_extensions;
+      
+      (* Also check for .stop files (blasons might be here) *)
+      let stop_file = key ^ ".stop" in
+      let stop_path = Filename.concat saved_dir stop_file in
+      if Sys.file_exists stop_path then
+        let (res : ImageTypes.carrousel_entry) =
+          {path = stop_file; url = ""; source = ""; note = ""}
+        in
+        results :=  res :: !results
+      else ();
+      !results)
+      
+
+(** [list_all_saved_blasons conf base p] returns a list of ALL saved blason files.
+    
+    @param self If true, get person's own blason; if false, get family blason
+    @return List of (filename, source) pairs *)
+let list_all_saved_blasons conf base p =
+  let key = ImagePath.blason_key base p in
+  let dir = ImagePath.portrait_dir conf in
+  let saved_dir = Filename.concat dir "saved" in
+  
+  if not (Sys.file_exists saved_dir && Sys.is_directory saved_dir) then []
+  else
+    let results = ref [] in
+    
+    (* Check each possible extension *)
+    Array.iter (fun ext ->
+      let filename = key ^ ext in
+      let filepath = Filename.concat saved_dir filename in
+      
+      if Sys.file_exists filepath && not (Sys.is_directory filepath) then
+        let source =
+          if ext = ".url" then
+            try
+              let ic = open_in filepath in
+              let url = input_line ic in
+              close_in ic;
+              ImageTypes.Url url
+            with _ -> ImageTypes.Path filepath
+          else
+            ImageTypes.Path filepath
+        in
+        results := (filename, source) :: !results
+    ) ImageTypes.image_extensions;
+    
+    (* Also check for .stop files *)
+    let stop_file = key ^ ".stop" in
+    let stop_path = Filename.concat saved_dir stop_file in
+    if Sys.file_exists stop_path then
+      results := (stop_file, ImageTypes.Path stop_path) :: !results;
+    
+    !results
+
+
+(** [count_saved_portraits conf base p] returns the number of saved portrait versions *)
+let count_saved_portraits conf base p =
+  List.length (list_all_saved_portraits conf base p)
+
+
+(** [count_saved_blasons conf base p] returns the number of saved blason versions *)
+let count_saved_blasons conf base p =
+  List.length (list_all_saved_blasons conf base p)
+
+
+(** [has_saved_portraits conf base p] checks if any saved portraits exist *)
+let has_saved_portraits conf base p =
+  count_saved_portraits conf base p > 0
+
+
+(** [has_saved_blasons conf base p] checks if any saved blasons exist *)
+let has_saved_blasons conf base p =
+  count_saved_blasons conf base p > 0
+
+
+(** [get_saved_portrait_by_extension conf base p ext] retrieves a specific saved portrait
+    by extension.
+    
+    @param ext The extension to look for (e.g., ".jpg", ".png")
+    @return Some source if found, None otherwise *)
+let get_saved_portrait_by_extension conf base p ext =
+  if not (can_view_image conf base p ~mode:Portrait) then None
+  else
+    let key = ImagePath.person_key base p in
+    let dir = ImagePath.portrait_dir conf in
+    let saved_dir = Filename.concat dir "saved" in
+    let filename = key ^ ext in
+    let filepath = Filename.concat saved_dir filename in
+    
+    if Sys.file_exists filepath && not (Sys.is_directory filepath) then
+      if ext = ".url" then
+        try
+          let ic = open_in filepath in
+          let url = input_line ic in
+          close_in ic;
+          Some (ImageTypes.Url url)
+        with _ -> Some (ImageTypes.Path filepath)
+      else
+        Some (ImageTypes.Path filepath)
+    else
+      None
+
+
+(** [get_saved_blason_by_extension conf base p ~self ext] retrieves a specific saved blason
+    by extension *)
+let get_saved_blason_by_extension conf base p ext =
+  let key = ImagePath.blason_key base p in
+  let dir = ImagePath.portrait_dir conf in
+  let saved_dir = Filename.concat dir "saved" in
+  let filename = key ^ ext in
+  let filepath = Filename.concat saved_dir filename in
+  
+  if Sys.file_exists filepath && not (Sys.is_directory filepath) then
+    if ext = ".url" then
+      try
+        let ic = open_in filepath in
+        let url = input_line ic in
+        close_in ic;
+        Some (ImageTypes.Url url)
+      with _ -> Some (ImageTypes.Path filepath)
+    else
+      Some (ImageTypes.Path filepath)
+  else
+    None

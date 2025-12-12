@@ -481,3 +481,87 @@ let dump_bad_image conf content =
   match List.assoc_opt "dump_bad_images" conf.base_env with
   | Some "yes" -> (try write_file "bad-image" content with Sys_error _ -> ())
   | _ -> ()
+  
+(* Comprehensive cleanup function for imageOps.ml *)
+(* Add this function to ImageOps module *)
+
+(** [clean_all_person_images dir key ~include_url] removes all image files
+    for a person key, regardless of extension.
+    
+    This is used before uploading a new portrait/blason to ensure no old
+    versions with different extensions are left behind.
+    
+    @param dir The directory containing the images
+    @param key The person key (e.g., "henri.0.gouraud" or "henri.0.gouraud.blason")
+    @param include_url If true, also removes .url files
+    @return List of files that were moved to saved *)
+let clean_all_person_images dir key ~include_url =
+  Logs.syslog `LOG_INFO
+    (Format.sprintf "[CLEANUP] Cleaning all images for key: %s in dir: %s" key dir);
+  
+  (* Extensions to check *)
+  let extensions_to_check =
+    if include_url then
+      Array.append ImageTypes.image_extensions [| ".url" |]
+    else
+      ImageTypes.image_extensions
+  in
+  
+  let moved_files = ref [] in
+  
+  (* Check each possible extension *)
+  Array.iter (fun ext ->
+    let filename = key ^ ext in
+    let filepath = Filename.concat dir filename in
+    
+    if Sys.file_exists filepath && not (Sys.is_directory filepath) then (
+      Logs.syslog `LOG_INFO
+        (Format.sprintf "[CLEANUP] Found existing file: %s" filename);
+      
+      (* Move to saved *)
+      if move_to_saved dir filename then (
+        moved_files := filename :: !moved_files;
+        Logs.syslog `LOG_INFO
+          (Format.sprintf "[CLEANUP] Moved to saved: %s" filename)
+      ) else (
+        Logs.syslog `LOG_ERR
+          (Format.sprintf "[CLEANUP] Failed to move: %s" filename)
+      )
+    )
+  ) extensions_to_check;
+  
+  (* Also check for .stop files (blasons) *)
+  let stop_file = key ^ ".stop" in
+  let stop_path = Filename.concat dir stop_file in
+  if Sys.file_exists stop_path then (
+    Logs.syslog `LOG_INFO
+      (Format.sprintf "[CLEANUP] Found .stop file: %s" stop_file);
+    if move_to_saved dir stop_file then (
+      moved_files := stop_file :: !moved_files;
+      Logs.syslog `LOG_INFO
+        (Format.sprintf "[CLEANUP] Moved .stop to saved: %s" stop_file)
+    )
+  );
+  
+  let count = List.length !moved_files in
+  if count > 0 then
+    Logs.syslog `LOG_INFO
+      (Format.sprintf "[CLEANUP] Moved %d file(s) to saved" count)
+  else
+    Logs.syslog `LOG_INFO
+      "[CLEANUP] No existing files found";
+  
+  !moved_files
+
+
+(** [clean_all_portraits dir person_key] removes all portrait files for a person.
+    This is a convenience wrapper around clean_all_person_images. *)
+let clean_all_portraits dir person_key =
+  clean_all_person_images dir person_key ~include_url:true
+
+
+(** [clean_all_blasons dir blason_key] removes all blason files for a person.
+    This is a convenience wrapper around clean_all_person_images. *)
+let clean_all_blasons dir blason_key =
+  clean_all_person_images dir blason_key ~include_url:true
+

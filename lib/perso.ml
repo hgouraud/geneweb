@@ -3591,28 +3591,28 @@ and eval_bool_person_field conf base env (p, p_auth) = function
       else Driver.get_first_names_aliases p <> []
   | "has_history" -> has_history conf base p p_auth
   (* Beware: lots of confusion between image and portrait *)
-  | "has_image" | "has_portrait" ->
-      Image.get_portrait conf base p |> Option.is_some
+  (* carrousel *)
   | "has_blason" -> Image.has_blason conf base p false
+  | "has_saved_blason" ->
+      Image.get_old_portrait_or_blason conf base "blasons" p |> Option.is_some
   | "has_blason_self" -> Image.has_blason conf base p true
   | "has_blason_stop" -> Image.has_blason_stop conf base p
-  | "has_image_url" | "has_portrait_url" -> (
+  | "has_portrait" | "has_image" -> Image.get_portrait conf base p |> Option.is_some
+  | "has_saved_portrait" | "has_old_image" ->
+      Image.get_old_portrait_or_blason conf base "portraits" p |> Option.is_some
+  | "has_portrait_url" | "has_image_url" -> (
       match Image.get_portrait conf base p with
       | Some (`Url _url) -> true
       | _ -> false)
-  | "has_c_image_url" -> (
-      match get_env "carrousel_img" env with
-      | Vstring s -> Image.is_url s
+  | "has_saved_portrait_url" | "has_old_image_url" -> (
+      match get_env "url" env with
+      | Vstring s -> s <> ""
       | _ -> false)
-  | "has_old_image_url" | "has_old_portrait_url" -> (
-      match Image.get_old_portrait_or_blason conf base "portraits" p with
-      | Some (`Url _url) -> true
+  | "has_carrousel_image_url" | "has_c_image_url" -> (
+      match get_env "url" env with
+      | Vstring s -> s <> ""
       | _ -> false)
-  (* carrousel *)
-  | "has_old_image" | "has_old_portrait" ->
-      Image.get_old_portrait_or_blason conf base "portraits" p |> Option.is_some
-  | "has_old_blason" ->
-      Image.get_old_portrait_or_blason conf base "blasons" p |> Option.is_some
+  (* end carrousel *)
   | "has_nephews_or_nieces" -> has_nephews_or_nieces conf base p
   | "has_nobility_titles" -> p_auth && Util.nobtit conf base p <> []
   | "has_notes" | "has_pnotes" ->
@@ -3878,59 +3878,18 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
         let sn = Driver.sou base (Driver.get_surname p) in
         let occ = Driver.get_occ p in
         HistoryDiff.history_file fn sn occ |> str_val
-  | "image" | "portrait" -> (
-      match Image.get_portrait conf base p with
-      | Some src -> Image.src_to_string src |> str_val
-      | None -> null_val)
-  | "old_image" | "old_portrait" -> (
-      match Image.get_old_portrait conf base p with
-      | Some (`Path s) -> str_val s
-      | Some (`Url u) -> str_val u
-      | None -> null_val)
-  | "image_html_url" | "portrait_html_url" ->
-      string_of_image_url conf base ep true false |> safe_val
-  | "image_size" | "portrait_size" ->
-      string_of_image_size conf base ep |> str_val
-  | "blason_size" -> string_of_blason_size conf base ep |> str_val
-  | "image_medium_size" | "portrait_medium_size" ->
-      string_of_image_medium_size conf base ep |> str_val
-  | "blason_medium_size" -> string_of_blason_medium_size conf base ep |> str_val
-  | "image_small_size" | "portrait_small_size" ->
-      string_of_image_small_size conf base ep |> str_val
-  | "blason_small_size" -> string_of_blason_small_size conf base ep |> str_val
-  | "blason_extra_small_size" ->
-      string_of_blason_extra_small_size conf base ep |> str_val
-  | "image_url" | "portrait_url" ->
-      string_of_image_url conf base ep false false |> safe_val
-  | "old_image_url" | "old_portrait_url" ->
-      string_of_image_url conf base ep false true |> safe_val
-  | "blason_url" -> string_of_blason_url conf base ep false false |> safe_val
-  | "old_blason_url" -> string_of_blason_url conf base ep false true |> safe_val
-  | "index" ->
-      Driver.get_iper p |> Driver.Iper.to_string |> Mutil.encode |> safe_val
-  | "carrousel" -> Image.default_image_filename "portraits" base p |> str_val
-  | "blason_carrousel" ->
-      Image.default_image_filename "blasons" base p |> str_val
-  | "carrousel_img_nbr" ->
-      string_of_int (List.length (Image.get_carrousel_imgs conf base p))
-      |> str_val
-  | "carrousel_old_img_nbr" ->
-      string_of_int (List.length (Image.get_carrousel_old_imgs conf base p))
-      |> str_val
-  | "carrousel_img_note" -> (
-      match get_env "carrousel_img_note" env with
-      | Vstring note -> str_val note
-      | _ -> raise Not_found)
-  | "carrousel_img_src" -> (
-      match get_env "carrousel_img_src" env with
-      | Vstring source -> str_val source
-      | _ -> raise Not_found)
+
+  (* carrousel *)
   | "blason" -> (
       match Image.get_blason conf base p false with
       | Some (`Path p) when Filename.extension p = ".stop" -> null_val
       | Some src -> Image.src_to_string src |> str_val
       | None -> null_val)
-  | "old_blason" -> (
+  | "blason_name" -> str_val (Image.get_blason_name conf base p)
+  | "blason_saved_name" -> str_val (Image.get_old_blason_name conf base p)
+  | "blason_stop_name" ->
+      str_val (Image.default_image_filename "blasons" base p ^ ".stop")
+  | "blason_saved" -> (
       match Image.get_old_blason conf base p false with
       | Some (`Path p) when Filename.extension p = ".stop" -> null_val
       | Some src -> Image.src_to_string src |> str_val
@@ -3940,18 +3899,126 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       | Some (`Path p) when Filename.extension p = ".stop" -> null_val
       | Some src -> Image.src_to_string src |> str_val
       | None -> null_val)
+  | "blason_small_size" -> string_of_blason_small_size conf base ep |> str_val
+  | "blason_extra_small_size" ->
+      string_of_blason_extra_small_size conf base ep |> str_val
+  | "blason_url" -> string_of_blason_url conf base ep false false |> safe_val
+  | "blason_saved_url" -> string_of_blason_url conf base ep false true |> safe_val
+  | "blason_size" -> string_of_blason_size conf base ep |> str_val
+  | "blason_medium_size" -> string_of_blason_medium_size conf base ep |> str_val
+  (* FIXME carrousel -> keydir *)
+  | "carrousel" -> Image.default_image_filename "portraits" base p |> str_val
+  | "carrousel_img_nbr" ->
+      string_of_int (List.length (Image.get_carrousel_imgs conf base p))
+      |> str_val
+  | "carrousel_img_note" -> (
+      match get_env "carrousel_img_note" env with
+      | Vstring note -> str_val note
+      | _ -> raise Not_found)
+  | "carrousel_img_src" -> (
+      match get_env "carrousel_img_src" env with
+      | Vstring source -> str_val source
+      | _ -> raise Not_found)
+  | "portrait" | "image" -> (
+      match Image.get_portrait conf base p with
+      | Some src -> Image.src_to_string src |> str_val
+      | None -> null_val)
+  | "portrait_saved" | "old_image" -> (
+      let _ = Logs.debug (fun k -> k  " ***** Portrait saved\n") in
+      let file = ImageAccess.get_old_portrait_name  conf base p in
+      str_val file)
+  | "portrait_html_url" | "image_html_url" ->
+      string_of_image_url conf base ep true false |> safe_val
+  | "portrait_size" | "image_size" ->
+      string_of_image_size conf base ep |> str_val
+  | "portrait_medium_size" | "image_medium_size" ->
+      string_of_image_medium_size conf base ep |> str_val
+  | "portrait_small_size" | "image_small_size" ->
+      string_of_image_small_size conf base ep |> str_val
+  | "portrait_url" | "image_url" ->
+      string_of_image_url conf base ep false false |> safe_val
+  | "portrait_saved_img_url" | "old_image_url" ->
+      string_of_image_url conf base ep false true |> safe_val
+  | "portrait_saved_img_store" ->
+    let res =
+      [!GWPARAM.src_d conf.bname; conf.bname;
+              (Format.sprintf "%s.%d.%s"
+								(Driver.p_first_name base p |> Name.lower)
+								(Driver.get_occ p)
+								(Driver.p_surname base p |> Name.lower))]
+    in
+    str_val (String.concat Filename.dir_sep res)
+  | "portrait_saved_img_nbr" ->
+      string_of_int (List.length (ImageAccess.list_all_saved_portraits conf base p))
+      |> str_val
+  | "portrait_saved_img" -> (
+      let l = ImageAccess.list_all_saved_portraits conf base p in
+      if l <> [] then
+        let cnt =
+          match get_env "img_cnt" env with
+          | Vint cnt -> cnt
+          | _ -> raise Not_found
+        in
+				if List.length l > 0 && List.length l >= cnt
+				then
+					let entry = List.nth l (cnt - 1) in
+					str_val entry.path
+				else null_val
+      else null_val)
+  | "portrait_saved_img_name" -> (
+      let l = ImageAccess.list_all_saved_portraits conf base p in
+      if l <> [] then
+        let cnt =
+          match get_env "img_cnt" env with
+          | Vint cnt -> cnt
+          | _ -> raise Not_found
+        in
+				if List.length l > 0 && List.length l >= cnt
+				then
+					let entry = List.nth l (cnt - 1) in
+					str_val entry.path
+				else null_val
+      else null_val)
+  | "portrait_saved_img_src" -> (
+      let l = ImageAccess.list_all_saved_portraits conf base p in
+      if l <> [] then
+        let cnt =
+          match get_env "img_cnt" env with
+          | Vint cnt -> cnt
+          | _ -> raise Not_found
+        in
+				if List.length l > 0 && List.length l >= cnt
+				then
+					let entry = List.nth l (cnt - 1) in
+					str_val entry.source
+				else null_val
+      else null_val)
+  | "portrait_saved_img_note" -> (
+      let l = ImageAccess.list_all_saved_portraits conf base p in
+      if l <> [] then
+        let cnt =
+          match get_env "img_cnt" env with
+          | Vint cnt -> cnt
+          | _ -> raise Not_found
+        in
+				if List.length l > 0 && List.length l >= cnt
+				then
+					let entry = List.nth l (cnt - 1) in
+					str_val entry.note
+				else null_val
+      else null_val)
+  
   | "portrait_name" -> str_val (Image.get_portrait_name conf base p)
-  | "blason_name" -> str_val (Image.get_blason_name conf base p)
-  | "old_portrait_name" -> str_val (Image.get_old_portrait_name conf base p)
-  | "old_blason_name" -> str_val (Image.get_old_blason_name conf base p)
-  | "blason_stop_name" ->
-      str_val (Image.default_image_filename "blasons" base p ^ ".stop")
+  | "portrait_saved_name" -> str_val (Image.get_old_portrait_name conf base p)
+  | "index" ->
+      Driver.get_iper p |> Driver.Iper.to_string |> Mutil.encode |> safe_val
   | "X" -> str_val Filename.dir_sep
   | "ext" -> (
       match p_getenv conf.env "file_name" with
       | Some f -> str_val (Filename.extension f)
       | None -> str_val "no_ext")
   (* end carrousel functions *)
+
   | "key" ->
       if hide_person conf base p then null_val
       else
@@ -5386,27 +5453,57 @@ let print_foreach conf base print_ast eval_expr =
     else ()
   in
 
-  (* carrousel *)
-  let print_foreach_img_in_carrousel env al ((p, _p_auth) as ep) old =
-    let l =
-      let l =
-        (if old then Image.get_carrousel_old_imgs else Image.get_carrousel_imgs)
-          conf base p
-      in
-      List.sort (fun (a, _, _, _) (b, _, _, _) -> String.compare a b) l
+  (* carrousel both *)
+  let print_foreach_carrousel_img env al ((p, _p_auth) as ep) saved =
+    let l = 
+      ImageAccess.get_carrousel_images conf base p ~saved:saved
+      |> List.sort (
+        fun (entry1 : ImageTypes.carrousel_entry)
+          (entry2 : ImageTypes.carrousel_entry) -> 
+            String.compare entry1.path entry2.path)
     in
     let rec loop first cnt = function
       | [] -> ()
-      | (name, url, src, note) :: l ->
+      | (entry : ImageTypes.carrousel_entry) :: l ->
           let env =
             Templ.Env.(
               env
-              |> add "carrousel_img" (Vstring (Filename.basename name))
-              |> add "carrousel_img_src" (Vstring src)
-              |> add "carrousel_img_note" (Vstring note)
+              |> add "carrousel_img" (Vstring (Filename.basename entry.path))
+              |> add "carrousel_img_src" (Vstring entry.source)
+              |> add "carrousel_img_note" (Vstring entry.note)
               |> add "first" (Vbool first)
               |> add "last" (Vbool (l = []))
-              |> add "url" (Vstring url) |> add "img_cnt" (Vint cnt))
+              |> add "url" (Vstring entry.url)
+              |> add "img_cnt" (Vint cnt))
+          in
+          List.iter (print_ast env ep) al;
+          loop false (cnt + 1) l
+    in
+    loop true 1 l
+  in
+
+  (* portraits saved *)
+  let print_foreach_portrait_saved_img env al ((p, _p_auth) as ep) =
+    let l =
+      ImageAccess.list_all_saved_portraits conf base p
+      |> List.sort (
+        fun (entry1 : ImageTypes.carrousel_entry)
+          (entry2 : ImageTypes.carrousel_entry) -> 
+          String.compare entry1.path entry2.path)
+    in
+    let rec loop first cnt = function
+      | [] -> ()
+      | (entry : ImageTypes.carrousel_entry) :: l ->
+          let env =
+            Templ.Env.(
+              env
+              |> add "portrait_saved_img" (Vstring (Filename.basename entry.path))
+              |> add "portrait_saved_img_src" (Vstring entry.source)
+              |> add "portrait_saved_img_note" (Vstring entry.note)
+              |> add "first" (Vbool first)
+              |> add "last" (Vbool (l = []))
+              |> add "url" (Vstring entry.url)
+              |> add "img_cnt" (Vint cnt))
           in
           List.iter (print_ast env ep) al;
           loop false (cnt + 1) l
@@ -5428,6 +5525,9 @@ let print_foreach conf base print_ast eval_expr =
     | "path" | "cous_path" -> print_foreach_cousin_path env el al ep false
     | "path_at_level" | "cous_path_at_level" ->
         print_foreach_cousin_path env el al ep true
+    | "carrousel_img" -> print_foreach_carrousel_img env al ep false
+    | "carrousel_saved_img" -> print_foreach_carrousel_img env al ep true
+    | "portrait_saved_img" -> print_foreach_portrait_saved_img env al ep
     | "cousin_level" -> print_foreach_cousin_level env al ep
     | "descendant" -> print_foreach_descendant env al ep false
     | "descendant_cnt" -> print_foreach_descendant env al ep true
@@ -5435,8 +5535,6 @@ let print_foreach conf base print_ast eval_expr =
     | "event" -> print_foreach_event env al ep
     | "family" -> print_foreach_family env al ini_ep ep
     | "first_name_alias" -> print_foreach_first_name_alias env al ep
-    | "img_in_carrousel" -> print_foreach_img_in_carrousel env al ep false
-    | "img_in_carrousel_old" -> print_foreach_img_in_carrousel env al ep true
     | "nobility_title" -> print_foreach_nobility_title env al ep
     | "nob_title" -> print_foreach_nob_title env al ep
     | "parent" -> print_foreach_parent env al ep

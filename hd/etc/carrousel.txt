@@ -73,7 +73,7 @@
     </samp>
   %elseif;(e.mode="blasons")<samp>
     %if;(e.em="SND_IMAGE_C_OK")
-      %portraits_store;%X;%carrousel;%X;%blason_name;
+      %portraits_store;%X;%keydir;%X;%blason_name;
     %elseif;(e.em="DEL_IMAGE_C_OK")
       %if;(e.delete="on")%portraits_store;%X;saved%X;%e.file_name;%else;%nn;
         %( attention, %blason_name; may be gone!! %)
@@ -158,7 +158,7 @@
           type="submit" disabled>[*send::]</button>
       </form>
       <div class="small mt-2">%nn;
-        %if;(has_blason and has_old_blason)[*previous::blason/blasons]0%end;
+        %if;(has_blason and has_saved_blason)[*previous::blason/blasons]0%end;
       </div>
       <div class="d-inline-flex">
         <h1 class="display-5">[*add image]</h1>
@@ -209,7 +209,7 @@
     </div>
     %( *** Col 2 *** image cache disabled with a kch=%random_bits; %)
     <div class="col-6">
-      %if;(has_portrait or has_old_portrait)
+      %if;(has_portrait or has_saved_portrait)
         <h1 class="display-5">[*portrait]0</h1>
         %if;has_portrait;
           <div class="d-flex mt-1">
@@ -232,29 +232,37 @@
               <i class="far fa-trash-can text-warning mr-1"></i>%nn;</a>
           </div>
         %end;
-        %if;has_old_portrait;
+
+      %if;(portrait_saved_img_nbr>0)
+        <div class="d-flex align-items-center">
+          <i class="fa fa-folder-open fa-lg text-warning mx-2" aria-hidden="true"></i>
+          <strong><samp class="text-truncate" title="%portrait_saved_img_store;">%portrait_saved_img_store;%X;</samp></strong>
+          <div class="ml-auto">(%portrait_saved_img_nbr;)</div>
+        </div>
+        %foreach;portrait_saved_img;
           <div class="d-flex">
             <a role="button"
-              href="%old_portrait_url;" target="_blank" rel="noopener"%sp;
+              href="%portrait_saved_img_url;" target="_blank" rel="noopener"%sp;
               data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<strong>[*see portrait]</strong><br><span class="small">%old_portrait;</span><br>
-                <img class="rounded my-1" src="%old_portrait_url;" width="185px">'>
+              title='<strong>[*see portrait]</strong><br><span class="small">%portrait_saved_img;</span><br>
+                <img class="rounded my-1" src="%portrait_saved_img_url;" width="185px">'>
               <i class="far fa-file-image fa-fw text-primary"></i></a>
-            <a role="button" href="%prefix;m=RESET_IMAGE_C_OK&i=%index;&mode=portraits&file_name=%old_portrait_name;"
+            <a role="button" href="%prefix;m=RESET_IMAGE_C_OK&i=%index;&mode=portraits&file_name=%portrait_saved_img_name;"
               title="[*restore portrait saved]">
               <i class="fa fa-retweet fa-rotate-90 fa-fw text-success"></i>%nn;</a>
-            %if;has_old_portrait_url;<strong><samp class="text-truncate">%old_portraits_store;%X;</samp></strong>%old_portrait_name;%else;
-            <strong><samp class="text-truncate">%old_portraits_store;%X;</samp></strong><samp>%old_portrait_name;%end;</samp>
+            %if;portrait_saved_img_has_url;<strong><samp class="text-truncate">%portrait_saved_img_store;%X;</samp></strong>%portrait_saved_img_name;%else;
+              <samp>%portrait_saved_img_name;%end;</samp>
             <a role="button" class="ml-auto"
-              href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=portraits&delete=on&file_name=%old_portrait_name;"
+              href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=portraits&delete=on&file_name=%portrait_saved_img_name;"
               data-toggle="tooltip" data-html="true" data-placement="left"
-              title='<i class="far fa-trash-can text-danger mr-1"></i><strong>[*delete saved portrait]0</strong><br><span class="small">%old_portrait;</span><br>
-                <img class="rounded my-1" src="%old_portrait_url;" width="185px">'>
+              title='<i class="far fa-trash-can text-danger mr-1"></i><strong>[*delete saved portrait]0</strong><br><span class="small">%portrait_saved_img;</span><br>
+                <img class="rounded my-1" src="%portrait_saved_img_url;" width="185px">'>
               <i class="far fa-trash-can text-danger"></i></a>
           </div>
         %end;
       %end;
-      %if;(has_blason or has_blason_stop or has_old_blason)
+
+      %if;(has_blason or has_blason_stop or has_saved_blason)
         <div class="d-flex justify-content-between">
           <h1 class="display-5">[*blason/blasons]0</h1>
           %reset_count;
@@ -328,7 +336,7 @@
               <i class="fa-solid fa-xmark fa-fw fa-xl text-danger"></i></a>
           </div>
         %end;
-        %if;has_old_blason;
+        %if;has_saved_blason;
           <div class="d-flex mt-1">
             <a role="button" href="%old_blason_url;"
               target="_blank" rel="noopener"
@@ -352,10 +360,10 @@
         <h1 class="display-5">[*image/images]1</h1>
         <div class="d-flex align-items-center">
           <i class="fa fa-folder-open fa-lg text-warning mx-2" aria-hidden="true"></i>
-          <strong><samp class="text-truncate" title="%images_store;%X;%carrousel;">%images_store;%X;%carrousel;%X;</samp></strong>
+          <strong><samp class="text-truncate" title="%images_store;%X;%keydir;">%images_store;%X;%keydir;%X;</samp></strong>
           <div class="ml-auto">(%carrousel_img_nbr;)</div>
         </div>
-        %foreach;img_in_carrousel;
+        %foreach;carrousel_img;
           <div class="d-flex mt-1">
             <a role="button" href="#" id="source_%img_cnt;"
               onclick='editImageNote(%img_cnt;, "%carrousel_img_raw;"); return false;'
@@ -370,7 +378,7 @@
               <i class="far fa-file-image fa-fw text-primary"></i></a>
             <a href="%prefix;m=IMAGE_TO_BLASON&i=%index;&mode=blasons&file_name=%carrousel_img;"
             title="[*copy image to blason]"><i class="fa fa-user-shield text-success"></i></a>
-            <samp class="text-truncate ml-1" title="%images_store;%X;%carrousel;%X;%carrousel_img_raw;">%carrousel_img_raw;</samp>
+            <samp class="text-truncate ml-1" title="%images_store;%X;%keydir;%X;%carrousel_img_raw;">%carrousel_img_raw;</samp>
             <div class="ml-auto">
               <a role="button"
                 href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=carrousel&file_name=%carrousel_img;"
@@ -384,16 +392,16 @@
           </div>
         %end;
       %end;
-      %if;(carrousel_old_img_nbr>0)
+      %if;(carrousel_saved_img_nbr>0)
         <h1 class="display-5">[*saved images]1</h1>
         <div class="d-flex align-items-center">
           <i class="fa fa-folder-open fa-lg text-warning mx-2" aria-hidden="true"></i>
-          <strong><samp class="text-truncate" title="%images_store;%X;%carrousel;%X;saved%X;">%images_store%X;%carrousel;%X;saved%X;</samp></strong>
-          <div class="ml-auto">(%carrousel_old_img_nbr;)</div>
+          <strong><samp class="text-truncate" title="%images_store;%X;%keydir;%X;saved%X;">%images_store%X;%keydir;%X;saved%X;</samp></strong>
+          <div class="ml-auto">(%carrousel_saved_img_nbr;)</div>
         </div>
-        %foreach;img_in_carrousel_old;
+        %foreach;carrousel_saved_img;
           <div class="d-flex mt-1">
-            <a role="button" href="#" id="source_old_%img_cnt;"
+            <a role="button" href="#" id="source_saved_%img_cnt;"
               onclick='editImageNote(%img_cnt;, "%carrousel_img_raw;"); return false;'
               data-source="%carrousel_img_src;" data-note="%carrousel_img_note;"
               data-toggle="tooltip" data-html="true" data-placement="left"
@@ -408,7 +416,7 @@
                data-toggle="tooltip" data-html="true" data-placement="top"
                title="[*restore image saved]">
               <i class="fa fa-retweet fa-rotate-90 fa-fw text-success"></i></a>
-            <samp class="text-truncate ml-1" title="%images_store;%X;%carrousel;%X;saved%X;%carrousel_img_raw;">%carrousel_img_raw;</samp>
+            <samp class="text-truncate ml-1" title="%images_store;%X;%keydir;%X;saved%X;%carrousel_img_raw;">%carrousel_img_raw;</samp>
             <a role="button" class="ml-auto"
                 href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=carrousel&delete=on&file_name=%carrousel_img;"
                 data-toggle="tooltip" data-html="true" data-placement="left"

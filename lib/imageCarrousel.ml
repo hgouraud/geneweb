@@ -126,18 +126,18 @@ let parse_multipart_content file_content =
   (request, (content :> string) ^ remaining)
 
 (** [validate_image_content conf base p content] validates and extracts
-    image data, checking format and size limits *)
+    image data, checking img_format and size limits *)
 let validate_image_content conf base p content =
   match ImageOps.detect_image_type content with
   | None ->
       ImageOps.dump_bad_image conf content;
       None
-  | Some format -> (
-      let content = ImageOps.extract_clean_content content format in
+  | Some img_format -> (
+      let content = ImageOps.extract_clean_content content img_format in
       match get_max_image_size conf with
       | Some max_len when String.length content > max_len ->
           error_too_big_image conf base p (String.length content) max_len
-      | _ -> Some (format, content))
+      | _ -> Some (img_format, content))
 
 (* ========================================================================== *)
 (* UI generation - Forms                                                      *)
@@ -170,7 +170,7 @@ let print_send_image conf base mode p =
       Output.print_sstring conf (transl conf ":");
       Output.print_sstring conf " ";
       Output.print_string conf (escape_html (Driver.p_first_name base p));
-      Output.print_sstring conf (Format.sprintf ".%d " (Driver.get_occ p));
+      Output.print_sstring conf (Printf.sprintf ".%d " (Driver.get_occ p));
       Output.print_string conf (escape_html (Driver.p_surname base p)))
   in
   Hutil.header conf title;
@@ -259,39 +259,17 @@ let print_deleted conf base p =
 (* Effective operations - Send                                                *)
 (* ========================================================================== *)
 
-let effective_send_ok conf base p file =
-  let mode = get_mode conf in
-  let _request, content = parse_multipart_content file in
-  match validate_image_content conf base p content with
-  | None ->
-      Mutil.extract_param "content-type: " '\n' []
-      |> incorrect_content_type conf base p
-  | Some (format, content) ->
-      let key = ImagePath.person_key base p in
-      let dir =
-        if mode = "portraits" || mode = "blasons" then
-          ImagePath.portrait_dir conf
-        else ImagePath.carrousel_dir conf
-      in
-      ImageOps.ensure_dir dir;
-      let filename =
-        if mode = "portraits" || mode = "blasons" then
-          key ^ extension_of_format format
-        else key
-      in
-      let filepath = Filename.concat dir filename in
-      let _ = ImageOps.move_to_saved dir filename in
-      ImageOps.write_file filepath content;
-      let changed =
-        U_Send_image
-          (string_gen_person base (Driver.gen_person_of_person p))
-      in
-      History.record conf base changed "si";
-      print_sent conf base p
+(* Refactored image send/upload functions for imageCarrousel.ml *)
+(* Merges effective_send_ok and effective_send_c_ok *)
+(* Replaces lines 262-290 and 292-390 *)
 
-(** [effective_send_c_ok conf base p file file_name] handles carrousel
-    image upload with support for URLs, notes, and sources *)
-let effective_send_c_ok conf base p file file_name =
+(** [do_send_image conf base p file file_name] performs the actual image upload.
+    This is the core upload logic shared by both old and new interfaces.
+    
+    @param file The uploaded file content
+    @param file_name The target filename (can be empty for portraits/blasons)
+    @return the filename that was created *)
+let do_send_image conf base p file file_name =
   let mode = get_mode conf in
   let mode_typed = get_mode_typed conf in
   let image_url = get_image_url conf in
@@ -303,14 +281,32 @@ let effective_send_c_ok conf base p file file_name =
   in
   let note = get_note conf in
   let source = get_source conf in
+  
+  Logs.syslog `LOG_INFO
+    (Printf.sprintf "[SEND_DEBUG] mode='%s' file_name='%s' image_url='%s' image_name='%s'"
+      mode file_name image_url image_name);
+  
   (* Parse content if not a URL or note/source only submission *)
   let format_and_content =
     if mode = "note" || mode = "source" || image_url <> "" then None
     else
       let _request, content = parse_multipart_content file in
       if content = "" then None
-      else validate_image_content conf base p content
+      else (
+        match validate_image_content conf base p content with
+        | None ->
+            Logs.syslog `LOG_ERR
+              "[SEND_DEBUG] Invalid image content";
+            (* Extract content-type for error message *)
+            let ct = Mutil.extract_param "content-type: " '\n' [] in
+            incorrect_content_type conf base p ct
+        | Some (img_format, content) ->
+            Logs.syslog `LOG_INFO
+              (Printf.sprintf "[SEND_DEBUG] Valid image: format=%s size=%d"
+                (extension_of_format img_format) (String.length content));
+            Some (img_format, content))
   in
+  
   let keydir = ImagePath.person_key base p in
   let dir =
     match mode_typed with
@@ -318,55 +314,104 @@ let effective_send_c_ok conf base p file file_name =
     | Carrousel -> Filename.concat (ImagePath.carrousel_dir conf) keydir
   in
   ImageOps.ensure_dir dir;
+  
+  Logs.syslog `LOG_INFO
+    (Printf.sprintf "[SEND_DEBUG] Base dir='%s'" dir);
+  
   (* Determine filename and handle existing files *)
   let filename =
     match (mode_typed, format_and_content) with
-    | (Portrait | Blason), Some (format, _) ->
-        keydir ^ extension_of_format format
-    | _ -> file_name
+    | (Portrait | Blason), Some (img_format, _) ->
+        (* For portraits/blasons, filename is person_key + extension *)
+        let fname = keydir ^ extension_of_format img_format in
+        Logs.syslog `LOG_INFO
+          (Printf.sprintf "[SEND_DEBUG] Portrait/blason filename: %s" fname);
+        fname
+    | _ ->
+        (* For carrousel or when no file, use provided filename *)
+        Logs.syslog `LOG_INFO
+          (Printf.sprintf "[SEND_DEBUG] Using provided filename: %s" file_name);
+        file_name
   in
+  
   (* Move pre-existing file to saved for portraits/blasons *)
   (match mode_typed with
   | Portrait | Blason -> (
+      Logs.syslog `LOG_INFO
+        "[SEND_DEBUG] Checking for existing portrait/blason";
       let existing =
         if mode = "portraits" then ImageAccess.get_portrait conf base p
         else ImageAccess.get_blason conf base p ~self:true
       in
       match existing with
       | Some (Path path) ->
+          Logs.syslog `LOG_INFO
+            (Printf.sprintf "[SEND_DEBUG] Found existing file: %s, moving to saved" path);
           if not (ImageOps.move_to_saved dir (Filename.basename path)) then
-            incorrect conf "effective send (portrait/blason)"
+            incorrect conf "Failed to move existing portrait/blason to saved"
       | Some (Url url) ->
+          Logs.syslog `LOG_INFO
+            (Printf.sprintf "[SEND_DEBUG] Found existing URL: %s, saving to saved/" url);
           let key =
             if mode = "portraits" then ImagePath.person_key base p
             else ImagePath.blason_key base p
           in
           let _ = ImageOps.save_url_to_file conf mode_typed base p url in
           ignore key
-      | None -> ())
+      | None ->
+          Logs.syslog `LOG_INFO
+            "[SEND_DEBUG] No existing portrait/blason")
   | Carrousel ->
-      if Option.is_some format_and_content && Sys.file_exists (Filename.concat dir filename) then
-        if not (ImageOps.move_to_saved dir filename) then
-          incorrect conf "effective send (image)");
+      (* For carrousel, only move if we're uploading a file with same name *)
+      if Option.is_some format_and_content then (
+        let existing_path = Filename.concat dir filename in
+        if Sys.file_exists existing_path then (
+          Logs.syslog `LOG_INFO
+            (Printf.sprintf "[SEND_DEBUG] Found existing carrousel image: %s, moving to saved"
+              filename);
+          if not (ImageOps.move_to_saved dir filename) then
+            incorrect conf "Failed to move existing carrousel image to saved"
+        ) else
+          Logs.syslog `LOG_INFO
+            "[SEND_DEBUG] No existing carrousel image with same name"
+      ));
+  
   (* Write the file *)
   let final_filename =
     if image_url <> "" then Filename.concat dir (image_name ^ ".url")
     else Filename.concat dir filename
   in
+  
+  Logs.syslog `LOG_INFO
+    (Printf.sprintf "[SEND_DEBUG] Final filename: %s" final_filename);
+  
   (match format_and_content with
-  | Some (_, content) -> ImageOps.write_file final_filename content
-  | None when image_url <> "" -> ImageOps.write_file final_filename image_url
-  | None -> ());
+  | Some (_, content) ->
+      Logs.syslog `LOG_INFO
+        (Printf.sprintf "[SEND_DEBUG] Writing image file: %d bytes" (String.length content));
+      ImageOps.write_file final_filename content
+  | None when image_url <> "" ->
+      Logs.syslog `LOG_INFO
+        (Printf.sprintf "[SEND_DEBUG] Writing URL file: %s" image_url);
+      ImageOps.write_file final_filename image_url
+  | None ->
+      Logs.syslog `LOG_INFO
+        "[SEND_DEBUG] No file to write (note/source only)");
+  
   (* Write note if provided *)
-  if note <> Adef.safe "" then
-    ImageOps.write_file
-      (Filename.remove_extension final_filename ^ ".txt")
-      (note :> string);
+  if note <> Adef.safe "" then (
+    let note_file = Filename.remove_extension final_filename ^ ".txt" in
+    Logs.syslog `LOG_INFO
+      (Printf.sprintf "[SEND_DEBUG] Writing note file: %s" note_file);
+    ImageOps.write_file note_file (note :> string));
+  
   (* Write source if provided *)
-  if source <> Adef.safe "" then
-    ImageOps.write_file
-      (Filename.remove_extension final_filename ^ ".src")
-      (source :> string);
+  if source <> Adef.safe "" then (
+    let source_file = Filename.remove_extension final_filename ^ ".src" in
+    Logs.syslog `LOG_INFO
+      (Printf.sprintf "[SEND_DEBUG] Writing source file: %s" source_file);
+    ImageOps.write_file source_file (source :> string));
+  
   (* Record history *)
   let changed =
     U_Send_image (string_gen_person base (Driver.gen_person_of_person p))
@@ -387,7 +432,29 @@ let effective_send_c_ok conf base p file file_name =
     | _ -> "s?"
   in
   History.record conf base changed history_code;
-  file_name
+  
+  Logs.syslog `LOG_INFO
+    (Printf.sprintf "[SEND_DEBUG] Upload completed successfully: history_code=%s" history_code);
+  
+  (* Return filename for caller *)
+  filename
+
+
+(** [effective_send_ok conf base p file] handles old-style image upload (SEND_IMAGE_OK).
+    Uses core upload logic, then displays success page.
+    This maintains backward compatibility with old interface. *)
+let effective_send_ok conf base p file =
+  let _filename = do_send_image conf base p file "" in
+  (* Display success page (old interface expects this) *)
+  print_sent conf base p
+
+
+(** [effective_send_c_ok conf base p file file_name] handles new-style image upload (SND_IMAGE_C_OK).
+    Uses core upload logic, then returns the filename.
+    
+    @return the filename that was created *)
+let effective_send_c_ok conf base p file file_name =
+  do_send_image conf base p file file_name
 
 (* ========================================================================== *)
 (* Effective operations - Delete                                              *)
