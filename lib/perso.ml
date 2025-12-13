@@ -3600,6 +3600,10 @@ and eval_bool_person_field conf base env (p, p_auth) = function
   | "has_portrait" | "has_image" -> Image.get_portrait conf base p |> Option.is_some
   | "has_saved_portrait" | "has_old_image" ->
       Image.get_old_portrait_or_blason conf base "portraits" p |> Option.is_some
+  | "has_carrousel" ->
+      Image.get_old_portrait_or_blason conf base "portraits" p |> Option.is_some
+  | "has_saved_carrousel" ->
+      Image.get_old_portrait_or_blason conf base "portraits" p |> Option.is_some
   | "has_portrait_url" | "has_image_url" -> (
       match Image.get_portrait conf base p with
       | Some (`Url _url) -> true
@@ -3909,7 +3913,10 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
   (* FIXME carrousel -> keydir *)
   | "carrousel" -> Image.default_image_filename "portraits" base p |> str_val
   | "carrousel_img_nbr" ->
-      string_of_int (List.length (Image.get_carrousel_imgs conf base p))
+			string_of_int (List.length (ImageAccess.get_carrousel_images conf base p ~saved:false))
+      |> str_val
+  | "carrousel_saved_img_nbr" ->
+			string_of_int (List.length (ImageAccess.get_carrousel_images conf base p ~saved:true))
       |> str_val
   | "carrousel_img_note" -> (
       match get_env "carrousel_img_note" env with
@@ -3941,11 +3948,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       string_of_image_url conf base ep false true |> safe_val
   | "portrait_saved_img_store" ->
     let res =
-      [!GWPARAM.src_d conf.bname; conf.bname;
-              (Format.sprintf "%s.%d.%s"
-								(Driver.p_first_name base p |> Name.lower)
-								(Driver.get_occ p)
-								(Driver.p_surname base p |> Name.lower))]
+      [!GWPARAM.portraits_d conf.bname; "saved"]
     in
     str_val (String.concat Filename.dir_sep res)
   | "portrait_saved_img_nbr" ->
