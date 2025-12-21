@@ -836,6 +836,8 @@
             %end;
           </ol>
         %elseif(e.siblings="on" and ancestor.is_female and nb_children>0)
+        %( This requires Sosa to be turned on! Computing with %ancestor.nbr;
+           wont do it if there are gaps in the ancestors %)
           %let;tmp;%expr(ancestor.anc_sosa - 1)%in;
           %if;(tmp=family.f_sosa)
             %apply;havingchildren(nb_children)[:] [see above]

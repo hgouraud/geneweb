@@ -2674,6 +2674,10 @@ and eval_cell_field_var conf base env cell loc = function
   | _ -> raise Not_found
 
 and eval_ancestor_field_var conf base env gp loc = function
+  | [ "cnt" ] -> (
+      match get_env "cnt" env with
+      | Vint cnt -> VVstring (string_of_int cnt)
+      | _ -> VVstring "")
   | "family" :: sl -> (
       match gp with
       | GP_person (_, ip, Some ifam) ->
@@ -2716,6 +2720,10 @@ and eval_ancestor_field_var conf base env gp loc = function
           let n = Sosa.twice n in
           VVstring (parent_sosa conf base ip all_gp n Driver.get_father)
       | _ -> null_val)
+  | [ "first" ] -> (
+      match get_env "first" env with
+      | Vbool first -> VVbool first
+      | _ -> VVbool false)
   | "interval" :: sl -> (
       let to_string x = eval_sosa conf x sl in
       match gp with
@@ -2730,6 +2738,10 @@ and eval_ancestor_field_var conf base env gp loc = function
           VVstring (to_string n1 ^ "-" ^ to_string n2 ^ " = ...")
       | GP_interv None -> VVstring "..."
       | GP_person _ | GP_same _ | GP_missing _ -> null_val)
+  | [ "last" ] -> (
+      match get_env "last" env with
+      | Vbool last -> VVbool last
+      | _ -> VVbool false)
   | [ "mother_sosa" ] -> (
       match (gp, get_env "all_gp" env) with
       | (GP_person (n, ip, _) | GP_same (n, _, ip)), Vallgp all_gp ->
@@ -4546,7 +4558,7 @@ let print_foreach conf base print_ast eval_expr =
   let print_foreach_ascendant env al ep =
     match get_env "gpl" env with
     | Vgpl gpl ->
-        let rec loop first gpl =
+        let rec loop first gpl cnt =
           match gpl with
           | [] -> ()
           | gp :: gl ->
@@ -4558,12 +4570,13 @@ let print_foreach conf base print_ast eval_expr =
                       env |> add "ancestor" (Vanc gp)
                       |> add "first" (Vbool first)
                       |> add "last" (Vbool (gl = []))
+                      |> add "cnt" (Vint cnt)
                       |> add "mode" (Vstring "Vgpl"))
                   in
                   List.iter (print_ast env ep) al);
-              loop false gl
+              loop false gl (cnt + 1)
         in
-        loop true gpl
+        loop true gpl 0
     | _ -> ()
   in
 
