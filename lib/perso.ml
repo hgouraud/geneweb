@@ -4286,6 +4286,8 @@ and eval_family_field_var conf base env
   | [ "sep_date_s" ] | [ "sep_dates" ] ->
       VVstring
         (DateDisplay.short_family_dates_text conf base false fam :> string)
+  | [ "f_sosa" ] -> (
+      match get_env "f_sosa" env with Vstring s -> str_val s | _ -> null_val)
   | [ s ] -> str_val (eval_str_family_field env fcd s)
   | _ -> raise Not_found
 
@@ -5016,6 +5018,9 @@ let print_foreach conf base print_ast eval_expr =
           let ifam = (Driver.get_family p).(i) in
           let fam = Driver.foi base ifam in
           let ifath = Driver.get_father fam in
+          let f_sosa =
+            SosaCache.get_sosa_person (Driver.poi base ifath) |> Sosa.to_string
+          in
           let imoth = Driver.get_mother fam in
           let ispouse = Gutil.spouse (Driver.get_iper p) fam in
           let cpl = (ifath, imoth, ispouse) in
@@ -5023,10 +5028,12 @@ let print_foreach conf base print_ast eval_expr =
             authorized_age conf base (pget conf base ifath)
             && authorized_age conf base (pget conf base imoth)
           in
-
           let vfam = Vfam (ifam, fam, cpl, m_auth) in
           let env =
-            Templ.Env.(env |> add "fam" vfam |> add "family_cnt" (Vint (i + 1)))
+            Templ.Env.(
+              env |> add "fam" vfam
+              |> add "family_cnt" (Vint (i + 1))
+              |> add "f_sosa" (Vstring f_sosa))
           in
           let env =
             match prev with
