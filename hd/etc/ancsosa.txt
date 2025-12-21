@@ -236,6 +236,10 @@
   %apply;somebody_extra_info("xx")
 %end;
 
+%define;just_somebody(xx)
+  <b>%apply;my_link(xx.access, xx, xx.is_restricted, xx.index)</b>%nn;
+%end;
+
 %define;somebody_spouse_parent(xx)
   <b>%apply;my_link(spouse.xx.access, spouse.xx, spouse.is_restricted, spouse.index)</b>%nn;
   %if;spouse.xx.has_nobility_titles;,
@@ -270,7 +274,7 @@
     %elseif;are_not_married;[relationship%t to:::date_place]0%nn;
     %elseif;are_engaged;[engaged%t to:::date_place]0%nn;
     %elseif;is_no_sexes_check;[relationship%t to:::date_place]0%nn;
-    %elseif;are_pacs;[pacs%t to:::date_place]%nn;
+    %elseif;are_pacs;[pacs%t to:::date_place]0%nn;
     %elseif;is_no_mention;date_place [with]%nn;
     %end;
   %else;
@@ -278,7 +282,7 @@
     %elseif;are_not_married;[relationship%t to:::date_place]1%nn;
     %elseif;are_engaged;[engaged%t to:::date_place]1%nn;
     %elseif;is_no_sexes_check;[relationship%t to:::date_place]1%nn;
-    %elseif;are_pacs;[pacs%t to:::date_place]%nn;
+    %elseif;are_pacs;[pacs%t to:::date_place]1%nn;
     %elseif;is_no_mention;date_place [with]%nn;
     %end;
   %end;
@@ -585,7 +589,7 @@
              and ancestor.same="")
           <div class="shadow p-3">
           <dt><b><a href="#%ancestor.anc_sosa.v;" name="notes-%ancestor.anc_sosa.v;">%ancestor.anc_sosa;</a></b>
-          %apply;letter(child_cnt)</b></a> <span class="small text-muted">(%ancestor;%ancestor.dates;)</span></dt>
+          </a> <span class="small text-muted">(%ancestor;%ancestor.dates;)</span></dt>
           <dd>
           %if;(e.notes = "on" and (ancestor.has_notes or ancestor.has_event))
             <table><tr><td>
@@ -811,7 +815,7 @@
   %end;
 %end;
 
-%define;long_display_ancestor_families()
+%define;long_display_ancestor_families(father_index)
   %foreach;ancestor.family;
       <div class="mt-1 mb-3 ml-4 mr-2 px-3 py-2 shadow">…
         %apply;married_to%with;%ancestor.is_male;%and;
@@ -825,7 +829,11 @@
             %apply;link2(witness.var, witness.index)
           %end;)
         %end;
-        <div>%apply;somebody("spouse").</div>
+        %if;(father_index=family.father.index)
+          <div>%apply;just_somebody("spouse")</div>
+        %else;
+          <div>%apply;somebody("spouse").</div>
+        %end;
         %if(e.siblings="on" and ancestor.is_male and nb_children>0)
           %apply;havingchildren(nb_children)[:]
           <ol type="a" class="mt-1">
@@ -836,10 +844,7 @@
             %end;
           </ol>
         %elseif(e.siblings="on" and ancestor.is_female and nb_children>0)
-        %( This requires Sosa to be turned on! Computing with %ancestor.nbr;
-           wont do it if there are gaps in the ancestors %)
-          %let;tmp;%expr(ancestor.anc_sosa - 1)%in;
-          %if;(tmp=family.f_sosa)
+          %if;(father_index=family.father.index)
             %apply;havingchildren(nb_children)[:] [see above]
           %else
               %apply;havingchildren(nb_children)[:]
@@ -1295,6 +1300,10 @@ TODO: obtenir les secondes valeurs valeurs jj/mm/aaaa pour les cas « ou | » 
   %end;
 %end;
 
+%define;set_father_index(xxx)
+  %set_var.father_index.xxx;
+%end;
+
 %( Main %)
 %if;(e.templ!="templm")
 <h1 class="h3 mt-3%if;not cancel_links; ml-2%end;">%nn;
@@ -1665,7 +1674,7 @@ TODO: obtenir les secondes valeurs valeurs jj/mm/aaaa pour les cas « ou | » 
             <b><a name="%ancestor.anc_sosa.v;">%ancestor.anc_sosa;</a></b>
             %apply;long_display_ancestor_personal()
           %if;(ancestor.index!=self.index or true)
-            <p>%apply;long_display_ancestor_families()</p>
+            <p>%apply;long_display_ancestor_families(0)</p>
           %end;
         %end;
       %end;
@@ -1682,13 +1691,17 @@ TODO: obtenir les secondes valeurs valeurs jj/mm/aaaa pour les cas « ou | » 
     %foreach;ancestor_level(nb_gen)
       %if;(level>0)<h4 class="mt-3">[*generation/generations]0 %level;</h4>%end;
       %foreach;ancestor;
+        %if;(ancestor.is_male)
+          %apply;set_father_index(ancestor.index)
+        %end;
         %if;(ancestor.same!="")
           <b><a name="%ancestor.anc_sosa.v;">%ancestor.anc_sosa;.</a></b>[:]
           [see] <b><a href="#%ancestor.same.v;">%ancestor.same;</a></b>.
         %else;
           <b><a name="%ancestor.anc_sosa.v;">%ancestor.anc_sosa;.</a></b>
+          %let;tmp;%get_var.father_index;%in;
           %apply;long_display_ancestor_personal()
-          <div class="my-1">%apply;long_display_ancestor_families()</div>
+          <div class="my-1">%apply;long_display_ancestor_families(tmp)</div>
         %end;
       %end;
     %end;
