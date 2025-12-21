@@ -12310,6 +12310,10 @@ sl: se je poročil ko je imel %t/se je poročila ko je imela %t
 sv: gift vid %t ålder
 tr: %t yaşında evlendi
 
+    pacs%t to
+en: pacs%t with
+fr: pacsé%t avec/pacsée%t avec
+
     married%t to
 af: getroud met %t
 bg: встъпва в брак%t с
