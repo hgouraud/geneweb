@@ -61,36 +61,55 @@ let make_gzip_output_conf ~level request =
             if !flushed then ()
             else begin
               flushed := true;
-              let body = Buffer.contents body_buf in
-              let body_len = String.length body in
-              let final_body, is_gzipped =
-                if !is_compressible && body_len > gzip_min_size then
-                  try
-                    let compressed = My_gzip.gzip_string ~level body in
-                    if String.length compressed < body_len then
-                      (compressed, true)
-                    else (body, false)
-                  with _ -> (body, false)
-                else (body, false)
-              in
               let oc = Wserver.woc () in
-              let status_line = Wserver.string_of_status !status_ref in
-              if not !Wserver.cgi then
-                Printf.fprintf oc "HTTP/1.0 %s\r\n" status_line
-              else Printf.fprintf oc "Status: %s\r\n" status_line;
-              if is_gzipped then begin
-                output_string oc "Content-Encoding: gzip\r\n";
-                output_string oc "Vary: Accept-Encoding\r\n"
-              end;
-              Printf.fprintf oc "Content-Length: %d\r\n"
-                (String.length final_body);
-              let headers = Buffer.contents headers_buf in
-              output_string oc headers;
-              output_string oc "\r\n";
-              output_string oc final_body;
-              flush oc;
-              Buffer.clear body_buf;
-              Buffer.clear headers_buf
+              try
+                let body = Buffer.contents body_buf in
+                let body_len = String.length body in
+                let final_body, is_gzipped =
+                  if !is_compressible && body_len > gzip_min_size then
+                    try
+                      let compressed = My_gzip.gzip_string ~level body in
+                      if String.length compressed < body_len then
+                        (compressed, true)
+                      else (body, false)
+                    with _ -> (body, false)
+                  else (body, false)
+                in
+                let status_line = Wserver.string_of_status !status_ref in
+                if not !Wserver.cgi then
+                  Printf.fprintf oc "HTTP/1.0 %s\r\n" status_line
+                else Printf.fprintf oc "Status: %s\r\n" status_line;
+                if is_gzipped then begin
+                  output_string oc "Content-Encoding: gzip\r\n";
+                  output_string oc "Vary: Accept-Encoding\r\n"
+                end;
+                Printf.fprintf oc "Content-Length: %d\r\n"
+                  (String.length final_body);
+                let headers = Buffer.contents headers_buf in
+                output_string oc headers;
+                output_string oc "\r\n";
+                output_string oc final_body;
+                flush oc;
+                Buffer.clear body_buf;
+                Buffer.clear headers_buf
+              with e ->
+                (* Emergency fallback: ensure we send a valid HTTP response
+                   even if an error occurred during body processing *)
+                (try
+                  let error_msg = "Internal server error during response generation" in
+                  let status_line = Wserver.string_of_status Def.Internal_Server_Error in
+                  if not !Wserver.cgi then
+                    Printf.fprintf oc "HTTP/1.0 %s\r\n" status_line
+                  else Printf.fprintf oc "Status: %s\r\n" status_line;
+                  Printf.fprintf oc "Content-Type: text/plain; charset=utf-8\r\n";
+                  Printf.fprintf oc "Content-Length: %d\r\n" (String.length error_msg);
+                  Printf.fprintf oc "\r\n";
+                  output_string oc error_msg;
+                  flush oc
+                with _ -> ());
+                Buffer.clear body_buf;
+                Buffer.clear headers_buf;
+                raise e
             end);
       }
 
@@ -1711,6 +1730,12 @@ let conf_and_connection =
               if Printexc.backtrace_status () then
                 Logs.err (fun k -> k "Backtrace:@ %s" bt)
             in
+            let ensure_response_sent () =
+              (* Ensure the output configuration's flush is called
+                 to guarantee a valid HTTP response is sent *)
+              try Output.flush conf
+              with _ -> ()
+            in
             try
               let t1 = Unix.gettimeofday () in
               Request.treat_request conf;
@@ -1722,13 +1747,30 @@ let conf_and_connection =
                       (context conf contents : Adef.encoded_string :> string)
                       (t2 -. t1))
             with
-            | Exit -> ()
+            | Exit -> ensure_response_sent ()
             | Def.HttpExn (code, _) as exn ->
                 let bt = Printexc.get_backtrace () in
-                GWPARAM.output_error conf code;
+                (try GWPARAM.output_error conf code
+                 with _ ->
+                   (* Fallback error response if output_error fails *)
+                   try
+                     Output.status conf Def.Internal_Server_Error;
+                     Output.header conf "Content-type: text/plain; charset=utf-8";
+                     Output.print_sstring conf "Internal server error";
+                     ()
+                   with _ -> ());
+                ensure_response_sent ();
                 printexc bt exn
             | exn ->
                 let bt = Printexc.get_backtrace () in
+                (* Attempt to send a minimal error response *)
+                (try
+                   Output.status conf Def.Internal_Server_Error;
+                   Output.header conf "Content-type: text/plain; charset=utf-8";
+                   Output.print_sstring conf "Internal server error";
+                   ()
+                 with _ -> ());
+                ensure_response_sent ();
                 printexc bt exn))
 
 let chop_extension name =
