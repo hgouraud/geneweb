@@ -80,7 +80,7 @@ let http status =
       output_string !wserver_oc "Status: ";
       output_string !wserver_oc answer)
     else (
-      output_string !wserver_oc "HTTP/1.0 ";
+      output_string !wserver_oc "HTTP/1.1 ";
       output_string !wserver_oc answer);
     printnl ())
 

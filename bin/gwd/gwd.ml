@@ -77,7 +77,7 @@ let make_gzip_output_conf ~level request =
                 in
                 let status_line = Wserver.string_of_status !status_ref in
                 if not !Wserver.cgi then
-                  Printf.fprintf oc "HTTP/1.0 %s\r\n" status_line
+                  Printf.fprintf oc "HTTP/1.1 %s\r\n" status_line
                 else Printf.fprintf oc "Status: %s\r\n" status_line;
                 if is_gzipped then begin
                   output_string oc "Content-Encoding: gzip\r\n";
@@ -99,7 +99,7 @@ let make_gzip_output_conf ~level request =
                   let error_msg = "Internal server error during response generation" in
                   let status_line = Wserver.string_of_status Def.Internal_Server_Error in
                   if not !Wserver.cgi then
-                    Printf.fprintf oc "HTTP/1.0 %s\r\n" status_line
+                    Printf.fprintf oc "HTTP/1.1 %s\r\n" status_line
                   else Printf.fprintf oc "Status: %s\r\n" status_line;
                   Printf.fprintf oc "Content-Type: text/plain; charset=utf-8\r\n";
                   Printf.fprintf oc "Content-Length: %d\r\n" (String.length error_msg);
