@@ -7491,6 +7491,14 @@ ru: демобилизация
 sv: demobilisering
 tr: terhis
 
+    depth
+en: depth
+fr: profondeur
+
+    depth_help
+en: maximum depth when searching for ascendants/descendants
+fr: profondeur maximum pour la recherche d'ascendants/descendants
+
     descendant tree view
 co: arburiscenza discendente
 de: Ansicht Nachfahren-Baum

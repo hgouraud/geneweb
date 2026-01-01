@@ -321,10 +321,14 @@ let rec eval_var conf base env _xx _loc = function
   (* person_index.1 -> i1=, p1=, n1=, oc1= *)
   (* person_index.2 -> i2=, p2=, n2=, oc2= *)
   (* person_index.e -> ei=, ep=, en=, eoc= *)
+  (* person_index.select -> pn, p, n from url *)
   (* same thing in perso.ml, but differences! *)
   | [ "person_index"; x; sl ] -> (
       let find_person =
-        match x with "e" -> find_person_in_env_pref | _ -> find_person_in_env
+        match x with
+        | "e" -> find_person_in_env_pref
+        | "select" -> find_person_from_url
+        | _ -> find_person_in_env
       in
       let s = if x = "x" then "" else x in
       match find_person conf base s with
@@ -334,6 +338,7 @@ let rec eval_var conf base env _xx _loc = function
           eval_person_field_var conf base env ep sl
       | None -> (
           match p_getenv conf.env s with
+          (* FIXME ??? what is s ? *)
           | Some s when Option.is_some (int_of_string_opt s) ->
               let p = Driver.poi base (Driver.Iper.of_string s) in
               let auth = authorized_age conf base p in
@@ -342,7 +347,10 @@ let rec eval_var conf base env _xx _loc = function
           | _ -> VVstring ""))
   | [ "person_index"; x ] -> (
       let find_person =
-        match x with "e" -> find_person_in_env_pref | _ -> find_person_in_env
+        match x with
+        | "e" -> find_person_in_env_pref
+        | "select" -> find_person_from_url
+        | _ -> find_person_in_env
       in
       let s = if x = "x" then "" else x in
       match find_person conf base s with
@@ -380,10 +388,11 @@ let rec eval_var conf base env _xx _loc = function
   | [ "static_max_desc_level" ] -> VVstring "10"
   | _ -> raise Not_found
 
-and eval_person_field_var _conf base _env (p, pauth) = function
-  | "surname" when pauth -> VVstring (Driver.sou base (Driver.get_surname p))
-  | "first_name" when pauth ->
+and eval_person_field_var _conf base _env (p, p_auth) = function
+  | "surname" when p_auth -> VVstring (Driver.sou base (Driver.get_surname p))
+  | "first_name" when p_auth ->
       VVstring (Driver.sou base (Driver.get_first_name p))
+  | "is_visible" -> VVbool p_auth
   | _ -> raise Not_found
 
 and eval_dag_cell_var conf base env (colspan, align, td) = function

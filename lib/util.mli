@@ -551,6 +551,11 @@ val find_person_in_env_pref :
 (** [find_person_in_env_pref conf base prefix] Same as [find_person_in_env]
     except that it uses a prefix instead of a suffix. *)
 
+val find_person_from_url :
+  config -> Geneweb_db.Driver.base -> string -> Geneweb_db.Driver.person option
+(** url says select=input&pn=fn.occ sn&p=&n=, or select=input&pn=&p=fn.oc&n=sn
+*)
+
 (* Recherche le sosa uniquement dans le fichier gwf *)
 val default_sosa_ref :
   config -> Geneweb_db.Driver.base -> Geneweb_db.Driver.person option

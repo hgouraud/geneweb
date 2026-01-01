@@ -2153,7 +2153,7 @@ let string_of_decimal_num conf f =
       exp_str
   else "0"
 
-let find_person_in_env_aux conf base env_i env_p env_n env_occ =
+let find_person_in_env_aux conf base env_i env_pn env_p env_n env_occ =
   match p_getenv conf.env env_i with
   | Some i when i <> "" ->
       let i = Geneweb_db.Driver.Iper.of_string i in
@@ -2162,9 +2162,14 @@ let find_person_in_env_aux conf base env_i env_p env_n env_occ =
         if is_hidden p then None else Some p
       else None
   | _ -> (
-      match (p_getenv conf.env env_p, p_getenv conf.env env_n) with
-      | None, Some n -> (
-          match Gutil.person_of_string_key base n with
+      let no_dot_in p = String.index_opt p '.' <> None in
+      match
+        ( p_getenv conf.env env_pn,
+          p_getenv conf.env env_p,
+          p_getenv conf.env env_n )
+      with
+      | Some pn, None, None -> (
+          match Gutil.person_of_string_key base pn with
           | Some ip ->
               let p = pget conf base ip in
               if is_hidden p then None
@@ -2172,8 +2177,25 @@ let find_person_in_env_aux conf base env_i env_p env_n env_occ =
               then Some p
               else None
           | None -> None)
-      | Some p, Some n -> (
+      | None, Some p, Some n when no_dot_in p -> (
           let occ = Option.value ~default:0 (p_getint conf.env env_occ) in
+          match Driver.person_of_key base p n occ with
+          | Some ip ->
+              let p = pget conf base ip in
+              if is_hidden p then None
+              else if (not (is_hide_names conf p)) || authorized_age conf base p
+              then Some p
+              else None
+          | None -> None)
+      | None, Some p0, Some n -> (
+          let dot = String.index p0 '.' in
+          let p = String.sub p0 0 dot in
+          let occ =
+            try
+              String.sub p0 (dot + 1) (String.length p0 - dot - 2)
+              |> int_of_string
+            with Failure _ -> 0
+          in
           match Driver.person_of_key base p n occ with
           | Some ip ->
               let p = pget conf base ip in
@@ -2185,12 +2207,17 @@ let find_person_in_env_aux conf base env_i env_p env_n env_occ =
       | _ -> None)
 
 let find_person_in_env conf base suff =
-  find_person_in_env_aux conf base ("i" ^ suff) ("p" ^ suff) ("n" ^ suff)
+  find_person_in_env_aux conf base ("i" ^ suff) "" ("p" ^ suff) ("n" ^ suff)
     ("oc" ^ suff)
 
 let find_person_in_env_pref conf base pref =
-  find_person_in_env_aux conf base (pref ^ "i") (pref ^ "p") (pref ^ "n")
+  find_person_in_env_aux conf base (pref ^ "i") "" (pref ^ "p") (pref ^ "n")
     (pref ^ "oc")
+
+let find_person_from_url conf base _s =
+  match p_getenv conf.env "select" with
+  | Some "input" -> find_person_in_env_aux conf base "" "pn" "p" "n" ""
+  | _ -> None
 
 let person_exists conf base (fn, sn, oc) =
   let auth =

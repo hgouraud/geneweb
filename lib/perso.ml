@@ -2224,18 +2224,18 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
           let ep = (p, auth) in
           eval_person_field_var conf base env ep loc sl
       | _ -> raise Not_found)
-  | [ "person_index" ] -> (
-      match find_person_in_env conf base "" with
-      | Some p -> VVstring (Driver.Iper.to_string (Driver.get_iper p))
-      | None -> VVstring "")
   (* person_index.x -> i=, p=, n=, oc= *)
   (* person_index.1 -> i1=, p1=, n1=, oc1= *)
   (* person_index.2 -> i2=, p2=, n2=, oc2= *)
   (* person_index.e -> ei=, ep=, en=, eoc= *)
+  (* person_index.select -> pn p n from url *)
   (* same code in dagDisplay.ml, but with slight differences *)
   | "person_index" :: x :: sl -> (
       let find_person =
-        match x with "e" -> find_person_in_env_pref | _ -> find_person_in_env
+        match x with
+        | "e" -> find_person_in_env_pref
+        | "select" -> find_person_from_url
+        | _ -> find_person_in_env
       in
       let s = if x = "x" then "" else x in
       match find_person conf base s with
@@ -2245,12 +2245,17 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
           eval_person_field_var conf base env ep loc sl
       | None -> (
           match p_getenv conf.env s with
+          (* FIXME ??? what is s ? *)
           | Some s when Option.is_some (int_of_string_opt s) ->
               let p = Driver.poi base (Driver.Iper.of_string s) in
               let auth = authorized_age conf base p in
               let ep = (p, auth) in
               eval_person_field_var conf base env ep loc sl
           | _ -> VVstring ""))
+  | [ "person_index" ] -> (
+      match find_person_in_env conf base "" with
+      | Some p -> VVstring (Driver.Iper.to_string (Driver.get_iper p))
+      | None -> VVstring "")
   | "prev_item" :: sl -> (
       match get_env "prev_item" env with
       | Vslistlm ell -> eval_item_field_var ell sl
