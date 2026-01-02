@@ -1039,12 +1039,29 @@ let treat_notes gen rl =
              Buffer.add_string buf n;
              Buffer.add_string buf (if end_spc then " " else "")
            end
-         else if lab = "CONT" || lab = "NOTE" then
-           begin
-             Buffer.add_string buf "<br>\n";
-             Buffer.add_string buf n;
-             Buffer.add_string buf (if end_spc then " " else "")
-           end
+          else if lab = "CONT" || lab = "NOTE" then
+            begin
+              let buf_len = Buffer.length buf in
+              let ends_with_newline = buf_len > 0 && Buffer.nth buf (buf_len - 1) = '\n' in
+              
+              if n = "" then
+                (* Empty CONT - just add \n (may create \n\n if previous ended with \n) *)
+                Buffer.add_string buf "\n"
+              else if ends_with_newline then
+                (* Previous line ended with \n, don't add <br>, just add new content *)
+                begin
+                  Buffer.add_string buf "\n";
+                  Buffer.add_string buf n;
+                  Buffer.add_string buf (if end_spc then " " else "")
+                end
+              else
+                (* Normal case: add <br>\n before content *)
+                begin
+                  Buffer.add_string buf "<br>\n";
+                  Buffer.add_string buf n;
+                  Buffer.add_string buf (if end_spc then " " else "")
+                end
+            end
          else if n = "" then ()
          else
            begin

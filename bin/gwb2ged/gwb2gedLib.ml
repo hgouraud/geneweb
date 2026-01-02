@@ -91,10 +91,10 @@ let encode opts s =
   | Gwexport.Ascii | Gwexport.Ansi -> Mutil.iso_8859_1_of_utf_8 s
   | Gwexport.Utf8 -> s
 
-let max_len = 78
+let _max_len = 78
 let br = "<br>"
 
-let find_br s ini_i =
+let _find_br s ini_i =
   let ini = "<br" in
   let rec loop i j =
     if i = String.length ini then
@@ -126,159 +126,165 @@ let oc opts = match opts.Gwexport.oc with _, oc, _ -> oc
       charset)
     @param len
       specifies the number of characters (char or wide char) already printed
-    @param i specifies the last char index (index to s -- one byte char) 
-    
-    On the way back to .gw, ged2geb will insert a <br> at the end of CONT lines.
-    To avoid unnecessary <br> lines are concatenated (with additional space)
-    up to the next <br> or \n\n and output as CONT + multiple CONC.
-    The resulting note (after a gwb2ged/ged2gwb cycle) will not match the 
-    original note but its html display should match!
-    *)
+    @param i specifies the last char index (index to s -- one byte char)
 
+    On the way back to .gw, ged2geb will insert a <br> at the end of CONT lines.
+    To avoid unnecessary <br> lines are concatenated (with additional space) up
+    to the next <br> or \n\n and output as CONT + multiple CONC. The resulting
+    note (after a gwb2ged/ged2gwb cycle) will not match the original note but
+    its html display should match! *)
 
 let rec display_note_aux opts tagn s len i =
   if i >= len then Printf.ksprintf (oc opts) "\n"
-  else
-    (* Find next paragraph separator *)
-    let rec find_para_sep pos =
-      if pos >= len then len
-      else if pos + 1 < len && s.[pos] = '\n' && s.[pos + 1] = '\n' then pos
-      else if pos + 3 < len && s.[pos] = '<' && s.[pos + 1] = 'b' && 
-              s.[pos + 2] = 'r' && s.[pos + 3] = '>' then pos
-      else if pos + 4 < len && s.[pos] = '<' && s.[pos + 1] = 'b' && 
-              s.[pos + 2] = 'r' && s.[pos + 3] = '>' && s.[pos + 4] = '\n' then pos
-      else if pos + 4 < len && s.[pos] = '\n' && s.[pos + 1] = '<' && 
-              s.[pos + 2] = 'b' && s.[pos + 3] = 'r' && s.[pos + 4] = '>' then pos
-      else find_para_sep (pos + 1)
+  else begin
+    (* Check if we're at a lone \n (empty line indicator) *)
+    let at_empty_line =
+      i < len
+      && s.[i] = '\n'
+      && (i = 0
+         || s.[i - 1] = '\n'
+         || i >= 4
+            && s.[i - 4] = '<'
+            && s.[i - 3] = 'b'
+            && s.[i - 2] = 'r'
+            && s.[i - 1] = '>')
     in
-    let para_end = find_para_sep i in
-    
-    (* Extract piece and normalize newlines to spaces *)
-    let piece_len = para_end - i in
-    let piece = Bytes.create piece_len in
-    for j = 0 to piece_len - 1 do
-      let c = s.[i + j] in
-      Bytes.set piece j (if c = '\n' || c = '\r' then ' ' else c)
-    done;
-    let piece = Bytes.to_string piece in
-    
-    (* Find valid UTF-8 boundary <= max_pos *)
-    let find_utf8_boundary str max_pos =
-      let rec aux pos =
-        if pos < 0 then 0
-        else
-          let c = Char.code str.[pos] in
-          if c land 0b11000000 <> 0b10000000 then pos
-          else aux (pos - 1)
+    if at_empty_line then begin
+      (* Output empty CONT and skip this \n *)
+      Printf.ksprintf (oc opts) "\n%d CONT" tagn;
+      display_note_aux opts tagn s len (i + 1)
+    end
+    else begin
+      (* Find next paragraph separator: \n\n, <br>, <br>\n, \n<br> *)
+      let rec find_para_sep pos =
+        if pos >= len then len
+        else if pos + 1 < len && s.[pos] = '\n' && s.[pos + 1] = '\n' then pos
+        else if
+          pos + 3 < len
+          && s.[pos] = '<'
+          && s.[pos + 1] = 'b'
+          && s.[pos + 2] = 'r'
+          && s.[pos + 3] = '>'
+        then pos
+        else if
+          pos + 4 < len
+          && s.[pos] = '<'
+          && s.[pos + 1] = 'b'
+          && s.[pos + 2] = 'r'
+          && s.[pos + 3] = '>'
+          && s.[pos + 4] = '\n'
+        then pos
+        else if
+          pos + 4 < len
+          && s.[pos] = '\n'
+          && s.[pos + 1] = '<'
+          && s.[pos + 2] = 'b'
+          && s.[pos + 3] = 'r'
+          && s.[pos + 4] = '>'
+        then pos (* deal also with wiki syntax delimiters * # : ; *)
+        else if
+          pos + 2 < len
+          && s.[pos] = '\n'
+          && s.[pos + 1] = '*'
+          && s.[pos + 2] = ' '
+        then pos
+        else if
+          pos + 2 < len
+          && s.[pos] = '\n'
+          && s.[pos + 1] = '#'
+          && s.[pos + 2] = ' '
+        then pos
+        else if
+          pos + 2 < len
+          && s.[pos] = '\n'
+          && s.[pos + 1] = ':'
+          && s.[pos + 2] = ' '
+        then pos
+        else if
+          pos + 2 < len
+          && s.[pos] = '\n'
+          && s.[pos + 1] = ';'
+          && s.[pos + 2] = ' '
+        then pos
+        else find_para_sep (pos + 1)
       in
-      aux (min max_pos (String.length str - 1))
-    in
-    
-    (* Output piece in chunks of max 80 chars *)
-    let rec output_chunks tag start =
-      let remaining = String.length piece - start in
-      if remaining > 0 then begin
-        let chunk_len = 
-          if remaining <= 80 then remaining
-          else find_utf8_boundary piece (start + 79) - start
+      let para_end = find_para_sep i in
+      (* Extract piece and normalize newlines to spaces *)
+      let piece_len = para_end - i in
+      let piece = Bytes.create piece_len in
+      for j = 0 to piece_len - 1 do
+        let c = s.[i + j] in
+        Bytes.set piece j (if c = '\n' || c = '\r' then ' ' else c)
+      done;
+      let piece = Bytes.to_string piece in
+      let piece_trimmed = String.trim piece in
+      (* Find valid UTF-8 boundary <= max_pos *)
+      let find_utf8_boundary str max_pos =
+        let rec aux pos =
+          if pos < 0 then 0
+          else
+            let c = Char.code str.[pos] in
+            if c land 0b11000000 <> 0b10000000 then pos else aux (pos - 1)
         in
-        let chunk = String.sub piece start chunk_len in
-        Printf.ksprintf (oc opts) "\n%d %s %s" tagn tag chunk;
-        output_chunks "CONC" (start + chunk_len)
-      end
-    in
-    output_chunks "CONT" 0;
-    
-    (* Skip separator and continue with next paragraph *)
-    let next_i = 
-      if para_end >= len then len
-      else if para_end + 1 < len && s.[para_end] = '\n' && s.[para_end + 1] = '\n' then 
-        (Printf.eprintf "SKIP \\n\\n: %d -> %d\n" i (para_end + 2); para_end + 2)
-      else if para_end + 4 < len && s.[para_end] = '<' && s.[para_end + 1] = 'b' && 
-              s.[para_end + 2] = 'r' && s.[para_end + 3] = '>' then
-        (* Skip <br> or <br>\n *)
-        let sep_len = if para_end + 4 < len && s.[para_end + 4] = '\n' then 5 else 4 in
-        (Printf.eprintf "SKIP <br>: %d -> %d\n" i (para_end + sep_len); para_end + sep_len)
-      else if para_end + 4 < len && s.[para_end] = '\n' && s.[para_end + 1] = '<' && 
-              s.[para_end + 2] = 'b' && s.[para_end + 3] = 'r' && s.[para_end + 4] = '>' then
-        (Printf.eprintf "SKIP \\n<br>: %d -> %d\n" i (para_end + 5); para_end + 5)
-      else 
-        (Printf.eprintf "NO SEPARATOR: i=%d para_end=%d next_i=%d\n" i para_end (para_end + 1); para_end + 1)
-    in
-    
-    if next_i <= i then (
-      Printf.eprintf "ERROR: infinite loop detected! i=%d next_i=%d para_end=%d\n" i next_i para_end;
-      Printf.eprintf "Context: '%s'\n" (String.sub s (max 0 (i-10)) (min 30 (len - (max 0 (i-10)))));
-      failwith "Infinite loop in display_note_aux"
-    );
-    
-    display_note_aux opts tagn s len next_i
-    
+        aux (min max_pos (String.length str - 1))
+      in
+      (* Output piece in chunks of max 80 chars *)
+      let rec output_chunks is_first start =
+        let remaining = String.length piece_trimmed - start in
+        if remaining > 0 then (
+          let chunk_len =
+            if remaining <= 80 then remaining
+            else find_utf8_boundary piece_trimmed (start + 79) - start
+          in
+          let chunk = String.sub piece_trimmed start chunk_len in
+          if is_first && i = 0 then (
+            (* First chunk on same line as NOTE *)
+            Printf.ksprintf (oc opts) " %s" chunk;
+            output_chunks false (start + chunk_len))
+          else
+            (* Subsequent chunks on new lines with CONT/CONC *)
+            let tag = if is_first then "CONT" else "CONC" in
+            Printf.ksprintf (oc opts) "\n%d %s %s" tagn tag chunk;
+            output_chunks false (start + chunk_len))
+      in
+      output_chunks true 0;
+      (* Skip separator *)
+      let next_i =
+        if para_end >= len then len
+        else if
+          para_end + 1 < len && s.[para_end] = '\n' && s.[para_end + 1] = '\n'
+        then para_end + 1
+        else if
+          para_end + 4 < len
+          && s.[para_end] = '<'
+          && s.[para_end + 1] = 'b'
+          && s.[para_end + 2] = 'r'
+          && s.[para_end + 3] = '>'
+        then
+          let skip =
+            if para_end + 4 < len && s.[para_end + 4] = '\n' then 5 else 4
+          in
+          para_end + skip
+        else if
+          para_end + 4 < len
+          && s.[para_end] = '\n'
+          && s.[para_end + 1] = '<'
+          && s.[para_end + 2] = 'b'
+          && s.[para_end + 3] = 'r'
+          && s.[para_end + 4] = '>'
+        then para_end + 5
+        else para_end + 1
+      in
 
-    
-let  _display_note_aux opts tagn s len i =
-  let j = ref i in
-  (* read wide char (case charset UTF-8) or char (other charset) in s string*)
-  if !j = String.length s then Printf.ksprintf (oc opts) "\n"
-  else
-    (* \n, <br>, <br \> : cut text for CONTinuate with new gedcom line *)
-    let br = find_br s i in
-    if
-      i <= String.length s - String.length br
-      && String.lowercase_ascii (String.sub s i (String.length br)) = br
-    then (
-      Printf.ksprintf (oc opts) "\n%d CONT " (succ tagn);
-      let i = i + String.length br in
-      let i = if i < String.length s && s.[i] = '\n' then i + 1 else i in
-      display_note_aux opts tagn s
-        (String.length (string_of_int (succ tagn) ^ " CONT "))
-        i)
-    else if s.[i] = '\n' then (
-      Printf.ksprintf (oc opts) "\n%d CONT " (succ tagn);
-      let i = if i < String.length s then i + 1 else i in
-      display_note_aux opts tagn s
-        (String.length (string_of_int (succ tagn) ^ " CONT "))
-        i)
-    else if
-      (* cut text at max length for CONCat with next gedcom line *)
-      len = max_len
-    then (
-      Printf.ksprintf (oc opts) "\n%d CONC " (succ tagn);
-      display_note_aux opts tagn s
-        (String.length (string_of_int (succ tagn) ^ " CONC "))
-        i)
-    else (* continue same gedcom line *)
-      (* FIXME: Rewrite this so we can get rid of this custom [nbc] *)
-      let nbc c =
-        if Char.code c < 0b10000000 then 1
-        else if Char.code c < 0b11000000 then -1
-        else if Char.code c < 0b11100000 then 2
-        else if Char.code c < 0b11110000 then 3
-        else if Char.code c < 0b11111000 then 4
-        else if Char.code c < 0b11111100 then 5
-        else if Char.code c < 0b11111110 then 6
-        else -1
-      in
-      (* FIXME: avoid this buffer *)
-      let b = Buffer.create 4 in
-      let rec output_onechar () =
-        if !j = String.length s then decr j (* non wide char / UTF-8 char *)
-        else if opts.Gwexport.charset <> Gwexport.Utf8 then
-          Buffer.add_char b s.[i] (* 1 to 4 bytes UTF-8 wide char *)
-        else if i = !j || nbc s.[!j] = -1 then (
-          Buffer.add_char b s.[!j];
-          incr j;
-          output_onechar ())
-        else decr j
-      in
-      output_onechar ();
-      (oc opts) (Buffer.contents b);
-      display_note_aux opts tagn s (len + 1) (!j + 1)
+      display_note_aux opts tagn s len next_i
+    end
+  end
 
 let display_note opts tagn s =
-  let tag = Printf.sprintf "%d NOTE " tagn in
-  Printf.ksprintf (oc opts) "%s" tag;
-  display_note_aux opts tagn (encode opts s) (String.length s) 0
+  let encoded = encode opts s in
+  let len = String.length encoded in
+  Printf.ksprintf (oc opts) "%d NOTE" tagn;
+  if len > 0 then display_note_aux opts (tagn + 1) encoded len 0
 
 let ged_header opts base ifile ofile =
   Printf.ksprintf (oc opts) "0 HEAD\n";
