@@ -568,6 +568,7 @@ let print_witness opts base gen p =
 
 let print_pevent opts base gen e =
   (match e.epers_name with
+  | Epers_None -> Printf.ksprintf (oc opts) "#none"
   | Epers_Birth -> Printf.ksprintf (oc opts) "#birt"
   | Epers_Baptism -> Printf.ksprintf (oc opts) "#bapt"
   | Epers_Death -> Printf.ksprintf (oc opts) "#deat"

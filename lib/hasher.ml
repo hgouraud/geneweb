@@ -211,6 +211,7 @@ module Make (H : Digestif.S) = struct
 
   let gen_pers_event_name feed_string (e : _ Def.gen_pers_event_name) =
     match e with
+    | Epers_None -> string "Epers_None"
     | Epers_Birth -> string "Epers_Birth"
     | Epers_Baptism -> string "Epers_Baptism"
     | Epers_Death -> string "Epers_Death"

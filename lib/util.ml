@@ -1229,6 +1229,7 @@ let index_of_sex = function Male -> 0 | Female -> 1 | Neuter -> 2
 
 let string_of_pevent_name conf base epers_name =
   match epers_name with
+  | Epers_None -> Adef.safe @@ transl conf "none"
   | Epers_Birth -> Adef.safe @@ transl conf "birth"
   | Epers_Baptism -> Adef.safe @@ transl conf "baptism"
   | Epers_Death -> Adef.safe @@ transl conf "death"

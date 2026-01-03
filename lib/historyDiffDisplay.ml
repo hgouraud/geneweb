@@ -280,6 +280,7 @@ let string_of_event_witness conf base witnesses =
 
 let string_of_epers_name conf epers_name =
   match epers_name with
+  | Epers_None -> Adef.safe @@ Utf8.capitalize_fst (transl conf "none")
   | Epers_Birth -> Adef.safe @@ Utf8.capitalize_fst (transl conf "birth")
   | Epers_Baptism -> Adef.safe @@ Utf8.capitalize_fst (transl conf "baptism")
   | Epers_Death -> Adef.safe @@ Utf8.capitalize_fst (transl conf "death")

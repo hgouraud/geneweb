@@ -222,6 +222,7 @@ module Event = struct
 
   let kind (n, _, _, _, _, _, _) =
     match n with
+    | Event.Pevent Epers_None -> "EPERS_NONE"
     | Event.Pevent Epers_Birth -> "EPERS_BIRTH"
     | Pevent Epers_Baptism -> "EPERS_BAPTISM"
     | Pevent Epers_Death -> "EPERS_DEATH"

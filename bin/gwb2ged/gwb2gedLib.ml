@@ -355,6 +355,7 @@ let ged_ev_detail opts n typ d pl note src =
 
 let ged_tag_pevent base evt =
   match evt.epers_name with
+  | Epers_None -> "NONE"
   | Epers_Birth -> "BIRT"
   | Epers_Baptism -> "BAPM"
   | Epers_Death -> "DEAT"

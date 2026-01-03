@@ -16,6 +16,7 @@ let designation base p =
 
 let string_of_epers_name base epers_name =
   match epers_name with
+  | Epers_None -> "none"
   | Epers_Birth -> "birth"
   | Epers_Baptism -> "baptism"
   | Epers_Death -> "death"

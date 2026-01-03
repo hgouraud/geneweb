@@ -186,6 +186,7 @@ val show_witness_kind : witness_kind -> string
 (** Convert [witness_kind] to string *)
 
 type 'string gen_pers_event_name = 'string Def.gen_pers_event_name =
+  | Epers_None
   | Epers_Birth
   | Epers_Baptism
   | Epers_Death

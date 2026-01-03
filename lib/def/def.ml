@@ -120,6 +120,7 @@ type witness_kind =
 
 (** Personal event name. *)
 type 'string gen_pers_event_name =
+  | Epers_None
   | Epers_Birth
   | Epers_Baptism
   | Epers_Death

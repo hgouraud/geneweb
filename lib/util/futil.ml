@@ -31,7 +31,7 @@ let map_title_strings ?(fd = identity) f t =
 let map_pers_event ?(fd = identity) fp fs e =
   let epers_name =
     match e.epers_name with
-    | ( Epers_Birth | Epers_Baptism | Epers_Death | Epers_Burial
+    | ( Epers_None | Epers_Birth | Epers_Baptism | Epers_Death | Epers_Burial
       | Epers_Cremation | Epers_Accomplishment | Epers_Acquisition
       | Epers_Adhesion | Epers_BaptismLDS | Epers_BarMitzvah | Epers_BatMitzvah
       | Epers_Benediction | Epers_ChangeName | Epers_Circumcision

@@ -357,6 +357,7 @@ and eval_event_var e = function
       match e with
       | Some { epers_name = name; _ } -> (
           match name with
+          | Epers_None -> str_val "#none"
           | Epers_Birth -> str_val "#birt"
           | Epers_Baptism -> str_val "#bapt"
           | Epers_Death -> str_val "#deat"

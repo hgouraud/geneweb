@@ -129,6 +129,7 @@ let rec reconstitute_pevents conf ext cnt =
       let epers_name =
         (* TODO EVENT to/of_string *)
         match epers_name with
+        | "#none" -> Epers_None
         | "#birt" -> Epers_Birth
         | "#bapt" -> Epers_Baptism
         | "#deat" -> Epers_Death
@@ -294,7 +295,7 @@ let rec reconstitute_pevents conf ext cnt =
       in
       let el, ext = reconstitute_pevents conf ext (cnt + 1) in
       let el, ext = reconstitute_insert_pevent conf ext (cnt + 1) el in
-      (e :: el, ext)
+      if e.epers_name = Epers_None then (el, ext) else (e :: el, ext)
 
 let reconstitute_add_relation conf ext cnt rl =
   match get_nth conf "add_relation" cnt with

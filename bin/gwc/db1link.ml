@@ -999,7 +999,7 @@ let insert_family gen co fath_sex moth_sex witl fevtl fo deo =
 (** Convert [string Def.gen_pers_event_name] to [int Def.gen_pers_event_name].
     If event is [Epers_Name] stores event name as a string in the base. *)
 let pevent_name_unique_string gen = function
-  | ( Epers_Birth | Epers_Baptism | Epers_Death | Epers_Burial | Epers_Cremation
+  | ( Epers_None | Epers_Birth | Epers_Baptism | Epers_Death | Epers_Burial | Epers_Cremation
     | Epers_Accomplishment | Epers_Acquisition | Epers_Adhesion
     | Epers_BaptismLDS | Epers_BarMitzvah | Epers_BatMitzvah | Epers_Benediction
     | Epers_ChangeName | Epers_Circumcision | Epers_Confirmation
