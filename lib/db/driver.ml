@@ -241,23 +241,6 @@ let delete_ascend base ip =
 
 let delete_union base ip = patch_union base ip { family = [||] }
 
-let delete_family base ifam =
-  patch_family base ifam
-    {
-      marriage = Date.cdate_None;
-      marriage_place = Istr.empty;
-      marriage_note = Istr.empty;
-      marriage_src = Istr.empty;
-      relation = Married;
-      divorce = NotDivorced;
-      fevents = [];
-      witnesses = [||];
-      comment = Istr.empty;
-      origin_file = Istr.empty;
-      fsources = Istr.empty;
-      fam_index = Ifam.dummy;
-    }
-
 let delete_couple base ifam =
   patch_couple base ifam (Adef.couple Iper.dummy Iper.dummy)
 
@@ -502,6 +485,49 @@ let empty_family base ifam =
 let foi base ifam =
   if ifam = Ifam.dummy then empty_family base ifam
   else { base; ifam; f = None; c = None; d = None }
+
+let delete_family base ifam =
+  let fam = foi base ifam in
+  (* Check if already deleted to avoid assertion failure *)
+  if get_ifam fam = Ifam.dummy then () (* Already deleted, nothing to do *)
+  else begin
+    let fath = get_father fam in
+    let moth = get_mother fam in
+    let children = get_children fam in
+
+    (* Remove family from parents' unions *)
+    let remove_from_union iper =
+      let u = gen_union_of_person (poi base iper) in
+      let new_family = u.Def.family |> Mutil.array_except ifam in
+      patch_union base iper { Def.family = new_family }
+    in
+    remove_from_union fath;
+    remove_from_union moth;
+
+    (* Clear children's ascendants *)
+    Array.iter (fun i -> patch_ascend base i no_ascend) children;
+
+    (* Mark family as deleted *)
+    patch_family base ifam
+      {
+        marriage = Date.cdate_None;
+        marriage_place = Istr.empty;
+        marriage_note = Istr.empty;
+        marriage_src = Istr.empty;
+        relation = Married;
+        divorce = NotDivorced;
+        fevents = [];
+        witnesses = [||];
+        comment = Istr.empty;
+        origin_file = Istr.empty;
+        fsources = Istr.empty;
+        fam_index = Ifam.dummy;
+      };
+
+    (* Clean up couple and descend *)
+    delete_couple base ifam;
+    delete_descend base ifam
+  end
 
 let persons base =
   Collection.make ~len:(nb_of_persons base) (fun i -> Some (poi base i))
