@@ -241,23 +241,6 @@ let delete_ascend base ip =
 
 let delete_union base ip = patch_union base ip { family = [||] }
 
-let delete_family base ifam =
-  patch_family base ifam
-    {
-      marriage = Date.cdate_None;
-      marriage_place = Istr.empty;
-      marriage_note = Istr.empty;
-      marriage_src = Istr.empty;
-      relation = Married;
-      divorce = NotDivorced;
-      fevents = [];
-      witnesses = [||];
-      comment = Istr.empty;
-      origin_file = Istr.empty;
-      fsources = Istr.empty;
-      fam_index = Ifam.dummy;
-    }
-
 let delete_couple base ifam =
   patch_couple base ifam (Adef.couple Iper.dummy Iper.dummy)
 
@@ -400,7 +383,7 @@ let get_death = cache_per (fun p -> p.Def.death)
 let get_death_note = cache_per (fun p -> p.Def.death_note)
 let get_death_place = cache_per (fun p -> p.Def.death_place)
 let get_death_src = cache_per (fun p -> p.Def.death_src)
-let get_family = cache_uni (fun u -> u.Def.family)
+let get_family_raw = cache_uni (fun u -> u.Def.family)
 let get_first_name = cache_per (fun p -> p.Def.first_name)
 let get_first_names_aliases = cache_per (fun p -> p.Def.first_names_aliases)
 let get_image = cache_per (fun p -> p.Def.image)
@@ -501,7 +484,48 @@ let empty_family base ifam =
 
 let foi base ifam =
   if ifam = Ifam.dummy then empty_family base ifam
-  else { base; ifam; f = None; c = None; d = None }
+  else
+    let fam = { base; ifam; f = None; c = None; d = None } in
+    (* Check if the family record is marked as deleted *)
+    if get_ifam fam = Ifam.dummy then empty_family base Ifam.dummy
+    else fam
+
+(* get_family filters out deleted families automatically *)
+let get_family : person -> Ifam.t array =
+  fun p ->
+    let base = p.base in
+    let raw = get_family_raw p in
+    let result = Array.fold_right
+      (fun ifam acc ->
+        let fam = foi base ifam in
+        let fam_index = get_ifam fam in
+        if fam_index <> Ifam.dummy then ifam :: acc else acc)
+      raw
+      []
+    |> Array.of_list in
+    result
+
+let delete_family base ifam =
+  let fam = foi base ifam in
+  (* If family is already deleted (foi returns empty family), do nothing *)
+  if get_ifam fam = Ifam.dummy then
+    ()
+  else
+    patch_family base ifam
+      {
+        marriage = Date.cdate_None;
+        marriage_place = Istr.empty;
+        marriage_note = Istr.empty;
+        marriage_src = Istr.empty;
+        relation = Married;
+        divorce = NotDivorced;
+        fevents = [];
+        witnesses = [||];
+        comment = Istr.empty;
+        origin_file = Istr.empty;
+        fsources = Istr.empty;
+        fam_index = Ifam.dummy;
+      }
 
 let persons base =
   Collection.make ~len:(nb_of_persons base) (fun i -> Some (poi base i))
