@@ -84,48 +84,85 @@ main() {
     local SCRIPT_DIR
     SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
     local BASES_DIR="$SCRIPT_DIR/bases"
-    
     export LANG=$(detect_language)
-    
     # Stop any running instances
     kill_process '/gwd'
     kill_process '/gwsetup'
-    
+
     # Test for gmplib
-# Fonction pour tester la présence de libgmp
-check_gmp() {
+# Liste des bibliothèques requises
+REQUIRED_LIBS=("libgmp" "libpcre2")
+
+# Fonction pour tester la présence d'une bibliothèque
+check_lib() {
+    local lib_name="$1"
     local binaries=("./gwd" "./gwsetup")
     if command -v otool &> /dev/null; then
-        # macOS : vérifier si gwd/gwsetup peuvent trouver libgmp
+        # macOS : vérifier si gwd/gwsetup peuvent trouver la lib
         for bin in "${binaries[@]}"; do
-            [ -f "$bin" ] && otool -L "$bin" 2>/dev/null | grep -q libgmp && return 0
+            [ -f "$bin" ] && otool -L "$bin" 2>/dev/null | grep -q "$lib_name" && return 0
         done
     elif command -v ldd &> /dev/null; then
         # Linux : vérifier les dépendances
         for bin in "${binaries[@]}"; do
-            [ -f "$bin" ] && ldd "$bin" 2>/dev/null | grep -q libgmp && return 0
+            [ -f "$bin" ] && ldd "$bin" 2>/dev/null | grep -q "$lib_name" && return 0
         done
     else
-        # Pas d'outil de vérification disponible, on suppose que c'est OK
+        # Pas d'outil de vérification disponible
         echo "⚠️  Impossible de vérifier les dépendances (otool/ldd manquant)"
         return 0
     fi
     return 1
 }
 
-if ! check_gmp; then
-    echo "❌ Erreur : libgmp.10 introuvable"
-    echo ""
-    echo "Installation requise :"
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        echo "  brew install gmp"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        echo "  sudo apt-get install libgmp10  # Debian/Ubuntu"
-        echo "  sudo yum install gmp            # RedHat/CentOS"
+# Fonction pour obtenir les instructions d'installation
+get_install_instructions() {
+    local lib_name="$1"
+    case "$lib_name" in
+        libgmp)
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                echo "  brew install gmp"
+            else
+                echo "  sudo apt-get install libgmp10  # Debian/Ubuntu"
+                echo "  sudo yum install gmp            # RedHat/CentOS"
+            fi
+            ;;
+        libpcre2)
+            echo "Required if you intent to use ged2gwb"
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                echo "  brew install pcre2"
+            else
+                echo "  sudo apt-get install libpcre2-8-0  # Debian/Ubuntu"
+                echo "  sudo yum install pcre2              # RedHat/CentOS"
+            fi
+            ;;
+        *)
+            echo "  Bibliothèque inconnue : $lib_name"
+            ;;
+    esac
+}
+
+# Vérifier toutes les bibliothèques requises
+missing_libs=()
+for lib in "${REQUIRED_LIBS[@]}"; do
+    if ! check_lib "$lib"; then
+        missing_libs+=("$lib")
     fi
+done
+
+# Afficher les erreurs si des bibliothèques manquent
+if [ ${#missing_libs[@]} -gt 0 ]; then
+    echo "❌ Erreur : bibliothèques manquantes"
+    echo ""
+    for lib in "${missing_libs[@]}"; do
+        echo "📦 $lib"
+        get_install_instructions "$lib"
+        echo ""
+    done
     exit 1
 fi
 
+echo "✅ Toutes les bibliothèques requises sont présentes"
     # Prepare directories and logs
     mkdir -p "$BASES_DIR"
     cd "$BASES_DIR"
