@@ -396,7 +396,7 @@ fr: Autour de l'arbre
         <i class="far fa-file-lines fa-fw mr-1" aria-hidden="true"></i>%apply;notes_title(lang)
       </a>
     %end;
-    %if;has_misc_notes;
+    %if;(has_misc_notes)
       <a role="button" class="btn btn-outline-primary" href="%prefix;m=MISC_NOTES">%nn;
       <i class="fas fa-align-justify fa-fw mr-1" aria-hidden="true"></i>[*base index notes]</a>
     %end;

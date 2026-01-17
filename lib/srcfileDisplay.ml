@@ -506,6 +506,14 @@ let eval_var conf base env () _loc = function
       | _ -> raise Not_found)
   | [ "has_history" ] -> VVbool (Sys.file_exists (History.file_name conf))
   | [ "has_misc_notes" ] -> VVbool (Driver.read_nldb base <> [])
+  | [ "had_misc_non_ref_notes" ] ->
+      VVbool
+        (try
+           let files =
+             Sys.readdir (Filename.concat (!GWPARAM.bpath conf.bname) "notes_d")
+           in
+           Array.exists (fun f -> not (String.starts_with ~prefix:"." f)) files
+         with Sys_error _ -> false)
   | [ "is_welcome" ] -> VVbool !Util.is_welcome
   | [ "nb_accesses" ] ->
       let r = count conf in
