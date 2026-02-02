@@ -24,6 +24,9 @@ let config_reorg bname =
 let config_legacy bname =
   String.concat Filename.dir_sep [ Secure.base_dir (); bname ^ ".gwf" ]
 
+let history = ref "history"
+let history_d = ref "history_d"
+
 type my_fun_2 = string -> string
 type my_fun_3 = string -> string -> string
 
@@ -45,6 +48,8 @@ let base_dir () = Secure.base_dir ()
 (* Module for reorg mode paths *)
 module Default = struct
   let config bname = config_reorg bname
+  let history = "history"
+  let history_d = "history_d"
 
   let cnt_d bname =
     let bname = clean_bname bname in
@@ -90,6 +95,8 @@ end
 (* Module for legacy mode paths *)
 module Legacy = struct
   let config = config_legacy
+  let history = "history"
+  let history_d = "history_d"
 
   let cnt_d bname =
     let _ = bname in
@@ -138,6 +145,8 @@ let init () =
   Secure.add_assets Filename.current_dir_name;
   if !reorg then (
     config := Default.config;
+    history := Default.history;
+    history_d := Default.history_d;
     cnt_d := Default.cnt_d;
     adm_file := Default.adm_file;
     src_d := Default.src_d;
@@ -149,6 +158,8 @@ let init () =
     images_d := Default.images_d)
   else (
     config := Legacy.config;
+    history := Legacy.history;
+    history_d := Legacy.history_d;
     cnt_d := Legacy.cnt_d;
     adm_file := Legacy.adm_file;
     src_d := Legacy.src_d;
