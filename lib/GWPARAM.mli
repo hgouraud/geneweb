@@ -20,6 +20,8 @@ type my_fun_2 = string -> string
 type my_fun_3 = string -> string -> string
 
 val config : my_fun_2 ref
+val history : string ref
+val history_d : string ref
 val cnt_d : my_fun_2 ref
 val adm_file : my_fun_2 ref
 val src_d : my_fun_2 ref
@@ -49,6 +51,8 @@ val create_base_and_config : string -> string
 
 module Default : sig
   val config : string -> string
+  val history : string
+  val history_d : string
   val cnt_d : string -> string
   val adm_file : string -> string
   val portraits_d : string -> string
@@ -64,6 +68,8 @@ end
 
 module Legacy : sig
   val config : string -> string
+  val history : string
+  val history_d : string
   val cnt_d : string -> string
   val adm_file : string -> string
   val portraits_d : string -> string

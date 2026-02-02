@@ -201,7 +201,7 @@ let rec eval_variable (conf : Config.config) = function
           acc
           ^ Format.sprintf "<b%s>%s</b>=%s<br>\n" duplicate k
               (Util.escape_html v :> string))
-        "" conf.base_env
+        "" l
   | [ "gwd"; "arglist" ] -> !GWPARAM.gwd_cmd
   | [ "bvar"; v ] | [ "b"; v ] -> (
       try List.assoc v conf.base_env with Not_found -> "")
@@ -217,6 +217,32 @@ let rec eval_variable (conf : Config.config) = function
       match conf.n_connect with
       | Some (c, _cw, _cf, _) -> if c > 0 then Printf.sprintf "%d" c else ""
       | None -> "")
+  | [ "dir_list" ] ->
+      let dirs =
+        [
+          ("config_d", !GWPARAM.config_d conf.bname);
+          ("config", !GWPARAM.config conf.bname);
+          ("cnt_d", !GWPARAM.cnt_d conf.bname);
+          ("etc_d", !GWPARAM.etc_d conf.bname);
+          ("lang_d", !GWPARAM.lang_d conf.bname "");
+          ("portraits_d", !GWPARAM.portraits_d conf.bname);
+          ("src_d", !GWPARAM.src_d conf.bname);
+          ("images_d", !GWPARAM.images_d conf.bname);
+          ( "history_d",
+            if !GWPARAM.reorg then
+              Filename.concat (!GWPARAM.bpath conf.bname) !GWPARAM.history_d
+            else Filename.concat (Secure.base_dir ()) !GWPARAM.history_d );
+        ]
+      in
+      let str =
+        List.fold_left
+          (fun acc (n, p) ->
+            acc
+            ^ Printf.sprintf "<tr><td><b>%s%s</b></td><td>&nbsp;%s</td></tr>\n"
+                n (Util.transl conf ":") p)
+          "" dirs
+      in
+      Printf.sprintf "<table>\n%s</table>\n" str
   | [ "evar"; v; "ns" ] | [ "e"; v; "ns" ] -> (
       try
         let vv = List.assoc v (conf.env @ conf.henv) in
@@ -1364,6 +1390,7 @@ and print_simple_variable conf = function
       in
       Output.print_sstring conf
         (String.concat ", " (Util.get_bases_list ~format_fun:format_link ()))
+  | "config" -> Output.print_sstring conf (!GWPARAM.config conf.bname)
   | "hidden" -> Util.hidden_env conf
   | "message_to_wizard" -> Util.message_to_wizard conf
   | "query_time" ->
