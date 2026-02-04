@@ -13,7 +13,7 @@ val reorg : bool ref
 val force : bool ref
 (** force creation of database if already existing *)
 
-val config_reorg : string -> string
+val config_default : string -> string
 val config_legacy : string -> string
 
 type my_fun_2 = string -> string

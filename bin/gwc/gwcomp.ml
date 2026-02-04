@@ -541,7 +541,7 @@ let auth_access fn sn oc l =
   let bname = Filename.basename !out_file |> Filename.remove_extension in
   let gwf_file =
     if Geneweb.GWPARAM.is_reorg_base bname then
-      Geneweb.GWPARAM.config_reorg bname
+      Geneweb.GWPARAM.config_default bname
     else Geneweb.GWPARAM.config_legacy bname
   in
   let auth_file_name =
