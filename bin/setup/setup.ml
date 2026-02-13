@@ -602,6 +602,26 @@ let rec copy_from_stream conf print strm =
                   let k1 = get_variable strm in
                   let k2 = get_variable strm in
                   print_if_else conf print (s_getenv conf.env k1 = k2) strm
+              | 'J' ->
+                  (* %Jvar;value;{var = value part|false part} *)
+                  (* var and value may contain %m macros *)
+                  let k1 = parse_upto ';' strm in
+                  let s1 = ref "" in
+                  let _ =
+                    copy_from_stream conf
+                      (fun k -> s1 := !s1 ^ k)
+                      (Stream.of_string k1)
+                  in
+                  let k1 = !s1 in
+                  let k2 = parse_upto ';' strm in
+                  let s2 = ref "" in
+                  let _ =
+                    copy_from_stream conf
+                      (fun k -> s2 := !s2 ^ k)
+                      (Stream.of_string k2)
+                  in
+                  let k2 = !s2 in
+                  print_if_else conf print (k1 = k2) strm
               | 'K' ->
                   (* print the name of -o filename, prepend bname or -o1 filename *)
                   let outfile1 = strip_spaces (s_getenv conf.env "o") in
