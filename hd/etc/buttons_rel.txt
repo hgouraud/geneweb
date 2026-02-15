@@ -74,6 +74,21 @@
       <span class="invisible"><i class="fa fa-chevron-up fa-fw"></i></span>
     %end;
   </div>
+  %if;(e.lim!="")
+    %let;evarlim;%e.lim;%in;
+    <div class="d-flex">
+      %if;(evarlim>2)
+        <a role="button" href="%apply;url_set%with;lim%and;%expr(evarlim-1)%end;"
+          class="btn btn-sm btn-outline-primary font-weight-bold border-0 px-2">−</a>
+      %else;
+        <span
+          class="btn btn-sm btn-outline-primary font-weight-bold border-0 px-2">-</span>
+      %end;
+      <span class="mt-1" title="[*visualize/show/hide/summary]1 %e.lim; [*items]">%e.lim;</span>
+      <a role="button" href="%apply;url_set%with;lim%and;%expr(evarlim+1)%end;"
+        class="btn btn-sm btn-outline-primary font-weight-bold border-0 px-2">+</a>
+    </div>
+  %end;
   <div class="d-flex col-5 ml-5">
     <a href="%if;(e_im=1)%url_set.im.0;%else;%url_set.im;%end;"
       %if;(e.dag="on") class="disabled"%end;

@@ -57,15 +57,10 @@
     %if;(e.oi!=""), [partial]%elseif;(e.dag="on"), [dag]%end;
   %end;
 </h3>
+</div>
 
-%if;(e.m="DAG")
-<div class="ml-auto">
-  %include;buttons_dag
-</div>
-%end;
-</div>
 %if;(not cancel_links)
-  %if;(e.m="A" or e.m="D")
+  %if;(e.m="A" or e.m="D" or e.m="DAG")
     <div class="d-flex justify-content-center">
       %include;buttons_dag
     </div>
@@ -76,9 +71,6 @@
   %end;
 %end;
 %( TODO how to write ind name on navigation link? %dag_cell.index; seems empty?! %)
-%if;(link_next!="" and not cancel_links)
-  %include;buttons_rel
-%end;
 <table id="dag" class="mt-2 mb-6 ml-4">
 %foreach;dag_line;
   <tr align="left">
