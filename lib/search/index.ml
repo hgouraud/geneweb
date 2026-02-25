@@ -7,6 +7,7 @@ module type S = sig
   type cmp
 
   val cmp : (elt, cmp) Comparator.t
+  val size : t -> int
   val of_seq : (word * entry) Seq.t -> t
   val mem : word -> t -> bool
   val search : word list -> t -> (elt, entry, cmp) Cursor.t
@@ -90,6 +91,9 @@ module Make (W : Word.S) (E : Entry) = struct
       t
 
   let mem = Trie.mem
+
+  let size t =
+    Trie.fold (fun _ flatset acc -> acc + Flatset.cardinal flatset) t 0
 
   let intersection l =
     match l with

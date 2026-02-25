@@ -24,7 +24,7 @@ let tokenize s =
   in
   loop [] [] 0 0 |> List.rev
 
-let normalize = String.lowercase_ascii
+let normalize = Name.lower
 
 let preprocess s =
   List.map

@@ -75,15 +75,33 @@ module Analyze = Geneweb_search.Analyze
 module Cursor = Geneweb_search.Cursor
 
 module Search = struct
+  let list_indexes idx =
+    decl "list_indexes"
+      Desc.Syntax.(ret (list string))
+      (let indexes = List.map fst idx in
+       Lwt_result.return indexes)
+
+  let index_info idx =
+    decl "index_info"
+      Desc.Syntax.(ret (list (tup2 string int)))
+      (let info =
+         List.map
+           (fun (name, i) ->
+             let size = Index.size i in
+             (name, size))
+           idx
+       in
+       Lwt_result.return info)
+
   let lookup ~fuel idx =
     decl "lookup"
-      Desc.Syntax.(string @-> string @-> int @-> ret (list string))
+      Desc.Syntax.(string @-> string @-> int @-> ret (list (list string)))
       (fun name s size ->
         match List.assoc name idx with
         | exception Not_found ->
             (* TODO: Methods could fail and emit errors. We can implement
                this by changing the return type of methods to Lwt_result.t *)
-            Lwt_result.return []
+            Lwt_result.return [ []; []; []; [] ]
         | i ->
             let words =
               List.map
@@ -96,20 +114,43 @@ module Search = struct
                 3. Entries that match prefixes of all the [words] up to
                    Levenshtein distance of 1. *)
             let size = min size fuel in
-            let r =
-              (* TODO: There is no guarantee that bounding the size of forced
-                 elements in the sequence will limit the running time. We
-                 should find a solution to limit the running time itself. *)
+            let take cursor =
               List.of_seq @@ Compat.Seq.take size @@ Seq.map snd
-              @@ Cursor.to_seq
-              @@ Cursor.union Index.cmp
-                   [
-                     Index.search words i;
-                     Index.search_prefix words i;
-                     Index.fuzzy_search ~max_dist:1 words i;
-                   ]
+              @@ Cursor.to_seq cursor
             in
-            Lwt_result.return r)
+            let exact = take (Index.search words i) in
+            let exact_s = List.sort_uniq String.compare exact in
+            let prefix = take (Index.search_prefix words i) in
+            let s_lower = Name.lower s in
+            let prefix_only =
+              List.filter (fun x -> not (List.mem x exact_s)) prefix
+            in
+            let prefix1, prefix2 =
+              List.partition
+                (fun a -> Mutil.start_with s_lower 0 (Name.lower a))
+                prefix_only
+            in
+            let prefix_only =
+              List.sort_uniq String.compare prefix1
+              @ List.sort_uniq String.compare prefix2
+            in
+            let exact1, exact2 =
+              List.partition
+                (fun a -> Mutil.start_with s_lower 0 (Name.lower a))
+                (List.sort_uniq String.compare exact_s)
+            in
+            let fuzzy = take (Index.fuzzy_search ~max_dist:1 words i) in
+            let fuzzy_only =
+              List.filter
+                (fun x ->
+                  (not (List.mem x exact_s)) && not (List.mem x prefix_only))
+                fuzzy
+            in
+            Lwt_result.return [ prefix_only; exact1; exact2; fuzzy_only ])
 
-  let make ~fuel idx = empty |> add (lookup ~fuel idx)
+  let make ~fuel idx =
+    empty
+    |> add (list_indexes idx)
+    |> add (index_info idx)
+    |> add (lookup ~fuel idx)
 end

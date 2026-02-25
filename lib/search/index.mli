@@ -11,6 +11,9 @@ module type S = sig
 
   val cmp : (elt, cmp) Comparator.t
 
+  val size : t -> int
+  (** [size t] returns the total number of entries in the index [t]. *)
+
   val of_seq : (word * entry) Seq.t -> t
   (** [of_seq s] creates a new inverted index from the sequence [s]. The
       sequence [s] is forced. *)

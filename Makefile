@@ -178,8 +178,12 @@ endif
 distrib-rpc: build-geneweb-rpc
 	@printf "\n\n\033[1;1m└ Copy RPC server executable and js client to distribution\033[0m\n"
 	mkdir -p $(DISTRIB_DIR)/gw/etc/js
-	cp $(BUILD_DIR)/rpc/server/server.exe $(DISTRIB_DIR)/gw/rpc_server$(EXT)
-	cp $(BUILD_DIR)/rpc/test/client.bc.js $(DISTRIB_DIR)/gw/etc/js/rpc_client.min.js
+	mkdir -p $(DISTRIB_DIR)/gw/etc/css
+	cp -R rpc/etc/* $(DISTRIB_DIR)/gw/etc
+	cd $(DISTRIB_DIR)/gw/etc/js && terser autocomplete.js -o autocomplete.min.js --compress --mangle
+	cd $(DISTRIB_DIR)/gw/etc/css && cleancss -o autocomplete.min.css autocomplete.css
+	cp -f $(BUILD_DIR)/rpc/server/server.exe $(DISTRIB_DIR)/gw/rpc_server$(EXT)
+	cp -f $(BUILD_DIR)/rpc/test/client.bc.js $(DISTRIB_DIR)/gw/etc/js/rpc_client.min.js
 	gzip -9 -k -f $(DISTRIB_DIR)/gw/etc/js/rpc_client.min.js
 	@echo "Done."
 
