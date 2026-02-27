@@ -6025,24 +6025,33 @@ let interp_notempl_with_menu title templ_fname conf base p =
 let print_isolated conf base =
   let isolated =
     Geneweb_db.Collection.fold
-    (fun acc iper ->
-      let p = Driver.poi base iper in
-      if Driver.get_parents p = None
-        && Array.length (Driver.get_family p) = 0
-      then iper :: acc else acc)
-    [] (Driver.ipers base)
+      (fun acc iper ->
+        let p = Driver.poi base iper in
+        if Driver.get_parents p = None && Array.length (Driver.get_family p) = 0
+        then iper :: acc
+        else acc)
+      [] (Driver.ipers base)
   in
-  let base_url = Printf.sprintf "%sm=L&nb=%d&t=I&w=%s&"
-    (commd conf :> string) (List.length isolated)
-    (if conf.wizard then "w" else if conf.friend then "f" else "")
+
+  let url = Util.url_aux ~pwd:true conf in
+
+  let evar_l = [ "m"; "t"; "nb"; "w" ] in
+  let str_l =
+    [
+      "L";
+      "I";
+      Printf.sprintf "%d" (List.length isolated);
+      (if conf.wizard then "w" else if conf.friend then "f" else "");
+    ]
   in
+  let base_url = Util.url_set_aux conf url evar_l str_l in
   let isolated =
-    List.mapi (fun i ip ->
-      Printf.sprintf "i%d=%s" i (Driver.Iper.to_string ip))
-    isolated
+    List.mapi
+      (fun i ip -> Printf.sprintf "i%d=%s" i (Driver.Iper.to_string ip))
+      isolated
     |> String.concat "&"
   in
-  let redirect_url = base_url ^ isolated in
+  let redirect_url = base_url ^ "&" ^ isolated in
   Output.status conf Def.Moved_Temporarily;
   Output.header conf "Location: %s" redirect_url;
   Output.flush conf

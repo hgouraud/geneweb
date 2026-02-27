@@ -908,5 +908,10 @@ val evar_buttons : config -> string -> evar_button list -> string -> unit
 (** evar_button conf query_string evar evar_text title_text creates a button to
     toggle evar *)
 
+val url_aux : ?pwd:bool -> config -> string
+(** capture current url *)
+
 val url_set_aux : config -> string -> string list -> string list -> string
-(** *)
+(** url_set_aux conf url evar_l str_l returns a new url with evar values
+    replaced by new values from str_l 0 length values in str_l removes the evar
+*)

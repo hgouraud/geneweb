@@ -3601,6 +3601,22 @@ let reorder (conf : Config.config) url_env =
 
   String.concat "&" (List.rev ordered_params @ List.rev unordered_params)
 
+let url_aux ?(pwd = true) (conf : Config.config) =
+  let l =
+    List.filter_map
+      (fun (k, v) ->
+        let v = Adef.as_string v in
+        if ((k = "oc" || k = "ocz") && v = "0") || k = "" then None
+        else Some (Format.sprintf "%s=%s" k v))
+      (conf.henv @ conf.senv @ conf.env)
+  in
+  let prefix =
+    if pwd then (prefix_base_password conf :> string)
+    else (prefix_base conf :> string)
+  in
+  if conf.cgi then prefix ^ "?" ^ conf.bname ^ String.concat "&" l
+  else prefix ^ String.concat "&" l
+
 let url_set_aux conf url evar_l str_l =
   (* Extract base URL before query string *)
   let href =
