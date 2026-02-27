@@ -93,7 +93,7 @@ module Make (W : Word.S) (E : Entry) = struct
   let mem = Trie.mem
 
   let size t =
-    Trie.fold (fun _ flatset acc -> acc + Flatset.cardinal flatset) t 0
+    Trie.fold (fun _ _ acc -> acc + 1) t 0
 
   let intersection l =
     match l with
