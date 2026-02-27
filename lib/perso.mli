@@ -181,3 +181,5 @@ val string_of_title :
   Adef.safe_string
 (** Optionnal [link] argument is passed to {!val:DateDisplay.string_of_ondate}
 *)
+
+val print_isolated : config -> Geneweb_db.Driver.base -> unit
