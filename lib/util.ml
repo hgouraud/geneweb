@@ -1317,6 +1317,20 @@ let string_of_witness_kind conf sex witness_kind =
   in
   Adef.safe @@ transl_nth conf s n
 
+let string_of_rel_kind conf sex rel_kind =
+  let n = index_of_sex sex in
+  let s =
+    match rel_kind with
+    | Def.GodParent -> "godfather/godmother/godparents"
+    | Def.Adoption -> "adoptive father/adoptive mother/adoptive parents"
+    | Def.Recognition ->
+        "recognizing father/recognizing mother/recognizing parents"
+    | Def.FosterParent -> "foster father/foster mother/foster parents"
+    | Def.CandidateParent ->
+        "candidate father/candidate mother/candidate parents"
+  in
+  Adef.safe @@ transl_nth conf s n
+
 let string_of_witness_kind_raw witness_kind =
   let s =
     match witness_kind with

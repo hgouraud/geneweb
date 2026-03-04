@@ -513,6 +513,10 @@ val string_of_fevent_name :
   Adef.safe_string
 (** [string_of_fevent_name conf base fevent_name] *)
 
+val string_of_rel_kind : config -> sex -> relation_type -> Adef.safe_string
+(** [string_of_rel_kind conf sex rt] Return the string corresponding to rt
+    according to [sex] and [conf]. *)
+
 val string_of_witness_kind : config -> sex -> witness_kind -> Adef.safe_string
 (** [string_of_witness_kind conf sex wk] Return the string corresponding to wk
     according to [sex] and [conf]. *)

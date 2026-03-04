@@ -6042,15 +6042,6 @@ let print_isolated conf base =
       Def.CandidateParent;
     |]
   in
-  let rtype_keys =
-    [|
-      "godfather/godmother/godparents";
-      "adoptive father/adoptive mother/adoptive parents";
-      "recognizing father/recognizing mother/recognizing parents";
-      "foster father/foster mother/foster parents";
-      "candidate father/candidate mother/candidate parents";
-    |]
-  in
   let wkinds =
     [|
       Def.Witness;
@@ -6063,25 +6054,18 @@ let print_isolated conf base =
       Def.Witness_Other;
     |]
   in
-  let wkind_keys =
-    [|
-      "witness/witness/witnesses";
-      "godfather/godmother/godparents";
-      "informant/informant/informant";
-      "present/present/present";
-      "mentioned/mentioned/mentioned";
-      "civil registrar/civil registrar/civil registrar";
-      "parrish registrar/parrish registrar/parrish registrar";
-      "other/other/other";
-    |]
-  in
   let idx_of arr v =
     let rec aux i =
       if i >= Array.length arr then 0 else if arr.(i) = v then i else aux (i + 1)
     in
     aux 0
   in
-  let label keys i = transl_nth conf keys.(i) 2 in
+  let label_rel i =
+    (Util.string_of_rel_kind conf Def.Neuter rtypes.(i) :> string)
+  in
+  let label_wit i =
+    (Util.string_of_witness_kind conf Def.Neuter wkinds.(i) :> string)
+  in
   let candidates =
     Geneweb_db.Collection.fold
       (fun acc iper ->
@@ -6187,18 +6171,54 @@ let print_isolated conf base =
       (Utf8.capitalize_fst (transl_nth conf iso 0))
       tot
   in
+  let rel_kinds_cache = Hashtbl.create 64 in
+  let find_all_rel_kinds iper =
+    match Hashtbl.find_opt rel_kinds_cache iper with
+    | Some v -> v
+    | None ->
+        let v =
+          let direct =
+            List.map
+              (fun r -> idx_of rtypes r.Def.r_type)
+              (Driver.get_rparents (Driver.poi base iper))
+          in
+          let via_related =
+            List.concat_map
+              (fun ip ->
+                let rp = Driver.poi base ip in
+                List.filter_map
+                  (fun r ->
+                    if r.Def.r_fath = Some iper || r.Def.r_moth = Some iper then
+                      Some (idx_of rtypes r.Def.r_type)
+                    else None)
+                  (Driver.get_rparents rp))
+              (Driver.get_related (Driver.poi base iper))
+          in
+          List.sort_uniq compare (direct @ via_related)
+        in
+        Hashtbl.add rel_kinds_cache iper v;
+        v
+  in
+  let wit_kinds_cache = Hashtbl.create 64 in
   let find_all_wit_kinds iper =
-    List.concat_map
-      (fun ip ->
-        let rp = Driver.poi base ip in
-        List.filter_map
-          (fun (_, _, _, _, _, wl, _) ->
-            Mutil.array_find_map
-              (fun (wip, wk) -> if wip = iper then Some wk else None)
-              wl)
-          (Event.sorted_events conf base rp))
-      (Driver.get_related (Driver.poi base iper))
-    |> List.sort_uniq compare
+    match Hashtbl.find_opt wit_kinds_cache iper with
+    | Some v -> v
+    | None ->
+        let v =
+          List.concat_map
+            (fun ip ->
+              let rp = Driver.poi base ip in
+              List.filter_map
+                (fun (_, _, _, _, _, wl, _) ->
+                  Array.find_map
+                    (fun (wip, wk) -> if wip = iper then Some wk else None)
+                    wl)
+                (Event.sorted_events conf base rp))
+            (Driver.get_related (Driver.poi base iper))
+          |> List.sort_uniq compare
+        in
+        Hashtbl.add wit_kinds_cache iper v;
+        v
   in
   Hutil.header conf title;
   let print_person_li p =
@@ -6235,7 +6255,31 @@ let print_isolated conf base =
                       :> string))
                   others)
            in
-           Output.printf conf " <em>(%s)</em>" s);
+           Output.printf conf " <em>(%s %s)</em>" (transl conf "and also") s);
+        Output.print_sstring conf "</li>\n")
+      list;
+    Output.print_sstring conf "</ul>\n"
+  in
+  let print_rel_list cur_idx list =
+    Output.print_sstring conf "<ul>\n";
+    List.iter
+      (fun p ->
+        print_person_li p;
+        let others =
+          List.filter
+            (fun i -> i <> cur_idx)
+            (find_all_rel_kinds (Driver.get_iper p))
+        in
+        (if others <> [] then
+           let s =
+             String.concat ", "
+               (List.map
+                  (fun i ->
+                    (Util.string_of_rel_kind conf (Driver.get_sex p) rtypes.(i)
+                      :> string))
+                  others)
+           in
+           Output.printf conf " <em>(%s %s)</em>" (transl conf "and also") s);
         Output.print_sstring conf "</li>\n")
       list;
     Output.print_sstring conf "</ul>\n"
@@ -6258,7 +6302,7 @@ let print_isolated conf base =
       (Printf.sprintf "<a href=\"#%s\">%s&nbsp;(%d)</a>" id
          (Utf8.capitalize_fst lbl) n)
   in
-  let add_sub_toc prefix keys arr =
+  let add_sub_toc prefix label_fn arr =
     let first = ref true in
     Array.iteri
       (fun i list ->
@@ -6270,7 +6314,7 @@ let print_isolated conf base =
           else Buffer.add_string toc " &middot; ";
           Buffer.add_string toc
             (Printf.sprintf "<a href=\"#%s-%d\">%s&nbsp;(%d)</a>" prefix i
-               (Utf8.capitalize_fst (label keys i))
+               (Utf8.capitalize_fst (label_fn i))
                (List.length list))))
       arr
   in
@@ -6278,11 +6322,11 @@ let print_isolated conf base =
   if n2 > 0 then (
     if Buffer.length toc > 0 then Buffer.add_string toc "<br>\n";
     add_toc_raw "sec-rel" (transl_nth conf iso 2) n2;
-    add_sub_toc "sec-rel" rtype_keys by_rel);
+    add_sub_toc "sec-rel" label_rel by_rel);
   if n3 > 0 then (
     if Buffer.length toc > 0 then Buffer.add_string toc "<br>\n";
     add_toc_raw "sec-wit" (transl_nth conf iso 3) n3;
-    add_sub_toc "sec-wit" wkind_keys by_wit);
+    add_sub_toc "sec-wit" label_wit by_wit);
   Output.print_sstring conf (Buffer.contents toc);
   Output.print_sstring conf "</div>\n";
   if n1 > 0 then (
@@ -6300,9 +6344,9 @@ let print_isolated conf base =
     print_h3 "sec-rel" (transl_nth conf iso 2) n2;
     Array.iteri
       (fun i list ->
-        print_sub print_list
+        print_sub (print_rel_list i)
           (Printf.sprintf "sec-rel-%d" i)
-          (label rtype_keys i) list)
+          (label_rel i) list)
       by_rel);
   if n3 > 0 then (
     print_h3 "sec-wit" (transl_nth conf iso 3) n3;
@@ -6310,7 +6354,7 @@ let print_isolated conf base =
       (fun i list ->
         print_sub (print_wit_list i)
           (Printf.sprintf "sec-wit-%d" i)
-          (label wkind_keys i) list)
+          (label_wit i) list)
       by_wit);
   Hutil.trailer conf
 

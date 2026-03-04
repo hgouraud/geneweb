@@ -21397,6 +21397,10 @@ fr: %s au %s de
 pt: %s de %s de
 sv: %s vid %s av
 
+    and also
+en: and also
+fr: et aussi
+
     witness at marriage of %s and %s
 af: getuie by die troue van %s met %s
 bg: свидетел при брака на %s и %s
