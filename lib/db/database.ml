@@ -782,6 +782,10 @@ let make_immut_record_access ~read_only ic ic_acc shift array_pos len name
           | Some ic_acc ->
               seek_in ic_acc (shift + (Iovalue.sizeof_long * i));
               let pos = input_binary_int ic_acc in
+              (* FIXME. required by Roglo whose base file is larger than 2GB (2.1 GB) *)
+              (* this will work only for bases < 4GB *)
+              (* better solution is to read/write 8 byte chunks rather than 4 *)
+              let pos = pos land 0xFFFFFFFF in
               seek_in ic pos;
               input_item ic
           | None ->
