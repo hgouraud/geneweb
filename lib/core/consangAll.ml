@@ -22,7 +22,7 @@ let relationship base tab ip1 ip2 =
 
 let trace verbosity cnt max_cnt =
   if verbosity >= 2 then (
-    Printf.eprintf "%7d\008\008\008\008\008\008\008" cnt;
+    Printf.eprintf "%9d\008\008\008\008\008\008\008\008\008" cnt;
     flush stderr)
   else if verbosity >= 1 then ProgrBar.run (max_cnt - cnt) max_cnt
 

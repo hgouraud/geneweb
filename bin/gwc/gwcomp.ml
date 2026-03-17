@@ -536,65 +536,81 @@ let name_unaccent_lower s =
   in
   copy 0 0
 
+(* Cache: bname -> nom du fichier .auth (None si absent/non configuré) *)
+let auth_file_name_cache : (string, string option) Hashtbl.t = Hashtbl.create 4
+
+(* Cache: bname -> hashtable des clés de consentement *)
+let consent_htbl_cache : (string, (string, string) Hashtbl.t) Hashtbl.t =
+  Hashtbl.create 4
+
+let get_auth_file_name bname =
+  match Hashtbl.find_opt auth_file_name_cache bname with
+  | Some v -> v
+  | None ->
+      let gwf_file =
+        if Geneweb.GWPARAM.is_reorg_base bname then
+          Geneweb.GWPARAM.config_reorg bname
+        else Geneweb.GWPARAM.config_legacy bname
+      in
+      let v =
+        try
+          Secure.with_open_in_text gwf_file (fun ic ->
+              let rec loop () =
+                match input_line ic with
+                | exception End_of_file -> None
+                | line when Geneweb.Util.start_with line 0 "friend_passwd_file"
+                  -> (
+                    match Geneweb.Util.extract_value '=' line with
+                    | exception Not_found -> None
+                    | passwd_file -> Some passwd_file)
+                | _ -> loop ()
+              in
+              loop ())
+        with Sys_error _ -> None
+      in
+      Hashtbl.add auth_file_name_cache bname v;
+      v
+
+let get_consent_htbl bname =
+  match Hashtbl.find_opt consent_htbl_cache bname with
+  | Some ht -> ht
+  | None ->
+      let ht = Hashtbl.create 256 in
+      (match get_auth_file_name bname with
+      | None -> ()
+      | Some file_name -> (
+          let friend_passwd_file =
+            Filename.concat (Secure.base_dir ()) file_name
+          in
+          try
+            Secure.with_open_in_text friend_passwd_file (fun ic ->
+                let rec loop () =
+                  match input_line ic |> name_unaccent_lower with
+                  | exception End_of_file -> ()
+                  | line ->
+                      let parts = String.split_on_char ':' line in
+                      let username =
+                        try List.nth parts 2 with Failure _ -> ""
+                      in
+                      (match Geneweb.Util.extract_value '|' username with
+                      | exception Not_found -> ()
+                      | key -> Hashtbl.add ht key key);
+                      loop ()
+                in
+                loop ())
+          with Sys_error _ ->
+            if Sys.file_exists friend_passwd_file then
+              Printf.eprintf "Warning: error reading %s\n" friend_passwd_file));
+      Hashtbl.add consent_htbl_cache bname ht;
+      ht
+
 (* read .auth file and build a consent_list of keys *)
 let auth_access ~bname fn sn oc l =
   let access, l = get_access l in
   let fns = name_unaccent_lower fn |> Mutil.tr ' ' '_' in
   let sns = name_unaccent_lower sn |> Mutil.tr ' ' '_' in
   let frs = if access = SemiPublic then "SemiPublic" else "Other" in
-  let gwf_file =
-    if Geneweb.GWPARAM.is_reorg_base bname then
-      Geneweb.GWPARAM.config_reorg bname
-    else Geneweb.GWPARAM.config_legacy bname
-  in
-  let auth_file_name =
-    try
-      Secure.with_open_in_text gwf_file (fun ic ->
-          let rec loop () =
-            match input_line ic with
-            | exception End_of_file -> None
-            | line when Geneweb.Util.start_with line 0 "friend_passwd_file" -> (
-                match Geneweb.Util.extract_value '=' line with
-                | exception Not_found -> None
-                | passwd_file -> Some passwd_file)
-            | _ -> loop ()
-          in
-          loop ())
-    with Sys_error _ -> None
-  in
-
-  let consent_htbl =
-    let ht = Hashtbl.create 10 in
-    match auth_file_name with
-    | Some file_name -> (
-        let friend_passwd_file =
-          Filename.concat (Secure.base_dir ()) file_name
-        in
-        try
-          Secure.with_open_in_text friend_passwd_file (fun ic ->
-              let rec loop ht =
-                match input_line ic |> name_unaccent_lower with
-                | exception End_of_file -> ht
-                | line -> (
-                    (* ident:passwd:name[|key]:comment *)
-                    let parts = String.split_on_char ':' line in
-                    let username =
-                      try List.nth parts 2 with Failure _ -> ""
-                    in
-                    match Geneweb.Util.extract_value '|' username with
-                    | exception Not_found -> loop ht
-                    | key ->
-                        Hashtbl.add ht key key;
-                        loop ht)
-              in
-              loop ht)
-        with Sys_error _ ->
-          if Sys.file_exists friend_passwd_file then
-            Printf.eprintf "Warning: error reading %s\n" friend_passwd_file;
-          ht)
-    | None -> ht
-  in
-
+  let consent_htbl = get_consent_htbl bname in
   let is_consent =
     Hashtbl.mem consent_htbl (Format.sprintf "%s.%d+%s" fns oc sns)
   in
