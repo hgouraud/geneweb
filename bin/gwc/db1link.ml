@@ -1730,7 +1730,7 @@ let link ?(no_warn = false) next_family_fun bdir =
     if !pr_stats then Stats.(print_stats base @@ stat_base base));
   if not gen.g_errored then (
     if !do_consang then (
-      ignore @@ ConsangAll.compute base true;
+      ignore @@ ConsangAll.compute base;
       Driver.sync base);
     output_wizard_notes bdir gen.g_wiznotes;
     output_command_line bdir;

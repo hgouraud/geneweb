@@ -4,8 +4,10 @@ open Def
 
 (* TODOOCP: doc *)
 
-type anc_stat
-(** Relation with ancestor status *)
+type anc_stat =
+  | MaybeAnc
+  | IsAnc
+      (** Ancestor reachability status used during relationship computation *)
 
 type relationship = {
   mutable weight1 : float;
@@ -29,6 +31,9 @@ type relationship_info = {
     (Geneweb_db.Driver.iper * Geneweb_db.Driver.ifam option) list array;
 }
 (** Computation consanguinity state for every person in the base *)
+
+val phony_rel : relationship
+(** Sentinel value used to detect uninitialized relationship records *)
 
 exception TopologicalSortError of Geneweb_db.Driver.person
 (** Error that could occure while topological sorting, and raised when person is
