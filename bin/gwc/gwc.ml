@@ -98,6 +98,7 @@ let compile_gw_files ~bname bar inputs =
         match kind with
         | Gw ->
             let output = Format.sprintf "%so" (Filename.basename fname) in
+            (try Sys.remove output with Sys_error _ -> ());  (* supprimer si existant *)
             let () =
               try Gwcomp.compile ~bname ~output fname
               with e ->
