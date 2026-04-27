@@ -1118,15 +1118,55 @@ let search_fullname cache conf base fn variants_sn =
          existing order within each tier.  This ensures e.g. "Annie" appears
          before "Anne" when the query is "annie vivier". *)
       let fn_lower = Name.lower fn in
-      let fn_score p =
+      (* Use the first element of variants_sn as the canonical surname query.
+         variants_sn is sorted and deduplicated but all variants share the same
+         base string; any of them works for the relevance comparison. *)
+      let sn_lower = Name.lower (List.hd variants_sn) in
+      (* Normalise all apostrophe variants to plain ' for comparisons. *)
+      let norm_apo s =
+        let buf = Buffer.create (String.length s) in
+        let i = ref 0 in
+        while !i < String.length s do
+          (match s.[!i] with
+          | '\'' -> Buffer.add_char buf '\''
+          | '\xE2'
+            when !i + 2 < String.length s
+                 && s.[!i + 1] = '\x80'
+                 && s.[!i + 2] = '\x99' ->
+              Buffer.add_char buf '\'';
+              i := !i + 2
+          | '\xCA'
+            when !i + 1 < String.length s
+                 && (s.[!i + 1] = '\xBC' || s.[!i + 1] = '\xBB') ->
+              Buffer.add_char buf '\'';
+              i := !i + 1
+          | c -> Buffer.add_char buf c);
+          i := !i + 1
+        done;
+        Buffer.contents buf
+      in
+      let fn_lower = norm_apo fn_lower in
+      let sn_lower = norm_apo sn_lower in
+      (* Combined relevance score: weight fn match (0/2) + sn match (0/1).
+         Score 0 = both exact, 1 = fn exact only, 2 = sn exact only,
+         3 = neither exact.  This pushes e.g. "Sophie d'Oiron" above
+         "Sophie Aron" when the query is "sophiee d'orion". *)
+      let relevance_score p =
         let fn1 = StringCache.get_cached cache base (Driver.get_first_name p) in
-        if Name.lower fn1 = fn_lower then 0 else 1
+        let sn1 = Driver.sou base (Driver.get_surname p) in
+        let fn_match = if norm_apo (Name.lower fn1) = fn_lower then 0 else 2 in
+        let sn_match = if norm_apo (Name.lower sn1) = sn_lower then 0 else 1 in
+        fn_match + sn_match
       in
       let exact =
-        List.stable_sort (fun a b -> compare (fn_score a) (fn_score b)) exact
+        List.stable_sort
+          (fun a b -> compare (relevance_score a) (relevance_score b))
+          exact
       in
       let partial =
-        List.stable_sort (fun a b -> compare (fn_score a) (fn_score b)) partial
+        List.stable_sort
+          (fun a b -> compare (relevance_score a) (relevance_score b))
+          partial
       in
       (* Phonetic crush fallback for fn: catches typos / double-letter
          differences like "fereol" vs "Ferreol" where substring matching
@@ -1204,9 +1244,9 @@ let search_fullname cache conf base fn variants_sn =
               in
               spouse_substr @ phonetic_extra
           in
-          (* Sort spouse results by first-name relevance, same as direct. *)
+          (* Sort spouse results by combined fn+sn relevance, same as direct. *)
           List.stable_sort
-            (fun a b -> compare (fn_score a) (fn_score b))
+            (fun a b -> compare (relevance_score a) (relevance_score b))
             spouse_all
         else []
       in
@@ -1606,13 +1646,39 @@ let rec handle_search_results alias_cache conf base query fn_options components
                type B — fn matches and a spouse's sn matches exactly.
              If zero or more than one perfect match exists, fall through to
              specify so the user can choose. *)
-          let qfn_l = Name.lower qfn in
-          let qsn_l = Name.lower qsn in
+          (* Normalise apostrophes to plain ' before comparing, so that
+             "d'Oiron" and "d'Oiron" (curly apostrophe) both match. *)
+          let norm_apo s =
+            let buf = Buffer.create (String.length s) in
+            let i = ref 0 in
+            while !i < String.length s do
+              (match s.[!i] with
+              | '\'' -> Buffer.add_char buf '\''
+              | '\xE2'
+                when !i + 2 < String.length s
+                     && s.[!i + 1] = '\x80'
+                     && s.[!i + 2] = '\x99' ->
+                  Buffer.add_char buf '\'';
+                  i := !i + 2
+              | '\xCA'
+                when !i + 1 < String.length s
+                     && (s.[!i + 1] = '\xBC' || s.[!i + 1] = '\xBB') ->
+                  Buffer.add_char buf '\'';
+                  i := !i + 1
+              | c -> Buffer.add_char buf c);
+              i := !i + 1
+            done;
+            Buffer.contents buf
+          in
+          let qfn_l = norm_apo (Name.lower qfn) in
+          let qsn_l = norm_apo (Name.lower qsn) in
           let fn_exact p =
-            Name.lower (Driver.sou base (Driver.get_first_name p)) = qfn_l
+            norm_apo (Name.lower (Driver.sou base (Driver.get_first_name p)))
+            = qfn_l
           in
           let sn_exact p =
-            Name.lower (Driver.sou base (Driver.get_surname p)) = qsn_l
+            norm_apo (Name.lower (Driver.sou base (Driver.get_surname p)))
+            = qsn_l
           in
           let spouse_sn_exact p =
             (* True if p has at least one spouse whose surname matches qsn. *)
@@ -1625,7 +1691,8 @@ let rec handle_search_results alias_cache conf base query fn_options components
                   else Driver.get_father f
                 in
                 let sp = Driver.poi base spouse_ip in
-                Name.lower (Driver.sou base (Driver.get_surname sp)) = qsn_l)
+                norm_apo (Name.lower (Driver.sou base (Driver.get_surname sp)))
+                = qsn_l)
               (Driver.get_family p)
           in
           let perfect_a =
