@@ -231,29 +231,37 @@ body {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+        <input type="hidden" id="ig_img" name="ig_img">
+        <!-- shown only when opened from carrousel -->
+        <div class="mb-3 row d-none" id="ig_img_row">
+          <label class="col-sm-2 col-form-label text-muted small">[*image/images]0</label>
+          <div class="col-sm-10 d-flex align-items-center">
+            <span id="ig_img_hint" class="font-monospace small text-info"></span>
+          </div>
+        </div>
         <div class="mb-3 row">
           <label for="ig_page_title" class="col-sm-2 col-form-label">[*title/titles]0</label>
           <div class="col-sm-10">
             <input type="text" class="form-control" id="ig_page_title" name="ig_page_title">
           </div>
         </div>
-        <div class="mb-2 row">
+        <div class="mb-2 row" id="ig_fname_row">
           <label for="ig_fname" class="col-sm-2 col-form-label">[*file]</label>
           <div class="col-sm-10">
             <input type="text" class="form-control" id="ig_fname" name="ig_fname"
                    list="ig_src_images" placeholder="[*choose an image]">
             <datalist id="ig_src_images">
-              %src_images_list;
+               %src_images_list;
             </datalist>
           </div>
         </div>
-        <div class="mb-2 row">
+        <div class="mb-2 row" id="ig_or_row">
           <div class="col-sm-2 text-center">
             <span class="text-body-secondary small">[or]</span>
           </div>
           <div class="col-sm-10"></div>
         </div>
-        <div class="mb-3 row">
+        <div class="mb-3 row" id="ig_folder_row">
           <label for="ig_folder" class="col-sm-2 col-form-label">[*folder/folders]0</label>
           <div class="col-sm-10">
             <input type="text" class="form-control" id="ig_folder" name="ig_folder"

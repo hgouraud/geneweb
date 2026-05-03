@@ -11958,6 +11958,10 @@ de: Galerieübersicht
 en: gallery index
 fr: index de la galerie
 
+    create gallery
+en: create gallery with
+fr: créer une galerie avec
+
     linked pages (pages) help
 co: pagine o note induve a pagina hè referenzata
 de: Seiten oder Notizen, wo die Seite referenziert wird

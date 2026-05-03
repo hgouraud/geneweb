@@ -356,7 +356,21 @@
         %end;
       %end;
       %if;(carrousel_img_nbr>0)
-        <h1 class="display-5">[*image/images]1</h1>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <h1 class="display-5 mb-0">[*image/images]1</h1>
+          <a role="button"
+            class="btn btn-sm btn-outline-info"
+            id="ng_open_btn"
+            href="%prefix;m=MOD_NOTES&new&p=%self.first_name;&n=%self.surname;%if;(self.occ!="")&oc=%self.occ;%end;&folder=%carrousel;"
+            title="[*create gallery]">
+            <i class="far fa-images me-1"></i>[*create gallery][:]
+          </a>
+          <select id="ng_img_select" class="form-select form-select-sm w-auto">
+            %foreach;img_in_carrousel;
+              <option value="%carrousel_img_raw;">%carrousel_img_raw;</option>
+            %end;
+          </select>
+        </div>
         <div class="d-flex align-items-center">
           <i class="fa fa-folder-open fa-lg text-warning mx-2" aria-hidden="true"></i>
           <strong><samp class="text-truncate" title="%images_store;%X;%carrousel;">%images_store;%X;%carrousel;%X;</samp></strong>
@@ -437,6 +451,79 @@
     </div>
   %end;
 %end;
+
+
+<!-- ── Modal : créer une nouvelle galerie depuis une image du carrousel ── -->
+<div class="modal fade" id="new_gallery_modal" tabindex="-1"
+     aria-labelledby="new_gallery_modal_label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="new_gallery_modal_label">
+          <i class="far fa-images me-2 text-info"></i>[*create gallery]
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                aria-label="[*user/password/cancel]2"></button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Mini-carrousel de sélection de l'image de départ -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">[*image/images]0</label>
+          <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm px-2"
+                    id="ng_prev" title="←">
+              <i class="fa fa-chevron-left"></i>
+            </button>
+            <div class="flex-grow-1 text-center" style="min-height:120px">
+              <img id="ng_preview" src="" alt=""
+                   class="img-thumbnail"
+                   style="max-height:120px; max-width:100%; object-fit:contain;">
+              <div id="ng_img_label"
+                   class="small text-muted text-truncate mt-1"
+                   style="max-width:260px; margin:0 auto;"></div>
+            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm px-2"
+                    id="ng_next" title="→">
+              <i class="fa fa-chevron-right"></i>
+            </button>
+          </div>
+          <!-- Indicateur de position -->
+          <div class="text-center mt-1">
+            <span id="ng_pos" class="small text-muted"></span>
+          </div>
+        </div>
+
+        <!-- Nom du fichier galerie -->
+        <div class="mb-3">
+          <label for="ng_fname" class="form-label fw-semibold">
+            [*note/notes]0 — [*name]
+          </label>
+          <input type="text" id="ng_fname" class="form-control"
+                 placeholder="ex: famille_dupont_1900"
+                 autocomplete="off" required>
+          <div class="invalid-feedback">[*name] [required]</div>
+        </div>
+
+        <!-- Titre de la galerie -->
+        <div class="mb-2">
+          <label for="ng_title" class="form-label fw-semibold">[*title]</label>
+          <input type="text" id="ng_title" class="form-control"
+                 placeholder="[*title]">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary"
+                data-bs-dismiss="modal">[*user/password/cancel]2</button>
+        <button type="button" class="btn btn-info text-white" id="ng_ok_btn"
+                disabled>
+          <i class="far fa-images me-1"></i>[*create gallery]
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 %include;trl
 %include;copyr
@@ -661,6 +748,17 @@ document.addEventListener('DOMContentLoaded', () => {
   $qa('[data-bs-toggle="tooltip"]').forEach(el => {
     new bootstrap.Tooltip(el, { html: true });
   });
+
+  // Inject the selected image into the URL before navigating to MOD_NOTES
+  const ngBtn = $('ng_open_btn');
+  if (ngBtn) {
+    ngBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const sel = $('ng_img_select');
+      const img = sel ? sel.value : '';
+      window.location.href = ngBtn.href + (img ? '&img=' + encodeURIComponent(img) : '');
+    });
+  }
 });
 </script>
 </body>

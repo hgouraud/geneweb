@@ -991,6 +991,10 @@ let rgb_of_str_hsv h s v =
   let ios s = int_of_string s in
   rgb_of_hsv (ios h) (ios s) (ios v)
 
+let image_extension f =
+  let ext = Filename.extension f in
+  Array.mem ext Image.ext_list_1
+
 let rec eval_date_var conf jd = function
   | "french" :: sl -> eval_dmy_var (Calendar.french_of_sdn Sure jd) sl
   | "gregorian" :: sl -> eval_dmy_var (Calendar.gregorian_of_sdn Sure jd) sl
@@ -1397,7 +1401,23 @@ and print_simple_variable conf = function
       Util.time_debug conf query_time !GWPARAM.nb_errors !GWPARAM.errors_undef
         !GWPARAM.errors_other !GWPARAM.set_vars
   | "src_albums_list" -> (
-      let dir = !GWPARAM.albums_d conf.bname in
+      (* FIXME should those two template functions be moved to perso.ml? and benefit from
+         Util.find_person_in_env *)
+      let get_env evar env =
+        match List.assoc_opt evar env with
+        | Some s -> Adef.as_string s
+        | None -> ""
+      in
+      let p = get_env "p" conf.env in
+      let n = get_env "n" conf.env in
+      let oc = get_env "oc" conf.env in
+      let oc = if oc = "" then "0" else oc in
+      let keydir = Printf.sprintf "%s.%s.%s" p oc n in
+      let dir =
+        if p != "" && n != "" then
+          Filename.concat (!GWPARAM.albums_d conf.bname) keydir
+        else !GWPARAM.albums_d conf.bname
+      in
       let collect entry acc =
         match entry with
         | Filesystem.Dir path ->
@@ -1417,7 +1437,21 @@ and print_simple_variable conf = function
           Log.warn (fun k ->
               k "src_albums_list: %s (%s)" (Unix.error_message err) dir))
   | "src_images_list" -> (
-      let dir = !GWPARAM.images_d conf.bname in
+      let get_env evar env =
+        match List.assoc_opt evar env with
+        | Some s -> Adef.as_string s
+        | None -> ""
+      in
+      let p = get_env "p" conf.env in
+      let n = get_env "n" conf.env in
+      let oc = get_env "oc" conf.env in
+      let oc = if oc = "" then "0" else oc in
+      let keydir = Printf.sprintf "%s.%s.%s" p oc n in
+      let dir =
+        if p != "" && n != "" then
+          Filename.concat (!GWPARAM.images_d conf.bname) keydir
+        else !GWPARAM.images_d conf.bname
+      in
       try
         let f_list = Sys.readdir dir |> Array.to_list |> List.sort compare in
         List.iter
@@ -1427,6 +1461,7 @@ and print_simple_variable conf = function
               (Unix.stat full_path).st_kind = Unix.S_REG
               && f.[0] <> '.'
               && f.[0] <> '~'
+              && image_extension f
             then
               Output.printf conf "<option>%s\n" (Util.escape_html f :> string))
           f_list
