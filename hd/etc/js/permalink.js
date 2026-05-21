@@ -19,9 +19,12 @@
     rawBase = segs.length ? segs[0] : "";
     prefix = origin;
   }
-  var bare = rawBase;
-  if (role === 2 && /_w$/.test(bare)) bare = bare.slice(0, -2);
-  else if (role === 1 && /_f$/.test(bare)) bare = bare.slice(0, -2);
+  // Strip trailing role suffix (_w or _f)
+  if (/_w$/.test(bare)) bare = bare.slice(0, -2);
+  else if (/_f$/.test(bare)) bare = bare.slice(0, -2);
+  // Strip session token: keep only up to the first underscore
+  var firstUs = bare.indexOf("_");
+  if (firstUs !== -1) bare = bare.slice(0, firstUs);
   function build(s) {
     var b = bare + s;
     return cgi ? prefix + "?b=" + b + "&" + G.q
