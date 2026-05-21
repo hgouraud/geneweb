@@ -313,6 +313,8 @@ let rec eval_var conf base env _xx _loc = function
       match get_env "next_txt" env with
       | Vestring s -> VVstring (s :> string)
       | _ -> VVstring "")
+  | [ "permalink" ] ->
+      VVstring (Permalink.script conf (Permalink.query conf base) :> string)
   | [ "person_index" ] -> (
       match find_person_in_env conf base "" with
       | Some p -> VVstring (Driver.Iper.to_string (Driver.get_iper p))

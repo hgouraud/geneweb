@@ -10,6 +10,11 @@ let key_env conf base =
     try
       let i = Driver.Iper.of_string (Mutil.decode v) in
       let p = Util.pget conf base i in
+      Printf.eprintf "get_a_person %s -> %s %s\n%!"
+        (v :> string)
+        (Driver.sou base (Driver.get_first_name p))
+        (Driver.sou base (Driver.get_surname p));
+
       if
         (Util.is_hide_names conf p && not (Util.authorized_age conf base p))
         || Util.is_hidden p
@@ -50,6 +55,14 @@ let key_env conf base =
     | kv :: l when drop kv -> loop l
     | ("i", v) :: l -> new_env "i" v (fun x -> x) l
     | ("ei", v) :: l -> new_env "ei" v (fun x -> "e" ^ x) l
+    | (k, v) :: l
+      when String.length k >= 2
+           && k.[0] = 'i'
+           && String.sub k 1 (String.length k - 1)
+              |> String.to_seq
+              |> Seq.for_all (fun c -> c >= '0' && c <= '9') ->
+        let suffix = String.sub k 1 (String.length k - 1) in
+        new_env k v (fun x -> x ^ suffix) l
     | (k, v) :: l when String.length k = 2 && k.[0] = 'i' ->
         let c = String.make 1 k.[1] in
         new_env k v (fun x -> x ^ c) l
