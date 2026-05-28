@@ -997,6 +997,37 @@ let print_no_relationship conf base pl =
   Output.print_sstring conf "</ul>";
   Hutil.trailer conf
 
+let spouse_triples_of_rendered_set conf base rendered_set =
+  (* For each rendered iper, find spouses also in the rendered set.
+     We use Iper.compare ip < sp_ip to emit each pair exactly once.
+     If a couple has multiple marriages, only the first encountered is
+     kept (deduplicated on (ip1, ip2) at the end). *)
+  let triples =
+    Iper.Set.fold
+      (fun ip acc ->
+        let p = pget conf base ip in
+        Array.fold_left
+          (fun acc ifam ->
+            let fam = Driver.foi base ifam in
+            let sp_ip = Gutil.spouse ip fam in
+            if Iper.compare ip sp_ip < 0 && Iper.Set.mem sp_ip rendered_set then
+              let year_opt =
+                match Date.od_of_cdate (Driver.get_marriage fam) with
+                | Some (Adef.Dgreg (d, _)) -> Some d.Adef.year
+                | _ -> None
+              in
+              (ip, sp_ip, year_opt) :: acc
+            else acc)
+          acc (Driver.get_family p))
+      rendered_set []
+  in
+  (* Deduplicate: keep only the first occurrence of each (ip1, ip2) pair *)
+  List.fold_right
+    (fun ((ip1, ip2, _) as triple) acc ->
+      if List.exists (fun (a, b, _) -> a = ip1 && b = ip2) acc then acc
+      else triple :: acc)
+    triples []
+
 let print_multi_relation conf base pl lim assoc_txt =
   let assoc_txt : (Geneweb_db.Driver.iper, string) Hashtbl.t = assoc_txt in
   let pl1, pl2 =
@@ -1048,8 +1079,96 @@ let print_multi_relation conf base pl lim assoc_txt =
       DagDisplay.Item (p, content)
     in
     let vbar_txt _ = Adef.escaped "" in
+    let rendered_set =
+      ind_set_of_relation_path base path
+      |> List.fold_left (fun s ip -> Iper.Set.add ip s) Iper.Set.empty
+    in
+    let triples = spouse_triples_of_rendered_set conf base rendered_set in
     let next_txt = multi_relation_next_txt conf pl2 lim assoc_txt in
-    print_relationship_dag conf base elem_txt vbar_txt path next_txt
+    print_relationship_dag conf base elem_txt vbar_txt path next_txt;
+    (* The script is emitted after </body></html> because Hutil.trailer
+       fires inside print_relationship_dag. Browsers still execute it;
+       the inline call to rlmDrawSpouseArcs() works because the DOM is
+       fully loaded by the time this runs (readyState = 'complete'). *)
+    if triples <> [] then begin
+      Output.print_sstring conf
+        {|<script>
+function rlmDrawSpouseArcs() {
+  var dag = document.getElementById('dag');
+  if (!dag) return;
+  if (!rlmSpousePairs || rlmSpousePairs.length === 0) return;
+  /* Use offset coordinates (relative to document, scroll-independent)
+     for SVG positioning, and the same origin for arc coordinates. */
+  var dagLeft = dag.offsetLeft;
+  var dagTop  = dag.offsetTop;
+  var dagW    = dag.offsetWidth;
+  var dagH    = dag.offsetHeight;
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.style.position      = 'absolute';
+  svg.style.top           = dagTop + 'px';
+  svg.style.left          = dagLeft + 'px';
+  svg.style.width         = dagW + 'px';
+  svg.style.height        = (dagH + 80) + 'px';
+  svg.style.pointerEvents = 'none';
+  svg.style.overflow      = 'visible';
+  svg.style.zIndex        = '10';
+  document.body.appendChild(svg);
+  rlmSpousePairs.forEach(function (triple) {
+    var i1 = triple[0], i2 = triple[1], year = triple[2];
+    var el1 = document.getElementById('i' + i1);
+    var el2 = document.getElementById('i' + i2);
+    if (!el1 || !el2) return;
+    /* Skip pairs already connected by an hr bar in the dag table:
+       such couples share the same <td> cell. */
+    if (el1.closest('td') === el2.closest('td')) return;
+    /* Compute element centres relative to document origin */
+    var e1r = el1.getBoundingClientRect();
+    var e2r = el2.getBoundingClientRect();
+    var sx  = window.scrollX, sy = window.scrollY;
+    var x1  = e1r.left + e1r.width  / 2 + sx - dagLeft;
+    var x2  = e2r.left + e2r.width  / 2 + sx - dagLeft;
+    var y   = Math.max(e1r.bottom, e2r.bottom) + sy - dagTop + 6;
+    var sag = Math.max(30, Math.abs(x2 - x1) * 0.15);
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d',
+      'M ' + x1 + ' ' + y +
+      ' C ' + x1 + ' ' + (y + sag) + ',' +
+              x2 + ' ' + (y + sag) + ',' +
+              x2 + ' ' + y);
+    path.setAttribute('stroke',           '#886644');
+    path.setAttribute('stroke-width',     '1.5');
+    path.setAttribute('fill',             'none');
+    path.setAttribute('stroke-dasharray', '4,3');
+    svg.appendChild(path);
+    if (year !== null) {
+      var xMid = (x1 + x2) / 2;
+      var yMid = y + sag + 12;
+      var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x',           xMid);
+      text.setAttribute('y',           yMid);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('font-size',   '70%');
+      text.setAttribute('fill',        '#886644');
+      text.textContent = '&' + year;
+      svg.appendChild(text);
+    }
+  });
+}
+var rlmSpousePairs = [
+|};
+      List.iter
+        (fun (ip1, ip2, year_opt) ->
+          let y =
+            match year_opt with Some y -> string_of_int y | None -> "null"
+          in
+          Output.printf conf "  [%s, %s, %s],\n" (Iper.to_string ip1)
+            (Iper.to_string ip2) y)
+        triples;
+      Output.print_sstring conf {|];
+rlmDrawSpouseArcs();
+</script>
+|}
+    end
 
 let print_base_loop conf base p =
   let title _ =
