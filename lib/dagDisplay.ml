@@ -186,10 +186,10 @@ let make_tree_hts conf base elem_txt vbar_txt invert set spl d =
           image_txt conf base p
           ^^^ nowrap (string_of_item conf base (elem_txt p))
         in
-        let spouses =
+        let spouses, via_connector_iperse =
           if n.chil <> [] && (spouse_on || n.pare = []) && not invert then
             List.fold_left
-              (fun list id ->
+              (fun (list, vcs) id ->
                 let cn = d.Dag2html.dag.(Dag2html.int_of_idag id) in
                 match cn.Dag2html.valu with
                 | Left cip -> (
@@ -198,19 +198,17 @@ let make_tree_hts conf base elem_txt vbar_txt invert set spl d =
                         let cpl = Driver.foi base ifam in
                         if ip = Driver.get_father cpl then
                           if List.mem_assoc (Driver.get_mother cpl) list then
-                            list
-                          else (Driver.get_mother cpl, Some ifam) :: list
+                            (list, vcs)
+                          else ((Driver.get_mother cpl, Some ifam) :: list, vcs)
                         else if ip = Driver.get_mother cpl then
                           if List.mem_assoc (Driver.get_father cpl) list then
-                            list
-                          else (Driver.get_father cpl, Some ifam) :: list
-                        else list
-                    | None -> list)
+                            (list, vcs)
+                          else ((Driver.get_father cpl, Some ifam) :: list, vcs)
+                        else (list, vcs)
+                    | None -> (list, vcs))
                 | Right _ -> (
                     match other_left_parent cn ip with
-                    | Some sp_ip
-                      when is_suppressed sp_ip
-                           && not (List.mem_assoc sp_ip list) ->
+                    | Some sp_ip when not (List.mem_assoc sp_ip list) ->
                         let p = Util.pget conf base ip in
                         let ifam_opt =
                           Array.fold_left
@@ -223,9 +221,9 @@ let make_tree_hts conf base elem_txt vbar_txt invert set spl d =
                                 else None)
                             None (Driver.get_family p)
                         in
-                        (sp_ip, ifam_opt) :: list
-                    | _ -> list))
-              [] n.chil
+                        ((sp_ip, ifam_opt) :: list, Iper.Set.add sp_ip vcs)
+                    | _ -> (list, vcs)))
+              ([], Iper.Set.empty) n.chil
           else if n.chil = [] then
             (* Childless leaf: spl (relation-path terminal spouses, e.g. m=RL
              endpoints i3/i4) has priority to keep m=RL output unchanged. When
@@ -236,22 +234,30 @@ let make_tree_hts conf base elem_txt vbar_txt invert set spl d =
                carries its portrait; review ordering and image coherence
                for the multi-spouse case. *)
             let from_spl = try [ List.assq ip spl ] with Not_found -> [] in
-            if from_spl <> [] then from_spl
+            if from_spl <> [] then (from_spl, Iper.Set.empty)
             else if spouse_on then
               let p = Util.pget conf base ip in
-              Array.fold_left
-                (fun list ifam ->
-                  let cpl = Driver.foi base ifam in
-                  let sp_ip = Geneweb_db.Gutil.spouse ip cpl in
-                  if List.mem_assoc sp_ip list then list
-                  else (sp_ip, Some ifam) :: list)
-                [] (Driver.get_family p)
-            else []
-          else []
+              let l =
+                Array.fold_left
+                  (fun list ifam ->
+                    let cpl = Driver.foi base ifam in
+                    let sp_ip = Geneweb_db.Gutil.spouse ip cpl in
+                    if List.mem_assoc sp_ip list then list
+                    else (sp_ip, Some ifam) :: list)
+                  [] (Driver.get_family p)
+              in
+              (l, Iper.Set.empty)
+            else ([], Iper.Set.empty)
+          else ([], Iper.Set.empty)
         in
         List.fold_left
           (fun txt (ips, ifamo) ->
-            if Iper.Set.mem ips set_lookup && not (is_suppressed ips) then txt
+            let skip =
+              Iper.Set.mem ips set_lookup
+              && (not (is_suppressed ips))
+              && not (Iper.Set.mem ips via_connector_iperse)
+            in
+            if skip then txt
             else
               let ps = Util.pget conf base ips in
               let auth =
