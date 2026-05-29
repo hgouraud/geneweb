@@ -110,11 +110,76 @@ let make_tree_hts conf base elem_txt vbar_txt invert set spl d =
     | _, _ -> true
   in
   let nowrap inner = {|<span class="text-nowrap">|} ^<^ inner ^>^ "</span>" in
+  (* B2 — Spouse hooks: a hook is a Left node with no parents in the DAG
+     whose children are exclusively Right phony connectors linking to
+     another Left parent. Hooks are pure spouse anchors injected by the
+     DAG builder when one side of a couple has no further ascending nor
+     descending path in the displayed set; the absolute-depth layout has
+     no rule to co-position them with their partner, so they render as
+     isolated cells with a bar descending toward the invisible connector.
+     We render hooks inline beside their partner and suppress their
+     standalone cell. When both sides of a couple are hooks, the lower
+     idag stays primary; the other is suppressed. *)
+  let other_left_parent cn ip =
+    List.find_map
+      (fun pid ->
+        match d.Dag2html.dag.(Dag2html.int_of_idag pid).Dag2html.valu with
+        | Left pip when pip <> ip -> Some pip
+        | _ -> None)
+      cn.Dag2html.pare
+  in
+  let is_hook_node n =
+    match n.Dag2html.valu with
+    | Left ip ->
+        n.Dag2html.pare = [] && n.Dag2html.chil <> []
+        && List.for_all
+             (fun cid ->
+               let cn = d.Dag2html.dag.(Dag2html.int_of_idag cid) in
+               match cn.Dag2html.valu with
+               | Right _ -> other_left_parent cn ip <> None
+               | _ -> false)
+             n.Dag2html.chil
+    | _ -> false
+  in
+  let suppressed_hooks =
+    let n_arr = d.Dag2html.dag in
+    let len = Array.length n_arr in
+    let rec loop i acc =
+      if i = len then acc
+      else
+        let n = n_arr.(i) in
+        let acc =
+          match n.Dag2html.valu with
+          | Left ip when is_hook_node n ->
+              let dominated =
+                List.exists
+                  (fun cid ->
+                    let cn = n_arr.(Dag2html.int_of_idag cid) in
+                    List.exists
+                      (fun pid ->
+                        let pi = Dag2html.int_of_idag pid in
+                        pi <> i
+                        &&
+                        match n_arr.(pi).Dag2html.valu with
+                        | Left _ -> (not (is_hook_node n_arr.(pi))) || pi < i
+                        | _ -> false)
+                      cn.Dag2html.pare)
+                  n.Dag2html.chil
+              in
+              if dominated then Iper.Set.add ip acc else acc
+          | _ -> acc
+        in
+        loop (i + 1) acc
+    in
+    loop 0 Iper.Set.empty
+  in
+  let is_suppressed ip = Iper.Set.mem ip suppressed_hooks in
   let indi_ip n =
     match n.Dag2html.valu with Left ip -> ip | Right _ -> Driver.Iper.dummy
   in
   let indi_txt n =
     match n.Dag2html.valu with
+    | Left ip when is_suppressed ip -> Adef.safe ""
     | Left ip ->
         let p = Util.pget conf base ip in
         let txt =
@@ -122,10 +187,11 @@ let make_tree_hts conf base elem_txt vbar_txt invert set spl d =
           ^^^ nowrap (string_of_item conf base (elem_txt p))
         in
         let spouses =
-          if ((spouse_on && n.chil <> []) || n.pare = []) && not invert then
+          if n.chil <> [] && (spouse_on || n.pare = []) && not invert then
             List.fold_left
               (fun list id ->
-                match d.Dag2html.dag.(Dag2html.int_of_idag id).valu with
+                let cn = d.Dag2html.dag.(Dag2html.int_of_idag id) in
+                match cn.Dag2html.valu with
                 | Left cip -> (
                     match Driver.get_parents (Util.pget conf base cip) with
                     | Some ifam ->
@@ -140,7 +206,25 @@ let make_tree_hts conf base elem_txt vbar_txt invert set spl d =
                           else (Driver.get_father cpl, Some ifam) :: list
                         else list
                     | None -> list)
-                | Right _ -> list)
+                | Right _ -> (
+                    match other_left_parent cn ip with
+                    | Some sp_ip
+                      when is_suppressed sp_ip
+                           && not (List.mem_assoc sp_ip list) ->
+                        let p = Util.pget conf base ip in
+                        let ifam_opt =
+                          Array.fold_left
+                            (fun acc ifam ->
+                              if acc <> None then acc
+                              else
+                                let cpl = Driver.foi base ifam in
+                                if Geneweb_db.Gutil.spouse ip cpl = sp_ip then
+                                  Some ifam
+                                else None)
+                            None (Driver.get_family p)
+                        in
+                        (sp_ip, ifam_opt) :: list
+                    | _ -> list))
               [] n.chil
           else if n.chil = [] then
             (* Childless leaf: spl (relation-path terminal spouses, e.g. m=RL
@@ -167,7 +251,7 @@ let make_tree_hts conf base elem_txt vbar_txt invert set spl d =
         in
         List.fold_left
           (fun txt (ips, ifamo) ->
-            if Iper.Set.mem ips set_lookup then txt
+            if Iper.Set.mem ips set_lookup && not (is_suppressed ips) then txt
             else
               let ps = Util.pget conf base ips in
               let auth =
@@ -193,7 +277,7 @@ let make_tree_hts conf base elem_txt vbar_txt invert set spl d =
     match n.Dag2html.valu with Left ip -> vbar_txt ip | _ -> Adef.escaped ""
   in
   let phony n =
-    match n.Dag2html.valu with Left _ -> false | Right _ -> true
+    match n.Dag2html.valu with Left ip -> is_suppressed ip | Right _ -> true
   in
   let t = Dag2html.table_of_dag phony false invert no_group d in
   if Array.length t.table = 0 then [||]
