@@ -170,6 +170,7 @@ let html_table_struct indi_ip indi_txt vbar_txt phony d t =
                 || t.table.(k).(j).elem = Nothing
               then TDnothing
               else if phony t.table.(i).(j).elem then TDnothing
+              else if phony t.table.(k).(j).elem then TDnothing
               else bar_txt (k <> i) t.table.(i).(j).elem
             in
             (colspan - 2, CenterA, td) :: les
