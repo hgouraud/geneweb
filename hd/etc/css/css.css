@@ -1301,9 +1301,10 @@ table hr.right { width: 50%; margin-left: 50%; }
 /* DAG */
 #dag                          { border-collapse: collapse; }
 #dag td                       { padding: 0; }
-#dag .dag-bar                 { line-height: 1.06; }
+#dag td:empty                 { min-width: 0.4em; }
+#dag .dag-bar, #dag .dag-cell { line-height: 1.06; }
 #dag .dag-collapse            { line-height: 0; }
-#dag .dag-cell > div.mx-1     { margin: 2px 0.25rem; }
+#dag .dag-cell                 { margin: 2px 0.25rem; }
 #dag .dag-img-slot {
   min-height: 75px;
   display: flex;
