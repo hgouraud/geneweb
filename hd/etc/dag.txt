@@ -173,7 +173,10 @@
 %include;trl
 </div>
 %include;js
+%( TODO: support m=D/A > break navigation links on pipes | %)
+%if;(e.m!="D" and e.m!="A")
 <script defer src="js/dagSvg.js"></script>
+%end;
 %query_time;
 </body>
 </html>
