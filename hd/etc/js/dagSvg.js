@@ -1,34 +1,9 @@
 /**
  * dagSvg.js — GeneWeb DAG table: overlay clean SVG connectors
  *
- * Geometry rules (derived from HTML structure):
- *
- * Each bar row sits between two "significant" rows. Scanning outward:
- *
- *   ABOVE a bar: either a content row or a branch row
- *   BELOW a bar: either a content row or a branch row
- *
- * y endpoints — all meet at branch CENTER (same Y as the drawn hr line):
- *   - toward content above  → y1 = contentBottom (div.mx-1 bottom)
- *   - toward branch above   → y1 = branch.y (center = where hr line is drawn)
- *   - toward content below  → y2 = contentTop (div.mx-1 top)
- *   - toward branch below   → y2 = branch.y (center = where hr line is drawn)
- *
- * BUT: when sigAbove is content AND sigBelow is branch, the bar spans
- * from contentBottom down to branchY. The td of the content cell may be
- * taller than its div.mx-1 (stretched by a sibling). In that case
- * contentBottom < tdBottom < branchY, so the line still reaches branchY
- * correctly — no gap. Use contentBottom for y1 always.
- *
- * cx — always the content cell this bar belongs to:
- *   - bar below a branch (child bar)  → cx = child content cell below
- *   - bar above a branch (parent bar) → cx = parent content cell above
- *   - bar between two content rows    → cx = content cell above
- * The hr lines position themselves via their own cell geometry.
- *
- * Horizontal lines:
- *   - all drawn at branchY of their row
- *   - runs with no right/left anchors = dashed (sibling reach)
+ * Content cells: td.dag-cell that is NOT dag-bar (TDitem person cells).
+ * y endpoints meet at branch CENTER (same Y as the drawn hr line).
+ * cx = centre of the content td.
  */
 
 (function () {
@@ -66,6 +41,10 @@
 
   /* ── Row classification ───────────────────────────────────────── */
 
+  function isContentTd(td) {
+    return td.classList.contains('dag-cell') && !td.classList.contains('dag-bar');
+  }
+
   function classifyRow(tr) {
     let hasBar = false, hasBranch = false, hasContent = false, hasHr = false;
     for (const td of tr.cells) {
@@ -76,7 +55,7 @@
         if (hr.className === 'right' || hr.className === 'left') hasBranch = true;
         continue;
       }
-      if (td.querySelector('a[id]')) hasContent = true;
+      if (isContentTd(td)) hasContent = true;
     }
     if (hasContent) return 'content';
     if (hasBar)     return 'bar';
@@ -97,6 +76,50 @@
     return map;
   }
 
+  /* ── Tight content rect for a td ─────────────────────────────── */
+  /*
+   * The td may be stretched taller than its rendered content by siblings.
+   * Before %dag_cell.item; the template may emit:
+   *   - nothing  (line_nbr=0 or index="-1")
+   *   - <a href=... title=...></a>                  (RLM / dag / em=R branch)
+   *   - <div class="position-relative"><a ...></a></div>  (D/A branch)
+   * These navigation elements are zero- or near-zero-height.
+   * %dag_cell.item; itself emits:
+   *   [div.dag-img-slot | div.text-center]   (portrait, may be absent)
+   *   span.text-nowrap                        (name + dates, always present)
+   *   [<br> + span.text-nowrap]*              (inline spouses)
+   *
+   * Strategy: iterate all descendants, collect rects of IMG and SPAN
+   * elements (the actual rendered atoms), take their union.
+   * Fallback to full td rect if nothing found.
+   */
+  function contentRect(td, toSVG) {
+    const tdR = toSVG(td.getBoundingClientRect());
+    let top = Infinity, bottom = -Infinity;
+
+    /* Walk every element inside the td */
+    const walker = document.createTreeWalker(td, NodeFilter.SHOW_ELEMENT);
+    let node = walker.nextNode();
+    while (node) {
+      const tag = node.tagName;
+      /* Only measure leaf content nodes — images and inline spans */
+      if (tag === 'IMG' || tag === 'SPAN') {
+        const r = toSVG(node.getBoundingClientRect());
+        if (r.h >= 1) {
+          if (r.y        < top)    top    = r.y;
+          if (r.y + r.h  > bottom) bottom = r.y + r.h;
+        }
+      }
+      node = walker.nextNode();
+    }
+
+    if (!isFinite(top) || bottom <= top) {
+      top    = tdR.y;
+      bottom = tdR.y + tdR.h;
+    }
+    return { top, bottom };
+  }
+
   /* ── Content index ────────────────────────────────────────────── */
 
   function buildContentIndex(rows, toSVG) {
@@ -106,15 +129,17 @@
       const colMap = buildColStarts(tr);
       idx[ri] = [];
       for (const td of tr.cells) {
-        if (!td.querySelector('a[id]')) continue;
+        if (!isContentTd(td)) continue;
         const tdR = toSVG(td.getBoundingClientRect());
-        const mx1 = td.querySelector('div.mx-1');
-        const mx1R = mx1 ? toSVG(mx1.getBoundingClientRect()) : null;
-        const contentTop    = mx1R ? mx1R.y          : tdR.y;
-        const contentBottom = mx1R ? mx1R.y + mx1R.h : tdR.y + tdR.h;
-        const cs = colMap.get(td);
-        const ce = cs + parseInt(td.getAttribute('colspan') || '1', 10);
-        idx[ri].push({ cs, ce, cx: tdR.cx, tdTop: tdR.y, contentTop, contentBottom });
+        const cs  = colMap.get(td);
+        const ce  = cs + parseInt(td.getAttribute('colspan') || '1', 10);
+        const cr  = contentRect(td, toSVG);
+        idx[ri].push({
+          cs, ce,
+          cx:            tdR.cx,
+          contentTop:    cr.top,
+          contentBottom: cr.bottom,
+        });
       }
     });
     return idx;
@@ -173,7 +198,6 @@
 
     const STROKE = 'var(--color-border-secondary, #999)';
 
-    /* First significant (non-empty, non-bar) row in direction dir */
     function nearestSig(ri, dir) {
       for (let r = ri + dir; r >= 0 && r < nRows; r += dir) {
         const t = rowType[r];
@@ -208,7 +232,6 @@
         /* ── y1 ── */
         let y1 = barR.y;
         if (aboveIsBranch) {
-          /* Child bar: start at branch center — same Y where the hr line is drawn */
           const b = branchIdx[sigAbove.ri];
           if (b && b.y !== null) y1 = b.y;
         } else if (sigAbove && sigAbove.type === 'content') {
@@ -219,7 +242,6 @@
         /* ── y2 ── */
         let y2 = barR.y + barR.h;
         if (belowIsBranch) {
-          /* Parent bar: end at branch center — same Y where the hr line is drawn */
           const b = branchIdx[sigBelow.ri];
           if (b && b.y !== null) y2 = b.y;
         } else if (sigBelow && sigBelow.type === 'content') {
@@ -227,27 +249,20 @@
           if (e) y2 = e.contentTop;
         }
 
-        /* ── cx ── always the content cell this bar belongs to:
-              child bar (above is branch) → content BELOW
-              parent bar (below is branch) → content ABOVE
-              direct bar (no branch)       → content ABOVE
-           The hr lines position themselves correctly using cell geometry;
-           the vertical bar just needs to meet branchY at the right x.  */
+        /* ── cx ── */
         let cx = barR.cx;
         if (aboveIsBranch) {
-          /* Child bar: content is below */
           if (sigBelow && sigBelow.type === 'content') {
             const e = findOverlap(contentIdx, sigBelow.ri, cs, ce);
             if (e) cx = e.cx;
           }
         } else if (sigAbove && sigAbove.type === 'content') {
-          /* Parent bar or direct bar: content is above */
           const e = findOverlap(contentIdx, sigAbove.ri, cs, ce);
           if (e) cx = e.cx;
         }
 
         if (y2 > y1 + 1) {
-          svg.appendChild(makeLine(cx, y1, cx, y2, STROKE, '1', false));
+          svg.appendChild(makeLine(cx, y1, cx, y2, STROKE, '2', false));
         }
       }
     });
@@ -271,7 +286,6 @@
       }
       hrCells.sort(function (a, b) { return a.cs - b.cs; });
 
-      /* Group into contiguous runs */
       const runs = [];
       let cur = [];
       hrCells.forEach(function (c, i) {
@@ -289,11 +303,11 @@
           if (r.w < 1) return;
           const y = midY !== null ? midY : r.cy;
           if (c.cls === 'full') {
-            svg.appendChild(makeLine(r.x, y, r.x + r.w, y, STROKE, '1', dashed));
+            svg.appendChild(makeLine(r.x, y, r.x + r.w, y, STROKE, '2', dashed));
           } else if (c.cls === 'right') {
-            svg.appendChild(makeLine(r.cx, y, r.x + r.w, y, STROKE, '1', false));
+            svg.appendChild(makeLine(r.cx, y, r.x + r.w, y, STROKE, '2', false));
           } else if (c.cls === 'left') {
-            svg.appendChild(makeLine(r.x, y, r.cx, y, STROKE, '1', false));
+            svg.appendChild(makeLine(r.x, y, r.cx, y, STROKE, '2', false));
           }
         });
       });
