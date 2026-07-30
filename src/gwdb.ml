@@ -386,7 +386,14 @@ value person2_fun =
         burial_place = self.get_burial_place pp;
         burial_src = self.get_burial_src pp; notes = self.get_notes pp;
         psources = self.get_psources pp; key_index = self.get_key_index pp};
-     dsk_person_of_person p = failwith "not impl dsk_person_of_person";
+     dsk_person_of_person (db2, i) =
+       let desc =
+         try
+           sprintf "\"%s.%d %s\"" (sou2 (self.get_first_name (db2, i)))
+             (self.get_occ (db2, i)) (sou2 (self.get_surname (db2, i)))
+         with [ _ -> "<unreadable>" ]
+       in
+       failwith (sprintf "not impl dsk_person_of_person; person %d %s" i desc);
      get_consang (db2, i) =
        match db2.consang_array with
        [ Some tab -> tab.(i)
@@ -448,7 +455,9 @@ value person2gen_fun =
    gen_person_of_person (db2, i, p) =
      map_person_ps (fun p -> p) (fun s -> Istr2New db2 s) p;
    dsk_person_of_person (db2, i, p) =
-     failwith "not impl dsk_person_of_person (gen)";
+     failwith
+       (sprintf "not impl dsk_person_of_person (gen); person %d \"%s.%d %s\""
+          i p.Def.first_name p.Def.occ p.Def.surname);
    get_consang (db2, i, a) = a.Def.consang;
    get_parents (db2, i, a) = a.Def.parents;
    get_family (db2, i, u) = u.Def.family}

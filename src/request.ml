@@ -921,14 +921,19 @@ value this_request_updates_database conf =
 type t = [ Accept | Refuse ];
 *)
 value treat_request_on_base conf log =
-  let bfile = Util.base_path [] (conf.bname ^ ".gwb") in
-  if this_request_updates_database conf then
+    if conf.wizard
+    || conf.friend
+    || p_getenv conf.base_env "visitor_access" <> Some "no"
+    then
+      let bfile = Util.base_path [] (conf.bname ^ ".gwb") in
+      if this_request_updates_database conf then
 (**)
     lock Mutil.lock_file bfile with
 (*
     match if Sys.file_exists "refuse" then Refuse else Accept with
 *)
-    [ Accept -> treat_request_on_possibly_locked_base conf bfile log
-    | Refuse -> Update.error_locked conf ]
-  else treat_request_on_possibly_locked_base conf bfile log
+      [ Accept -> treat_request_on_possibly_locked_base conf bfile log
+      | Refuse -> Update.error_locked conf ]
+      else treat_request_on_possibly_locked_base conf bfile log
+    else Hutil.incorrect_request conf
 ;
