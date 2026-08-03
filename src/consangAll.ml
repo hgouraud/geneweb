@@ -33,7 +33,7 @@ value trace quiet cnt max_cnt =
   do {
     if quiet then ProgrBar.run (max_cnt - cnt) max_cnt
     else do {
-      Printf.eprintf "%7d\008\008\008\008\008\008\008" cnt;
+      Printf.eprintf "%9d\008\008\008\008\008\008\008\008\008" cnt;
       flush stderr;
     }
   }

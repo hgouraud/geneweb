@@ -886,23 +886,31 @@ value fold_option fsome vnone =
   | None -> vnone ]
 ;
 
-value changed_p (ip, p, o_sex, o_rpar) =
-  let i = Adef.int_of_iper ip in
-  try
-    let p = Gwdb.dsk_person_of_person p in
-    let _p =
-      {(p) with
-       sex = fold_option (fun s -> s) p.sex o_sex;
-       rparents =
-         fold_option
-           (List.map
-              (Futil.map_relation_ps (fun p -> p)
-                 (fun s -> Adef.istr_of_int 0)))
-           p.rparents o_rpar}
-    in
-    do { Printf.eprintf "person %d not changed\n" i; flush stderr }
-  with
-  [ Failure msg -> do { Printf.eprintf "changed_p: %s\n" msg; flush stderr } ]
+value so_sex =
+  fun
+  [ Male -> "M" | Female -> "F" | Neuter -> "?" ]
+;
+
+value changed_p base (ip, p, o_sex, o_rpar) =
+  match o_sex with
+  [ Some s ->
+      let role =
+        match s with
+        [ Male   -> "role masculin (parrain / pere / temoin H)"
+        | Female -> "role feminin (marraine / mere / temoin F)"
+        | Neuter -> "role indetermine" ]
+      in
+      do {
+        Printf.eprintf
+          "SEXE INCOHERENT: person %d  %S.%d %S  sexe declare=%s  %s  =>  correction proposee=%s\n"
+          (Adef.int_of_iper ip)
+          (Gwdb.p_first_name base p) (Gwdb.get_occ p) (Gwdb.p_surname base p)
+          (so_sex (Gwdb.get_sex p)) role (so_sex s);
+        flush stderr
+      }
+  | None ->
+      (* o_sex = None : pas d'incoherence de sexe, rien a signaler *)
+      () ]
 ;
 
 value mkdir_and_open_out_field_unknown_size tmp_dir (name, valu) = do {
@@ -1092,7 +1100,7 @@ value link next_family_fun bdir = do {
       let base = Gwdb.open_base bdir in
       if do_check.val then
         Check.check_base base (set_error base) (set_warning base)
-          (fun _ -> True) changed_p pr_stats.val
+          (fun _ -> True) (changed_p base) pr_stats.val
       else ();
       if do_consang.val then
         let _ : option _ = ConsangAll.compute base (-1) True False in ()
