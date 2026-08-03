@@ -1,0 +1,17 @@
+; À ajouter dans le dune de ged2gwb (et retirer la préprocessing camlp5 de ce
+; répertoire — c'était le dernier utilisateur, cf. `(preprocess (pps ...))` /
+; `camlp5` dans les libraries).
+
+(ocamllex gedDateLexer)
+
+(menhir
+ (modules gedDateParser))
+
+(executable
+ (name ged2gwb)
+ (libraries geneweb geneweb_db str)   ; plus besoin de camlp5.* ni camlp-streams
+ (modules ged2gwb gedDateAux gedDateParser gedDateLexer))
+
+; Ordre de dépendance : gedDateAux <- gedDateParser <- gedDateLexer <- ged2gwb
+; (dune le résout seul).  Vérifier les conflits avec :
+;   menhir --explain gedDateParser.mly   (produit gedDateParser.conflicts)
