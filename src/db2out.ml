@@ -88,10 +88,10 @@ value output_value_array_compress bdir e _ pad f = do {
       fname nb_items.val;
   }
   else if Db2.first_item_pos nb_items.val > Db2.first_item_pos len then do {
-    (* may happen one day and to be debugged then *)
+    let delta = Db2.first_item_pos nb_items.val - Db2.first_item_pos len in
     Printf.eprintf "nb_items %d\n" nb_items.val;
-    Printf.eprintf "first_item_pos nb_items %d\n"
-      (Db2.first_item_pos nb_items.val);
+    Printf.eprintf "first_item_pos nb_items %d (decalage access %d)\n"
+      (Db2.first_item_pos nb_items.val) delta;
     flush stderr;
     Printf.eprintf "rebuilding it...";
     flush stderr;
@@ -110,13 +110,29 @@ value output_value_array_compress bdir e _ pad f = do {
     close_in ic;
     Mutil.remove_file fname;
     Sys.rename (fname ^ "2") fname;
+    (* CORRECTION : l'en-tete definitif est plus long de "delta" octets que
+       celui reserve (len = phony_min_size) ; toutes les valeurs de "data" ont
+       donc ete decalees de "delta". Les offsets de "access", calcules avec
+       l'ancien en-tete, doivent etre decales d'autant (sentinelles -1 preservees). *)
+    let afname = Filename.concat bdir ("access" ^ e) in
+    let ica = open_in_bin afname in
+    let oca = open_out_bin (afname ^ "2") in
+    try
+      while True do {
+        let p = input_binary_int ica in
+        output_binary_int oca (if p >= 0 then p + delta else p)
+      }
+    with [ End_of_file -> () ];
+    close_out oca;
+    close_in ica;
+    Mutil.remove_file afname;
+    Sys.rename (afname ^ "2") afname;
     Printf.eprintf " ok";
     flush stderr;
     (* test *)
     check_input_value "Db2out.output_value_array_compress 1"
       fname nb_items.val;
-  }
-  else assert False;
+  }  else assert False;
 };
 
 type hashtbl_t 'a 'b =
