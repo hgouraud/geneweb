@@ -646,5 +646,6 @@ let output base =
   (* FIXME: should not be present in this part of the code? *)
   Mutil.rm (Filename.concat bname "tstab");
   Mutil.rm (Filename.concat bname "tstab_visitor");
+
   (* final test against 4Go size limit *)
   test_size bname
