@@ -5,10 +5,8 @@
  (preprocess
   (action
    (run
-    camlp5o
-    %{lib:camlp5:pa_extend.cmo}
-    %{lib:camlp5:q_MLast.cmo}
-    %{lib:camlp5:o_keywords.cmo}
-    %{lib:camlp5:pr_o.cmo}
-    %{input-file})))
- (libraries camlp5 unix str geneweb_db geneweb))
+    not-ocamlfind
+    preprocess
+    -package
+    -syntax
+ (libraries unix str geneweb_db geneweb))
