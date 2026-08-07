@@ -812,6 +812,21 @@ let print_empty_family opts base p =
 
 let print_family opts base gen m =
   let fam = m.m_fam in
+  (* Nouveau format (hors old_gw) : la date, le lieu (#mp) et la source (#ms)
+     de mariage ne sont portes que par le bloc fevt lorsqu'un evenement de type
+     mariage y figure, afin de ne pas dupliquer l'information sur la ligne "fam". *)
+  let marr_in_fevents =
+    (not !old_gw)
+    && List.exists
+         (fun e ->
+           match e.efam_name with
+           | Efam_Marriage | Efam_NoMarriage | Efam_Engage | Efam_NoMention
+           | Efam_MarriageBann | Efam_MarriageContract | Efam_MarriageLicense
+           | Efam_PACS | Efam_Residence ->
+               true
+           | _ -> false)
+         (Driver.get_fevents fam)
+  in
   let fath, moth =
     if Driver.get_sex m.m_fath = Female && Driver.get_sex m.m_moth = Male then
       (m.m_moth, m.m_fath)
@@ -820,7 +835,8 @@ let print_family opts base gen m =
   Printf.ksprintf (oc opts) "fam ";
   print_parent opts base gen fath;
   Printf.ksprintf (oc opts) " +";
-  print_date_option opts (Date.od_of_cdate (Driver.get_marriage fam));
+  if not marr_in_fevents then
+    print_date_option opts (Date.od_of_cdate (Driver.get_marriage fam));
   let print_sexes s =
     let c x =
       match Driver.get_sex x with Male -> 'm' | Female -> 'f' | Neuter -> '?'
@@ -848,9 +864,10 @@ let print_family opts base gen m =
   | MarriageLicense -> if not !old_gw then print_sexes "#license"
   | Pacs -> if not !old_gw then print_sexes "#pacs"
   | Residence -> if not !old_gw then print_sexes "#residence");
-  print_if_no_empty opts base "#mp" (Driver.get_marriage_place fam);
-  if opts.source = None then
-    print_if_no_empty opts base "#ms" (Driver.get_marriage_src fam);
+  if not marr_in_fevents then (
+    print_if_no_empty opts base "#mp" (Driver.get_marriage_place fam);
+    if opts.source = None then
+      print_if_no_empty opts base "#ms" (Driver.get_marriage_src fam));
   (* divorce and separation are events, but we keep it if old_gw *)
   (if !old_gw then
      match Driver.get_divorce fam with
