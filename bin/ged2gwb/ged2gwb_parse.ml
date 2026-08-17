@@ -715,7 +715,11 @@ let p_date_calendar toks =
       ((d, Adef.Dgregorian), r)
 
 (* NB: the AFT->Before / BEF->After mapping is reproduced bug-for-bug from the
-   original grammar (ged2gwb date: rule). *)
+   original grammar (ged2gwb date: rule). 
+   Corrected to AFT -> After, BEF -> Before,
+   but observe that these cases can never occur in actual output 
+   Could happen in BET AFT 1900 AND …, but is overwritten by the BET
+   or thrown away when happening in the second date *)
 
 let p_date toks =
   let withp p r =
@@ -726,8 +730,8 @@ let p_date toks =
   | ID "ABT" :: r -> withp Adef.About r
   | ID "ENV" :: r -> withp Adef.About r
   | ID "EST" :: r -> withp Adef.Maybe r
-  | ID "AFT" :: r -> withp Adef.Before r
-  | ID "BEF" :: r -> withp Adef.After r
+  | ID "AFT" :: r -> withp Adef.After r
+  | ID "BEF" :: r -> withp Adef.Before r
   | _ -> p_date_calendar toks
 
 let p_date_range toks =
