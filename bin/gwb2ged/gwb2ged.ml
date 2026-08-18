@@ -1,9 +1,5 @@
 module Driver = Geneweb_db.Driver
-<<<<<<< HEAD
 module Dirs = Geneweb_dirs
-=======
-module Stream = Geneweb_compat.Stream
->>>>>>> ce6b07587 (remove camlp_streams dependency)
 
 let with_indexes = ref false
 
