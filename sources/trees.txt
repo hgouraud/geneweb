@@ -1,0 +1,21 @@
+Source : https://geneweb.tuxfamily.org/wiki/trees
+Récupération : extrait substantiel via recherche (cumul de deux passages distincts obtenus séparément dans la conversation)
+
+---
+
+[Premier extrait, obtenu précédemment :]
+The templm template offers similar functions under the headings "Ascendants", "Siblings", "Descendants", as well as under the "Relations" heading. The latter displays the tree between the selected person and all its relations (godfather, godmother, godchildren, persons to which he or she was witness at some event). Each event in turn offers a button to display the relation between the person and its witnesses.
+
+[Second extrait :]
+The example above merges all the ascendance path between Henri Bidaud (lui) and his relations (godparents, godchildren, person for which he was witness at some event), and has been augmented, for the sake of demonstration, by some links to a common ancestor. At this time, there is no option to instruct the m=RLM command to use relation by marriage paths. This explains the isolated person "Francis Redier" (mariage) for which Henri was witness to his wedding with Chantal Bridaud.
+
+The url can be enriched with image=on; and spouse=on;.
+
+In addition to the classical descendant tree (m=D&t=V) another descendant tree template is proposed (m=D&t=TV). In this new descendant tree, it is possible to reduce the width of the tree by selecting one particular descendant with the clickable vertical bar above that person. With this option, the tree will be limited to the direct ascendants of the selected person plus the brothers and sisters of those ascendants (but not their other descendants).
+
+A small monospace font based on DejaVu Sans Mono with only needed characters is available at /webfonts/dejavusansmono-genewebfont.woff2 (9 ko) and should do the job since v7. If you still see bad rendering of the descendant horizontal treeview, check your browser fixed width font and choose a "better monospaced one". DejaVuSans.ttf works well.
+
+[Note : l'exemple "Henri Bidaud" utilisé par le wiki officiel pour illustrer cette fonctionnalité
+correspond vraisemblablement à l'utilisateur Henri (hgouraud) lui-même, cf. les autres
+occurrences de son nom trouvées sur d'autres pages du même wiki (Henri/Gouraud dans wikitext,
+signature "Henri" dans une issue GitHub sur connex).]

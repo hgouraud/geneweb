@@ -1,0 +1,33 @@
+Source : https://geneweb.tuxfamily.org/wiki/templates
+Récupération : extrait substantiel via recherche (fetch complet tenté, timeout)
+
+---
+
+Using templates - GeneWeb
+
+The file perso.txt controls the display of information associated with each person. Two modes of operation are provided through the following structure: Import of utilities functions and menu bar.
+
+The menu bar of the perso.txt page provides an interface to change the value of this p_mod parameter and to select options. As the mouse hovers on the option button, a pop-up showing the general aspect of the chosen option will appear. On the right of the selection window, these pop-ups will accumulate representing the resulting page. You may choose any set of (single) letters (a-z) to designate modules.
+
+The default configuration file a.gwf provides the list of available modules. For GeneWeb version 7.1 (after beta version and next cid reference) the default list of modules is hardcoded in etc/perso_utils.txt as documented in git cid 81a6acbdd.
+
+Users have the possibility to add their own modules, to be stored in the folder: [tronqué dans l'extrait obtenu].
+
+Note that the value of p_mod can be stored in the base.gwf parameter file. GeneWeb copies this value automatically in each URL in a fashion similar to the templ= variable.
+
+- welcome.txt: the welcome page shown when you connect to localhost:2317/basename.
+- perso.txt: the page that displays one individual of the base.
+- updfam.txt: the page containing the form to update a family.
+
+A template is a set of such files organized into a coherent user interface.
+
+---
+COMPLÉMENT — page Talk:templates (discussion, en français), signée "Henri83" — probable
+ancien pseudonyme/alias d'Henri sur ce wiki :
+
+Je pense aussi que les fichiers hed.txt et trl.txt (et probablement copyr.txt) ne sont pas
+traités de la même manière et que leur ordre de recherche est légèrement différent. À suivre.
+— Henri83 (talk), 24 October 2015
+
+Discussion : on est confronté à un problème dans la mesure où il y a deux critères de choix
+des fichiers template : la base et le template.

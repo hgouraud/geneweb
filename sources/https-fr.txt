@@ -1,0 +1,21 @@
+Source : https://geneweb.tuxfamily.org/wiki/https/fr
+Récupération : extrait obtenu précédemment dans la conversation
+
+---
+
+[Guide de configuration HTTPS pour GeneWeb, deux approches selon le mode de fonctionnement :]
+
+- Mode CGI : configurer un VirtualHost Apache sur le port 443 avec un certificat TLS (par
+  exemple Let's Encrypt), Apache gérant le HTTPS en amont de GeneWeb.
+- Mode service (gwd sur le port 2317) : encapsuler gwd avec l'outil stunnel4, en configurant
+  les certificats dans son fichier de configuration (modèle fourni dans
+  /usr/share/doc/stunnel4/examples/stunnel.conf-sample sur les systèmes basés Debian).
+
+Une redirection automatique du HTTP (port 80) vers HTTPS peut être ajoutée via un second
+VirtualHost Apache utilisant RewriteEngine/RewriteRule.
+
+Procédure testée sur Ubuntu Server 16.04 en janvier 2017, valable pour Debian et dérivés ;
+non utilisable sur macOS à cette date.
+
+[Contenu détaillé (exemples de configuration Apache/stunnel complets) non conservé verbatim
+au moment de la première consultation — seul ce résumé a été noté.]

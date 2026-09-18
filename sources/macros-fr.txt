@@ -1,0 +1,148 @@
+Source : https://geneweb.tuxfamily.org/wiki/macros/fr
+Récupération : contenu transmis directement par l'utilisateur (copié depuis son navigateur) —
+version plus complète que macros.txt (anglais) sur plusieurs points, notamment la distinction
+des deux contextes d'utilisation des macros.
+
+---
+
+Description des variables
+
+Base
+- %t : nom de la base.
+- %f : en mode serveur, nom de la base, suivi de l'éventuel mot de passe (ex: toto_xyzzy) ; en mode CGI, nom de la commande CGI (ex: gwd.exe).
+- %g : en mode serveur, comme "%f" ; en mode CGI, nom de la commande CGI suivi de "?b=", du nom de la base et d'un point-virgule (ex: gwd.exe?b=toto;).
+- %s : valeur de "%f" suivi d'un point d'interrogation et des variables contextuelles (voir ci-dessous) suivies d'un point-virgule. Ex: toto?lang=it;iz=8233;.
+
+Compte
+- %c : nombre d'accès à la page d'accueil.
+- %q : nombre de requêtes.
+- %d : date de la première consultation.
+
+Conditionnels
+Les conditionnels commencent par "%I" suivi d'une expression booléenne (vrai ou faux) et se terminent par %E. Le texte entre ces deux macros est affiché si et seulement si l'expression booléenne est vraie. Une expression booléenne est soit :
+- f : on est "ami"
+- w : on est "magicien"
+- j : on est "magicien" juste "ami" (cf fichier a.gwf, "wizard_just_friend")
+- c : on est en mode cgi
+- h : il y a un fichier historique
+- l : le navigateur ne traite pas les tables
+- n : il y a des notes pour la base de données
+- t : il y a une recherche par titres de noblesse
+- z : il y a une personne prise comme référence Sosa (voir macro "%u")
+- a : il y a une restriction globale d'accès à la base de données
+- N : contraire de l'expression qui suit
+- | : "ou" logique entre les deux expressions qui suivent
+- & : "et" logique entre les deux expressions qui suivent
+
+Exemples :
+afficher le texte s'il y a une recherche par titre : %It...%E
+afficher le texte si on est ni "magicien" ni "ami" : %I&NwNf...%E
+
+Divers
+- %r suivi d'un nom et d'un retour-ligne : inclusion du fichier "nom.txt". Le fichier nom.txt doit se trouver au même endroit que le fichier source qui l'invoque (à vérifier!!) — l'expérience montre par exemple que css.txt doit être :
+  - dans gw/etc pour les fichiers associés à l'affichage par gwd (perso.txt, ...)
+  - dans bases/src/base si css.txt est invoqué dans un fichier résultant d'un "%sm=SRC;v=fichier".
+- %b : valeur de la variable "body_prop" du fichier "toto.gwf" pour la base "toto".
+- %h : variables contextuelles (voir ci-dessous) sous la forme "<input type=hidden name=var value=val>".
+- %l : langue.
+- %n : nombre de personnes de la base.
+- %u : personne prise comme référence Sosa.
+- %% : un seul "%".
+- %[ : un "[".
+- %] : un "]".
+
+Variables contextuelles
+Les variables contextuelles sont celles qui influencent l'ensemble du comportement de gwd (par opposition à celles qui sont associées à une seule requête). Elles apparaissent explicitement dans l'URL d'accès à GeneWeb.
+- lang
+- templ
+- pz, nz, ocz, iz (prénom, nom, occurrence, index d'une référence sosa)
+- p_mod
+- liste à compléter à partir du code...
+
+Contexte d'utilisation — DISTINCTION IMPORTANTE
+Les macros peuvent être utilisées dans deux contextes au comportement très différent :
+
+1. Dans le contenu d'un fichier appelé avec la commande m=SRC : dans ce contexte, TOUTES les
+   macros citées ci-dessus sont actives.
+
+2. Dans le contenu d'une note (personnelle, relative à un événement, ou page liée) : dans ce
+   contexte, SEULES DEUX macros sont actives : %s et une variante spécifique de la macro %v.
+   La commande %vtexte; est remplacée par le contenu de la variable bvar.var_texte, avec une
+   syntaxe d'expansion supplémentaire des variables d'environnement système
+   ${SYSTEM_ENV_VARIABLE} si la variable expand_env=yes est présente dans le fichier .gwf.
+
+Les macros fréquemment utilisées
+- %b que vous pourrez mettre dans le tag "<body>" en l'écrivant "<body%b>".
+- %s que vous pourrez mettre dans les liens.
+
+Exemple de phrase dans "celebres.txt" :
+  Voyez mon cousin <a href="%sp=louis;n=de+bourbon;oc=5">
+  Louis XIV</a> et mes
+  <a href="%sem=R;ep=jean;en=dupont;m=NG;n=louis+xiv;t=PN">
+  liens de parenté</a> avec lui.
+
+Liste des macros (tableau complet — Macro | Example use | Result | What it does)
+
+%a | %a | | Displays name of sosa reference (See %Iz below)
+%b | %b | | Value of "body_prop" (in base.gwf)
+%c | %c | 42 | Number of queries for the welcome page
+%d | %d | 10 décembre 2018 | Date of first visit
+%D | %D | 10/12/2018 | Date of first visit
+%e | %e | UTF-8 | Character set
+%f | %f | HenriT_w | In server mode, base name followed by password. In CGI mode, name of the CGI command (ex: gwd.exe)
+%g | %g | HenriT_w? | In server mode, same as "f". In CGI mode, name of the command, followed by "?b=basename;"
+%h | %h | | A list of var=value for each hidden url variable
+%i | %i | #2f6400 | Highlight color
+%j | %j | | Include hed.txt file
+%k | %k | geneweb? | Value of the action parameter of a http GET/PUT command
+%l | %l | fr | Language
+%L | %L | left | Left (style: used in align="%L")
+%m | %m | 30 | Value of latest_event (in base.gwf)
+%n | %n | 8879 | Number of persons in the base
+%N | %N | : titre | Content of [as] first line of base.gwb/notes file
+%o | %o | images | Value of %image_prefix; (see doc for image_prefix details, to be completed)
+%p | %p | %p | noop
+%P | %P | next | (%Pc)
+%q | %q | 285 | Number of queries
+%r | %rfile | test for macros | Reads file bases/src/base/test.txt (file must be followed by "end of line")
+%R | %R | right | Right (style: used in align="%R")
+%s | %s | HenriT_w? | Value of %f followed by "?" and contextual variables (ex: "toto?lang=it;iz=8233;"). Typical use: <a href="%sp=first_name&n=surname">Link to person First_name Surname</a>
+%t | %t | HenriT | Base name
+%T | %T | | Value of %doctype; (given that doctype translates into <!-- .... -->, nothing is visible in the result column. Look at the sources to verify)
+%u | %ufr; | français | returns "Français" if lang=fr, and "French" if lang=en (don't forget the ;)
+%U | %U | : hg | User name
+%v | %v | 7.00-exp | Returns GeneWeb version number
+%v | %vtext; | xxxx | Specific to the NOTES context: returns the value of bvar.var_text
+%V | %Vvar; | oui | Value of bvar.var (in base.gwf), example %Vtest;
+%w | %w | | Link to previous page (with back arrow icon)
+%x | %x | %x | noop
+%X | %Xvar; | macros | Value of evar.var (in URL), example %Xv;
+%y | %y | %y | noop
+%/ | %/ | | if doctype = "html-4.01" then "" else "/" (used to terminate html tags as in <br%/>)
+%% | %% | % | %
+%Ia | %IaYes%E %INaNo%E | No | auth_file exists. Global access restriction is on (see Access)
+%Ic | %IcYes%E %INcNo%E | No | Cannot handle passwords
+%If | %IfYes%E %INfNo%E | No | We are "Friend"
+%Ih | %IhYes%E %INhNo%E | Yes | There is a history file
+%Ij | %IjYes%E %INjNo%E | No | Wizard_just_friend is active
+%Il | %IlYes%E %INlNo%E | No | Browser handles tables
+%Im | %ImYes%E %INmNo%E | Yes | notes_links <> []
+%In | %InYes%E %INnNo%E | Yes | There is a base note file
+%Io | %IoYes%E %INoNo%E | Yes | Notes dir exists
+%Ip | %Iptest;Yes%E %INptest;No%E | Yes | Base env variable <> "" (var terminated by ;)
+%Is | %IsYes%E %INsNo%E | Yes | Base env variable <> "no"
+%Iw | %IwYes%E %INwNo%E | Yes | We are "Wizard"
+%Iz | %IzYes%E %INzNo%E | No | Sosa ref exists
+
+Expressions are limited to the following macros: a c f j l m n o p s w z which return True or False.
+
+%It | %ItYes%E %INtNo%E | !!!!!t!!!!!Yes !!!!!t!!!!! | Bad macro (twice) (prints !!!!x!!!!, returns True)
+%IN | %IN[expression] | | Inverts the result of [expression] (See %If thru %Iz for usage examples)
+%I| | %I|fwfrd or wiz%E | frd or wiz | Logical "or" of the two following expressions
+%I& | %I&whwizard and history file%E | wizard and history file | Logical "and" with two following expressions
+
+[NOTE : différences repérées avec macros.txt (version anglaise) :
+- %N ici décrit comme "Content of [as] first line of base.gwb/notes file", alors que la version
+  anglaise disait "Content of base_notes_title (.gwf)" — divergence à clarifier.
+- %I| et %I& n'ont ici pas d'exemple "the command character... is a vertical bar" précisé côté
+  anglais, mais le sens reste identique.]

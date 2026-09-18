@@ -1,0 +1,48 @@
+Source : https://geneweb.tuxfamily.org/wiki/UI
+Récupération : intégrale, verbatim (via web_fetch)
+
+---
+
+Web based interface
+
+GeneWeb offers a general purpose web based interface to its users. Any standard browser can be used to access a GeneWeb base, either on your personal computer or on a remote server.
+
+Start page
+After a fresh install and a launch of the appropriate start command (depending on your environment), a simple startup page will propose to:
+- open a GeneWeb base
+- open the GeneWeb management tool
+
+Welcome page
+Opening a base will display a welcome page organized into:
+- a search area used to explore the base
+- a tool area for reports and tools
+
+The welcome page offers the possibility to change the global appearance of the pages through the selection of a template (in most cases, template selection will not be visible until a personal page is displayed). The template selection is maintained across the navigation through the base, and can be changed at any time, either through a visible button, or by typing directly in the URL the text templ=template_name;
+
+The welcome page also offers the possibility to select another language for the user interface.
+- GeneWeb 5.02 offered this through a set of country flag icons.
+- GeneWeb 7.00 offers a set of 9 buttons for frequently used languages.
+
+At any time, the language may be changed, either through a visible button, or by typing directly in the URL the text lang=xx; where xx is the two letter code (ISO 639-1) of the language of your choice.
+
+All the wordings of the user interface which go through the translation process (some rare texts might escape this) are kept in a lexicon (gw/lang/lex-utf8.txt) which is editable if some translations were not to your liking.
+
+Individual pages
+Individual pages display personal data associated with a person in a format which greatly depends on the template you have chosen. Most of the data on the page is "clickable" and will follow a link to another individual, or trigger the display of a list. Tools are provided in a format which depends on the GeneWeb version you are using:
+- GeneWeb 5.02: a tool-box area at the bottom of the page (template templ502)
+- GeneWeb 6.08 and later: a pull-down cascaded menu bar at the top of the page
+
+A set of six views of the same page with templates c, d, f, h, m and 502. Note that templm brings its full power through its update forms!
+
+Update pages
+All data capture is performed through pages containing HTML forms organized into:
+- zones (one person, one event, a note).
+- fields (one or more lines where text can be entered).
+- checkboxes
+- buttons
+- radio buttons
+- pull-down menus
+
+Template templm offers a large set of keyboard shortcuts facilitating navigation within families and in the base during update sessions.
+
+On some pages, you may notice next to individuals or families a small "wrench" icon that will link directly to the update page for this person or this family.

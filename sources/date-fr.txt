@@ -1,0 +1,31 @@
+Source : https://geneweb.tuxfamily.org/wiki/date/fr
+Récupération : extrait substantiel via recherche
+
+---
+
+Raccourcis pour la saisie des dates - GeneWeb - TuxFamily
+
+Si les jours et mois inférieurs à 10 sont saisis avec leur 0 initial (c'est-à-dire sur deux chiffres), par exemple 04 07 pour le 4 juillet, il n'y a pas besoin de tabuler pour changer de champ. De fait 04071776 écrira la date complète dans les trois champs adéquats.
+
+Si un champ s'efface après la saisie c'est que la date est incohérente : il est impossible d'écrire des dates incorrectes avec templm ; mois et jours sont vérifiés, de même que les années bissextiles pour les 29 février.
+
+Pour les mois du calendrier républicain, les raccourcis sont VD, BR, FM, NI, PL, VT, GE, FL, PR, ME, TH, FT et JC pour le mois complémentaire (JC). En cas d'hésitation, cliquer sur le champ mois vide déroule la liste complète et saisir la première initiale ouvre un menu déroulant avec des suggestions (par exemple V donne VD ou VT pour vendémiaire ou ventôse).
+
+La nomenclature utilisée pour les dates courtes sur les fiches individuelles et dans la plupart des autres pages de GeneWeb est la suivante :
+1935-1950 = né en 1935, mort en 1950
+1935- = né en 1935, date de décès inconnue
+1935 = né en 1935, toujours vivant
+†1950 = date de naissance inconnue, décédé en 1950
+† = date de naissance inconnue, date de décès inconnue
+/1935 = avant 1935
+1935/ = après 1935
+ca 1935 = vers 1935
+?1935 = peut-être en 1935
+1935/1938 = en 1935 ou en 1938
+1935..1938 = entre 1935 et 1938
+
+Plusieurs raccourcis sont disponibles dans les formulaires pour modifier la précision des dates directement dans le champ année : [liste non reproduite ici dans l'extrait obtenu].
+
+Les fonctions ci-dessous sont disponibles sur le template m uniquement. D'autres raccourcis sont gérés par templm sur une fiche individuelle dans le champ année d'une date : [liste non reproduite ici dans l'extrait obtenu].
+
+Il est possible de réaliser des additions et soustractions dans le champ année.

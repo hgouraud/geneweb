@@ -1,0 +1,125 @@
+Source : https://geneweb.tuxfamily.org/wiki/distribution
+Récupération : ÉCHEC — la page wiki elle-même n'a pas pu être localisée via recherche.
+Substituts faisant autorité trouvés à la place : le Makefile source du projet (qui construit
+la distribution) et un README GitHub montrant un listing réel de dossier installé.
+
+---
+
+EXTRAIT 1 — README.md de github.com/geneweb/geneweb (structure de la distribution) :
+
+Download the file corresponding to your environment from the releases page.
+Extract the distribution folder and place it at the location of your choice. You may also
+rename it. Its content is as follows (this example is for a GNU/Linux distribution; other
+distributions are very similar):
+
+distribution/
+├── bases
+├── CHANGES.txt
+├── gw
+│   ├── a.gwf
+│   ├── connex
+│   ├── consang
+│   ├── etc
+│   ├── ged2gwb
+│   ├── gwb2ged
+│   ├── gwc
+│   ├── gwd
+│   ├── gwd.arg
+│   ├── gwdiff
+│   ├── gwfixbase
+│   ├── gwrepl
+│   ├── gwsetup
+│   ├── gwu
+│   ├── images
+│   ├── lang
+│   ├── plugins
+│   ├── setup
+│   └── update_nldb
+├── gwd.sh
+├── gwsetup.sh
+├── install-cgi
+├── install-cgi.sh
+├── LICENSE.txt
+├── LISEZMOI.txt
+├── README.txt
+└── START.htm
+
+Starting the GeneWeb servers may depend on your specific environment.
+
+---
+
+EXTRAIT 2 — README.md de github.com/stweil/geneweb (LISTING RÉEL D'UNE INSTALLATION,
+propriétaire des fichiers affiché : "Henri") :
+
+Extract the distribution folder and place it at the location of your choice. You may also
+rename it. Its content is as follows (this example is for a Mac distribution. Other
+distributions are very similar):
+
+drwxr-xr-x  13 Henri  staff     416 10 jul 08:34 .
+drwxr-xr-x  44 Henri  staff    1408 10 jul 16:14 ..
+-rw-r--r--   1 Henri  staff  160427 10 jul 08:34 CHANGES.txt
+-rw-r--r--   1 Henri  staff   18007 10 jul 08:34 LICENSE.txt
+-rw-r--r--   1 Henri  staff    1053 10 jul 08:34 LISEZMOI.txt
+-rw-r--r--   1 Henri  staff     950 10 jul 08:34 README.txt
+-rw-r--r--   1 Henri  staff   10780 10 jul 08:34 START.htm
+drwxr-xr-x   2 Henri  staff      64 10 jul 08:34 bases
+-rwxr-xr-x   1 Henri  staff    1632 10 jul 08:34 geneweb.command
+drwxr-xr-x  21 Henri  staff     672 10 jul 08:34 gw
+-rwxr-xr-x   1 Henri  staff      67 10 jul 08:34 gwd.command
+-rwxr-xr-x   1 Henri  staff      71 10 jul 08:34 gwsetup.command
+
+Starting the GeneWeb servers may depend on your specific environment.
+
+Windows: TBD
+MacOS: Apple provides a security mechanism p[reventing...] (voir contenu déjà archivé ailleurs, page configuration/README GitHub principal)
+
+---
+
+EXTRAIT 3 — Makefile source (règle "distrib", montre la construction exacte du dossier) :
+
+BUILD_DISTRIB_DIR=$(BUILD_DIR)/bin/distrib/
+distrib: exe
+	$(RM) -r $(DISTRIB_DIR)
+	mkdir $(DISTRIB_DIR)
+	mkdir -p $(DISTRIB_DIR)/bases
+	cp CHANGES $(DISTRIB_DIR)/CHANGES.txt
+	cp LICENSE $(DISTRIB_DIR)/LICENSE.txt
+	cp etc/README.txt $(DISTRIB_DIR)/.
+	cp etc/LISEZMOI.txt $(DISTRIB_DIR)/.
+	cp etc/START.htm $(DISTRIB_DIR)/.
+	if test $(OS_TYPE) = "Win"; then \
+		cp etc/Windows/gwd.bat $(DISTRIB_DIR); \
+		cp etc/Windows/gwsetup.bat $(DISTRIB_DIR); \
+		cp -f etc/Windows/README.txt $(DISTRIB_DIR)/README.txt; \
+		cp -f etc/Windows/LISEZMOI.txt $(DISTRIB_DIR)/LISEZMOI.txt; \
+	elif test $(OS_TYPE) = "Darwin"; then \
+		cp etc/gwd $(DISTRIB_DIR)/gwd.command; \
+		cp etc/gwsetup $(DISTRIB_DIR)/gwsetup.command; \
+		cp etc/macOS/geneweb.command $(DISTRIB_DIR); \
+	else \
+		cp etc/gwd $(DISTRIB_DIR); \
+		cp etc/gwsetup $(DISTRIB_DIR); \
+	fi
+	mkdir $(DISTRIB_DIR)/gw
+	cp etc/a.gwf $(DISTRIB_DIR)/gw/.
+	echo "127.0.0.1" > $(DISTRIB_DIR)/gw/only.txt
+	echo "-setup_link" > $(DISTRIB_DIR)/gw/gwd.arg
+	cp bin/distrib/setup/intro.txt $(DISTRIB_DIR)/gw/setup/
+
+EXE = \
+	bin/distrib/connex \
+	bin/distrib/consang \
+	bin/distrib/ged2gwb \
+	bin/distrib/gwb2ged \
+	bin/distrib/gwc \
+	bin/distrib/gwd \
+	bin/distrib/gwdiff \
+	bin/distrib/gwtp \
+	bin/distrib/gwu \
+	bin/distrib/setup \
+	bin/distrib/update_nldb
+
+(Source : https://github.com/geneweb/geneweb/blob/master/Makefile — confirme au passage que
+gwd.arg par défaut ne contient que "-setup_link", et que only.txt par défaut contient
+"127.0.0.1". Note : gwtp apparaît dans EXE mais pas dans la liste README plus haut — outil
+supplémentaire non documenté ailleurs dans ce manuel, à investiguer.)

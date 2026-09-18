@@ -1,0 +1,20 @@
+Source : https://geneweb.tuxfamily.org/wiki/header
+Récupération : ÉCHEC — la page elle-même n'a pas pu être localisée malgré plusieurs tentatives.
+Éléments trouvés ailleurs et pertinents :
+
+---
+
+Depuis bases.txt : hed.txt (en-tête spécifique à la base) et trl.txt (pied de page spécifique
+à la base) résident dans le dossier etc/mybase/ (structure classique) ou etc/ (structure reorg
+7.x.x).
+
+Depuis Talk:templates (discussion, signée "Henri83") : les fichiers hed.txt et trl.txt (et
+probablement copyr.txt) ne sont peut-être pas traités de la même manière, avec un ordre de
+recherche légèrement différent — point resté en suspens ("à suivre") dans la discussion.
+
+Depuis changelog (entrée ancienne, 26 janvier 2001, nommage historique antérieur à la
+structure actuelle) : les fichiers en-tête et bas de page portaient alors les noms
+lang/base.hed et lang/base.trl. Deux macros spécifiquement utilisables dans ces fichiers :
+%p (remplacé par le préfixe de l'URL courante, jusqu'au point d'interrogation) et %s (par le
+suffixe, après le point d'interrogation) — permettant de construire une adresse indépendante
+de l'index, utilisable comme signet.

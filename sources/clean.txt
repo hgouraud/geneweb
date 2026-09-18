@@ -1,0 +1,19 @@
+Source : https://geneweb.tuxfamily.org/wiki/Clean
+Récupération : extrait substantiel via recherche
+
+---
+
+Cleaning up a GeneWeb database - GeneWeb
+
+This article explains how to clean up a GeneWeb database using command lines. This action is also available through the gwsetup interface.
+
+As you progress in the modification of your base, some issues may crop up:
+- After a lot of modifications, response time may increase.
+- If you add or modify families, consanguinity does not appear anymore or is incorrect.
+- If you suppress persons or families, the corresponding space in the base is not reclaimed (the total number of persons in the base does not vary after suppressions).
+
+To correct all these problems, it is necessary to clean up the base.
+
+A first action can be performed with consang which will recompute consanguinity for the whole base and improve access time. If your base is named toto, the command is: [commande exacte non retranscrite dans l'extrait obtenu — voir consang.txt pour la syntaxe générale].
+
+The execution speed of this command depends largely on the size of your base. During this process, update possibilities are prohibited.

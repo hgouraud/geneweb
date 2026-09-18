@@ -1,0 +1,16 @@
+Source : https://geneweb.tuxfamily.org/wiki/plugins
+Récupération : la page elle-même n'a pas été localisée ; options confirmées via la page gwd
+
+---
+
+Extrait de la page gwd, confirmant exactement les options déjà documentées dans plugins.txt/gwd.txt :
+
+-plugin <PLUGIN>.cmxs
+    load a safe plugin. Combined with -force to enable for every base. Combined with -unsafe
+    to allow unverified plugins. e.g. "-plugin -unsafe -force".
+-plugins <DIR>
+    load all plugins in <DIR>. Combined with -force to enable for every base. Combined with
+    -unsafe to allow unverified plugins. e.g. "-plugins -unsafe -force".
+
+(Le contenu propre de la page "plugins" elle-même — structure d'un plugin, plugins fournis en
+standard, etc. — reste à documenter si la page peut être localisée ultérieurement.)

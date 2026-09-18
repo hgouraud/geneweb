@@ -1,0 +1,45 @@
+Source : https://geneweb.tuxfamily.org/wiki/Windows
+Récupération : intégrale, verbatim (via web_fetch)
+
+RÉSERVE IMPORTANTE : cette page décrit un installeur Windows classique (licence, choix du
+dossier, raccourcis...) pour GeneWeb 6 — probablement une méthode ancienne, remplacée depuis
+par la distribution actuelle (archive .zip à extraire, lancement via START.htm), documentée
+dans installation-win.md à partir d'autres sources. Ne pas mélanger les deux procédures sans
+vérifier laquelle s'applique à la version actuelle de master.
+
+---
+
+Install GeneWeb 6 on Windows
+
+Screenshots are made under Windows 7 and may change a bit depending on your Windows version.
+
+Download and run setup
+- Download GeneWeb for Windows and click on downloaded file.
+- When you run the install program, the "Open file - Security Warning" dialog may appear. Click "Run".
+
+Select the setup language
+- Click "Next".
+
+License Agreement
+- Accept the License Agreement then click "Next".
+
+Destination folder
+- Click "Browse" to select the destination location to install GeneWeb. Otherwise, leave the default setting and click "Next".
+
+Shortcuts location
+- Select Start Menu Folder for GeneWeb's shortcuts location. By default all shortcuts are located in 'GeneWeb 6.00'.
+
+Desktop icon
+- Select "Create a Desktop Icon" to create a shortcut on your desktop, then click "Next".
+
+Ready to install
+- Click "Install" to continue with the installation, or click "Back" if you want to review or change any settings.
+
+Completing setup
+- Click "Finish" to launch GeneWeb.
+
+Allow firewall
+- When you launch GeneWeb for the first time, you need to allow access to gwd and gwsetup programs to the firewall of your computer.
+
+GeneWeb is installed
+- If you have checked the last three options of the setup, gwd and gwsetup are launched and a page will be shown in your default web browser.

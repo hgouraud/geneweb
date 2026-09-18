@@ -1,0 +1,23 @@
+Source : https://geneweb.tuxfamily.org/wiki/FAQ
+Récupération : contenu obtenu précédemment dans la conversation (fetch réussi à l'époque)
+
+---
+
+[Résumé fidèle des points retenus lors de la consultation initiale, la page complète n'ayant
+pas été conservée verbatim :]
+
+- Lors d'un import GEDCOM, quand un seul parent est mentionné, GeneWeb crée automatiquement
+  l'autre parent avec un prénom/nom composé d'un point d'interrogation "?" — pour matérialiser
+  un parent manquant mais nécessairement existant, plutôt que d'inventer une identité.
+- La liste des liens de parenté entre deux personnes est volontairement tronquée pour éviter
+  un affichage trop long ; les liens non affichés restent réels et comptent dans le calcul de
+  consanguinité.
+- Le statut décès/vivant connaît trois états (vivant / décédé / ne sait pas) ; l'âge n'est
+  affiché que pour les personnes considérées vivantes. Un import GEDCOM aboutit souvent à
+  "ne sait pas" par défaut, ce format n'ayant pas de mention "vivant" explicite.
+- Pour un problème de démarrage de `gwd` en mode CGI : vérifier le journal du serveur HTTP
+  (Apache), et les droits d'accès (l'utilisateur `nobody` sous Unix a souvent très peu de
+  droits, pouvant empêcher l'exécution de `gwd`).
+- Une question ancienne sur les coupures de connexion internet liées à des connexions par
+  modem à la demande et au mode hors-ligne de certains navigateurs — contenu probablement
+  daté, pertinence actuelle non vérifiée.

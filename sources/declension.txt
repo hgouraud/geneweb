@@ -1,0 +1,36 @@
+Source : https://geneweb.tuxfamily.org/wiki/declension
+Récupération : intégrale, verbatim (via web_fetch)
+
+---
+
+Languages with declension
+
+In some languages, first-names and last-names may have different spelling depending on their place in a phrase. These situations are called "declensions". This is the case in the Czech language (one of the languages supported by GeneWeb).
+
+For instance, the following chunks in English:
+… married to Vladana
+… cousin of Vladana
+
+translate in Czech as:
+… si vzal Vladanu
+… bratranci Vladany
+
+The first name Vladana has several forms: "Vladana" is called nominative, "Vladanu" accusative, "Vladany" genitive.
+
+Data capture
+In the lexicon for this language, and in the captured data, these cases are designated by letters between two colons. In Czech, accusative and genitive are designated by letters :a: and :g:.
+
+In a form where you want to enter a first name or a last name subject to declension, enter the nominative form, followed by the two other forms.
+
+There are two possible shortcuts:
+- a form beginning with + means "start from the nominative form": Adler:g:+a means that the genitive form for "Adler" is "Adlera"
+- a form beginning with - means "start from the nominative form, but subtract one letter from the end" (-- means subtract two, etc.). The form Vladana:a:-u:g:-y is valid for the case described above.
+
+When displaying the data about one person, the nominative form is usually displayed. The other forms are used only in the context of full expressions where the language requires their use.
+
+If a language without declension has been selected, the nominative will be the only form visible.
+
+The full form, with declension data, appears in the update form.
+
+Language specific documentation
+There is no documentation on each language's specific cases. Look at linguistic sites, available examples in other genealogy sites, and possibly some examples in the lexicon.

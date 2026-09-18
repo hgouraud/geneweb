@@ -1,0 +1,59 @@
+Source : https://geneweb.tuxfamily.org/wiki/lexicon
+Récupération : extrait substantiel via recherche (cumul de deux passages)
+
+---
+
+Multilingual lexicon for GeneWeb - GeneWeb
+
+Upcoming version 7.1 of GeneWeb proposes a new organisation for resource files (templates and lexicons). Lexicons are placed in plugins/v7/assets/lex, and all the files in this folder are added to the lexicon.
+
+Goodwill to expand GeneWeb translations capabilities is welcome!!
+
+[Complément obtenu séparément, plus tôt dans la conversation :]
+The documentation lists a wide range of variables to be used in "notes" (%t, %f, ...), but most of them seem not to work in all contexts — see macros.txt for the definitive, verified list of macros and their actual behavior.
+
+---
+COMPLÉMENT 2 (extrait de recherche distinct) :
+
+GeneWeb performs text translations according to rules contained in a file called lex-utf8.txt
+and start_utf8.txt in the folder gw/lang of your installation. The second file contains text
+specific to the welcome page. Version 7 of GeneWeb has reverted to the initial lexicon.txt
+naming. These files are encoded according to UTF-8, and it is important to maintain this
+encoding if you decide to edit their content. GeneWeb versions 5 and before were using the
+file lexicon.txt encoded in Latin-1.
+
+[NOTE : légère tension avec ce qui est documenté ailleurs (i18n-lexiques.md dit "lex_utf8.txt"
+comme nom de fichier v7) — cet extrait affirme que la v7 "est revenue" au nom "lexicon.txt".
+Possible confusion entre plusieurs sous-versions 7.x, ou évolution du nommage au fil du temps.
+À clarifier avant de trancher.]
+
+---
+COMPLÉMENT 3 — liste complète des codes langue confirmée :
+
+Goodwill to expand GeneWeb translations capabilities is welcome!! See the contribute page.
+
+The language of the user interface of GeneWeb is selectable from the welcome page, or can be
+changed at any time by adding the lang=xx text in the URL, where xx is the two-letter code
+(ISO 639-1) of the language of your choice:
+
+af=Afrikaans ar=Arabic bg=Bulgarian br=Breton ca=Catalan co=Corsican cs=Czech da=Danish
+de=German en=English eo=Esperanto es=Spanish et=Estonian fi=Finnish fr=French he=Hebrew
+is=Icelandic it=Italian lt=Lithuanian lv=Latvian nl=Dutch no=Norwegian oc=Occitan pl=Polish
+pt=Portuguese pt-br=Brazilian-Portuguese ro=Romanian ru=Russian sk=Slovak sl=Slovenian
+sv=Swedish tr=Turkish zh=Chinese
+
+Note that if the command lang= appears multiple times in the URL, only the first one will be
+taken into account.
+
+The lexicon is a text file which defines translations in several languages (hopefully all the
+ones supported by GeneWeb, but not necessarily) for terms that appear at the head of [tronqué].
+
+Some languages offer multiple translations for a single item, e.g. (french revolution month)
+fr: vendémiaire/brumaire/frimaire/nivôse/pluviôse/ventôse/germinal/floréal/prairial/messidor/
+thermidor/fructidor/complémentaire ; son/daughter/child fr: fils/fille/enfant.
+
+Several translation items may appear between brackets, separated by two colons, as in
+[$add::parents]. In this case, the terms "add" and "parents" have each their own entry
+[tronqué].
+
+

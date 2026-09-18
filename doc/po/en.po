@@ -1,0 +1,2726 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Manuel utilisateur GeneWeb\n"
+"POT-Creation-Date: 2026-09-18T11:16:33+02:00\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/SUMMARY.md:1
+msgid "Table des matières"
+msgstr "Table of Contents"
+
+#: src/SUMMARY.md:3
+msgid "Introduction Démarrage rapide"
+msgstr "Introduction Quick start"
+
+#: src/SUMMARY.md:6
+msgid "GeneWeb (administration serveur)"
+msgstr "GeneWeb (server administration)"
+
+#: src/SUMMARY.md:8 src/geneweb/installation.md:1
+msgid "Installation"
+msgstr "Installation"
+
+#: src/SUMMARY.md:9 src/geneweb/installation-binaires-sources.md:1
+msgid "Binaires et sources"
+msgstr "Binaries and sources"
+
+#: src/SUMMARY.md:10
+msgid "Windows"
+msgstr "Windows"
+
+#: src/SUMMARY.md:11
+msgid "Unix / Linux"
+msgstr "Unix / Linux"
+
+#: src/SUMMARY.md:12
+msgid "macOS"
+msgstr "macOS"
+
+#: src/SUMMARY.md:13
+msgid "Docker"
+msgstr "Docker"
+
+#: src/SUMMARY.md:14 src/geneweb/base.md:1
+msgid "Mise en place et paramétrisation d'une base"
+msgstr "Setting up and configuring a database"
+
+#: src/SUMMARY.md:15 src/geneweb/base-localisation.md:1
+msgid "Localisation d'une base"
+msgstr "Locating a database"
+
+#: src/SUMMARY.md:16
+msgid "Fichier .gwf"
+msgstr ".gwf file"
+
+#: src/SUMMARY.md:17 src/geneweb/gestion.md:1
+msgid "Gestion d'une base (outils gwsetup)"
+msgstr "Managing a database (gwsetup tools)"
+
+#: src/SUMMARY.md:18 src/geneweb/gestion-import-export.md:1
+msgid "Import / export : gwu, gwb2ged, gwc, ged2gwb"
+msgstr "Import / export: gwu, gwb2ged, gwc, ged2gwb"
+
+#: src/SUMMARY.md:19 src/geneweb/gestion-maintenance.md:1
+msgid "Maintenance : update_nldb, consang, connex, cache_files"
+msgstr "Maintenance: update_nldb, consang, connex, cache_files"
+
+#: src/SUMMARY.md:21
+msgid "Magicien (administration de base)"
+msgstr "Wizard (database administration)"
+
+#: src/SUMMARY.md:23 src/magicien/creation.md:1
+msgid "Création d'individu / famille"
+msgstr "Creating an individual / family"
+
+#: src/SUMMARY.md:24 src/magicien/creation-champs.md:1
+msgid "Signification des divers champs"
+msgstr "Meaning of the various fields"
+
+#: src/SUMMARY.md:25 src/magicien/creation-notes.md:1
+msgid "Notes diverses"
+msgstr "Miscellaneous notes"
+
+#: src/SUMMARY.md:26 src/magicien/images-carrousel.md:1
+msgid "Portraits, blasons, images, carrousel"
+msgstr "Portraits, coats of arms, images, carousel"
+
+#: src/SUMMARY.md:27 src/magicien/navigation-maj.md:1
+msgid "Navigation et mise à jour"
+msgstr "Navigation and updating"
+
+#: src/SUMMARY.md:28 src/magicien/navigation-maj-dates.md:1
+msgid "Convention date → MOD_IND"
+msgstr "Date convention → MOD_IND"
+
+#: src/SUMMARY.md:29 src/magicien/suppression-fusion.md:1
+msgid "Suppression, fusion"
+msgstr "Deletion, merging"
+
+#: src/SUMMARY.md:30 src/magicien/outils-dictionnaires.md:1
+msgid "Outils : dictionnaires, correction orthographique"
+msgstr "Tools: dictionaries, spelling correction"
+
+#: src/SUMMARY.md:32
+msgid "Utilisateur"
+msgstr "User"
+
+#: src/SUMMARY.md:34 src/utilisateur/recherche.md:1
+msgid "Recherche"
+msgstr "Search"
+
+#: src/SUMMARY.md:35 src/utilisateur/navigation.md:1
+msgid "Navigation"
+msgstr "Navigation"
+
+#: src/SUMMARY.md:36 src/utilisateur/affichage.md:1
+msgid "Affichage : pages, arbres, relations"
+msgstr "Display: pages, trees, relationships"
+
+#: src/SUMMARY.md:38
+msgid "Divers"
+msgstr "Miscellaneous"
+
+#: src/SUMMARY.md:40 src/divers/format-gw.md:1
+msgid "Le format .gw"
+msgstr "The .gw format"
+
+#: src/SUMMARY.md:41 src/divers/format-wiki.md:1
+msgid "Le format wiki"
+msgstr "The wiki format"
+
+#: src/SUMMARY.md:42 src/divers/securite.md:1
+msgid "Sécurité et contrôle d'accès"
+msgstr "Security and access control"
+
+#: src/SUMMARY.md:43 src/divers/templates.md:1
+msgid "Templates"
+msgstr "Templates"
+
+#: src/SUMMARY.md:44 src/divers/i18n-lexiques.md:1
+msgid "Internationalisation, lexiques"
+msgstr "Internationalization, lexicons"
+
+#: src/SUMMARY.md:45 src/divers/faq.md:1
+msgid "FAQ / Dépannage"
+msgstr "FAQ / Troubleshooting"
+
+#: src/SUMMARY.md:49 src/glossaire.md:1
+msgid "Glossaire"
+msgstr "Glossary"
+
+#: src/index.md:1
+msgid "Introduction"
+msgstr "Introduction"
+
+#: src/index.md:3
+msgid ""
+"Ce manuel documente **GeneWeb** "
+"([geneweb/master](https://github.com/geneweb/geneweb)), un logiciel libre de"
+" généalogie fonctionnant comme serveur web."
+msgstr ""
+"This manual documents **GeneWeb** "
+"([geneweb/master](https://github.com/geneweb/geneweb)), a free genealogy "
+"program that runs as a web server."
+
+#: src/index.md:5
+msgid ""
+"Il s'adresse à trois publics différents, correspondant aux trois grandes "
+"parties de ce manuel :"
+msgstr ""
+"It is aimed at three different audiences, matching the three main parts of "
+"this manual:"
+
+#: src/index.md:7
+msgid ""
+"**GeneWeb** (administration serveur) : installation du logiciel, création et"
+" paramétrisation des bases, outils de gestion en ligne de commande. Public :"
+" administrateur système / hébergeur de la base."
+msgstr ""
+"**GeneWeb** (server administration): installing the software, creating and "
+"configuring databases, command-line management tools. Audience: system "
+"administrator / database host."
+
+#: src/index.md:8
+msgid ""
+"**Magicien** (administration de base) : création et modification des fiches,"
+" gestion des images, fusion/suppression, outils d'aide à la saisie. Public :"
+" généalogiste gérant le contenu d'une base."
+msgstr ""
+"**Wizard** (database administration): creating and editing records, managing"
+" images, merging/deleting, data-entry helper tools. Audience: the "
+"genealogist managing a database's content."
+
+#: src/index.md:9
+msgid ""
+"**Utilisateur** : recherche, navigation, consultation des arbres et "
+"relations. Public : visiteur consultant une base."
+msgstr ""
+"**User**: searching, browsing, and viewing trees and relationships. "
+"Audience: a visitor consulting a database."
+
+#: src/index.md:11
+msgid ""
+"Une section **Divers** regroupe les sujets transverses (formats de fichiers,"
+" sécurité, personnalisation, internationalisation)."
+msgstr ""
+"A **Miscellaneous** section groups cross-cutting topics (file formats, "
+"security, customization, internationalization)."
+
+#: src/index.md:13
+msgid ""
+"**Périmètre de cette documentation** Ce manuel documente le comportement de "
+"la branche `master` du dépôt officiel "
+"[geneweb/geneweb](https://github.com/geneweb/geneweb). Les forks et versions"
+" dérivées peuvent présenter des différences non couvertes ici."
+msgstr ""
+"**Scope of this documentation** This manual documents the behavior of the "
+"`master` branch of the official "
+"[geneweb/geneweb](https://github.com/geneweb/geneweb) repository. Forks and "
+"derivative versions may differ in ways not covered here."
+
+#: src/index.md:16
+msgid "Comment contribuer à cette documentation"
+msgstr "How to contribute to this documentation"
+
+#: src/demarrage-rapide.md:1
+msgid "Démarrage rapide"
+msgstr "Quick start"
+
+#: src/geneweb/installation.md:3
+msgid ""
+"Cette section décrit les différentes méthodes pour installer et lancer un "
+"serveur GeneWeb à partir de la branche `master` du [dépôt "
+"officiel](https://github.com/geneweb/geneweb)."
+msgstr ""
+"This section describes the various ways to install and run a GeneWeb server "
+"from the `master` branch of the [official "
+"repository](https://github.com/geneweb/geneweb)."
+
+#: src/geneweb/installation.md:5
+msgid ""
+"**Attention avant toute mise à jour** Il est fortement recommandé d'exporter"
+" vos bases au format `.gw` avant d'installer une nouvelle version de GeneWeb"
+" (voir [Le format .gw](../divers/format-gw.md)), le format interne des bases"
+" pouvant évoluer d'une version à l'autre."
+msgstr ""
+"**Before any update** It is strongly recommended to export your databases to"
+" `.gw` format before installing a new version of GeneWeb (see [The .gw "
+"format](../divers/format-gw.md)), since the internal database format may "
+"change between versions."
+
+#: src/geneweb/installation.md:8
+msgid "Vue d'ensemble des méthodes"
+msgstr "Overview of the methods"
+
+#: src/geneweb/installation.md:10
+msgid "Méthode"
+msgstr "Method"
+
+#: src/geneweb/installation.md:10
+msgid "Cas d'usage recommandé"
+msgstr "Recommended use case"
+
+#: src/geneweb/installation.md:10
+msgid "Détails"
+msgstr "Details"
+
+#: src/geneweb/installation.md:12
+msgid "**Binaires précompilés**"
+msgstr "**Precompiled binaries**"
+
+#: src/geneweb/installation.md:12
+msgid "La plupart des utilisateurs — aucune dépendance à installer"
+msgstr "Most users — no dependency to install"
+
+#: src/geneweb/installation.md:12 src/geneweb/installation.md:13
+msgid "[Binaires et sources](installation-binaires-sources.md)"
+msgstr "[Binaries and sources](installation-binaires-sources.md)"
+
+#: src/geneweb/installation.md:13
+msgid "**Compilation depuis les sources**"
+msgstr "**Building from source**"
+
+#: src/geneweb/installation.md:13
+msgid ""
+"Développeurs, contributeurs, plateformes non couvertes par les binaires"
+msgstr "Developers, contributors, platforms not covered by the binaries"
+
+#: src/geneweb/installation.md:14
+msgid "**Docker**"
+msgstr "**Docker**"
+
+#: src/geneweb/installation.md:14
+msgid "Déploiement serveur, environnement isolé et reproductible"
+msgstr "Server deployment, isolated and reproducible environment"
+
+#: src/geneweb/installation.md:14
+msgid "[Docker](installation-docker.md)"
+msgstr "[Docker](installation-docker.md)"
+
+#: src/geneweb/installation.md:16
+msgid ""
+"Les instructions spécifiques à chaque système sont détaillées dans les pages"
+" suivantes :"
+msgstr "System-specific instructions are detailed in the following pages:"
+
+#: src/geneweb/installation.md:17
+msgid "[Windows](installation-win.md)"
+msgstr "[Windows](installation-win.md)"
+
+#: src/geneweb/installation.md:18
+msgid "[Unix / Linux](installation-unix.md)"
+msgstr "[Unix / Linux](installation-unix.md)"
+
+#: src/geneweb/installation.md:19
+msgid "[macOS](installation-mac.md)"
+msgstr "[macOS](installation-mac.md)"
+
+#: src/geneweb/installation.md:21
+msgid "Essayer sans installer"
+msgstr "Trying it without installing"
+
+#: src/geneweb/installation.md:23
+msgid ""
+"Pour un premier essai sans rien installer localement, GeneWeb peut être "
+"exécuté directement dans un notebook [Google "
+"Colab](https://github.com/geneweb/geneweb/blob/master/geneweb_colab.ipynb) "
+"fourni dans le dépôt."
+msgstr ""
+"For a first try without installing anything locally, GeneWeb can be run "
+"directly in a [Google "
+"Colab](https://github.com/geneweb/geneweb/blob/master/geneweb_colab.ipynb) "
+"notebook provided in the repository."
+
+#: src/geneweb/installation-binaires-sources.md:3
+msgid "Télécharger les binaires précompilés"
+msgstr "Downloading the precompiled binaries"
+
+#: src/geneweb/installation-binaires-sources.md:5
+msgid ""
+"La méthode la plus simple consiste à télécharger une archive précompilée "
+"depuis la [page des releases "
+"GitHub](https://github.com/geneweb/geneweb/releases/latest), pour Linux, "
+"macOS ou Windows."
+msgstr ""
+"The simplest method is to download a precompiled archive from the [GitHub "
+"releases page](https://github.com/geneweb/geneweb/releases/latest), for "
+"Linux, macOS, or Windows."
+
+#: src/geneweb/installation-binaires-sources.md:7
+msgid "Téléchargez l'archive correspondant à votre système."
+msgstr "Download the archive matching your system."
+
+#: src/geneweb/installation-binaires-sources.md:8
+msgid ""
+"Extrayez-la à l'emplacement de votre choix (le dossier peut être renommé "
+"sans problème)."
+msgstr ""
+"Extract it to the location of your choice (the folder can be renamed without"
+" issue)."
+
+#: src/geneweb/installation-binaires-sources.md:9
+msgid ""
+"Le contenu de la distribution se présente ainsi (l'exemple ci-dessous "
+"correspond à une distribution GNU/Linux ; les autres systèmes sont très "
+"similaires) :"
+msgstr ""
+"The distribution's contents look like this (the example below is for a "
+"GNU/Linux distribution; other systems are very similar):"
+
+#: src/geneweb/installation-binaires-sources.md:28
+msgid ""
+"Voir les pages [Windows](installation-win.md), [Unix / Linux](installation-"
+"unix.md) et [macOS](installation-mac.md) pour le premier lancement propre à "
+"chaque système."
+msgstr ""
+"See the [Windows](installation-win.md), [Unix / Linux](installation-"
+"unix.md), and [macOS](installation-mac.md) pages for the first launch "
+"specific to each system."
+
+#: src/geneweb/installation-binaires-sources.md:30
+msgid "Compiler depuis les sources"
+msgstr "Building from source"
+
+#: src/geneweb/installation-binaires-sources.md:32
+msgid ""
+"Recommandé pour les développeurs, les contributeurs, ou si aucun binaire "
+"précompilé ne correspond à votre plateforme."
+msgstr ""
+"Recommended for developers, contributors, or if no precompiled binary "
+"matches your platform."
+
+#: src/geneweb/installation-binaires-sources.md:34
+msgid "Prérequis"
+msgstr "Prerequisites"
+
+#: src/geneweb/installation-binaires-sources.md:36
+msgid "[OCaml](https://ocaml.org) 4.10 ou supérieur"
+msgstr "[OCaml](https://ocaml.org) 4.10 or later"
+
+#: src/geneweb/installation-binaires-sources.md:37
+msgid "[opam](https://opam.ocaml.org), le gestionnaire de paquets OCaml"
+msgstr "[opam](https://opam.ocaml.org), the OCaml package manager"
+
+#: src/geneweb/installation-binaires-sources.md:39
+msgid "Étapes de compilation"
+msgstr "Build steps"
+
+#: src/geneweb/installation-binaires-sources.md:44
+msgid "# Installer les dépendances déclarées par les fichiers .opam du projet\n"
+msgstr "# Install the dependencies declared by the project's .opam files\n"
+
+#: src/geneweb/installation-binaires-sources.md:47
+msgid "# Configurer le projet (voir les options ci-dessous)\n"
+msgstr "# Configure the project (see the options below)\n"
+
+#: src/geneweb/installation-binaires-sources.md:50
+msgid ""
+"# Compiler et générer une distribution complète (équivalent au contenu d'une"
+" release)\n"
+msgstr ""
+"# Build and generate a complete distribution (equivalent to a release)\n"
+
+#: src/geneweb/installation-binaires-sources.md:55
+msgid ""
+"`make distrib` produit un dossier de distribution avec la même structure que"
+" les archives précompilées (voir ci-dessus), prêt à être déplacé et lancé "
+"comme n'importe quelle release."
+msgstr ""
+"`make distrib` produces a distribution folder with the same structure as the"
+" precompiled archives (see above), ready to be moved and launched like any "
+"release."
+
+#: src/geneweb/installation-binaires-sources.md:57
+msgid ""
+"Pour connaître les options de configuration disponibles (par exemple activer"
+" l'API, choisir le format de base de données, etc.) :"
+msgstr ""
+"To see the available configuration options (e.g. enabling the API, choosing "
+"the database format, etc.):"
+
+#: src/geneweb/installation-binaires-sources.md:63
+msgid ""
+"**Note pour les contributeurs** Le projet a changé de système de "
+"configuration au fil du temps (auparavant un script shell `configure`, "
+"aujourd'hui `configure.ml`). Assurez-vous de suivre les instructions du "
+"`README.md` de la version exacte de `master` que vous clonez, celles-ci "
+"pouvant évoluer."
+msgstr ""
+"**Note for contributors** The project's configuration system has changed "
+"over time (previously a shell script `configure`, now `configure.ml`). Make "
+"sure to follow the instructions in the `README.md` of the exact `master` "
+"version you clone, as they may change."
+
+#: src/geneweb/installation-win.md:1
+msgid "Installation sous Windows"
+msgstr "Installing on Windows"
+
+#: src/geneweb/installation-win.md:3 src/geneweb/installation-unix.md:3
+#: src/geneweb/installation-mac.md:3
+msgid ""
+"Cette page suppose que vous disposez déjà d'une distribution GeneWeb, "
+"précompilée ou compilée depuis les sources (voir [Binaires et "
+"sources](installation-binaires-sources.md))."
+msgstr ""
+"This page assumes you already have a GeneWeb distribution, either "
+"precompiled or built from source (see [Binaries and sources](installation-"
+"binaires-sources.md))."
+
+#: src/geneweb/installation-win.md:5 src/geneweb/installation-unix.md:5
+#: src/geneweb/installation-mac.md:5
+msgid "Premier lancement"
+msgstr "First launch"
+
+#: src/geneweb/installation-win.md:7
+msgid "Extrayez l'archive `.zip` téléchargée à l'emplacement de votre choix."
+msgstr "Extract the downloaded `.zip` archive to the location of your choice."
+
+#: src/geneweb/installation-win.md:8
+msgid "Double-cliquez sur `START.htm`."
+msgstr "Double-click `START.htm`."
+
+#: src/geneweb/installation-win.md:9 src/geneweb/installation-unix.md:14
+#: src/geneweb/installation-mac.md:9
+msgid ""
+"Ouvrez votre navigateur à l'adresse "
+"[http://localhost:2317](http://localhost:2317)."
+msgstr "Open your browser at [http://localhost:2317](http://localhost:2317)."
+
+#: src/geneweb/installation-win.md:11 src/geneweb/installation-unix.md:25
+#: src/geneweb/installation-mac.md:27
+msgid "Aller plus loin"
+msgstr "Going further"
+
+#: src/geneweb/installation-unix.md:1
+msgid "Installation sous Unix / Linux"
+msgstr "Installing on Unix / Linux"
+
+#: src/geneweb/installation-unix.md:7
+msgid "Ouvrez un terminal dans le dossier de la distribution."
+msgstr "Open a terminal in the distribution folder."
+
+#: src/geneweb/installation-unix.md:8
+msgid "Lancez le serveur :"
+msgstr "Start the server:"
+
+#: src/geneweb/installation-unix.md:16 src/geneweb/installation-mac.md:21
+msgid "Lancer sur le port 80"
+msgstr "Running on port 80"
+
+#: src/geneweb/installation-unix.md:18
+msgid ""
+"Sous Unix, les ports inférieurs à 1024 nécessitent des privilèges élevés. "
+"Plutôt que d'exécuter GeneWeb en `root`, utilisez les capacités Linux "
+"(`capabilities`) pour autoriser uniquement la liaison au port :"
+msgstr ""
+"On Unix, ports below 1024 require elevated privileges. Rather than running "
+"GeneWeb as `root`, use Linux capabilities to authorize only the port "
+"binding:"
+
+#: src/geneweb/installation-unix.md:21
+msgid "'cap_net_bind_service=+ep'"
+msgstr "'cap_net_bind_service=+ep'"
+
+#: src/geneweb/installation-mac.md:1
+msgid "Installation sous macOS"
+msgstr "Installing on macOS"
+
+#: src/geneweb/installation-mac.md:7
+msgid "Extrayez l'archive téléchargée à l'emplacement de votre choix."
+msgstr "Extract the downloaded archive to the location of your choice."
+
+#: src/geneweb/installation-mac.md:8
+msgid "Double-cliquez sur `geneweb.command`."
+msgstr "Double-click `geneweb.command`."
+
+#: src/geneweb/installation-mac.md:11
+msgid "Autoriser GeneWeb (Gatekeeper)"
+msgstr "Authorizing GeneWeb (Gatekeeper)"
+
+#: src/geneweb/installation-mac.md:13
+msgid ""
+"macOS bloque par défaut les applications provenant de développeurs non "
+"identifiés. Il faut autoriser manuellement les deux exécutables principaux, "
+"**une seule fois** :"
+msgstr ""
+"macOS blocks applications from unidentified developers by default. You need "
+"to manually authorize the two main executables, **once only**:"
+
+#: src/geneweb/installation-mac.md:15
+msgid ""
+"Dans le dossier `gw`, faites un clic droit (ou Ctrl+clic) sur `gwd`, puis "
+"choisissez **Ouvrir** dans le menu contextuel."
+msgstr ""
+"In the `gw` folder, right-click (or Ctrl-click) on `gwd`, then choose "
+"**Open** from the context menu."
+
+#: src/geneweb/installation-mac.md:16
+msgid ""
+"Cliquez sur **Ouvrir** dans la boîte de dialogue de sécurité qui apparaît."
+msgstr "Click **Open** in the security dialog that appears."
+
+#: src/geneweb/installation-mac.md:17
+msgid "Répétez les étapes 1 et 2 pour `gwsetup`."
+msgstr "Repeat steps 1 and 2 for `gwsetup`."
+
+#: src/geneweb/installation-mac.md:19
+msgid ""
+"Une fois cette autorisation accordée, `geneweb.command` fonctionne "
+"normalement pour tous les lancements suivants."
+msgstr ""
+"Once this authorization is granted, `geneweb.command` works normally for all"
+" subsequent launches."
+
+#: src/geneweb/installation-mac.md:23
+msgid ""
+"Comme sous Unix, les ports inférieurs à 1024 nécessitent des privilèges "
+"élevés. Sur macOS, la méthode recommandée est de rediriger le port 80 vers "
+"le port 2317 via `launchd`, plutôt que d'exécuter GeneWeb avec des droits "
+"élevés."
+msgstr ""
+"As on Unix, ports below 1024 require elevated privileges. On macOS, the "
+"recommended method is to redirect port 80 to port 2317 via `launchd`, rather"
+" than running GeneWeb with elevated rights."
+
+#: src/geneweb/installation-docker.md:1
+msgid "Installation avec Docker"
+msgstr "Installing with Docker"
+
+#: src/geneweb/installation-docker.md:3
+msgid ""
+"Le dépôt `geneweb/geneweb` contient un dossier "
+"[`docker/`](https://github.com/geneweb/geneweb/tree/master/docker) maintenu "
+"à jour dans `master`, permettant de construire une image à partir des "
+"sources."
+msgstr ""
+"The `geneweb/geneweb` repository contains a "
+"[`docker/`](https://github.com/geneweb/geneweb/tree/master/docker) folder "
+"kept up to date in `master`, allowing an image to be built from source."
+
+#: src/geneweb/installation-docker.md:5
+msgid ""
+"**À vérifier / compléter** Au moment de la rédaction, aucune image "
+"officielle publiée par le projet sur Docker Hub n'a été identifiée avec "
+"certitude — seul le `Dockerfile` du dépôt a été repéré. Plusieurs images "
+"**communautaires non officielles** existent par ailleurs "
+"(`jeffernz/geneweb`, `momoz/geneweb`, etc.), généralement basées sur "
+"d'anciennes versions de GeneWeb. Cette page doit être complétée et vérifiée "
+"directement à partir du contenu actuel de `docker/` avant publication — "
+"idéalement par quelqu'un ayant testé le build en conditions réelles."
+msgstr ""
+"**To verify / complete** At the time of writing, no official image published"
+" by the project on Docker Hub was identified with certainty — only the "
+"repository's `Dockerfile` was found. Several **unofficial community** images"
+" also exist (`jeffernz/geneweb`, `momoz/geneweb`, etc.), generally based on "
+"older versions of GeneWeb. This page should be completed and verified "
+"directly from the current contents of `docker/` before publishing — ideally "
+"by someone who has tested the build under real conditions."
+
+#: src/geneweb/installation-docker.md:8
+msgid "Construire l'image depuis les sources"
+msgstr "Building the image from source"
+
+#: src/geneweb/installation-docker.md:18
+msgid "Lancer le conteneur"
+msgstr "Running the container"
+
+#: src/geneweb/installation-docker.md:28
+msgid "Alternative : images communautaires"
+msgstr "Alternative: community images"
+
+#: src/geneweb/installation-docker.md:30
+msgid ""
+"Si vous cherchez une solution prête à l'emploi plutôt qu'un build depuis les"
+" sources, plusieurs images non officielles maintenues par des membres de la "
+"communauté existent sur Docker Hub. Elles ne sont pas couvertes par cette "
+"documentation officielle ; consultez leur page respective pour leurs "
+"instructions d'usage et vérifiez la version de GeneWeb qu'elles embarquent "
+"avant de les utiliser en production."
+msgstr ""
+"If you're looking for a ready-to-use solution rather than building from "
+"source, several unofficial images maintained by community members exist on "
+"Docker Hub. They are not covered by this official documentation; check their"
+" respective pages for usage instructions and verify the GeneWeb version they"
+" bundle before using them in production."
+
+#: src/geneweb/base.md:3
+msgid ""
+"Cette section décrit la création d'une nouvelle base GeneWeb et les "
+"principaux paramètres qui régissent son fonctionnement."
+msgstr ""
+"This section describes the creation of a new GeneWeb database and the main "
+"parameters governing its behavior."
+
+#: src/geneweb/base-gwf.md:1
+msgid "Le fichier .gwf"
+msgstr "The .gwf file"
+
+#: src/geneweb/gestion.md:3
+msgid ""
+"Présentation de `gwsetup`, l'interface web d'administration, et des outils "
+"en ligne de commande associés."
+msgstr ""
+"Overview of `gwsetup`, the web administration interface, and the associated "
+"command-line tools."
+
+#: src/geneweb/gestion-import-export.md:11
+msgid "gwc"
+msgstr "gwc"
+
+#: src/geneweb/gestion-import-export.md:13
+msgid "gwu"
+msgstr "gwu"
+
+#: src/geneweb/gestion-import-export.md:15
+msgid "gwb2ged"
+msgstr "gwb2ged"
+
+#: src/geneweb/gestion-import-export.md:17
+msgid "ged2gwb"
+msgstr "ged2gwb"
+
+#: src/geneweb/gestion-maintenance.md:11
+msgid "update_nldb"
+msgstr "update_nldb"
+
+#: src/geneweb/gestion-maintenance.md:13
+msgid "consang"
+msgstr "consang"
+
+#: src/geneweb/gestion-maintenance.md:15
+msgid "connex"
+msgstr "connex"
+
+#: src/geneweb/gestion-maintenance.md:17
+msgid "cache_files"
+msgstr "cache_files"
+
+#: src/magicien/creation.md:3
+msgid "Les deux notions internes : personnes et familles"
+msgstr "The two internal concepts: persons and families"
+
+#: src/magicien/creation.md:5
+msgid "Une base GeneWeb repose sur deux types d'entités :"
+msgstr "A GeneWeb database relies on two types of entities:"
+
+#: src/magicien/creation.md:6
+msgid ""
+"**Une personne** porte les informations individuelles : prénom, patronyme, "
+"dates et lieux (naissance, baptême, décès), titres de noblesse, notes, etc."
+msgstr ""
+"**A person** holds individual information: first name, surname, dates and "
+"places (birth, baptism, death), titles of nobility, notes, etc."
+
+#: src/magicien/creation.md:7
+msgid ""
+"**Une famille** représente une union simple : un père, une mère, leurs "
+"enfants communs, ainsi que la date et le lieu du mariage (et du divorce, le "
+"cas échéant). Une personne mariée plusieurs fois appartient donc à plusieurs"
+" familles distinctes, une par union."
+msgstr ""
+"**A family** represents a single union: a father, a mother, their common "
+"children, as well as the date and place of the marriage (and of the divorce,"
+" if applicable). A person married more than once therefore belongs to "
+"several distinct families, one per union."
+
+#: src/magicien/creation.md:9
+msgid ""
+"Toute modification de la base se traduit par la création, la modification ou"
+" la suppression de personnes et/ou de familles."
+msgstr ""
+"Every change to the database takes the form of creating, modifying, or "
+"deleting persons and/or families."
+
+#: src/magicien/creation.md:11
+msgid "La clé d'une personne : prénom, patronyme, numéro"
+msgstr "A person's key: first name, surname, occurrence number"
+
+#: src/magicien/creation.md:13
+msgid ""
+"Chaque personne est repérée de façon unique par la combinaison **prénom + "
+"patronyme + numéro d'occurrence**. Le numéro sert uniquement à distinguer "
+"deux personnes qui porteraient le même prénom et le même patronyme (par "
+"exemple deux \"Jean Dupont\" dans la même base) — il n'a aucune valeur en "
+"lui-même et n'a pas besoin de suivre un ordre particulier. Quand il n'est "
+"pas précisé, il vaut 0 par défaut."
+msgstr ""
+"Each person is uniquely identified by the combination **first name + surname"
+" + occurrence number**. The number is only used to distinguish two persons "
+"who would share the same first name and surname (for example two \"Jean "
+"Dupont\" in the same database) — it has no meaning on its own and doesn't "
+"need to follow any particular order. When not specified, it defaults to 0."
+
+#: src/magicien/creation.md:15
+msgid ""
+"Ce numéro n'apparaît que dans les formulaires de mise à jour, jamais dans "
+"les pages de consultation normales. Il ne doit pas être confondu avec le "
+"numéro d'un titre de noblesse (« Louis XIV » n'a pas nécessairement le "
+"numéro d'occurrence 14, même s'il est pratique de les faire correspondre "
+"quand c'est possible)."
+msgstr ""
+"This number only appears in the update forms, never in the normal viewing "
+"pages. It must not be confused with the number in a title of nobility "
+"(\"Louis XIV\" doesn't necessarily have occurrence number 14, even though "
+"it's convenient to match them when possible)."
+
+#: src/magicien/creation.md:17
+msgid ""
+"Deux messages d'erreur classiques découlent directement de cette notion de "
+"clé :"
+msgstr "Two classic error messages stem directly from this notion of key:"
+
+#: src/magicien/creation.md:18
+msgid ""
+"**« Personne déjà existante »** : la combinaison prénom/patronyme/numéro que"
+" vous tentez de créer est déjà prise par quelqu'un d'autre dans la base."
+msgstr ""
+"**\"Person already exists\"**: the first name/surname/number combination you"
+" are trying to create is already taken by someone else in the database."
+
+#: src/magicien/creation.md:19
+msgid ""
+"**« Personne inconnue »** : vous tentez de relier une personne (comme parent"
+" ou enfant) à une combinaison prénom/patronyme/numéro qui n'existe pas dans "
+"la base."
+msgstr ""
+"**\"Unknown person\"**: you are trying to link a person (as a parent or "
+"child) to a first name/surname/number combination that doesn't exist in the "
+"database."
+
+#: src/magicien/creation.md:21
+msgid "Accéder aux formulaires de mise à jour"
+msgstr "Accessing the update forms"
+
+#: src/magicien/creation.md:23
+msgid "Deux points d'entrée principaux :"
+msgstr "Two main entry points:"
+
+#: src/magicien/creation.md:24
+msgid ""
+"Depuis la page d'accueil, le lien **Ajouter une famille** (utile pour "
+"démarrer une base vide)."
+msgstr ""
+"From the home page, the **Add a family** link (useful for starting an empty "
+"database)."
+
+#: src/magicien/creation.md:25
+msgid ""
+"Depuis une fiche personnelle, le lien **Mise à jour**, qui propose un menu "
+"dont les options varient selon la situation familiale de la personne (mariée"
+" ou non, avec ou sans parents, avec ou sans image, etc.) — voir [Navigation "
+"et mise à jour](navigation-maj.md)."
+msgstr ""
+"From a personal page, the **Update** link, which offers a menu whose options"
+" vary depending on the person's family situation (married or not, with or "
+"without parents, with or without an image, etc.) — see [Navigation and "
+"updating](navigation-maj.md)."
+
+#: src/magicien/creation.md:27
+msgid ""
+"Dans tous les formulaires, **aucune modification n'est appliquée avant "
+"validation explicite** (bouton \"Ok\" en fin de formulaire) : on peut "
+"toujours se rétracter en abandonnant simplement la navigation."
+msgstr ""
+"In every form, **no change is applied before explicit validation** (the "
+"\"Ok\" button at the end of the form): you can always back out simply by "
+"leaving the page."
+
+#: src/magicien/creation.md:29
+msgid "« Relier » ou « Créer » ?"
+msgstr "\"Link\" or \"Create\"?"
+
+#: src/magicien/creation.md:31
+msgid ""
+"Dans les champs désignant un parent ou un enfant, un choix apparaît entre "
+"deux modes :"
+msgstr ""
+"In the fields designating a parent or a child, a choice appears between two "
+"modes:"
+
+#: src/magicien/creation.md:32
+msgid ""
+"**Relier** : la personne existe déjà dans la base. La recherche se fait par "
+"clé (accents et majuscules ignorés) et le système vérifie la cohérence (sexe"
+" du parent, existence effective)."
+msgstr ""
+"**Link**: the person already exists in the database. The lookup is done by "
+"key (accents and capitalization ignored) and the system checks consistency "
+"(the parent's sex, actual existence)."
+
+#: src/magicien/creation.md:33
+msgid ""
+"**Créer** : la personne n'existe pas encore. Elle sera créée avec "
+"l'orthographe exacte saisie dans le formulaire — ici, accents et majuscules "
+"comptent, puisqu'ils définissent l'orthographe réelle de la personne créée."
+msgstr ""
+"**Create**: the person doesn't exist yet. They will be created with the "
+"exact spelling entered in the form — here, accents and capitalization "
+"matter, since they define the actual spelling of the created person."
+
+#: src/magicien/creation.md:35
+msgid "Pièges fréquents à éviter"
+msgstr "Common pitfalls to avoid"
+
+#: src/magicien/creation.md:37
+msgid ""
+"**Modifier le prénom ou le nom d'un enfant** : passez par **Modifier** la "
+"fiche de l'enfant lui-même, jamais par **Modifier/Famille**. Renommer un "
+"enfant depuis le formulaire famille casse le lien avec ses parents plutôt "
+"que de renommer la personne."
+msgstr ""
+"**Changing a child's first name or surname**: go through **Modify** on the "
+"child's own page, never through **Modify/Family**. Renaming a child from the"
+" family form breaks the link with its parents rather than renaming the "
+"person."
+
+#: src/magicien/creation.md:38
+msgid ""
+"**Ajouter un enfant à une famille existante** : passez par "
+"**Modifier/Famille** depuis la fiche d'un des parents. N'utilisez pas "
+"**Ajouter/Famille**, qui crée une toute nouvelle union (un nouveau "
+"conjoint), ni **Ajouter/Parents**, qui sert à remonter d'une génération."
+msgstr ""
+"**Adding a child to an existing family**: go through **Modify/Family** from "
+"one of the parents' page. Do not use **Add/Family**, which creates a brand-"
+"new union (a new spouse), nor **Add/Parents**, which is used to go up one "
+"generation."
+
+#: src/magicien/creation.md:40
+msgid ""
+"Voir aussi [Signification des divers champs](creation-champs.md) pour le "
+"détail de chaque zone du formulaire, et [Suppression, fusion](suppression-"
+"fusion.md) pour la fusion de doublons."
+msgstr ""
+"See also [Meaning of the various fields](creation-champs.md) for details on "
+"each form field, and [Deletion, merging](suppression-fusion.md) for merging "
+"duplicates."
+
+#: src/magicien/creation-champs.md:3
+msgid ""
+"Le formulaire **Modifier une personne** contient plusieurs zones dont le "
+"sens est précis et qu'il convient de bien distinguer, car chacune a un rôle "
+"différent dans la navigation et l'affichage."
+msgstr ""
+"The **Modify a person** form contains several fields with a precise meaning "
+"that should be clearly distinguished, since each plays a different role in "
+"navigation and display."
+
+#: src/magicien/creation-champs.md:5
+msgid "Identité de base"
+msgstr "Basic identity"
+
+#: src/magicien/creation-champs.md:7
+msgid ""
+"**Prénom / Patronyme** : le prénom d'usage et le nom de famille. Avec le "
+"numéro d'occurrence, ils forment la clé unique de la personne (voir "
+"[Création d'individu / famille](creation.md)). Il est conseillé d'y mettre "
+"le prénom réellement utilisé, et de réserver les variantes (prénoms "
+"complets, surnoms familiers, anciennes orthographes) aux champs alias — cela"
+" évite de fausser les statistiques par prénom."
+msgstr ""
+"**First name / Surname**: the everyday first name and the family surname. "
+"Together with the occurrence number, they form the person's unique key (see "
+"[Creating an individual / family](creation.md)). It's advisable to put the "
+"first name actually used here, and to reserve variants (full given names, "
+"family nicknames, old spellings) for the alias fields — this avoids skewing "
+"first-name statistics."
+
+#: src/magicien/creation-champs.md:9
+msgid "Nom public et qualificatif"
+msgstr "Public name and qualifier"
+
+#: src/magicien/creation-champs.md:11
+msgid ""
+"**Nom public** : le nom par lequel la personne est le plus connue, par "
+"exemple _Louis XIV_ (dont le prénom est _Louis_ et le patronyme _de "
+"Bourbon_). Si ce champ est rempli, c'est lui qui s'affiche comme titre de la"
+" fiche, à la place de « prénom patronyme » — la personne devient également "
+"accessible par ce nom dans la recherche."
+msgstr ""
+"**Public name**: the name by which the person is best known, for example "
+"_Louis XIV_ (whose first name is _Louis_ and surname _de Bourbon_). If this "
+"field is filled in, it is displayed as the page's title instead of \"first "
+"name surname\" — the person also becomes searchable by this name."
+
+#: src/magicien/creation-champs.md:12
+msgid ""
+"**Qualificatif** : un sobriquet associé aux personnages célèbres, par "
+"exemple _le Gros_ dans _Louis VI le Gros_. Une personne peut avoir plusieurs"
+" qualificatifs (ex. _Guillaume le Conquérant_, dit aussi _le Bâtard_) ; "
+"chacun devient un point d'accès à la fiche, sans pour autant être traité "
+"comme un nom de famille."
+msgstr ""
+"**Qualifier**: a nickname associated with famous figures, for example _the "
+"Fat_ in _Louis VI the Fat_. A person can have several qualifiers (e.g. "
+"_William the Conqueror_, also called _the Bastard_); each becomes an access "
+"point to the page, without being treated as a surname."
+
+#: src/magicien/creation-champs.md:14
+msgid "Alias"
+msgstr "Alias"
+
+#: src/magicien/creation-champs.md:16
+msgid ""
+"**Alias** : un nom sous lequel la personne est connue, mais qui ne "
+"fonctionne pas comme un prénom alternatif — la combinaison forme un tout "
+"indissociable. Exemple : _Aurore Dupin_ dite _George Sand_ (et non « George "
+"Dupin » ou « Aurore Sand »)."
+msgstr ""
+"**Alias**: a name under which the person is known, but which doesn't act as "
+"an alternative first name — the combination forms an inseparable whole. "
+"Example: _Aurore Dupin_ known as _George Sand_ (not \"George Dupin\" or "
+"\"Aurore Sand\")."
+
+#: src/magicien/creation-champs.md:17
+msgid ""
+"**Prénom alias** : prénoms complets d'état civil, petits noms familiers (« "
+"Bobby » pour « Robert »), ou variantes orthographiques d'un prénom "
+"incertain. On peut en avoir plusieurs ; ils sont utilisables dans les "
+"recherches mais ne comptent pas dans les statistiques par prénom."
+msgstr ""
+"**First name alias**: full legal given names, family nicknames (\"Bobby\" "
+"for \"Robert\"), or spelling variants of an uncertain first name. There can "
+"be several; they can be used in searches but do not count in first-name "
+"statistics."
+
+#: src/magicien/creation-champs.md:18
+msgid ""
+"**Nom alias** : une orthographe alternative du patronyme — usage peu "
+"fréquent."
+msgstr ""
+"**Surname alias**: an alternative spelling of the surname — infrequently "
+"used."
+
+#: src/magicien/creation-champs.md:20
+msgid "Image"
+msgstr "Image"
+
+#: src/magicien/creation-champs.md:22
+msgid ""
+"Fichier `.gif`, `.jpg` ou `.png` associé à la personne, soit par une URL "
+"complète, soit par un simple nom de fichier recherché dans le dossier "
+"`images/<nom_de_base>/` au moment de l'affichage. Sans nom précisé, un nom "
+"par défaut est construit à partir du prénom, du numéro et du nom de famille "
+"(minuscules, sans accents, caractères spéciaux remplacés par `_`) — par "
+"exemple `anne_cecile.0.dupont_de_nemours` pour _Anne-Cécile Dupont de "
+"Nemours_."
+msgstr ""
+"A `.gif`, `.jpg`, or `.png` file associated with the person, either as a "
+"full URL or as a simple file name looked up in the `images/<database_name>/`"
+" folder at display time. If no name is given, a default name is built from "
+"the first name, the number, and the surname (lowercase, no accents, special "
+"characters replaced with `_`) — for example "
+"`anne_cecile.0.dupont_de_nemours` for _Anne-Cécile Dupont de Nemours_."
+
+#: src/magicien/creation-champs.md:24
+msgid "Occupation et titres"
+msgstr "Occupation and titles"
+
+#: src/magicien/creation-champs.md:26
+msgid ""
+"**Occupation** : la profession. Pour un titre de noblesse, utilisez plutôt "
+"les champs **Titres**, pas ce champ."
+msgstr ""
+"**Occupation**: the profession. For a title of nobility, use the **Titles** "
+"fields instead of this one."
+
+#: src/magicien/creation-champs.md:27
+msgid ""
+"**Titres** : une personne peut avoir plusieurs titres, chacun décomposé en :"
+msgstr "**Titles**: a person can have several titles, each broken down into:"
+
+#: src/magicien/creation-champs.md:28
+msgid "la **dénomination** (comte, duc, roi...)"
+msgstr "the **title itself** (count, duke, king...)"
+
+#: src/magicien/creation-champs.md:29
+msgid ""
+"le **lieu** (d'Anjou, de Bourgogne, de France...), affiché combiné à la "
+"dénomination et cliquable pour retrouver toutes les personnes portant ce "
+"même titre"
+msgstr ""
+"the **place** (of Anjou, of Burgundy, of France...), displayed combined with"
+" the title and clickable to find every person holding that same title"
+
+#: src/magicien/creation-champs.md:30
+msgid ""
+"un **nom** public associé spécifiquement à ce titre (ex. _Charles Quint_ est"
+" _Charles Ier_ comme roi d'Espagne)"
+msgstr ""
+"a public **name** specifically associated with this title (e.g. _Charles V_ "
+"is _Charles I_ as king of Spain)"
+
+#: src/magicien/creation-champs.md:31
+msgid ""
+"un numéro d'ordre (« N-ième ») pour les titres numérotés, par exemple le « "
+"3ème comte de Warwick »"
+msgstr ""
+"an ordinal number (\"Nth\") for numbered titles, for example the \"3rd Earl "
+"of Warwick\""
+
+#: src/magicien/creation-champs.md:32
+msgid ""
+"un titre marqué **principal**, utilisé quand la personne est affichée de "
+"façon simplifiée ailleurs (fiche du conjoint, d'un enfant)"
+msgstr ""
+"a title marked as **main**, used when the person is displayed in simplified "
+"form elsewhere (a spouse's or child's page)"
+
+#: src/magicien/creation-champs.md:33
+msgid "les dates de début et de fin de règne"
+msgstr "the start and end dates of the reign"
+
+#: src/magicien/creation-champs.md:35
+msgid "Accès (confidentialité)"
+msgstr "Access (privacy)"
+
+#: src/magicien/creation-champs.md:37
+msgid ""
+"Ce champ ne s'applique qu'aux personnes potentiellement vivantes (dates de "
+"moins de 100 ans) :"
+msgstr ""
+"This field only applies to potentially living persons (dates less than 100 "
+"years old):"
+
+#: src/magicien/creation-champs.md:38
+msgid ""
+"Par défaut, une personne titrée (ou dont un parent est titré) est considérée"
+" « publique » et ses informations restent visibles."
+msgstr ""
+"By default, a titled person (or one whose parent is titled) is considered "
+"\"public\" and their information remains visible."
+
+#: src/magicien/creation-champs.md:39
+msgid "**public** force l'affichage systématique, titre de noblesse ou non."
+msgstr ""
+"**public** forces the information to always be shown, title of nobility or "
+"not."
+
+#: src/magicien/creation-champs.md:40
+msgid ""
+"**privé** masque les informations personnelles même en présence d'un titre."
+msgstr ""
+"**private** hides the personal information even in the presence of a title."
+
+#: src/magicien/creation-champs.md:42
+msgid ""
+"Un accès magicien ou ami (par mot de passe, voir [Sécurité et contrôle "
+"d'accès](../divers/securite.md)) lève toujours ces restrictions."
+msgstr ""
+"Wizard or friend access (via password, see [Security and access "
+"control](../divers/securite.md)) always lifts these restrictions."
+
+#: src/magicien/creation-champs.md:44
+msgid "Notes et sources"
+msgstr "Notes and sources"
+
+#: src/magicien/creation-champs.md:46
+msgid ""
+"**Notes** : texte libre sur la personne (voir [Notes diverses](creation-"
+"notes.md) pour les détails de rendu)."
+msgstr ""
+"**Notes**: free text about the person (see [Miscellaneous notes](creation-"
+"notes.md) for rendering details)."
+
+#: src/magicien/creation-champs.md:47
+msgid ""
+"**Sources** : une référence courte à l'origine de l'information (nom, sigle,"
+" titre d'ouvrage, code personnel) — pas destinée à un texte long ; pour une "
+"transcription complète d'un document, utilisez plutôt le champ Notes."
+msgstr ""
+"**Sources**: a short reference to where the information comes from (a name, "
+"an acronym, a book title, a personal code) — not meant for lengthy text; for"
+" a full transcription of a document, use the Notes field instead."
+
+#: src/magicien/creation-champs.md:49
+msgid "Champs équivalents côté famille"
+msgstr "Equivalent fields on the family side"
+
+#: src/magicien/creation-champs.md:51
+msgid ""
+"Le formulaire famille reprend une logique similaire pour le mariage lui-même"
+" (date, lieu, notes et sources du mariage), en plus des zones "
+"prénom/patronyme/numéro pour chaque conjoint et chaque enfant. Pour les "
+"enfants, le patronyme est facultatif : s'il est omis, celui du père est "
+"repris automatiquement."
+msgstr ""
+"The family form follows a similar logic for the marriage itself (date, "
+"place, marriage notes and sources), in addition to the first "
+"name/surname/number fields for each spouse and each child. For children, the"
+" surname is optional: if omitted, the father's is used automatically."
+
+#: src/magicien/creation-notes.md:3
+msgid "Notes personnelles"
+msgstr "Personal notes"
+
+#: src/magicien/creation-notes.md:5
+msgid ""
+"Chaque personne dispose d'un champ **Notes**, destiné au texte libre "
+"(anecdotes, transcriptions de documents, informations qui ne correspondent à"
+" aucun champ structuré). Deux points à connaître :"
+msgstr ""
+"Every person has a **Notes** field, intended for free text (anecdotes, "
+"document transcriptions, information that doesn't fit any structured field)."
+" Two things to know:"
+
+#: src/magicien/creation-notes.md:7
+msgid ""
+"À l'affichage, le texte est rendu **en continu** : les sauts de ligne "
+"présents dans le formulaire ne produisent pas de passage à la ligne visuel. "
+"Pour forcer un retour à la ligne dans le rendu, il faut insérer une entité "
+"HTML de saut de ligne (`<br>`) à l'endroit voulu."
+msgstr ""
+"When displayed, the text is rendered **as one continuous flow**: line breaks"
+" entered in the form do not produce a visible line break. To force a line "
+"break in the rendering, insert an HTML line-break tag (`<br>`) where needed."
+
+#: src/magicien/creation-notes.md:8
+msgid ""
+"Les notes acceptent la syntaxe wiki décrite dans [Le format "
+"wiki](../divers/format-wiki.md) — liens internes vers d'autres fiches, HTML,"
+" certaines variables interprétées à l'affichage."
+msgstr ""
+"Notes accept the wiki syntax described in [The wiki "
+"format](../divers/format-wiki.md) — internal links to other pages, HTML, and"
+" some variables interpreted at display time."
+
+#: src/magicien/creation-notes.md:10
+msgid "Distinction Notes / Sources"
+msgstr "Notes vs. Sources"
+
+#: src/magicien/creation-notes.md:12
+msgid ""
+"Le champ **Sources** (voir [Signification des divers champs](creation-"
+"champs.md)) est pensé pour une référence courte à l'origine d'une "
+"information (nom d'un document, sigle, code personnel), pas pour une "
+"transcription complète. Une copie longue d'un acte d'état civil, par "
+"exemple, relève du champ **Notes**, pas du champ **Sources**."
+msgstr ""
+"The **Sources** field (see [Meaning of the various fields](creation-"
+"champs.md)) is meant for a short reference to where information comes from "
+"(a document name, an acronym, a personal code), not for a full "
+"transcription. A long copy of a civil-status record, for instance, belongs "
+"in the **Notes** field, not the **Sources** field."
+
+#: src/magicien/creation-notes.md:14
+msgid "Notes de mariage"
+msgstr "Marriage notes"
+
+#: src/magicien/creation-notes.md:16
+msgid ""
+"Le formulaire famille propose des champs Notes et Sources équivalents, mais "
+"rattachés à l'union elle-même plutôt qu'à un individu (par exemple, une note"
+" sur les circonstances du mariage plutôt que sur l'un des deux conjoints)."
+msgstr ""
+"The family form offers equivalent Notes and Sources fields, but attached to "
+"the union itself rather than to an individual (for example, a note about the"
+" circumstances of the marriage rather than about one of the two spouses)."
+
+#: src/magicien/creation-notes.md:18
+msgid "Notes générales de la base"
+msgstr "General notes for the database"
+
+#: src/magicien/creation-notes.md:26
+msgid "Notes liées à un événement particulier"
+msgstr "Notes tied to a specific event"
+
+#: src/magicien/images-carrousel.md:3
+msgid "Portrait individuel : envoyer / supprimer une image"
+msgstr "Individual portrait: sending / deleting an image"
+
+#: src/magicien/images-carrousel.md:5
+msgid ""
+"Depuis le menu **Mise à jour** d'une fiche personnelle, les liens **Envoyer "
+"image** et **Supprimer image** apparaissent à deux conditions :"
+msgstr ""
+"From the **Update** menu of a personal page, the **Send image** and **Delete"
+" image** links appear under two conditions:"
+
+#: src/magicien/images-carrousel.md:6
+msgid ""
+"le propriétaire de la base a autorisé cette fonctionnalité (paramètre de "
+"configuration — voir [Le fichier .gwf](../geneweb/base-gwf.md)) ;"
+msgstr ""
+"the database owner has enabled this feature (a configuration setting — see "
+"[The .gwf file](../geneweb/base-gwf.md));"
+
+#: src/magicien/images-carrousel.md:7
+msgid ""
+"pour **Envoyer image**, le champ Image de la personne doit être vide. Si une"
+" image est déjà associée, il n'est pas proposé de la remplacer directement "
+"par ce lien : il faut d'abord passer par **Modifier** la personne et vider "
+"le champ Image, ou utiliser **Supprimer image** au préalable."
+msgstr ""
+"for **Send image**, the person's Image field must be empty. If an image is "
+"already attached, this link doesn't offer to replace it directly: you must "
+"first go through **Modify** on the person and clear the Image field, or use "
+"**Delete image** beforehand."
+
+#: src/magicien/images-carrousel.md:9
+msgid ""
+"Le fichier envoyé doit être au format `.gif`, `.jpg` ou `.png`. Voir "
+"[Signification des divers champs](creation-champs.md#image) pour la "
+"convention de nommage par défaut des fichiers image."
+msgstr ""
+"The uploaded file must be in `.gif`, `.jpg`, or `.png` format. See [Meaning "
+"of the various fields](creation-champs.md#image) for the default naming "
+"convention for image files."
+
+#: src/magicien/images-carrousel.md:11
+msgid "Blasons"
+msgstr "Coats of arms"
+
+#: src/magicien/images-carrousel.md:15
+msgid "Galerie / carrousel"
+msgstr "Gallery / carousel"
+
+#: src/magicien/navigation-maj.md:3
+msgid ""
+"Depuis une fiche personnelle, le lien **Mise à jour** ouvre un menu dont le "
+"contenu s'adapte à la situation de la personne :"
+msgstr ""
+"From a personal page, the **Update** link opens a menu whose contents adapt "
+"to the person's situation:"
+
+#: src/magicien/navigation-maj.md:5
+msgid ""
+"**Modifier** et **Supprimer** sont toujours proposés (voir [Suppression, "
+"fusion](suppression-fusion.md) pour la suppression)."
+msgstr ""
+"**Modify** and **Delete** are always offered (see [Deletion, "
+"merging](suppression-fusion.md) for deletion)."
+
+#: src/magicien/navigation-maj.md:6
+msgid ""
+"**Envoyer image** (et, si une image existe déjà, **Supprimer image**) "
+"apparaît seulement si le propriétaire de la base a autorisé cette "
+"fonctionnalité — voir [Portraits, blasons, images, carrousel](images-"
+"carrousel.md)."
+msgstr ""
+"**Send image** (and, if an image already exists, **Delete image**) appears "
+"only if the database owner has enabled this feature — see [Portraits, coats "
+"of arms, images, carousel](images-carrousel.md)."
+
+#: src/magicien/navigation-maj.md:7
+msgid ""
+"Pour chaque mariage de la personne : **Modifier/Famille** et "
+"**Supprimer/Famille**. S'il y a plusieurs mariages, un choix **Intervertir**"
+" permet d'échanger leur ordre d'affichage."
+msgstr ""
+"For each of the person's marriages: **Modify/Family** and **Delete/Family**."
+" If there are several marriages, a **Swap** option lets you exchange their "
+"display order."
+
+#: src/magicien/navigation-maj.md:8
+msgid ""
+"**Ajouter/Famille** est toujours proposé en fin de liste : il ouvre le même "
+"formulaire que \"Ajouter une famille\" depuis l'accueil, avec la personne "
+"pré-inscrite comme parent. **Attention** : ce choix crée un nouveau mariage,"
+" ce n'est pas la manière d'ajouter un enfant à une union déjà existante "
+"(voir [Création d'individu / famille](creation.md#pièges-fréquents-à-"
+"éviter))."
+msgstr ""
+"**Add/Family** is always offered at the end of the list: it opens the same "
+"form as \"Add a family\" from the home page, with the person pre-filled in "
+"as a parent. **Warning**: this option creates a new marriage; it is not the "
+"way to add a child to an existing union (see [Creating an individual / "
+"family](creation.md#common-pitfalls-to-avoid))."
+
+#: src/magicien/navigation-maj.md:9
+msgid ""
+"Si la personne n'a pas encore de parents connus, **Ajouter/Parents** propose"
+" de remonter d'une génération : ce choix crée également une nouvelle "
+"famille, avec la personne pré-inscrite comme enfant."
+msgstr ""
+"If the person doesn't yet have known parents, **Add/Parents** offers to go "
+"up one generation: this option also creates a new family, with the person "
+"pre-filled in as a child."
+
+#: src/magicien/navigation-maj.md:10
+msgid ""
+"**Changer les noms des enfants** permet de modifier en un seul formulaire le"
+" prénom, le patronyme et le numéro de tous les enfants d'une personne. Une "
+"facilité notable : si l'on efface le patronyme d'un enfant dans ce "
+"formulaire, il reprend automatiquement celui du parent — pratique pour "
+"renommer rapidement toute une branche en partant de l'ancêtre puis en "
+"répétant l'opération génération par génération."
+msgstr ""
+"**Change children's names** lets you modify, in a single form, the first "
+"name, surname, and number of all of a person's children. One handy feature: "
+"clearing a child's surname in this form makes it automatically inherit the "
+"parent's — convenient for quickly renaming a whole branch, starting from the"
+" ancestor and repeating the operation generation by generation."
+
+#: src/magicien/navigation-maj.md:12
+msgid "Principe général de validation"
+msgstr "General validation principle"
+
+#: src/magicien/navigation-maj.md:14
+msgid ""
+"Dans tous les formulaires de mise à jour, rien n'est appliqué à la base "
+"avant d'avoir cliqué sur **Ok** en fin de formulaire. Certains boutons "
+"**Insérer/...** (Insérer/Enfant, Insérer/Titre, Insérer/Qualificatif, etc.) "
+"ne valident jamais directement : ils redemandent seulement un formulaire "
+"agrandi avec une zone supplémentaire disponible."
+msgstr ""
+"In every update form, nothing is applied to the database until you click "
+"**Ok** at the end of the form. Some **Insert/...** buttons (Insert/Child, "
+"Insert/Title, Insert/Qualifier, etc.) never validate directly: they simply "
+"bring up a larger form with an additional field available."
+
+#: src/magicien/navigation-maj.md:16
+msgid ""
+"Après validation réussie, la page affichée indique le résultat (« Personne "
+"modifiée », « Famille ajoutée ou modifiée »...) et peut signaler des "
+"remarques (incohérences de dates ou d'ordre entre enfants) sans empêcher la "
+"modification. En cas d'erreur (personne déjà existante, personne inconnue), "
+"la page l'indique et rien n'est modifié — il suffit de revenir en arrière et"
+" de corriger."
+msgstr ""
+"After successful validation, the displayed page shows the result (\"Person "
+"modified\", \"Family added or modified\"...) and may report remarks (date or"
+" ordering inconsistencies between children) without preventing the change. "
+"On error (person already exists, unknown person), the page states it and "
+"nothing is changed — simply go back and correct it."
+
+#: src/magicien/navigation-maj.md:18
+msgid ""
+"Voir [Convention date → MOD_IND](navigation-maj-dates.md) pour les "
+"raccourcis de saisie disponibles dans les champs de date de ces formulaires."
+msgstr ""
+"See [Date convention → MOD_IND](navigation-maj-dates.md) for the entry "
+"shortcuts available in these forms' date fields."
+
+#: src/magicien/navigation-maj-dates.md:3
+msgid ""
+"Dans les formulaires de mise à jour (accessibles via la commande d'URL "
+"`MOD_IND` pour un individu, ou l'équivalent pour une famille — voir "
+"[Commandes d'URL](../divers/templates.md#commandes-durl-m)), les champs de "
+"date acceptent une syntaxe abrégée pour exprimer la précision réelle de "
+"l'information disponible, sans avoir à utiliser un menu séparé."
+msgstr ""
+"In the update forms (accessible via the `MOD_IND` URL command for an "
+"individual, or the equivalent for a family — see [URL "
+"commands](../divers/templates.md#url-commands-m)), date fields accept an "
+"abbreviated syntax to express the actual precision of the available "
+"information, without needing a separate menu."
+
+#: src/magicien/navigation-maj-dates.md:5
+msgid "Raccourcis de précision de date"
+msgstr "Date precision shortcuts"
+
+#: src/magicien/navigation-maj-dates.md:7
+msgid "Saisie"
+msgstr "Entry"
+
+#: src/magicien/navigation-maj-dates.md:7
+msgid "Signification"
+msgstr "Meaning"
+
+#: src/magicien/navigation-maj-dates.md:9
+msgid "`?1912`"
+msgstr "`?1912`"
+
+#: src/magicien/navigation-maj-dates.md:9
+msgid "Peut-être en 1912"
+msgstr "Maybe in 1912"
+
+#: src/magicien/navigation-maj-dates.md:10
+msgid "`~1912`"
+msgstr "`~1912`"
+
+#: src/magicien/navigation-maj-dates.md:10
+msgid "Vers 1912 (environ)"
+msgstr "Around 1912"
+
+#: src/magicien/navigation-maj-dates.md:11
+msgid "`>1912` ou `1912/`"
+msgstr "`>1912` or `1912/`"
+
+#: src/magicien/navigation-maj-dates.md:11
+msgid "Après 1912"
+msgstr "After 1912"
+
+#: src/magicien/navigation-maj-dates.md:12
+msgid "`<1912` ou `/1912`"
+msgstr "`<1912` or `/1912`"
+
+#: src/magicien/navigation-maj-dates.md:12
+msgid "Avant 1912"
+msgstr "Before 1912"
+
+#: src/magicien/navigation-maj-dates.md:13
+msgid "`/1912/`"
+msgstr "`/1912/`"
+
+#: src/magicien/navigation-maj-dates.md:13
+msgid "Environ 1912"
+msgstr "Circa 1912"
+
+#: src/magicien/navigation-maj-dates.md:15
+msgid "Cas particulier du champ décès"
+msgstr "Special case of the death field"
+
+#: src/magicien/navigation-maj-dates.md:17
+msgid "Dans la zone décès, l'année peut aussi recevoir :"
+msgstr "In the death field, the year can also receive:"
+
+#: src/magicien/navigation-maj-dates.md:18
+msgid "`+` seul → décédé, mais on ne sait pas quand"
+msgstr "`+` alone → deceased, but date unknown"
+
+#: src/magicien/navigation-maj-dates.md:19
+msgid "`-` seul → vivant"
+msgstr "`-` alone → living"
+
+#: src/magicien/navigation-maj-dates.md:21
+msgid "Choix automatique du statut décès/vivant"
+msgstr "Automatic determination of living/deceased status"
+
+#: src/magicien/navigation-maj-dates.md:23
+msgid ""
+"Quand le premier menu de la zone « décès » est laissé sur `-` (« choix "
+"automatique ») et qu'aucune date ni lieu de décès n'est renseigné, GeneWeb "
+"déduit le statut à partir de l'âge calculé depuis la date de naissance :"
+msgstr ""
+"When the first menu of the \"death\" field is left at `-` (\"automatic\") "
+"and no death date or place is given, GeneWeb determines the status from the "
+"age calculated from the birth date:"
+
+#: src/magicien/navigation-maj-dates.md:24
+msgid "moins de 80 ans → considéré non décédé"
+msgstr "under 80 years → considered not deceased"
+
+#: src/magicien/navigation-maj-dates.md:25
+msgid "entre 81 et 120 ans → statut « ne sais pas »"
+msgstr "between 81 and 120 years → status \"unknown\""
+
+#: src/magicien/navigation-maj-dates.md:26
+msgid "plus de 120 ans → considéré décédé"
+msgstr "over 120 years → considered deceased"
+
+#: src/magicien/navigation-maj-dates.md:28
+msgid ""
+"Une personne au statut « ne sais pas » n'aura pas son âge calculé sur sa "
+"fiche ni dans les listes d'anniversaires. Si une personne a entre 80 et 120 "
+"ans et est vivante, il faut donc sélectionner explicitement « non décédé » "
+"plutôt que de laisser faire le choix automatique."
+msgstr ""
+"A person with \"unknown\" status will not have their age calculated on their"
+" page or in the birthday lists. If a person is between 80 and 120 years old "
+"and alive, you should therefore explicitly select \"not deceased\" rather "
+"than leaving the automatic choice."
+
+#: src/magicien/navigation-maj-dates.md:30
+msgid "Où ces raccourcis s'appliquent"
+msgstr "Where these shortcuts apply"
+
+#: src/magicien/navigation-maj-dates.md:32
+msgid ""
+"Ces raccourcis sont surtout utiles dans les formulaires **famille** "
+"(ajout/modification), qui permettent de saisir directement une date de "
+"naissance ou de décès pour chaque personne créée, sans passer par un "
+"formulaire individuel séparé — ce qui accélère la saisie initiale d'une "
+"famille nombreuse."
+msgstr ""
+"These shortcuts are especially useful in the **family** forms (add/modify), "
+"which let you enter a birth or death date directly for each newly created "
+"person, without going through a separate individual form — speeding up the "
+"initial entry of a large family."
+
+#: src/magicien/suppression-fusion.md:3
+msgid "Suppression d'une personne"
+msgstr "Deleting a person"
+
+#: src/magicien/suppression-fusion.md:5
+msgid ""
+"Le formulaire de suppression ne comporte qu'une case de confirmation — rien "
+"n'est fait sans validation explicite."
+msgstr ""
+"The deletion form contains only a confirmation box — nothing happens without"
+" explicit validation."
+
+#: src/magicien/suppression-fusion.md:7
+msgid ""
+"Point important : une personne supprimée n'est **pas réellement effacée** de"
+" la base. Ses informations personnelles (y compris prénom et patronyme) sont"
+" vidées, ainsi que son lien avec ses parents, mais une « entité personne » "
+"subsiste, toujours reliée à son éventuel conjoint et à ses éventuels "
+"enfants. En pratique, supprimer une personne isole surtout sa branche plutôt"
+" que de la faire disparaître complètement de la structure."
+msgstr ""
+"Important point: a deleted person is **not actually erased** from the "
+"database. Their personal information (including first name and surname) is "
+"cleared, along with their link to their parents, but a \"person entity\" "
+"remains, still linked to any spouse and any children. In practice, deleting "
+"a person mainly isolates their branch rather than making them disappear "
+"completely from the structure."
+
+#: src/magicien/suppression-fusion.md:9
+msgid "Suppression d'une famille"
+msgstr "Deleting a family"
+
+#: src/magicien/suppression-fusion.md:11
+msgid ""
+"De même, supprimer une famille ne supprime aucune des personnes qui la "
+"composaient : le père, la mère et les enfants sont simplement dissociés les "
+"uns des autres. Le père et la mère ne sont plus mariés entre eux (mais "
+"conservent leurs autres mariages éventuels), et les enfants se retrouvent "
+"sans parents renseignés. Il peut être nécessaire de supprimer ensuite, "
+"séparément, les personnes ainsi devenues isolées si elles n'ont plus lieu "
+"d'exister dans la base."
+msgstr ""
+"Likewise, deleting a family doesn't delete any of the persons who made it "
+"up: the father, mother, and children are simply separated from one another. "
+"The father and mother are no longer married to each other (but keep any "
+"other marriages), and the children end up with no recorded parents. It may "
+"then be necessary to separately delete the persons thus left isolated, if "
+"they no longer need to exist in the database."
+
+#: src/magicien/suppression-fusion.md:13
+msgid "Fusionner deux personnes (doublons)"
+msgstr "Merging two persons (duplicates)"
+
+#: src/magicien/suppression-fusion.md:15
+msgid ""
+"Cas d'usage typique : la même personne a été saisie deux fois par erreur."
+msgstr "Typical use case: the same person was entered twice by mistake."
+
+#: src/magicien/suppression-fusion.md:17
+msgid ""
+"**Si les deux fiches ont le même prénom et le même nom** : notez les numéros"
+" d'occurrence de chacune, choisissez **Fusionner** dans le menu, "
+"sélectionnez la fiche portant le bon numéro, puis laissez-vous guider."
+msgstr ""
+"**If both pages have the same first name and surname**: note the occurrence "
+"numbers of each, choose **Merge** from the menu, select the page with the "
+"correct number, then follow the prompts."
+
+#: src/magicien/suppression-fusion.md:18
+msgid ""
+"**Si les deux fiches ont des prénom/nom différents** : soit renommez l'une "
+"des deux pour qu'elle porte le même prénom/nom que l'autre (avec un numéro "
+"distinct) puis appliquez la méthode précédente ; soit lancez **Fusionner** "
+"depuis l'une des deux fiches et saisissez directement `Prénom.numéro Nom` de"
+" l'autre. Exemple : pour fusionner _Marie-Anne LE COMPTE_ (occurrence 3) "
+"avec _Marianne LECONTE_ (occurrence 2), on lance la fusion depuis la fiche "
+"de Marianne LECONTE et on saisit `Marie-Anne.3 LE COMPTE`."
+msgstr ""
+"**If the two pages have different first names/surnames**: either rename one "
+"of the two so it has the same first name/surname as the other (with a "
+"distinct number) and apply the previous method; or launch **Merge** from one"
+" of the two pages and directly enter `FirstName.number Surname` of the "
+"other. Example: to merge _Marie-Anne LE COMPTE_ (occurrence 3) with "
+"_Marianne LECONTE_ (occurrence 2), launch the merge from Marianne LECONTE's "
+"page and enter `Marie-Anne.3 LE COMPTE`."
+
+#: src/magicien/suppression-fusion.md:19
+msgid ""
+"**Si les deux personnes ont chacune des parents** : le système propose de "
+"fusionner également les ascendants et les familles d'ascendants "
+"correspondantes. Il suffit de valider chaque étape proposée ; des "
+"formulaires intermédiaires (individus, familles) permettent de vérifier les "
+"informations avant chaque fusion."
+msgstr ""
+"**If both persons each have parents**: the system offers to also merge the "
+"corresponding ancestors and ancestor families. Simply validate each proposed"
+" step; intermediate forms (individuals, families) let you check the "
+"information before each merge."
+
+#: src/magicien/suppression-fusion.md:21
+msgid "Fusionner deux familles"
+msgstr "Merging two families"
+
+#: src/magicien/suppression-fusion.md:23
+msgid ""
+"Fusionnez d'abord les deux époux entre eux (s'ils sont des fiches "
+"distinctes), puis les deux épouses entre elles, en suivant la procédure de "
+"fusion de personnes ci-dessus."
+msgstr ""
+"First merge the two husbands together (if they are separate pages), then the"
+" two wives together, following the person-merging procedure above."
+
+#: src/magicien/suppression-fusion.md:24
+msgid ""
+"Depuis la fiche de l'un des conjoints ainsi fusionnés, un menu **fusionner "
+"les doublons éventuels** propose alors de fusionner les deux familles elles-"
+"mêmes."
+msgstr ""
+"From the page of one of the spouses thus merged, a **merge possible "
+"duplicates** menu then offers to merge the two families themselves."
+
+#: src/magicien/suppression-fusion.md:26
+msgid "Bonnes pratiques"
+msgstr "Good practices"
+
+#: src/magicien/suppression-fusion.md:28
+msgid ""
+"Une fusion n'est jamais totalement anodine : vérifiez systématiquement les "
+"formulaires intermédiaires plutôt que de valider par réflexe."
+msgstr ""
+"A merge is never entirely trivial: systematically check the intermediate "
+"forms rather than validating by reflex."
+
+#: src/magicien/suppression-fusion.md:29
+msgid ""
+"En cas de doute sur une fusion en cours d'ascendants, il est toujours "
+"possible d'interrompre en abandonnant la navigation avant la validation "
+"finale d'une étape."
+msgstr ""
+"If in doubt during a merge of ancestors in progress, it is always possible "
+"to stop by leaving the page before the final validation of a step."
+
+#: src/magicien/outils-dictionnaires.md:3
+msgid ""
+"La correction orthographique est citée comme une fonctionnalité native de "
+"GeneWeb dans la présentation générale du projet, au même titre que le calcul"
+" de parenté/consanguinité ou la gestion des titres de noblesse. Le détail "
+"concret de son fonctionnement dans l'interface reste à documenter "
+"précisément."
+msgstr ""
+"Spelling correction is mentioned as a native GeneWeb feature in the "
+"project's general presentation, alongside relationship/consanguinity "
+"calculation or the management of titles of nobility. The concrete details of"
+" how it works in the interface remain to be documented precisely."
+
+#: src/magicien/outils-dictionnaires.md:5
+msgid ""
+"**Ne pas confondre avec les outils Geneanet.** Geneanet (qui utilise GeneWeb"
+" comme moteur) propose ses propres « dictionnaires de saisie » pour les "
+"métiers et les lieux, ainsi qu'une auto-complétion — mais ce sont des "
+"fonctionnalités ajoutées par Geneanet à sa propre interface de saisie (dite "
+"« saisie standard »), distinctes de l'interface native de `geneweb/master`. "
+"Cette page doit décrire le comportement du logiciel `geneweb/master` lui-"
+"même, pas les outils spécifiques de Geneanet."
+msgstr ""
+"**Do not confuse with Geneanet's tools.** Geneanet (which uses GeneWeb as "
+"its engine) offers its own \"data-entry dictionaries\" for occupations and "
+"places, as well as auto-completion — but these are features added by "
+"Geneanet to its own entry interface (called \"standard entry\"), distinct "
+"from the native `geneweb/master` interface. This page should describe the "
+"behavior of the `geneweb/master` software itself, not Geneanet's specific "
+"tools."
+
+#: src/utilisateur/recherche.md:3
+msgid "Recherche simple depuis la page d'accueil"
+msgstr "Simple search from the home page"
+
+#: src/utilisateur/recherche.md:5
+msgid ""
+"La page d'accueil d'une base propose un champ de recherche par nom. La "
+"recherche fonctionne par la « clé » de la personne — prénom et patronyme — "
+"sans tenir compte des accents ni de la casse : chercher « therese dupont » "
+"retrouve aussi bien « Thérèse Dupont »."
+msgstr ""
+"A database's home page offers a search field by name. The search works on "
+"the person's \"key\" — first name and surname — regardless of accents or "
+"case: searching \"therese dupont\" also finds \"Thérèse Dupont\"."
+
+#: src/utilisateur/recherche.md:7
+msgid ""
+"Quand plusieurs personnes partagent le même prénom et le même patronyme, "
+"GeneWeb propose une liste de choix plutôt que d'ouvrir directement une "
+"fiche. Il est possible de cibler directement une personne précise en "
+"insérant son numéro d'occurrence entre un point et le prénom et le nom :"
+msgstr ""
+"When several people share the same first name and surname, GeneWeb offers a "
+"list to choose from rather than opening a page directly. You can target a "
+"specific person directly by inserting their occurrence number between a dot "
+"and the first name and surname:"
+
+#: src/utilisateur/recherche.md:13
+msgid ""
+"retrouve directement la personne portant le numéro d'occurrence 4 (voir "
+"[Création d'individu / famille](../magicien/creation.md#la-clé-dune-"
+"personne-prénom-patronyme-numéro) pour la notion de clé et de numéro "
+"d'occurrence)."
+msgstr ""
+"directly finds the person with occurrence number 4 (see [Creating an "
+"individual / family](../magicien/creation.md#a-persons-key-first-name-"
+"surname-occurrence-number) for the notion of key and occurrence number)."
+
+#: src/utilisateur/recherche.md:15
+msgid "Recherche avancée"
+msgstr "Advanced search"
+
+#: src/utilisateur/recherche.md:25
+msgid "Recherche des personnes de même prénom/nom dans toute la base"
+msgstr ""
+"Finding all persons with the same first name/surname across the database"
+
+#: src/utilisateur/recherche.md:27
+msgid ""
+"L'interface permet de lister toutes les personnes portant un prénom ou un "
+"patronyme donné (utile notamment pour repérer des doublons avant une fusion "
+"— voir [Suppression, fusion](../magicien/suppression-fusion.md))."
+msgstr ""
+"The interface lets you list every person with a given first name or surname "
+"(particularly useful for spotting duplicates before a merge — see [Deletion,"
+" merging](../magicien/suppression-fusion.md))."
+
+#: src/utilisateur/recherche.md:31
+msgid "Astuce pour l'administrateur de base"
+msgstr "Tip for the database administrator"
+
+#: src/utilisateur/recherche.md:33
+msgid ""
+"En tant que magicien, une astuce de recherche par clé permet de retrouver "
+"rapidement une personne précise sans naviguer par les liens familiaux, ce "
+"qui est notamment utile lors de la préparation d'une fusion de doublons."
+msgstr ""
+"As a wizard, a key-based search trick lets you quickly find a specific "
+"person without navigating through family links, which is particularly useful"
+" when preparing to merge duplicates."
+
+#: src/utilisateur/navigation.md:3
+msgid "Navigation entre fiches"
+msgstr "Navigating between pages"
+
+#: src/utilisateur/navigation.md:5
+msgid ""
+"Depuis une fiche personnelle, des liens permettent de circuler dans la base "
+":"
+msgstr "From a personal page, links let you move around the database:"
+
+#: src/utilisateur/navigation.md:6
+msgid "vers les parents (père, mère)"
+msgstr "to the parents (father, mother)"
+
+#: src/utilisateur/navigation.md:7
+msgid ""
+"vers le ou les conjoints, et pour chacun, vers la famille correspondante"
+msgstr "to the spouse(s), and for each, to the corresponding family"
+
+#: src/utilisateur/navigation.md:8
+msgid "vers chaque enfant"
+msgstr "to each child"
+
+#: src/utilisateur/navigation.md:9
+msgid "vers les frères et sœurs"
+msgstr "to the siblings"
+
+#: src/utilisateur/navigation.md:11
+msgid "Confidentialité rencontrée en navigation"
+msgstr "Privacy encountered while navigating"
+
+#: src/utilisateur/navigation.md:13
+msgid ""
+"Selon le niveau d'accès (visiteur, ami, magicien — voir [Sécurité et "
+"contrôle d'accès](../divers/securite.md)), certaines informations peuvent "
+"être masquées pour les personnes considérées comme potentiellement vivantes "
+"(dates de naissance, de mariage, etc.), sauf si la personne est marquée "
+"comme publique par son propriétaire de base (par exemple en raison d'un "
+"titre de noblesse — voir [Signification des divers "
+"champs](../magicien/creation-champs.md#accès-confidentialité))."
+msgstr ""
+"Depending on the access level (visitor, friend, wizard — see [Security and "
+"access control](../divers/securite.md)), some information may be hidden for "
+"persons considered potentially living (birth dates, marriage dates, etc.), "
+"unless the person is marked as public by the database owner (for example "
+"because of a title of nobility — see [Meaning of the various "
+"fields](../magicien/creation-champs.md#access-privacy))."
+
+#: src/utilisateur/navigation.md:15
+msgid "Numérotation Sosa"
+msgstr "Sosa numbering"
+
+#: src/utilisateur/navigation.md:17
+msgid ""
+"GeneWeb peut numéroter les ascendants d'une personne de référence selon la "
+"numérotation Sosa-Stradonitz (la personne de référence porte le numéro 1, "
+"son père le numéro 2, sa mère le numéro 3, et ainsi de suite en doublant à "
+"chaque génération). Cette numérotation permet de se repérer rapidement dans "
+"un grand nombre de générations ascendantes et de comparer facilement deux "
+"ascendances."
+msgstr ""
+"GeneWeb can number the ancestors of a reference person according to the "
+"Sosa-Stradonitz numbering (the reference person holds number 1, their father"
+" number 2, their mother number 3, and so on, doubling at each generation). "
+"This numbering makes it easy to find your way through a large number of "
+"ancestor generations and to compare two ancestries."
+
+#: src/utilisateur/navigation.md:21
+msgid "Historique et signets"
+msgstr "History and bookmarks"
+
+#: src/utilisateur/navigation.md:29
+msgid "Liens permanents (permalinks)"
+msgstr "Permanent links (permalinks)"
+
+#: src/utilisateur/navigation.md:33
+msgid "Construction manuelle d'URL"
+msgstr "Manually building a URL"
+
+#: src/utilisateur/navigation.md:35
+msgid ""
+"Il est possible de construire directement une URL pointant vers une action "
+"ou une vue précise (par exemple afficher un arbre ascendant sur un nombre de"
+" générations donné), en utilisant les paramètres de commande décrits dans "
+"[Templates](../divers/templates.md#commandes-durl-m). Utile notamment pour "
+"créer des liens personnalisés depuis une note."
+msgstr ""
+"It is possible to build a URL directly pointing to a specific action or view"
+" (for example displaying an ancestor tree over a given number of "
+"generations), using the command parameters described in "
+"[Templates](../divers/templates.md#url-commands-m). Particularly useful for "
+"creating custom links from a note."
+
+#: src/utilisateur/affichage.md:3
+msgid "Types de pages"
+msgstr "Page types"
+
+#: src/utilisateur/affichage.md:5
+msgid ""
+"**Fiche individu** : informations personnelles, liens familiaux, image le "
+"cas échéant."
+msgstr ""
+"**Individual page**: personal information, family links, an image if "
+"available."
+
+#: src/utilisateur/affichage.md:6
+msgid "**Fiche famille** : informations sur l'union et liste des enfants."
+msgstr ""
+"**Family page**: information about the union and the list of children."
+
+#: src/utilisateur/affichage.md:7
+msgid ""
+"**Arbre ascendant / descendant** : représentation graphique sur plusieurs "
+"générations."
+msgstr ""
+"**Ancestor / descendant tree**: graphical representation over several "
+"generations."
+
+#: src/utilisateur/affichage.md:8
+msgid ""
+"**Page de relations** : chemin(s) de parenté entre deux individus de la "
+"base."
+msgstr ""
+"**Relationship page**: relationship path(s) between two individuals in the "
+"database."
+
+#: src/utilisateur/affichage.md:10
+msgid "Arbres ascendants et descendants"
+msgstr "Ancestor and descendant trees"
+
+#: src/utilisateur/affichage.md:12
+msgid ""
+"GeneWeb peut afficher un arbre sur un nombre de générations paramétrable, "
+"dans plusieurs styles (texte, tableau HTML, ou représentation graphique). Le"
+" nombre maximal de générations affichées peut être limité par la "
+"configuration de la base (voir les variables `max_anc_level` / "
+"`max_desc_level` mentionnées dans "
+"[Templates](../divers/templates.md#variables-de-configuration-bvar))."
+msgstr ""
+"GeneWeb can display a tree over a configurable number of generations, in "
+"several styles (text, HTML table, or graphical representation). The maximum "
+"number of generations displayed can be limited by the database configuration"
+" (see the `max_anc_level` / `max_desc_level` variables mentioned in "
+"[Templates](../divers/templates.md#configuration-variables-bvar))."
+
+#: src/utilisateur/affichage.md:14
+msgid "Représentation en graphe (DAG/SVG)"
+msgstr "Graph representation (DAG/SVG)"
+
+#: src/utilisateur/affichage.md:16
+msgid ""
+"Au-delà de l'arbre classique, GeneWeb peut représenter les relations "
+"familiales sous forme de graphe orienté (DAG), utile notamment pour "
+"visualiser correctement les cas de consanguinité ou de familles recomposées,"
+" où un simple arbre en couches ne suffit pas à représenter fidèlement tous "
+"les liens."
+msgstr ""
+"Beyond the classic tree, GeneWeb can represent family relationships as a "
+"directed graph (DAG), particularly useful for correctly visualizing cases of"
+" consanguinity or blended families, where a simple layered tree isn't enough"
+" to faithfully represent every link."
+
+#: src/utilisateur/affichage.md:20
+msgid "Calcul de parenté et de consanguinité"
+msgstr "Relationship and consanguinity calculation"
+
+#: src/utilisateur/affichage.md:22
+msgid ""
+"GeneWeb intègre un calculateur de parenté capable de déterminer, entre deux "
+"individus quelconques de la base, le ou les chemins de parenté qui les "
+"relient — y compris sur des bases comportant plusieurs millions d'individus."
+" Le même mécanisme sert au calcul du taux de consanguinité d'une personne "
+"(probabilité que ses deux lignées parentales se recroisent)."
+msgstr ""
+"GeneWeb includes a relationship calculator able to determine, between any "
+"two individuals in the database, the relationship path(s) linking them — "
+"even on databases with several million individuals. The same mechanism is "
+"used to calculate a person's consanguinity rate (the probability that their "
+"two parental lines cross)."
+
+#: src/utilisateur/affichage.md:26
+msgid "Statistiques et widgets d'accueil"
+msgstr "Home page statistics and widgets"
+
+#: src/utilisateur/affichage.md:28
+msgid ""
+"La page d'accueil d'une base peut afficher des éléments complémentaires : "
+"anniversaires du jour, naissances ou décès récents, pyramide des âges pour "
+"une année donnée, etc."
+msgstr ""
+"A database's home page can display additional elements: today's birthdays, "
+"recent births or deaths, an age pyramid for a given year, etc."
+
+#: src/utilisateur/affichage.md:32
+msgid "Personnalisation de l'affichage"
+msgstr "Customizing the display"
+
+#: src/utilisateur/affichage.md:34
+msgid ""
+"Le contenu et la mise en page de ces différentes vues sont pilotés par les "
+"templates du serveur (voir [Templates](../divers/templates.md)) : ce sont "
+"eux qui déterminent, par exemple, quelles informations apparaissent sur la "
+"fiche individu et dans quel ordre."
+msgstr ""
+"The content and layout of these various views are driven by the server's "
+"templates (see [Templates](../divers/templates.md)): they determine, for "
+"example, which pieces of information appear on the individual page and in "
+"what order."
+
+#: src/divers/format-gw.md:3
+msgid ""
+"Le format `.gw` est le format texte natif de GeneWeb pour représenter une "
+"base généalogique — c'est le format produit par `gwu` (décompilation d'une "
+"base `.gwb`) et consommé par `gwc` (compilation). C'est aussi le format "
+"recommandé pour les sauvegardes, notamment avant toute mise à jour de "
+"version (voir [Installation](../geneweb/installation.md))."
+msgstr ""
+"The `.gw` format is GeneWeb's native text format for representing a "
+"genealogical database — it's the format produced by `gwu` (decompiling a "
+"`.gwb` database) and consumed by `gwc` (compiling). It is also the "
+"recommended format for backups, especially before any version update (see "
+"[Installation](../geneweb/installation.md))."
+
+#: src/divers/format-gw.md:5
+msgid ""
+"**Sur la version « gwplus »** Geneanet utilise en interne des extensions du "
+"format `.gw` d'origine, parfois désignées « gwplus » dans les exports. Ce "
+"manuel décrit le format `.gw` tel que compris par `geneweb/master` ; les "
+"extensions propres à Geneanet ne sont pas nécessairement couvertes ici et "
+"devront être vérifiées séparément si vous importez un export Geneanet."
+msgstr ""
+"**On the \"gwplus\" variant** Geneanet internally uses extensions of the "
+"original `.gw` format, sometimes labeled \"gwplus\" in exports. This manual "
+"describes the `.gw` format as understood by `geneweb/master`; extensions "
+"specific to Geneanet are not necessarily covered here and should be checked "
+"separately if you import a Geneanet export."
+
+#: src/divers/format-gw.md:8
+msgid "Structure générale d'un fichier .gw"
+msgstr "General structure of a .gw file"
+
+#: src/divers/format-gw.md:10
+msgid ""
+"Un fichier `.gw` est un fichier texte, structuré en blocs introduits par un "
+"mot-clé de début de bloc. Il peut contenir, dans n'importe quel ordre, un "
+"nombre quelconque des blocs suivants :"
+msgstr ""
+"A `.gw` file is a text file, structured into blocks each introduced by a "
+"starting keyword. It can contain, in any order, any number of the following "
+"blocks:"
+
+#: src/divers/format-gw.md:22
+msgid "Bloc famille (`fam`)"
+msgstr "Family block (`fam`)"
+
+#: src/divers/format-gw.md:24
+msgid ""
+"Décrit une famille : les deux conjoints, éventuellement la date et le lieu "
+"de mariage, puis la liste des enfants."
+msgstr ""
+"Describes a family: the two spouses, optionally the marriage date and place,"
+" then the list of children."
+
+#: src/divers/format-gw.md:38
+msgid "Bloc personne (individu)"
+msgstr "Person block (individual)"
+
+#: src/divers/format-gw.md:40
+msgid ""
+"Chaque personne au sein d'un bloc `fam` (parents et enfants) porte ses "
+"propres attributs : dates de naissance/décès, occupation, notes, sources, "
+"alias, etc."
+msgstr ""
+"Each person within a `fam` block (parents and children) carries their own "
+"attributes: birth/death dates, occupation, notes, sources, aliases, etc."
+
+#: src/divers/format-gw.md:48
+msgid "Notes personnelles (`notes`)"
+msgstr "Personal notes (`notes`)"
+
+#: src/divers/format-gw.md:56
+msgid "Relations (`rel`)"
+msgstr "Relations (`rel`)"
+
+#: src/divers/format-gw.md:60
+msgid "Notes de base (page étendue et notes générales)"
+msgstr "Database notes (extended page and general notes)"
+
+#: src/divers/format-gw.md:64
+msgid "Où trouver la référence complète"
+msgstr "Where to find the complete reference"
+
+#: src/divers/format-gw.md:66
+msgid ""
+"La description exhaustive du format `.gw` évolue avec les versions de "
+"GeneWeb. Les sources les plus fiables à consulter avant de compléter cette "
+"page :"
+msgstr ""
+"The exhaustive description of the `.gw` format evolves with GeneWeb "
+"versions. The most reliable sources to check before completing this page:"
+
+#: src/divers/format-gw.md:67
+msgid ""
+"le wiki du projet : `https://geneweb.tuxfamily.org/wiki/gw/fr` (description "
+"en français, incluant les évolutions dites « gwplus »)"
+msgstr ""
+"the project's wiki: `https://geneweb.tuxfamily.org/wiki/gw/fr` (description "
+"in French, including the so-called \"gwplus\" extensions)"
+
+#: src/divers/format-gw.md:68
+msgid ""
+"le code source de `gwc` (compilateur `.gw` → `.gwb`) et de `gwu` "
+"(décompilateur `.gwb` → `.gw`) dans le dépôt, qui reste la source de vérité "
+"en cas de désaccord avec la documentation externe"
+msgstr ""
+"the source code of `gwc` (`.gw` → `.gwb` compiler) and `gwu` (`.gwb` → `.gw`"
+" decompiler) in the repository, which remains the source of truth in case of"
+" disagreement with external documentation"
+
+#: src/divers/format-gw.md:70
+msgid "Utilitaires associés"
+msgstr "Related utilities"
+
+#: src/divers/format-gw.md:72
+msgid ""
+"Voir [Import / export : gwu, gwb2ged, gwc, ged2gwb](../geneweb/gestion-"
+"import-export.md) pour la compilation et décompilation d'un fichier `.gw`."
+msgstr ""
+"See [Import / export: gwu, gwb2ged, gwc, ged2gwb](../geneweb/gestion-import-"
+"export.md) for compiling and decompiling a `.gw` file."
+
+#: src/divers/format-wiki.md:3
+msgid ""
+"Les notes (individuelles, familiales, ou notes générales de la base) "
+"utilisent une syntaxe de type wiki plutôt que du HTML brut. Cette syntaxe "
+"permet notamment de créer des liens internes vers d'autres fiches de la "
+"base, d'insérer des images, et d'inclure des passages HTML."
+msgstr ""
+"Notes (individual, family, or the database's general notes) use a wiki-style"
+" syntax rather than raw HTML. This syntax notably allows creating internal "
+"links to other pages in the database, inserting images, and including HTML "
+"snippets."
+
+#: src/divers/format-wiki.md:5
+msgid "Liens internes vers une fiche"
+msgstr "Internal links to a page"
+
+#: src/divers/format-wiki.md:7
+msgid ""
+"Un lien vers un individu de la base s'écrit avec des doubles crochets, en "
+"indiquant le prénom et le nom séparés par une barre oblique, suivis du texte"
+" affiché :"
+msgstr ""
+"A link to an individual in the database is written with double square "
+"brackets, giving the first name and surname separated by a slash, followed "
+"by the displayed text:"
+
+#: src/divers/format-wiki.md:13
+msgid "Exemple :"
+msgstr "Example:"
+
+#: src/divers/format-wiki.md:25
+msgid "Mise en forme du texte"
+msgstr "Text formatting"
+
+#: src/divers/format-wiki.md:36
+msgid "Images"
+msgstr "Images"
+
+#: src/divers/format-wiki.md:40
+msgid "HTML et variables dans les notes"
+msgstr "HTML and variables in notes"
+
+#: src/divers/format-wiki.md:42
+msgid ""
+"Les notes ne sont pas du texte purement passif : elles peuvent contenir des "
+"balises HTML ainsi que certaines variables interprétées par GeneWeb au "
+"moment de l'affichage (par exemple pour construire dynamiquement une URL "
+"vers une image ou une autre page). Voir [Templates](templates.md) pour le "
+"mécanisme général de variables et macros, dont une partie est également "
+"disponible dans les notes — en pratique, toutes les variables documentées "
+"pour les templates ne sont pas nécessairement utilisables dans une note ; "
+"mieux vaut tester avant de généraliser."
+msgstr ""
+"Notes are not purely passive text: they can contain HTML tags as well as "
+"certain variables interpreted by GeneWeb at display time (for example, to "
+"dynamically build a URL to an image or another page). See "
+"[Templates](templates.md) for the general variable and macro mechanism, part"
+" of which is also available in notes — in practice, not every variable "
+"documented for templates is necessarily usable in a note; it's best to test "
+"before generalizing."
+
+#: src/divers/format-wiki.md:44
+msgid "Comment vérifier concrètement la syntaxe"
+msgstr "How to check the syntax in practice"
+
+#: src/divers/format-wiki.md:46
+msgid "Le plus fiable, avant de compléter les TODO ci-dessus, est de :"
+msgstr "The most reliable approach, before completing the TODOs above, is to:"
+
+#: src/divers/format-wiki.md:47
+msgid ""
+"Créer une note de test sur une base locale avec différentes syntaxes "
+"candidates."
+msgstr ""
+"Create a test note on a local database with different candidate syntaxes."
+
+#: src/divers/format-wiki.md:48
+msgid "Observer le rendu réel via l'interface web."
+msgstr "Observe the actual rendering via the web interface."
+
+#: src/divers/format-wiki.md:49
+msgid ""
+"En cas de doute, consulter le code source du moteur de rendu wiki (recherche"
+" de `wiki` dans le dépôt) plutôt que de se fier à une documentation externe "
+"potentiellement datée."
+msgstr ""
+"When in doubt, check the source code of the wiki rendering engine (search "
+"for `wiki` in the repository) rather than relying on potentially outdated "
+"external documentation."
+
+#: src/divers/securite.md:3
+msgid ""
+"GeneWeb propose plusieurs mécanismes, combinables, pour contrôler qui peut "
+"consulter et modifier une base."
+msgstr ""
+"GeneWeb offers several combinable mechanisms to control who can view and "
+"modify a database."
+
+#: src/divers/securite.md:5
+msgid ""
+"Les options ci-dessous sont documentées à partir du man `gwd` historique. "
+"Certaines options récentes ou renommées sur `master` peuvent manquer — à "
+"confirmer avec `gwd -help` sur votre version avant publication."
+msgstr ""
+"The options below are documented from the historical `gwd` man page. Some "
+"recent or renamed options on `master` may be missing — confirm with `gwd "
+"-help` on your version before publishing."
+
+#: src/divers/securite.md:7
+msgid "Niveaux d'accès"
+msgstr "Access levels"
+
+#: src/divers/securite.md:9
+msgid ""
+"GeneWeb distingue plusieurs profils d'utilisateurs pour une même base :"
+msgstr "GeneWeb distinguishes several user profiles for a single database:"
+
+#: src/divers/securite.md:11
+msgid "Niveau"
+msgstr "Level"
+
+#: src/divers/securite.md:11
+msgid "Accès"
+msgstr "Access"
+
+#: src/divers/securite.md:13
+msgid "**Visiteur**"
+msgstr "**Visitor**"
+
+#: src/divers/securite.md:13
+msgid ""
+"Consultation seule, avec les restrictions de confidentialité par défaut (ex."
+" dates masquées pour les personnes potentiellement vivantes)"
+msgstr ""
+"View-only, with the default privacy restrictions (e.g. dates hidden for "
+"potentially living persons)"
+
+#: src/divers/securite.md:14
+msgid "**Ami (friend)**"
+msgstr "**Friend**"
+
+#: src/divers/securite.md:14
+msgid ""
+"Consultation étendue, incluant les dates normalement masquées aux visiteurs"
+msgstr "Extended viewing, including dates normally hidden from visitors"
+
+#: src/divers/securite.md:15
+msgid "**Magicien (wizard)**"
+msgstr "**Wizard**"
+
+#: src/divers/securite.md:15
+msgid ""
+"Accès complet : consultation étendue et droit de modification (création, "
+"édition, suppression, fusion)"
+msgstr ""
+"Full access: extended viewing and the right to modify (create, edit, delete,"
+" merge)"
+
+#: src/divers/securite.md:17
+msgid "Mots de passe"
+msgstr "Passwords"
+
+#: src/divers/securite.md:19
+msgid ""
+"Les mots de passe magicien et ami peuvent être définis au lancement de `gwd`"
+" :"
+msgstr "The wizard and friend passwords can be set when launching `gwd`:"
+
+#: src/divers/securite.md:24
+msgid ""
+"# \"wizard just friend\" : le magicien est traité comme un simple ami (accès"
+" permanent réduit)\n"
+msgstr ""
+"# \"wizard just friend\": the wizard is treated as a plain friend (reduced "
+"permanent access)\n"
+
+#: src/divers/securite.md:27
+msgid ""
+"Ces mots de passe peuvent aussi être définis dans le fichier `.gwf` de la "
+"base (voir [Le fichier .gwf](../geneweb/base-gwf.md)) plutôt qu'en ligne de "
+"commande, ce qui est recommandé pour un usage en production (éviter "
+"d'exposer un mot de passe dans les logs de processus)."
+msgstr ""
+"These passwords can also be set in the database's `.gwf` file (see [The .gwf"
+" file](../geneweb/base-gwf.md)) rather than on the command line, which is "
+"recommended for production use (to avoid exposing a password in process "
+"logs)."
+
+#: src/divers/securite.md:29
+msgid "Fichier d'autorisation (`-auth`)"
+msgstr "Authorization file (`-auth`)"
+
+#: src/divers/securite.md:31
+msgid ""
+"Pour restreindre l'accès à des utilisateurs nommés plutôt qu'à un mot de "
+"passe partagé unique :"
+msgstr ""
+"To restrict access to named users rather than a single shared password:"
+
+#: src/divers/securite.md:37
+msgid ""
+"Le fichier doit contenir une ligne par utilisateur autorisé, au format :"
+msgstr "The file must contain one line per authorized user, in the format:"
+
+#: src/divers/securite.md:42
+msgid "Restriction par adresse IP"
+msgstr "Restriction by IP address"
+
+#: src/divers/securite.md:48
+msgid ""
+"N'accepte les requêtes que depuis l'adresse IP indiquée. Utile notamment "
+"pour restreindre l'accès à l'interface d'administration `gwsetup` à une "
+"seule machine (voir le fichier `only.txt` mentionné par certaines "
+"distributions packagées)."
+msgstr ""
+"Only accepts requests from the specified IP address. Particularly useful for"
+" restricting access to the `gwsetup` administration interface to a single "
+"machine (see the `only.txt` file mentioned by some packaged distributions)."
+
+#: src/divers/securite.md:50
+msgid "Protection contre les robots d'indexation agressifs"
+msgstr "Protection against aggressive indexing bots"
+
+#: src/divers/securite.md:56
+msgid ""
+"Exclut une connexion si elle dépasse `<nombre>` requêtes en `<secondes>` "
+"secondes — utile pour limiter l'impact d'un robot d'indexation trop agressif"
+" sur les performances du serveur."
+msgstr ""
+"Excludes a connection if it exceeds `<count>` requests within `<seconds>` "
+"seconds — useful for limiting the impact of an overly aggressive indexing "
+"bot on server performance."
+
+#: src/divers/securite.md:58
+msgid "Autres options utiles"
+msgstr "Other useful options"
+
+#: src/divers/securite.md:60
+msgid "Option"
+msgstr "Option"
+
+#: src/divers/securite.md:60
+msgid "Effet"
+msgstr "Effect"
+
+#: src/divers/securite.md:62
+msgid "`-log <fichier>`"
+msgstr "`-log <file>`"
+
+#: src/divers/securite.md:62
+msgid "Redirige les traces de connexion vers ce fichier"
+msgstr "Redirects connection logs to this file"
+
+#: src/divers/securite.md:63
+msgid "`-trace_failed_passwd`"
+msgstr "`-trace_failed_passwd`"
+
+#: src/divers/securite.md:63
+msgid "Journalise les tentatives de mot de passe échouées"
+msgstr "Logs failed password attempts"
+
+#: src/divers/securite.md:64
+msgid "`-conn_tmout <secondes>`"
+msgstr "`-conn_tmout <seconds>`"
+
+#: src/divers/securite.md:64
+msgid "Délai d'expiration d'une connexion (0 = pas de limite)"
+msgstr "Connection timeout (0 = no limit)"
+
+#: src/divers/securite.md:65
+msgid "`-max_clients <nombre>`"
+msgstr "`-max_clients <count>`"
+
+#: src/divers/securite.md:65
+msgid ""
+"Nombre maximal de clients traités simultanément (mode daemon uniquement)"
+msgstr "Maximum number of clients handled simultaneously (daemon mode only)"
+
+#: src/divers/securite.md:67
+msgid "Exposition en production : recommandations"
+msgstr "Production exposure: recommendations"
+
+#: src/divers/templates.md:3
+msgid ""
+"GeneWeb génère ses pages HTML (et d'autres formats, comme du LaTeX pour des "
+"outils tiers) à partir de fichiers de template situés dans le dossier `etc/`"
+" de la distribution (par exemple `perso.txt` pour la fiche individu). Ces "
+"fichiers combinent du HTML classique avec un petit langage de programmation "
+"propre à GeneWeb, permettant de conditionner l'affichage selon le contenu de"
+" la base."
+msgstr ""
+"GeneWeb generates its HTML pages (and other formats, such as LaTeX for "
+"third-party tools) from template files located in the distribution's `etc/` "
+"folder (for example `perso.txt` for the individual page). These files "
+"combine regular HTML with a small GeneWeb-specific programming language, "
+"allowing display to be conditioned on the database's content."
+
+#: src/divers/templates.md:5
+msgid ""
+"Référence complète : la page "
+"[Expert](https://geneweb.tuxfamily.org/wiki/Expert) du wiki du projet "
+"documente plusieurs centaines de commandes de template. Cette page-ci n'en "
+"donne qu'une introduction ; consultez le wiki (ou, en dernier recours, le "
+"code source `templ.ml`/`perso.ml`) pour la liste exhaustive."
+msgstr ""
+"Complete reference: the project wiki's "
+"[Expert](https://geneweb.tuxfamily.org/wiki/Expert) page documents several "
+"hundred template commands. This page only gives an introduction; check the "
+"wiki (or, as a last resort, the `templ.ml`/`perso.ml` source code) for the "
+"exhaustive list."
+
+#: src/divers/templates.md:7
+msgid "Structures de contrôle de base"
+msgstr "Basic control structures"
+
+#: src/divers/templates.md:9
+msgid "Le langage de template propose notamment :"
+msgstr "The template language notably offers:"
+
+#: src/divers/templates.md:11
+msgid ""
+"**Condition** : `%if;(condition) ... %elseif;(...) ... %else; ... %end;`"
+msgstr ""
+"**Condition**: `%if;(condition) ... %elseif;(...) ... %else; ... %end;`"
+
+#: src/divers/templates.md:12
+msgid ""
+"**Définition de macro locale** : `%define;nom(paramètres) ... %end;`, "
+"appelée ensuite avec `%apply;nom(valeurs)`"
+msgstr ""
+"**Local macro definition**: `%define;name(parameters) ... %end;`, then "
+"called with `%apply;name(values)`"
+
+#: src/divers/templates.md:13
+msgid "**Liaison de variable locale** : `%let;nom;valeur%in; ...`"
+msgstr "**Local variable binding**: `%let;name;value%in; ...`"
+
+#: src/divers/templates.md:14
+msgid "**Boucle sur une liste** : `%foreach; ... %end;`"
+msgstr "**Loop over a list**: `%foreach; ... %end;`"
+
+#: src/divers/templates.md:15
+msgid "**Boucle bornée** : `%for;compteur;début;fin; ... %end;`"
+msgstr "**Bounded loop**: `%for;counter;start;end; ... %end;`"
+
+#: src/divers/templates.md:16
+msgid ""
+"**Espacement / mise en forme** : `%nl;` (retour à la ligne), `%nn;` (pas de "
+"retour à la ligne), `%sp;` (espace), `%sq;` (guillemet)"
+msgstr ""
+"**Spacing / formatting**: `%nl;` (line break), `%nn;` (no line break), "
+"`%sp;` (space), `%sq;` (quote)"
+
+#: src/divers/templates.md:18
+msgid ""
+"Les conditions et expressions supportent les opérateurs arithmétiques et "
+"logiques usuels (`+ - * / %`, comparaisons, `and` / `or` / `not`, "
+"`is_substr`, `in`)."
+msgstr ""
+"Conditions and expressions support the usual arithmetic and logical "
+"operators (`+ - * / %`, comparisons, `and` / `or` / `not`, `is_substr`, "
+"`in`)."
+
+#: src/divers/templates.md:20
+msgid ""
+"**Avertissement du projet lui-même** : toutes les commandes ne sont pas "
+"disponibles sur toutes les pages. Il n'existe pas de table exhaustive fiable"
+" de \"quelle commande est disponible où\" — l'exploration par essai/erreur, "
+"ou la lecture du code source, reste souvent nécessaire."
+msgstr ""
+"**Warning from the project itself**: not every command is available on every"
+" page. There is no reliable exhaustive table of \"which command is available"
+" where\" — trial and error, or reading the source code, often remains "
+"necessary."
+
+#: src/divers/templates.md:22
+msgid "Exemple illustratif"
+msgstr "Illustrative example"
+
+#: src/divers/templates.md:24
+msgid ""
+"Extrait simplifié inspiré d'un test de condition sur le sexe d'un individu, "
+"tel qu'on peut le rencontrer dans `perso.txt` :"
+msgstr ""
+"Simplified excerpt inspired by a test on an individual's sex, as it might "
+"appear in `perso.txt`:"
+
+#: src/divers/templates.md:26
+msgid ""
+"```\n"
+"%if;(sex = 0 or sex = 2)\n"
+"  Affichage adapté au cas \"homme ou sexe inconnu\"\n"
+"%else;\n"
+"  Affichage adapté au cas \"femme\"\n"
+"%end;\n"
+"```"
+msgstr ""
+"```\n"
+"%if;(sex = 0 or sex = 2)\n"
+"  Display suited to the \"male or unknown sex\" case\n"
+"%else;\n"
+"  Display suited to the \"female\" case\n"
+"%end;\n"
+"```"
+
+#: src/divers/templates.md:34
+msgid "Variables de configuration (`bvar`)"
+msgstr "Configuration variables (`bvar`)"
+
+#: src/divers/templates.md:36
+msgid ""
+"Toute variable ajoutée dans le fichier `.gwf` d'une base (voir [Le fichier "
+".gwf](../geneweb/base-gwf.md)) devient accessible dans les templates via le "
+"préfixe `bvar.` :"
+msgstr ""
+"Any variable added to a database's `.gwf` file (see [The .gwf "
+"file](../geneweb/base-gwf.md)) becomes accessible in templates via the "
+"`bvar.` prefix:"
+
+#: src/divers/templates.md:38
+msgid ""
+"```\n"
+"# dans le .gwf :\n"
+"new_var=some-text\n"
+"\n"
+"# dans un template :\n"
+"%if;(bvar.new_var = \"some-text\")\n"
+"  ... action spécifique ...\n"
+"%end;\n"
+"```"
+msgstr ""
+"```\n"
+"# in the .gwf file:\n"
+"new_var=some-text\n"
+"\n"
+"# in a template:\n"
+"%if;(bvar.new_var = \"some-text\")\n"
+"  ... specific action ...\n"
+"%end;\n"
+"```"
+
+#: src/divers/templates.md:48
+msgid ""
+"De nombreuses options de comportement du serveur passent par ce mécanisme "
+"plutôt que par une option `gwd` dédiée — la page Expert du wiki en liste un "
+"grand nombre (affichage de la consanguinité, gestion du forum, chemins "
+"d'images personnalisés, etc.)."
+msgstr ""
+"Many server behavior options go through this mechanism rather than through a"
+" dedicated `gwd` option — the wiki's Expert page lists a large number of "
+"them (displaying consanguinity, forum management, custom image paths, etc.)."
+
+#: src/divers/templates.md:50
+msgid "Variables d'environnement (`evar`)"
+msgstr "Environment variables (`evar`)"
+
+#: src/divers/templates.md:52
+msgid ""
+"Les paramètres présents dans l'URL de la requête sont accessibles dans les "
+"templates via `%evar.nom;` (ou la forme courte `%e.nom;` depuis la version "
+"7.1). Par exemple, avec une URL contenant `?lang=fr&p=jean&n=dupont`, un "
+"template peut tester la langue demandée ou récupérer le prénom passé en "
+"paramètre."
+msgstr ""
+"Parameters present in the request URL are accessible in templates via "
+"`%evar.name;` (or the short form `%e.name;` since version 7.1). For example,"
+" with a URL containing `?lang=fr&p=jean&n=dupont`, a template can test the "
+"requested language or retrieve the first name passed as a parameter."
+
+#: src/divers/templates.md:54
+msgid "Variables personnelles dans les notes"
+msgstr "Personal variables in notes"
+
+#: src/divers/templates.md:56
+msgid ""
+"Une variable définie dans le `.gwf` sous la forme `var_xxx=valeur` peut être"
+" insérée dans une note ou un template via la macro `%vxxx;`. C'est notamment"
+" utilisé pour factoriser la signature d'une source répétée dans plusieurs "
+"notes (nom complet, éventuellement lien vers une page)."
+msgstr ""
+"A variable defined in the `.gwf` file as `var_xxx=value` can be inserted "
+"into a note or template via the `%vxxx;` macro. This is notably used to "
+"factor out a source signature repeated across several notes (full name, "
+"possibly a link to a page)."
+
+#: src/divers/templates.md:58
+msgid "Personnaliser l'apparence"
+msgstr "Customizing the appearance"
+
+#: src/divers/templates.md:67
+msgid "Commandes d'URL (`m=...`)"
+msgstr "URL commands (`m=...`)"
+
+#: src/divers/templates.md:69
+msgid ""
+"Les actions de GeneWeb (affichage d'une fiche, ajout, modification, fusion, "
+"etc.) sont déclenchées par un paramètre `m=` dans l'URL, par exemple "
+"`m=MOD_IND` pour modifier un individu. La liste de ces commandes est "
+"également documentée sur la page Expert du wiki ; leur usage direct "
+"(construction manuelle d'URL) est surtout utile pour créer des liens "
+"personnalisés depuis une note ou un template."
+msgstr ""
+"GeneWeb actions (displaying a page, adding, modifying, merging, etc.) are "
+"triggered by an `m=` parameter in the URL, for example `m=MOD_IND` to modify"
+" an individual. The list of these commands is also documented on the wiki's "
+"Expert page; using them directly (manually building a URL) is mainly useful "
+"for creating custom links from a note or a template."
+
+#: src/divers/i18n-lexiques.md:3
+msgid ""
+"GeneWeb est traduit dans de nombreuses langues (français, anglais, allemand,"
+" espagnol, italien, et bien d'autres). Les textes de l'interface ne sont pas"
+" codés en dur : ils sont chargés depuis des fichiers de lexique situés dans "
+"le dossier `lang/` de la distribution."
+msgstr ""
+"GeneWeb is translated into many languages (French, English, German, Spanish,"
+" Italian, and many others). Interface text is not hard-coded: it is loaded "
+"from lexicon files located in the distribution's `lang/` folder."
+
+#: src/divers/i18n-lexiques.md:5
+msgid "Sélection de la langue"
+msgstr "Language selection"
+
+#: src/divers/i18n-lexiques.md:7
+msgid ""
+"Plusieurs mécanismes déterminent la langue affichée, par ordre de priorité "
+"croissant en pratique :"
+msgstr ""
+"Several mechanisms determine the displayed language, in increasing order of "
+"priority in practice:"
+
+#: src/divers/i18n-lexiques.md:9
+msgid ""
+"**Langue par défaut du serveur** : option `gwd -lang <code>` (par défaut "
+"`en`)"
+msgstr ""
+"**Server default language**: `gwd -lang <code>` option (defaults to `en`)"
+
+#: src/divers/i18n-lexiques.md:10
+msgid ""
+"**Langue du navigateur** : option `gwd -blang`, qui utilise la langue "
+"déclarée par le navigateur du visiteur si elle est disponible"
+msgstr ""
+"**Browser language**: `gwd -blang` option, which uses the language declared "
+"by the visitor's browser if available"
+
+#: src/divers/i18n-lexiques.md:11
+msgid ""
+"**Langue explicite dans l'URL** : paramètre `?lang=<code>` de la requête, "
+"qui a la priorité"
+msgstr ""
+"**Explicit language in the URL**: the request's `?lang=<code>` parameter, "
+"which takes priority"
+
+#: src/divers/i18n-lexiques.md:15
+msgid "Structure des fichiers de lexique"
+msgstr "Structure of the lexicon files"
+
+#: src/divers/i18n-lexiques.md:24
+msgid "Ajouter ou compléter une traduction"
+msgstr "Adding or completing a translation"
+
+#: src/divers/i18n-lexiques.md:33
+msgid "Lien avec cette documentation"
+msgstr "Connection with this documentation"
+
+#: src/divers/i18n-lexiques.md:35
+msgid ""
+"Le glossaire de ce manuel ([Glossaire](../glossaire.md)) devrait, à terme, "
+"rester cohérent avec la terminologie officielle utilisée dans le lexique "
+"français de l'interface — pour éviter qu'un même concept soit nommé "
+"différemment dans l'interface et dans le manuel."
+msgstr ""
+"This manual's glossary ([Glossary](../glossaire.md)) should, in time, stay "
+"consistent with the official terminology used in the interface's French "
+"lexicon — to avoid the same concept being named differently in the interface"
+" and in the manual."
+
+#: src/glossaire.md:5
+msgid "**Base** :"
+msgstr "**Database**:"
+
+#: src/glossaire.md:6
+msgid "**Fiche** :"
+msgstr "**Personal page**:"
+
+#: src/glossaire.md:7
+msgid "**Magicien** :"
+msgstr "**Wizard**:"
+
+#: src/glossaire.md:8
+msgid "**Wizard** (mag/friend/normal — à clarifier les niveaux d'accès) :"
+msgstr "**Wizard** (mag/friend/normal — access levels to clarify):"
+
+#: src/glossaire.md:9
+msgid "**.gwf** :"
+msgstr "**.gwf**:"
+
+#: src/glossaire.md:10
+msgid "**.gw** :"
+msgstr "**.gw**:"
+
+#: src/glossaire.md:11
+msgid "**GEDCOM** :"
+msgstr "**GEDCOM**:"
+
+#: src/glossaire.md:12
+msgid "**Consanguinité** :"
+msgstr "**Consanguinity**:"
+
+#: src/glossaire.md:13
+msgid "**Connexité** :"
+msgstr "**Connectivity**:"

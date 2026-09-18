@@ -1,0 +1,81 @@
+Source : https://geneweb.tuxfamily.org/wiki/configuration/fr
+Récupération : intégrale, verbatim (via web_fetch)
+Licence indiquée par le wiki : CC BY-SA 3.0
+
+---
+
+Configuration des bases de données GeneWeb : le fichier .gwf
+
+Le fichier de configuration d'une base de données GeneWeb est un simple fichier texte contenant des variables. Il doit avoir le même nom que la base avec l'extension .gwf et doit se trouver à la racine du dossier contenant votre base.
+
+Le fichier d'exemple a.gwf (https://github.com/geneweb/geneweb/blob/master/etc/a.gwf) contient une configuration-type avec toutes les options possibles.
+
+Par exemple, si votre base s'appelle dupont, faites une copie du fichier a.gwf et placez la à côté du dossier \dupont.gwb\ sous le nom dupont.gwf puis éditez ce fichier texte pour en changer les options.
+
+Si vous créez une base avec gwsetup, il vous sera proposé une configuration type plus restreinte :
+
+use_cdn=yes
+access_by_key=yes
+disable_forum=yes
+hide_private_names=no
+use_restrict=no
+show_consang=yes
+display_sosa=yes
+place_surname_link_to_ind=yes
+max_anc_level=8
+max_anc_tree=7
+max_desc_level=12
+max_desc_tree=4
+max_cousins=2000
+max_cousins_level=5
+latest_event=20
+template=*
+long_date=no
+counter=no
+full_siblings=yes
+hide_advanced_request=no
+
+L'interface gwsetup permet de modifier certaines variables de configuration depuis votre navigateur web sans avoir à éditer le fichier.
+
+Le template templm propose plusieurs paramètres supplémentaires.
+
+Description détaillée des variables
+
+Principales valeurs configurables (pour une liste exhaustive et à jour (mais en anglais) voir le fichier source de référence a.gwf) :
+
+- body_prop permet de configurer les couleurs de fond, ou d'y mettre un motif et de changer la couleur du texte et des liens. Sa syntaxe est la syntaxe HTML acceptée dans le tag "<body>" avant le ">". Exemple :
+  body_prop=background=monfond.jpg vlink=yellow
+  Ceci s'applique non seulement à la page d'accueil, mais à toutes les pages affichées de cette base.
+  body_prop remplacé par css_prop depuis gw 6.00
+
+- friend_passwd (mot de passe "ami") permet de limiter globalement la visibilité des données sur les personnes potentiellement encore vivantes (voir private_years dans a.gwf. La valeur par défaut est 150 ans).
+  friend_passwd_file permet une limite visiteur par visiteur. Si vous mettez une valeur à ce champ, seulement les personnes qui auront mis le mot de passe à partir de la page d'accueil auront accès à ces données.
+
+- wizard_passwd (mot de passe "magicien") permet de limiter globalement le droit de faire des modifications dans votre base.
+  wizard_passwd_file permet une limite visiteur par visiteur. Si vous mettez une valeur à ce champ, seulement les personnes qui auront mis le mot de passe à partir de la page d'accueil auront accès aux modifications.
+
+- wizard_just_friend ("magicien" seulement "ami") permet d'interdire la mise à jour de la base. Mettez "yes" pour le faire, "no" pour remettre l'autorisation. Il peut être utile de mettre "yes", temporairement, pendant le nettoyage de votre base.
+
+- default_lang permet de spécifier une langue par défaut de la page d'accueil. Sans précision, la langue est le français. Les valeurs possibles sont : "af" (afrikaans), "bg" (bulgare), "br" (breton), "cs" (tchèque), "ca" (catalan), "de" (allemand), "da" (danois), "en" (anglais), "eo" (espéranto), "es" (espagnol), "et" (estonien), "fi" (finlandais), "fr" (français), "he" (hébreu), "is" (islandais), "it" (italien), "lv" (letton), "nl" (néerlandais), "no" (norvégien), "pl" (polonais), "pt" (portugais), "pt-br" (portugais brésilien), "ro" (roumain), "ru" (russe), "sl" (slovène), "sv" (suédois), "zh" (chinois).
+  Notez que, quelle que soit la langue sélectionnée par défaut, vous pouvez en choisir une autre dans la page d'accueil, en cliquant dans son drapeau en haut de la page.
+
+- can_send_image (peut envoyer des images) permet d'autoriser les "magiciens" à envoyer (et supprimer) des images. Dans ce cas, au moment des mises à jour, ils peuvent cliquer sur un lien envoyer image (et éventuellement un autre intitulé supprimer image). Par défaut, c'est "no" (on ne peut pas en envoyer) ; pour l'autoriser, il faut mettre explicitement "yes".
+  Attention : les images seront enregistrées sur votre ordinateur, et peuvent donc consommer beaucoup d'espace disque, s'il y a beaucoup d'images envoyées.
+
+- renamed (renommée) permet d'indiquer qu'une base a été renommée. Si votre site a beaucoup été consulté et que votre base a été mise dans beaucoup de signets de beaucoup de personnes, c'est un moyen pour les rediriger vers votre base, avec son nouveau nom. S'ils essaient d'accéder à l'ancien nom, ils verront une page avec un lien de la même requête vers le nouveau nom.
+
+- history permet d'indiquer si vous souhaitez archiver un historique des modifications. Il est stocké dans bases\nomdemabase.gwb\history et un lien s'affiche sur la page d'accueil lorsqu'il existe.
+
+- history_diff permet de stocker un historique spécifique à chaque individu.
+
+[Bas de page / navigation standard du wiki, non spécifique à cette page — liens vers Télécharger, Linux, OSX, Windows, FreeBSD, CGI, gwd, namesake/fr, consang/fr, gwsetup/fr, man/fr, GWformat/fr, update/fr, fusion/fr, date/fr, wikitext/fr, macros/fr, shortcuts/fr, clean/fr, recover/fr, rename/fr, save/fr, archive/fr, merge/fr, divide/fr, CSS/fr, header/fr, templates/fr, lexicon/fr, declension/fr, templm/fr, password/fr, access/fr, image/fr, expert.]
+
+[Liens utiles repérés dans la barre latérale du wiki, potentiellement utiles pour la doc :]
+- Demo 7.1 beta : https://demo.geneweb.tuxfamily.org/gw71/  (NOTE : diffère du lien /gw7/ utilisé jusqu'ici dans le manuel — à vérifier/mettre à jour)
+- Live test master (Colab) : https://colab.research.google.com/github/geneweb/geneweb/blob/master/geneweb_colab.ipynb
+- Manual : https://geneweb.tuxfamily.org/wiki/manual
+- FAQ : https://geneweb.tuxfamily.org/wiki/FAQ
+- Roadmap : https://geneweb.tuxfamily.org/wiki/TODO
+- Changelog : https://geneweb.tuxfamily.org/wiki/changelog
+
+Page modifiée pour la dernière fois le 28 juin 2024.

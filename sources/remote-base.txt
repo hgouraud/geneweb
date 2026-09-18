@@ -1,0 +1,35 @@
+Source : https://geneweb.tuxfamily.org/wiki/remote-base
+Récupération : extrait substantiel obtenu précédemment dans la conversation
+
+---
+
+Remote script for base upload - GeneWeb
+
+#!/bin/sh
+# BASE, BASES_S, GW_DIR_S, WUSR, WGRP, LOGS and ADDRESS
+# will be replaced by the appropriate values by sed
+cd HOME_S
+DATE=$(date +"%Y-%m-%d-%T")
+echo "Error log of update for base: BASE" #### > LOGS/remote.log
+echo "$DATE" #### >> LOGS/remote.log
+
+# Save current version
+if [ -d BASES_S/BASE.gwb ] ; then # do it only if folder exists
+  mv BASES_S/BASE.gwb BASES_S/BASE-$DATE.gwb ####2>> LOGS/remote.log
+fi
+
+# rebuild BASE from .gw file
+echo "Building BASE.gwb" #### >> LOGS/remote.log
+GW_DIR_S/gwc1 -f -o BASES_S/BASE HOME_S/BASE.gw ####2>> LOGS/remote.log
+
+if [ -f GW_DIR_S/updnldb ] ; then
+  echo "Updating notes links" #### >> LOGS/remote.log
+  GW_DIR_S/updnldb BASES_S/BASE ####2>> LOGS/remote.log
+fi
+if [ -f GW_DIR_S/update_nldb ] ; then
+  GW_DIR_S/update_nldb BASES_S/BASE ####2>> LOGS/remote.log
+fi
+if [ -f BASES_S/BASE-$DATE.gwb/history ] ; then # do it only if file exists
+  cp -f BASES_S/BASE-$DATE.gwb/history BASES_S/BASE.gwb ####2>> LOGS/remote.log
+fi
+if [ -f BASES_S/BASE-$DATE.gwb/forum ... [script tronqué dans l'extrait obtenu]

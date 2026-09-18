@@ -1,0 +1,12 @@
+Source : https://geneweb.tuxfamily.org/wiki/merge
+Récupération : extrait substantiel via recherche (cumul de plusieurs passages)
+
+---
+
+This section explains how to "merge multiple GeneWeb bases". Merging bases is performed in three steps: concatenation of bases, suppression of redundant "doubles", cleanup. If you are not specialists of terminal command lines, you may use gwsetup which will guide you if the bases are already installed in your environment.
+
+Merging bases in gwsetup: choosing bases to merge. If you have two bases toto and titi, create the corresponding GW format files with the gwu command: [commande non retranscrite dans l'extrait obtenu — voir gwformat.txt / save.txt pour la syntaxe générale de gwu].
+
+Merging bases in gwsetup: confirmation. It is possible that gwc will display error messages triggered by persons bearing the same lastname, firstname, occurrence combination in both bases. To remove these errors, the gwc option -sep will offset automatically occurrence numbers thus avoiding conflicts. Note: in order to give you more control over this process, there is an additional parameter forcing the offset to a specified value.
+
+In order to merge these double entries, you must follow the instructions of the section on merging two persons or families as much as needed. After this person and families merging steps, the memory space used by these doubles is not automatically reclaimed (you will notice that the total number of persons in the base remains constant).

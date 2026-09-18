@@ -1,0 +1,16 @@
+Source : https://geneweb.tuxfamily.org/wiki/rename
+Récupération : extrait substantiel via recherche
+
+---
+
+Renaming or moving a base - GeneWeb
+
+A GeneWeb base can be renamed through command lines or through gwsetup. Bases are kept in folders with extension .gwb. If you change the name of this folder, your base name will be changed. Several other files and folders have to be renamed in accordance with this new choice: ... the folders bases/etc/basename, bases/image/basename, bases/src/basename containing template files and image data for your base.
+
+Gwsetup offers a "rename" command which performs the first task (basename.gwb renaming) but not the others!
+
+Once a base has been renamed, one should alert users of this fact. This is done by adding a line in the .gwf file: [ligne exacte non retranscrite dans l'extrait obtenu — probablement la variable "renamed" déjà documentée via configuration-fr.txt].
+
+A message indicating this new name will be displayed when accessing the base. For this function to be effective, one must keep the mybase.gwb and mybase.gwf files.
+
+Beyond simple renaming, the method above allows the transfer of a base to a new hosting server.

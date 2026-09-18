@@ -1,0 +1,27 @@
+Source : https://geneweb.tuxfamily.org/wiki/consang
+Récupération : contenu obtenu précédemment dans la conversation (fetch/extrait réussi à l'époque)
+
+---
+
+[Résumé fidèle des points retenus lors de la consultation initiale, la page complète n'ayant
+pas été conservée verbatim :]
+
+Usage : ./consang -i [options] <nom_de_base>
+
+L'option -i (reconstruction des index) est présentée comme obligatoire dans la documentation
+consultée — sans elle les index ne sont pas recalculés. Avertissement du wiki lui-même : cette
+option pourrait ne plus être supportée depuis GeneWeb 7.0.0 (à vérifier sur master actuel).
+
+Options :
+- -q : mode silencieux
+- -scratch : recalcul intégral depuis zéro
+- -mem : économise la mémoire, plus lent à la réécriture de la base
+- -nolock : ne verrouille pas la base
+
+Le temps d'exécution dépend de la taille de la base, avec barre de progression. La base reste
+consultable pendant le calcul, mais toute mise à jour est bloquée (message invitant à
+réessayer plus tard). Le traitement peut être interrompu par Ctrl+C et reprend où il s'était
+arrêté au prochain lancement, sauf si des familles ont été modifiées entre-temps (repart alors
+de zéro).
+
+L'affichage du taux de consanguinité est contrôlé par la variable show_consang du fichier .gwf.

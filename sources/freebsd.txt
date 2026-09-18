@@ -1,0 +1,12 @@
+Source : https://geneweb.tuxfamily.org/wiki/FreeBSD
+Récupération : extrait obtenu précédemment dans la conversation (nouvelle tentative infructueuse)
+
+---
+
+Two methods:
+- Manual installation: follow the procedure described for macOS, simply replacing `make` with `gmake`.
+- Via the package manager: `pkg install geneweb`
+
+[Corroboré indirectement par un fichier de configuration CI (.cirrus.yml) d'un projet tiers
+(zstd) montrant l'usage standard de `pkg install -y gmake coreutils` sur FreeBSD — confirme
+que gmake est bien l'outil de compilation attendu à la place de make sur cette plateforme.]

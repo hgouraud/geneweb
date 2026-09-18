@@ -1,0 +1,26 @@
+Source : https://geneweb.tuxfamily.org/wiki/namesake
+Récupération : intégrale, verbatim (via web_fetch)
+
+---
+
+Managing namesake with occurrence numbers
+
+In a GeneWeb base, a person is uniquely identified through its first name, its last name and an occurrence number.
+
+The occurrence number guarantees uniqueness in case of homonyms. There is no constraint when choosing the occurrence number for a new homonym. This number is not displayed on the personal data result page, but is visible in the URL window of your browser (and on some templates). If there are no homonyms, "0" is assumed and there is no need to enter it.
+
+This occurrence number is totally disconnected from the first-name number found in Louis XIV for instance, but it can be helpful to choose the same number.
+
+When importing from GEDCOM files, the occurrence assignment is done automatically.
+
+When merging multiple bases, the gwc command allows some control by offsetting automatically potentially conflicting numbers (assumes that two identical persons from two different source files should not be considered to be the same. Possible merge should happen later under your control). A second possibility is to ask gwc to shift all numbers of a source file by some value.
+
+The set first name/last name/occurrence number, called the index of this person (appearing as %index; in templates code), may be replaced by a more compact unique (but non stable) numerical value (oc=…).
+
+Note that except in the data capture situation, GeneWeb ignores accented characters. This forces you to choose a different occurrence number for two individuals whose names differ only through an accented letter. GeneWeb assumes that European ISO-8859-1 coding is used. Using another coding should not trigger an error but yields strange results.
+
+GeneWeb produces on occasion error messages describing two possible situations:
+- "Person already exists" at person creation time. You either should link to that person rather than create it, or select a new occurrence number.
+- "Unknown person", a situation that may happen if you want to link to an existing person but omit or incorrectly specify the occurrence number.
+
+Be careful when entering occurrence numbers as you could link or merge a person with the wrong one. GeneWeb cannot detect these errors.

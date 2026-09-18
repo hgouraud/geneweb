@@ -1,155 +1,127 @@
-<img align="left" src="hd/images/arbre_start.png" height="90" alt="GeneWeb">
+# Documentation GeneWeb (doc/)
 
-# GeneWeb
+Ce dossier contient le manuel utilisateur de GeneWeb, écrit en Markdown et
+buildé avec [mdBook](https://rust-lang.github.io/mdBook/) en HTML statique.
 
-## Open source genealogy software with a web interface written in OCaml
-[![Build](https://github.com/geneweb/geneweb/actions/workflows/ci.yml/badge.svg)](https://github.com/geneweb/geneweb/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/geneweb/geneweb?label=latest)](https://github.com/geneweb/geneweb/releases/latest)
-[![License](https://img.shields.io/badge/license-GPL--2.0-blue.svg)](LICENSE)
+## Build local
 
----
-
-> [!NOTE]
-> **Version 7.1 is currently in beta.**
-> The software is stable and thoroughly tested. The "beta" label exists only
-> because the internal database format is not yet compatible with Geneanet’s
-> infrastructure. This will be resolved for the final 7.1.0 release.
-
----
-
-## Why GeneWeb?
-
-Created by [Daniel de Rauglaudre](https://github.com/roglo) in 1998, GeneWeb is the engine behind some of the largest genealogical databases
-in the world:
-
-- **[Roglo](https://roglo.eu)** — Over **11 million individuals**, maintained
-  collaboratively by nearly **300 contributors**
-- **[Geneanet](https://www.geneanet.org)** — Used GeneWeb as its core engine
-  for two decades
-
-What sets GeneWeb apart:
-
-| Feature | Description |
-|---------|-------------|
-| **Proven at scale** | Handles databases with millions of individuals |
-| **Battle-tested** | Years of development, real-world refinement |
-| **Advanced relationships** | Find connections across billions of possible paths |
-| **Your data, your control** | Run locally on your computer or deploy as a web server |
-| **Privacy built-in** | Granular access controls protect living persons’ information |
-| **Standard formats** | Full GEDCOM import and export for interoperability |
-
----
-
-## Getting started
-
-**Want to try first?** Run GeneWeb directly in your browser with
-[Google Colab](https://github.com/geneweb/geneweb/blob/master/geneweb_colab.ipynb)
-— no installation required.
-
-> [!WARNING]
-> **Export backups of your databases in `.gw` format before installing a new version!**
-
-<details>
-<summary><strong>Building from source</strong></summary>
-
-You need [OCaml](https://ocaml.org) 4.10+ and
-[opam](https://opam.ocaml.org).
-
-```sh
-# Install dependencies, configure and build
-opam install . --deps-only
-ocaml ./configure.ml
-make distrib
+```bash
+cargo install mdbook      # une seule fois
+cd doc
+mdbook build               # génère doc/book/ (HTML statique)
+mdbook serve                # ou : serveur local avec rechargement automatique
 ```
 
-See `ocaml ./configure.ml --help` for configuration options.
+Le résultat statique (`doc/book/`) peut être :
+- publié sur GitHub Pages,
+- copié dans le tarball de distribution (`make dist` ou équivalent),
+- consulté directement en ouvrant `doc/book/index.html` dans un navigateur.
 
-</details>
+## Structure
 
-### Download
-
-**[Download the latest release](https://github.com/geneweb/geneweb/releases/latest)**
-for Linux, macOS, or Windows.
-
-### First steps
-
-1. **Extract** the downloaded archive to a folder of your choice
-2. **Launch** the application:
-   - Linux: run `./gwd.sh` in a terminal
-   - macOS: double-click `geneweb.command`
-   - Windows: double-click `START.htm`
-3. **Open** your browser at [http://localhost:2317](http://localhost:2317)
-
-You're ready for your genealogical journey.
-
-<details>
-<summary><strong>macOS security note</strong></summary>
-
-macOS may block applications from unidentified developers. To authorize GeneWeb:
-
-1. Right-click on `gwd` and `gwsetup` in the `gw` folder
-2. Select "Open" from the context menu
-3. Click "Open" in the security dialog
-
-This only needs to be done once. After that, `geneweb.command` will work
-normally.
-
-</details>
-
-<details>
-<summary><strong>Running on port 80</strong></summary>
-
-On Unix systems, ports below 1024 require elevated privileges.
-
-**Linux** — use capabilities:
-```sh
-sudo setcap 'cap_net_bind_service=+ep' gwd
-./gwd -p 80
+```
+geneweb-doc/
+├── doc/
+│   ├── book.toml           # configuration mdBook (+ préprocesseur gettext)
+│   ├── po/                 # traductions (gettext) — voir section Traduction
+│   └── src/
+│       ├── SUMMARY.md       # table des matières (structure du manuel)
+│       ├── README.md        # page d'introduction
+│       ├── demarrage-rapide.md
+│       ├── glossaire.md
+│       ├── geneweb/         # administration serveur (installation, bases, gwsetup)
+│       ├── magicien/        # administration de base (fiches, images, fusion...)
+│       ├── utilisateur/     # consultation (recherche, navigation, affichage)
+│       └── divers/          # sujets transverses (.gw, wiki, sécurité, templates, i18n)
+├── scripts/i18n.sh          # aide-mémoire des commandes de traduction
+├── TRANSLATION-GLOSSARY.md  # glossaire FR→EN de la terminologie GeneWeb
+└── .github/workflows/docs.yml  # build + publication fr + traductions
 ```
 
-**macOS** — use `launchd` to redirect port 80 to 2317.
+## Traduction (anglais et autres langues)
 
-</details>
+Le français est la langue source, écrite directement dans `doc/src/*.md`.
+Les traductions se font via [Gettext](https://www.gnu.org/software/gettext/)
+et le plugin [mdbook-i18n-helpers](https://github.com/google/mdbook-i18n-helpers) :
+chaque texte traduisible du français est extrait dans un fichier modèle
+`doc/po/messages.pot`, puis traduit dans un fichier `doc/po/<langue>.po`
+(ex. `doc/po/en.po`).
 
----
+**Prérequis (une fois) :**
+```bash
+cargo install mdbook-i18n-helpers
+brew install gettext && brew link gettext --force   # macOS ; sous Linux : apt install gettext
+```
 
-## Documentation
+**À chaque modification du français**, mettre à jour les traductions
+existantes (les traducteurs relisent ensuite les entrées marquées « fuzzy »,
+qui gardent temporairement l'ancienne traduction) :
+```bash
+./scripts/i18n.sh update
+./scripts/i18n.sh check     # combien de messages restent à traduire/relire ?
+```
 
-- **[User documentation](https://geneweb.tuxfamily.org/wiki/GeneWeb)** —
-  Getting started guides, tutorials, and reference
-- **[API reference](http://geneweb.github.io/geneweb/)** —
-  Generated documentation for developers
-- **[Architecture overview](https://geneweb.github.io/)** —
-  Technical introduction (by [OCamlPro](https://ocamlpro.com/))
+**Démarrer une nouvelle langue :**
+```bash
+./scripts/i18n.sh new en
+# éditer doc/po/en.po
+./scripts/i18n.sh build en   # génère doc/book/en/
+./scripts/i18n.sh serve en   # prévisualisation locale
+```
 
----
+Voir `TRANSLATION-GLOSSARY.md` pour la terminologie GeneWeb à respecter
+(« Magicien » → « Wizard », pas « Magician », etc.) — à consulter avant
+toute traduction pour garder une terminologie cohérente entre les pages.
 
-## Community
+Le fichier `.github/workflows/docs.yml` automatise ce pipeline : à chaque
+push, il régénère le `.pot`, fusionne les `.po` existants, signale (sans
+bloquer) le nombre de messages non traduits, puis publie le français et
+chaque traduction disponible sur GitHub Pages.
 
-- **Forum**: [Geneanet GeneWeb forum](https://www.geneanet.org/forum/GeneWeb-85)
-  (French and English)
-- **Mailing list**: [geneweb@framalistes.org](https://framalistes.org/sympa/subscribe/geneweb)
-- **IRC**: [#geneweb on Libera.Chat](irc://irc.libera.chat/geneweb)
+## Sélecteur de langue sur le site publié
 
-Found a bug or have a feature request?
-[Open an issue](https://github.com/geneweb/geneweb/issues) on GitHub.
+`doc/theme/language-picker.js` et `.css` ajoutent un petit sélecteur de
+langue en haut de chaque page une fois le site publié. Il suppose la
+structure produite par `.github/workflows/docs.yml` :
 
----
+```
+site/          → français (racine)
+site/en/       → anglais
+site/<lang>/   → une future langue
+```
 
-## Contributing
+Le script calcule lui-même l'URL équivalente dans l'autre langue en
+ajoutant/retirant le préfixe `/en/` — pas de configuration supplémentaire
+nécessaire, il suffit que les pages traduites vivent au même chemin relatif
+que leur original français.
 
-We welcome contributions from developers and translators.
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+> **Limite en local** : ce sélecteur ne fonctionne correctement qu'une fois
+> le site publié avec cette structure de dossiers (un seul serveur, deux
+> sous-chemins). En local, `mdbook serve` et `./scripts/i18n.sh serve en`
+> tournent sur des ports séparés (souvent tous les deux sur `:3000`, l'un
+> après l'autre) — le sélecteur y pointera vers une URL qui n'existe pas
+> tel quel. Pour tester le sélecteur lui-même, le plus simple est de builder
+> les deux langues puis de les servir ensemble avec un serveur statique
+> unique, par exemple :
+> ```bash
+> ./scripts/i18n.sh build en
+> mdbook build            # régénère doc/book/ (français) sans écraser book/en/
+> cd book && python3 -m http.server 8000
+> # ouvrir http://localhost:8000/ (fr) et http://localhost:8000/en/ (anglais)
+> ```
 
----
+## État actuel
 
-## License
+Squelette initial : chaque fichier contient un titre et des commentaires
+`<!-- TODO -->` indiquant le contenu à rédiger. Rechercher `TODO` dans
+`doc/src/` pour la liste complète des sections à compléter :
 
-GeneWeb is free software distributed under the
-[GNU General Public License v2](LICENSE).
+```bash
+grep -rn "TODO" doc/src/
+```
 
-Copyright © 1998–2011 [INRIA](https://github.com/inria/).
+## Contribuer
 
----
-
-<h3 align="center">Preserving family history, one generation at a time.</h3>
+1. Éditer les fichiers `.md` concernés dans `doc/src/`.
+2. Si une nouvelle page est ajoutée, l'enregistrer dans `doc/src/SUMMARY.md`.
+3. Vérifier le rendu avec `mdbook serve` avant de proposer une PR.

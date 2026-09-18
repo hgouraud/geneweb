@@ -1,0 +1,13 @@
+Source : https://geneweb.tuxfamily.org/wiki/base-upld
+Récupération : extrait obtenu précédemment dans la conversation
+
+---
+
+[Script shell "update-base", variante de remote-base pensée pour un hébergement mutualisé,
+signé par l'utilisateur Henri (hgouraud), daté du 24/11/2016. Usage : update-base <nom_de_base>
+[images|src]. S'appuie sur scp/ssh avec authentification par paire de clés plutôt que mot de
+passe en clair.]
+
+[Contenu détaillé non conservé verbatim au moment de la première consultation — seul le résumé
+ci-dessus (fonction, auteur, date, mécanisme d'authentification) a été noté. À re-consulter en
+détail si le script complet est nécessaire.]

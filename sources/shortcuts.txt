@@ -1,0 +1,17 @@
+Source : https://geneweb.tuxfamily.org/wiki/shortcuts (anglais) et
+         https://geneweb.tuxfamily.org/wiki/shortcuts/fr (français)
+Récupération : extraits substantiels via recherche (cumul de plusieurs passages)
+
+---
+
+[Anglais, obtenu précédemment dans la conversation :]
+Example: to select the third child of the third spouse of a person, one must first navigate
+to the right spouse, then type a sequence of six keys followed by "P" (or its accented
+equivalent): "0 0 0 8 8 8 P" (or "à à à ç ç ç p"). This numbering by keys appears to be based
+on `accesskey`, likely a digit or letter per spouse/child depending on their position.
+
+---
+[Français :]
+* Réglages par défaut de Firefox. Le paramètre `ui.key.contentAccess` modifiable dans
+`about:config` permet de choisir la façon d'accéder aux accesskeys (0 désactivé, 1 Maj,
+2 Ctrl, 4 Alt, 8 Meta, et sommes des précédentes pour combiner plusieurs touches modificatrices).

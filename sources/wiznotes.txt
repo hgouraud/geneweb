@@ -1,0 +1,12 @@
+Source : https://geneweb.tuxfamily.org/wiki/wiznotes
+Récupération : extrait substantiel via recherche
+
+---
+
+Wizard notes - GeneWeb
+
+The list of such pages is accessible from the welcome page footer m=WIZNOTES and is displayed by default in alphabetic order m=WIZNOTES;o=A. This order is governed by the syntax provided in the password file. Alternatively, the chronological sorting of the list can be obtained with m=WIZNOTES;o=H. At the end of the alphabetical list will appear the list of former wizards whose page is still available in the base. Each wizard page can be displayed with the command m=WIZNOTES;f=wizard_name, and its HTML source displayed (to wizards only) with the command m=VIEW_WIZNOTES;v=0;f=wizard_name.
+
+A wizard may modify his own page with the command m=MOD_WIZNOTES;v=0;f=wizard_name.
+
+At the bottom of each returned page, GeneWeb (with its current templates) returns, among other things, the current number of connections to the base, including those by wizards. The number of wizards is clickable (m=CONN_WIZ), and returns a page containing the list of wizards currently connected.

@@ -1,0 +1,64 @@
+Source : https://geneweb.tuxfamily.org/wiki/save
+Récupération : contenu transmis directement par l'utilisateur (copié depuis son navigateur), complété par un extrait de recherche corroborant
+
+---
+
+This article explains how to save a GeneWeb base using command line tools. The same operations are also accessible through the web-based interface gwsetup.
+
+Storage devices are not 100% failsafe, and one should maintain multiple archives on separate devices. It may also be prudent to maintain intermediate versions of a base, allowing fallback to an earlier version in case of severe modification problems. Lastly, the .gw save format is a clean and sure mechanism to exchange bases between GeneWeb users (GEDCOM is also available but not with 100% compatibility).
+
+A simple mechanism to archive a base is to make a copy of the `base.gwb` folder. A better mechanism is to produce a textual `base.gw` file using the .gw format.
+
+To create an archive for base `toto`, use the gwu command and archive the resulting output:
+
+gwu toto > toto.gw
+
+Or using option -o for gwu:
+
+gwu toto -o toto.gw
+
+You may select any name of your choice, provided you keep the extension `.gw`. For safe archival, make multiple copies of the base.gw file, on multiple devices.
+
+Using the .gw file format has many advantages:
+- simplicity: a single file when the base folder contains multiple files (note forum and update history are not preserved through a .gw file);
+- economy: a .gw source file is quite a bit smaller than the corresponding base folder;
+- compatibility: the .gw format maintains compatibility with future versions of GeneWeb;
+- accessibility: the .gw is a human readable format, and allows for global editing or difference detection (using a command such as `diff base-v1.gw base-v2.gw` under Unix/Linux/OSX)
+
+To restore a base `toto` from `toto.gw`, use the gwc command:
+
+gwc toto.gw -o toto
+
+Partial extraction of data from a base
+
+gwu commands allow the partial extraction of data from a base.
+- `-a`: extract the ancestors of the designated person.
+- `-d`: extract the descendants of the designated person, as well as their spouses and the parents of their spouses (except, for the latter point, if the option `-nsp` has been activated).
+- `-ad`: extract ancestors of the designated person and their descendants, including spouses, but without spouses' parents. Note that in this case, the descendants of the designated person are included in the extract.
+- `-s`: extract persons bearing a particular surname, including their spouses and the parents of their spouses (except, for the latter point, if the option `-nsp` has been activated).
+
+Linked pages associated with extracted persons should be part of the extracted data (to be verified).
+
+Archiving a V7 base
+
+Caveats
+
+In the .gw file created by gwu some orphan information is not saved:
+- Isolated persons, that is, which have no family and are not part of any family nor related to anyone (witness, god parent...). Such a person may appear for instance as a witness at some event which is subsequently deleted. GeneWeb V7 offers an additional parameter `-isolated` that also archives isolated persons.
+- A Linked page (created with the WikiText syntax, or with the command `m=NOTES;f=linked_page`) will not be saved if it is not referenced in the notes section of a person, or in another linked page.
+- Should gwu stop with `Uncaught exception: Invalid_argument("index out of bounds")`, add the `-mem` parameter (seen with 5.02 on Ubuntu).
+
+---
+Extrait corroborant obtenu séparément par recherche (gwu, page dédiée) :
+
+Usage: ./gwu [options] <base_file>
+If both options -a and -d are used, intersection is assumed.
+If several options -s are used, union is assumed.
+Options are:
+  -o <file>      output file name (else stdout)
+  -odir <dir>    create files from original name in directory (else on -o file)
+  -mem           save memory space, but slower
+  -isolated      extract isolated persons present in the base (witnesses, god parents, ...). Works only if all the base is being extracted
+  -a "<1st_name>" [num] "<surname>" : select ancestors of...
+  -sep_only_file <file> : With option "-sep", tells to separate only groups of that file.
+  -sep_limit <num> : When using the option [truncated in source]

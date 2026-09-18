@@ -1,0 +1,174 @@
+Source : https://geneweb.tuxfamily.org/wiki/gwd
+Récupération : intégrale, verbatim (via web_fetch)
+
+CORRECTIONS À APPORTER AU MANUEL suite à cette page (voir texte source ci-dessous) :
+1. i18n-lexiques.md / gwd.md disent "par défaut en" pour -lang — LA PAGE DIT "default: fr" ! Erreur à corriger.
+2. templates.md dit "cgl=on désactive les liens" — LA PAGE DIT "cgl=off (cancel geneweb links)" pour désactiver,
+   cgl=on n'est pas mentionné comme syntaxe (à vérifier s'il existe un cgl=on distinct ou si c'est une erreur de ma part).
+3. -conn_tmout EST bien réel et distinct de -login_tmout : -conn_tmout (défaut 120s, timeout de connexion générique,
+   démon uniquement) vs -login_tmout (défaut 1800s, spécifique à la saisie de mot de passe en mode CGI).
+
+---
+
+Building requests to GeneWeb server
+
+gwd is the GeneWeb server that accepts requests and returns results. Its interfaces are entirely web-based: it behaves like a HTTP server.
+
+All query parameters are directly available in the URL window of your web browser to build links to GeneWeb pages. They may be useful both to GeneWeb users, and to persons who, without knowledge of GeneWeb, may want to insert in some of their web documents a link to a page produced by a GeneWeb server that they may have found on the Web.
+
+Welcome page of a GeneWeb database
+
+The welcome page of a GeneWeb base can be found at an URL of the form http://server:port/base where:
+- server is the IP address or DNS name of the server hosting the GeneWeb daemon;
+- port is the TCP port on which the daemon is listening, the default value being 2317 for base access with gwd and 2316 for management with gwsetup (these two parameters may be changed at launch time of these two programs);
+- base is the name of the GeneWeb database.
+
+To ease things, gwd opens up by displaying the standard page welcome.txt on which a multiplicity of text capture zones and clickable buttons provides a convenient way to build a complex request.
+
+When further navigating with GeneWeb, you will discover that your requests translate into URLs which contain a command (action) and related parameters (data).
+
+Starting the gwd server
+
+GeneWeb server gwd is a web server listening for requests on TCP port 2317 by default, in the same way a standard HTTP server, such as Apache, would do on port 80 or 8080. gwd accepts a specific set of URLs following a precise syntax describing all the commands it can perform. Results are returned as text and if the URL request was sent from a web browser or any HTTP compatible program, the text will be treated as HTML code.
+
+Note that the parameters -allowed_tags, -auth and -log, and -add_lexicon for supplementary lexicon are pointing to existing <file>s that can be moved or renamed; use either absolute or relative path depending on your configuration and how you launch gwd itself.
+
+Usage: gwd [options] where options are:
+
+-hd <dir>
+    Directory where the directory lang is installed.
+-bd <dir>
+    Directory where the databases are installed.
+-wd <dir>
+    Directory for socket communication (Windows) and access count.
+    Force CGI mode.
+-images_url <url>
+    URL for GeneWeb images (default: gwd send them)
+-images_dir <dir>
+    Same than previous but directory name relative to current
+-a <address>
+    Select a specific address (default = any address of this computer)
+-p <number>
+    Select a port number (default = 2317); > 1024 for normal users.
+    Display a link to local gwsetup in bottom of pages.
+-allowed_tags <file>
+    HTML tags which are allowed to be displayed. One tag per line in file.
+-wizard <passwd>
+    Set a wizard password: access to all dates and updating.
+-friend <passwd>
+    Set a friend password: access to all dates.
+    Wizard just friend (permanently)
+-lang <lang>
+    Set a default language (default: fr).
+    Select the user browser language if any.
+-only <address>
+    Only inet address accepted.
+-auth <file>
+    Authorization file to restrict access. The file must hold lines
+    of the form "user:password".
+    Force no reverse host by address
+    Use Digest authorization scheme (more secure on passwords)
+-add_lexicon <lexicon>
+    Add file as lexicon.
+-log <file>
+    Redirect log trace to this file.
+-robot_xcl <cnt>,<sec>
+    Exclude connections when more than <cnt> requests in <sec> seconds.
+    Minimum number of requests in robot trace (default: 6)
+-login_tmout <sec>
+    Login timeout for entries with passwords in CGI mode (default 1800s)
+-redirect <addr>
+    Send a message to say that this service has been redirected to <addr>
+    Print the failed passwords in log (except if option -digest is set)
+    Do not lock files before writing.
+-max_clients <num>
+    Max number of clients treated at the same time (default: no limit) (not cgi).
+-conn_tmout <sec>
+    Connection timeout (default 120s; 0 means no limit)
+    Unix daemon mode.
+-chwd <comm>
+    Call command when wdoc changed
+
+(Note: the source formatting interleaves some flags with their descriptions somewhat ambiguously — flags without an explicit leading dash immediately after another flag's description, such as "Force CGI mode.", "Display a link to local gwsetup in bottom of pages.", "Wizard just friend (permanently)", "Select the user browser language if any.", "Force no reverse host by address", "Use Digest authorization scheme (more secure on passwords)", "Print the failed passwords in log (except if option -digest is set)", "Do not lock files before writing.", "Unix daemon mode." appear to be descriptions of separate boolean flags whose exact flag names were not clearly captured by the page extraction — likely -cgi, -setup_link, -wjf, -blang, -digest (appears twice contextually), -trace_failed_passwd, -nolock, -daemon respectively, based on cross-referencing with other pages already documented in this manual.)
+
+Requests to gwd server
+
+Requests to gwd server are formulated as URLs loaded with parameters. The question mark ? after the base address marks the beginning of the request: http://server:port/base?request.
+
+It may sometimes be necessary to manually edit the URL to obtain the desired effect because some parameters aren't available for selection and/or clicking for all pages of the interface.
+
+The request in itself is the sum of all query parameters added to the end of the URL after the question mark. The gwd server analyses the different parameters and will render a specific page. Depending on the situation, the delimiter between the query parameters in the URLs may change between ; and &. Both can be used simultaneously.
+
+The gwd server assumes that the URL request comes from a standard HTTP client (a browser or any other HTTP compatible program), and returns its result page accordingly (i.e. prefixed by the standard Content-type text/html header).
+
+Links to persons, access_by_key and opt=no_index
+
+Within GeneWeb, persons can be identified through two main methods, names and id:
+- p=first_name;n=last_name (exact match);
+- p=first_name;n=last_name;oc=occurrence if there are homonyms;
+- i=1234 GeneWeb internal id.
+
+GeneWeb id numbers are unique across a base, but may change over time after clean up for instance.
+
+Obtaining permanent links is achieved through two methods:
+- using option access_by_key=yes in the .gwf configuration file of your base, which will prevent the use of internal ids for URL construction;
+- adding opt=no_index to an URL containing id numbers will return the URL with unique but bulkier keys of individuals p=firstname;n=lastname;oc=occurence instead of id numbers.
+
+This last remark applies to all GeneWeb queries, particularly those about parental relationship where many individuals are referenced.
+
+Pedigree collapse, dag=on
+On ascendant and descendant trees, dag=on will merge common ancestors.
+
+Origin of a person, opt=from
+The opt=from option is used to determine which source file a particular person's data comes from. See merging bases for details. This information appears in italic after the family of the person, and is visible only to wizards.
+
+Cancel GeneWeb links, cgl=on/off
+Use the cgl=off (cancel geneweb links) option to cancel GeneWeb links in a given page. This may be useful for printing, or to do a copy/paste operation of a page into some other document where you do not want to transport the various GeneWeb links.
+
+Names for one person, opt=misc
+The opt=misc option will display at the end of the page all the first_name last_name alias combinations considered valid to call a particular person.
+
+Hidden titles, all_titles
+[no further detail extracted]
+
+Refresh modified pages, escache
+[no further detail extracted]
+
+Insert images and text files
+- m=IMH insert image
+- m=SRC insert text file (typically HTML code)
+
+For example, to display an image in notes we use <a href="%sm=IMH;s=image.jpg">Displayed text</a>. In this example, the "command" is the m=IMH part, %s is a macro transformed into the server address, and the rest of the URL being the parameters passed to the command, here the name of the image.
+
+---
+COMPLÉMENT (extrait de recherche distinct — options supplémentaires confirmées, absentes du
+fetch principal ci-dessus) :
+
+-version
+    Print the Geneweb version, the source repository and last commit id and message
+-wd <DIR>
+    Directory for socket communication (Windows) and access count.
+-wizard <PASSWD>
+    Set a wizard password.
+-wjf
+    Wizard just friend (permanently).
+-help
+    Display this list of options
+--help
+    Display this list of options
+
+Note that when running with -debug, GeneWeb will add begin/end html comments in the returned
+document providing the full path of the various included files such as:
+<!-- begin include /Users/Henri/Genea/GeneWeb/GeneWeb-7.0h-Mac/gw/plugins/welcome/assets/etc/welcome.txt -->
+
+Note that in future gwd 7.1 version, gwd is able to support automatically the two versions of
+Geneweb bases folder that can be created with gwc -reorg parameter.
+
+gwd and gwsetup may be started with a common shell script similar to Gwd-start, or its
+up-to-date version geneweb.sh (in git).
+
+[Note : le chemin d'exemple "/Users/Henri/Genea/GeneWeb/GeneWeb-7.0h-Mac/..." utilisé pour
+illustrer l'option -debug dans la documentation officielle correspond vraisemblablement au
+poste de travail réel de l'utilisateur Henri (hgouraud) — cohérent avec ses autres apparitions
+relevées sur ce même wiki.]
+

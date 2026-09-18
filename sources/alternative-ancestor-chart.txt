@@ -1,0 +1,11 @@
+Source : https://geneweb.tuxfamily.org/wiki/Alternative_ancestor_chart
+Récupération : contenu obtenu précédemment dans la conversation (page consultée avec succès)
+
+---
+
+GeneWeb 7.00 introduced a compact ancestor chart which reduced the surface area required to show up to 5 generations of ancestors.
+
+[Le reste de la page est une proposition de contributeur pour un graphique encore plus
+compact, non implémentée à ce jour : "a proposed suggestion for a more useful compact
+chart... I hope someone will implement this for a future release." Il s'agit donc d'un
+souhait/d'une discussion, pas d'une fonctionnalité livrée dans GeneWeb.]

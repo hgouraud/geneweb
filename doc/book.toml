@@ -1,0 +1,33 @@
+[book]
+title = "Manuel utilisateur GeneWeb"
+description = "Documentation officielle de GeneWeb (geneweb/master)"
+authors = ["Projet GeneWeb"]
+language = "fr"
+src = "src"
+
+[build]
+extra-watch-dirs = ["po"]
+
+[preprocessor.gettext]
+after = ["links"]
+optional = true
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/geneweb/geneweb"
+edit-url-template = "https://github.com/geneweb/geneweb/edit/master/doc/src/{path}"
+additional-js = ["theme/language-picker.js"]
+additional-css = ["theme/language-picker.css"]
+
+[output.html.search]
+enable = true
+limit-results = 20
+use-boolean-and = true
+
+[output.html.print]
+enable = true
+
+[output.html.fold]
+enable = true
+level = 1

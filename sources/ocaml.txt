@@ -1,0 +1,35 @@
+Source : https://geneweb.tuxfamily.org/wiki/OCaml
+Récupération : extrait substantiel via recherche
+
+---
+
+Installing OCaml and Camlp5 to compile GeneWeb - GeneWeb
+
+You can check the path to Camlp5 with `camlp5 -where` or `ocamlfind query camlp5` (for this example camlp5 lib is in /root/.opam/3.12.1/lib/camlp5/).
+
+Apply the same process as with Linux, with the exception of the sed command (for Windows/Cygwin):
+./configure
+sed -i .bak 's|CAMLP5D=+camlp5|CAMLP5D=~/.opam/3.12.1/lib/camlp5|' tools/Makefile.inc
+make
+make distrib
+
+Previous chapter for Linux works for Windows under Cygwin modifying a few steps, OCaml version name is: [tronqué]. Using relative path or /cygdrive/… don't work, we must target camlp5 lib using its full Windows path that depends on where your home directory is in the Cygwin installation:
+sed -i 's|CAMLP5D=.*|CAMLP5D=c:\\cygwin\\home\\user\\.opam\\3.12.1+mingw32\\lib\\camlp5|' tools/Makefile.inc
+
+Building version 6.07 like this also works under Windows. GeneWeb uses the version control software Git. Its repository is hosted on GitHub at https://github.com/geneweb/geneweb.
+
+For example, if you want debug symbols/warnings use `./configure -d -we`, then you can launch gwd adding `OCAMLRUNPARAM=b` to trigger the printing of a stack backtrace when an uncaught exception aborts the program.
+
+In version 6.xx, a user-friendly GTK GUI helps managing gwd and gwsetup; it can be built with lablgtk installed.
+
+This has been tested on Raspbian GNU/Linux 10 (Buster) in July 2019.
+
+---
+COMPLÉMENT — page Talk:OCaml (discussion, en français) :
+
+Réponse de Daniel [de Rauglaudre] : il faut utiliser la "bonne" version de OCaml avec chaque
+version de GeneWeb ! Voir la page OCaml.
+
+Attention à la subtile différence entre https://github.com/geneanet/geneweb (ancien dépôt,
+utilisé par Geneanet en interne) et https://github.com/geneweb/geneweb (dépôt "officiel"
+actuel) — la compilation a été testée fonctionnelle avec OCaml 4.02.3 sur ce second dépôt.

@@ -1,0 +1,88 @@
+Source : https://geneweb.tuxfamily.org/wiki/templm
+Récupération : intégrale, verbatim (via web_fetch)
+
+---
+
+Configuration parameters for templm in GeneWeb 7.00
+
+templm uses specific configuration variables that must be added in /bases/base.gwf:
+
+Style sheets
+- css= default CSS, grey background (css.css).
+- css=1 contrasted CSS, black background (css1.css).
+
+Birth/death symbols
+Allow to change default symbols for births and deaths, respectively "°" and "†", with another character.
+- birth_symbol=
+- death_symbol=
+
+Loads lists of preexisting data in the base when entering new data on forms.
+- datalist_xx= does nothing.
+- datalist_xx=1 loads the whole list at once.
+- datalist_xx=2 loads a sub-list after typing their characters
+
+Available lists:
+- datalist_fn= first names.
+- datalist_sn= surnames.
+- datalist_place= places.
+- datalist_src= sources.
+- datalist_occu= occupation.
+
+Age computation
+On a personal page, display the age of parents at birth, and the age of the person for each other event.
+- event_age=yes
+
+jquery functions
+If jquery is active, the number of ancestors, implexes and descendants will be displayed. This also activates automatic locations, professions, sources and witness lookup in personal and family update forms.
+- jquery=yes
+
+Shortest path
+Deactivate "shortest path" links in statistics if more than n dates.
+- max_dates=n
+
+Number of generations
+Number of generations displayed in the "Descendants" of a personal page. If maxlev is greater than 1, then great-grandparents are displayed in the Ascendants section.
+- maxlev=2 Show two generations.
+
+Display the wiki link
+Display the wiki link [[first_name/patronyme/0/First_name SURNAME]] and the various ways a person is called at the bottom of his page.
+- misc=surname
+
+Move the marriage comment
+On the family form, if there is a comment for "married/not married/engaged/no mention" section, then the comment is automatically moved to the corresponding event.
+- move_comment=yes
+
+Surname display
+Converts automatically "first_name" to "First_name" and "particles surname" to "particles SURNAME" in the data capture forms (doesn't work for aliases of first names and surnames).
+- uppercase=yes
+Warning: multiple first names with hyphens are not correctly treated at the present time (marie claude becomes Marie Claude, but marie-claude becomes Marie-claude!).
+
+Add particles
+Add particles to the already defined particles "af, av, d, dal, de, den, des, di, du, of, und, van, vor, zu et zur".
+- particles="AF","AV","D","DAL","DE","DEN","DES","DI","DU","OF","UND","VAN","VON","ZU","ZUR","PARTICLE","PARTICLE2"…
+Warning: add new particles after the existing list, the particles are defined without spaces and in capitals (they'll end in lowercase one day!).
+
+[NOTE : incohérence dans la page source elle-même — la liste par défaut en minuscules mentionne
+"vor" tandis que l'exemple de syntaxe utilise "VON" (majuscule). Probable coquille du wiki
+("von" est la particule standard) plutôt qu'une réelle divergence — à garder à l'esprit sans
+trancher arbitrairement.]
+
+Link to gwsetup
+Display a link to gwsetup on personal pages.
+- setup_link=yes
+
+gwsetup port number
+Provides a URL to gwsetup with the appropriate value of the -p parameter. Default is localhost:2316.
+- setup_http=
+
+Show flags
+Show flags in the upper right menu.
+- show_flag=yes show all flags.
+
+Path to .js and .css files
+Allow to specify the static path of javascript and css files for an installation in CGI mode when no .htaccess is used. See details in CGI#Connecting_style_files
+
+Number of columns for display
+Alters display of personal pages:
+- wide=yes single column display
+- wide=no two columns display.

@@ -1,0 +1,16 @@
+Source : https://geneweb.tuxfamily.org/wiki/CGI/fr
+Récupération : extrait substantiel via recherche (cumul de plusieurs passages)
+
+---
+
+Utiliser GeneWeb en mode CGI à travers un serveur web - GeneWeb
+
+Le message d'erreur en retour vous renseignera : "File not found", "You do not have access permission", ...
+
+Souvenez-vous que certains fichiers vous sont renvoyés par le serveur HTTP plutôt que par gwd. En mode CGI, gwd fonctionne derrière un serveur HTTP, typiquement Apache. De ce fait, le processus gwd s'exécute sous l'identification du serveur HTTP. Avec Apache, cette identité est définie dans le fichier http.conf, et sa valeur par défaut est user: _www and group: _www. Selon votre environnement, vous pourrez avoir ou ne pas avoir accès à ces éléments de configuration.
+
+[Complément obtenu séparément, plus tôt dans la conversation :]
+- robot_xcl protège notamment contre les outils d'aspiration de site comme HTTrack ou WebSite Extractor.
+- Format du fichier gwd.arg : un paramètre et sa valeur sur deux lignes séparées.
+- Dans un environnement CGI hébergé, les CSS/JS sont servis par le serveur HTTP (Apache) lui-même, nécessitant un lien symbolique à la racine web.
+- Exemple de script shell complet avec OPTIONS="-blang -robot_xcl 40,70 -max_clients 15 -conn_tmout 120 -min_disp_req 30 -images_url ..."

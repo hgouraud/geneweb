@@ -1,0 +1,35 @@
+Source : https://geneweb.tuxfamily.org/wiki/gwc
+Récupération : extrait substantiel via recherche
+
+CORRECTION À APPORTER : gestion-import-export.md mentionne "gwc2" comme variante existante
+sans préciser sa disparition — CETTE PAGE CONFIRME que gwc2 a disparu depuis GeneWeb 7.
+
+---
+
+Creating a base gwc (gwc1, gwc2) - GeneWeb
+
+The simple command gwc with no parameter will create an empty base named "a" (in folder a.gwb) in which you can start entering families and persons.
+
+gwc2 (existing since GeneWeb 5, disappeared in GeneWeb 7) creates a base using a newer format
+with separate files for each table, optimised for larger bases.
+
+Options:
+-nopicture      Do not create associative pictures
+-o <file>       Output database (default: <input file name>.gwb, a.gwb if not available)
+-particles <file>  Particles file (default = predefined particles)
+-q              Quiet
+-reorg          Mode reorg (see note below)
+-sep            Separate all persons in next file
+-sh <int>       Shift all persons' occ numbers in next files
+-stats          Print statistics
+-v              Verbose
+
+The base as defined by the -o option must be in the same partition or device as the current
+folder, otherwise, gwc will terminate with the following error message:
+Uncaught exception: Sys_error("Invalid cross-device link")
+
+Note: the mode "reorg" will be proposed with versions 7.1 (or 7.2). In this mode, all the
+auxiliary data (configuration, counters, portraits, images, source files) are kept within the
+mybase.gwb folder as detailed in the "Geneweb bases" wiki page, allowing for a global Zip
+based save possibility.
+

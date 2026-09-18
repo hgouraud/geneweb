@@ -1,0 +1,61 @@
+name: Build & publish documentation
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "doc/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer mdbook
+        run: |
+          curl -fsSL https://github.com/rust-lang/mdBook/releases/download/v0.4.40/mdbook-v0.4.40-x86_64-unknown-linux-gnu.tar.gz \
+            | tar -xz -C /usr/local/bin
+
+      - name: Installer mdbook-i18n-helpers + gettext
+        run: |
+          cargo install mdbook-i18n-helpers --locked
+          sudo apt-get update -qq
+          sudo apt-get install -y gettext
+
+      - name: Régénérer le modèle de traduction (.pot)
+        working-directory: doc
+        run: |
+          MDBOOK_OUTPUT='{"xgettext": {"pot-file": "messages.pot"}}' mdbook build -d po
+
+      - name: Vérifier l'état des traductions (non bloquant)
+        working-directory: doc
+        run: |
+          for po in po/*.po; do
+            [ -e "$po" ] || continue
+            lang=$(basename "$po" .po)
+            msgmerge --update --backup=off "$po" po/messages.pot
+            untranslated=$(msgattrib --untranslated "$po" | grep -c '^msgid' || true)
+            fuzzy=$(msgattrib --only-fuzzy "$po" | grep -c '^msgid' || true)
+            echo "::notice title=Traduction $lang::$untranslated message(s) non traduit(s), $fuzzy à relire (fuzzy)"
+          done
+
+      - name: Builder le français (langue source)
+        working-directory: doc
+        run: mdbook build -d ../site
+
+      - name: Builder les traductions disponibles
+        working-directory: doc
+        run: |
+          for po in po/*.po; do
+            [ -e "$po" ] || continue
+            lang=$(basename "$po" .po)
+            MDBOOK_BOOK__LANGUAGE="$lang" mdbook build -d "../site/$lang"
+          done
+
+      - name: Publier sur GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site

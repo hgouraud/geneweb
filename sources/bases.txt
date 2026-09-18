@@ -1,0 +1,136 @@
+Source : https://geneweb.tuxfamily.org/wiki/bases
+Récupération : intégrale, verbatim (via web_fetch)
+
+---
+
+Geneweb bases folder
+
+The bases folder is a default subfolder of the GeneWeb distribution named bases. It may be an isolated folder anywhere on your computer. This folder contains all your personal data and configurations: the genealogical databases themselves with their notes, images, authentification files, template personalisation, etc. It can be moved or renamed according to your preferences.
+
+Under this folder, the choice of names for your databases and .auth files is unconstrained and in each of its etc, images, lang and src folders, subfolders carrying the name of the base mybase hold the specific data for each base.
+
+CLASSIC STRUCTURE:
+
+- directory distribution: details all the other files and subfolders out of bases folder, like the programs or template files. This main directory can be renamed.
+  - directory bases: The folder containing the GeneWeb databases
+    - directory mybase.gwb: folder of the genealogical database called mybase
+      - file […]: a set of binary files holding the base data (base, *.acc, cache_visited, *.dat, *.inx, nb_persons, notes_links, synchro_patches, tstab)
+      - file forum: a text file containing the forum
+      - file history: a text file containing the history of modifications
+      - directory history_d: folder containing history diffs
+      - file notes: a text file containing the main note of the base (m=NOTES)
+      - directory notes_d: folder containing notes (m=NOTES;f=file)
+      - file particles.txt: a text file containing particles (must contain the whole set)
+      - directory wiznotes: folder containing wizard notes
+    - file mybase.gwf: associated .gwf configuration/parameters file
+    - file mybase-f.auth: example of password file for friends (friend_passwd_file=)
+    - file mybase-w.auth: example of password file for wizards (wizard_passwd_file=)
+    - directory mybase2.gwb: folder of a second genealogical database mybase2
+    - file mybase2.gwf/auth configuration files associated to mybase2, etc.
+    - file tags.txt: list of authorized HTML tags supplied to gwd with -allowed_tags (full path name)
+    - directory cnt: holding the robot file, locks, and memorising the access counts for each base
+      - file actlog: file temporary storing the tokens needed for login in CGI mode
+      - file robot: list IP address of robots
+      - file mybase.txt: access counts for mybase
+      - file mybase.lck: lock file for mybase
+    - directory etc: used in priority over the generic gw/etc files (see templates)
+      - directory mybase: template folders for mybase
+        - directory modules
+          - file module_xx.txt
+        - file hed.txt: base specific header file
+        - file trl.txt: base specific trailer file
+      - directory mybase2: idem
+    - directory images
+      - directory mybase: portraits images for mybase
+        - file first_name.occurence.last_name.jpg
+        - file other_first_name.occurence.last_name.jpg
+      - directory mybase2: idem
+    - directory lang: containing some base specific language related template text files
+      - file lex_utf8.txt: lexicon file
+      - file lex_additionnal.txt: additionnal lexicon file used by gwd with -add_lexicon (must be here)
+      - directory mybase
+      - directory mybase2
+    - directory src
+      - directory mybase
+        - directory images: images called with m=IMH
+          - file myimage.jpg
+        - file file1.txt: text file called with m=SRC
+      - directory mybase2: idem
+  - directory gw: executables and templates folder
+  - […] gwd/gwsetup launch scripts, README, etc.
+
+Files names in italic are chosen by users.
+
+Translations: All text files read through the m=SRC&v=file or m=DOC&s=file.txt commands are processed by GeneWeb which performs translations ([text to be translated]) and expands some macros (%s, %v, %i, %k). In addition, a more global translation of the text file can be obtained by appending _lg to the filename (where lg is the 2-letter acronym of a given language) which selects an entirely new file, specific to the selected language.
+
+REORGANIZED STRUCTURE (Bases folder in GeneWeb 7.x.x):
+
+GeneWeb 7.x.x simplifies the archival of databases regrouping all the files needed for a single database under the same folder. With this configuration, it becomes far simpler to use archival tools such as tar, zip or rar to store a single database folder in an archive (see save for details and comments).
+
+- directory distribution
+  - directory gw
+  - file… gwd/gwsetup launch scripts, CHANGES.txt, README, etc.
+- directory bases: The folder containing the GeneWeb databases
+  - directory mybase.gwb: folder of the genealogical database called mybase
+    - directory documents: image/txt/pdf/html files, sub-folders allowed for images and src
+      - directory portraits: portraits images called with m=IM&i=index (no sub-dirs here!)
+        - file first_name.occurence.last_name.jpg
+        - file other_first_name.occurence.last_name.jpg
+        - directory saved: saved portraits called with m=IMS&i=index
+          - file saved portraits may be saved as first_name.occurence.last_name.url
+      - directory images: other images associated with a person shown in a carrousel
+        - file otherimage.jpg: images called with m=IM&i=index&s=otherimage.jpg
+        - file otherimage.txt: comment associated with otherimage
+        - file otherimage.url: otherimage when defined as url
+        - directory first_name.occurence.last_name: other images associated with a person (no sub_dirs)
+          - file other_carrousel_image.jpg called with m=IM_C&i=index&s=other_carrousel_image.jpg
+          - directory saved: saved images and comments
+            - file other_carrousel_image.jpg
+        - directory subfolder: the images folder may contain sub-folders
+      - directory src: source files
+        - file mytext.txt: text files called with m=DOC&s=mytext.txt or m=SRC&v=mytext (See translation note above)
+        - file mydoc.pdf: PDF files called with m=DOC&s=mydoc.pdf
+        - file mypage.html: HTML pages called with m=DOC&s=mypage.html
+        - directory subfolder: the src folder may contain sub-folders
+    - directory config: configurations files and personnalized variants of template files, used in priority over the generic gw/etc files (see templates)
+      - file mybase.gwf: configuration file
+      - file mybase-f.auth: example of password file for friends (friend_passwd_file= in config.txt)
+      - file mybase-w.auth: example of password file for wizards (wizard_passwd_file= in config.txt)
+      - directory cnt: holding access counts for the base and several access logs
+        - file robot: robot verification file
+        - file mybase.txt: access counts
+        - file mybase.lck: access lock
+        - file mybase_w.txt: access logs for wizards
+        - file mybase_f.txt: access logs for friends
+        - file mybase_u.log: modifications logs
+    - directory lang: local complements to the language lexicon (loaded with -add_lexicon at gwd start)
+    - directory etc:
+      - file template.txt: personnalized variants of template files used in priority over the generic gw/etc files (see templates)
+      - directory modules: personnalized variants of modules files
+        - file module_xx.txt
+      - directory cache
+        - file mybase_fnames_cache.gz: list of fnames used by browser for input completion
+      - directory template.txt: personal variant of template.txt files
+      - file particles.txt: (mybase-particles.txt?): particles list for this base.
+      - file hed.txt and trl.txt: base specific header/trailer files
+    - file history: history of modifications
+    - directory history_d: folder with all diff files (this folder may be located elsewhere according to history_path= in config.txt)
+      - directory a
+      - directory b
+      - directory …
+    - file notes: main notes for the base, displayed in the welcome page
+    - directory notes_d: folder with all the notes and linked pages
+      - file notes_n.txt
+    - file linked_page.txt: other "linked_page" obtained with [[[linked_page/text]]]
+    - file… base, base.acc, cache_info […] names.inx, notes_links, patches (all internal files and folders of the database)
+  - directory mybase2.gwb: folder of a second genealogical database mybase2
+    - […] the organisation is the same for each database, see description for mybase.gwb folder above
+  - directory cnt: admin files
+    - file actlog: file temporary storing the tokens needed for login in CGI mode
+    - file gwd.lck: lock file
+    - file robot: list IP addresses of detected robots
+  - file comm.log: execution log of the last base creation with a gwc command (when the base name is not available)
+  - file particles.txt: default particles list ???
+  - file tags.txt: ??? alternate list of authorized HTML tags (loaded with -allowed_tags at gwd start)
+
+[Note : les "???" apparaissent tels quels dans la page originale — incertitude signalée par les auteurs du wiki eux-mêmes.]

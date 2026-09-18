@@ -1,0 +1,24 @@
+Source : https://geneweb.tuxfamily.org/wiki/Divide/fr
+Récupération : extrait substantiel via recherche (pas confirmé être la page à 100% intégrale)
+
+---
+
+Séparer les données d'une base fusionnée - GeneWeb
+(Redirected from Divide/fr)
+
+GeneWeb peut séparer les données d'une base fusionnée. Lors du processus de fusion de bases de données, GeneWeb enregistre l'origine des informations et peut les séparer à nouveau pour recréer les fichiers source.
+
+Si vous avez fusionné trois fichiers source toto.gw, dupont.gw et titi.gw avec :
+gwc toto.gw -sep dupont.gw -sep titi.gw -o basefusionnee
+
+Pour recréer les fichiers source toto.gw, dupont.gw et titi.gw dans le répertoire outdir, utilisez la commande gwu :
+gwu basefusionnee -odir outdir
+
+Si le répertoire outdir n'existe pas, créez-le préalablement avec la commande mkdir outdir.
+
+Si vous avez édité votre base de données après la fusion, les trois fichiers générés sont mis à jour et ne seront plus les mêmes que ceux de départ.
+
+Si la commande gwu affiche du texte source cela signifie que vous avez ajouté des personnes que GeneWeb ne sait pas dans quel fichier mettre, par exemple de nouvelles personnes reliées à aucu[ne source connue — phrase tronquée dans l'extrait obtenu].
+
+[Pied de page standard du wiki, non spécifique à cette page :]
+Annexe technique. Personnaliser avec CSS, entête et pieds de page, templates, lexique et déclinaisons. Fichier de configuration .gwf (pour templm), mots de passe pour amis et magiciens et restrictions d'accès à une base. Ajouter une image dans les notes. Autres commentaires pour les experts.

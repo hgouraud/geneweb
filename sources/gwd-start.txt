@@ -1,0 +1,39 @@
+Source : https://geneweb.tuxfamily.org/wiki/Gwd-start
+Récupération : extrait substantiel via recherche (script complet, quelques lignes tronquées à la fin)
+
+---
+
+Gwd-start - GeneWeb
+
+[Script shell de démarrage combiné gwsetup + gwd :]
+
+"$BIN_DIR/$VERS/gw/gwsetup" -gd "$BIN_DIR/$VERS/gw" -lang $LANG > "$BIN_DIR/$VERS/gw/gwsetup.log" 2>&1 &
+if test "`ps auw | grep gwsetup | wc -l`" -ne 2; then
+  if test "$LANG" = "fr"; then echo Echec gwsetup; else echo Failed gwsetup; fi
+  cat
+  exit 1
+fi
+
+# Starting gwd
+if test "$LANG" = "fr"; then echo "Demarrage de gwd..."; else echo "Starting gwd..."; fi
+"$BIN_DIR/$VERS/gw/gwd" -allowed_tags "$BASE_DIR/tags.txt" -hd "$BIN_DIR/$VERS/gw" -bd "$BASE_DIR" -robot_xcl 1000,1 > "$BIN_DIR/$VERS/gw/gwd.log" 2>&1 &
+if test "`ps auw | grep gwd | wc -l`" -ne 2; then
+  if test "$LANG" = "fr"; then echo Echec gwd; else echo Failed gwd; fi
+  cat
+  exit 1
+fi
+
+# Updating nldb
+if test "$LANG" = "fr"; then echo "Demarrage de update_nldb ..."; else echo "Starting update_nldb ..."; fi
+# you may want to insert here appropriate lines according to your existing bases
+#echo "Base $DEFAULTBASE"
+#./update_nldb $BASE_DIR/$DEFAULTBASE.gwb
+
+if test "$LANG" = "fr"; then
+  echo "Gardez cette fenêtre ouverte tant que"
+  echo "vous v[...texte tronqué dans l'extrait obtenu...]"
+fi
+
+[Note du wiki (page gwsetup) : "gwsetup and gwd may be started with a common shell script
+similar to Gwd-start or it's up-to-date version geneweb.sh (in git)" — indique que ce script
+Gwd-start est potentiellement obsolète, remplacé par geneweb.sh dans le dépôt actuel.]

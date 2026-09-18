@@ -1,0 +1,311 @@
+Source : https://geneweb.tuxfamily.org/wiki/gw/fr
+Récupération : intégrale, verbatim (via web_fetch)
+NOTE IMPORTANTE : cette version française contient PLUS de détails que la page anglaise
+GWformat sur plusieurs points (tags #nsck/#nsckm/#banns/#contract/#license/#pacs/#residence/
+cbp/csrc dans le bloc fam ; #pacs et #strng dans les FamilyEventNames et PersonEventNames).
+À utiliser pour mettre à jour format-gw.md si Henri le souhaite.
+
+---
+
+Le format de fichier .gw
+
+Le format GW est celui d'un fichier source à partir duquel GeneWeb peut construire une base généalogique (en utilisant la commande gwc). GeneWeb peut aussi bien sûr produire un fichier au format GW à partir d'une base généalogique existante (en utilisant la commande gwu). Le format GW contient toutes les informations (voir cependant les caveats pour les personnes ou pages isolées) d'une base de données GeneWeb sous une forme textuelle compatible avec tous les éditeurs de texte permettant une édition manuelle, et aisément manipulable par d'autres programmes. Un fichier au format GW est la meilleure sauvegarde de votre base de données, et le meilleur moyen d'échanger de données avec d'autres programmes compatibles. Pour mémoire, GeneWeb accepte et produit aussi le format GEDCOM, mais une certaine ambiguïté de cette norme n'en fait pas le moyen de sauvegarde idéal.
+
+Avec la version 7.00 de GeneWeb, le format GW a été augmenté (gwplus, voir la section structure générale d'un fichier gw ci-dessous). De plus, une version V7.01 supprimera la redondance des informations entre les lignes fam et les pevents ou fevents. Les informations de détails ne seront conservées que dans les événements. Cette version 7.01 restera compatible avec les fichiers .gw produits par les versions antérieures.
+
+À ce jour, un fichier au format GW ne conserve pas la mémoire de la version de GeneWeb avec lequel il a été créé. Ceci pourrait changer.
+
+Attention : les versions antérieures à GeneWeb 7.00 ne savent pas lire le format gwplus et perdraient les informations qui y sont stockées (Quel est le comportement exact?). Il existe cependant pour la compatibilité descendante une option de gwu (-old_gw) qui produit un fichier au format gw ancien et reporte en notes tout ce qui est incompatible.
+
+Note du wiki : quelques morceaux de cette page sont encore en anglais!! Elles seront traduites sous peu.
+
+Guide des styles
+- Le texte devant apparaître 'tel quel' est écrit en caractères gras.
+- Les mots en italique seront remplacés par leur valeur actuelle. La première lettre de ces noms est une majuscule, e.g. HusbandLastName
+- Les paramètres entre [crochets] sont optionnels: ils peuvent être omis.
+- Les mots séparés par des barres verticales '|' signifient des choix : un seul de ceux-ci doit être utilisé.
+
+Exemple de définition :
+ fam HusbandLastName FirstName[.Number] + [WeddingDate] [#mp WeddingPlace] WifeLastName FirstName[.Number]
+
+Exemples valides:
+fam CORNO Joseph_Marie_Vincent + THOMAS Marie_Julienne
+fam CORNO Alain.1 +25/11/1728 #mp Ile-aux-Moines CAUZIC Marie
+
+Dates
+Les formats de dates sont les suivants: dd/mm/yyyy, yyyy, mm/yyyy. Dans certains cas, si vous devez donner une date mais que vous ne la connaissiez pas, entrez seulement 0.
+
+Les modificateurs de date utilisent des caractères spéciaux pour préfixes, afin de spécifier "vers", "avant", "peut-être", "après" etc.
+
+Type de date | Caractère spécial | Exemple
+Vers | ~ | ~10/5/1990
+Peut-être | ? | ?10/5/1990
+Avant | < | <10/5/1990
+Après | > | >10/5/1990
+Ou | | | 10/5/1990|1991
+Entre | .. | 10/5/1990..1991
+
+Le calendrier est de type Grégorien par défaut. Pour le type Julien, ajoutez "J" à la date, "F" pour le type Français Républicain, et "H" pour l'Hébreu. Exemple : 10/9/5750H
+
+Pour obtenir une date en texte simple, mettez le chiffre 0 et placez des parenthèses de cette façon : 0(5_Mai_1990)
+
+Chaînes de caractères
+Les espaces dans les chaînes de caractères sont remplacés par des tirets bas "_" (sauf dans les notes et dans certains commentaires) : Marie_Julienne
+Les capitales ASCII correspondent à la norme ISO-8859-1.
+
+Référencement des individus
+Une même personne peut être référencée plusieurs fois dans un fichier; en tant que parent, ou enfant, ou encore dans une note. Nom de famille, Prénom et numéro (s'il existe) doivent correspondre exactement, sans cela le programme ne pourra pas déterminer un même individu et lier ses références ensemble.
+
+Structure générale d'un fichier gw
+
+[encoding: utf-8]	# (optionnel) redefines text encoding to be utf-8 instead of iso-8859-1
+[gwplus]		# (optionnel) specifies that this file follows the gwplus instead of gw format
+
+suivi par un nombre quelconque de blocks :
+Family          # début de block : fam
+PersonalNote 	# début de block : notes
+Relations       # début de block : rel
+PersonEvents  	# début de block : pevt (specific to gwplus)
+DataBaseNotes 	# début de block : notes-db (only one)
+ExtendedPages 	# début de block : page-ext
+WizardNotes  	# début de block : wizard-note (possibly one for each wizard)
+
+Principale structure : la famille
+
+Le format du fichier est basé sur les Familles. Une famille comprend l'époux et sa femme, et une liste d'enfants. L'information personnelle (DoB, etc.) est située au niveau de chaque enfant. Si un individu n'a aucun parent, ses informations personnelles sont alors insérées directement après son nom dans la rubrique famille.
+
+Note du wiki : la description qui suit est un effort de présentation simplifiée de la réalité qui se trouve dans le code lui-même. Les aventureux peuvent le consulter dans la fonction print_family du fichier gwuLib.ml.
+
+1er cas : L'époux et sa femme sont tous les deux listés quelque part en tant qu'enfants d'une famille parente.
+
+ fam HusbandLastName FirstName[.Number] [PersonDetails] +[WeddingDate]
+  [#nm | #eng]  [ [#nsck | #nsckm | #noment | #banns | #contract | #license | #pacs | #residence] [m | f | ?][m | f | ?] ]
+  [#mp WeddingPlace] [#ms WeddingSource]
+  [#sep | - DivorceDate]
+  WifeLastName FirstName[.Number]   # family arguments should be on a single line
+  [wit[ m| f|]: Witness (use Person format, see Person Information section)]  # possibly several witnesses, respect spaces
+  [src Family source]
+  [comm Family comments in free format]
+  [cbp common children birth place]
+  [csrc common children source]
+ [fevt
+    FamilyEvent (multiples)
+ end fevt]
+ [beg
+ - [h | f |  ] Person # see detailed description at the next section
+ end]
+
+- Si les parents ne sont pas mariés (relation), insérez l'étiquette #nm. S'ils sont fiancés, utilisez #eng.
+- Si les parents sont séparés, utilisez #sep. Ou bien s'ils sont divorcés, utilisez - et ajoutez la date du divorce juste après (optionnel).
+- Si le ChildLastName est omis, le patronyme du père est utilisé.
+- Les étiquettes src, comm et wit suivent sur des lignes séparées, après l'étiquette fam. Ils sont optionnels.
+- Si le sexe de l'enfant n'est pas connu, ne mettez rien (pas de h ni de f) après le - (tiret).
+
+Si une famille n'a pas d'enfants, vous pouvez sauter toute la séquence des étiquettes beg/end :
+fam HEYDENREICH Gaspard +1719 TRESCH Rosine_Catherine
+
+2ème cas : L'époux ou sa femme ne sont listés nulle part en tant qu'enfants d'une autre famille. Entrez simplement leurs informations personnelles, comme vous le feriez pour un enfant.
+
+Exemple : John Corno (o 1935 at Soisy, +1997). L'information est directement mise dans la rubrique famille, car cette personne n'est listée nulle part ailleurs:
+fam Corno John 1935 #bp Soisy 1997 + Rempp Zabeth
+
+Si vous ne possédez réellement aucune autre information que son nom sur une personne, ajoutez alors le chiffre 0 à son nom, ce qui servira comme une DoB nulle et comme l'indicateur que cette personne ne figure nulle part ailleurs, et éventuellement deux points d'interrogation séparés par un espace (? ?) indiquant que son épouse est inconnue :
+fam Diemer Patrick 0 + Heidenreich Sylvie 0
+fam Doe John 0 + ? ?
+
+FamilyEvent structure (spécifique du format gwplus)
+
+fevt PersonLastName PersonFirstName[.Number]
+OneFamilyEvent (multiples)
+end fevt
+
+Chaque OneFamilyEvent a la structure suivante :
+FamilyEventName [EventDate] [#p EventPlace] [#s EventSource]
+[wit[ m| f]: [#godp | #offi | ] Person]
+[note Free text (no "_"!)]
+
+FamilyEventNames :
+#marr  -> (Efam_Marriage)
+#nmar  -> (Efam_NoMarriage)
+#nmen  -> (Efam_NoMention)
+#enga  -> (Efam_Engage)
+#div   -> (Efam_Divorce)
+#sep   -> (Efam_Separated)
+#anul  -> (Efam_Annulation)
+#marb  -> (Efam_MarriageBann)
+#marc  -> (Efam_MarriageContract)
+#marl  -> (Efam_MarriageLicense)
+#pacs  -> (Efam_PACS)
+#resi  -> (Efam_Residence)
+#strng -> (Efam_Name strng)
+
+On notera que certains évènements (mariage, divorce…) peuvent être décrits directement dans la structure fam, ou dans une sous-structure fevt. Les informations principales (date, lieu…) apparaissent aux deux endroits, mais certaines informations de détail n'apparaissent que dans la sous-rubrique évènement.
+
+Informations sur la personne
+
+Les informations sur la personne peuvent figurer aussi bien sur la rubrique enfant dans une famille, ou dans la rubrique famille si la personne n'est pas mentionnée en tant qu'enfant quelque part ailleurs. Les informations sur la personne peuvent même être introduites dans la rubrique relations (rel, voir section ci-bas) s'il est impossible de les définir ailleurs (par exemple, pour un enfant adopté).
+
+Le strict minimum d'informations pour un parent sont ses patronyme et prénom(s), avec le chiffre 0 comme Date de Naissance (DoB) :
+Corno Yann 0
+
+Pour un enfant, la DoB n'est pas obligatoire (le nom de famille peut aussi être omis: celui du père sera alors utilisé).
+
+Pour résumer, la DoB (Date de naissance) est seulement obligatoire si la personne est un Parent, ou si la personne a une date de décès (DoD). Dans ce dernier cas, si la DoB est inconnue, attribuez-lui simplement le chiffre 0.
+
+Exemple : Maurice, DoB inconnue, décédé en 1935 à Caen :
+Corno Maurice 0 1935 #dp Caen
+
+Le format complet pour une personne suit ci-dessous :
+ LastName FirstName[.Number]
+   [(PublicName)] [#nick Qualifier]
+   [{FirstNameAlias}] [#salias SurnameAlias]  [#alias Alias]
+   [[Title (see Title section)]] [#apubl | #apriv]
+   [#image ImageFilePath]
+   [#occu Occupation] [#src PersonSource]
+   BirthDate  [#bp BirthPlace]  [#bs BirthSource]
+   [!BaptismDate] [#pp BaptismPlace] [#ps BaptismSource]
+   [#od]
+   [ [k|m|e|s] [ ? | #mj | DeathDate] [#dp DeathPlace] [#ds DeathSource]
+   [#buri | #crem [BurialDate]] [#rp BurialPlace] [#rs BurialSource]
+
+- Voir les notes ci-dessus à propos de l'obligation d'attribuer une DoB (Date de naissance) ou pas.
+- Dans le cas où vous ne savez pas si la personne vit toujours, mettez un ? pour la DoD (Date de décès).
+- Si la personne est morte de toute évidence (née il y a plus de 150 ans par exemple) utilisez le tag #od (évolution après la version GeneWeb 5.?).
+- Si la personne est décédée jeune, utilisez l'étiquette #mj comme DoD.
+- #apubl et #apriv contrôlent l'accès : Public ou Privé. Rien n'est marqué par défaut, ce qui signifie "Si Titres".
+
+Pour spécifier différentes catégories de décès, utilisez ces caractères spéciaux comme préfixe devant la DoD :
+Type de décès | Caractère spécial | Exemple
+Tué | k | k10/5/1990
+Assassiné | m | m10/5/1990
+Exécuté | e | e10/5/1990
+Disparu | s | s10/5/1990
+
+Utilisez l'étiquette #buri pour spécifier l'enterrement d'une personne, ou #crem pour une crémation. La date correspondante est optionnelle.
+
+Titres
+Bien que les titres apparaissent simplement comme une autre étiquette dans la rubrique Personne, ils sont décrits séparément dans cette section pour une meilleure compréhension. Les Titres sont inclus entre crochets [ ] (le wiki s'excuse d'utiliser des crochets en tant que descripteur de format). S'il y en a plusieurs, ils sont simplement ajoutés les uns après les autres, en répétant les paires de crochets.
+[TitleName:Title:TitlePlace:StartDate:EndDate:Nth]
+- Chaque item est séparé par un caractère ':'. Si l'information correspondante n'est pas disponible, laisser l'item vide.
+- Le titre principal est entré en utilisant le signe '*' pour le Nom du Titre.
+
+Évènements personnels (spécifique du format gwplus)
+
+pevt PersonLastName PersonFirstName[.Number]
+OnePersonEvent (multiples)
+end pevt
+
+Chaque OnePersonEvent a la structure suivante :
+PersonEventName [EventDate] [#p EventPlace] [#s EventSource]
+ [wit[ m| f]: [#godp | #offi | ] Person]   # multiple witness. l'option offi (pour officiant) est en cours de développement
+ [note One line of free text] # plusieurs lignes note
+
+PersonEventNames :
+#birt -> (Epers_Birth)
+#bapt -> (Epers_Baptism)
+#deat -> (Epers_Death)
+#buri -> (Epers_Burial)
+#crem -> (Epers_Cremation)
+#acco -> (Epers_Accomplishment)
+#acqu -> (Epers_Acquisition)
+#adhe -> (Epers_Adhesion)
+#bapl -> (Epers_BaptismLDS)
+#barm -> (Epers_BarMitzvah)
+#basm -> (Epers_BatMitzvah)
+#bles -> (Epers_Benediction)
+#cens -> (Epers_Recensement)
+#chgn -> (Epers_ChangeName)
+#circ -> (Epers_Circumcision)
+#conf -> (Epers_Confirmation)
+#conl -> (Epers_ConfirmationLDS)
+#degr -> (Epers_Diploma)
+#awar -> (Epers_Decoration)
+#demm -> (Epers_DemobilisationMilitaire)
+#dist -> (Epers_Distinction)
+#endl -> (Epers_Dotation)
+#dotl -> (Epers_DotationLDS)
+#educ -> (Epers_Education)
+#elec -> (Epers_Election)
+#emig -> (Epers_Emigration)
+#exco -> (Epers_Excommunication)
+#flkl -> (Epers_FamilyLinkLDS)
+#fcom -> (Epers_FirstCommunion)
+#fune -> (Epers_Funeral)
+#grad -> (Epers_Graduate)
+#hosp -> (Epers_Hospitalisation)
+#illn -> (Epers_Illness)
+#immi -> (Epers_Immigration)
+#lpas -> (Epers_ListePassenger)
+#mdis -> (Epers_MilitaryDistinction)
+#mpro -> (Epers_MilitaryPromotion)
+#mser -> (Epers_MilitaryService)
+#mobm -> (Epers_MobilisationMilitaire)
+#natu -> (Epers_Naturalisation)
+#occu -> (Epers_Occupation)
+#ordn -> (Epers_Ordination)
+#prop -> (Epers_Property)
+#resi -> (Epers_Residence)
+#reti -> (Epers_Retired)
+#slgc -> (Epers_ScellentChildLDS)
+#slgp -> (Epers_ScellentParentLDS)
+#slgs -> (Epers_ScellentSpouseLDS)
+#vteb -> (Epers_VenteBien)
+#will -> (Epers_Will)
+#strng -> (Epers_Name strng)
+
+Notes
+Les notes sont stockées séparément dans le fichier, entre les marqueurs notes et end notes et sont associées à un individu :
+ notes LastName FirstName[.Number]
+ beg
+ Notes go here in a totally free format
+ (HTML tags can be inserted here. See the -tags option for gwd and tags.txt file)
+ end notes
+
+Relations
+Les relations sont aussi stockées séparément, comme les notes.
+rel LastName FirstName[.Number]
+beg
+- adop: AdoptiveFather + AdoptiveMother
+- adop fath: AdoptiveFather
+- adop moth: AdoptiveMother
+- reco: RecognizingFather + RecognizingMother
+- reco fath: RecognizingFather
+- reco moth: RecognizingMother
+- cand: CandidateFather + CandidateMother
+- cand fath: CandidateFather
+- cand moth: CandidateMother
+- godp: GodFather + GodMother
+- godp fath: GodFather
+- godp moth: GodMother
+- fost: FosterFather + FosterMother
+- fost fath: FosterFather
+- fost moth: FosterMother
+end
+
+DataBaseNote
+The DataBase Note is the text that appears when one clicks on the "Note de présentation" tag of the Welcome page.
+notes-db
+  Free text starting with two spaces (including HTML and WiKi syntax formatting)
+end notes-db
+
+ExtendedPages
+Extended pages are pages referenced within persons notes using the WiKi syntax [[[ExtendedPageName/Free text]]]. The same syntax can be used within extended pages themselves.
+# extended page PageName used by:
+# - person PersonFirstName[.Number] PersonLastName 	# multiple lines indicating usage by Person
+# - extended page PageName	                  	# or by other ExtendedPage
+page-ext PageName
+  Free text with two spaces at the beginning of each line.
+  Free text may contain HTML and WiKi formatting commands.
+  Continued free text
+end page-ext
+
+WizardPage
+Wizard-note Wizard_name
+  timestamp   # timestamp de la date de création de la page, calculé comme le nombre de secondes depuis le 1er janvier 1970 (epoch au sens unix)
+  Free text following WiKiText format describing the wizard and his activities.
+  Each line begins with two spaces.
+end wizard-note
+
+Chaque magicien autorisé à faire des modifications dans une base peut disposer d'une page expliquant qui il est, et la nature de ses activités. Si le paramètre authorized_wizards_notes est positionné à yes dans le fichier basename.gwf, la page d'accueil proposera un lien permettant de consulter ces pages, triées par ordre alphabétique.
+
+Chaque magicien a la possibilité de modifier sa page (à valider!).

@@ -1,0 +1,172 @@
+Source : https://geneweb.tuxfamily.org/wiki/wikitext
+Récupération : intégrale, verbatim (via web_fetch)
+
+---
+
+Geneweb Wikitext
+
+From GeneWeb
+Jump to: navigation, search
+Language: English • français
+
+GeneWeb uses Wikitext, a markup language that offers a simplified alternative to HTML and is used to write pages in wiki websites such as Wikipedia.
+
+A toolbar around text zones allow to easily add wikitext:
+
+Title of the page
+
+Add the "TITLE=" tag before the text.
+
+Table of contents
+
+Headings and subheadings are a way to improve the organization of an article.
+
+= Heading =
+== Subheading ==
+
+If an article has at least four headings, a table of contents will automatically be generated. Some options are available:
+- hide the table of contents (TOC):
+- to place a table of contents at a specific position (overriding):
+- to place a short table of contents:
+
+When editing the content of a note is allowed, GeneWeb opens the editing window section by section, and provides at the top left of the page, three arrows (left, up, right) to allow navigation between sections.
+
+Text formatting
+
+You can format your text using wiki markup. This consists of normal characters like asterisks, single quotes or equation marks which have a special function in the wiki, sometimes depending on their position. For example, to format a word in italic, you include it in two single quotes like this:
+
+ '''''bold and italic'''''
+
+For GeneWeb underlining style, green bold by default, use curly brackets: {texte}
+
+To indent text, use a colon at the beginning of the line, as much as needed:
+
+:1st indent
+::2nd indent
+
+To add a forced line-break for a new paragraph, leave an empty line or start line with HTML tag <br />.
+
+Lines starting with space are displayed as they are provided that:
+- there are at least two such lines
+- there is an empty line before and after the group of lines.
+
+Bullet list
+
+To create a bullet list simply start each line with an asterisk (*):
+
+* one
+* two
+* three
+** three and one-third
+** three and two-thirds
+
+To maintain indentation in a multi paragraph bullet list, mix appropriately * and : as in:
+
+* one
+* two line one
+: two line two
+:* two one line one
+:: two one line two
+* three
+** three and one-third
+** three and two-thirds
+
+Internal links
+
+You can create links to a page (text+HTML+WikiText), by putting its name in triple square brackets, like this:
+[[[Target_page]]]
+
+If you want to display some other text for the link, you can do so by adding / followed by the alternative name. For example:
+
+[[[Target_page/display text]]]
+
+If the page doesn't exist, the link appears in red. Clicking on the link, you'll reach an empty page you can fill.
+
+One can organize linked pages into folders by prefixing the filename with a folder name.
+
+One may create a link to a wizard's page with the following syntax:
+
+[[w:Wizard]] ou [[w:Wizard/Wizard full name]]
+
+To insert a link to an individual, use the following syntax:
+
+[[first_name/surname/number/display text]]
+
+For example:
+
+[[Maria/Baxter/0/Maria Baxter]]
+
+GeneWeb maintains an index of the notes and pages where a particular individual is mentionned. This information is available on the individual's page under the link linked pages (m=LINKED;p=firstname;n=lastname). The tool update_nldb updates this cross references index.
+
+Backlink to a page
+
+When a page contain links to individuals, GeneWeb may add a link back to this page at several locations on the individual page:
+- HEAD=: below the name;
+- OCCU=: below the occupation;
+- DEATH=: at the end the date and place of death, between parenthesis;
+- BIBLIO=: after sources, with a bibliography sub-title;
+- BNOTE=: at the beginning of notes;
+- NOTE=: at the end of notes;
+
+The link to the page appears under the text comprised between ; and ]] in the individual's link, or under the part of the text between curly brackets ({text}) if any. In this text, the character *, if present, is replaced by the content of the tag (Warning, white space before and after the * are taken into account).
+
+If there is no text_for_link (; alone), then the link to the page will not appear for this individual. This may be useful to keep in the page a link back to a wizard.
+
+Page content follows the general wikitext conventions. A TITLE tag must be present, and the other tags must follow immediately.
+
+Here are some typical usage examples of this mechanism.
+
+TITLE=List of MIT alumni
+
+[[John/Doe;]] Managing this page<br>
+[[Nicholas/Jhonson/Johnson, Nicholas;* 1942]], engineer, writer, 1942<br>
+[[Bernard/Smith/Smith, Bernard;* 1967]] CEO of Ford Motors, 1967<br>
+
+The text "MIT year" will appear at the end of the notes section on the personal page of the persons listed in this page (except for the first one). Note the presence of the <li> tag in the NOTE header which will produce a list bullet.
+
+TITLE=List of Missing in Action
+
+[[Henri/Duchmoll;]] Managing this page<br>
+[[Jean/Test/Test, Jean;*]] Argonne campain 1944.<br>
+[[Bernard/Dupont;*]], Sargeant, Bois Belleau battle 1917<br>
+
+With this list, the mention (MIA) will appear after the death indications present on the individual page. The text "Argonne campain 1944" and "Sargeant ..." is displayed when the page itself is requested.
+
+When a person appears in several linked pages, the corresponding informations appear in succession, separated by commas (,), but the overall aspect may be changed by the presence of <li> or <br> tags as shown in the MIT alumni example.
+
+Other examples of lists managed with this mechanism can be found on the Roglo site.
+
+ HEAD=baron d'Empire
+ OCCU=maire de Thionville
+ DEATH=raison inconnue
+ BIBLIO=documentation personnelle
+ BNOTE=remarque de début de note
+ NOTE=remarque de fin de note
+
+[[Henri/Gouraud;]] Responsable de cette page<br>
+[[Bernard/Test/Test, Bernard;* texte_du_lien]] texte 2<br>
+[[Charlotte/Test/Test, Charlotte;voir  en complément une {page} d'explications]] texte 3<br>
+
+The example above will produce the following result on the page for Bernard Test (note that in most cases, a single tag will appear in a page).
+
+Special caracters
+
+All the characters used for syntax can be written in notes or in the forum preceded by % :
+- %' gives '.
+- %} and %{ give } and {.
+- %] and %[ give ] and [.
+- %% gives %.
+
+[Footer navigation to "GeneWeb Manual", "Use and manage genealogical databases", "Technical annex" — standard site navigation, not page-specific content.]
+
+---
+COMPLÉMENT IMPORTANT (extrait de recherche distinct, mise à jour de la syntaxe) :
+
+The wiki syntax for internal links is being updated to use | rather than / as delimiter
+between the name information and the displayed text. This applies to the pages and wizards
+cases. For backwards compatibility, the use of / is still valid.
+
+[NOTE : ceci concerne potentiellement aussi les liens vers un individu à quatre parties
+(prénom/nom/numéro/texte) déjà documentés dans format-wiki.md — à vérifier si le délimiteur |
+s'applique aussi à ce cas précis ou seulement aux liens vers une page/un magicien.]
+

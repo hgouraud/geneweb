@@ -1,0 +1,15 @@
+Source : https://geneweb.tuxfamily.org/wiki/Access
+Récupération : extrait substantiel via recherche
+
+---
+
+Access restrictions, robots and black lists - GeneWeb
+
+Putting a single * on a line will block all access, including for your own address.
+
+Geneweb can be managed through gwsetup. For security reasons, administration can be performed only from a specific IP address provided in the only.txt file (see distribution for its location). The default value is 127.0.0.1 and can be changed to any valid IP address (only.txt stores a single IP address).
+
+[CONFIRME : la valeur par défaut de only.txt est bien 127.0.0.1 — la page gwsetup (voir
+gwsetup.txt) mentionnait "128.0.0.1" par erreur, comme suspecté.]
+
+When accessing the site, visitors will be requested a username and a password which should match one of the pairs stored in ba[se... — extrait tronqué].

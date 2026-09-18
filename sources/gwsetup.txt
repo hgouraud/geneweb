@@ -1,0 +1,32 @@
+Source : https://geneweb.tuxfamily.org/wiki/gwsetup
+Récupération : extrait substantiel via recherche
+
+---
+
+The gwsetup program - GeneWeb
+
+gwsetup and gwd may be started with a common shell script similar to Gwd-start, or its up-to-date version geneweb.sh (in git).
+
+Gwsetup acts as a http server, and as such, is accessible from remote client machines. In order to prevent random users to launch base maintenance operations through the gwsetup interface, its access is limited to a single remote machine whose IP address is stored in a file called only.txt located in the gw folder. If the only.txt file does not exist, it is assumed to hold the value 128.0.0.1 (or ::1 in IPV6 land).
+
+[Note : "128.0.0.1" semble être une coquille du wiki lui-même — l'adresse de boucle locale
+standard est 127.0.0.1, valeur déjà documentée par ailleurs (page distribution / Makefile :
+echo "127.0.0.1" > only.txt). À ne pas reprendre telle quelle sans vérification.]
+
+---
+COMPLÉMENT (extrait de recherche distinct, confirme et enrichit gestion.md) :
+
+gwsetup is a program to create and maintain genealogy database(s) using a browser-based user
+interface instead of command lines in a terminal window.
+
+The default port for gwsetup is 2316 and its welcome page is: http://localhost:2316/.
+
+- under Windows, double click on gwsetup.bat available in the GeneWeb installation folder. A
+  window should pop up proposing a selection of languages and specifying the address at which
+  gwsetup is available. Keep this window open as long as you wish to interact with gwsetup.
+  You may minimise it with the "-" button in the top right corner of the window.
+- under Linux, if you have installed GeneWeb using the RPM package manager, you probably
+  already have gwsetup running. Use the address provided at install time to manage your bases.
+- if you have installed GeneWeb under Unix, Linux or OSX through another method, you may
+  launch gwsetup by entering ./gwsetup in a terminal window.
+

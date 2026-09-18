@@ -1,0 +1,16 @@
+Source : https://geneweb.tuxfamily.org/wiki/recover
+Récupération : extrait substantiel via recherche
+
+---
+
+Recovery or migration of a GeneWeb database - GeneWeb
+
+This page describes how to recover a base from source files after version evolution of GeneWeb. For minor revisions, implying no change in the database formats, it is sufficient to copy/paste the folder containing a base basename.gwb from one version to the other (assuming you have installed the new version in a separate folder as a precaution). Open your base with the new version to verify that your base is accepted by the new version of GeneWeb. If you started from a GEDCOM file and have made no (or very few) modifications, you may choose to repeat the process with the new GeneWeb version.
+
+From version to version, the GEDCOM to GW program may have improved and new GEDCOM tags might be accepted. In the case of a major version ev[olution...]:
+
+The process is almost the same as that of cleaning a base: as in the "cleaning" case, the base is firstly saved, then restored. Other files associated with the base are copy/pasted, and launch the consanguinity and notes links restoration processes. Repeat these steps for each of your bases.
+
+With the older version of GeneWeb, launch gwsetup, then select Save a GeneWeb source file. Remember the name of the saved source file with extension .gw (default name is that of your base). Close gwsetup. You may also trigger yourself the save process through a command-line with the gwu program.
+
+With the newer version of GeneWeb, launch gwsetup and select "Create a base ... from a GeneWeb source file (gwc1)" or "... from a GeneWeb source file (gwc2)". The source file to submit is the .gw file created at the previous step. You may also trigger yourself the import process through a command-line with the gwc1 or gwc2 programs.

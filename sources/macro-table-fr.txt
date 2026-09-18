@@ -1,0 +1,35 @@
+Source : https://geneweb.tuxfamily.org/wiki/Macro-table/fr
+Récupération : extrait substantiel via recherche (code source de la page générant la table de macros)
+
+---
+
+Macro-table/fr
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<title>GeneWeb macros</title>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- Insert the following line in the note of an individual :
+<a href="%sm=SRC;v=macros">Macros table</a>
+and place this whole page in file "bases/src/base/macros.txt" -->
+%%Xi;=%Xi;<br>
+%%Xk;=%Xk;<br>
+%%Xp;=%Xp;<br>
+%%Xo;=%Xo;<br>
+%%Xn;=%Xn;<br>
+%%Xm;=%Xm;<br>
+%%Xv;=%Xv;<br>
+<a href="%s"><img src="images/up.png" width="24" height="29"></a>
+<h2>GeneWeb Macros</h2>
+<p>
+The following table lists the macros available when personalizing GeneWeb pages.<br>
+The second column provides the result of executing the macro in the current context.
+
+[Table HTML des macros, correspondant à ce qui est documenté intégralement dans macros.txt —
+voir ce fichier pour le contenu complet de chaque ligne (%a à %I&).]
+
+Extrait de la table (colonnes tronquées observées dans la recherche) :
+%Ic | %IcYes%E %INcNo%E | %IcYes%E %INcNo%E | Cannot handle passwords
+%If | %IfYes%E %INfNo%E | %IfYes%E %INfNo%E | We are "Friend"
+%Ih | %IhYes%E %INhNo%E | %IhYes%E %INhNo%E | There is a history file
+%Ij | %IjYes%E %INjNo%E | ... | [tronqué]

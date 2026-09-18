@@ -1,0 +1,29 @@
+Source : https://geneweb.tuxfamily.org/wiki/Archive
+Récupération : extrait substantiel via recherche
+
+---
+
+Archive and distribute your base on a removable media (CD-ROM) - GeneWeb
+
+#!/bin/sh
+# Shutdown daemon already running
+killall gwd
+DIR=$(dirname "$0")
+cd $DIR
+./gw/gwd -hd ./gw -bd ./bases -wd /tmp/geneweb
+[...script tronqué dans l'extrait obtenu, probablement suivi du lancement effectif et de
+messages d'attente...]
+
+---
+COMPLÉMENT (extrait de recherche distinct — liste de contrôle pour l'archivage) :
+
+Any tags.txt (see tags) and file.auth (see access) files needed for proper execution of your
+base. The bases folders whose extensions are .gwb. The .gwf configuration file(s) associated
+with your bases.
+
+In the .gwf configuration file associated with your base(s), add the line wizard_passwd=xyz.
+This will prevent display of wizard related stuff which would be inoperative anyway.
+
+If your base proposes portraits for persons, install the corresponding .jpg files in an
+images/mybase folder (see example below).
+

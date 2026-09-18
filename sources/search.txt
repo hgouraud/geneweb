@@ -1,0 +1,12 @@
+Source : https://geneweb.tuxfamily.org/wiki/search
+Récupération : extrait obtenu précédemment dans la conversation (nouvelle tentative de recherche
+infructueuse — n'a remonté que des résultats généalogiques hors sujet sur le patronyme Gautier)
+
+---
+
+[English page, exact title not captured]
+
+...querying for "gautier" will return only [a] list of persons matching "Gautier" exactly, while querying "gautiera" or "gautier de" will propose [a] alternative between the two last names [Gautier and Gautier Sauvagnac].
+
+[Extrait tronqué — le reste de la page (mécanisme complet de recherche par préfixe, autres
+options de recherche) n'a pas pu être récupéré.]

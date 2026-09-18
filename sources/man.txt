@@ -1,0 +1,50 @@
+Source : https://geneweb.tuxfamily.org/wiki/man
+Récupération : intégrale, verbatim (via web_fetch)
+
+---
+
+Starting GeneWeb and its components
+
+GeneWeb's distribution comes with standard tools for starting GeneWeb in a minimal configuration. To start Geneweb:
+- start gwd.
+- start gwsetup.
+- open the START.html page with your preferred browser.
+
+In the tree below, the scripts have extension .bat for Windows, and .command for macOS.
+
+- directory gw
+  - file CHANGES.txt: changelog
+  - script file geneweb: (macOS only) launch script for gwsetup, gwd and START.html page in a single command.
+  - script file gwd: minimal launch script for gwd
+  - script file gwsetup: minimal launch script for gwsetup
+  - file LICENSE.txt
+  - file LIZEZMOI.txt
+  - file README.txt
+  - file START.htm: a minimal start page (assumes that gwd and gwsetup have been started)
+
+Alternatively, you may launch the execution of the various components of GeneWeb with command lines in a terminal window as described below.
+
+Command lines operation
+
+Using GeneWeb with command lines assumes that you are familiar with the notions of files, folders and that you are not afraid of entering commands directly in a terminal window. If this was not the case, you should limit yourself to the use of gwsetup which provides a web based interface for most of the needed actions.
+
+In order to configure and launch GeneWeb, you may use interactive commands in a terminal window:
+- with a xterm virtual console under Unix/Linux or a terminal window under OS X,
+- with cmd.exe under Windows (various ways to start cmd.exe depending on Windows version).
+
+In this window, type the command to position yourself in the folder where GeneWeb is installed, which could be:
+- under Unix or OSX: cd /home/user/gw-7.00-alpha-linux/gw/
+- under Windows: cd c:\"program files (x86)"\gw-7.00-alpha-win\gw
+
+./program -help will return the help documentation with a list of possible parameters.
+
+Main components
+
+The following programs perform the following tasks:
+- gwd: act as a HTTP server processing requests and returning results.
+- gwc: read a GWformat file to create a GeneWeb base.
+- ged2gwb: read a GED file to create a GeneWeb base.
+- gwu: outputs the content of a base in the GeneWeb format.
+- gwb2ged: outputs the content of a base in the GED format.
+- consang: computes the consanguinity in a base and performs a base clean-up.
+- update_nldb: create the index of the various auxiliary pages created in notes with the wiki syntax [[[linked_page/displayed text]]] (see wikitext). A listing of these pages is obtained with the m=MISC_NOTES command. Usage: ./update_nldb <base_name>.

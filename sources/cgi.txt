@@ -1,0 +1,25 @@
+Source : https://geneweb.tuxfamily.org/wiki/CGI
+Récupération : extrait substantiel via recherche
+
+---
+
+Install GeneWeb in CGI mode - GeneWeb
+
+[Mécanisme détaillé de mise à jour distante d'une base, complétant remote-base.txt :]
+
+- extracts a listing of the content of bases/images/base, bases/src/base and
+  bases/src/base/images in three ls-xxx.txt files.
+- creates a remote.sh file (see remote-base.sh or remote-files.sh) depending on the second
+  parameter.
+- creates a tar file containing base.gw, history, remote.sh and the three ls-*.txt files above.
+- triggers on the remote server unfolding of the tar file and execution of the remote.sh script.
+
+Depending on the availability of /usr/bin/mail on your server, the result of this remote
+execution can be a mail containing the remote.log and three diffs between images folders.
+
+This procedure saves the previous folder of the base or its images and src folders with a
+"yyyy-mm-dd-hh:mm:ss" date tag. As time progresses, you may want to clean up this accumulation
+of saves.
+
+When uploading a base, the remote.sh shell script is executed on your remote server, and
+installs your base or its images at the proper location.

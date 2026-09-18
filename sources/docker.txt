@@ -1,0 +1,99 @@
+Source : https://geneweb.tuxfamily.org/wiki/Docker
+Récupération : intégrale, verbatim (via web_fetch)
+NOTE : contient plus de détails que installation-docker.md actuel (scripts backup.sh/import.sh,
+image arm64 distincte ravermeister/geneweb) — à exploiter pour mise à jour ultérieure.
+
+---
+
+Running Geneweb on Mac, Linux, arm64 or Windows using Docker
+
+Download and install for your operating system from Docker. To download the latest Dockerized image of Geneweb, open your favourite terminal and follow the instructions below.
+
+windows/mac/linux
+The Containers for each System architecture differ because they have to be adjusted individually. Therefore the Dockerfiles are developed independently.
+
+Download Image
+docker pull jeffernz/geneweb:latest
+The above command will download the latest Dockerized image of Geneweb. The image is built on top of Ubuntu:19.04
+
+Run the Container
+docker run -d \
+  --name jeffernz-geneweb \
+  -p 2316:2316 -p 2317:2317 \
+  -v ~/GenealogyData:/usr/local/var/geneweb \
+  jeffernz/geneweb:latest
+
+This will launch the Geneweb portal at http://localhost:2317 and the Geneweb setup portal at http://localhost:2316.
+
+To run the Geneweb portal by itself:
+docker run -d \
+  --name jeffernz-geneweb \
+  -p 2317:2317 \
+  -v ~/GenealogyData:/usr/local/var/geneweb \
+  jeffernz/geneweb:latest \
+  start-portal
+
+To run the Geneweb Setup by itself:
+docker run -d \
+  --name jeffernz-geneweb \
+  -p 2316:2316 \
+  -v ~/GenealogyData:/usr/local/var/geneweb \
+  jeffernz/geneweb:latest \
+  start-setup
+
+Additional running options:
+- Run Geneweb in a different language (default is English): -e LANGUAGE=de
+- Change the host ip-address when accessing Geneweb Setup portal: -e HOST_IP=10.0.1.2
+- Run GeneWeb in a different timezone (useful for edit history timestamps): -e TZ=Australia/Melbourne
+
+Geneweb bases storage
+Once you run Geneweb in the dockerized container, the bases created in Geneweb will be stored under ~/GenealogyData
+
+Export as GEDCOM
+To backup your bases on a running container:
+docker exec -it jeffernz-geneweb backup.sh
+The backup will be stored under ~/GenealogyData/backup
+
+Import from GEDCOM
+To import a GEDCOM file into GeneWeb, place the GEDCOM file under ~/GenealogyData/import and then execute the import command on the running instance, e.g.:
+docker exec -it jeffernz-geneweb import.sh
+This will import the GEDCOM file into GeneWeb. Note, all GEDCOM files in the import folder will be imported. Make sure you remove older files to prevent the database from being overwritten.
+
+arm64
+For a detailed description see the readme file of the project.
+
+Prepare folders:
+# prepare shared folders
+CONFDIR=/etc/geneweb
+LOGDIR=/var/log/geneweb
+DATADIR=/var/local/geneweb
+mkdir -p $CONFDIR
+echo "172.17.0.1" >$CONFDIR/gwsetup_only
+mkdir -p $DATADIR
+mkdir -p $LOGDIR
+
+Pull the Container:
+# pull the image
+docker pull ravermeister/geneweb
+
+Start the Container:
+#run the image
+docker run -d -t \
+  -p $GWD_PORT:2317 \
+  -p $GWSETUP_PORT:2316 \
+  -p $GWAPI_PORT:2322 \
+  -v $CONFDIR:/usr/local/share/geneweb/etc \
+  -v $DATADIR:/usr/local/share/geneweb/share/data \
+  -v $LOGDIR:/usr/local/share/geneweb/log \
+  --restart always \
+  --name geneweb \
+  ravermeister/geneweb
+
+Additional running options:
+For gwsetup you must edit the $CONFDIR/gwsetup_only file and replace the IP with the local IP or Hostname where the docker container runs within.
+gwsetup will be available on localhost:2316, gwd will be available on localhost:2317.
+
+There are 3 folders which are currently exposed:
+- log → all log files are written into this folder
+- config → all necessary config files. Note you can overwrite the default redis.conf
+- data → all geneweb databases. You can create an authority file for gwd where each line is e.g. user:password. The file must be called gwd_passwd because the geneweb-launch.sh starts gwd with the correct runtime argument when the file is found.

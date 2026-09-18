@@ -1,0 +1,24 @@
+Source : https://geneweb.tuxfamily.org/wiki/ged
+Récupération : extraits substantiels via recherche (cumul de plusieurs passages)
+
+---
+
+Importing/Exporting a Gedcom file - GeneWeb
+
+At the present time, gwb2ged is missing the option -ad available with gwu. In case of need, one can extract with gwu, recreate a base from the extracted data, and do a full extraction with gwb2ged.
+
+The base as defined by the -o option must be in the same partition or device as the current folder, otherwise, gwc will terminate with the following error message:
+Uncaught exception: Sys_error("Invalid cross-device link")
+
+The command gwb2ged will export a Gedcom (.ged) file from a GeneWeb base.
+Usage: gwb2ged <base> [options]
+If both options -a and -d are used, intersection is assumed.
+If several options -s are used, union is assumed.
+Options are:
+- -charset [ASCII|ANSEL|UTF-8]: set charset; default is UTF-8.
+
+ged2gwb options (extrait complémentaire) :
+-no_epn : cancels the previous option.
+-no_pit : No public if titles - Do not consider persons having titles as public.
+-tnd : Try negative dates - Set negative dates when inconsistency (e.g. [tronqué]).
+-fne be : First names enclosed - When creating a person, if the GEDCOM first name part holds a part between 'b' (any character) and 'e' (any character), it is considered to be the usual first name, e.g. -fne '""' or -fne "()".

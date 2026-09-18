@@ -1,0 +1,30 @@
+Source : https://geneweb.tuxfamily.org/wiki/CSS
+Récupération : ÉCHEC du fetch direct (2 tentatives, timeouts). Extrait substantiel conservé
+depuis une recherche antérieure dans cette même conversation.
+
+---
+
+CSS Page Layout - GeneWeb
+
+Page title (all pages). ... Footer (all pages). ...
+
+#acces { float: right; width: 160px; height: 65px; border: solid 2px #6f8301; margin-right: 10px; text-align: center; }
+Title of the 'Access' section (page 'welcome.txt').
+
+#acces h3 { text-align: left; background-color: #6f8301; color: white; margin: 0; }
+
+Search form (page 'welcome.txt').
+#search { width: 750px; border: solid 2px #6f8301; text-align: left; align: center; margin-left: auto; margin-right: auto; }
+
+Title of the search form (page 'welcome.txt').
+#search h3 { margin: 0; text-align: left; background-color: #6f8301; color: white; }
+
+Properties for the search form (page 'welcome.txt').
+#search form { margin-top: 10px; margin-left: 10px; }
+
+Display the 'Search by title/fief' form on a single line (page 'welcome.txt').
+#form-titles div { float: left; margin-right: 3px; }
+Properties for the 'Search by title/fief' form in the search form section (page 'welcome.txt').
+
+[Extrait tronqué — la page continue vraisemblablement avec d'autres sélecteurs CSS documentés
+de la même façon (un sélecteur + sa cible + son rôle), non capturés dans cette recherche.]
