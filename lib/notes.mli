@@ -15,10 +15,13 @@ val update_notes_links_db :
   (Geneweb_db.Driver.iper, Geneweb_db.Driver.ifam) Def.NLDB.page ->
   string ->
   unit
-(** Re-scans note-bearing text into nldb and adjusts the linked-pages cache by
-    the resulting difference in referenced keys (added and removed), so the
-    cache stays exact between two runs of update_nldb instead of drifting on
-    every edit. *)
+(** [update_notes_links_db conf base page s] replaces [page]'s nldb entry with
+    the links found in [s] and, if the linked-pages cache exists, adds or
+    subtracts one for each key [page] starts or stops referencing. *)
+
+val links_of_text : string -> string list * (Def.NLDB.key * Def.NLDB.ind) list
+(** [links_of_text s] is the note pages and person links found in [s], as stored
+    in nldb. *)
 
 val has_links : string -> bool
 (** Whether a text contains a double opening bracket, i.e. may hold a link
@@ -44,13 +47,12 @@ val update_notes_links_person :
   unit
 (** Re-scans a person's note-bearing fields into nldb. [?old_text] is the text
     [notes_bearing_text_of_person] returned before the edit ([""] for a person
-    that did not exist); when given, the full nldb rewrite is skipped if the
-    text is unchanged or neither version contains a link. Omit it to force a
-    rescan. *)
+    that did not exist); when given, the nldb rewrite is skipped if both texts
+    hold the same links. Omit it to force a rescan. *)
 
 val update_notes_links_family :
-  Config.config ->
   ?old_text:string ->
+  Config.config ->
   Geneweb_db.Driver.base ->
   (_, Geneweb_db.Driver.ifam, Geneweb_db.Driver.istr) Def.gen_family ->
   unit

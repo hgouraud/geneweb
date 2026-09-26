@@ -256,17 +256,8 @@ let syntax_links conf wi s =
        | Bold -> Buffer.add_string buff "</b>"
        | BoldItalic -> Buffer.add_string buff "</b></i>"
        | Zero -> ());
-    if i = slen then (
-      (match stop_at_brace with
-      | Some brace_pos ->
-          Buffer.add_string buff
-            (Printf.sprintf
-               "<span style=\"color:red\">[{ non ferm\xc3\xa9 \xc3\xa0 la \
-                position %d]</span>"
-               brace_pos)
-      | None -> ());
-      (pos, i))
-    else if brace_stop then (pos, i + 1)
+    if i = slen then (false, pos, i)
+    else if brace_stop then (true, pos, i + 1)
     else if
       s.[i] = '%'
       && i < slen - 1
@@ -283,12 +274,16 @@ let syntax_links conf wi s =
       loop ?stop_at_brace quot_lev pos (i + 1))
     else if s.[i] = '{' then (
       let start_len = Buffer.length buff in
-      let pos', j = loop ~stop_at_brace:i Zero pos (i + 1) in
-      let inner = Buffer.sub buff start_len (Buffer.length buff - start_len) in
-      Buffer.truncate buff start_len;
-      if inner <> "" then
-        Buffer.add_string buff
-          (Printf.sprintf "<span class=\"highlight\">%s</span>" inner);
+      Buffer.add_char buff '{';
+      let closed, pos', j = loop ~stop_at_brace:() Zero pos (i + 1) in
+      if closed then (
+        let inner =
+          Buffer.sub buff (start_len + 1) (Buffer.length buff - start_len - 1)
+        in
+        Buffer.truncate buff start_len;
+        if inner <> "" then
+          Buffer.add_string buff
+            (Printf.sprintf "<span class=\"highlight\">%s</span>" inner));
       loop ?stop_at_brace quot_lev pos' j)
     else if bold_italic_delimiter_at s i quot_lev then (
       let t, ql =
@@ -309,21 +304,6 @@ let syntax_links conf wi s =
       loop ?stop_at_brace quot_lev pos (i + 1))
     else
       let link = NotesLinks.misc_notes_link s i in
-      let link =
-        (* [misc_notes_link]/[wlnone] never stops a plain-text run at a
-           bare '}' - only at '%'/'\''/'{'/'['. Inside a highlight span,
-           clamp such a run at its first '}' so the outer stop-condition
-           above actually gets to see that character on the next call,
-           instead of it being swallowed into the text. *)
-        if stop_at_brace <> None then
-          match link with
-          | NotesLinks.WLnone (_, none_s) -> (
-              match String.index_opt none_s '}' with
-              | Some k -> NotesLinks.WLnone (i + k, String.sub none_s 0 k)
-              | None -> link)
-          | _ -> link
-        else link
-      in
       let next_pos = if NotesLinks.advances_pos link then pos + 1 else pos in
       match link with
       | NotesLinks.WLpage (j, fpath1, fname1, anchor, text) ->

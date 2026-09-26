@@ -6,7 +6,7 @@ module StrSet = Mutil.StrSet
 module Driver = Geneweb_db.Driver
 module Gutil = Geneweb_db.Gutil
 
-let src = Logs.Src.create ~doc:"Perso" "PERS"
+let src = Logs.Src.create ~doc:"Notes" "NOTS"
 
 module Log = (val Logs.src_log src : Logs.LOG)
 
@@ -314,13 +314,12 @@ let read_cache_linked_pages conf =
   match try Some (Secure.open_in_bin fname) with Sys_error _ -> None with
   | Some ic ->
       Fun.protect
-        ~finally:(fun () -> close_in ic)
+        ~finally:(fun () -> close_in_noerr ic)
         (fun () -> Some (input_value ic : cache_linked_pages_t))
   | None ->
-      Printf.eprintf "%s not exist. Run update_nldb\n" fname;
+      Log.warn (fun k -> k "%s not found: run update_nldb" fname);
       None
 
-(* sync with update_nldb.ml if this changes *)
 let save_cache_linked_pages bdir (ht : cache_linked_pages_t) =
   let fname = Filename.concat bdir cache_linked_pages_name in
   let tmp = fname ^ ".tmp" in
@@ -356,50 +355,40 @@ let adjust_cache_linked_pages conf ~removed ~added =
           added;
         write_cache_linked_pages conf ht
 
+let links_of_text s =
+  NotesLinks.fold_links
+    (fun ~pos link (list_nt, list_ind) ->
+      match link with
+      | NotesLinks.WLpage (_, _, lfname, _, _) ->
+          let list_nt =
+            if List.mem lfname list_nt then list_nt else lfname :: list_nt
+          in
+          (list_nt, list_ind)
+      | NotesLinks.WLperson (_, key, _, txt, fam_marker) ->
+          let link =
+            {
+              Def.NLDB.lnTxt = txt;
+              Def.NLDB.lnPos = pos;
+              Def.NLDB.lnFamMarker = fam_marker;
+            }
+          in
+          (list_nt, (key, link) :: list_ind)
+      | NotesLinks.WLwizard _ | NotesLinks.WLimage _ | NotesLinks.WLnone _ ->
+          (list_nt, list_ind))
+    ([], []) s
+
 let update_notes_links_db conf base fnotes s =
-  let describe_page = function
-    | Def.NLDB.PgInd ip -> Printf.sprintf "PgInd %s" (Driver.Iper.to_string ip)
-    | Def.NLDB.PgFam ifam ->
-        Printf.sprintf "PgFam %s" (Driver.Ifam.to_string ifam)
-    | Def.NLDB.PgNotes -> "PgNotes"
-    | Def.NLDB.PgMisc f -> Printf.sprintf "PgMisc %s" f
-    | Def.NLDB.PgWizard f -> Printf.sprintf "PgWizard %s" f
-  in
-  let on_unclosed_brace brace_pos =
-    Printf.eprintf "Warning: unclosed '{' at position %d in %s\n%!" brace_pos
-      (describe_page fnotes)
-  in
-  let list_nt, list_ind =
-    NotesLinks.fold_links ~on_unclosed_brace
-      (fun ~pos link (list_nt, list_ind) ->
-        match link with
-        | NotesLinks.WLpage (_, _, lfname, _, _) ->
-            let list_nt =
-              if List.mem lfname list_nt then list_nt else lfname :: list_nt
-            in
-            (list_nt, list_ind)
-        | NotesLinks.WLperson (_, key, _, txt, fam_marker) ->
-            let link =
-              {
-                Def.NLDB.lnTxt = txt;
-                Def.NLDB.lnPos = pos;
-                Def.NLDB.lnFamMarker = fam_marker;
-              }
-            in
-            (list_nt, (key, link) :: list_ind)
-        | NotesLinks.WLwizard _ | NotesLinks.WLimage _ | NotesLinks.WLnone _ ->
-            (list_nt, list_ind))
-      ([], []) s
-  in
+  let list_nt, list_ind = links_of_text s in
   let keys l = List.sort_uniq compare (List.map fst l) in
-  let old_entry = NotesLinks.update_db base fnotes (list_nt, list_ind) in
   let old_keys =
-    match old_entry with Some (_, old_ind) -> keys old_ind | None -> []
+    match NotesLinks.update_db base fnotes (list_nt, list_ind) with
+    | Some (_, old_ind) -> keys old_ind
+    | None -> []
   in
   let new_keys = keys list_ind in
-  let removed = List.filter (fun k -> not (List.mem k new_keys)) old_keys in
-  let added = List.filter (fun k -> not (List.mem k old_keys)) new_keys in
-  adjust_cache_linked_pages conf ~removed ~added
+  adjust_cache_linked_pages conf
+    ~removed:(List.filter (fun k -> not (List.mem k new_keys)) old_keys)
+    ~added:(List.filter (fun k -> not (List.mem k old_keys)) new_keys)
 
 let notes_bearing_text_of_person base (p : _ Def.gen_person) =
   let sl =
@@ -444,14 +433,14 @@ let has_links s = Mutil.contains s "[["
 let update_notes_links_person ?old_text conf base (p : _ Def.gen_person) =
   let s = notes_bearing_text_of_person base p in
   match old_text with
-  | Some t when String.equal t s || not (has_links t || has_links s) -> ()
+  | Some t when links_of_text t = links_of_text s -> ()
   | Some _ | None ->
       update_notes_links_db conf base (Def.NLDB.PgInd p.Def.key_index) s
 
-let update_notes_links_family conf ?old_text base (f : _ Def.gen_family) =
+let update_notes_links_family ?old_text conf base (f : _ Def.gen_family) =
   let s = notes_bearing_text_of_family base f in
   match old_text with
-  | Some t when String.equal t s || not (has_links t || has_links s) -> ()
+  | Some t when links_of_text t = links_of_text s -> ()
   | Some _ | None ->
       update_notes_links_db conf base (Def.NLDB.PgFam f.Def.fam_index) s
 
