@@ -113,10 +113,7 @@ let make_henv _conn conf base =
       | Some ip ->
           {
             conf with
-            semi_public =
-              (if conf.semi_public then
-                 Driver.get_access (Driver.poi base ip) = SemiPublic
-               else true);
+            consent = Driver.get_access (Driver.poi base ip) = SemiPublic;
             user_iper = Some ip;
           }
       | None -> conf
