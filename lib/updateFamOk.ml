@@ -1095,10 +1095,13 @@ let all_checks_family conf base ifam gen_fam cpl des scdo =
   (wl, ml)
 
 let print_family conf base (wl, ml) cpl des =
+  let is_roglo = List.assoc_opt "roglo" conf.base_env = Some "yes" in
   let rdsrc =
-    match p_getenv conf.env "rdsrc" with
-    | Some "on" -> p_getenv conf.env "src"
-    | Some _ | None -> p_getenv conf.env "dsrc"
+    if is_roglo then Some ""
+    else
+      match p_getenv conf.env "rdsrc" with
+      | Some "on" -> p_getenv conf.env "src"
+      | Some _ | None -> p_getenv conf.env "dsrc"
   in
   (match rdsrc with
   | Some x ->

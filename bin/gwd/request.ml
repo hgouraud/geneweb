@@ -93,8 +93,10 @@ let make_henv _conn conf base =
         conf
     | None -> conf
   in
+  let is_roglo = List.assoc_opt "roglo" conf.base_env = Some "yes" in
   (match p_getenv conf.env "dsrc" with
   | Some "" | None -> ()
+  | Some _ when is_roglo -> ()
   | Some s -> add_extra "dsrc" (Mutil.encode s));
   (match p_getenv conf.env "templ" with
   | None -> ()
