@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="%lang;" id="updform">
 <head>
-  <!-- $Id: updfam.txt v7.1 06/01/2026 01:59:36 $ -->
+  <!-- $Id: updfam.txt v7.1 06/10/2026 01:59:36 $ -->
   <!-- Copyright (c) 1998-2007 INRIA -->
   <meta name="robots" content="none">
   <meta charset="UTF-8">
@@ -745,30 +745,78 @@
 
   <div class="card">
     %apply;card_header("sources","source/sources")
+    <input type="hidden" name="dsrc" id="dsrc" value="">
     <div class="card-body">
       <div class="row">
         <label for="psrc" class="col-sm-2 col-form-label">[[*person/persons]1]</label>
         <div class="col-sm-10">
           <textarea class="form-control" rows="1" name="psrc" id="psrc" placeholder="[*source/sources]1 [person/persons]1" %datalist_sources;>
-            %if;(evar_psrc!="")%evar_psrc;%else;%evar_dsrc;%end;
           </textarea>
         </div>
       </div>
       <div class="row">
         <label for="src" class="col-sm-2 col-form-label">[*family/families]0</label>
-        <div class="col-sm-9">
-          %if;(fsources!="")
-            <textarea class="form-control" name="src" rows="1" id="src" placeholder="[*source/sources]1 [family/families]0" %l_on1s;>%fsources;</textarea>
-          %else;
-            <input class="form-control" name="src" id="src" placeholder="[*source/sources]1 [family/families]0" value="%fsources;"%datalist_sources;>
-          %end;
-        </div>
-        <div class="col-sm-1">
-          <label class="form-check-label">
-            <input type="checkbox" name="rdsrc" value="on" %if;(evar_rdsrc="on")checked%end;>
-          </label>
+        <div class="col-sm-10">
+            <textarea class="form-control" name="src" rows="1" id="src" placeholder="[*source/sources]1 [family/families]0" %l_on1s;>%nn;
+              %fsources;
+            </textarea>
         </div>
       </div>
+      %if;roglo;
+      <script>
+      function date_src(ids, user, label) {
+        const d = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const rom = 'I,II,III,IV,V,VI,VII,VIII,IX,X,XI,XII'.split(',');
+        const date = pad(d.getDate()) + '/' + rom.at(d.getMonth()) + '/' + d.getFullYear();
+        const s = document.getElementById('source');
+        const txt = s ? s.value.trim() : '';
+        if (txt) label = txt;
+        const sig = '%[%[w:' + user + '%]%] (' + label + ') ' + date;
+        ids.split(',').forEach(id => {
+          id = id.trim();
+          const f = document.getElementById(id);
+          if (!f) return;
+          if (id === 'dsrc') {
+            set_dsrc(label);
+          } else {
+            const cur = f.value.trim();
+            f.value = cur ? cur + ', ' + sig : sig;
+          }
+          f.dispatchEvent(new Event('input', { bubbles: true }));
+        });  return false;
+      }
+      
+      function set_dsrc(v) {
+        document.getElementsByName('dsrc').forEach(e => { e.value = v; });
+      }
+      </script>
+      %define;month(xx)
+        %apply;nth%with;/I/II/III/IV/V/VI/VII/VIII/IX/X/XI/XII/%and;xx%end;%nn;
+      %end;
+      
+      %define;date_sign()
+        %today.day;/%apply;month(today.month)/%today.year;%nn;
+      %end;
+
+      <div class="row">
+        <div class="col-12">
+          <div style="display:flex; align-items:center; gap:.3em; white-space:nowrap;">
+            <a href="#" role="button" data-user="%user.ident;" style="background-color:#FDD;"
+              onclick="return date_src('src,psrc,dsrc', this.dataset.user,'Source?');">[*sign with][:]%sp;</a>
+            <span>%[%[w:%user.ident;%]%](</span>
+            <input type="text" class="form-control form-control-sm" style="flex:1 1 auto; min-width:8em;"
+              id="source" placeholder="%if;(e.dsrc!="")%e.dsrc;%else;Source?%end;" value="%if;(e.dsrc!="")%e.dsrc;%end;">
+            <span>) %apply;date_sign()</span>
+            <span class="ml-3"><input type="checkbox" name="rdsrc" id="rdsrc" value="on" %if;(e.dsrc!="") checked="checked"%end;
+              title="[*remember source help]"> [*remember source]</span>
+            <button type="button" class="btn btn-link p-0 ml-3"
+              title="[*clear source memory help]"
+              onclick="set_dsrc(''); document.getElementById('rdsrc').checked=false; document.getElementById('source').value='';">[*clear source memory]</button>
+          </div>
+        </div>
+      </div>
+      %end; %(if;roglo %)
     </div>
   </div>
 

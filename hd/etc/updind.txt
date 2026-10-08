@@ -972,6 +972,57 @@
           <span class="visually-hidden fw-bold">[*validate/delete]0</span>
         </button>
       </div>
+      %if;roglo;
+        <script>
+        function date_src(ids, user, label) {
+          const d = new Date();
+          const pad = n => String(n).padStart(2, '0');
+          const rom = 'I,II,III,IV,V,VI,VII,VIII,IX,X,XI,XII'.split(',');
+          const date = pad(d.getDate()) + '/' + rom.at(d.getMonth()) + '/' + d.getFullYear();
+          const s = document.getElementById('source');
+          const txt = s ? s.value.trim() : '';
+          if (txt) label = txt;
+          const sig = '%[%[w:' + user + '%]%] (' + label + ') ' + date;
+          ids.split(',').forEach(id => {
+            id = id.trim();
+            const f = document.getElementById(id);
+            if (!f) return;
+            if (id === 'dsrc') {
+              set_dsrc(label);
+            } else {
+              const cur = f.value.trim();
+              f.value = cur ? cur + ', ' + sig : sig;
+            }
+            f.dispatchEvent(new Event('input', { bubbles: true }));
+          });  return false;
+        }
+        
+        function set_dsrc(v) {
+          document.getElementsByName('dsrc').forEach(e => { e.value = v; });
+        }
+        </script>
+        
+        %define;month(xx)
+          %apply;nth%with;/I/II/III/IV/V/VI/VII/VIII/IX/X/XI/XII/%and;xx%end;%nn;
+        %end;
+        
+        %define;date_sign()
+          %today.day;/%apply;month(today.month)/%today.year;%nn;
+        %end;
+        <div style="display:flex; align-items:center; gap:.3em; white-space:nowrap;">
+          <a href="#" role="button" data-user="%user.ident;" style="background-color:#FDD;"
+            onclick="return date_src('src,psrc,dsrc', this.dataset.user,'Source?');">[*sign with][:]%sp;</a>
+          <span>%[%[w:%user.ident;%]%](</span>
+          <input type="text" class="form-control form-control-sm" style="flex:1 1 auto; min-width:8em;"
+            id="source" placeholder="%if;(e.dsrc!="")%e.dsrc;%else;Source?%end;" value="%if;(e.dsrc!="")%e.dsrc;%end;">
+          <span>) %apply;date_sign()</span>
+          <span class="ml-3"><input type="checkbox" name="rdsrc" id="rdsrc" value="on" %if;(e.dsrc!="") checked="checked"%end;
+            title="[*remember source help]"> [*remember source]</span>
+          <button type="button" class="btn btn-link p-0 ml-3"
+            title="[*clear source memory help]"
+            onclick="set_dsrc(''); document.getElementById('rdsrc').checked=false; document.getElementById('source').value='';">[*clear source memory]</button>
+        </div>
+      %end;
     </div>
   </div>
 
