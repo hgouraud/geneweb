@@ -278,69 +278,80 @@ let print_longest_lived conf base =
   Output.print_sstring conf "</ul>";
   Hutil.trailer conf
 
-let print_union_list ?(mt = false) conf base list =
-  Output.print_sstring conf (if mt then {|<ul class="mt-3">|} else "<ul>");
-  let last_month_txt, _ =
-    List.fold_left
-      (fun (last_month_txt, was_future) (fam, d, cal) ->
-        let month_txt, future =
-          list_aux_1 conf d cal last_month_txt was_future
-        in
-        Output.print_sstring conf "<li><b>";
-        Output.print_string conf
-          (referenced_person_text conf base
-             (pget conf base (Driver.get_father fam)));
-        Output.print_sstring conf "</b> ";
-        Output.print_sstring conf (transl_nth conf "and" 0);
-        Output.print_sstring conf " <b>";
-        Output.print_string conf
-          (referenced_person_text conf base
-             (pget conf base (Driver.get_mother fam)));
-        Output.print_sstring conf "</b>, ";
-        if future then (
-          Output.print_sstring conf "<em>";
-          Output.print_string conf
-            (DateDisplay.string_of_date conf (Dgreg (d, cal)));
-          Output.print_sstring conf "</em>")
-        else (
-          (match Driver.get_relation fam with
-          | NotMarried | NoSexesCheckNotMarried ->
-              Output.print_sstring conf
-              @@ transl_nth conf "relation/relations" 0
-          | Married | NoSexesCheckMarried ->
-              Output.print_sstring conf @@ transl conf "married"
-          | Engaged -> Output.print_sstring conf @@ transl conf "engaged"
-          | MarriageBann | MarriageContract | MarriageLicense | Pacs | Residence
-          | NoMention ->
-              ());
-          Output.print_sstring conf " <em>";
-          Output.print_string conf
-            (DateDisplay.string_of_ondate conf (Dgreg (d, cal)));
-          Output.print_sstring conf "</em>.");
-        Output.print_sstring conf "</li>";
-        (month_txt, future))
-      (Adef.safe "", false)
-      list
-  in
-  if (last_month_txt :> string) <> "" then
-    Output.print_sstring conf "</ul></li>";
-  Output.print_sstring conf "</ul>"
+(* Roglo: the Efam_Engage event records a religious marriage *)
+let engage_is_marriage conf =
+  List.assoc_opt "engage_is_marriage" conf.base_env = Some "yes"
+
+(* date of the first Efam_Engage event, used as a fallback *)
+let engage_date fam =
+  List.find_map
+    (fun e ->
+      if e.efam_name = Efam_Engage then Date.od_of_cdate e.efam_date else None)
+    (Driver.get_fevents fam)
 
 let print_marr_or_eng conf base title list =
   Hutil.header conf title;
-  print_union_list conf base list;
+  Output.print_sstring conf "<ul>\n";
+  ignore
+  @@ List.fold_left
+       (fun (last_month_txt, was_future) (fam, d, cal) ->
+         let month_txt, future =
+           list_aux_1 conf d cal last_month_txt was_future
+         in
+         Output.print_sstring conf "<li><b>";
+         Output.print_string conf
+           (referenced_person_text conf base
+              (pget conf base (Driver.get_father fam)));
+         Output.print_sstring conf "</b> ";
+         Output.print_sstring conf (transl_nth conf "and" 0);
+         Output.print_sstring conf " <b>";
+         Output.print_string conf
+           (referenced_person_text conf base
+              (pget conf base (Driver.get_mother fam)));
+         Output.print_sstring conf "</b>, ";
+         if future then (
+           Output.print_sstring conf "<em>";
+           Output.print_string conf
+             (DateDisplay.string_of_date conf (Dgreg (d, cal)));
+           Output.print_sstring conf "</em>")
+         else (
+           (match Driver.get_relation fam with
+           | NotMarried | NoSexesCheckNotMarried ->
+               Output.print_sstring conf
+               @@ transl_nth conf "relation/relations" 0
+           | Married | NoSexesCheckMarried ->
+               Output.print_sstring conf @@ transl conf "married"
+           | Engaged ->
+               Output.print_sstring conf
+               @@ transl conf
+                    (if engage_is_marriage conf then "married" else "engaged")
+           | MarriageBann | MarriageContract | MarriageLicense | Pacs
+           | Residence | NoMention ->
+               ());
+           Output.print_sstring conf " <em>";
+           Output.print_string conf
+             (DateDisplay.string_of_ondate conf (Dgreg (d, cal)));
+           Output.print_sstring conf "</em>.");
+         Output.print_sstring conf "</li>";
+         (month_txt, future))
+       (Adef.safe "", false)
+       list;
+  Output.print_sstring conf "</ul></li>";
   Hutil.trailer conf
 
 let print_marriage conf base =
+  let eng = engage_is_marriage conf in
   let list, len =
     select_family conf base
       (fun fam ->
         match Driver.get_relation fam with
-        | Married | NoSexesCheckMarried | Engaged ->
-            Date.od_of_cdate (Driver.get_marriage fam)
-        | NotMarried | NoSexesCheckNotMarried | NoMention | MarriageBann
-        | MarriageContract | MarriageLicense | Pacs | Residence ->
-            None)
+        | Married | NoSexesCheckMarried -> (
+            match Date.od_of_cdate (Driver.get_marriage fam) with
+            | Some _ as d -> d
+            | None when eng -> engage_date fam
+            | None -> None)
+        | Engaged when eng -> Date.od_of_cdate (Driver.get_marriage fam)
+        | _ -> None)
       false
   in
   let title _ =
