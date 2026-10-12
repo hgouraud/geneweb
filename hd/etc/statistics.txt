@@ -154,6 +154,23 @@
   </div></div></div>
 </div>
 
+<!-- Quick links -->
+<div class="row mb-4">
+  <div class="col-12"><div class="card"><div class="card-body">
+    <h2 class="h6 card-title text-body-secondary">[*other statistics]</h2>
+    <div class="d-flex flex-wrap">
+      <a class="btn btn-outline-secondary btn-sm m-1" href="%prefix;m=LB">[*latest births]</a>
+      <a class="btn btn-outline-secondary btn-sm m-1" href="%prefix;m=LD">[*latest deaths]</a>
+      <a class="btn btn-outline-secondary btn-sm m-1" href="%prefix;m=LM">[*latest marriages]</a>
+      <a class="btn btn-outline-secondary btn-sm m-1" href="%prefix;m=OE">%if;(bvar.engage_is_marriage = "yes")[*oldest couples alive]%else;[*oldest engagements]%end;</a>
+      <a class="btn btn-outline-secondary btn-sm m-1" href="%prefix;m=OA">[*oldest alive]</a>
+      <a class="btn btn-outline-secondary btn-sm m-1" href="%prefix;m=LL">[*who lived the longest]</a>
+      <a class="btn btn-outline-secondary btn-sm m-1" href="%prefix;m=POP_PYR">[*population pyramid]</a>
+      <a class="btn btn-outline-secondary btn-sm m-1" href="%prefix;m=PS">[*place/places]1</a>
+    </div>
+  </div></div></div>
+</div>
+
 </div><!-- stats-content -->
 
 %include;trl
