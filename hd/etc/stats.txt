@@ -21,8 +21,14 @@
 
 %define;births(nnn)[the latest %d births:::nnn]%end;
 %define;deaths(nnn)[the latest %t deaths:::nnn]%end;
-%define;marriages(nnn)[the latest %d marriages:::nnn]%end;
-%define;engaged(nnn)
+%define;marriages(nnn)
+  %if;(bvar.engage_is_marriage = "yes")
+    [the latest %d marriages:::nnn]%nn;
+  %else;
+    [the latest %d marriages and engagements:::nnn]%nn;
+  %end;
+%end;
+%define;couples(nnn)
   %if;(bvar.engage_is_marriage = "yes")
     [the %d oldest couples perhaps still alive and married:::nnn]%nn;
   %else;

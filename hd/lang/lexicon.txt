@@ -21119,23 +21119,6 @@ sl: zadnjih %d rojstev
 sv: de senaste %d födslarna
 tr: son %d doğum
 
-    the latest %d celebrated marriages
-bg: последните %d чествувани сватби
-co: e %d ultime unione celebrate
-de: die %d letzten gefeierten Hochzeiten
-en: last %d marriages
-es: los %d últimos matrimonios célebres
-fi: viimeiset %d avioliittoa (vihkipäivämäärä)
-fr: les %d dernières unions célébrées
-it: i %d ultime unioni celebrate
-nl: de %d laatste uitgevoerde huwelijken
-no: siste %d ekteskap (Ekteskapsdato)
-oc: las %d darrièras unions celebradas
-pt: as últimas %d uniões celebradas
-ru: последние %d свадеб
-sv: det senaste %d firade bröllopet
-tr: son %d evlilik (Evlilik tarihi)
-
     the latest %d marriages and engagements
 af: die laaste %d huwelike en verlowings
 bg: последните %d брака и годежа
@@ -21168,22 +21151,22 @@ sl: zadnjih %d porok in zarok
 sv: de senaste %d äktenskapen och förlovningarna
 tr: son %d evlilik ve nişan
 
-    the latest %d registered marriages
-bg: последните %d регистрирани сватби
-co: e %d ultime unione arregistrate
-de: die %d letzten eingetragenen Hochzeiten
+    the latest %d marriages
+bg: последните %d сватби
+co: e %d ultime unione
+de: die %d letzten Hochzeiten
 en: last %d marriages
-es: los %d últimos matrimonios registrados
-fi: viimeiset %d rekisteröityä avioliittoa (syöttämispäivämäärä)
-fr: les %d dernières unions enregistrées
-it: le %d ultime unioni inserite
+es: los %d últimos matrimonios
+fi: viimeiset %d avioliittoa
+fr: les %d dernières unions
+it: le %d ultime unioni
 nl: de %d laatste uitgevoerde huwelijken
-no: siste %d ekteskap (Registreringsdato)
-oc: las %d darrièras unions enregistradas
-pt: as últimas %d uniões registadas
-ru: последние %d зарегистрированных браков
-sv: det senast %d registreade äktenskapet
-tr: son %d evlilik (Giriş tarihi)
+no: siste %d ekteskap
+oc: las %d darrièras unions
+pt: as últimas %d uniões
+ru: последние %d браков
+sv: det senast %d äktenskapet
+tr: son %d evlilik
 
     the latest %t deaths
 af: die laaste %t afsterwes
