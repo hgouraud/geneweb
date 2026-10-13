@@ -545,6 +545,9 @@
     [*merge::family/families]1 # %evar_i;
   %end;
 </h1>
+%if;((evar_m="MOD_FAM" or evar_m="MOD_FAM_OK") and nb_fevents>1)
+  <h5><b>[*other action][:] </b><a href="%prefix;m=CHG_EVT_FAM_ORD&i=%evar_i;%if;(evar_ip!="")&ip=%evar_ip;%end;" title="[*changed order of family's events]">[*invert::event/events]1</a></h5>
+%end;
 %let;l_on1s;onkeydown="if (event.keyCode == 13) if (!event.shiftKey) javascript:document.upd.submit()"%in;
 %define;ev(vv,xx)%e.ins_vvxx_n;%end;
 <form method="post" action="%action;" id="updfam"
