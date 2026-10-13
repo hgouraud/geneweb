@@ -1,0 +1,5 @@
+(executable
+ (package geneweb)
+ (name gwreplay)
+ (public_name gwreplay)
+ (libraries unix geneweb))
