@@ -117,7 +117,7 @@ let print_change conf base p =
     (Utf8.capitalize_fst (transl conf "change all children's surnames to"));
   print_children conf base children;
   Output.print_sstring conf
-    {|<button type="submit" class="btn btn-primary btn-lg ml-5 mb-2">|};
+    {|<button type="submit" class="btn btn-primary btn-lg ms-5 mb-2">|};
   transl_nth conf "validate/delete" 0
   |> Utf8.capitalize_fst |> Output.print_sstring conf;
   Output.print_sstring conf "</button></form>";
