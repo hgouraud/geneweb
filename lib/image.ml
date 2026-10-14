@@ -77,6 +77,7 @@ let full_image_path mode conf base p saved =
   let f = Filename.concat (portrait_folder conf) s in
   match find_img_opt f with
   | Some (`Path _) as full_path -> full_path
+  | Some (`Url u) when u = "" -> None
   | Some (`Url _) as full_url -> full_url
   | None -> None
 
@@ -290,6 +291,7 @@ let get_portrait_aux conf base p saved =
           match parse_src_with_size_info conf s_info with
           | Error _e -> None
           | Ok (s, _size) -> Some s)
+      | `Url s when s = "" -> None
       | `Url _s as url -> Some url
       | `Path p as path -> if Sys.file_exists p then Some path else None
       | `Empty -> full_image_path "portraits" conf base p false
@@ -304,12 +306,9 @@ let get_portrait_name_aux conf base p saved =
   let f = Filename.concat (portrait_folder conf) name in
   Printf.eprintf "Get_portrait_name: %s, %s\n" name f;
   match find_img_opt f with
-  | Some (`Path p) ->
-      Printf.eprintf "Path %s\n" p;
-      Filename.basename p
-  | Some (`Url u) ->
-      Printf.eprintf "Url %s\n" u;
-      Filename.basename name ^ ".url"
+  | Some (`Path p) -> Filename.basename p
+  | Some (`Url u) when u = "" -> ""
+  | Some (`Url _u) -> Filename.basename name ^ ".url"
   | None -> ""
 
 let get_portrait_name conf base p = get_portrait_name_aux conf base p false
@@ -341,6 +340,7 @@ let get_blason_name_aux conf base p saved =
   let f = Filename.concat (portrait_folder conf) name in
   match find_img_opt f with
   | Some (`Path p) -> Filename.basename p
+  | Some (`Url u) when u = "" -> ""
   | Some (`Url _u) -> name ^ ".url"
   | None -> ""
 
@@ -352,6 +352,7 @@ let has_blason conf base p self =
   | None -> false
   | Some (`Path p) when Filename.extension p = ".stop" -> false
   | Some (`Path _p) -> true
+  | Some (`Url u) when u = "" -> false
   | Some (`Url _u) -> true
 
 let has_blason_stop conf base p =
@@ -430,7 +431,8 @@ let get_portrait_with_size conf base p =
         match parse_src_with_size_info conf s_info with
         | Error _e -> None
         | Ok (s, size) -> Some (s, Some size))
-    | `Url _s as url -> Some (url, None)
+    | `Url u when u = "" -> None
+    | `Url _u as url -> Some (url, None)
     | `Path p as path ->
         if Sys.file_exists p then
           Some (path, size_from_path p |> Result.to_option)
@@ -438,6 +440,7 @@ let get_portrait_with_size conf base p =
     | `Empty -> (
         match full_image_path "portraits" conf base p false with
         | Some (`Path p) -> Some (`Path p, size_from_path p |> Result.to_option)
+        | Some (`Url u) when u = "" -> None
         | Some (`Url u) -> Some (`Url u, None)
         | None -> None)
   else None
@@ -453,7 +456,8 @@ let get_blason_with_size conf base p self =
           match parse_src_with_size_info conf s_info with
           | Error _e -> None
           | Ok (s, size) -> Some (s, Some size))
-      | `Url _s as url -> Some (url, None)
+      | `Url u when u = "" -> None
+      | `Url _u as url -> Some (url, None)
       | `Path p as path ->
           if Sys.file_exists p then
             Some (path, size_from_path p |> Result.to_option)
@@ -468,6 +472,7 @@ let get_blason_with_size conf base p self =
               match full_image_path "blasons" conf base p false with
               | Some (`Path p) ->
                   Some (`Path p, size_from_path p |> Result.to_option)
+              | Some (`Url u) when u = "" -> None
               | Some (`Url u) -> Some (`Url u, None)
               | None -> None))
     in
@@ -525,6 +530,7 @@ let get_carrousel_img_aux conf base p old =
               | Some (`Path path) ->
                   (path, "", get_carrousel_img_src f1, get_carrousel_img_note f1)
                   :: acc
+              | Some (`Url url) when url = "" -> acc
               | Some (`Url url) ->
                   ( Filename.chop_extension (Filename.basename f1) ^ ".url",
                     url,
