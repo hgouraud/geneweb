@@ -14,13 +14,19 @@ module Driver = Geneweb_db.Driver
 module Gutil = Geneweb_db.Gutil
 module Iper = Driver.Iper
 
+let elapsed_age d1 d2 =
+  let a = Date.time_elapsed d1 d2 in
+  if a.Adef.prec = Sure && (d1.Adef.day = 0 || d2.Adef.day = 0) then
+    { a with prec = About }
+  else a
+
 let person_living_age conf p p_auth =
   match
     ( p_auth,
       Date.cdate_to_gregorian_dmy_opt (Driver.get_birth p),
       Driver.get_death p )
   with
-  | true, Some d, NotDead -> Some (Date.time_elapsed d conf.today)
+  | true, Some d, NotDead -> Some (elapsed_age d conf.today)
   | _ -> None
 
 let format_age conf age =
@@ -141,7 +147,7 @@ let eval_death_age conf p p_auth sl =
       when d1 <> d2 -> (
         let d1 = Date.approx_gregorian ~from:c1 d1 in
         let d2 = Date.approx_gregorian ~from:c2 d2 in
-        let age = Date.time_elapsed d1 d2 in
+        let age = elapsed_age d1 d2 in
         match sl with
         | [] -> Templ.VVstring (format_age conf age :> string)
         | _ -> eval_age_field_var conf age sl)
@@ -3790,6 +3796,15 @@ and eval_bool_person_field conf base env (p, p_auth) = function
         in
         Driver.get_rparents p <> [] || related <> []
       else p_auth && (Driver.get_rparents p <> [] || Driver.get_related p <> [])
+  | "has_secondary_pevents" ->
+      List.exists
+        (fun e ->
+          match e.epers_name with
+          | Epers_Birth | Epers_Baptism | Epers_Death | Epers_Burial
+          | Epers_Cremation ->
+              false
+          | _ -> true)
+        (Driver.get_pevents p)
   | "has_siblings" -> (
       match Driver.get_parents p with
       | Some ifam ->
@@ -4231,6 +4246,8 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
           |> string_of_int |> str_val)
   | "nb_families" ->
       Driver.get_family p |> Array.length |> string_of_int |> str_val
+  | "nb_pevents" ->
+      Driver.get_pevents p |> List.length |> string_of_int |> str_val
   | "notes" | "pnotes" ->
       Driver.get_notes p |> get_note_or_source conf base ~p p_auth conf.no_note
   | "occ" ->
@@ -4442,6 +4459,8 @@ and eval_family_field_var conf base env
       let ep = make_ep conf base imoth in
       eval_person_field_var conf base env ep loc sl
   | "marriage" :: sl -> eval_family_marriage_field_var fam sl
+  | [ "nb_fevents" ] ->
+      VVstring (string_of_int (List.length (Driver.get_fevents fam)))
   | [ "sep_date_s" ] | [ "sep_dates" ] ->
       VVstring
         (DateDisplay.short_family_dates_text conf base false fam :> string)
@@ -4531,10 +4550,8 @@ and string_of_image_url conf base (p, p_auth) html saved : Adef.escaped_string =
       if saved then Image.get_old_portrait conf base p
       else Image.get_portrait conf base p
     with
-    | Some (`Path fname) when Filename.extension fname = ".url" -> (
-        match Some (Secure.open_in fname) with
-        | Some ic -> Adef.escaped (input_line ic)
-        | None -> Adef.escaped "")
+    | Some (`Path fname) when Filename.extension fname = ".url" ->
+        Adef.escaped (Image.read_url_file fname)
     | Some (`Path fname) ->
         let s = Unix.stat fname in
         let b = acces conf base p in
