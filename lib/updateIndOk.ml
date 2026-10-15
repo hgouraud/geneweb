@@ -82,35 +82,18 @@ let rec reconstitute_titles conf ext cnt =
   | _ -> ([], ext)
 
 let reconstitute_insert_pevent conf ext cnt el =
-  let var = "ins_event" ^ string_of_int cnt in
-  let n =
-    match (p_getenv conf.env var, p_getint conf.env (var ^ "_n")) with
-    | _, Some n when n > 1 -> n
-    | Some "on", _ -> 1
-    | _ -> 0
-  in
-  if n > 0 then
-    let el =
-      let rec loop el n =
-        if n > 0 then
-          let e1 =
-            {
-              epers_name = Epers_Name "";
-              epers_date = Date.cdate_None;
-              epers_place = "";
-              epers_reason = "";
-              epers_note = "";
-              epers_src = "";
-              epers_witnesses = [||];
-            }
-          in
-          loop (e1 :: el) (n - 1)
-        else el
-      in
-      loop el n
-    in
-    (el, true)
-  else (el, ext)
+  insert_blanks conf
+    ("ins_event" ^ string_of_int cnt)
+    {
+      epers_name = Epers_Name "";
+      epers_date = Date.cdate_None;
+      epers_place = "";
+      epers_reason = "";
+      epers_note = "";
+      epers_src = "";
+      epers_witnesses = [||];
+    }
+    (el, ext)
 
 let rec reconstitute_pevents conf ext cnt =
   match get_nth conf "e_name" cnt with
@@ -257,13 +240,10 @@ let rec reconstitute_pevents conf ext cnt =
       (e :: el, ext)
 
 let reconstitute_add_relation conf ext cnt rl =
-  match get_nth conf "add_relation" cnt with
-  | Some "on" ->
-      let r =
-        { r_type = GodParent; r_fath = None; r_moth = None; r_sources = "" }
-      in
-      (r :: rl, true)
-  | Some _ | None -> (rl, ext)
+  insert_blanks conf
+    ("add_relation" ^ string_of_int cnt)
+    { r_type = GodParent; r_fath = None; r_moth = None; r_sources = "" }
+    (rl, ext)
 
 let deleted_relation = ref []
 

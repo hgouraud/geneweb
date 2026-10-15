@@ -78,16 +78,17 @@ let is_fluid conf =
   (try List.assoc "wide" conf.env = Adef.encoded "on" with Not_found -> false)
   || try List.assoc "wide" conf.base_env = "on" with Not_found -> false
 
-let header_without_title conf =
+let header_without_title ?(title = fun _ -> ()) conf =
   let fluid = is_fluid conf in
   Util.html conf;
-  header_without_http_nor_home conf (fun _ -> ());
+  header_without_http_nor_home conf title;
   include_home_template conf;
   Output.print_sstring conf
     (if fluid then "<div class=\"container-fluid mx-3\">\n"
      else "<div class=\"container\">\n")
 
-let header_with_title ?(error = false) ?(fluid = false) conf title =
+let header_with_title ?(error = false) ?(fluid = false) ?(h1_class = "") conf
+    title =
   let fluid = fluid || is_fluid conf in
   Util.html conf;
   header_without_http_nor_home conf title;
@@ -95,12 +96,14 @@ let header_with_title ?(error = false) ?(fluid = false) conf title =
   Output.print_sstring conf
     (if fluid then "<div class=\"container-fluid mx-3\">\n"
      else "<div class=\"container\">\n");
-  Output.print_sstring conf (if error then "<h1 class=\"error\">" else "<h1>");
+  let cls = String.trim ((if error then "error " else "") ^ h1_class) in
+  Output.print_sstring conf
+    (if cls = "" then "<h1>" else "<h1 class=\"" ^ cls ^ "\">");
   title false;
   Output.print_sstring conf "</h1>\n"
 
-let header ?(error = false) ?(fluid = false) conf title =
-  header_with_title ~error ~fluid conf title
+let header ?(error = false) ?(fluid = false) ?h1_class conf title =
+  header_with_title ~error ~fluid ?h1_class conf title
 
 let rheader conf title = header_with_title ~error:true conf title
 

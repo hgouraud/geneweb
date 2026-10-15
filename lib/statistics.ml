@@ -9,6 +9,9 @@ let year_min = 500
 let year_max = 2100
 let year_span = year_max - year_min + 1
 let age_max = 150
+let period_span = 50
+let period_count = ((year_max - year_min) / period_span) + 1
+let period_min_count = 30
 let marriage_age_min = 10
 let marriage_age_max = 80
 let marriage_age_span = marriage_age_max - marriage_age_min + 1
@@ -102,10 +105,10 @@ let make_acc () =
     age_marriage_women = Array.make marriage_age_span 0;
     children_count = Array.make (children_max + 1) 0;
     remarriage = Array.make (remarriage_max + 1) 0;
-    life_cent_sum_men = Array.make 17 0;
-    life_cent_cnt_men = Array.make 17 0;
-    life_cent_sum_women = Array.make 17 0;
-    life_cent_cnt_women = Array.make 17 0;
+    life_cent_sum_men = Array.make period_count 0;
+    life_cent_cnt_men = Array.make period_count 0;
+    life_cent_sum_women = Array.make period_count 0;
+    life_cent_cnt_women = Array.make period_count 0;
     sum_gap_father = 0;
     cnt_gap_father = 0;
     sum_gap_mother = 0;
@@ -145,6 +148,56 @@ let death_dmy_greg p =
   | _ -> None
 
 let yi y = y - year_min
+let is_set s = not (Driver.Istr.is_empty s)
+
+let person_sourced p =
+  is_set (Driver.get_psources p)
+  || is_set (Driver.get_birth_src p)
+  || is_set (Driver.get_baptism_src p)
+  || is_set (Driver.get_death_src p)
+  || is_set (Driver.get_burial_src p)
+  || List.exists (fun e -> is_set e.epers_src) (Driver.get_pevents p)
+
+let family_sourced fam =
+  is_set (Driver.get_fsources fam)
+  || is_set (Driver.get_marriage_src fam)
+  || List.exists (fun e -> is_set e.efam_src) (Driver.get_fevents fam)
+
+let key_of_portrait f =
+  let len = String.length f in
+  let rec digits j =
+    if j < len && f.[j] >= '0' && f.[j] <= '9' then digits (j + 1) else j
+  in
+  let rec find i =
+    match String.index_from_opt f i '.' with
+    | None -> None
+    | Some i ->
+        let j = digits (i + 1) in
+        if j > i + 1 && j < len && f.[j] = '.' then
+          match int_of_string_opt (String.sub f (i + 1) (j - i - 1)) with
+          | Some occ ->
+              Some (String.sub f 0 i, occ, String.sub f (j + 1) (len - j - 1))
+          | None -> None
+        else find (i + 1)
+  in
+  find 0
+
+let portrait_pass conf a =
+  let n =
+    try
+      Array.fold_left
+        (fun n f ->
+          let ext = Filename.extension f in
+          if
+            (ext = ".url" || Array.mem ext Image.ext_list_1)
+            && Option.is_some (key_of_portrait (Filename.remove_extension f))
+          then n + 1
+          else n)
+        0
+        (Sys.readdir (Image.portrait_folder conf))
+    with Sys_error _ -> 0
+  in
+  a.has_image <- a.has_image + n
 
 let person_pass conf base a by_cache auth_cache =
   Collection.iter
@@ -152,113 +205,113 @@ let person_pass conf base a by_cache auth_cache =
       let ip = Driver.get_iper p in
       let auth = authorized_age conf base p in
       Bytes.set auth_cache (ipi ip) (if auth then '\001' else '\000');
-      a.n_total <- a.n_total + 1;
-      (match Driver.get_sex p with
-      | Male -> a.n_men <- a.n_men + 1
-      | Female -> a.n_women <- a.n_women + 1
-      | Neuter -> a.n_neuter <- a.n_neuter + 1);
-      if Util.is_empty_name p then a.n_noname <- a.n_noname + 1;
-      let has_parents = Driver.get_parents p <> None in
-      let has_family = Array.length (Driver.get_family p) > 0 in
-      if (not has_parents) && not has_family then
-        a.n_isolated <- a.n_isolated + 1;
-      if has_parents then a.has_parents <- a.has_parents + 1;
-      (match Driver.get_death p with
-      | NotDead -> a.n_alive <- a.n_alive + 1
-      | DontKnowIfDead -> a.n_unknown_status <- a.n_unknown_status + 1
-      | Death _ | DeadYoung | DeadDontKnowWhen | OfCourseDead ->
-          a.n_dead <- a.n_dead + 1);
-      let sn = Driver.get_surname p in
-      incr_istr_tbl a.surnames sn;
-      let fn = Driver.get_first_name p in
-      (match Driver.get_sex p with
-      | Male -> incr_istr_tbl a.firstnames_m fn
-      | Female -> incr_istr_tbl a.firstnames_f fn
-      | Neuter -> ());
-      let occ = Driver.get_occupation p in
-      incr_istr_tbl a.occupations occ;
-      let bp = Driver.get_birth_place p in
-      incr_istr_tbl a.birth_places bp;
-      let dp = Driver.get_death_place p in
-      incr_istr_tbl a.death_places dp;
-      if not (Driver.Istr.is_empty occ || Driver.Istr.is_quest occ) then
-        a.has_occupation <- a.has_occupation + 1;
-      if not (Driver.Istr.is_empty bp || Driver.Istr.is_quest bp) then
-        a.has_birth_place <- a.has_birth_place + 1;
-      if not (Driver.Istr.is_empty dp || Driver.Istr.is_quest dp) then
-        a.has_death_place <- a.has_death_place + 1;
-      if not (Driver.Istr.is_empty (Driver.get_psources p)) then
-        a.has_sources <- a.has_sources + 1;
-      if not (Driver.Istr.is_empty (Driver.get_image p)) then
-        a.has_image <- a.has_image + 1;
-      let nf = Array.length (Driver.get_family p) in
-      let ri = min nf remarriage_max in
-      a.remarriage.(ri) <- a.remarriage.(ri) + 1;
-      let bdmy = birth_dmy_greg p in
-      (match bdmy with
-      | Some d ->
-          by_cache.(ipi ip) <- d.year;
-          a.has_birth_date <- a.has_birth_date + 1;
-          if auth then begin
-            let iy = yi d.year in
-            if iy >= 0 && iy < year_span then
-              a.births_by_year.(iy) <- a.births_by_year.(iy) + 1;
-            if d.month >= 1 && d.month <= 12 then
-              a.births_by_month.(d.month - 1) <-
-                a.births_by_month.(d.month - 1) + 1
-          end
-      | None -> ());
-      let ddmy = death_dmy_greg p in
-      (match ddmy with
-      | Some _ -> a.has_death_date <- a.has_death_date + 1
-      | None -> ());
-      if auth then begin
-        (match ddmy with
+      if Util.is_empty_name p then a.n_noname <- a.n_noname + 1
+      else (
+        a.n_total <- a.n_total + 1;
+        (match Driver.get_sex p with
+        | Male -> a.n_men <- a.n_men + 1
+        | Female -> a.n_women <- a.n_women + 1
+        | Neuter -> a.n_neuter <- a.n_neuter + 1);
+        let has_parents = Driver.get_parents p <> None in
+        let has_family = Array.length (Driver.get_family p) > 0 in
+        if (not has_parents) && not has_family then
+          a.n_isolated <- a.n_isolated + 1;
+        if has_parents then a.has_parents <- a.has_parents + 1;
+        (match Driver.get_death p with
+        | NotDead -> a.n_alive <- a.n_alive + 1
+        | DontKnowIfDead -> a.n_unknown_status <- a.n_unknown_status + 1
+        | Death _ | DeadYoung | DeadDontKnowWhen | OfCourseDead ->
+            a.n_dead <- a.n_dead + 1);
+        let sn = Driver.get_surname p in
+        incr_istr_tbl a.surnames sn;
+        let fn = Driver.get_first_name p in
+        (match Driver.get_sex p with
+        | Male -> incr_istr_tbl a.firstnames_m fn
+        | Female -> incr_istr_tbl a.firstnames_f fn
+        | Neuter -> ());
+        let occ = Driver.get_occupation p in
+        incr_istr_tbl a.occupations occ;
+        let bp = Driver.get_birth_place p in
+        incr_istr_tbl a.birth_places bp;
+        let dp = Driver.get_death_place p in
+        incr_istr_tbl a.death_places dp;
+        if not (Driver.Istr.is_empty occ || Driver.Istr.is_quest occ) then
+          a.has_occupation <- a.has_occupation + 1;
+        if not (Driver.Istr.is_empty bp || Driver.Istr.is_quest bp) then
+          a.has_birth_place <- a.has_birth_place + 1;
+        if not (Driver.Istr.is_empty dp || Driver.Istr.is_quest dp) then
+          a.has_death_place <- a.has_death_place + 1;
+        if person_sourced p then a.has_sources <- a.has_sources + 1;
+        if is_set (Driver.get_image p) then a.has_image <- a.has_image + 1;
+        let nf = Array.length (Driver.get_family p) in
+        let ri = min nf remarriage_max in
+        a.remarriage.(ri) <- a.remarriage.(ri) + 1;
+        let bdmy = birth_dmy_greg p in
+        (match bdmy with
         | Some d ->
-            let iy = yi d.year in
-            if iy >= 0 && iy < year_span then
-              a.deaths_by_year.(iy) <- a.deaths_by_year.(iy) + 1;
-            if d.month >= 1 && d.month <= 12 then
-              a.deaths_by_month.(d.month - 1) <-
-                a.deaths_by_month.(d.month - 1) + 1
+            by_cache.(ipi ip) <- d.year;
+            a.has_birth_date <- a.has_birth_date + 1;
+            if auth then begin
+              let iy = yi d.year in
+              if iy >= 0 && iy < year_span then
+                a.births_by_year.(iy) <- a.births_by_year.(iy) + 1;
+              if d.month >= 1 && d.month <= 12 then
+                a.births_by_month.(d.month - 1) <-
+                  a.births_by_month.(d.month - 1) + 1
+            end
         | None -> ());
-        match (bdmy, ddmy) with
-        | Some bd, Some dd ->
-            let age = dd.year - bd.year in
-            let age =
-              if
-                dd.month > 0 && bd.month > 0
-                && (dd.month < bd.month
-                   || dd.month = bd.month && dd.day > 0 && bd.day > 0
-                      && dd.day < bd.day)
-              then age - 1
-              else age
-            in
-            if age >= 0 && age < age_max then
-              begin match Driver.get_sex p with
-              | Male ->
-                  a.age_death_men.(age) <- a.age_death_men.(age) + 1;
-                  a.sum_life_men <- a.sum_life_men + age;
-                  a.cnt_life_men <- a.cnt_life_men + 1;
-                  let ci = (bd.year - year_min) / 100 in
-                  if ci >= 0 && ci < 17 then begin
-                    a.life_cent_sum_men.(ci) <- a.life_cent_sum_men.(ci) + age;
-                    a.life_cent_cnt_men.(ci) <- a.life_cent_cnt_men.(ci) + 1
-                  end
-              | Female ->
-                  a.age_death_women.(age) <- a.age_death_women.(age) + 1;
-                  a.sum_life_women <- a.sum_life_women + age;
-                  a.cnt_life_women <- a.cnt_life_women + 1;
-                  let ci = (bd.year - year_min) / 100 in
-                  if ci >= 0 && ci < 17 then begin
-                    a.life_cent_sum_women.(ci) <-
-                      a.life_cent_sum_women.(ci) + age;
-                    a.life_cent_cnt_women.(ci) <- a.life_cent_cnt_women.(ci) + 1
-                  end
-              | Neuter -> ()
-              end
-        | _ -> ()
-      end)
+        let ddmy = death_dmy_greg p in
+        (match ddmy with
+        | Some _ -> a.has_death_date <- a.has_death_date + 1
+        | None -> ());
+        if auth then begin
+          (match ddmy with
+          | Some d ->
+              let iy = yi d.year in
+              if iy >= 0 && iy < year_span then
+                a.deaths_by_year.(iy) <- a.deaths_by_year.(iy) + 1;
+              if d.month >= 1 && d.month <= 12 then
+                a.deaths_by_month.(d.month - 1) <-
+                  a.deaths_by_month.(d.month - 1) + 1
+          | None -> ());
+          match (bdmy, ddmy) with
+          | Some bd, Some dd ->
+              let age = dd.year - bd.year in
+              let age =
+                if
+                  dd.month > 0 && bd.month > 0
+                  && (dd.month < bd.month
+                     || dd.month = bd.month && dd.day > 0 && bd.day > 0
+                        && dd.day < bd.day)
+                then age - 1
+                else age
+              in
+              if age >= 0 && age < age_max then
+                begin match Driver.get_sex p with
+                | Male ->
+                    a.age_death_men.(age) <- a.age_death_men.(age) + 1;
+                    a.sum_life_men <- a.sum_life_men + age;
+                    a.cnt_life_men <- a.cnt_life_men + 1;
+                    let ci = (dd.year - year_min) / period_span in
+                    if ci >= 0 && ci < period_count then begin
+                      a.life_cent_sum_men.(ci) <- a.life_cent_sum_men.(ci) + age;
+                      a.life_cent_cnt_men.(ci) <- a.life_cent_cnt_men.(ci) + 1
+                    end
+                | Female ->
+                    a.age_death_women.(age) <- a.age_death_women.(age) + 1;
+                    a.sum_life_women <- a.sum_life_women + age;
+                    a.cnt_life_women <- a.cnt_life_women + 1;
+                    let ci = (dd.year - year_min) / period_span in
+                    if ci >= 0 && ci < period_count then begin
+                      a.life_cent_sum_women.(ci) <-
+                        a.life_cent_sum_women.(ci) + age;
+                      a.life_cent_cnt_women.(ci) <-
+                        a.life_cent_cnt_women.(ci) + 1
+                    end
+                | Neuter -> ()
+                end
+          | _ -> ()
+        end))
     (Driver.persons base)
 
 let relation_kind_ord = function
@@ -292,8 +345,7 @@ let family_pass _conf a by_cache auth_cache base =
       (match Driver.get_separation fam with
       | Separated _ | Separated_old -> a.n_separations <- a.n_separations + 1
       | _ -> ());
-      if not (Driver.Istr.is_empty (Driver.get_fsources fam)) then
-        a.has_fsources <- a.has_fsources + 1;
+      if family_sourced fam then a.has_fsources <- a.has_fsources + 1;
       let mp = Driver.get_marriage_place fam in
       incr_istr_tbl a.marriage_places mp;
       let children = Driver.get_children fam in
@@ -598,17 +650,20 @@ let emit_json buf base a =
   Buffer.add_string buf {|,"women":|};
   add_int_array buf ad_women;
   Buffer.add_char buf '}';
-  Buffer.add_string buf {|,"life_exp_by_century":{"labels":|};
+  Buffer.add_string buf {|,"age_at_death_by_period":{"labels":|};
   let lec_labels = ref [] in
   let lec_men = ref [] in
   let lec_women = ref [] in
-  for i = 0 to 16 do
-    if a.life_cent_cnt_men.(i) > 0 || a.life_cent_cnt_women.(i) > 0 then begin
-      let century = year_min + (i * 100) in
-      lec_labels := string_of_int century :: !lec_labels;
-      lec_men := avg a.life_cent_cnt_men.(i) a.life_cent_sum_men.(i) :: !lec_men;
-      lec_women :=
-        avg a.life_cent_cnt_women.(i) a.life_cent_sum_women.(i) :: !lec_women
+  let period_avg cnt sum =
+    if cnt < period_min_count then Float.nan else avg cnt sum
+  in
+  for i = 0 to period_count - 1 do
+    let cm = a.life_cent_cnt_men.(i) in
+    let cw = a.life_cent_cnt_women.(i) in
+    if cm >= period_min_count || cw >= period_min_count then begin
+      lec_labels := string_of_int (year_min + (i * period_span)) :: !lec_labels;
+      lec_men := period_avg cm a.life_cent_sum_men.(i) :: !lec_men;
+      lec_women := period_avg cw a.life_cent_sum_women.(i) :: !lec_women
     end
   done;
   let lec_labels = Array.of_list (List.rev !lec_labels) in
@@ -713,6 +768,7 @@ let print_json conf base =
   let by_cache = Array.make np 0 in
   let auth_cache = Bytes.make np '\000' in
   person_pass conf base a by_cache auth_cache;
+  portrait_pass conf a;
   family_pass conf a by_cache auth_cache base;
   let buf = Buffer.create 16384 in
   emit_json buf base a;
