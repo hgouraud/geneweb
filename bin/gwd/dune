@@ -22,7 +22,7 @@
   dune-site
   dune-site.plugins
   cmdliner)
- (modules request sites cmd cmd_legacy robot gwd_oidc))
+ (modules request sites cmd cmd_legacy robot gwd_oidc gwd_log))
 
 (executable
  (package geneweb)

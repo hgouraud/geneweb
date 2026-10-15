@@ -211,6 +211,12 @@ val read_or_create_value :
 
     On Windows, file is not locked. *)
 
+val string_of_gc_stat : Gc.stat -> string
+(** One line per field, with signed thousands-separated values. *)
+
+val gc_stat_diff : Gc.stat -> Gc.stat -> Gc.stat
+(** [gc_stat_diff gc1 gc2] Field-by-field difference [gc2 - gc1]. *)
+
 val bench : string -> (unit -> 'a) -> 'a
 (** [bench name fn] Execute [fn], print stats about time and memory allocation,
     return [fn] result. *)

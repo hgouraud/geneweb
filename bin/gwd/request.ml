@@ -929,7 +929,7 @@ let treat_request =
         Hutil.trailer conf
     in
     if conf.debug then
-      Mutil.bench (__FILE__ ^ " " ^ string_of_int __LINE__) process
+      Gwd_log.bench (__FILE__ ^ " " ^ string_of_int __LINE__) process
     else process ()
 
 let treat_request conn conf =

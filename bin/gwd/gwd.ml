@@ -1987,6 +1987,9 @@ let connection ~predictable_mode ~cgi ~loaded_plugins ~secret_salt conn
    my computer. *)
         Unix.string_of_inet_addr iaddr
   in
+  (* Not [!GWPARAM.cnt_d ""]: it would reset [GWPARAM.cnt_dir] as a side
+     effect. Both reorg and legacy layouts resolve it to <bases>/cnt. *)
+  Gwd_log.refresh ~ctl_dir:(Filename.concat (Secure.base_dir ()) "cnt");
   let printer_conf = printer_conf conn in
   if request = [] then ()
   else if script_name = "robots.txt" then robots_txt printer_conf
@@ -2213,6 +2216,7 @@ let main ~plugins ?interface ~port ~daemon ~predictable_mode ~cgi () =
      in
      images_prefix := Some ("file://" ^ slashify abs_dir));
   GWPARAM.cnt_dir := !GWPARAM.cnt_d "";
+  Gwd_log.init ~ctl_dir:!GWPARAM.cnt_dir;
   if !Mutil.particles_file = "" then
     Mutil.particles_file := Option.get !gw_prefix // "etc" // "particles.txt";
   Server.stop_server :=
