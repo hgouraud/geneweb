@@ -32,7 +32,6 @@ let print_placeholder_gendered_portrait conf p size =
     - fname : le nom du fichier [Retour] : aucun [Rem] : Ne pas utiliser en
       dehors de ce module. *)
 let content conf ct len fname =
-  Output.status conf Code.OK;
   Output.header conf "Content-type: %s" ct;
   Output.header conf "Content-length: %d" len;
   Output.header conf "Content-disposition: inline; filename=%s"
@@ -111,7 +110,6 @@ let print_folder_images_json conf folder =
   let json =
     Yojson.Basic.to_string (`List (List.map (fun s -> `String s) files))
   in
-  Output.status conf Code.OK;
   Output.header conf "Content-type: application/json; charset=utf-8";
   Output.header conf "Connection: close";
   Output.print_sstring conf json;

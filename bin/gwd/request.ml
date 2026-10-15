@@ -780,7 +780,6 @@ let treat_request =
                                ~key:"incorrect fallback for relation")))
              | "REQUEST" ->
                  w_wizard @@ fun _ _ ->
-                 Output.status conf Code.OK;
                  Output.header conf "Content-type: text/plain";
                  Output.header conf "Connection: close";
                  List.iter
