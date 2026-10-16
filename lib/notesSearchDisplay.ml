@@ -132,65 +132,54 @@ let family_hits conf base q ifam =
           hit_of_entry q (Of_family (fath, moth)) event e)
         (NotesCorpus.family_entries base ifam fam)
 
-type candidate = Cand_person of Driver.iper | Cand_family of Driver.ifam
-
-(* Persons and families to check: those with a matching corpus entry, in
-   corpus order, then all those changed since the corpus was built (their
-   corpus entries are stale and skipped). *)
-let candidates q (corpus : NotesCorpus.t) (ch_p, ch_f) =
+(* Hits, at most [max], and [true] if the search stopped there. The corpus
+   is streamed: an entry whose folded text may match is a candidate, checked
+   at once on the live base (access, exact match); persons and families
+   changed since the build are skipped there and checked afterwards, as
+   their corpus text is stale. Stopping at [max] hits bounds the work for
+   common words. *)
+let collect conf base q bname (ch_p, ch_f) max =
   let seen_p = Driver.Iper.Table.create 256 in
   let seen_f = Driver.Ifam.Table.create 256 in
-  let acc =
-    Array.fold_left
-      (fun acc (e : NotesCorpus.entry) ->
-        if
-          in_scope q.scope e.kind
-          && NotesSearch.matches ~full_word:q.full_word q.case_sens q.terms
-               e.text
-        then
-          match e.kind with
-          | NotesCorpus.Person | NotesCorpus.Person_event ->
-              let ip = Driver.Iper.of_string e.id in
-              if Driver.Iper.Set.mem ip ch_p || Driver.Iper.Table.mem seen_p ip
-              then acc
-              else (
-                Driver.Iper.Table.add seen_p ip ();
-                Cand_person ip :: acc)
-          | NotesCorpus.Family | NotesCorpus.Family_event ->
-              let ifam = Driver.Ifam.of_string e.id in
-              if
-                Driver.Ifam.Set.mem ifam ch_f
-                || Driver.Ifam.Table.mem seen_f ifam
-              then acc
-              else (
-                Driver.Ifam.Table.add seen_f ifam ();
-                Cand_family ifam :: acc)
-        else acc)
-      [] corpus.entries
+  let may_match = NotesSearch.candidate q.terms in
+  let exception Enough of hit list in
+  let check (n, acc) hits =
+    let n = n + List.length hits in
+    let acc = List.rev_append hits acc in
+    if n >= max then raise (Enough acc) else (n, acc)
   in
-  let acc =
-    Driver.Iper.Set.fold (fun ip acc -> Cand_person ip :: acc) ch_p acc
+  let from_corpus kind id folded acc =
+    if in_scope q.scope kind && may_match folded then
+      match kind with
+      | NotesCorpus.Person | NotesCorpus.Person_event ->
+          let ip = Driver.Iper.of_string id in
+          if Driver.Iper.Set.mem ip ch_p || Driver.Iper.Table.mem seen_p ip
+          then acc
+          else (
+            Driver.Iper.Table.add seen_p ip ();
+            check acc (person_hits conf base q ip))
+      | NotesCorpus.Family | NotesCorpus.Family_event ->
+          let ifam = Driver.Ifam.of_string id in
+          if Driver.Ifam.Set.mem ifam ch_f || Driver.Ifam.Table.mem seen_f ifam
+          then acc
+          else (
+            Driver.Ifam.Table.add seen_f ifam ();
+            check acc (family_hits conf base q ifam))
+    else acc
   in
-  let acc =
-    Driver.Ifam.Set.fold (fun ifam acc -> Cand_family ifam :: acc) ch_f acc
-  in
-  List.rev acc
-
-(* hits of the candidates, at most [max]; [true] if some were left out *)
-let collect conf base q cands max =
-  let rec loop n acc cands =
-    match cands with
-    | [] -> (List.rev acc, false)
-    | _ :: _ when n >= max -> (List.rev acc, true)
-    | c :: rest ->
-        let hits =
-          match c with
-          | Cand_person ip -> person_hits conf base q ip
-          | Cand_family ifam -> family_hits conf base q ifam
-        in
-        loop (n + List.length hits) (List.rev_append hits acc) rest
-  in
-  loop 0 [] cands
+  match
+    let acc = NotesCorpus.fold_entries bname from_corpus (0, []) in
+    let acc =
+      Driver.Iper.Set.fold
+        (fun ip acc -> check acc (person_hits conf base q ip))
+        ch_p acc
+    in
+    Driver.Ifam.Set.fold
+      (fun ifam acc -> check acc (family_hits conf base q ifam))
+      ch_f acc
+  with
+  | _, acc -> (List.rev acc, false)
+  | exception Enough acc -> (List.rev acc, true)
 
 (* "?" button and the panel it opens (Bootstrap collapse, no script),
    shared with the misc notes search form. The examples are the same in
@@ -339,7 +328,7 @@ let search conf base q s =
            (Driver.Iper.Set.cardinal ch_p + Driver.Ifam.Set.cardinal ch_f));
       let max = max_results conf in
       let hits, truncated =
-        collect conf base q (candidates q corpus changes) max
+        collect conf base q bname changes max
       in
       if hits = [] then
         Output.printf conf "<p>%s</p>\n"
