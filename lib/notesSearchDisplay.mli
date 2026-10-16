@@ -22,3 +22,10 @@ val print_help_button : Config.config -> unit
 val print_help_panel : Config.config -> unit
 (** [print_help_panel conf] prints the (collapsed) query syntax help, to be
     placed after the form holding {!print_help_button}. *)
+
+val highlight_note : Config.config -> string -> string
+(** [highlight_note conf html] highlights in the rendered note [html] the
+    terms of the [hl] URL parameter (options [hl_c=on], case sensitive, and
+    [hl_w=on], word match), which the links of the results carry; [html] is
+    returned unchanged without [hl]. Used by {!Perso} for the notes of person
+    pages. *)

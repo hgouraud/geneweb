@@ -252,19 +252,43 @@ let print_form conf s q =
   Output.print_sstring conf "</div></form>\n";
   print_help_panel conf
 
-(* links without id: a person can appear in several hits *)
-let person_link conf base p =
-  (gen_person_title_text reference_noid conf base p :> string)
+(* Highlighting on the pages opened from the results: the query is passed
+   as hl (with hl_c / hl_w for the options), and the notes rendered by
+   Perso go through [highlight_note]. *)
+let highlight_params q s =
+  "&hl="
+  ^ (Mutil.encode s :> string)
+  ^ (if q.case_sens then "&hl_c=on" else "")
+  ^ if q.full_word then "&hl_w=on" else ""
 
-let subject_html conf base subject =
+let highlight_note conf html =
+  match p_getenv conf.env "hl" with
+  | None | Some "" -> html
+  | Some s ->
+      let case_sens = p_getenv conf.env "hl_c" = Some "on" in
+      let full_word = p_getenv conf.env "hl_w" = Some "on" in
+      NotesSearch.highlight_html ~full_word ~anchor:false case_sens
+        (NotesSearch.terms case_sens s)
+        html
+
+(* links without id (a person can appear in several hits), carrying the
+   query so that the person page highlights it in the notes *)
+let person_link conf base hl p =
+  Printf.sprintf {|<a href="%s%s%s">%s</a>|}
+    (commd conf :> string)
+    (acces conf base p :> string)
+    hl
+    (person_title_text conf base p :> string)
+
+let subject_html conf base hl subject =
   match subject with
   | Of_person p ->
-      person_link conf base p ^ " "
+      person_link conf base hl p ^ " "
       ^ (DateDisplay.short_dates_text conf base p :> string)
   | Of_family (fath, moth) ->
-      person_link conf base fath ^ " &amp; " ^ person_link conf base moth
+      person_link conf base hl fath ^ " &amp; " ^ person_link conf base hl moth
 
-let print_hits conf base hits =
+let print_hits conf base hl hits =
   List.iter
     (fun kind ->
       let l = List.filter (fun h -> h.kind = kind) hits in
@@ -292,7 +316,7 @@ let print_hits conf base hits =
             Output.printf conf
               {|<li class="list-group-item"><div>%s%s%s</div><div class="small text-muted">%s</div></li>
 |}
-              (subject_html conf base h.subject)
+              (subject_html conf base hl h.subject)
               event count h.snippet)
           l;
         Output.print_sstring conf "</ul>\n"))
@@ -337,7 +361,7 @@ let search conf base q s =
         if truncated then
           print_message conf
             (Printf.sprintf (ftransl conf "notes search first results %d") max);
-        print_hits conf base hits);
+        print_hits conf base (highlight_params q s) hits);
       Output.printf conf
         {|<p class="mt-3"><a href="%sm=MISC_NOTES_SEARCH&s=%s%s%s">%s</a></p>|}
         (commd conf :> string)
