@@ -192,6 +192,42 @@ let collect conf base q cands max =
   in
   loop 0 [] cands
 
+(* "?" button and the panel it opens (Bootstrap collapse, no script),
+   shared with the misc notes search form. The examples are the same in
+   every language; their explanations come from the lexicon. *)
+let help_id = "notes-search-help"
+
+let print_help_button conf =
+  Output.printf conf
+    {|<button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#%s" aria-expanded="false" aria-controls="%s" title="%s"><i class="far fa-circle-question"></i></button>|}
+    help_id help_id
+    (transl conf "notes search help" |> Utf8.capitalize_fst)
+
+let print_help_panel conf =
+  let rows =
+    [
+      ("moulin dupont", "notes search help and");
+      ({|"saint pair"|}, "notes search help phrase");
+      ("moulin -dupont", "notes search help exclude");
+      ("dupon?", "notes search help joker");
+      ("henri* *ette", "notes search help star");
+      ("l'a", "notes search help word");
+      ("Église", "notes search help case");
+    ]
+  in
+  Output.printf conf
+    {|<div class="collapse mt-2" id="%s"><div class="card card-body small"><div class="fw-semibold mb-1">%s</div><dl class="row mb-0">|}
+    help_id
+    (transl conf "notes search help" |> Utf8.capitalize_fst);
+  List.iter
+    (fun (example, key) ->
+      Output.printf conf
+        {|<dt class="col-sm-3"><code>%s</code></dt><dd class="col-sm-9">%s</dd>|}
+        (Util.escape_html example :> string)
+        (transl conf key |> Utf8.capitalize_fst))
+    rows;
+  Output.print_sstring conf "</dl></div></div>\n"
+
 let print_form conf s q =
   Output.printf conf {|<form class="mb-3" method="get" action="%s">|}
     conf.command;
@@ -205,23 +241,27 @@ let print_form conf s q =
     (Util.escape_html s :> string);
   let check name id label on =
     Output.printf conf
-      {|<div class="form-check form-check-inline mb-0"><input type="checkbox" name="%s" value="on" class="form-check-input" id="%s"%s><label class="form-check-label" for="%s">%s</label></div>|}
+      {|<div class="form-check form-check-inline mb-0"><input type="checkbox" name="%s" value="on" class="form-check-input" id="%s"%s><label class="form-check-label text-nowrap" for="%s">%s</label></div>|}
       name id
       (if on then " checked" else "")
       id label
   in
   check "c" "case" (transl_nth conf "search/case sensitive" 1) q.case_sens;
   check "word" "word" (transl conf "word match") q.full_word;
+  (* the buttons stay together when the row wraps *)
   Output.printf conf
-    {|<button type="submit" class="btn btn-primary">%s</button></div>|}
+    {|<div class="d-flex gap-2"><button type="submit" class="btn btn-primary text-nowrap">%s</button>|}
     (transl_nth conf "search/case sensitive" 0 |> Utf8.capitalize_fst);
+  print_help_button conf;
+  Output.print_sstring conf "</div></div>";
   Output.print_sstring conf {|<div class="d-flex flex-wrap gap-2">|};
   List.iter
     (fun kind ->
       let p = scope_param kind in
       check p p (scope_label conf kind) (in_scope q.scope kind))
     kinds;
-  Output.print_sstring conf "</div></form>\n"
+  Output.print_sstring conf "</div></form>\n";
+  print_help_panel conf
 
 (* links without id: a person can appear in several hits *)
 let person_link conf base p =
