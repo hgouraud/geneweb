@@ -464,51 +464,58 @@ let person_link conf base hl p =
     hl
     (person_title_text conf base p :> string)
 
-let edit_link conf href title =
-  Printf.sprintf
-    {|<div class="small"><a href="%s%s" title="%s"><i class="fa fa-pen-to-square fa-fw me-1"></i>%s</a></div>|}
-    (commd conf :> string)
-    href
-    (Util.escape_html title :> string)
-    (transl conf "modify" |> Utf8.capitalize_fst)
+(* "Jean.1 Dupont", as in the "modify" titles of the templates *)
+let key_text base p =
+  Driver.sou base (Driver.get_first_name p)
+  ^ (match Driver.get_occ p with 0 -> "" | n -> "." ^ string_of_int n)
+  ^ " "
+  ^ Driver.sou base (Driver.get_surname p)
 
-(* the subject with its dates, and (wizards) the link to edit it, shown
-   below *)
-let subject_parts conf base hl subject =
-  let dates s =
-    if s = "" then "" else {|<span class="text-muted ms-1">|} ^ s ^ "</span>"
-  in
+(* As elsewhere in GeneWeb, the dates are, for wizards, a link to modify the
+   person or the family, with a title saying so. *)
+let edit_dates conf href title text =
+  if conf.wizard && text <> "" then
+    Printf.sprintf {|<a href="%s%s" title="%s">%s</a>|}
+      (commd conf :> string)
+      href
+      (Util.escape_html title :> string)
+      text
+  else text
+
+let subject_html conf base hl subject =
   match subject with
   | Of_page { href; label; icon; file } ->
-      ( Printf.sprintf
-          {|<i class="far fa-%s fa-fw me-2"></i><a href="%s">%s</a><code class="small ms-2">%s</code>|}
-          icon href label
-          (Util.escape_html file :> string),
-        "" )
+      Printf.sprintf
+        {|<i class="far fa-%s fa-fw me-2"></i><a href="%s">%s</a><code class="small ms-2">%s</code>|}
+        icon href label
+        (Util.escape_html file :> string)
   | Of_person p ->
-      ( person_link conf base hl p
-        ^ dates (years_text (birth_year p) (death_year p)),
-        if conf.wizard then
-          edit_link conf
-            ("m=MOD_IND&i=" ^ Driver.Iper.to_string (Driver.get_iper p))
-            (transl_decline conf "modify" (transl_nth conf "person/persons" 0))
-        else "" )
+      let dates = years_text (birth_year p) (death_year p) in
+      person_link conf base hl p
+      ^ (if dates = "" then "" else " ")
+      ^ edit_dates conf
+          ("m=MOD_IND&i=" ^ Driver.Iper.to_string (Driver.get_iper p))
+          (Utf8.capitalize_fst (transl conf "modify") ^ " " ^ key_text base p)
+          dates
   | Of_family (ifam, fam, fath, moth) ->
-      let marriage =
+      let amp =
         match year (Driver.get_marriage fam) with
-        | Some y -> Printf.sprintf "(%d)" y
-        | None -> ""
+        | Some y -> Printf.sprintf "&amp; %d" y
+        | None -> "&amp;"
       in
-      ( person_link conf base hl fath
-        ^ " &amp; "
-        ^ person_link conf base hl moth
-        ^ dates marriage,
-        if conf.wizard then
-          edit_link conf
-            (Printf.sprintf "m=MOD_FAM&i=%s&ip=%s" (Driver.Ifam.to_string ifam)
-               (Driver.Iper.to_string (Driver.get_iper fath)))
-            (transl_decline conf "modify" (transl_nth conf "family/families" 0))
-        else "" )
+      person_link conf base hl fath
+      ^ " "
+      ^ edit_dates conf
+          (Printf.sprintf "m=MOD_FAM&i=%s&ip=%s" (Driver.Ifam.to_string ifam)
+             (Driver.Iper.to_string (Driver.get_iper fath)))
+          (Printf.sprintf "%s %s %s %s"
+             (Utf8.capitalize_fst
+                (transl_decline conf "modify"
+                   (transl_nth conf "family/families" 0)))
+             (key_text base fath) (transl conf "and") (key_text base moth))
+          amp
+      ^ " "
+      ^ person_link conf base hl moth
 
 let print_hits conf base q hits =
   let hl = highlight_params q in
@@ -543,11 +550,11 @@ let print_hits conf base q hits =
                   {|<span class="badge text-bg-secondary ms-2">%d</span>|}
                   h.count
             in
-            let main, below = subject_parts conf base hl h.subject in
             Output.printf conf
-              {|<li class="list-group-item"><div>%s%s%s</div>%s<div class="small text-muted">%s</div></li>
+              {|<li class="list-group-item"><div>%s%s%s</div><div class="small text-muted">%s</div></li>
 |}
-              main event count below h.snippet)
+              (subject_html conf base hl h.subject)
+              event count h.snippet)
           l;
         Output.print_sstring conf "</ul>\n"))
     groups
