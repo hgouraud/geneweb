@@ -311,6 +311,14 @@
 # Used in: welcome page and individual modification forms
 #datalist_titles=1
 #datalist_estates=1
+#
+# Loading of the cache files into the page. With "no", the .gz files are
+# never loaded, not even as a fallback when the RPC server below is
+# unavailable: the fields then stay plain text inputs. Set it on large
+# bases, where a full list of names makes the browser very slow.
+# The datalist_xxx options above still select the fields that the RPC
+# server completes. Default: yes
+#datalist_files=no
 
 # =============================================================================
 # RPC Datalist Server (alternative to static .gz cache files)

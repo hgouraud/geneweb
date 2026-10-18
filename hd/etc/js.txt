@@ -498,7 +498,15 @@ const DatalistManager = {
   }
 };
 %end;
+%( datalist_files=no: never load the .cache.gz files into the page, not even
+   as a fallback when the RPC server is unavailable (on a large base they
+   hold hundreds of thousands of names).  The fields then stay plain text
+   inputs.  Tested here so that every caller, the gallery included,
+   respects it. %)
 function populateDatalists() {
+  %if;(b.datalist_files="no")
+    return;
+  %end;
   %if;cgi;
     const path = `/${location.pathname.split('/')%[1%] || ''}/bases/etc/%base.name;/cache/%base.name;_`;
   %else;
