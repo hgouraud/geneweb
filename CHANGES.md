@@ -32,6 +32,16 @@
   `update_nldb` once after upgrading (#2961).
 - Links inside `{...}` highlights are rendered as links; an unclosed `{`
   is displayed as typed (#2961).
+- New notes search (`m=NOTES_SEARCH`, also reached by the former
+  `m=MISC_NOTES_SEARCH`): AND-ed words, "phrases", `-` exclusions, `?`
+  and, with word match, `*` jokers. Misc notes are searched for everybody
+  (honouring `RESTRICT`); wizard, person, family and event notes for
+  friends and wizards. The latter need the index built by
+  `cache_files -notes` (also part of `-all`), to be rebuilt nightly;
+  changes made since are searched directly. Base parameter
+  `notes_search_max_results` (default 500).
+- Case-insensitive text searches (notes, history) treat the apostrophes
+  ' and ’ as equal.
 
 ## Gwsetup
 - Bind `127.0.0.1` instead of resolving `localhost`, which selects the
