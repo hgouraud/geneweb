@@ -89,4 +89,6 @@ buildDunePackage {
     ptime
     ipaddr
   ];
+
+  postPatch = "patchShebangs test/gwd/gwd-cgi.sh";
 }
