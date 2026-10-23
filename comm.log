@@ -1,0 +1,25 @@
+Generating binary caches for tools and text caches for datalists
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_places.bin                        1044 places           0.06 s
+/Users/henri/Genea/GeneWeb-Bases/etc/HenriT/cache/HenriT_places.cache.gz                    1044 places           0.00 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_fnames.bin                        1431 fnames           0.07 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_fnames_alias.bin                  1028 fnames_alias     0.02 s
+/Users/henri/Genea/GeneWeb-Bases/etc/HenriT/cache/HenriT_fnames.cache.gz                    2401 fnames+alias     0.00 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_snames.bin                        2425 snames           0.07 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_snames_alias.bin                    38 snames_alias     0.01 s
+/Users/henri/Genea/GeneWeb-Bases/etc/HenriT/cache/HenriT_snames.cache.gz                    2456 snames+alias     0.00 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_aliases.bin                         54 aliases          0.01 s
+/Users/henri/Genea/GeneWeb-Bases/etc/HenriT/cache/HenriT_aliases.cache.gz                     54 aliases          0.00 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_pub_names.bin                       28 pub_names        0.01 s
+/Users/henri/Genea/GeneWeb-Bases/etc/HenriT/cache/HenriT_pub_names.cache.gz                   28 pub_names        0.00 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_estates.bin                        104 estates          0.01 s
+/Users/henri/Genea/GeneWeb-Bases/etc/HenriT/cache/HenriT_estates.cache.gz                    104 estates          0.00 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_titles.bin                          12 titles           0.01 s
+/Users/henri/Genea/GeneWeb-Bases/etc/HenriT/cache/HenriT_titles.cache.gz                      12 titles           0.00 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_occupations.bin                    407 occupations      0.01 s
+/Users/henri/Genea/GeneWeb-Bases/etc/HenriT/cache/HenriT_occupations.cache.gz                407 occupations      0.00 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_qualifiers.bin                       2 qualifiers       0.01 s
+/Users/henri/Genea/GeneWeb-Bases/etc/HenriT/cache/HenriT_qualifiers.cache.gz                   2 qualifiers       0.00 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_sources.bin                        371 sources          0.11 s
+/Users/henri/Genea/GeneWeb-Bases/etc/HenriT/cache/HenriT_sources.cache.gz                    371 sources          0.00 s
+/Users/henri/Genea/GeneWeb-Bases/HenriT.gwb/caches/HenriT_notes_search.cache            759 notes, 0.10 s
+Total duration: 0 min   0.50 s
