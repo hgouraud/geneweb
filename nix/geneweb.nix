@@ -34,6 +34,7 @@
   digestif,
   pp_loc,
   ptime,
+  ipaddr,
   geneweb-compat,
   geneweb-http,
 }:
@@ -86,5 +87,6 @@ buildDunePackage {
     digestif
     pp_loc
     ptime
+    ipaddr
   ];
 }

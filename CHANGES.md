@@ -51,6 +51,10 @@
   `notes_search_max_results` (default 500).
 - Case-insensitive text searches (notes, history) treat the apostrophes
   ' and ’ as equal.
+- `--trusted-proxy ADDR,...` lists the reverse proxies in front of gwd: for
+  the requests they relay, the client address is read from
+  `X-Forwarded-For`, so that logs, address restrictions and robot detection
+  apply to the visitor rather than to the proxy (#3067).
 
 ## Gwsetup
 - Bind `127.0.0.1` instead of resolving `localhost`, which selects the
