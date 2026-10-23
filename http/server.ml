@@ -60,6 +60,16 @@ type printing_state = Nothing | Status | Contents
 
 let printing_state = ref Nothing
 
+(* Headers that must go out with the response whatever its status (e.g. a
+   session Set-Cookie emitted before the request handler runs). Unlike
+   [header], queuing one does not commit the response to [200 OK]. *)
+let deferred_headers = ref []
+
+let take_deferred_headers () =
+  let l = List.rev !deferred_headers in
+  deferred_headers := [];
+  l
+
 let http status =
   if !printing_state <> Nothing then failwith "HTTP Status already sent";
   printing_state := Status;
@@ -71,7 +81,22 @@ let http status =
     else (
       output_string !wserver_oc "HTTP/1.0 ";
       output_string !wserver_oc answer);
-    printnl ())
+    printnl ());
+  List.iter
+    (fun s ->
+      output_string !wserver_oc s;
+      printnl ())
+    (take_deferred_headers ())
+
+let defer_header s =
+  match !printing_state with
+  | Nothing -> deferred_headers := s :: !deferred_headers
+  | Status ->
+      output_string !wserver_oc s;
+      printnl ()
+  | Contents ->
+      Log.warn (fun k ->
+          k "Deferred header dropped, contents already started: %s" s)
 
 let header s =
   if !printing_state <> Status then
@@ -162,6 +187,7 @@ let timeout_handler ~timeout _ =
 
 let treat_connection callback client_addr client_socket =
   printing_state := Nothing;
+  deferred_headers := [];
   let request, path, query =
     let request, query =
       let strm = Stream.of_channel (Unix.in_channel_of_descr client_socket) in
