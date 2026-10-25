@@ -16,8 +16,9 @@
   cache_test
   blank_name_test
   notes_search_test
-  notes_corpus_test)
- (libraries alcotest geneweb geneweb.oidc fmt))
+  notes_corpus_test
+  anomaly_test)
+ (libraries alcotest geneweb geneweb.oidc fmt unix))
 
 (test
  (package geneweb)
