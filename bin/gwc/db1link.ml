@@ -1739,7 +1739,8 @@ let link ?(no_warn = false) next_family_fun bdir =
   in
   if not gen.g_errored then (
     Option.iter
-      (fun anomalies -> Anomaly.write ~bdir ~producer:"gwc" (anomalies ()))
+      (fun anomalies ->
+        Anomaly.write ~base ~bdir ~producer:"gwc" (anomalies ()))
       anomalies;
     if !do_consang then (
       ignore @@ ConsangAll.compute base true;
