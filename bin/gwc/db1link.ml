@@ -1733,7 +1733,7 @@ let link ?(no_warn = false) next_family_fun bdir =
           set_warning base no_warn w;
           add_anomaly w)
         ignore;
-      if !pr_stats then Stats.(print_stats base @@ stat_base base);
+      (if !pr_stats then Stats.(print_stats base @@ stat_base base));
       Some anomalies)
     else None
   in
