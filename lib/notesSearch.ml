@@ -415,10 +415,9 @@ let within ?(full_word = false) case_sens terms n p =
 
 let matches ?(full_word = false) ?near case_sens (terms, excluded) p =
   (match near with
-  | Some n -> within ~full_word case_sens terms n p
-  | None -> true)
-  &&
-  mem_all ~full_word case_sens terms p
+    | Some n -> within ~full_word case_sens terms n p
+    | None -> true)
+  && mem_all ~full_word case_sens terms p
   && not (List.exists (fun t -> mem_all ~full_word case_sens [ t ] p) excluded)
 
 let count_occurrences ?(full_word = false) case_sens terms p =
@@ -645,7 +644,7 @@ let fold s =
   let len = String.length s in
   let b = Buffer.create len in
   let rec loop i =
-    if i < len then
+    if i < len then (
       if
         i + 2 < len
         && s.[i] = '\xE2'
@@ -657,7 +656,7 @@ let fold s =
       else
         let t, j = Name.unaccent_utf_8 true s i in
         Buffer.add_string b t;
-        loop (if j > i then j else i + 1)
+        loop (if j > i then j else i + 1))
   in
   loop 0;
   Buffer.contents b
@@ -699,8 +698,6 @@ let short_words terms =
     (fun t ->
       (not (String.contains t ' '))
       &&
-      let c =
-        String.concat "" (String.split_on_char '?' (core t))
-      in
+      let c = String.concat "" (String.split_on_char '?' (core t)) in
       c <> "" && Utf8.length c <= 3)
     terms

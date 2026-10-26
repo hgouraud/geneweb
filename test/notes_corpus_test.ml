@@ -54,14 +54,21 @@ let test_round_trip () =
   let read =
     NotesCorpus.fold_entries "fake"
       (fun kind id text acc ->
-        (NotesCorpus.(match kind with
-          | Person -> "p" | Family -> "f" | Person_event -> "pe" | Family_event -> "fe")
-        ^ id ^ ":" ^ text) :: acc)
+        (NotesCorpus.(
+           match kind with
+           | Person -> "p"
+           | Family -> "f"
+           | Person_event -> "pe"
+           | Family_event -> "fe")
+        ^ id ^ ":" ^ text)
+        :: acc)
       []
     |> List.rev
   in
   Alcotest.(check (list string))
-    "entries, folded" [ "p3:le moulin de l'eglise"; "f0:x" ] read;
+    "entries, folded"
+    [ "p3:le moulin de l'eglise"; "f0:x" ]
+    read;
   (* a rebuilt base (other "base" file) makes the corpus outdated *)
   write_file (file "base") "version 2";
   Alcotest.(check string)
@@ -106,20 +113,24 @@ let test_changes () =
 
 let test_candidate () =
   let cand q = NotesSearch.candidate (NotesSearch.query false q) in
-  let f = NotesSearch.fold "Jean-Pierre Dupond, baptisé à l’Église de Saint‑Pair" in
+  let f =
+    NotesSearch.fold "Jean-Pierre Dupond, baptisé à l’Église de Saint‑Pair"
+  in
   Alcotest.(check bool) "folded word" true (cand "eglise" f);
   Alcotest.(check bool) "accented query" true (cand "Église baptisé" f);
   Alcotest.(check bool) "apostrophe" true (cand "l'eglise" f);
   Alcotest.(check bool) "joker pieces" true (cand "jean?pierre dupon?" f);
   Alcotest.(check bool) "stars dropped" true (cand "*pierre*" f);
   Alcotest.(check bool) "missing word" false (cand "moulin" f);
-  Alcotest.(check bool) "exclusions left to the exact match" true
-    (cand "dupond -eglise" f);
+  Alcotest.(check bool)
+    "exclusions left to the exact match" true (cand "dupond -eglise" f);
   (* never rejects what matches accepts, whatever the mode *)
   let texts =
     [ "Église Saint-Pierre"; "l’aube"; "Jean Pierre"; "HENRIETTE"; "Dupont" ]
   in
-  let queries = [ "eglise"; "l'a"; "jean?pierre"; "henri*"; "*ette"; "dupon?" ] in
+  let queries =
+    [ "eglise"; "l'a"; "jean?pierre"; "henri*"; "*ette"; "dupon?" ]
+  in
   List.iter
     (fun cs ->
       List.iter
@@ -151,7 +162,9 @@ let test_matches () =
 
 let test_near () =
   let text = "Jean Dupont meunier au moulin de Saint-Pair, puis à Granville" in
-  let within n q = NotesSearch.within false (NotesSearch.terms false q) n text in
+  let within n q =
+    NotesSearch.within false (NotesSearch.terms false q) n text
+  in
   Alcotest.(check bool) "adjacent words" true (within 1 "jean dupont");
   Alcotest.(check bool) "any order" true (within 1 "dupont jean");
   (* Jean 0, Dupont 1, meunier 2, au 3, moulin 4, de 5, Saint 6, Pair 7,
@@ -159,19 +172,24 @@ let test_near () =
   Alcotest.(check bool) "3 words apart, n=3" true (within 3 "dupont moulin");
   Alcotest.(check bool) "3 words apart, n=2" false (within 2 "dupont moulin");
   (* window: every pair within n, not a chain of successive pairs *)
-  Alcotest.(check bool) "window too wide" false (within 4 "jean moulin granville");
-  Alcotest.(check bool) "window wide enough" true (within 10 "jean moulin granville");
+  Alcotest.(check bool)
+    "window too wide" false
+    (within 4 "jean moulin granville");
+  Alcotest.(check bool)
+    "window wide enough" true
+    (within 10 "jean moulin granville");
   Alcotest.(check bool) "one word" true (within 0 "moulin");
   (* the phrase "de saint" starts at word 5, next to moulin *)
-  Alcotest.(check bool) "phrase counts at its start" true
+  Alcotest.(check bool)
+    "phrase counts at its start" true
     (within 1 {|"de saint" moulin|});
-  Alcotest.(check bool) "phrase too far" false
-    (within 0 {|"de saint" moulin|});
+  Alcotest.(check bool) "phrase too far" false (within 0 {|"de saint" moulin|});
   Alcotest.(check bool) "word missing" false (within 50 "jean paris");
   Alcotest.(check bool)
     "matches with near" false
     (NotesSearch.matches ~near:2 false
-       (NotesSearch.query false "jean granville") text);
+       (NotesSearch.query false "jean granville")
+       text);
   Alcotest.(check bool)
     "matches without near" true
     (NotesSearch.matches false (NotesSearch.query false "jean granville") text)

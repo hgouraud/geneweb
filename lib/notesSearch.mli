@@ -34,11 +34,11 @@ val mem_all : ?full_word:bool -> bool -> string list -> string -> bool
 
 val within : ?full_word:bool -> bool -> string list -> int -> string -> bool
 (** [within case_sens terms n p] is [true] if some passage of [p] holds an
-    occurrence of every term of [terms] with at most [n] words between the
-    first and the last one, i.e. every pair of terms at most [n] words apart
-    (adjacent words: 1). An occurrence counts at the word where it starts;
-    words are the runs of letters, digits and combining marks. Always [true]
-    for fewer than two terms. *)
+    occurrence of every term of [terms] with at most [n] words between the first
+    and the last one, i.e. every pair of terms at most [n] words apart (adjacent
+    words: 1). An occurrence counts at the word where it starts; words are the
+    runs of letters, digits and combining marks. Always [true] for fewer than
+    two terms. *)
 
 val matches :
   ?full_word:bool ->
@@ -73,11 +73,11 @@ val highlight_html :
 (** [highlight_html case_sens terms html] wraps every occurrence of any of
     [terms] in the text of the rendered HTML [html] in [<span class="found">],
     the first one with [id="first-found"] (unless [~anchor:false]) so that a
-    [#first-found] URL fragment scrolls to it. Tags, attribute values, comments and the contents of
-    [script], [style], [textarea] and [title] are left untouched. Matching is
-    done on the decoded text: an entity counts as the character it stands for
-    and a white space run as one space. Occurrences that span a tag
-    ([mou<i>lin</i>]) are not highlighted. *)
+    [#first-found] URL fragment scrolls to it. Tags, attribute values, comments
+    and the contents of [script], [style], [textarea] and [title] are left
+    untouched. Matching is done on the decoded text: an entity counts as the
+    character it stands for and a white space run as one space. Occurrences that
+    span a tag ([mou<i>lin</i>]) are not highlighted. *)
 
 val highlight : ?full_word:bool -> bool -> string list -> string -> string
 (** [highlight case_sens terms p] is the whole plain text [p], HTML-escaped,

@@ -1631,8 +1631,7 @@ and eval_simple_str_var conf base env (p, p_auth) = function
   | "comment" | "fnotes" -> (
       match get_env "fam" env with
       | Vfam (_, fam, _, m_auth) ->
-          Driver.get_comment fam
-          |> get_note conf base m_auth
+          Driver.get_comment fam |> get_note conf base m_auth
       | _ -> raise Not_found)
   | "count" -> (
       match get_env "count" env with
@@ -1919,8 +1918,7 @@ and eval_simple_str_var conf base env (p, p_auth) = function
   | "marriage_note" -> (
       match get_env "fam" env with
       | Vfam (_, fam, _, m_auth) ->
-          Driver.get_marriage_note fam
-          |> get_note conf base m_auth
+          Driver.get_marriage_note fam |> get_note conf base m_auth
       | _ -> raise Not_found)
   | "marriage_source" -> (
       match get_env "fam" env with
@@ -3906,9 +3904,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
             :> Adef.safe_string)
       else null_val
   | "birth_place_norm" -> place_norm conf base p p_auth Driver.get_birth_place
-  | "birth_note" ->
-      Driver.get_birth_note p
-      |> get_note conf base ~p p_auth
+  | "birth_note" -> Driver.get_birth_note p |> get_note conf base ~p p_auth
   | "birth_source" ->
       Driver.get_birth_src p |> get_note_or_source conf base ~p p_auth false
   | "baptism_place" ->
@@ -3924,9 +3920,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       else null_val
   | "baptism_place_norm" ->
       place_norm conf base p p_auth Driver.get_baptism_place
-  | "baptism_note" ->
-      Driver.get_baptism_note p
-      |> get_note conf base ~p p_auth
+  | "baptism_note" -> Driver.get_baptism_note p |> get_note conf base ~p p_auth
   | "baptism_source" ->
       Driver.get_baptism_src p |> get_note_or_source conf base ~p p_auth false
   | "burial_place" ->
@@ -3941,9 +3935,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
             :> Adef.safe_string)
       else null_val
   | "burial_place_norm" -> place_norm conf base p p_auth Driver.get_burial_place
-  | "burial_note" ->
-      Driver.get_burial_note p
-      |> get_note conf base ~p p_auth
+  | "burial_note" -> Driver.get_burial_note p |> get_note conf base ~p p_auth
   | "burial_source" ->
       Driver.get_burial_src p |> get_note_or_source conf base ~p p_auth false
   | "child_name" ->
@@ -4011,9 +4003,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
             :> Adef.safe_string)
       else null_val
   | "death_place_norm" -> place_norm conf base p p_auth Driver.get_death_place
-  | "death_note" ->
-      Driver.get_death_note p
-      |> get_note conf base ~p p_auth
+  | "death_note" -> Driver.get_death_note p |> get_note conf base ~p p_auth
   | "death_source" ->
       Driver.get_death_src p |> get_note_or_source conf base ~p p_auth false
   | "died" -> string_of_died conf p p_auth |> safe_val
@@ -4241,8 +4231,7 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
           |> string_of_int |> str_val)
   | "nb_families" ->
       Driver.get_family p |> Array.length |> string_of_int |> str_val
-  | "notes" | "pnotes" ->
-      Driver.get_notes p |> get_note conf base ~p p_auth
+  | "notes" | "pnotes" -> Driver.get_notes p |> get_note conf base ~p p_auth
   | "occ" ->
       if GWPARAM.p_auth_sp conf base p then
         Driver.get_occ p |> string_of_int |> str_val
