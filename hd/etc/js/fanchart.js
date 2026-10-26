@@ -5277,14 +5277,6 @@ reRenderWithCurrentGenerations: function() {
         this.classList.toggle("active", !isVisible);
       }
     };
-    $("b-home").onclick = function() {
-      window.location = this.getAttribute("data-url");
-    };
-    $("b-rng").onclick = function() {
-      const url = this.getAttribute("data-url");
-      if (url) { window.location = url; }
-    };
-
     $("b-refresh").onclick = () => {
       this.calculateDimensions();
       this.fitScreen();
