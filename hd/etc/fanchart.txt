@@ -129,6 +129,14 @@
         <i class="fa fa-arrow-rotate-right fa-fw" aria-hidden="true"></i>
       </button>
     </div>
+    <div class="mt-1">
+      <button type="button" id="b-line-layout" class="btn btn-sm btn-outline-primary fc-btn"
+        title="[*paternal and maternal lines near the axis/on the edges]0"
+        data-title-center="[*paternal and maternal lines near the axis/on the edges]0"
+        data-title-edges="[*paternal and maternal lines near the axis/on the edges]1">
+        <span class="fc-glyph" aria-hidden="true">||</span>
+      </button>
+    </div>
   </div>
 
   <div class="control-section">

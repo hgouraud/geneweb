@@ -17,7 +17,7 @@
   /* Panneau de contrôles, décalé à droite de home.txt (.home-xs) */
   --fc-controls-left: 1.75rem;
   --fc-controls-top: 0.5rem;
-  --fc-controls-width: 8rem;
+  --fc-controls-width: 8.5rem;
 
   /* Surfaces flottantes (contrôles, légende, panneaux) */
   --fc-surface-bg: rgba(var(--bs-body-bg-rgb), 0.95);
@@ -104,8 +104,18 @@
 /* Boutons carrés du fanchart (complète .btn .btn-outline-primary) */
 .fc-btn {
   min-width: 2rem;
-  padding-left: 0.3rem;
-  padding-right: 0.3rem;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+/* Glyphe texte du bouton de disposition des lignées (|| ou __) */
+.fc-glyph {
+  display: inline-block;
+  width: 1.25em;
+  font-family: var(--bs-font-monospace);
+  font-weight: 700;
+  letter-spacing: -0.1em;
+  line-height: 1;
 }
 
 #font-selector {
