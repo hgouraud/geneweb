@@ -4422,14 +4422,44 @@ const SVGGeometry = {
   },
 
   /**
-   * Calcul la géométrie du secteur de mariage pour un couple
+   * Rang angulaire d'un Sosa dans sa génération (0 = le plus à gauche).
+   *
+   * Par défaut le père est à gauche et la mère à droite. Avec `mirror`
+   * (éventail 180°/220°), la moitié gauche, issue de S2, est inversée en
+   * miroir : la mère passe à gauche et le père à droite, si bien que la
+   * lignée paternelle longe l'axe central de l'éventail au lieu de son bord.
+   */
+  getSectorSlot: function(sosa, generation, mirror) {
+    const firstSosa = Math.pow(2, generation - 1);
+    const index = sosa - firstSosa;
+    const half = firstSosa / 2;
+    if (mirror && index < half) {
+      return half - 1 - index;
+    }
+    return index;
+  },
+
+  /**
+   * Indique si le couple dont fait partie ce Sosa est dessiné en miroir
+   * (mère à gauche du père). Les parents (S2, S3) ne le sont jamais.
+   */
+  isMirroredCouple: function(sosa, generation, mirror) {
+    if (!mirror || generation < 3) return false;
+    return sosa - Math.pow(2, generation - 1) < Math.pow(2, generation - 2);
+  },
+
+  /**
+   * Calcul la géométrie du secteur de mariage pour un couple.
+   * La mère occupe le secteur voisin du père : à sa droite en temps
+   * normal, à sa gauche quand le couple est en miroir.
    */
   getMarriageGeometry: function(fatherPosition) {
-    const marriageEndAngle = fatherPosition.a2 + fatherPosition.delta;
+    const mirrored = fatherPosition.mirrored === true;
 
     return {
-      startAngle: fatherPosition.a1,
-      endAngle: marriageEndAngle,
+      startAngle: mirrored ? fatherPosition.a1 - fatherPosition.delta : fatherPosition.a1,
+      endAngle: mirrored ? fatherPosition.a2 : fatherPosition.a2 + fatherPosition.delta,
+      separatorAngle: mirrored ? fatherPosition.a1 : fatherPosition.a2,
       innerRadius: fatherPosition.r1, // Couche interne pour éviter des conflits
       outerRadius: fatherPosition.r1 + 10
     };
@@ -4828,6 +4858,8 @@ const FanchartApp = {
     // rayon total accumulé
     let cumulativeR = CONFIG.a_r[0];
     const rings = isCircularMode ? max_gen : max_gen + 1;
+    // Miroir de la branche paternelle en éventail (180°/220°) seulement
+    const mirror = !isCircularMode;
 
     for (let gen = 2; gen <= rings; gen++) {
       const innerR = cumulativeR;                // rayon intérieur
@@ -4837,21 +4869,26 @@ const FanchartApp = {
       // angle total à découper - utilise l'angle dynamique
       const delta = current_angle / Math.pow(2, gen-1);
       // angle de départ au-dessus du centre
-      let angle = -90 - current_angle / 2 + delta/2;
+      const firstAngle = -90 - current_angle / 2 + delta/2;
 
-      // on itère sur les 2^(gen-1) cases de cette génération
+      // on itère sur les 2^(gen-1) cases de cette génération, dans l'ordre
+      // des Sosa (le père avant la mère, qui crée le groupe famille)
       const firstSosa = Math.pow(2, gen-1);
       const lastSosa  = Math.pow(2, gen) - 1;
 
-      for (let sosa = firstSosa; sosa <= lastSosa; sosa++, angle += delta) {
+      for (let sosa = firstSosa; sosa <= lastSosa; sosa++) {
         const person = this.getEffectivePerson(sosa);
         if (!person) continue;
+
+        const slot = SVGGeometry.getSectorSlot(sosa, gen, mirror);
+        const angle = firstAngle + slot * delta;
 
         // prépare la position de ce secteur
         const pos = {
           r1: innerR, r2: outerR,
           a1: angle - delta/2, a2: angle + delta/2,
-          generation: gen, delta: delta
+          generation: gen, delta: delta,
+          mirrored: SVGGeometry.isMirroredCouple(sosa, gen, mirror)
         };
 
         this.renderAncestorSector(sosa, pos, person);
@@ -5072,7 +5109,8 @@ const FanchartApp = {
       marriageGeometry.startAngle, marriageGeometry.endAngle);
 
     // Ligne de séparation entre père et mère
-    SVGRenderer.drawRadialLine(marriageGroup, marriageGeometry.outerRadius, position.r2, position.a2);
+    SVGRenderer.drawRadialLine(marriageGroup, marriageGeometry.outerRadius, position.r2,
+      marriageGeometry.separatorAngle);
 
     // Secteur interactif du mariage dans sa couronne exclusive
     SVGRenderer.drawPie(marriageGroup, marriageGeometry.innerRadius, marriageGeometry.outerRadius,
