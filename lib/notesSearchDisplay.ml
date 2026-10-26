@@ -55,6 +55,8 @@ type query = {
   full_word : bool;
   terms : string list * string list;  (** required, excluded *)
   scope : group list;  (** searched groups, all allowed *)
+  near : int option;
+      (** maximum distance in words between the required terms (near=N) *)
 }
 
 (* the ticked scopes the user may search; all of those when none is ticked *)
@@ -73,6 +75,10 @@ let query_of_env conf =
     text;
     case_sens;
     full_word = p_getenv conf.env "word" = Some "on";
+    near =
+      (match p_getint conf.env "near" with
+      | Some n when n > 0 -> Some n
+      | Some _ | None -> None);
     terms = NotesSearch.query case_sens text;
     scope = (match ticked with [] -> allowed_groups | _ :: _ -> ticked);
   }
@@ -104,7 +110,17 @@ type hit = {
 }
 
 let matches q text =
-  NotesSearch.matches ~full_word:q.full_word q.case_sens q.terms text
+  NotesSearch.matches ~full_word:q.full_word ?near:q.near q.case_sens q.terms
+    text
+
+(* the proximity condition, when asked for, on one of [texts] *)
+let near_ok q texts =
+  match q.near with
+  | None -> true
+  | Some n ->
+      List.exists
+        (NotesSearch.within ~full_word:q.full_word q.case_sens (fst q.terms) n)
+        texts
 
 let count q text =
   NotesSearch.count_occurrences ~full_word:q.full_word q.case_sens
@@ -118,7 +134,8 @@ let query_params q =
   "s="
   ^ (Mutil.encode q.text :> string)
   ^ (if q.case_sens then "&c=on" else "")
-  ^ if q.full_word then "&word=on" else ""
+  ^ (if q.full_word then "&word=on" else "")
+  ^ match q.near with Some n -> "&near=" ^ string_of_int n | None -> ""
 
 (* Misc notes (notes_d, base notes), read live: they are few. A note is a
    hit when every required term occurs in its title or text and no excluded
@@ -149,7 +166,10 @@ let misc_hits conf base q =
           || NotesSearch.mem_all ~full_word:q.full_word q.case_sens [ t ] plain
         in
         let required, excluded = q.terms in
-        if List.for_all present required && not (List.exists present excluded)
+        if
+          List.for_all present required
+          && (not (List.exists present excluded))
+          && near_ok q [ plain; plain_tit ]
         then
           let gallery = Notes.is_gallery nenv in
           let href =
@@ -203,7 +223,10 @@ let wiz_hits conf base q =
         || NotesSearch.mem_all ~full_word:q.full_word q.case_sens [ t ] plain
       in
       let required, excluded = q.terms in
-      if List.for_all present required && not (List.exists present excluded)
+      if
+        List.for_all present required
+        && (not (List.exists present excluded))
+        && near_ok q [ plain ]
       then
         Some
           {
@@ -354,6 +377,8 @@ let print_help_panel conf =
       ("henri* *ette", "notes search help star");
       ("l'a", "notes search help word");
       ("Église", "notes search help case");
+      ("moulin dupont ≤ 5", "notes search help near");
+      ("le la de", "notes search help short");
     ]
   in
   Output.printf conf
@@ -393,6 +418,13 @@ let print_form ?(suffix = "") ?(help = true) conf q =
   in
   check "c" (transl_nth conf "search/case sensitive" 1) q.case_sens;
   check "word" (transl conf "word match") q.full_word;
+  (* maximum distance between the words, empty for none *)
+  Output.printf conf
+    {|<div class="d-flex align-items-center gap-1"><label class="text-nowrap" for="near%s">%s</label><input type="number" name="near" id="near%s" min="1" max="999" class="form-control form-control-sm" style="width:5em" value="%s"></div>|}
+    suffix
+    (transl conf "notes search near" |> Utf8.capitalize_fst)
+    suffix
+    (match q.near with Some n -> string_of_int n | None -> "");
   (* the buttons stay together when the row wraps *)
   Output.printf conf
     {|<div class="d-flex gap-2"><button type="submit" class="btn btn-primary text-nowrap">%s</button>|}
@@ -608,6 +640,13 @@ let print conf base =
   in
   Hutil.header conf title;
   print_form conf q;
+  (match NotesSearch.short_words (fst q.terms) with
+  | [] -> ()
+  | words ->
+      print_message conf
+        (Printf.sprintf
+           (ftransl conf "notes search short words %s")
+           (Util.escape_html (String.concat ", " words) :> string)));
   (match q.terms with
   | [], [] -> ()
   | _ :: _, _ | [], _ :: _ -> (

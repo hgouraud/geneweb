@@ -32,10 +32,24 @@ val terms : bool -> string -> string list
 val mem_all : ?full_word:bool -> bool -> string list -> string -> bool
 (** [mem_all case_sens terms p] is [true] if every term occurs in [p]. *)
 
+val within : ?full_word:bool -> bool -> string list -> int -> string -> bool
+(** [within case_sens terms n p] is [true] if some passage of [p] holds an
+    occurrence of every term of [terms] with at most [n] words between the
+    first and the last one, i.e. every pair of terms at most [n] words apart
+    (adjacent words: 1). An occurrence counts at the word where it starts;
+    words are the runs of letters, digits and combining marks. Always [true]
+    for fewer than two terms. *)
+
 val matches :
-  ?full_word:bool -> bool -> string list * string list -> string -> bool
+  ?full_word:bool ->
+  ?near:int ->
+  bool ->
+  string list * string list ->
+  string ->
+  bool
 (** [matches case_sens (terms, excluded) p] is [true] if every term of [terms]
-    and none of [excluded] occurs in [p], as returned by {!query}. *)
+    and none of [excluded] occurs in [p], as returned by {!query}; with
+    [~near:n], the terms must also be {!within} [n] words. *)
 
 val plain_text : string -> string
 (** [plain_text m] is the readable text of the note source [m]: HTML tags
@@ -79,3 +93,8 @@ val candidate : string list * string list -> string -> bool
     [true] for every [f] whose original text could {!matches} [query], in any
     mode (case sensitive or not, word match or not), and possibly for a few
     more. Its result must be confirmed with {!matches} on the original text. *)
+
+val short_words : string list -> string list
+(** [short_words terms] are the terms of at most 3 letters outside a phrase
+    (jokers and outer [*] not counted): they occur in nearly every note, so a
+    search with them is slow and gives no significant result. *)
