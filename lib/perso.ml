@@ -186,21 +186,23 @@ let child_marriage base child =
 let get_cousins_sparse =
   let cache = ref None in
   fun conf base p ->
+    let key = (conf.query_start, Driver.get_iper p) in
     match !cache with
-    | Some (cached_ip, sparse) when cached_ip = Driver.get_iper p -> sparse
+    | Some (k, sparse) when k = key -> sparse
     | _ ->
         let sparse = Cousins.init_cousins_cnt conf base p in
-        cache := Some (Driver.get_iper p, sparse);
+        cache := Some (key, sparse);
         sparse
 
 let get_asc_cnt =
   let cache = ref None in
   fun conf base p ->
+    let key = (conf.query_start, Driver.get_iper p) in
     match !cache with
-    | Some (cached_ip, arr) when cached_ip = Driver.get_iper p -> arr
+    | Some (k, arr) when k = key -> arr
     | _ ->
         let arr = Cousins.init_asc_cnt conf base p in
-        cache := Some (Driver.get_iper p, arr);
+        cache := Some (key, arr);
         arr
 
 let max_im_wid = 240
@@ -395,25 +397,19 @@ let make_desc_level_table conf base max_level p =
     | Some "F" -> Female
     | Some _ | None -> Neuter
   in
-  (* the table 'levt' may be not necessary, since I added 'flevt'; kept
-     because '%max_desc_level;' is still used... *)
-  let levt =
-    Geneweb_db.Driver.iper_marker (Geneweb_db.Driver.ipers base) infinite
-  in
-  let flevt =
-    Geneweb_db.Driver.ifam_marker (Geneweb_db.Driver.ifams base) infinite
-  in
+  let levt = Hashtbl.create 1024 in
+  let flevt = Hashtbl.create 1024 in
   let get = pget conf base in
   let ini_ip = Driver.get_iper p in
-  let rec fill lev = function
-    | [] -> ()
+  let rec fill lev counts = function
+    | [] -> counts
     | ipl ->
-        let new_ipl =
+        let n, new_ipl =
           List.fold_left
-            (fun ipl ip ->
-              if Collection.Marker.get levt ip <= lev then ipl
+            (fun ((n, ipl) as acc) ip ->
+              if Hashtbl.mem levt ip then acc
               else if lev <= max_level then (
-                Collection.Marker.set levt ip lev;
+                Hashtbl.replace levt ip ();
                 let down =
                   if ip = ini_ip then true
                   else
@@ -423,34 +419,26 @@ let make_desc_level_table conf base max_level p =
                     | Neuter -> true
                 in
                 if down then
-                  Array.fold_left
-                    (fun ipl ifam ->
-                      if not (Collection.Marker.get flevt ifam <= lev) then
-                        Collection.Marker.set flevt ifam lev;
-                      let ipa = Driver.get_children (Driver.foi base ifam) in
-                      Array.fold_left (fun ipl ip -> ip :: ipl) ipl ipa)
-                    ipl
-                    (Driver.get_family (get ip))
-                else ipl)
-              else ipl)
-            [] ipl
+                  ( n + 1,
+                    Array.fold_left
+                      (fun ipl ifam ->
+                        if not (Hashtbl.mem flevt ifam) then
+                          Hashtbl.replace flevt ifam lev;
+                        let ipa = Driver.get_children (Driver.foi base ifam) in
+                        Array.fold_left (fun ipl ip -> ip :: ipl) ipl ipa)
+                      ipl
+                      (Driver.get_family (get ip)) )
+                else (n + 1, ipl))
+              else acc)
+            (0, []) ipl
         in
-        fill (succ lev) new_ipl
+        fill (succ lev) (if n > 0 then n :: counts else counts) new_ipl
   in
-  fill 0 [ ini_ip ];
-  (levt, flevt)
+  (flevt, Array.of_list (List.rev (fill 0 [] [ ini_ip ])))
 
-let desc_level_max base desc_level_table_l =
-  let levt, _ = Lazy.force desc_level_table_l in
-  Collection.fold
-    (fun acc i ->
-      let lev = Collection.Marker.get levt i in
-      if lev != infinite && acc < lev then lev else acc)
-    0
-    (Geneweb_db.Driver.ipers base)
-
-let max_descendant_level base desc_level_table_l =
-  desc_level_max base desc_level_table_l
+let max_descendant_level desc_level_table_l =
+  let _, counts = Lazy.force desc_level_table_l in
+  max 0 (Array.length counts - 1)
 
 (* ancestors by list *)
 
@@ -492,12 +480,12 @@ let next_generation conf base mark gpl =
     List.fold_left
       (fun gpl gp ->
         match gp with
-        | GP_person (n, ip, _) ->
-            let m = Collection.Marker.get mark ip in
-            if Sosa.eq m Sosa.zero then (
-              Collection.Marker.set mark ip n;
-              gp :: gpl)
-            else GP_same (n, m, ip) :: gpl
+        | GP_person (n, ip, _) -> (
+            match Hashtbl.find_opt mark ip with
+            | None ->
+                Hashtbl.replace mark ip n;
+                gp :: gpl
+            | Some m -> GP_same (n, m, ip) :: gpl)
         | GP_same _ | GP_interv _ | GP_missing _ -> gp :: gpl)
       [] gpl
   in
@@ -567,9 +555,7 @@ let will_print = function
 
 let get_all_generations conf base p =
   let max_level = match p_getint conf.env "v" with Some v -> v | None -> 0 in
-  let mark =
-    Geneweb_db.Driver.iper_marker (Geneweb_db.Driver.ipers base) Sosa.zero
-  in
+  let mark = Hashtbl.create 1024 in
   let rec get_generations level gpll gpl =
     let gpll = gpl :: gpll in
     if level < max_level then
@@ -1286,11 +1272,8 @@ type 'a env =
       list
       ref
   | Vcous_level of int ref * int ref
-  | Vdesclevtab of
-      ((Driver.iper, int) Collection.Marker.t
-      * (Driver.ifam, int) Collection.Marker.t)
-      lazy_t
-  | Vdmark of (Driver.iper, bool) Collection.Marker.t ref
+  | Vdesclevtab of ((Driver.ifam, int) Hashtbl.t * int array) lazy_t
+  | Vdmark of (Driver.iper, unit) Hashtbl.t
   | Vslist of SortedList.t ref
   | Vslistlm of string list list
   | Vind of Driver.person
@@ -1472,25 +1455,19 @@ let get_nb_marriage_witnesses_of_kind fam wk =
     (fun acc (_, w) -> if wk = w then acc + 1 else acc)
     0 witnesses
 
-let number_of_descendants_aux conf base env all_levels sl eval_int =
-  match get_env "level" env with
-  | Vint i -> (
-      match get_env "desc_level_table" env with
-      | Vdesclevtab t ->
-          let m = fst (Lazy.force t) in
-          let cnt =
-            Collection.fold
-              (fun cnt ip ->
-                if all_levels then
-                  if Collection.Marker.get m ip <= i then cnt + 1 else cnt
-                else if Collection.Marker.get m ip = i then cnt + 1
-                else cnt)
-              0
-              (Geneweb_db.Driver.ipers base)
-          in
-          Templ.VVstring
-            (eval_int conf (if all_levels then cnt - 1 else cnt) sl)
-      | _ -> raise Not_found)
+let number_of_descendants_aux conf env all_levels sl eval_int =
+  match (get_env "level" env, get_env "desc_level_table" env) with
+  | Vint i, Vdesclevtab t ->
+      let _, counts = Lazy.force t in
+      let len = Array.length counts in
+      let cnt =
+        if all_levels then
+          Array.fold_left ( + ) (-1)
+            (Array.sub counts 0 (max 0 (min (i + 1) len)))
+        else if i >= 0 && i < len then counts.(i)
+        else 0
+      in
+      Templ.VVstring (eval_int conf cnt sl)
   | _ -> raise Not_found
 
 let undo_parentheses s =
@@ -2061,20 +2038,14 @@ and eval_simple_str_var conf base env (p, p_auth) = function
           null_val
       | _ -> null_val)
   | "reset_desc_level" -> (
-      let flevt_save =
-        match get_env "desc_level_table_save" env with
-        | Vdesclevtab levt ->
-            let _, flevt = Lazy.force levt in
-            flevt
-        | _ -> raise Not_found
-      in
-      match get_env "desc_level_table" env with
-      | Vdesclevtab levt ->
-          let _, flevt = Lazy.force levt in
-          Collection.iter
-            (fun i ->
-              Collection.Marker.set flevt i (Collection.Marker.get flevt_save i))
-            (Geneweb_db.Driver.ifams base);
+      match
+        (get_env "desc_level_table" env, get_env "desc_level_table_save" env)
+      with
+      | Vdesclevtab levt, Vdesclevtab levt_save ->
+          let flevt, _ = Lazy.force levt in
+          let flevt_save, _ = Lazy.force levt_save in
+          Hashtbl.reset flevt;
+          Hashtbl.iter (Hashtbl.replace flevt) flevt_save;
           null_val
       | _ -> raise Not_found)
   | "source_field" -> (
@@ -2237,9 +2208,9 @@ and eval_compound_var conf base env ((a, _) as ep) loc = function
       | Vint n -> VVstring (eval_int conf n sl)
       | _ -> raise Not_found)
   | "number_of_descendants" :: sl | "nbr_desc" :: sl ->
-      number_of_descendants_aux conf base env true sl eval_int
+      number_of_descendants_aux conf env true sl eval_int
   | "number_of_descendants_at_level" :: sl | "nbr_desc_at_level" :: sl ->
-      number_of_descendants_aux conf base env false sl eval_int
+      number_of_descendants_aux conf env false sl eval_int
   | "parent" :: sl -> (
       match get_env "parent" env with
       | Vind p ->
@@ -3857,7 +3828,7 @@ and eval_bool_person_field conf base env (p, p_auth) = function
           false)
   | "is_descendant" -> (
       match get_env "desc_mark" env with
-      | Vdmark r -> Collection.Marker.get !r (Driver.get_iper p)
+      | Vdmark tab -> Hashtbl.mem tab (Driver.get_iper p)
       | _ -> raise Not_found)
   | "is_female" -> Driver.get_sex p = Female
   | "is_invisible" ->
@@ -4131,26 +4102,17 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
         |> Util.escape_html |> safe_val
   | "mark_descendants" -> (
       match get_env "desc_mark" env with
-      | Vdmark r ->
-          let tab =
-            Geneweb_db.Driver.iper_marker (Geneweb_db.Driver.ipers base) false
+      | Vdmark tab ->
+          Hashtbl.clear tab;
+          let rec mark ip =
+            if not (Hashtbl.mem tab ip) then (
+              Hashtbl.replace tab ip ();
+              Array.iter
+                (fun ifam ->
+                  Array.iter mark (Driver.get_children (Driver.foi base ifam)))
+                (Driver.get_family (pget conf base ip)))
           in
-          let rec mark_descendants len p =
-            let i = Driver.get_iper p in
-            if Collection.Marker.get tab i then ()
-            else (
-              Collection.Marker.set tab i true;
-              let u = p in
-              for i = 0 to Array.length (Driver.get_family u) - 1 do
-                let des = Driver.foi base (Driver.get_family u).(i) in
-                for i = 0 to Array.length (Driver.get_children des) - 1 do
-                  mark_descendants (len + 1)
-                    (pget conf base (Driver.get_children des).(i))
-                done
-              done)
-          in
-          mark_descendants 0 p;
-          r := tab;
+          mark (Driver.get_iper p);
           null_val
       | _ -> raise Not_found)
   | "marriage_age_years" -> (
@@ -4223,6 +4185,20 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
           |> safe_val
         else null_val
       else null_val
+  | "nb_children_before" -> (
+      match get_env "fam" env with
+      | Vfam (ifam, _, _, _) ->
+          let fams = Driver.get_family p in
+          let rec loop i n =
+            if i = Array.length fams || fams.(i) = ifam then n
+            else
+              loop (i + 1)
+                (n
+                + Array.length (Driver.get_children (Driver.foi base fams.(i)))
+                )
+          in
+          loop 0 0 |> string_of_int |> str_val
+      | _ -> raise Not_found)
   | "nb_children_total" ->
       Array.fold_left
         (fun n ifam ->
@@ -4499,15 +4475,17 @@ and eval_str_family_field env (ifam, _, _, _) = function
   | "desc_level" -> (
       match get_env "desc_level_table" env with
       | Vdesclevtab levt ->
-          let _, flevt = Lazy.force levt in
-          string_of_int (Collection.Marker.get flevt ifam)
+          let flevt, _ = Lazy.force levt in
+          Hashtbl.find_opt flevt ifam
+          |> Option.value ~default:infinite
+          |> string_of_int
       | _ -> raise Not_found)
   | "index" -> Driver.Ifam.to_string ifam
   | "set_infinite_desc_level" -> (
       match get_env "desc_level_table" env with
       | Vdesclevtab levt ->
-          let _, flevt = Lazy.force levt in
-          Collection.Marker.set flevt ifam infinite;
+          let flevt, _ = Lazy.force levt in
+          Hashtbl.replace flevt ifam infinite;
           ""
       | _ -> raise Not_found)
   | _ -> raise Not_found
@@ -4785,9 +4763,7 @@ let print_foreach conf base print_ast eval_expr =
       | [] -> ( match get_env "max_anc_level" env with Vint n -> n | _ -> 0)
       | _ -> raise Not_found
     in
-    let mark =
-      Geneweb_db.Driver.iper_marker (Geneweb_db.Driver.ipers base) Sosa.zero
-    in
+    let mark = Hashtbl.create 1024 in
     let rec loop gpl i n =
       let prev_n = n in
       if i > max_level then ()
@@ -4820,9 +4796,7 @@ let print_foreach conf base print_ast eval_expr =
   let print_foreach_ascendant_at_level env al ((p, _) as ep) =
     let max_lev = "max_anc_level" in
     let max_level = match get_env max_lev env with Vint n -> n | _ -> 0 in
-    let mark =
-      Geneweb_db.Driver.iper_marker (Geneweb_db.Driver.ipers base) Sosa.zero
-    in
+    let mark = Hashtbl.create 1024 in
     let rec loop gpl i =
       if i > max_level then ()
       else
@@ -4830,9 +4804,7 @@ let print_foreach conf base print_ast eval_expr =
           Templ.Env.(env |> add "gpl" (Vgpl gpl) |> add "level" (Vint i))
         in
         List.iter (print_ast env ep) al;
-        Collection.iter
-          (fun i -> Collection.Marker.set mark i Sosa.zero)
-          (Geneweb_db.Driver.ipers base);
+        Hashtbl.clear mark;
         let gpl = next_generation2 conf base mark gpl in
         loop gpl (succ i)
     in
@@ -5752,6 +5724,14 @@ let eval_predefined_apply conf env f vl =
           l := SortedList.add sl !l;
           ""
       | _ -> raise Not_found)
+  | "mem_sorted_list", name :: sl -> (
+      match get_env name env with
+      | Vslist l -> if SortedList.mem sl !l then "1" else "0"
+      | _ -> raise Not_found)
+  | "sorted_list_size", [ name ] -> (
+      match get_env name env with
+      | Vslist l -> string_of_int (SortedList.cardinal !l)
+      | _ -> raise Not_found)
   | "hexa", [ s ] -> Util.hexa_string s
   | "initial", [ s ] ->
       if String.length s = 0 then "" else String.sub s 0 (Utf8.next s 0)
@@ -5795,14 +5775,10 @@ let gen_interp_templ ?(no_headers = false) menu title templ_fname conf base p =
       | Some p -> SosaCache.init_sosa_t conf base p
       | None -> None
     in
-    let computed_mal = ref None in
-    let get_mal () =
-      match !computed_mal with
-      | Some v -> v
-      | None ->
-          let v = Cousins.max_ancestor_level conf base (Driver.get_iper p) 0 in
-          computed_mal := Some v;
-          v
+    let mal =
+      Vlazy
+        (Lazy.from_fun (fun () ->
+             Vint (Cousins.max_ancestor_level conf base (Driver.get_iper p) 0)))
     in
     let computed_mdl = ref None in
     let get_mdl () =
@@ -5833,10 +5809,6 @@ let gen_interp_templ ?(no_headers = false) menu title templ_fname conf base p =
       in
       Lazy.from_fun dlt
     in
-    let mal () = Vint (get_mal ()) in
-    let smal () =
-      Vint (Cousins.max_ancestor_level conf base (Driver.get_iper p) 0)
-    in
     let srmal () =
       match Util.find_sosa_ref conf base with
       | Some sosa_ref ->
@@ -5845,8 +5817,8 @@ let gen_interp_templ ?(no_headers = false) menu title templ_fname conf base p =
       | None -> Vint 0
     in
     let mcl () = Vint (Cousins.max_cousin_level conf) in
-    let mdl () = Vint (max_descendant_level base desc_level_table_l) in
-    let smdl () = Vint (max_descendant_level base desc_level_table_m) in
+    let mdl () = Vint (max_descendant_level desc_level_table_l) in
+    let smdl () = Vint (max_descendant_level desc_level_table_m) in
     let nldb () =
       let db = Driver.read_nldb base in
       let db = Notes.merge_possible_aliases conf db in
@@ -5867,14 +5839,13 @@ let gen_interp_templ ?(no_headers = false) menu title templ_fname conf base p =
     |> Templ.Env.add "listc" (Vslist (ref SortedList.empty))
     |> Templ.Env.add "listd" (Vslist (ref SortedList.empty))
     |> Templ.Env.add "liste" (Vslist (ref SortedList.empty))
-    |> Templ.Env.add "desc_mark"
-         (Vdmark (ref @@ Collection.Marker.dummy Driver.Iper.dummy false))
+    |> Templ.Env.add "desc_mark" (Vdmark (Hashtbl.create 1))
     |> Templ.Env.add "lazy_print" (Vlazyp (ref None))
     |> Templ.Env.add "sosa" (Vsosa (ref []))
     |> Templ.Env.add "sosa_ref" (Vsosa_ref sosa_ref)
     |> Templ.Env.add "t_sosa" (Vt_sosa t_sosa)
-    |> Templ.Env.add "max_anc_level" (Vlazy (Lazy.from_fun mal))
-    |> Templ.Env.add "static_max_anc_level" (Vlazy (Lazy.from_fun smal))
+    |> Templ.Env.add "max_anc_level" mal
+    |> Templ.Env.add "static_max_anc_level" mal
     |> Templ.Env.add "sosa_ref_max_anc_level" (Vlazy (Lazy.from_fun srmal))
     |> Templ.Env.add "max_cous_level" (Vlazy (Lazy.from_fun mcl))
     |> Templ.Env.add "max_desc_level" (Vlazy (Lazy.from_fun mdl))

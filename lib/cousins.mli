@@ -79,9 +79,10 @@ val sibling_has_desc_lev :
 
 val clear_cousins_cache :
   config -> Geneweb_db.Driver.base -> Geneweb_db.Driver.person -> unit
-(** Deletes the per-level disk cache of [p]
-    ([caches/cousins_json/<key>_level_*.json]); no-op when the cache directory
-    is absent. Backs the wizard cache-reset action of [m=C]. *)
+(** Deletes the per-level disk cache files of [p]
+    ([caches/cousins_json/<key>_level_*.json]) written before the last change of
+    the base; no-op when the cache directory is absent. Backs the wizard
+    cache-refresh action of [m=C]. *)
 
 val init_cousins_cnt :
   config ->
@@ -93,12 +94,16 @@ val init_cousins_cnt :
     depth. The ceiling, in priority order:
     - [up_to] when provided — explicit, no base-wide ancestor scan (used by the
       incremental JSON endpoint)
-    - [v] URL parameter when present and positive — effective ceiling is [v + 1]
-    - [max_ancestor_level] computed on [p] otherwise
+    - [max_ancestor_level] computed on [p], capped by the [v] URL parameter when
+      present and positive
+    - 0 otherwise
 
     Uses and populates the per-level disk cache when [cache_cousins_tool=yes] in
     the [.gwf]; cache files live in [caches/cousins_json/<key>_level_N.json]
-    where [<key>] is [strip_lower(surname).occ.strip_lower(first_name)]. *)
+    where [<key>] is [Image.key_dir_basename] of [p]. A cached level is rebuilt
+    when it was written before the last change of the base and is older than
+    [cache_cousins_ttl] hours (0 by default), or when its format version
+    differs; invalid files are deleted on the first rebuild of a request. *)
 
 val extract_level : cousins_sparse -> int -> cousins_sparse
 (** [extract_level sparse level] returns a sub-sparse keeping only the cells of

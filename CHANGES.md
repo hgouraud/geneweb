@@ -83,6 +83,8 @@
   count at once; `m=OK_FOLD` (or `anoma`) merges them into
   `<base>.gwb/config/verified.jsonl`. `m=OK_FILE` lists the verified
   anomalies with who verified them and when.
+- The descendant counters of the templates (number_of_descendants,
+  max_desc_level…) no longer scan nor allocate per person of the base.
 
 ## Gwsetup
 - Bind `127.0.0.1` instead of resolving `localhost`, which selects the
@@ -121,6 +123,10 @@
   1750 (a birth or baptism date more than 125 years old still makes the
   person of course dead), and `p` as birth year for a public person.
   Both statuses stay on the person form.
+- Descendant table: continuous d'Aboville numbers across unions,
+  consistent rows with collapsed implexes or without family column,
+  generation names in every language. Ancestor table: consistent rows
+  with the children column alone.
 
 ## Deprecated features
 - Inferring the CGI mode of `gwd` from the `QUERY_STRING` environment
