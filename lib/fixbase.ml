@@ -323,20 +323,29 @@ let fix_marriage_divorce ?report progress base =
       let marriage_place0 = Driver.get_marriage_place fam in
       let marriage_note0 = Driver.get_marriage_note fam in
       let marriage_src0 = Driver.get_marriage_src fam in
-      (* TODO is divorce treated as fevent! *)
-      let divorce0 = Driver.get_divorce fam in
       let marr_data0 =
         (relation0, marriage0, marriage_place0, marriage_note0, marriage_src0)
       in
+      (* Same-sex couples store NoSexesCheck* relations: keep that mode,
+         otherwise every such family would be "fixed" to Married/NotMarried. *)
+      let nsck =
+        match relation0 with
+        | NoSexesCheckMarried | NoSexesCheckNotMarried -> true
+        | _ -> false
+      in
+      (* Divorce and separation are not compared: [Driver.get_divorce] and
+         [Driver.get_separation] derive them from the fevents, so the stored
+         [divorce] field is never read and comparing it only produced false
+         positives (every separated couple, families with several #div). *)
       let ( ((relation, marriage, marriage_place, marriage_note, marriage_src)
              as marr_data),
-            divorce,
+            _divorce,
             _ ) =
-        UpdateFamOk.reconstitute_from_fevents false
+        UpdateFamOk.reconstitute_from_fevents nsck
           (Driver.insert_string base "")
           fevents
       in
-      if marr_data0 <> marr_data || divorce0 <> divorce then (
+      if marr_data0 <> marr_data then (
         let fam' =
           {
             (Driver.gen_family_of_family fam) with
@@ -345,7 +354,6 @@ let fix_marriage_divorce ?report progress base =
             marriage_place;
             marriage_note;
             marriage_src;
-            divorce;
           }
         in
         Driver.patch_family base (Driver.get_ifam fam) fam';

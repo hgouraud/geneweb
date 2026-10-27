@@ -96,8 +96,11 @@ val fix_marriage_divorce :
   (int -> int -> unit) ->
   Geneweb_db.Driver.base ->
   unit
-(** For every family in the base synchronise its fields with marriage and
-    divorce events. *)
+(** For every family in the base synchronise its marriage fields (relation,
+    date, place, note, source) with its events. Same-sex relations
+    ([NoSexesCheck*]) are preserved. Divorce and separation are not touched:
+    they are derived from the events by [Driver.get_divorce] and
+    [Driver.get_separation]. *)
 
 val fix_missing_spouses :
   ?report:(patch -> unit) ->
