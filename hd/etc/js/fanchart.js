@@ -68,6 +68,10 @@ let isCircularMode = false;
 let renderContext = { target: null, idSuffix: '' };
 let current_angle = CONFIG.default_angle;
 let currentRotation = 0;
+// Disposition des lignées en éventail (180°/220°) :
+// 'center' (||) lignées patronymiques paternelle (S2, S4, S8…) et maternelle
+// (S3, S6, S12…) de part et d'autre de l'axe, 'edges' (__) aux deux bords.
+let lineLayout = 'center';
 
 
 // Génère un ID unique selon le contexte de rendu (mode 360° ou standard)
@@ -245,6 +249,7 @@ const URLManager = {
       showEvents: urlParams.has('events'),
       isCircular: urlParams.get('mode') === 'couple',
       angle: parseInt(urlParams.get('angle')) || 220,
+      lineLayout: urlParams.get('lines') === 'edges' ? 'edges' : 'center',
       implexMode: urlParams.get('implex') === 'num' ? 'numbered' :
                   urlParams.get('implex') === 'full' ? 'full' : 'reduced',
       lockedPlace: urlParams.get('lock') || null
@@ -476,6 +481,7 @@ const URLManager = {
       } else if (current_angle !== 220) {
         params.push(`angle=${current_angle}`);
       }
+      if (lineLayout === 'edges') params.push('lines=edges');
     }
 
     if (options.preserveTools) {
@@ -3809,8 +3815,28 @@ const AngleManager = {
     FanchartApp.fitScreen();
   },
 
+  // Basculer la disposition des lignées et redessiner
+  toggleLineLayout: function() {
+    if (isCircularMode) return;
+    lineLayout = lineLayout === 'center' ? 'edges' : 'center';
+    this.updateAngleButtons();
+    URLManager.updateCurrentURL();
+    FanchartApp.reRenderWithCurrentGenerations();
+  },
+
   // Mettre à jour l'état visuel des boutons
   updateAngleButtons: function() {
+    const layoutBtn = $('b-line-layout');
+    if (layoutBtn) {
+      const edges = lineLayout === 'edges';
+      layoutBtn.classList.toggle('disabled', isCircularMode);
+      layoutBtn.disabled = isCircularMode;
+      // getAttribute plutôt que dataset : terser renomme les propriétés
+      layoutBtn.title = layoutBtn.getAttribute(edges ? 'data-title-edges' : 'data-title-center');
+      const glyph = layoutBtn.querySelector('.fc-glyph');
+      if (glyph) glyph.textContent = edges ? '__' : '||';
+    }
+
     // Désactiver tous les boutons d'angle
     [180, 220, 360].forEach(angle => {
       const btn = $(`b-angle-${angle}`);
@@ -4422,14 +4448,56 @@ const SVGGeometry = {
   },
 
   /**
-   * Calcul la géométrie du secteur de mariage pour un couple
+   * Indique si ce Sosa appartient à la moitié dessinée en miroir.
+   *
+   * Les lignées suivies sont les lignées patronymiques des deux parents :
+   * paternelle S2, S4, S8… et maternelle S3, S6, S12… (père de la mère).
+   * Dans l'ordre Sosa (père à gauche, mère à droite), la lignée paternelle
+   * longe le bord gauche et la lignée maternelle l'axe central. `mirror`
+   * désigne la moitié inversée pour obtenir une disposition symétrique :
+   * - 'left'  (||) : moitié issue de S2 inversée, les deux lignées à l'axe ;
+   * - 'right' (__) : moitié issue de S3 inversée, les deux lignées aux bords ;
+   * - null : aucun miroir (mode circulaire).
+   * S2 et S3 ne bougent pas.
+   */
+  isInMirroredHalf: function(sosa, generation, mirror) {
+    if (!mirror || generation < 2) return false;
+    const inLeftHalf = sosa - Math.pow(2, generation - 1) < Math.pow(2, generation - 2);
+    return mirror === 'left' ? inLeftHalf : !inLeftHalf;
+  },
+
+  /**
+   * Rang angulaire d'un Sosa dans sa génération (0 = le plus à gauche).
+   */
+  getSectorSlot: function(sosa, generation, mirror) {
+    const firstSosa = Math.pow(2, generation - 1);
+    const index = sosa - firstSosa;
+    if (!this.isInMirroredHalf(sosa, generation, mirror)) return index;
+    const half = firstSosa / 2;
+    // Inversion à l'intérieur de la moitié qui contient ce Sosa
+    return index < half ? half - 1 - index : 3 * half - 1 - index;
+  },
+
+  /**
+   * Indique si le couple dont fait partie ce Sosa est dessiné en miroir
+   * (mère à gauche du père).
+   */
+  isMirroredCouple: function(sosa, generation, mirror) {
+    return generation >= 3 && this.isInMirroredHalf(sosa, generation, mirror);
+  },
+
+  /**
+   * Calcul la géométrie du secteur de mariage pour un couple.
+   * La mère occupe le secteur voisin du père : à sa droite en temps
+   * normal, à sa gauche quand le couple est en miroir.
    */
   getMarriageGeometry: function(fatherPosition) {
-    const marriageEndAngle = fatherPosition.a2 + fatherPosition.delta;
+    const mirrored = fatherPosition.mirrored === true;
 
     return {
-      startAngle: fatherPosition.a1,
-      endAngle: marriageEndAngle,
+      startAngle: mirrored ? fatherPosition.a1 - fatherPosition.delta : fatherPosition.a1,
+      endAngle: mirrored ? fatherPosition.a2 : fatherPosition.a2 + fatherPosition.delta,
+      separatorAngle: mirrored ? fatherPosition.a1 : fatherPosition.a2,
       innerRadius: fatherPosition.r1, // Couche interne pour éviter des conflits
       outerRadius: fatherPosition.r1 + 10
     };
@@ -4480,6 +4548,7 @@ const FanchartApp = {
     showEvents = state.showEvents;
     isCircularMode = state.isCircular;
     current_angle = state.angle;
+    lineLayout = state.lineLayout;
     implexMode = state.implexMode;
 
     this.applyInitialBodyClass();
@@ -4828,6 +4897,8 @@ const FanchartApp = {
     // rayon total accumulé
     let cumulativeR = CONFIG.a_r[0];
     const rings = isCircularMode ? max_gen : max_gen + 1;
+    // Miroir d'une demi-branche en éventail (180°/220°) seulement
+    const mirror = isCircularMode ? null : (lineLayout === 'center' ? 'left' : 'right');
 
     for (let gen = 2; gen <= rings; gen++) {
       const innerR = cumulativeR;                // rayon intérieur
@@ -4837,21 +4908,26 @@ const FanchartApp = {
       // angle total à découper - utilise l'angle dynamique
       const delta = current_angle / Math.pow(2, gen-1);
       // angle de départ au-dessus du centre
-      let angle = -90 - current_angle / 2 + delta/2;
+      const firstAngle = -90 - current_angle / 2 + delta/2;
 
-      // on itère sur les 2^(gen-1) cases de cette génération
+      // on itère sur les 2^(gen-1) cases de cette génération, dans l'ordre
+      // des Sosa (le père avant la mère, qui crée le groupe famille)
       const firstSosa = Math.pow(2, gen-1);
       const lastSosa  = Math.pow(2, gen) - 1;
 
-      for (let sosa = firstSosa; sosa <= lastSosa; sosa++, angle += delta) {
+      for (let sosa = firstSosa; sosa <= lastSosa; sosa++) {
         const person = this.getEffectivePerson(sosa);
         if (!person) continue;
+
+        const slot = SVGGeometry.getSectorSlot(sosa, gen, mirror);
+        const angle = firstAngle + slot * delta;
 
         // prépare la position de ce secteur
         const pos = {
           r1: innerR, r2: outerR,
           a1: angle - delta/2, a2: angle + delta/2,
-          generation: gen, delta: delta
+          generation: gen, delta: delta,
+          mirrored: SVGGeometry.isMirroredCouple(sosa, gen, mirror)
         };
 
         this.renderAncestorSector(sosa, pos, person);
@@ -4870,6 +4946,10 @@ const FanchartApp = {
         };
       }
     });
+    const layoutBtn = $('b-line-layout');
+    if (layoutBtn) {
+      layoutBtn.onclick = () => AngleManager.toggleLineLayout();
+    }
   },
 
   // Résoudre les implexes virtuellement
@@ -5072,7 +5152,8 @@ const FanchartApp = {
       marriageGeometry.startAngle, marriageGeometry.endAngle);
 
     // Ligne de séparation entre père et mère
-    SVGRenderer.drawRadialLine(marriageGroup, marriageGeometry.outerRadius, position.r2, position.a2);
+    SVGRenderer.drawRadialLine(marriageGroup, marriageGeometry.outerRadius, position.r2,
+      marriageGeometry.separatorAngle);
 
     // Secteur interactif du mariage dans sa couronne exclusive
     SVGRenderer.drawPie(marriageGroup, marriageGeometry.innerRadius, marriageGeometry.outerRadius,
@@ -5277,14 +5358,6 @@ reRenderWithCurrentGenerations: function() {
         this.classList.toggle("active", !isVisible);
       }
     };
-    $("b-home").onclick = function() {
-      window.location = this.getAttribute("data-url");
-    };
-    $("b-rng").onclick = function() {
-      const url = this.getAttribute("data-url");
-      if (url) { window.location = url; }
-    };
-
     $("b-refresh").onclick = () => {
       this.calculateDimensions();
       this.fitScreen();

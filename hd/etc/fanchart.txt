@@ -3,26 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="none">
 <link rel="icon" href="%images_prefix;favicon_gwd.png">
 <link rel="apple-touch-icon" href="%images_prefix;favicon_gwd.png">
 <title>[*fanchart] %self; (g%e.v;)</title>
+%include;css
+<link rel="stylesheet" href="%etc_prefix;css/fanchart.css?hash=%apply;hash%with;%etc_prefix;css/fanchart.css%end;">
 <style title="fc-auto"></style>
-<style>
-  body { margin: 0; padding: 0; }
-  svg { position: absolute; left: 0; top: 0; }
-  .hidden { display: none; }
-</style>
-%if;(b.use_cdn="yes")
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-%else;
-  <link rel="preload" href="%etc_prefix;css/all.min.css?version=6.7.2" as="style" onload="this.onload=null;this.rel='stylesheet'">
-%end;
-<link rel="preload" href="%etc_prefix;css/fanchart.css?hash=%apply;hash%with;%etc_prefix;css/fanchart.css%end;" as="style" onload="this.onload=null;this.rel='stylesheet'">
 </head>
-%define;dice()
-  %random.init;
-  %apply;nth%with;one/two/three/four/five/six%and;%random.6;%end;
-%end;
 %define;event(xx,yy)
   %if;(xx.yy_place!=""),"yy_place":"%xx.yy_place;"%end;
   %if;(xx.yy_place.sub!=""),"yy_sub":"%xx.yy_place.sub;"%nn;
@@ -91,12 +79,16 @@
         <span class="legend-text">zz [years old]</span>
       </li>
 %end;
-<body id="body" class="bg-light p-4"%if;wizard; data-wizard="1"%end;>
+<body id="body"%body_prop;%if;wizard; data-wizard="1"%end;>
+%include;hed
+%if;(e.pdf!="on")
+  %include;home
+%end;
 <canvas id="pixel" width="1" height="1" style="display: none;"></canvas>
 <div id="age-legend" class="age-legend-container">
   <div class="legend-header">
     <h3 class="legend-title">[*age]</h3>
-    <button class="legend-close" title="[*close]">×</button>
+    <button type="button" class="btn-close legend-close" title="[*close]" aria-label="[*close]"></button>
   </div>
   <div class="legend-section ages-section">
     <h4 class="section-label"><i class="fas fa-user" aria-hidden="true"></i>[*person/persons]1</h4>
@@ -106,7 +98,6 @@
       %apply;age_li_item("age",2,"55-69")
       %apply;age_li_item("age",3,"70-84")
       %apply;age_li_item("age",4,"85+")
-      </li>
     </ul>
   </div>
   <div class="legend-section marriages-section">
@@ -121,120 +112,115 @@
   </div>
 </div>
 %if;(e.pdf!="on")
-<div class="fanchart-controls" id="fanchart-controls">
-  <div class="control-section">
-    <div class="btn-group-fanchart">
-      <button id="b-home" class="btn-fanchart" title="[*home]" data-url="%prefix_no_senv;">
-        <i class="fa fa-house fa-fw"></i>
-      </button>
-      <button id="b-help" class="btn-fanchart" title="[*help and shortcuts]">
-        <i class="fa fa-info fa-fw"></i>
-      </button>
-      <button id="b-rng" class="btn-fanchart" title="[*random individual]" data-url="%apply;url_set%with;rnd/v%and;1%end;&v=5">
-        <i class="fa fa-dice-%apply;dice() fa-fw"></i>
-      </button>
-    </div>
-    <button class="btn-close" id="b-no-buttons" title="[*visualize/show/hide/summary]2">×</button>
-  </div>
+<div class="fanchart-controls d-print-none" id="fanchart-controls">
+  <button type="button" class="btn-close fc-close" id="b-no-buttons"
+    title="[*visualize/show/hide/summary]2" aria-label="[*visualize/show/hide/summary]2"></button>
 
   <div class="control-section">
     <div class="section-title">[*view/opening]0</div>
-    <div class="btn-group-fanchart">
-      <button id="b-zoom-out" class="btn-fanchart" title="[*zoom/unzoom]1">
-        <i class="fa fa-magnifying-glass-minus fa-fw"></i>
+    <div class="btn-group btn-group-sm" role="group">
+      <button type="button" id="b-zoom-out" class="btn btn-outline-primary fc-btn" title="[*zoom/unzoom]1">
+        <i class="fa fa-magnifying-glass-minus fa-fw" aria-hidden="true"></i>
       </button>
-      <button id="b-zoom-in" class="btn-fanchart" title="[*zoom/unzoom]0">
-        <i class="fa fa-magnifying-glass-plus fa-fw"></i>
+      <button type="button" id="b-zoom-in" class="btn btn-outline-primary fc-btn" title="[*zoom/unzoom]0">
+        <i class="fa fa-magnifying-glass-plus fa-fw" aria-hidden="true"></i>
       </button>
-      <button id="b-refresh" class="btn-fanchart" title="[*resize fanchart]">
-        <i class="fa fa-arrow-rotate-right fa-fw"></i>
+      <button type="button" id="b-refresh" class="btn btn-outline-primary fc-btn" title="[*resize fanchart]">
+        <i class="fa fa-arrow-rotate-right fa-fw" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="mt-1">
+      <button type="button" id="b-line-layout" class="btn btn-sm btn-outline-primary fc-btn"
+        title="[*paternal and maternal lines near the axis/on the edges]0"
+        data-title-center="[*paternal and maternal lines near the axis/on the edges]0"
+        data-title-edges="[*paternal and maternal lines near the axis/on the edges]1">
+        <span class="fc-glyph" aria-hidden="true">||</span>
       </button>
     </div>
   </div>
 
   <div class="control-section">
     <div class="section-title" id="generation-section-title">[generation/generations]1</div>
-    <div class="btn-group-fanchart">
-      <button id="b-gen-del" class="btn-fanchart %if;(e.v <= 1)disabled%end;" title="[*add/remove one generation]1">
-        <i class="fa fa-minus fa-fw"></i>
+    <div class="btn-group btn-group-sm" role="group">
+      <button type="button" id="b-gen-del" class="btn btn-outline-primary fc-btn %if;(e.v <= 1)disabled%end;" title="[*add/remove one generation]1">
+        <i class="fa fa-minus fa-fw" aria-hidden="true"></i>
       </button>
-      <button id="b-gen-add" class="btn-fanchart %if;(e.v >= 10)disabled%end;" title="[*add/remove one generation]0">
-        <i class="fa fa-plus fa-fw"></i>
+      <button type="button" id="b-gen-add" class="btn btn-outline-primary fc-btn %if;(e.v >= 10)disabled%end;" title="[*add/remove one generation]0">
+        <i class="fa fa-plus fa-fw" aria-hidden="true"></i>
       </button>
-      <button id="b-implex" class="btn-fanchart" title="%if;(e.implex="")[*display implex]%else;[*collapse implex]%end;">
-        <i class="fa fa-comment-%if;(e.implex="")dots%else;slash%end; fa-fw"></i>
+      <button type="button" id="b-implex" class="btn btn-outline-primary fc-btn" title="%if;(e.implex="")[*display implex]%else;[*collapse implex]%end;">
+        <i class="fa fa-comment-%if;(e.implex="")dots%else;slash%end; fa-fw" aria-hidden="true"></i>
       </button>
-    </div>
-  </div>
-
-<div class="control-section">
-    <div class="section-title">[*view/opening]1</div>
-    <div class="btn-group-fanchart">
-      <button id="b-angle-180" class="btn-fanchart" title="180° ([half-disc/standard/double half-disc]0)">180</button>
-      <button id="b-angle-220" class="btn-fanchart active" title="220° ([half-disc/standard/double half-disc]1)">220</button>
-      <button id="b-angle-360" class="btn-fanchart" title="2×180° ([half-disc/standard/double half-disc]2)">360</button>
     </div>
   </div>
 
   <div class="control-section">
-    <div class="section-title">[*font/default/large/readable]0</div>
-    <div class="btn-group-fanchart">
-     <select id="font-selector" class="form-select form-select-sm mx-0">
-       <option value="">[*font/default/large/readable]1</option>
-       <option value="mono">Mono</option>
-       <option value="serif">Serif</option>
-       <option value="large">[*font/default/large/readable]2</option>
-       <option value="readable">[*font/default/large/readable]3</option>
-    </select>
+    <div class="section-title">[*view/opening]1</div>
+    <div class="btn-group btn-group-sm" role="group">
+      <button type="button" id="b-angle-180" class="btn btn-outline-primary fc-btn" title="180° ([half-disc/standard/double half-disc]0)">180</button>
+      <button type="button" id="b-angle-220" class="btn btn-outline-primary fc-btn active" title="220° ([half-disc/standard/double half-disc]1)">220</button>
+      <button type="button" id="b-angle-360" class="btn btn-outline-primary fc-btn" title="2×180° ([half-disc/standard/double half-disc]2)">360</button>
     </div>
   </div>
+
+  <div class="control-section">
+    <label class="section-title" for="font-selector">[*font/default/large/readable]0</label>
+    <select id="font-selector" class="form-select form-select-sm">
+      <option value="">[*font/default/large/readable]1</option>
+      <option value="mono">Mono</option>
+      <option value="serif">Serif</option>
+      <option value="large">[*font/default/large/readable]2</option>
+      <option value="readable">[*font/default/large/readable]3</option>
+    </select>
+  </div>
+
   <div class="control-section">
     <div class="section-title">[*tools]</div>
-    <div class="btn-group-fanchart">
-      <button id="b-age" class="btn-fanchart" 
-        title="[*death ages and marriage duration]">
-        <i class="fa fa-cake-candles fa-fw"></i>
+    <div class="btn-group btn-group-sm" role="group">
+      <button type="button" id="b-age" class="btn btn-outline-primary fc-btn" title="[*death ages and marriage duration]">
+        <i class="fa fa-cake-candles fa-fw" aria-hidden="true"></i>
       </button>
-       <button id="b-places-colorise" class="btn-fanchart"
-        title="[*colorize places]">
-        <i class="fa fa-map-location-dot fa-fw"></i>
+      <button type="button" id="b-places-colorise" class="btn btn-outline-primary fc-btn" title="[*colorize places]">
+        <i class="fa fa-map-location-dot fa-fw" aria-hidden="true"></i>
+      </button>
+      <button type="button" id="b-help" class="btn btn-outline-primary fc-btn" title="[*help and shortcuts]">
+        <i class="fa fa-info fa-fw" aria-hidden="true"></i>
       </button>
     </div>
-
-
   </div>
 </div>
-<button id="b-show-buttons" class="btn-restore-controls" style="display:none;" title="[*show controls]">
-  <i class="fa fa-align-justify"></i>
+<button type="button" id="b-show-buttons" class="btn btn-sm btn-link btn-restore-controls d-print-none" style="display:none;" title="[*show controls]">
+  <i class="fa fa-align-justify" aria-hidden="true"></i>
 </button>
+%end;
 <div id="container" style="position: relative;">
   <svg id="fanchart" class="bi ba ma de bu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
   <div id="person-panel" class="identity-panel"></div>
 </div>
 
 <!-- Panneau des lieux -->
-<div class="places-panel" id="places-panel">
-  <button class="panel-toggle" title="[*show panel]">‹</button>
+<div class="places-panel d-print-none" id="places-panel">
+  <button type="button" class="btn btn-sm btn-outline-secondary panel-toggle" title="[*show panel]">‹</button>
 
   <div class="places-header">
     <div class="header-left">
       <div class="places-title">[*places and events]</div>
       <div class="generation-count"></div>
     </div>
-    <button class="panel-close" title="[*visualize/show/hide/summary]2">›</button>
+    <button type="button" class="btn btn-sm btn-link panel-close" title="[*visualize/show/hide/summary]2">›</button>
   </div>
 
   <!-- Contrôles de recherche, tri et mode complet -->
   <div class="controls-search-section">
-    <div class="search-input-wrapper">
-      <input type="text" class="search-input" placeholder="[*search/case sensitive]0…">
-      <button class="search-clear" title="[*clear input]" style="display: none;">×</button>
+    <div class="search-input-wrapper input-wrapper">
+      <input type="text" class="form-control form-control-sm search-input" placeholder="[*search/case sensitive]0…">
+      <button type="button" class="btn-close search-clear" title="[*clear input]" aria-label="[*clear input]" style="display: none;"></button>
     </div>
-    <div class="controls-buttons">
-      <button class="sort-toggle">
+    <div class="btn-group btn-group-sm controls-buttons" role="group">
+      <button type="button" class="btn btn-outline-primary fc-btn sort-toggle">
         <i class="fas fa-arrow-down-wide-short"></i>
       </button>
-      <button class="events-toggle" title="[*visualize/show/hide/summary]1 [event/events]1">
+      <button type="button" class="btn btn-outline-primary fc-btn events-toggle" title="[*visualize/show/hide/summary]1 [event/events]1">
         <i class="far fa-lightbulb"></i>
       </button>
     </div>
@@ -403,6 +389,7 @@ window.t = function(key, defaultValue = key) {
   return typeof value === 'string' ? value : defaultValue;
 };
 </script>
+%include;js
 <script src="%etc_prefix;js/fanchart.min.js?hash=%apply;hash%with;%etc_prefix;js/fanchart.min.js%end;"></script>
 </body>
 </html>
