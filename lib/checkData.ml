@@ -141,24 +141,8 @@ let nbsp_re =
             (* U+202F espace insécable fine *)
           ]))
 
-let has_any_particle base s =
-  let rec check_from pos =
-    if pos >= String.length s then false
-    else
-      let remaining = String.sub s pos (String.length s - pos) in
-      if Mutil.get_particle (Driver.base_particles base) remaining <> "" then
-        true
-      else
-        match String.index_from_opt s pos ' ' with
-        | None -> false
-        | Some space_pos -> check_from (space_pos + 1)
-  in
-  check_from 0
-
 let is_roman_numeral s =
-  try
-    Re.execp (Lazy.force roman_re) s || Re.execp (Lazy.force first_ordinal_re) s
-  with _ -> false
+  Re.execp (Lazy.force roman_re) s || Re.execp (Lazy.force first_ordinal_re) s
 
 (* Multiple Spaces functions *)
 (* Check if the character following nbsp is part of a roman numeral *)
@@ -187,14 +171,19 @@ let is_any_space s pos =
   then true
   else false
 
+let char_len s i =
+  match Utf8.nbc s.[i] with
+  | n -> min n (String.length s - i)
+  | exception Invalid_argument _ -> 1
+
 let has_multiple_spaces s =
   let len = String.length s in
   let rec loop i =
     if i >= len then false
     else if is_any_space s i then
-      let j = Utf8.next s i in
+      let j = i + char_len s i in
       (j < len && is_any_space s j) || loop j
-    else loop (Utf8.next s i)
+    else loop (i + char_len s i)
   in
   loop 0
 
@@ -207,40 +196,34 @@ let find_multiple_spaces_positions s =
       let rec collect_sequence pos acc_positions =
         if pos >= len then (pos, List.rev acc_positions)
         else if is_any_space s pos then
-          let next_pos = Utf8.next s pos in
+          let next_pos = pos + char_len s pos in
           collect_sequence next_pos (pos :: acc_positions)
         else (pos, List.rev acc_positions)
       in
       let end_pos, sequence_positions = collect_sequence byte_pos [] in
       if List.length sequence_positions >= 2 then
-        positions := sequence_positions @ !positions;
+        positions := List.rev_append sequence_positions !positions;
       find_sequences end_pos)
-    else find_sequences (Utf8.next s byte_pos)
+    else find_sequences (byte_pos + char_len s byte_pos)
   in
   find_sequences 0
 
 let fix_multiple_spaces s =
   let len = String.length s in
   let buf = Buffer.create len in
-  let rec loop i in_space =
+  let rec skip i = if is_any_space s i then skip (i + char_len s i) else i in
+  let rec loop i =
     if i >= len then Buffer.contents buf
     else
-      let is_space = is_any_space s i in
-      let char_size =
-        if
-          i + 2 < len
-          && s.[i] = '\xE2'
-          && s.[i + 1] = '\x80'
-          && s.[i + 2] = '\xAF'
-        then 3
-        else if i + 1 < len && s.[i] = '\xC2' && s.[i + 1] = '\xA0' then 2
-        else 1
-      in
-      if is_space && not in_space then Buffer.add_char buf ' '
-      else if not is_space then Buffer.add_substring buf s i char_size;
-      loop (i + char_size) is_space
+      let j = i + char_len s i in
+      if is_any_space s i && is_any_space s j then (
+        Buffer.add_char buf ' ';
+        loop (skip j))
+      else (
+        Buffer.add_substring buf s i (j - i);
+        loop j)
   in
-  loop 0 false
+  loop 0
 
 (* Non-breaking spaces functions *)
 let has_non_breaking_space s =
@@ -278,15 +261,9 @@ let find_non_breaking_space_positions s =
 
 (* Detect if a word starts with Irish name prefixes Mac/Mc/Fitz *)
 let is_irish_prefix s =
-  let len = String.length s in
-  (len >= 3 && String.sub s 0 3 = "Mac")
-  || (len >= 2 && String.sub s 0 2 = "Mc")
-  || (len >= 4 && String.sub s 0 4 = "Fitz")
-(* Ocaml 4.13+
-let is_irish_prefix s =
-  String.starts_with ~prefix:"Mac" s ||
-  String.starts_with ~prefix:"Mc" s ||
-  String.starts_with ~prefix:"Fitz" s *)
+  String.starts_with ~prefix:"Mac" s
+  || String.starts_with ~prefix:"Mc" s
+  || String.starts_with ~prefix:"Fitz" s
 
 (* Check if a word is either a Roman numeral or starts with an Irish prefix
    Examples of valid words:
@@ -300,126 +277,131 @@ let lowercase_allowed_words =
 let is_lowercase_allowed word =
   List.mem (String.lowercase_ascii word) lowercase_allowed_words
 
-(* Detect invalid capitalization patterns:
-   - Multiple uppercase letters in sequence
-   - Lowercase followed by uppercase
-   - Uppercase, lowercase, uppercase sequence *)
 (* Bad capitalization functions *)
-let has_bad_capitalization_pattern s =
-  let len = String.length s in
-  let rec scan i =
-    if i >= len then false
-    else
-      (* Check AAz pattern: [A-Z][A-Z][a-z] *)
-      let has_aaz =
-        i + 2 < len
-        && s.[i] >= 'A'
-        && s.[i] <= 'Z'
-        && s.[i + 1] >= 'A'
-        && s.[i + 1] <= 'Z'
-        && s.[i + 2] >= 'a'
-        && s.[i + 2] <= 'z'
-      in
-      if has_aaz then true
-      else
-        (* Check aZ pattern: [a-z][A-Z] *)
-        let has_az =
-          i + 1 < len
-          && s.[i] >= 'a'
-          && s.[i] <= 'z'
-          && s.[i + 1] >= 'A'
-          && s.[i + 1] <= 'Z'
-        in
-        if has_az then true else scan (i + 1)
-  in
-  scan 0
 
-(* Capitalization check function
-   Examines each word for valid patterns for some books
-   For other types, just checks for invalid capitalization patterns *)
-let has_legitimate_mixed_case dict base s =
+let is_ascii_upper c = c >= 'A' && c <= 'Z'
+let is_ascii_lower c = c >= 'a' && c <= 'z'
+
+(* Byte spans [start, stop) of the space-separated words of [s]. *)
+let word_spans s =
+  let len = String.length s in
+  let rec loop i acc =
+    if i >= len then List.rev acc
+    else if s.[i] = ' ' then loop (i + 1) acc
+    else
+      let j =
+        match String.index_from_opt s i ' ' with Some j -> j | None -> len
+      in
+      loop j ((i, j) :: acc)
+  in
+  loop 0 []
+
+(* Byte spans [start, stop) of [s] covered by a particle of the base
+   particles file. Particles are looked for at the beginning of [s], after
+   a space or a hyphen, and right after a previous particle, so that
+   "de la ", "d'", "bin " are recognised wherever they appear. A segment
+   followed by a hyphen is also a particle when it is one followed by a
+   space: "al" in "Abd al-Rahman". *)
+let particle_spans particles s =
+  let len = String.length s in
+  let is_sep c = c = ' ' || c = '-' in
+  let rec next_sep j =
+    if j >= len || is_sep s.[j] then j else next_sep (j + 1)
+  in
+  let rec scan pos acc =
+    if pos >= len then List.rev acc
+    else if is_sep s.[pos] then scan (pos + 1) acc
+    else
+      let p = Mutil.get_particle particles (String.sub s pos (len - pos)) in
+      if p <> "" then
+        let stop = pos + String.length p in
+        scan stop ((pos, stop) :: acc)
+      else
+        let stop = next_sep pos in
+        let hyphen_particle =
+          stop < len
+          && s.[stop] = '-'
+          &&
+          let seg = String.sub s pos (stop - pos) ^ " " in
+          Mutil.get_particle particles seg = seg
+        in
+        if hyphen_particle then scan (stop + 1) ((pos, stop) :: acc)
+        else scan (stop + 1) acc
+  in
+  scan 0 []
+
+let in_spans spans i = List.exists (fun (a, b) -> i >= a && i < b) spans
+
+(* Roman numerals and Mac/Mc/Fitz names may legitimately mix cases. *)
+let exempts_allowed_words dict =
   match dict with
   | Fnames | Snames | Fnames_alias | Snames_alias | PubNames | Aliases | Places
     ->
-      has_any_particle base s
-      ||
-      let words = split_words s in
-      List.for_all
-        (fun w -> (not (has_bad_capitalization_pattern w)) || is_allowed_word w)
-        words
-  | _ -> false
+      true
+  | Qualifiers | Occupation | Estates | Titles | Sources -> false
 
-let has_bad_capitalization dict base s =
+(* Every word of a first name or surname must start with a capital letter,
+   except particles and a few connecting words ("dit", "y"...). *)
+let requires_initial_capital dict =
   match dict with
-  | Sources -> false
-  | _ ->
-      let has_particles = has_any_particle base s in
-      if has_particles then false
-      else
-        let has_general =
-          has_bad_capitalization_pattern s
-          && not (has_legitimate_mixed_case dict base s)
-        in
-        let has_lowercase =
-          match dict with
-          | Fnames | Snames | Fnames_alias | Snames_alias ->
-              let words = split_words s in
-              List.exists
-                (fun w ->
-                  String.length w > 0
-                  && w.[0] >= 'a'
-                  && w.[0] <= 'z'
-                  && not (is_lowercase_allowed w))
-                words
-          | _ -> false
-        in
-        has_general || has_lowercase
+  | Fnames | Snames | Fnames_alias | Snames_alias -> true
+  | PubNames | Aliases | Places | Qualifiers | Occupation | Estates | Titles
+  | Sources ->
+      false
+
+(* Invalid patterns inside the word [ws, we) of [s]:
+   - "AAz": two capitals followed by a lowercase letter ("DUpont")
+   - "aZ": a lowercase letter followed by a capital ("LaFayette") *)
+let add_pattern_positions s ws we acc =
+  let rec scan i acc =
+    if i + 1 >= we then acc
+    else
+      let acc =
+        if
+          i + 2 < we
+          && is_ascii_upper s.[i]
+          && is_ascii_upper s.[i + 1]
+          && is_ascii_lower s.[i + 2]
+        then i :: (i + 1) :: acc
+        else if is_ascii_lower s.[i] && is_ascii_upper s.[i + 1] then
+          i :: (i + 1) :: acc
+        else acc
+      in
+      scan (i + 1) acc
+  in
+  scan ws acc
 
 let find_bad_capitalization_positions dict base s =
-  let positions = ref [] in
-  let has_particles = has_any_particle base s in
-  if not has_particles then (
-    let rec scan i =
-      if i >= String.length s - 2 then ()
-      else if
-        s.[i] >= 'A'
-        && s.[i] <= 'Z'
-        && s.[i + 1] >= 'A'
-        && s.[i + 1] <= 'Z'
-        && i + 2 < String.length s
-        && s.[i + 2] >= 'a'
-        && s.[i + 2] <= 'z'
-      then (
-        positions := i :: (i + 1) :: !positions;
-        scan (i + 1))
-      else if
-        i < String.length s - 1
-        && s.[i] >= 'a'
-        && s.[i] <= 'z'
-        && s.[i + 1] >= 'A'
-        && s.[i + 1] <= 'Z'
-      then (
-        positions := i :: (i + 1) :: !positions;
-        scan (i + 1))
-      else scan (i + 1)
-    in
-    scan 0;
-    match dict with
-    | Fnames | Snames ->
-        let words = split_words s in
-        let word_pos = ref 0 in
-        List.iter
-          (fun word ->
-            if
-              String.length word > 0
-              && word.[0] >= 'a'
-              && word.[0] <= 'z'
-              && not (is_lowercase_allowed word)
-            then positions := !word_pos :: !positions;
-            word_pos := !word_pos + String.length word + 1)
-          words
-    | _ -> ());
-  List.sort_uniq compare !positions
+  match dict with
+  | Sources -> []
+  | Fnames | Snames | Fnames_alias | Snames_alias | PubNames | Aliases | Places
+  | Qualifiers | Occupation | Estates | Titles -> (
+      let exempt = exempts_allowed_words dict in
+      let initial = requires_initial_capital dict in
+      let positions =
+        List.fold_left
+          (fun acc (ws, we) ->
+            let pats = add_pattern_positions s ws we [] in
+            let low = initial && is_ascii_lower s.[ws] in
+            if pats = [] && not low then acc
+            else
+              let w = String.sub s ws (we - ws) in
+              let acc =
+                if pats = [] || (exempt && is_allowed_word w) then acc
+                else List.rev_append pats acc
+              in
+              if low && not (is_lowercase_allowed w) then ws :: acc else acc)
+          [] (word_spans s)
+      in
+      match positions with
+      | [] -> []
+      | _ ->
+          let pspans = particle_spans (Driver.base_particles base) s in
+          List.filter (fun i -> not (in_spans pspans i)) positions
+          |> List.sort_uniq compare)
+
+let has_bad_capitalization dict base s =
+  find_bad_capitalization_positions dict base s <> []
 
 let is_zero_width hex =
   match hex with
@@ -430,22 +412,20 @@ let is_zero_width hex =
   | _ -> false
 
 let invisible_chars_tbl =
-  let codes =
-    Util.get_problem_chars_codes `Control
-    @ Util.get_problem_chars_codes `Invisible
-    @ Util.get_problem_chars_codes `ZeroWidth
-  in
-  let tbl = Hashtbl.create (List.length codes) in
-  List.iter (fun code -> Hashtbl.add tbl code true) codes;
+  let tbl = Hashtbl.create 128 in
+  List.iter
+    (fun cat ->
+      List.iter
+        (fun code -> Hashtbl.replace tbl code ())
+        (Util.get_problem_chars_codes cat))
+    [ `Control; `Invisible; `ZeroWidth ];
   tbl
 
 let is_invisible_char code = Hashtbl.mem invisible_chars_tbl code
 
 let is_invisible_code code =
-  (code < 0x20 && code <> 0x09 && code <> 0x0A)
-  || code = 0x7F
-  || (code >= 0x80 && code <= 0x9F)
-  || is_invisible_char code
+  if code < 0x7F then code < 0x20 && code <> 0x09 && code <> 0x0A
+  else code <= 0x9F || is_invisible_char code
 
 let has_invisible_chars s =
   let len = String.length s in
@@ -497,6 +477,7 @@ let breton_trigram_pattern =
   Re.seq [ Re.group (Re.set "cC"); Re.set "’'"; Re.group (Re.set "hH") ]
 
 let dash_replacements = [ (Re.str " -", "-"); (Re.str "- ", "-") ]
+let max_misc_match_len = 6
 
 let compile_replacements l =
   List.map (fun (pat, repl) -> (Re.compile pat, repl)) l
@@ -546,7 +527,9 @@ let find_misc_typographic_positions dict_type s conf =
   let len = String.length s in
   let try_pattern re message_or_key add_positions found_match =
     if !found_match = None then
-      match Re.exec_opt ~pos:!pos re s with
+      match
+        Re.exec_opt ~pos:!pos ~len:(min max_misc_match_len (len - !pos)) re s
+      with
       | Some result ->
           let start_pos = Re.Group.start result 0 in
           let end_pos = Re.Group.stop result 0 in
@@ -644,7 +627,7 @@ let script_class_of_code code =
         | `Cyrl -> Some `Cyrillic
         | _ -> None
     in
-    Hashtbl.add script_cache code result;
+    Hashtbl.replace script_cache code result;
     result
 
 let has_mixed_scripts_in_word s =
@@ -671,8 +654,8 @@ let has_mixed_scripts_in_word s =
   !has_latin && (!has_greek || !has_cyrillic)
 
 let has_mixed_scripts s =
-  let words = split_words s in
-  List.exists has_mixed_scripts_in_word words
+  String.exists (fun c -> c >= '\xCD') s
+  && List.exists has_mixed_scripts_in_word (split_words s)
 
 let find_mixed_scripts_positions s =
   let positions = ref [] in
@@ -810,8 +793,6 @@ let get_death_src_x p = [ Driver.get_death_src p ]
 let get_burial_src_x p = [ Driver.get_burial_src p ]
 let get_psources_x p = [ Driver.get_psources p ]
 let get_marriage_place_x fam = [ Driver.get_marriage_place fam ]
-let get_marriage_src_x fam = [ Driver.get_marriage_src fam ]
-let get_fsources_x fam = [ Driver.get_fsources fam ]
 
 (* HTML Generation *)
 let make_highlight_html s highlight_info error_type conf =
@@ -834,13 +815,14 @@ let make_highlight_html s highlight_info error_type conf =
   let rec process_char i =
     if i >= String.length s then Buffer.contents buf
     else begin
-      let char_size = Utf8.nbc s.[i] in
+      let char_size = char_len s i in
       let escaped = (Util.escape_html (String.sub s i char_size) :> string) in
       if Hashtbl.mem pos_tbl i then
-        let code = Utf8.C.cp s i in
-        let hex = Printf.sprintf "%04X" (Uchar.to_int code) in
+        let code, _ = Util.get_unicode_point s i in
+        let code = if Uchar.is_valid code then code else 0xFFFD in
+        let hex = Printf.sprintf "%04X" code in
         let name =
-          match Util.get_problem_char_name (Uchar.to_int code) with
+          match Util.get_problem_char_name code with
           | Some n -> n
           | None -> "UNICODE CHARACTER"
         in
@@ -945,26 +927,19 @@ let collect_places base p =
     ~efam_attr_get:get_efam_place
 
 let collect_sources base p =
-  let sources =
-    collect_attributes base p
-      ~std_attrs:
-        [
-          get_birth_src_x;
-          get_baptism_src_x;
-          get_death_src_x;
-          get_burial_src_x;
-          get_psources_x;
-        ]
-      ~epers_attr_get:get_epers_src ~marriage_attr:get_marriage_src_x
-      ~efam_attr_get:get_efam_src
-  in
-  let sources = ref sources in
-  Array.iter
-    (fun ifam ->
-      let fam = Driver.foi base ifam in
-      List.iter (fun x -> sources := x :: !sources) (get_fsources_x fam))
-    (Driver.get_family p);
-  List.sort_uniq Driver.Istr.compare !sources
+  collect_attributes base p
+    ~std_attrs:
+      [
+        get_birth_src_x;
+        get_baptism_src_x;
+        get_death_src_x;
+        get_burial_src_x;
+        get_psources_x;
+      ]
+    ~epers_attr_get:get_epers_src
+    ~marriage_attr:(fun fam ->
+      [ Driver.get_marriage_src fam; Driver.get_fsources fam ])
+    ~efam_attr_get:get_efam_src
 
 let collect_dict_strings base = function
   | Fnames -> fun p -> [ Driver.get_first_name p ]
@@ -1067,64 +1042,30 @@ let collect_all_errors_from_cache conf dict_type base max_results
   List.rev (process_entries entries [] 0)
 
 let collect_all_errors ?max_results ?(sel_err_types = []) base dict =
-  let istr_errors = Hashtbl.create 1024 in
-  let unique_istrs = ref 0 in
+  let seen = Hashtbl.create 4096 in
+  let found = ref [] in
+  let count = ref 0 in
   let collect_strings = collect_dict_strings base dict in
-  let check_error_types_set = make_error_set sel_err_types in
-  let add_error istr s err =
-    match Hashtbl.find_opt istr_errors istr with
-    | Some (stored_s, errs) ->
-        if not (List.mem err errs) then
-          Hashtbl.replace istr_errors istr (stored_s, err :: errs)
-    | None -> (
-        Hashtbl.add istr_errors istr (s, [ err ]);
-        incr unique_istrs;
-        match max_results with
-        | Some max when !unique_istrs >= max -> raise Max_results_reached
-        | _ -> ())
+  let check_errors_set = make_error_set sel_err_types in
+  let check istr =
+    if not (Driver.Istr.is_empty istr || Hashtbl.mem seen istr) then (
+      Hashtbl.replace seen istr ();
+      let s = Driver.sou base istr in
+      match analyze_string_errors dict base s check_errors_set with
+      | [] -> ()
+      | errs -> (
+          found := (istr, s, errs) :: !found;
+          incr count;
+          match max_results with
+          | Some max when !count >= max -> raise Max_results_reached
+          | _ -> ()))
   in
   (try
      Geneweb_db.Collection.iter
-       (fun i ->
-         let p = Driver.poi base i in
-         let istrs = collect_strings p in
-         List.iter
-           (fun istr ->
-             if not (Driver.Istr.is_empty istr) then
-               let s = Driver.sou base istr in
-               if s <> "" then (
-                 if
-                   ErrorSet.mem InvisibleCharacters check_error_types_set
-                   && has_invisible_chars s
-                 then add_error istr s InvisibleCharacters;
-                 if
-                   ErrorSet.mem BadCapitalization check_error_types_set
-                   && has_bad_capitalization dict base s
-                 then add_error istr s BadCapitalization;
-                 if
-                   ErrorSet.mem MultipleSpaces check_error_types_set
-                   && has_multiple_spaces s
-                 then add_error istr s MultipleSpaces;
-                 if
-                   ErrorSet.mem NonBreakingSpace check_error_types_set
-                   && has_non_breaking_space s
-                 then add_error istr s NonBreakingSpace;
-                 if
-                   ErrorSet.mem MiscTypographicErrors check_error_types_set
-                   && has_misc_typographic_errors dict s
-                 then add_error istr s MiscTypographicErrors;
-                 if
-                   ErrorSet.mem MixedScripts check_error_types_set
-                   && has_mixed_scripts s
-                 then add_error istr s MixedScripts))
-           istrs)
+       (fun i -> List.iter check (collect_strings (Driver.poi base i)))
        (Driver.ipers base)
    with Max_results_reached -> ());
-  let result = ref [] in
-  Hashtbl.iter
-    (fun istr (s, errs) -> result := (istr, s, errs) :: !result)
-    istr_errors;
-  List.sort (fun (_, s1, _) (_, s2, _) -> String.compare s1 s2) !result
+  List.sort (fun (_, s1, _) (_, s2, _) -> String.compare s1 s2) !found
 
 (* Main function *)
 let collect_all_errors_with_cache ?max_results ?(sel_err_types = []) conf base
