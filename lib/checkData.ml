@@ -834,7 +834,7 @@ let make_highlight_html s highlight_info error_type conf =
   let rec process_char i =
     if i >= String.length s then Buffer.contents buf
     else begin
-      let char_size = Utf8.nbc s.[i] in
+      let char_size = Unidecode.nbc s.[i] in
       let escaped = (Util.escape_html (String.sub s i char_size) :> string) in
       if Hashtbl.mem pos_tbl i then
         let code = Utf8.C.cp s i in
