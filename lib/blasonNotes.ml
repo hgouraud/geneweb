@@ -1,12 +1,15 @@
-(* Redirect references to a person's portrait (m=IM) towards his blason
-   (m=FIM) in the misc notes of a dedicated folder (e.g. Roglo's Blasons:...),
-   once the portrait has been turned into the blason. *)
+(* Redirect references to a person's portrait (m=IM) towards his blason in
+   the misc notes of a dedicated folder (e.g. Roglo's Blasons:...), once the
+   portrait has been turned into the blason. The blason pages reference a
+   blason file with m=FIM and an url blason with the url itself. *)
 
 module Driver = Geneweb_db.Driver
 
 let src = Logs.Src.create ~doc:"BlasonNotes" __MODULE__
 
 module Log = (val Logs.src_log src : Logs.LOG)
+
+type target = Fim | Url of string
 
 let default_notes_dir = "Blasons"
 
@@ -114,21 +117,24 @@ let blason_key t =
   else k ^ ".blason" ^ String.sub t i (String.length t - i)
 
 (* Rewrites an attribute value if it is an m=IM url of [p]. *)
-let rewrite_value base p v =
+let rewrite_value base p target v =
   let tokens = split_query v in
   if List.exists is_im tokens && designates base p tokens then
-    Some
-      (String.concat ""
-         (List.map
-            (fun t ->
-              if is_im t then fim t
-              else if String.starts_with ~prefix:"k/" t then blason_key t
-              else t)
-            tokens))
+    match target with
+    | Url u -> Some u
+    | Fim ->
+        Some
+          (String.concat ""
+             (List.map
+                (fun t ->
+                  if is_im t then fim t
+                  else if String.starts_with ~prefix:"k/" t then blason_key t
+                  else t)
+                tokens))
   else None
 
 (* Scans the quoted attribute values (="..." or ='...') of [s]. *)
-let rewrite_text base p s =
+let rewrite_text base p target s =
   let len = String.length s in
   let b = Buffer.create (len + 64) in
   let rec loop i changed =
@@ -147,7 +153,7 @@ let rewrite_text base p s =
               changed
           | Some k -> (
               let v = String.sub s (j + 2) (k - j - 2) in
-              match rewrite_value base p v with
+              match rewrite_value base p target v with
               | Some v' ->
                   Buffer.add_string b v';
                   loop k true
@@ -166,7 +172,13 @@ let notes_path fnotes =
   | Some (dl, f) -> List.fold_right Filename.concat dl f
   | None -> fnotes
 
-let redirect_portrait_refs conf base p =
+(* An url replaces the whole attribute value: it must not close it. *)
+let usable_target target =
+  match target with
+  | Fim -> true
+  | Url u -> not (String.contains u '"' || String.contains u '\'')
+
+let redirect_portrait_refs conf base p target =
   let root =
     Filename.concat (Util.bpath conf.Config.bname) (Driver.base_notes_dir base)
   in
@@ -175,12 +187,12 @@ let redirect_portrait_refs conf base p =
       let s = Driver.base_notes_read base (notes_path fnotes) in
       if not (Mutil.contains s "m=IM") then acc
       else
-        match rewrite_text base p s with
+        match rewrite_text base p target s with
         | Some s' ->
             Log.info (fun k -> k "portrait -> blason in note %s" fnotes);
             Notes.commit_notes conf base fnotes s';
             fnotes :: acc
         | None -> acc)
     []
-    (fnotes_below root (notes_dir conf))
+    (if usable_target target then fnotes_below root (notes_dir conf) else [])
   |> List.rev

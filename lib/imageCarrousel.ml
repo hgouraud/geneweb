@@ -659,13 +659,19 @@ let effective_copy_portrait_to_blason conf base p =
 
 (* The portrait becomes the blason: copy it, move the portrait to saved
    (unless it is an url of the image field, which only MOD_IND can clear) and
-   point the blason notes to the blason. Returns the blason file name and the
-   names of the updated notes. *)
+   point the blason notes to the blason (m=FIM, or the url itself for an url
+   portrait). Returns the blason file name and the names of the updated
+   notes. *)
 let effective_move_portrait_to_blason conf base p =
   let image_field_is_url =
     match Image.src_of_string conf (Driver.sou base (Driver.get_image p)) with
     | `Url _ -> true
     | `Empty | `Path _ | `Src_with_size_info _ -> false
+  in
+  let target =
+    match Image.get_portrait conf base p with
+    | Some (`Url u) -> BlasonNotes.Url u
+    | Some (`Path _) | None -> BlasonNotes.Fim
   in
   let blason_filename = effective_copy_portrait_to_blason conf base p in
   (if not image_field_is_url then
@@ -674,7 +680,7 @@ let effective_move_portrait_to_blason conf base p =
        ^ Filename.extension blason_filename
      in
      ignore (effective_delete_c_ok conf base ~f_name:portrait p));
-  (blason_filename, BlasonNotes.redirect_portrait_refs conf base p)
+  (blason_filename, BlasonNotes.redirect_portrait_refs conf base p target)
 
 let effective_copy_image_to_blason conf base p =
   let fname =
