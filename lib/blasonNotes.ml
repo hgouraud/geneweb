@@ -189,23 +189,6 @@ let usable_target target =
   | Fim -> true
   | Url u -> not (String.contains u '"' || String.contains u '\'')
 
-(* p/n/oc/i of the m=IM urls of [s], for the log. *)
-let im_refs s =
-  let refs = ref [] in
-  ignore
-    (rewrite_text_with
-       (fun v ->
-         let tokens = split_query v in
-         (if List.exists is_im tokens then
-            let get k = Option.value ~default:"-" (param tokens k) in
-            refs :=
-              Printf.sprintf "p=%s n=%s oc=%s i=%s" (get "p") (get "n")
-                (get "oc") (get "i")
-              :: !refs);
-         None)
-       s);
-  List.rev !refs
-
 let redirect_portrait_refs conf base p target =
   let root =
     Filename.concat (Util.bpath conf.Config.bname) (Driver.base_notes_dir base)
@@ -214,7 +197,7 @@ let redirect_portrait_refs conf base p target =
   let files =
     if usable_target target then fnotes_below root dir else []
   in
-  Log.info (fun k ->
+  Log.debug (fun k ->
       k "%s.%d %s: %d notes in %s"
         (Driver.p_first_name base p) (Driver.get_occ p)
         (Driver.p_surname base p) (List.length files)
@@ -229,9 +212,6 @@ let redirect_portrait_refs conf base p target =
             Log.info (fun k -> k "portrait -> blason in note %s" fnotes);
             Notes.commit_notes conf base fnotes s';
             fnotes :: acc
-        | None ->
-            Log.debug (fun k ->
-                k "no match in %s: %s" fnotes (String.concat ", " (im_refs s)));
-            acc)
+        | None -> acc)
     [] files
   |> List.rev
