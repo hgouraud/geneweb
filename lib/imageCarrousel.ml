@@ -832,8 +832,7 @@ let print_main_c conf base =
                         (effective_copy_portrait_to_blason conf base p)
                   | "PORTRAIT_MOVE_TO_BLASON" ->
                       if
-                        List.assoc_opt "direct_portrait_to_blason"
-                          conf.base_env
+                        List.assoc_opt "direct_portrait_to_blason" conf.base_env
                         = Some "yes"
                       then (
                         let blason, notes =
