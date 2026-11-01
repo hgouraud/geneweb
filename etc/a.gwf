@@ -154,6 +154,12 @@
 # Don’t authorise wizards to send images.
 #can_send_image=no
 
+# In the carrousel, turn the portrait into the blason in one step: the
+# portrait is copied to the blason and moved to saved, and its m=IM
+# references in the misc notes Blasons (Blasons.txt and the Blasons folder)
+# become m=FIM references (or the url of an url portrait).
+#direct_portrait_to_blason=yes
+
 # Set a maximum images size in bytes which can be accepted in “send image”
 #max_images_size=
 
