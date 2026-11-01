@@ -617,17 +617,15 @@ let effective_copy_portrait_to_blason conf base p =
     try (List.assoc "mode" conf.env :> string) with Not_found -> "portraits"
   in
   let keydir = Image.default_image_filename "portraits" base p in
+  let dir = !GWPARAM.portraits_d conf.bname in
   let create_url_file keydir url =
-    let fname =
-      Filename.concat (!GWPARAM.images_d conf.bname) (keydir ^ ".url")
-    in
+    let fname = Filename.concat dir (keydir ^ ".url") in
     let oc = Secure.open_out_bin fname in
     output_string oc url;
     flush oc;
     close_out oc;
     fname
   in
-  let dir = !GWPARAM.portraits_d conf.bname in
   let fname, url =
     match Image.src_of_string conf (Driver.sou base (Driver.get_image p)) with
     | `Url u -> (create_url_file keydir u, true)
