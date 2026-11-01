@@ -20,7 +20,8 @@ let notes_dir conf =
   | Some d -> String.trim d
   | None -> default_notes_dir
 
-(* Misc notes names ("Blasons:pages:A:m") of all the .txt files below [dir]. *)
+(* Misc notes names of the page [dir] ("Blasons") and of all the .txt files
+   below the folder [dir] ("Blasons:pages:A:m"). *)
 let fnotes_below root dir =
   let rec walk rel acc =
     let path = List.fold_left Filename.concat root (List.rev rel) in
@@ -41,8 +42,15 @@ let fnotes_below root dir =
         else acc)
       acc entries
   in
-  if dir = "" || not (Sys.file_exists (Filename.concat root dir)) then []
-  else walk [ dir ] []
+  if dir = "" then []
+  else
+    let below =
+      if Sys.file_exists (Filename.concat root dir) then walk [ dir ] []
+      else []
+    in
+    (* the folder may come with a page of its own: Blasons.txt *)
+    if Sys.file_exists (Filename.concat root (dir ^ ".txt")) then dir :: below
+    else below
 
 (* An URL query is split on ';' and '&'; separators are kept so that the
    rewritten URL differs from the original only on the modified tokens. *)
