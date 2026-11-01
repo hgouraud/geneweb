@@ -229,12 +229,17 @@
               title="<strong>[*see portrait]</strong><br><span class='small'>%portrait;</span><br>
                 <img class='rounded my-1' src='%portrait_url;' width='185px'>">
               <i class="far fa-file-image fa-fw text-primary"></i></a>
-            <a href="%prefix;m=PORTRAIT_TO_BLASON&i=%index;" class="mx-1"
-               title="[*copy portrait to blason]">
-              <i class="fa fa-user-shield"></i></a>
-            <a href="%prefix;m=PORTRAIT_MOVE_TO_BLASON&i=%index;" class="mx-1"
-               title="[*move portrait to blason]">
-              <i class="fa fa-shield-halved"></i></a>
+            %( direct_portrait_to_blason=yes: one step, the portrait goes to saved
+               and the Blasons notes are updated (Roglo) %)
+            %if;(b.direct_portrait_to_blason="yes")
+              <a href="%prefix;m=PORTRAIT_MOVE_TO_BLASON&i=%index;" class="mx-1"
+                 title="[*move portrait to blason]">
+                <i class="fa fa-shield-halved"></i></a>
+            %else;
+              <a href="%prefix;m=PORTRAIT_TO_BLASON&i=%index;" class="mx-1"
+                 title="[*copy portrait to blason]">
+                <i class="fa fa-user-shield"></i></a>
+            %end;
             %if;(portrait_name="")
               %( url of the image field: no file, MOD_IND changes it %)
               <samp class="text-truncate">%portrait;</samp>

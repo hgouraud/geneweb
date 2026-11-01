@@ -1,5 +1,5 @@
 (* Redirect references to a person's portrait (m=IM) towards his blason in
-   the misc notes of a dedicated folder (e.g. Roglo's Blasons:...), once the
+   the misc notes Blasons (Blasons.txt and the Blasons folder), once the
    portrait has been turned into the blason. The blason pages reference a
    blason file with m=FIM and an url blason with the url itself. *)
 
@@ -11,14 +11,8 @@ module Log = (val Logs.src_log src : Logs.LOG)
 
 type target = Fim | Url of string
 
-let default_notes_dir = "Blasons"
-
-(* Notes folder scanned for portrait references; [blason_notes_dir=] in the
-   .gwf file disables the scan. *)
-let notes_dir conf =
-  match List.assoc_opt "blason_notes_dir" conf.Config.base_env with
-  | Some d -> String.trim d
-  | None -> default_notes_dir
+(* Misc notes holding the blason pages: Blasons.txt and/or Blasons/... *)
+let notes_dir = "Blasons"
 
 (* Misc notes names of the page [dir] ("Blasons") and of all the .txt files
    below the folder [dir] ("Blasons:pages:A:m"). *)
@@ -193,7 +187,7 @@ let redirect_portrait_refs conf base p target =
   let root =
     Filename.concat (Util.bpath conf.Config.bname) (Driver.base_notes_dir base)
   in
-  let dir = notes_dir conf in
+  let dir = notes_dir in
   let files =
     if usable_target target then fnotes_below root dir else []
   in
