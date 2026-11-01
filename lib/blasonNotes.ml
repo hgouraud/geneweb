@@ -134,7 +134,7 @@ let rewrite_value base p target v =
   else None
 
 (* Scans the quoted attribute values (="..." or ='...') of [s]. *)
-let rewrite_text base p target s =
+let rewrite_text_with rewrite s =
   let len = String.length s in
   let b = Buffer.create (len + 64) in
   let rec loop i changed =
@@ -153,7 +153,7 @@ let rewrite_text base p target s =
               changed
           | Some k -> (
               let v = String.sub s (j + 2) (k - j - 2) in
-              match rewrite_value base p target v with
+              match rewrite v with
               | Some v' ->
                   Buffer.add_string b v';
                   loop k true
@@ -167,6 +167,9 @@ let rewrite_text base p target s =
   if loop 0 false then Some (Buffer.contents b) else None
 
 (* Returns the names of the updated notes. *)
+let rewrite_text base p target s =
+  rewrite_text_with (rewrite_value base p target) s
+
 let notes_path fnotes =
   match NotesLinks.check_file_name fnotes with
   | Some (dl, f) -> List.fold_right Filename.concat dl f
@@ -178,10 +181,36 @@ let usable_target target =
   | Fim -> true
   | Url u -> not (String.contains u '"' || String.contains u '\'')
 
+(* p/n/oc/i of the m=IM urls of [s], for the log. *)
+let im_refs s =
+  let refs = ref [] in
+  ignore
+    (rewrite_text_with
+       (fun v ->
+         let tokens = split_query v in
+         (if List.exists is_im tokens then
+            let get k = Option.value ~default:"-" (param tokens k) in
+            refs :=
+              Printf.sprintf "p=%s n=%s oc=%s i=%s" (get "p") (get "n")
+                (get "oc") (get "i")
+              :: !refs);
+         None)
+       s);
+  List.rev !refs
+
 let redirect_portrait_refs conf base p target =
   let root =
     Filename.concat (Util.bpath conf.Config.bname) (Driver.base_notes_dir base)
   in
+  let dir = notes_dir conf in
+  let files =
+    if usable_target target then fnotes_below root dir else []
+  in
+  Log.info (fun k ->
+      k "%s.%d %s: %d notes in %s"
+        (Driver.p_first_name base p) (Driver.get_occ p)
+        (Driver.p_surname base p) (List.length files)
+        (Filename.concat root dir));
   List.fold_left
     (fun acc fnotes ->
       let s = Driver.base_notes_read base (notes_path fnotes) in
@@ -192,7 +221,9 @@ let redirect_portrait_refs conf base p target =
             Log.info (fun k -> k "portrait -> blason in note %s" fnotes);
             Notes.commit_notes conf base fnotes s';
             fnotes :: acc
-        | None -> acc)
-    []
-    (if usable_target target then fnotes_below root (notes_dir conf) else [])
+        | None ->
+            Log.debug (fun k ->
+                k "no match in %s: %s" fnotes (String.concat ", " (im_refs s)));
+            acc)
+    [] files
   |> List.rev
