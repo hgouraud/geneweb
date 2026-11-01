@@ -659,6 +659,25 @@ let effective_copy_portrait_to_blason conf base p =
     "cb";
   blason_filename
 
+(* The portrait becomes the blason: copy it, move the portrait to saved
+   (unless it is an url of the image field, which only MOD_IND can clear) and
+   point the blason notes to the blason. Returns the blason file name and the
+   names of the updated notes. *)
+let effective_move_portrait_to_blason conf base p =
+  let image_field_is_url =
+    match Image.src_of_string conf (Driver.sou base (Driver.get_image p)) with
+    | `Url _ -> true
+    | `Empty | `Path _ | `Src_with_size_info _ -> false
+  in
+  let blason_filename = effective_copy_portrait_to_blason conf base p in
+  (if not image_field_is_url then
+     let portrait =
+       Image.default_image_filename "portraits" base p
+       ^ Filename.extension blason_filename
+     in
+     ignore (effective_delete_c_ok conf base ~f_name:portrait p));
+  (blason_filename, BlasonNotes.redirect_portrait_refs conf base p)
+
 let effective_copy_image_to_blason conf base p =
   let fname =
     try List.assoc "file_name" conf.env |> Mutil.decode with Not_found -> ""
@@ -768,6 +787,7 @@ let print_main_c conf base =
             match Util.p_getenv conf.env "i" with
             | Some ip -> (
                 let p = Driver.poi base (Driver.Iper.of_string ip) in
+                let updated_notes = ref [] in
                 let processed_filename =
                   match m with
                   | "SND_IMAGE_OK" ->
@@ -812,6 +832,12 @@ let print_main_c conf base =
                   | "PORTRAIT_TO_BLASON" ->
                       Filename.basename
                         (effective_copy_portrait_to_blason conf base p)
+                  | "PORTRAIT_MOVE_TO_BLASON" ->
+                      let blason, notes =
+                        effective_move_portrait_to_blason conf base p
+                      in
+                      updated_notes := notes;
+                      Filename.basename blason
                   | "IMAGE_TO_BLASON" ->
                       Filename.basename
                         (effective_copy_image_to_blason conf base p)
@@ -873,6 +899,9 @@ let print_main_c conf base =
                        let ext = Filename.extension processed_filename in
                        if ext <> "" then
                          url_params := ("ext", ext) :: !url_params);
+                    if !updated_notes <> [] then
+                      url_params :=
+                        ("bn", String.concat " " !updated_notes) :: !url_params;
                     let params_string =
                       List.fold_left
                         (fun acc (key, value) ->
