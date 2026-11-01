@@ -618,24 +618,15 @@ let effective_copy_portrait_to_blason conf base p =
   in
   let keydir = Image.default_image_filename "portraits" base p in
   let dir = !GWPARAM.portraits_d conf.bname in
-  let create_url_file keydir url =
-    let fname = Filename.concat dir (keydir ^ ".url") in
-    let oc = Secure.open_out_bin fname in
-    output_string oc url;
-    flush oc;
-    close_out oc;
-    fname
-  in
-  let fname, url =
+  let field_url =
     match Image.src_of_string conf (Driver.sou base (Driver.get_image p)) with
-    | `Url u -> (create_url_file keydir u, true)
-    | _ -> (Image.default_image_filename "portraits" base p, false)
+    | `Url u -> Some u
+    | `Empty | `Path _ | `Src_with_size_info _ -> None
   in
   let ext =
-    if url then ".url" else get_extension conf keydir mode false fname
-  in
-  let portrait_filename =
-    String.concat Filename.dir_sep [ dir; keydir ^ ext ]
+    match field_url with
+    | Some _ -> ".url"
+    | None -> get_extension conf keydir mode false keydir
   in
   let blason_filename =
     String.concat Filename.dir_sep
@@ -651,7 +642,10 @@ let effective_copy_portrait_to_blason conf base p =
      else "OK")
     <> ""
   in
-  cp portrait_filename blason_filename;
+  (match field_url with
+  | Some u -> write_file blason_filename u
+  | None ->
+      cp (String.concat Filename.dir_sep [ dir; keydir ^ ext ]) blason_filename);
   History.record conf base
     (U_Send_image (Util.string_gen_person base (Driver.gen_person_of_person p)))
     "cb";
