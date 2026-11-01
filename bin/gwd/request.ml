@@ -20,8 +20,8 @@ let this_request_updates_database conf =
       ( "ADD_FAM" | "CHANGE_WIZ_VIS" | "CHG_CHN" | "CHG_FAM_ORD" | "DEL_FAM"
       | "DEL_IMAGE" | "DEL_IND" | "INV_FAM" | "KILL_ANC" | "MOD_FAM" | "MOD_IND"
       | "MOD_NOTES" | "MOD_WIZNOTES" | "MRG_DUP_IND_Y_N" | "MRG_DUP_FAM_Y_N"
-      | "MRG_IND" | "MRG_MOD_FAM" | "MRG_MOD_IND" | "MOD_DATA" | "SND_IMAGE"
-      | "UNKNOWN_OK" ) ->
+      | "MRG_IND" | "MRG_MOD_FAM" | "MRG_MOD_IND" | "MOD_DATA"
+      | "PORTRAIT_MOVE_TO_BLASON" | "SND_IMAGE" | "UNKNOWN_OK" ) ->
       true
   | _ -> false
 
@@ -721,6 +721,8 @@ let treat_request =
              | "PNOC_LOOKUP" ->
                  w_base @@ fun conf base -> PersonPicker.lookup_print conf base
              | "POP_PYR" -> w_base @@ BirthDeathDisplay.print_population_pyramid
+             | "PORTRAIT_MOVE_TO_BLASON" ->
+                 w_wizard @@ w_lock @@ w_base @@ ImageCarrousel.print_main_c
              | "PORTRAIT_TO_BLASON" -> w_base @@ ImageCarrousel.print_main_c
              | "PS" -> w_base @@ PlaceDisplay.print_all_places_surnames
              | "R" -> (
