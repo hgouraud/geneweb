@@ -321,22 +321,26 @@ type state = {
   report : report;
   whitelist : AnomalyWhitelist.t;
   rule : rule;  (** [anomalies_responsible] base parameter *)
-  wiz : string option;  (** only the anomalies this wizard is responsible for *)
+  wiz : who_id option;
+      (** restrict to the anomalies this wizard — or [Unknown], the ones with no
+          identified wizard — is responsible for; [None] shows all *)
 }
 
 let verified st (it : item) = AnomalyWhitelist.mem st.whitelist it.anomaly
 let resp st it = Anomaly.responsible st.rule it
 
 let of_wizard st it =
-  match st.wiz with
-  | None -> true
-  | Some w -> ( match resp st it with Some r -> r.by = w | None -> false)
+  match st.wiz with None -> true | Some who -> (resp st it).by = who
+
+(* the query parameter carrying a wizard filter: a login in [wiz], or [una=1]
+   for the anomalies with no identified wizard *)
+let wiz_param = function Wizard w -> ("wiz", w) | Unknown -> ("una", "1")
 
 (* the URL of a page, keeping the wizard filter *)
 let wurl conf st params =
   url conf
     (match st.wiz with
-    | Some w -> List.rev (("wiz", w) :: List.rev params)
+    | Some who -> List.rev (wiz_param who :: List.rev params)
     | None -> params)
 
 let page conf ~title body =
@@ -379,18 +383,21 @@ let print_wizard_filter conf st items link =
   let counts = Hashtbl.create 64 in
   List.iter
     (fun it ->
-      match resp st it with
-      | Some r ->
-          Hashtbl.replace counts r.by
-            (1 + Option.value ~default:0 (Hashtbl.find_opt counts r.by))
-      | None -> ())
+      let who = (resp st it).by in
+      Hashtbl.replace counts who
+        (1 + Option.value ~default:0 (Hashtbl.find_opt counts who)))
     items;
+  let count who = Option.value ~default:0 (Hashtbl.find_opt counts who) in
+  (* the identified wizards, ranked; [Unknown] is shown apart, never here *)
   let top =
-    Hashtbl.fold (fun w n acc -> (w, n) :: acc) counts []
+    Hashtbl.fold
+      (fun w n acc -> match w with Wizard _ -> (w, n) :: acc | Unknown -> acc)
+      counts []
     |> List.sort (fun (w1, n1) (w2, n2) ->
         match compare n2 n1 with 0 -> compare w1 w2 | c -> c)
     |> List.filteri (fun i _ -> i < max_wizards)
   in
+  let unknown_count = count Unknown in
   let button wiz label n =
     Printf.sprintf {|<a class="btn btn-sm %s me-1 mb-1" href="%s">%s%s</a>|}
       (if st.wiz = wiz then "btn-primary" else "btn-outline-secondary")
@@ -400,25 +407,34 @@ let print_wizard_filter conf st items link =
           Printf.sprintf {| <span class="badge bg-light text-dark">%d</span>|} n
       | None -> "")
   in
-  if top <> [] || st.wiz <> None then (
+  if top <> [] || unknown_count > 0 || st.wiz <> None then (
     Output.printf conf {|<div class="mb-2"><span class="me-2">%s%s</span>|}
       (esc (ctr conf "ANOMALY responsible wizard"))
       (esc (tr conf ":"));
     Output.print_sstring conf (button None (esc (ctr conf "all")) None);
     if conf.user <> "" then
       Output.print_sstring conf
-        (button (Some conf.user)
+        (button (Some (Wizard conf.user))
            (esc (ctr conf "ANOMALY my anomalies"))
-           (Some (Option.value ~default:0 (Hashtbl.find_opt counts conf.user))));
+           (Some (count (Wizard conf.user))));
     List.iter
       (fun (w, n) ->
-        if w <> conf.user then
-          Output.print_sstring conf (button (Some w) (esc w) (Some n)))
+        if w <> Wizard conf.user then
+          Output.print_sstring conf
+            (button (Some w)
+               (esc (match w with Wizard s -> s | Unknown -> ""))
+               (Some n)))
       top;
     (match st.wiz with
-    | Some w when w <> conf.user && not (List.mem_assoc w top) ->
-        Output.print_sstring conf (button (Some w) (esc w) (Some 0))
+    | Some (Wizard w) when w <> conf.user && not (List.mem_assoc (Wizard w) top)
+      ->
+        Output.print_sstring conf (button (Some (Wizard w)) (esc w) (Some 0))
     | Some _ | None -> ());
+    if unknown_count > 0 || st.wiz = Some Unknown then
+      Output.print_sstring conf
+        (button (Some Unknown)
+           (esc (ctr conf "ANOMALY unattributed"))
+           (Some unknown_count));
     Output.print_sstring conf "</div>\n")
 
 (* ---- summary ------------------------------------------------------------- *)
@@ -580,7 +596,7 @@ let print_summary conf base st items =
       print_wizard_filter conf st unverified (fun wiz ->
           url conf
             (("m", "ANOMA")
-            :: (match wiz with Some w -> [ ("wiz", w) ] | None -> [])));
+            :: (match wiz with Some who -> [ wiz_param who ] | None -> [])));
       if mine = [] then
         Output.printf conf {|<div class="alert alert-success">%s</div>|}
           (esc (ctr conf "ANOMALY none found"))
@@ -603,7 +619,7 @@ let print_summary conf base st items =
 type filters = {
   k : kind;
   all : bool;
-  wiz : string option;
+  wiz : who_id option;
   amin : int option;
   amax : int option;
   pg : int;
@@ -616,7 +632,7 @@ let filters_url conf f =
          Some ("m", "ANOMA");
          Some ("k", kind_name f.k);
          (if f.all then Some ("all", "1") else None);
-         Option.map (fun w -> ("wiz", w)) f.wiz;
+         Option.map wiz_param f.wiz;
          Option.map (fun m -> ("amin", string_of_int m)) f.amin;
          Option.map (fun m -> ("amax", string_of_int m)) f.amax;
          (if f.pg > 1 then Some ("pg", string_of_int f.pg) else None);
@@ -660,15 +676,18 @@ let list_open conf =
 let day date = if String.length date >= 10 then String.sub date 0 10 else date
 
 let responsible_text conf (r : responsible) =
-  if r.signed then
-    if r.at = "" then
-      Printf.sprintf (Util.ftransl conf "ANOMALY signed by %s") r.by
-    else
-      Printf.sprintf (Util.ftransl conf "ANOMALY signed by %s on %s") r.by r.at
-  else
-    Printf.sprintf
-      (Util.ftransl conf "ANOMALY in the history: %s on %s")
-      r.by r.at
+  match r.by with
+  | Unknown -> ctr conf "ANOMALY unattributed"
+  | Wizard w ->
+      if r.signed then
+        if r.at = "" then
+          Printf.sprintf (Util.ftransl conf "ANOMALY signed by %s") w
+        else
+          Printf.sprintf (Util.ftransl conf "ANOMALY signed by %s on %s") w r.at
+      else
+        Printf.sprintf
+          (Util.ftransl conf "ANOMALY in the history: %s on %s")
+          w r.at
 
 let print_item ?(with_kind = false) conf base resolve ~entry ~resp a =
   let verified = entry <> None in
@@ -766,7 +785,8 @@ let print_kind conf base (st : state) items k =
           if i >= (pg - 1) * page_size && i < pg * page_size then
             print_item conf base resolve
               ~entry:(AnomalyWhitelist.find st.whitelist it.anomaly)
-              ~resp:(resp st it) it.anomaly)
+              ~resp:(Some (resp st it))
+              it.anomaly)
         shown;
       Output.print_sstring conf "</ul>\n";
       if pages > 1 then (
@@ -801,8 +821,10 @@ let print conf base =
                  (List.assoc_opt "anomalies_responsible" conf.base_env));
           wiz =
             (match Util.p_getenv conf.env "wiz" with
-            | Some "" | None -> None
-            | Some w -> Some w);
+            | Some w when w <> "" -> Some (Wizard w)
+            | _ ->
+                if Util.p_getenv conf.env "una" = Some "1" then Some Unknown
+                else None);
         }
       in
       match kind with

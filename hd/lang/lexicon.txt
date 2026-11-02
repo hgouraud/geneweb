@@ -3308,6 +3308,10 @@ fr: magicien responsable
 en: my anomalies
 fr: mes anomalies
 
+    ANOMALY unattributed
+en: unattributed
+fr: non attribuées
+
     ANOMALY signed by %s
 en: signed by %s
 fr: signé par %s

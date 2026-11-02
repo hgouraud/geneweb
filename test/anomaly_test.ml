@@ -118,13 +118,13 @@ let test_signatures () =
 
 let test_responsible () =
   let it who = { anomaly = DeadOld (jean, 104); who = [ who ] } in
+  let name = function Wizard w -> w | Unknown -> "?" in
   let by rule w =
-    Option.map
-      (fun (r : responsible) -> (r.by, r.signed))
-      (responsible rule (it w))
+    let r = responsible rule (it w) in
+    (name r.by, r.signed)
   in
   let check name expected got =
-    Alcotest.(check (option (pair string bool))) name expected got
+    Alcotest.(check (pair string bool)) name expected got
   in
   let dated =
     {
@@ -136,13 +136,13 @@ let test_responsible () =
         ];
     }
   in
-  check "last signer, by date" (Some ("late", true)) (by Last_signer dated);
-  check "first signer, by date" (Some ("early", true)) (by First_signer dated);
-  check "undated: text order" (Some ("hg", true)) (by Last_signer who_jean);
+  check "last signer, by date" ("late", true) (by Last_signer dated);
+  check "first signer, by date" ("early", true) (by First_signer dated);
+  check "undated: text order" ("hg", true) (by Last_signer who_jean);
   let unsigned = { who_jean with signers = [] } in
-  check "history, last" (Some ("hg", false)) (by Last_signer unsigned);
-  check "history, first" (Some ("old", false)) (by First_signer unsigned);
-  check "nobody" None
+  check "history, last" ("hg", false) (by Last_signer unsigned);
+  check "history, first" ("old", false) (by First_signer unsigned);
+  check "nobody" ("?", false)
     (by Last_signer { signers = []; first = None; last = None })
 
 let test_identity () =

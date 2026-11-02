@@ -210,16 +210,23 @@ val rule_of_string : string -> rule
 (** ["first_signer"], anything else [Last_signer]: the [anomalies_responsible]
     base parameter. *)
 
+type who_id =
+  | Wizard of string
+  | Unknown
+      (** The responsible wizard's login, or [Unknown] when none can be
+          identified (no signature in the sources and no change in the history).
+      *)
+
 type responsible = {
-  by : string;  (** wizard's login *)
+  by : who_id;  (** the wizard's login, or [Unknown] *)
   signed : bool;  (** from a signature, else from the history *)
   at : string;  (** ["YYYY-MM-DD"], or [""] for an undated signature *)
 }
 
-val responsible : rule -> item -> responsible option
+val responsible : rule -> item -> responsible
 (** The wizard most likely responsible for an anomaly: the first or last signer
     of its subjects' sources; failing a signature, the first or last wizard in
-    their history. *)
+    their history; [Unknown] when neither names anyone. *)
 
 val file : string -> string
 (** [file config_dir] is the report path in the base config directory

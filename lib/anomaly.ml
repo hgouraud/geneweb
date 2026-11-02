@@ -648,7 +648,10 @@ type rule = First_signer | Last_signer
 let rule_of_string s =
   match s with "first_signer" -> First_signer | _ -> Last_signer
 
-type responsible = { by : string; signed : bool; at : string }
+type who_id = Wizard of string | Unknown
+type responsible = { by : who_id; signed : bool; at : string }
+
+let unknown = { by = Unknown; signed = false; at = "" }
 
 let responsible rule item =
   let last l = List.fold_left (fun _ x -> Some x) None l in
@@ -662,8 +665,8 @@ let responsible rule item =
         | Last_signer, _ -> last sigs
       in
       match pick with
-      | Some g -> Some { by = g.ident; signed = true; at = g.signed }
-      | None -> None)
+      | Some g -> { by = Wizard g.ident; signed = true; at = g.signed }
+      | None -> unknown)
   | [] -> (
       let change =
         List.fold_left
@@ -675,8 +678,8 @@ let responsible rule item =
       in
       match change with
       | Some c ->
-          Some { by = c.wizard; signed = false; at = String.sub c.time 0 10 }
-      | None -> None)
+          { by = Wizard c.wizard; signed = false; at = String.sub c.time 0 10 }
+      | None -> unknown)
 
 (* ---- JSON ---------------------------------------------------------------- *)
 
