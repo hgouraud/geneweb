@@ -20,11 +20,8 @@
   notes_search_test
   notes_corpus_test
   notes_rename_test
-<<<<<<< HEAD
-  anomaly_test)
-=======
+  anomaly_test
   notes_corpus_test)
->>>>>>> origin/place-terms
  (libraries alcotest geneweb geneweb.oidc fmt unix))
 
 (test
