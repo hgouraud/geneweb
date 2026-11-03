@@ -31,7 +31,8 @@ let fnotes_below root dir =
         else if Filename.check_suffix e ".txt" then
           let name = Filename.chop_suffix e ".txt" in
           let fnotes =
-            String.concat (String.make 1 NotesLinks.char_dir_sep)
+            String.concat
+              (String.make 1 NotesLinks.char_dir_sep)
               (List.rev (name :: rel))
           in
           match NotesLinks.check_file_name fnotes with
@@ -43,8 +44,7 @@ let fnotes_below root dir =
   if dir = "" then []
   else
     let below =
-      if Sys.file_exists (Filename.concat root dir) then walk [ dir ] []
-      else []
+      if Sys.file_exists (Filename.concat root dir) then walk [ dir ] [] else []
     in
     (* the folder may come with a page of its own: Blasons.txt *)
     if Sys.file_exists (Filename.concat root (dir ^ ".txt")) then dir :: below
@@ -192,13 +192,11 @@ let redirect_portrait_refs conf base p target =
     Filename.concat (Util.bpath conf.Config.bname) (Driver.base_notes_dir base)
   in
   let dir = notes_dir conf in
-  let files =
-    if usable_target target then fnotes_below root dir else []
-  in
+  let files = if usable_target target then fnotes_below root dir else [] in
   Log.debug (fun k ->
       k "%s.%d %s: %d notes in %s"
-        (Driver.p_first_name base p) (Driver.get_occ p)
-        (Driver.p_surname base p) (List.length files)
+        (Driver.p_first_name base p)
+        (Driver.get_occ p) (Driver.p_surname base p) (List.length files)
         (Filename.concat root dir));
   List.fold_left
     (fun acc fnotes ->

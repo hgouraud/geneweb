@@ -152,9 +152,7 @@ module Make (W : Word.S) (E : Entry) = struct
     let rec next front back () =
       match front with
       | [] -> (
-          match back with
-          | [] -> Seq.Nil
-          | _ :: _ -> next (List.rev back) [] ())
+          match back with [] -> Seq.Nil | _ :: _ -> next (List.rev back) [] ())
       | s :: front -> (
           match s () with
           | Seq.Nil -> next front back ()

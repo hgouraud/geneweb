@@ -37,15 +37,13 @@ let is_unicode_separator u =
   match u with
   | "\xC2\xA0" | "\xCA\xBC" -> true
   | u ->
-      String.length u = 3
-      && u.[0] = '\xE2'
-      && (u.[1] = '\x80' || u.[1] = '\x81')
+      String.length u = 3 && u.[0] = '\xE2' && (u.[1] = '\x80' || u.[1] = '\x81')
 
 let normalize s =
   let len = String.length s in
   let b = Buffer.create len in
   let rec loop i =
-    if i < len then
+    if i < len then (
       if Char.code s.[i] < 0x80 then (
         Buffer.add_char b (Char.lowercase_ascii s.[i]);
         loop (i + 1))
@@ -60,7 +58,7 @@ let normalize s =
             s i len
         in
         Buffer.add_string b (String.lowercase_ascii t);
-        loop (if j > i then j else i + 1)
+        loop (if j > i then j else i + 1))
   in
   loop 0;
   Buffer.contents b
