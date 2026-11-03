@@ -188,14 +188,23 @@ let treat_connection callback client_addr client_socket =
       get_request_and_content strm
     in
     let path, query =
-      match Header.extract_param "GET /" ' ' request with
-      | "" -> (Header.extract_param "POST /" ' ' request, query)
-      | str -> (
-          match String.index_opt str '?' with
-          | Some i ->
-              ( String.sub str 0 i,
-                String.sub str (i + 1) (String.length str - i - 1) )
-          | None -> (str, ""))
+      let url =
+        match Header.extract_param "GET /" ' ' request with
+        | "" -> Header.extract_param "POST /" ' ' request
+        | str -> str
+      in
+      match String.index_opt url '?' with
+      | None -> (url, query)
+      | Some i ->
+          let q = String.sub url (i + 1) (String.length url - i - 1) in
+          let multipart =
+            String.starts_with ~prefix:"multipart/form-data"
+              (Header.extract_param "content-type: " '\n' request)
+          in
+          ( String.sub url 0 i,
+            if query = "" then q
+            else if multipart then query
+            else q ^ "&" ^ query )
     in
     (request, path, query)
   in
@@ -371,7 +380,9 @@ let windows_worker callback =
     with _ -> ()
   in
   Fun.protect ~finally:shutdown (fun () ->
-      ignore (treat_connection callback addr client_socket))
+      try ignore (treat_connection callback addr client_socket)
+      with Sys_error _ as e ->
+        Log.info (fun k -> k "%s" (Printexc.to_string e)))
 
 let start ?addr ~port ?(timeout = 0) ~max_pending_requests ~n_workers callback =
   match Sys.getenv "WSERVER" with

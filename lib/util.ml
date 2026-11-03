@@ -1276,75 +1276,16 @@ let std_color conf (s : Adef.safe_string) =
 let index_of_sex = function Male -> 0 | Female -> 1 | Neuter -> 2
 
 let string_of_pevent_name conf base epers_name =
-  match epers_name with
-  | Epers_Birth -> Adef.safe @@ transl conf "birth"
-  | Epers_Baptism -> Adef.safe @@ transl conf "baptism"
-  | Epers_Death -> Adef.safe @@ transl conf "death"
-  | Epers_Burial -> Adef.safe @@ transl conf "burial"
-  | Epers_Cremation -> Adef.safe @@ transl conf "cremation"
-  | Epers_Accomplishment -> Adef.safe @@ transl conf "accomplishment"
-  | Epers_Acquisition -> Adef.safe @@ transl conf "acquisition"
-  | Epers_Adhesion -> Adef.safe @@ transl conf "adhesion"
-  | Epers_BaptismLDS -> Adef.safe @@ transl conf "baptismLDS"
-  | Epers_BarMitzvah -> Adef.safe @@ transl conf "bar mitzvah"
-  | Epers_BatMitzvah -> Adef.safe @@ transl conf "bat mitzvah"
-  | Epers_Benediction -> Adef.safe @@ transl conf "benediction"
-  | Epers_ChangeName -> Adef.safe @@ transl conf "change name"
-  | Epers_Circumcision -> Adef.safe @@ transl conf "circumcision"
-  | Epers_Confirmation -> Adef.safe @@ transl conf "confirmation"
-  | Epers_ConfirmationLDS -> Adef.safe @@ transl conf "confirmation LDS"
-  | Epers_Decoration -> Adef.safe @@ transl conf "decoration"
-  | Epers_DemobilisationMilitaire ->
-      Adef.safe @@ transl conf "demobilisationMilitaire"
-  | Epers_Diploma -> Adef.safe @@ transl conf "diploma"
-  | Epers_Distinction -> Adef.safe @@ transl conf "distinction"
-  | Epers_Dotation -> Adef.safe @@ transl conf "dotation"
-  | Epers_DotationLDS -> Adef.safe @@ transl conf "dotationLDS"
-  | Epers_Education -> Adef.safe @@ transl conf "education"
-  | Epers_Election -> Adef.safe @@ transl conf "election"
-  | Epers_Emigration -> Adef.safe @@ transl conf "emigration"
-  | Epers_Excommunication -> Adef.safe @@ transl conf "excommunication"
-  | Epers_FamilyLinkLDS -> Adef.safe @@ transl conf "familyLinkLDS"
-  | Epers_FirstCommunion -> Adef.safe @@ transl conf "firstCommunion"
-  | Epers_Funeral -> Adef.safe @@ transl conf "funeral"
-  | Epers_Graduate -> Adef.safe @@ transl conf "graduate"
-  | Epers_Hospitalisation -> Adef.safe @@ transl conf "hospitalisation"
-  | Epers_Illness -> Adef.safe @@ transl conf "illness"
-  | Epers_Immigration -> Adef.safe @@ transl conf "immigration"
-  | Epers_ListePassenger -> Adef.safe @@ transl conf "listePassenger"
-  | Epers_MilitaryDistinction -> Adef.safe @@ transl conf "militaryDistinction"
-  | Epers_MilitaryPromotion -> Adef.safe @@ transl conf "militaryPromotion"
-  | Epers_MilitaryService -> Adef.safe @@ transl conf "militaryService"
-  | Epers_MobilisationMilitaire ->
-      Adef.safe @@ transl conf "mobilisationMilitaire"
-  | Epers_Naturalisation -> Adef.safe @@ transl conf "naturalisation"
-  | Epers_Occupation -> Adef.safe @@ transl_nth conf "occupation/occupations" 0
-  | Epers_Ordination -> Adef.safe @@ transl conf "ordination"
-  | Epers_Property -> Adef.safe @@ transl conf "property"
-  | Epers_Recensement -> Adef.safe @@ transl conf "recensement"
-  | Epers_Residence -> Adef.safe @@ transl conf "residence"
-  | Epers_Retired -> Adef.safe @@ transl conf "retired"
-  | Epers_ScellentChildLDS -> Adef.safe @@ transl conf "scellentChildLDS"
-  | Epers_ScellentParentLDS -> Adef.safe @@ transl conf "scellentParentLDS"
-  | Epers_ScellentSpouseLDS -> Adef.safe @@ transl conf "scellentSpouseLDS"
-  | Epers_VenteBien -> Adef.safe @@ transl conf "venteBien"
-  | Epers_Will -> Adef.safe @@ transl conf "will"
-  | Epers_Name n -> (escape_html (Driver.sou base n) :> Adef.safe_string)
+  match EventForm.pevent_key epers_name with
+  | EventForm.Custom n -> (escape_html (Driver.sou base n) :> Adef.safe_string)
+  | EventForm.Key k when epers_name = Epers_Occupation ->
+      Adef.safe @@ transl_nth conf k 0
+  | EventForm.Key k -> Adef.safe @@ transl conf k
 
-let string_of_fevent_name conf base = function
-  | Efam_Marriage -> Adef.safe @@ transl conf "marriage event"
-  | Efam_NoMarriage -> Adef.safe @@ transl conf "no marriage event"
-  | Efam_NoMention -> Adef.safe @@ transl conf "no mention"
-  | Efam_Engage -> Adef.safe @@ transl conf "engage event"
-  | Efam_Divorce -> Adef.safe @@ transl conf "divorce event"
-  | Efam_Separated -> Adef.safe @@ transl conf "separate event"
-  | Efam_Annulation -> Adef.safe @@ transl conf "annulation"
-  | Efam_MarriageBann -> Adef.safe @@ transl conf "marriage bann"
-  | Efam_MarriageContract -> Adef.safe @@ transl conf "marriage contract"
-  | Efam_MarriageLicense -> Adef.safe @@ transl conf "marriage licence"
-  | Efam_PACS -> Adef.safe @@ transl conf "PACS"
-  | Efam_Residence -> Adef.safe @@ transl conf "residence"
-  | Efam_Name n -> (escape_html (Driver.sou base n) :> Adef.safe_string)
+let string_of_fevent_name conf base efam_name =
+  match EventForm.fevent_key efam_name with
+  | EventForm.Custom n -> (escape_html (Driver.sou base n) :> Adef.safe_string)
+  | EventForm.Key k -> Adef.safe @@ transl conf k
 
 let string_of_witness_kind conf sex witness_kind =
   let n = if witness_kind = Witness then 0 else index_of_sex sex in
@@ -2498,8 +2439,8 @@ let problem_chars =
     (0x0006, "ACKNOWLEDGE", `Control);
     (0x0007, "BELL", `Control);
     (0x0008, "BACKSPACE", `Control);
-    (* 0x0009 = TAB - on peut le garder *)
-    (* 0x000A = LF - on peut le garder *)
+    (0x0009, "CHARACTER TABULATION", `Control);
+    (0x000A, "LINE FEED", `Control);
     (0x000B, "VERTICAL TAB", `Control);
     (0x000C, "FORM FEED", `Control);
     (0x000D, "CARRIAGE RETURN", `Control);
@@ -2558,18 +2499,17 @@ let problem_chars =
     (* Caractères invisibles Unicode *)
     (0x00AD, "SOFT HYPHEN", `Invisible);
     (0x034F, "COMBINING GRAPHEME JOINER", `Invisible);
-    (0x0600, "ARABIC NUMBER SIGN", `Invisible);
-    (0x0601, "ARABIC SIGN SANAH", `Invisible);
-    (0x0602, "ARABIC FOOTNOTE MARKER", `Invisible);
-    (0x0603, "ARABIC SIGN SAFHA", `Invisible);
-    (0x06DD, "ARABIC END OF AYAH", `Invisible);
-    (0x070F, "SYRIAC ABBREVIATION MARK", `Invisible);
-    (0x0F0C, "TIBETAN MARK DELIMITER", `Invisible);
     (0x115F, "HANGUL CHOSEONG FILLER", `Invisible);
     (0x1160, "HANGUL JUNGSEONG FILLER", `Invisible);
-    (0x1680, "OGHAM SPACE MARK", `Invisible);
     (0x180E, "MONGOLIAN VOWEL SEPARATOR", `Invisible);
+    (0x3164, "HANGUL FILLER", `Invisible);
+    (0xFFA0, "HALFWIDTH HANGUL FILLER", `Invisible);
+    (0xFFF9, "INTERLINEAR ANNOTATION ANCHOR", `Invisible);
+    (0xFFFA, "INTERLINEAR ANNOTATION SEPARATOR", `Invisible);
+    (0xFFFB, "INTERLINEAR ANNOTATION TERMINATOR", `Invisible);
+    (0xFFFC, "OBJECT REPLACEMENT CHARACTER", `Invisible);
     (* Espaces Unicode variés *)
+    (0x1680, "OGHAM SPACE MARK", `Space);
     (0x2000, "EN QUAD", `Space);
     (0x2001, "EM QUAD", `Space);
     (0x2002, "EN SPACE", `Space);
@@ -2581,19 +2521,31 @@ let problem_chars =
     (0x2008, "PUNCTUATION SPACE", `Space);
     (0x2009, "THIN SPACE", `Space);
     (0x200A, "HAIR SPACE", `Space);
+    (0x2028, "LINE SEPARATOR", `Space);
+    (0x2029, "PARAGRAPH SEPARATOR", `Space);
     (0x205F, "MEDIUM MATHEMATICAL SPACE", `Space);
     (0x3000, "IDEOGRAPHIC SPACE", `Space);
     (* Zero-width *)
+    (0x061C, "ARABIC LETTER MARK", `ZeroWidth);
     (0x200B, "ZERO WIDTH SPACE", `ZeroWidth);
     (0x200C, "ZERO WIDTH NON-JOINER", `ZeroWidth);
     (0x200D, "ZERO WIDTH JOINER", `ZeroWidth);
     (0x200E, "LEFT-TO-RIGHT MARK", `ZeroWidth);
     (0x200F, "RIGHT-TO-LEFT MARK", `ZeroWidth);
+    (0x202A, "LEFT-TO-RIGHT EMBEDDING", `ZeroWidth);
+    (0x202B, "RIGHT-TO-LEFT EMBEDDING", `ZeroWidth);
+    (0x202C, "POP DIRECTIONAL FORMATTING", `ZeroWidth);
+    (0x202D, "LEFT-TO-RIGHT OVERRIDE", `ZeroWidth);
+    (0x202E, "RIGHT-TO-LEFT OVERRIDE", `ZeroWidth);
     (0x2060, "WORD JOINER", `ZeroWidth);
     (0x2061, "FUNCTION APPLICATION", `ZeroWidth);
     (0x2062, "INVISIBLE TIMES", `ZeroWidth);
     (0x2063, "INVISIBLE SEPARATOR", `ZeroWidth);
     (0x2064, "INVISIBLE PLUS", `ZeroWidth);
+    (0x2066, "LEFT-TO-RIGHT ISOLATE", `ZeroWidth);
+    (0x2067, "RIGHT-TO-LEFT ISOLATE", `ZeroWidth);
+    (0x2068, "FIRST STRONG ISOLATE", `ZeroWidth);
+    (0x2069, "POP DIRECTIONAL ISOLATE", `ZeroWidth);
     (0x206A, "INHIBIT SYMMETRIC SWAPPING", `ZeroWidth);
     (0x206B, "ACTIVATE SYMMETRIC SWAPPING", `ZeroWidth);
     (0x206C, "INHIBIT ARABIC FORM SHAPING", `ZeroWidth);
@@ -2604,9 +2556,9 @@ let problem_chars =
   ]
 
 let problem_chars_tbl =
-  let tbl = Hashtbl.create 100 in
+  let tbl = Hashtbl.create 128 in
   List.iter
-    (fun (code, name, cat) -> Hashtbl.add tbl code (name, cat))
+    (fun (code, name, cat) -> Hashtbl.replace tbl code (name, cat))
     problem_chars;
   tbl
 
@@ -2676,7 +2628,7 @@ let clean_string ?(options = default_clean_options) s =
       else
         match Hashtbl.find_opt problem_chars_tbl code with
         | Some (_, `Control) when options.remove_control ->
-            Buffer.add_char buf ' ';
+            if code < 0x80 then Buffer.add_char buf ' ';
             process (i + nb_bytes)
         | Some (_, `Invisible) when options.remove_invisible ->
             process (i + nb_bytes)
@@ -2968,12 +2920,12 @@ let rec in_text case_sens s m =
     else if m.[i] = '<' then loop true (i + 1)
     else if m.[i] = '[' && i + 1 < String.length m && m.[i + 1] = '[' then
       match NotesLinks.misc_notes_link m i with
-      | NotesLinks.WLpage (j, _, _, _, text)
-      | NotesLinks.WLperson (j, _, Some text, _, _)
-      | NotesLinks.WLwizard (j, _, text) ->
+      | NotesLinks.WLpage (j, _, _, _, text) | NotesLinks.WLwizard (j, _, text)
+        ->
           if in_text case_sens s text then true else loop false j
-      | NotesLinks.WLperson (j, (fn, sn, _), None, _, _) ->
-          if in_text case_sens s (fn ^ " " ^ sn) then true else loop false j
+      | NotesLinks.WLperson (j, _, t, _, _) ->
+          if in_text case_sens s (NotesLinks.display_text t) then true
+          else loop false j
       | NotesLinks.WLimage (j, _, alt, _) ->
           if in_text case_sens s alt then true else loop false j
       | NotesLinks.WLnone (j, _) -> loop false j

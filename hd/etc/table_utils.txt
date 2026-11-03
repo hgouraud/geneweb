@@ -1,164 +1,164 @@
-%define;rm(ccc,ttt)
-  %if;(e.ccc="on")<a role="button" class="stretched-link" href="%apply;url_set%with;ccc%end;"
-    title="%if;("ttt"!="")ttt&#010;&#010;%end;[*remove %s column:::ccc]"></a>%end;
+%let;famcols;%if;(e.marr="on" or e.marr_date="on" or e.marr_place="on" or e.child="on")1%else;0%end;%in;
+%define;rm(ccc,p_lbl)
+  %if;(e.ccc="on")<a class="stretched-link" href="%apply;url_set%with;ccc%end;"
+    title="[*remove %s column:::p_lbl]"></a>%end;
 %end;
-%define;rm3(ccc,ddd,eee)
-  %if;(e.ccc="on" and e.ddd="on")<a role="button" class="stretched-link"
+%define;rm3(ccc,ddd,eee,p_lbl)
+  %if;(e.ccc="on" and e.ddd="on")<a class="stretched-link"
     href="%apply;url_set%with;ccc/ddd%if;("eee"!="")/eee%end;%end;"
-    title="%if;("eee"="")[*remove %s column:::ccc+ddd]%else;[*remove %s column:::ccc+ddd+eee]%end;"></a>%end;
+    title="[*remove %s column:::p_lbl]"></a>%end;
 %end;
 %define;table_header()
   <thead><tr class="align-middle">
     %reset_count;
     %if;(e.num="on")
       <th scope="col" class="text-center align-middle position-relative" rowspan="2">№%nn;
-        %apply;rm%with;num%and;%if;(e.m="D")[*d'Aboville]%elseif;(e.m="A")[Sosa number]%end;%end;</th>
+        %apply;rm%with;num%and;%if;(e.m="D")[d'Aboville]%elseif;(e.m="A")[n° Sosa]%end;%end;</th>
       %incr_count;
     %end;
     <th scope="col" class="ps-2 align-middle no-hover" rowspan="2">[*person/persons]0</th>
     %incr_count;
     %if;(e.birth="on" and e.birth_place="on")
-      <th class="text-center position-relative" colspan="2">[*birth]
-        %apply;rm3("birth","birth_place","")</th>
+      <th scope="colgroup" class="text-center position-relative" colspan="2">[*birth]
+        %apply;rm3("birth","birth_place","",[birth])</th>
       %incr_count;%incr_count;
-    %elseif;(e.birth="on" and e.birth_place!="on")
+    %elseif;(e.birth="on")
       <th scope="col" class="text-center align-middle position-relative" rowspan="2">[*date of birth]
-        %apply;rm("birth","")</th>
+        %apply;rm("birth",[date of birth])</th>
       %incr_count;
-    %elseif;(e.birth!="on" and e.birth_place="on")
+    %elseif;(e.birth_place="on")
       <th scope="col" class="text-center align-middle position-relative" rowspan="2">[*birth place]0
-        %apply;rm("birth_place","")</th>
+        %apply;rm("birth_place",[birth place])</th>
       %incr_count;
     %end;
     %if;(e.baptism="on" and e.baptism_place="on")
-      <th class="text-center position-relative" colspan="2">[*baptism]
-        %apply;rm3("baptism","baptism_place","")</th>
+      <th scope="colgroup" class="text-center position-relative" colspan="2">[*baptism]
+        %apply;rm3("baptism","baptism_place","",[baptism])</th>
       %incr_count;%incr_count;
-    %elseif;(e.baptism="on" and e.baptism_place!="on")
-      <th scope="row" class="text-center align-middle position-relative" rowspan="2">[*date of baptism]
-        %apply;rm("baptism","")</th>
+    %elseif;(e.baptism="on")
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">[*date of baptism]
+        %apply;rm("baptism",[date of baptism])</th>
       %incr_count;
-    %elseif;(e.baptism!="on" and e.baptism_place="on")
-      <th scope="row" class="text-center align-middle position-relative" rowspan="2">[*baptism place]
-        %apply;rm("baptism_place","")</th>
+    %elseif;(e.baptism_place="on")
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">[*baptism place]
+        %apply;rm("baptism_place",[baptism place])</th>
       %incr_count;
     %end;
     %if;(e.marr="on" and (e.m="A" or (e.m="D" and e.t="H")))
       <th scope="col" class="ps-2 align-middle position-relative" rowspan="2">[*spouse/spouses]1
-        %apply;rm("marr","")</th>
+        %apply;rm("marr",[spouse/spouses]1)</th>
       %incr_count;
     %end;
     %if;((e.marr_date="on" and e.marr_place="on") or
          (e.marr_date="on" and e.child="on") or (e.marr_place="on" and e.child="on"))
-      <th class="text-center position-relative"
+      <th scope="colgroup" class="text-center position-relative"
         colspan="%if;(e.marr_date="on" and e.marr_place="on" and e.child="on")3%else;2%end;">%nn;
         [*marriage/marriages]0
-        %apply;rm3("marr_date","marr_place","child")
+        %apply;rm3("marr_date","marr_place","child",[marriage/marriages]0)
       </th>
       %if;(e.marr_date="on" and e.marr_place="on" and e.child="on")%incr_count;%end;
       %incr_count;%incr_count;
-    %elseif;(e.marr_date="on" and e.marr_place!="on" and e.child!="on")
+    %elseif;(e.marr_date="on")
       <th scope="col" class="text-center align-middle position-relative" rowspan="2">[*date of marriage]
-        %apply;rm("marr_date","")</th>
+        %apply;rm("marr_date",[date of marriage])</th>
       %incr_count;
-    %elseif;(e.marr_date!="on" and e.marr_place="on" and e.child!="on")
-      <th scope="col" class="text-center align-middle text-middle position-relative" rowspan="2">[*marriage place]
-        %apply;rm("marr_place","")</th>
+    %elseif;(e.marr_place="on")
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">[*marriage place]
+        %apply;rm("marr_place",[marriage place])</th>
       %incr_count;
-    %elseif;(e.marr_date!="on" and e.marr_place!="on" and e.child="on")
-      <th scope="col" class="text-center align-middel position-relative" rowspan="2">
-        <i class="fa fa-child"></i>
-        %apply;rm%with;child%and;[*nb children]/[nb children] [total]%end;</th>
+    %elseif;(e.child="on")
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">
+        <i class="fa fa-child" aria-hidden="true"></i>
+        %apply;rm("child",[nb children])</th>
       %incr_count;
     %end;
     %if;(e.death="on" and e.death_place="on")
-      <th class="text-center position-relative" colspan="2">[*death]
-        %apply;rm3("death","death_place","")</th>
+      <th scope="colgroup" class="text-center position-relative" colspan="2">[*death]
+        %apply;rm3("death","death_place","",[death])</th>
       %incr_count;%incr_count;
-    %elseif;(e.death="on" and e.death_place!="on")
-      <th scope="col" class="text-center position-relative" rowspan="2">[*date of death]
-        %apply;rm("death","")</th>
+    %elseif;(e.death="on")
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">[*date of death]
+        %apply;rm("death",[date of death])</th>
       %incr_count;
-    %elseif;(e.death!="on" and e.death_place="on")
-      <th scope="col" class="text-center position-relative" rowspan="2">[*death place]
-        %apply;rm("death_place","")</th>
+    %elseif;(e.death_place="on")
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">[*death place]
+        %apply;rm("death_place",[death place])</th>
       %incr_count;
     %end;
     %if;(e.burial="on" and e.burial_place="on")
-      <th class="text-center position-relative" colspan="2">[*burial]
-        %apply;rm3("burial","burial_place","")</th>
+      <th scope="colgroup" class="text-center position-relative" colspan="2">[*burial]
+        %apply;rm3("burial","burial_place","",[burial])</th>
       %incr_count;%incr_count;
-    %elseif;(e.burial="on" and e.burial_place!="on")
-      <th scope="col" class="text-center position-relative" rowspan="2">[*date of burial]
-        %apply;rm("burial","")</th>
+    %elseif;(e.burial="on")
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">[*date of burial]
+        %apply;rm("burial",[date of burial])</th>
       %incr_count;
-    %elseif;(e.burial!="on" and e.burial_place="on")
-      <th scope="col" class="text-center position-relative" rowspan="2">[*burial place]
-        %apply;rm("burial_place","")</th>
+    %elseif;(e.burial_place="on")
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">[*burial place]
+        %apply;rm("burial_place",[burial place])</th>
       %incr_count;
     %end;
     %if;(e.age="on")
       <th scope="col" class="align-middle text-center position-relative" rowspan="2">[*age]
-        %apply;rm("age","")</th>
+        %apply;rm("age",[age])</th>
       %incr_count;
     %end;
     %if;(e.occu="on")
       <th scope="col" class="ps-2 align-middle position-relative" rowspan="2">[*occupation/occupations]1
-        %apply;rm("occu","")</th>
+        %apply;rm("occu",[occupation/occupations]1)</th>
       %incr_count;
     %end;
     </tr>
     <tr>
     %if;(e.birth="on" and e.birth_place="on")
-      <th class="text-end pe-2 position-relative">[*date/dates]0
-        %apply;rm("birth",[*date of birth])</th>
-      <th class="ps-2 position-relative">[*place/places]0
-        %apply;rm("birth_place",[*birth place])</th>
+      <th scope="col" class="text-end pe-2 position-relative">[*date/dates]0
+        %apply;rm("birth",[date of birth])</th>
+      <th scope="col" class="ps-2 position-relative">[*place/places]0
+        %apply;rm("birth_place",[birth place])</th>
     %end;
     %if;(e.baptism="on" and e.baptism_place="on")
-      <th class="text-end pe-2 position-relative" title="[*date of baptism]">[*date/dates]0
-        %apply;rm("baptism",[*date of baptism])</th>
-      <th class="ps-2 position-relative">[*place/places]0
-        %apply;rm("baptism_place",[*baptism place])</th>
+      <th scope="col" class="text-end pe-2 position-relative">[*date/dates]0
+        %apply;rm("baptism",[date of baptism])</th>
+      <th scope="col" class="ps-2 position-relative">[*place/places]0
+        %apply;rm("baptism_place",[baptism place])</th>
     %end;
     %if;((e.marr_date="on" and e.marr_place="on") or
          (e.marr_date="on" and e.child="on") or (e.marr_place="on" and e.child="on"))
       %if;(e.marr_date="on")
-        <th class="%if;(e.marr_place!="on")text-center%else;text-end pe-2%end; position-relative">%nn;
-          [*date/dates]0 %apply;rm("marr_date",[*date of marriage])</th>
+        <th scope="col" class="%if;(e.marr_place!="on")text-center%else;text-end pe-2%end; position-relative">%nn;
+          [*date/dates]0 %apply;rm("marr_date",[date of marriage])</th>
       %end;
       %if;(e.marr_place="on")
-        <th class="%if;(e.marr_date!="on")text-center%else;ps-2%end; position-relative">
-          [*place/places]0 %apply;rm("marr_place",[*marriage place])</th>
+        <th scope="col" class="%if;(e.marr_date!="on")text-center%else;ps-2%end; position-relative">
+          [*place/places]0 %apply;rm("marr_place",[marriage place])</th>
       %end;
       %if;(e.child="on")
-        <th class="text-center px-2 position-relative">
-          <i class="fa fa-child"></i>
-          %apply;rm%with;child%and;[*nb children]/[nb children] [total]%end;</th>
+        <th scope="col" class="text-center px-2 position-relative">
+          <i class="fa fa-child" aria-hidden="true"></i>
+          %apply;rm("child",[nb children])</th>
       %end;
     %end;
     %if;(e.death="on" and e.death_place="on")
-      <th class="text-end pe-2 position-relative">[*date/dates]0
-        %apply;rm("death",[*date of death])</th>
-      <th class="ps-2 position-relative">[*place/places]0
-        %apply;rm("death_place",[*death place])</th>
+      <th scope="col" class="text-end pe-2 position-relative">[*date/dates]0
+        %apply;rm("death",[date of death])</th>
+      <th scope="col" class="ps-2 position-relative">[*place/places]0
+        %apply;rm("death_place",[death place])</th>
     %end;
     %if;(e.burial="on" and e.burial_place="on")
-      <th class="text-end pe-2 position-relative">[*date/dates]0
-        %apply;rm("burial",[*date of burial])</th>
-      <th class="ps-2 position-relative">[*place/places]0
-        %apply;rm("burial_place",[*burial place])</th>
+      <th scope="col" class="text-end pe-2 position-relative">[*date/dates]0
+        %apply;rm("burial",[date of burial])</th>
+      <th scope="col" class="ps-2 position-relative">[*place/places]0
+        %apply;rm("burial_place",[burial place])</th>
     %end;
   </tr></thead>
 %end;
 %define;popover_params(xxx)data-bs-toggle="popover"%if;("xxx"!="") data-bs-placement="xxx"%end; %end;
-%define;date_popup(xxx,yyy,fff)
-  %let;xxx;%if;(e.m="A")ancestor%elseif;(e.m="D")self%end;%in;
-  %let;symb;%if;("yyy"="birth")°%elseif;("yyy"="death" and xxx.is_dead)†%end;%in;
-  %if;(e.yyy="on" and ("xxx"="ancestor" or ("xxx"!="ancestor" and fff=1)))
-    <td%sp;
-      %if;(("xxx"="ancestor" or ("xxx"!="ancestor" and e.t="H")) and xxx.nb_families>1 and (e.marr="on" or e.marr_date="on" or e.marr_place="on" or e.child="on"))rowspan="%xxx.nb_families;" %end;
-      class="align-middle text-end%if;not cancel_links; table_big_cell%end;
+%define;incomplete(xxx)%if;(e.hl=1 and ("?" is_substr xxx or xxx.first_name="N." or xxx.first_name="Nn" or xxx.first_name="Ne" or xxx.first_name="Xx" or xxx.first_name="Yy" or xxx.first_name="Xy")) bg-ly-incomplete%end;%end;
+%( date_popup and place_popup: the caller sets %rowspan; %)
+%define;date_popup(xxx,yyy)
+  %if;(e.yyy="on")
+    %let;symb;%if;("yyy"="birth")°%elseif;("yyy"="death" and xxx.is_dead)†%end;%in;
+    <td%rowspan; class="align-middle text-end%if;not cancel_links; table_big_cell%end;
         %if;(e.hl=1)
           %if;((not xxx.has_yyy_date or xxx.yyy_date.month="" or xxx.yyy_date.day="" or xxx.yyy_date.prec!="") 
             and ("yyy"="birth" or (xxx.is_dead and "yyy"="death"))) bg-ly-incomplete
@@ -185,11 +185,9 @@
      %end;
    %and;[yyy]%end;
 %end;
-%define;place_popup(xxx,yyy,fff)
-  %if;(e.yyy_place="on" and ("xxx"="ancestor" or ("xxx"!="ancestor" and fff=1)))
-    <td%sp;
-      %if;(("xxx"="ancestor" or ("xxx"!="ancestor" and e.t="H" and nb_families>1)) and xxx.nb_families>1 and (e.marr="on" or e.marr_date="on" or e.marr_place="on" or e.child="on"))rowspan="%xxx.nb_families;" %end;
-      class="align-middle%nn;
+%define;place_popup(xxx,yyy)
+  %if;(e.yyy_place="on")
+    <td%rowspan; class="align-middle%nn;
         %if;(e.ns=1)
           %if;(xxx.has_yyy_note) note%if;(xxx.has_yyy_source)source%end;%elseif;(xxx.has_yyy_source) source%end;
         %end;
@@ -197,17 +195,12 @@
           %if;(not xxx.has_yyy_place and ("yyy"="birth" or (xxx.is_dead and "yyy"="death"))) bg-ly-incomplete
           %elseif;(not xxx.is_dead and "yyy"="death") bg-lg%end;
         %end;"
-        %if;(e.ns=1 or e.yyy="on")title="[*click]%sp;%end;
-               %if;(e.ns=1 and (xxx.has_yyy_source or xxx.has_yyy_note))%nn;
-                 [notes sources show help]%sp;
-                 %if;(xxx.has_yyy_note or xxx.has_yyy_source)
-                   %apply;place_title("xxx","yyy",0)
-                 %end;
-                 %if;(e.yyy="on" and wizard)&#010;[or] %end;
-               %end;
-               %if;(e.yyy="on" and wizard)[notes sources edit on date]%end;
-        %if;(e.ns=1 or e.yyy="on")."%end;
-        %if;(e.ns=1 and (xxx.has_yyy_note or xxx.has_yyy_source)) tabindex="0"
+        %let;nsrc;%if;(e.ns=1 and (xxx.has_yyy_note or xxx.has_yyy_source))1%end;%in;
+        %let;edit;%if;(wizard and e.yyy="on")1%end;%in;
+        %if;(nsrc=1 or edit=1)title="[*click]%sp;
+          %if;(nsrc=1)[notes sources show help]%sp;%apply;place_title("xxx","yyy",0)%if;(edit=1)&#010;[or] %end;%end;
+          %if;(edit=1)[notes sources edit on date]%end;."%end;
+        %if;(nsrc=1) tabindex="0"
           %apply;popover_params("bottom")
           data-bs-content='%if;xxx.has_yyy_note;%apply;clean_comment_tags%with;%apply;capitalize(xxx.yyy_note)%end;%end;
                         %if;xxx.has_yyy_source;

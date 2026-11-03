@@ -63,6 +63,35 @@
   Base parameter `notes_search_max_results` (default 500).
 - Case-insensitive text searches (notes, history) treat the apostrophes
   ' and ’ as equal (#3051).
+- The descendant counters of the templates (number_of_descendants,
+  max_desc_level…) no longer scan nor allocate per person of the base.
+- The `all_titles` and `extra_title` URL parameters are removed: they let
+  any visitor bypass `allowed_titles_file` and `denied_titles_file`,
+  including for the "if titles" access.
+- The titles lists (`m=TT`) show wizards every title, ignoring
+  `allowed_titles_file` and `denied_titles_file`, and show visitors only
+  the persons visible to them. Merged spellings are labeled with the most
+  frequent one, as stored.
+- Anomalies report for wizards (`m=ANOMA`, "Anomalies" button on the welcome
+  page): the warnings found by the base check, per kind, with their
+  messages in the reader's language, links to the persons and their edit
+  forms, extreme ages and the persons with several kinds of anomalies.
+  gwc and ged2gwb write it (`<base>.gwb/config/anomalies.jsonl`) during
+  the check they already run; the new `anoma` tool refreshes it for an
+  existing base. Base parameter `anomalies_hidden` lists the kinds shown
+  apart (default: the order, sex, duplicate and witness checks).
+- Each anomaly names the wizard most likely responsible for it: the last
+  `[[w:ident]]` signer in the sources of its persons (or family), else the
+  last wizard in the base history; base parameter
+  `anomalies_responsible=first_signer` takes the first one instead. The
+  anomalies pages filter by wizard, with a "my anomalies" view.
+- Verified anomalies: a wizard marks an anomaly as verified (a real
+  marriage at 12, a real death at 104) in one click, and it leaves the
+  report; the verification covers that anomaly only, and can be
+  cancelled. Each wizard's verifications go to a file of their own and
+  count at once; `m=OK_FOLD` (or `anoma`) merges them into
+  `<base>.gwb/config/verified.jsonl`. `m=OK_FILE` lists the verified
+  anomalies with who verified them and when.
 
 ## Gwsetup
 - Bind `127.0.0.1` instead of resolving `localhost`, which selects the
@@ -79,6 +108,8 @@
   and ignored (#3033).
 - `comm.log` is written next to `gwsetup.log` in the launch directory
   instead of the shared temporary directory (#3033).
+- New page to run `anoma` on an existing base; the page after a base
+  creation links to its anomalies report.
 
 ## Templates
 - Accessibility pass on the welcome, home, menubar, copyr and person
@@ -99,6 +130,10 @@
   1750 (a birth or baptism date more than 125 years old still makes the
   person of course dead), and `p` as birth year for a public person.
   Both statuses stay on the person form.
+- Descendant table: continuous d'Aboville numbers across unions,
+  consistent rows with collapsed implexes or without family column,
+  generation names in every language. Ancestor table: consistent rows
+  with the children column alone.
 
 ## Deprecated features
 - Inferring the CGI mode of `gwd` from the `QUERY_STRING` environment

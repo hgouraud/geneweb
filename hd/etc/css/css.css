@@ -381,7 +381,8 @@ td .rm-cell {
 }
 
 #cd .nbsp, #cd .nnbsp, #cd .ic,
-#cd .bc, #cd .zw, #cd .ms, #cd .mt {
+#cd .bc, #cd .zw, #cd .ms, #cd .mt,
+#cd .mj, #cd .he, #cd .sc, #cd .fo, #cd .rw, #cd .nl {
   background-color: #ffeb3b;
   border-bottom: 1px dashed #e65100;
   border-right: 1px dashed #e65100;
@@ -451,7 +452,7 @@ td .rm-cell {
 }
 
 #cd .edit-container .form-control {
-  flex: 1;
+  flex: none;
   margin-top: 0;
   font-size: 1rem;
 }
@@ -648,11 +649,6 @@ html {
 /* Upd_ind/fam forms scroll fix */
 #updform {
   scroll-padding-top: 52px;
-}
-
-/* Ascendant table by couple anchor fix */
-#scrollfix {
-  scroll-padding-top: 48px;
 }
 
 /* Carrousel */
@@ -867,11 +863,6 @@ Unicode Ranges: 0030-0039,0061-007A,00A0,2500-2503,250A,2514,2517,251C,2523,252C
   -ms-user-select: none;
 }
 
-*/ deslist hr alternate couple color */
-.ancestor-couple-color {
-  background-color: #D2691E !important;
-}
-
 /* Affichage long deslist */
 .desc-gen > li::marker { /* Numérotation de liste en gras */
   font-weight: bold;
@@ -899,7 +890,7 @@ Unicode Ranges: 0030-0039,0061-007A,00A0,2500-2503,250A,2514,2517,251C,2523,252C
 .asc-desc-table tr.even-row:not(:has(th) + tr) {
   border-top-style: solid !important;
   border-top-width: 1px !important;
-  border-top-color: #a0a0a0; !important;
+  border-top-color: #a0a0a0 !important;
 }
 
 .asc-desc-table td {
@@ -948,6 +939,11 @@ Unicode Ranges: 0030-0039,0061-007A,00A0,2500-2503,250A,2514,2517,251C,2523,252C
 
 .gen-row:hover {
   background-color: white;
+}
+
+/* Descendant table: cell reached through a d'Aboville link */
+#destable td:target, #anctableX td:target
+  --bs-table-bg-state: var(--bs-warning-bg-subtle);
 }
 
 .divorced-side-border {
