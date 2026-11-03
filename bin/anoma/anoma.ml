@@ -42,12 +42,13 @@ let () =
     Printf.eprintf "anoma: no base %s\n" bdir;
     exit 2);
   (if not !fold_only then
+     let verbose = Unix.isatty Unix.stderr in
      let anomalies =
        Driver.with_database
          (Filename.concat (Secure.base_dir ()) bname)
          (fun base ->
-           let anomalies = Anomaly.collect base in
-           Anomaly.write ~base ~bdir ~producer:"anoma" anomalies;
+           let anomalies = Anomaly.collect ~verbose base in
+           Anomaly.write ~verbose ~base ~bdir ~producer:"anoma" anomalies;
            anomalies)
      in
      Printf.eprintf "%d anomalies written to %s\n%!" (List.length anomalies)

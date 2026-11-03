@@ -378,9 +378,9 @@ let collector base =
   let acc = ref [] in
   ((fun w -> acc := of_warning base w :: !acc), fun () -> dedup (List.rev !acc))
 
-let collect base =
+let collect ?(verbose = false) base =
   let add, result = collector base in
-  Check.check_base base ignore add ignore;
+  Check.check_base ~verbose base ignore add ignore;
   result ()
 
 (* ---- report -------------------------------------------------------------- *)
@@ -506,7 +506,7 @@ let signers_of sources =
 (* A history line is "YYYY-MM-DD HH:MM:SS [wizard] action (fn.occ sn)", written
    by History.record; times sort as strings. For the persons in [wanted], the
    first and the last line naming them. The file is read line by line. *)
-let history_changes ~history_file wanted =
+let history_changes ?(verbose = false) ~history_file wanted =
   let tbl = Hashtbl.create 1024 in
   let parse line =
     let len = String.length line in
@@ -538,14 +538,26 @@ let history_changes ~history_file wanted =
       Fun.protect
         ~finally:(fun () -> close_in_noerr ic)
         (fun () ->
+          let total = in_channel_length ic in
+          let bar = verbose && total > 0 in
+          if bar then (
+            Printf.eprintf "read history\n";
+            ProgrBar.start ());
+          let last = ref (-1) in
           let rec loop () =
             match input_line ic with
             | line ->
                 parse line;
+                (if bar then
+                   let pct = pos_in ic * 100 / total in
+                   if pct <> !last then (
+                     ProgrBar.run pct 100;
+                     last := pct));
                 loop ()
             | exception End_of_file -> ()
           in
-          loop ()));
+          loop ();
+          if bar then ProgrBar.finish ()));
   tbl
 
 let earliest a b =
@@ -560,7 +572,7 @@ let latest a b =
   | Some _, None -> a
   | None, _ -> b
 
-let make ~base ~bdir ~producer anomalies =
+let make ?(verbose = false) ~base ~bdir ~producer anomalies =
   let wanted = Hashtbl.create 4096 in
   List.iter
     (fun a ->
@@ -574,7 +586,9 @@ let make ~base ~bdir ~producer anomalies =
         (subjects a))
     anomalies;
   let hist =
-    history_changes ~history_file:(Filename.concat bdir "history") wanted
+    history_changes ~verbose
+      ~history_file:(Filename.concat bdir "history")
+      wanted
   in
   let history p =
     match Hashtbl.find_opt hist (person_key p) with
@@ -1186,9 +1200,9 @@ let load config_dir =
     (fun (header, rev) -> { header with items = List.rev rev })
     (fold config_dir (fun acc it -> it :: acc) [])
 
-let write ~base ~bdir ~producer anomalies =
+let write ?(verbose = false) ~base ~bdir ~producer anomalies =
   let dir = Filename.concat bdir "config" in
-  match save dir (make ~base ~bdir ~producer anomalies) with
+  match save dir (make ~verbose ~base ~bdir ~producer anomalies) with
   | () -> ()
   | exception (Sys_error msg | Failure msg) ->
       Printf.eprintf "Cannot write the anomalies report: %s\n%!" msg

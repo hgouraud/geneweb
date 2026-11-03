@@ -146,10 +146,11 @@ val collector :
     on [base] (gwc and ged2gwb chain it with their own warning printer), then
     [result ()] gives the anomalies in the order found, without duplicates. *)
 
-val collect : Geneweb_db.Driver.base -> t list
+val collect : ?verbose:bool -> Geneweb_db.Driver.base -> t list
 (** Run {!Check.check_base} and keep its warnings, in the order found. Errors
     are ignored: gwc reports them itself, and a base with errors is not written.
-*)
+    [~verbose:true] shows a progress bar on stderr while scanning (no-op when
+    stderr is not a terminal). *)
 
 (** {1 Report} *)
 
@@ -182,6 +183,7 @@ type report = {
 }
 
 val make :
+  ?verbose:bool ->
   base:Geneweb_db.Driver.base ->
   bdir:string ->
   producer:string ->
@@ -189,9 +191,11 @@ val make :
   report
 (** [make ~base ~bdir ~producer anomalies] dates the report and gathers, for
     each subject, the signers in its sources and its first and last line in
-    [<bdir>/history] (read once, whole). *)
+    [<bdir>/history] (read once, whole). [~verbose:true] shows a progress bar on
+    stderr while reading the history (no-op when stderr is not a terminal). *)
 
 val write :
+  ?verbose:bool ->
   base:Geneweb_db.Driver.base ->
   bdir:string ->
   producer:string ->

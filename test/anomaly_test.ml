@@ -43,15 +43,21 @@ let samples =
     YoungForMarriage (marie, 12, cpl);
   ]
 
+let tmp_counter = ref 0
+
 let tmp_dir () =
-  let d =
-    Filename.concat
-      (Filename.get_temp_dir_name ())
-      (Printf.sprintf "anomaly_test_%d_%.0f" (Unix.getpid ())
-         (Unix.gettimeofday () *. 1e6))
+  let rec go () =
+    incr tmp_counter;
+    let d =
+      Filename.concat
+        (Filename.get_temp_dir_name ())
+        (Printf.sprintf "anomaly_test_%d_%d" (Unix.getpid ()) !tmp_counter)
+    in
+    match Unix.mkdir d 0o755 with
+    | () -> d
+    | exception Unix.Unix_error (Unix.EEXIST, _, _) -> go ()
   in
-  Unix.mkdir d 0o755;
-  d
+  go ()
 
 let test_kinds () =
   Alcotest.(check int)
