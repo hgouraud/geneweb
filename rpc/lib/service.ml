@@ -167,7 +167,7 @@ module Search = struct
                 stage (fun _ -> true) (Index.search words idx);
                 stage
                   (fun e -> not (exact e))
-                  (Index.search_prefix words idx);
+                  (Index.search_prefix_spread words idx);
                 stage
                   (fun e -> not (prefix e))
                   (Index.fuzzy_search ~max_dist:1 words idx);
