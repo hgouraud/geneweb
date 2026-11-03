@@ -24,7 +24,8 @@ let this_request_updates_database conf =
       | "MRG_IND" | "MRG_MOD_FAM" | "MRG_MOD_IND" | "MOD_DATA"
       | "OK_ADD" | "OK_DEL" | "OK_FOLD" 
       | "PORTRAIT_MOVE_TO_BLASON" | "PORTRAIT_TO_BLASON" | "RESET_IMAGE_C_OK"
-      | "SND_IMAGE" | "UNKNOWN_OK" ) ->
+      | "MRG_IND" | "MRG_MOD_FAM" | "MRG_MOD_IND" | "MOD_DATA" | "SND_IMAGE"
+      | "PLACE_TERMS_OK" | "SOURCE_TERMS_OK" | "UNKNOWN_OK" ) ->
       true
   | _ -> false
 
@@ -582,6 +583,14 @@ let treat_request =
              | "MISC_NOTES_SEARCH" ->
                  w_base @@ NotesDisplay.print_misc_notes_search
              | "MOD_DATA" -> w_wizard @@ w_base @@ UpdateDataDisplay.print_mod
+             | "PLACE_TERMS" -> w_wizard @@ w_base @@ PlaceTermsDisplay.print
+             | "PLACE_TERMS_OK" ->
+                 w_wizard @@ w_lock @@ w_base @@ PlaceTermsDisplay.print_ok
+             | "SOURCE_TERMS" ->
+                 w_wizard @@ w_base @@ PlaceTermsDisplay.print_sources
+             | "SOURCE_TERMS_OK" ->
+                 w_wizard @@ w_lock @@ w_base
+                 @@ PlaceTermsDisplay.print_sources_ok
              | "MOD_DATA_OK" ->
                  w_wizard @@ w_lock @@ w_base @@ UpdateDataDisplay.print_mod_ok
              | "MOD_FAM" -> w_wizard @@ w_base @@ UpdateFam.print_mod
