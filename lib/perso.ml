@@ -1168,7 +1168,12 @@ let linked_page_text conf base p s key (str : Adef.safe_string) (pg, (_, il)) :
                       let b = String.sub v (i + 1) (j - i - 1) in
                       let c = String.sub v (j + 1) (String.length v - j - 1) in
                       (a, b, c)
-                    with Not_found -> ("", v, "")
+                    with Not_found ->
+                      (* no {...}: keep a leading <li> outside the anchor *)
+                      let v' = String.trim v in
+                      if Util.start_with v' 0 "<li>" then
+                        ("<li>", String.sub v' 4 (String.length v' - 4), "")
+                      else ("", v, "")
                   in
                   Printf.sprintf "%s<a href=\"%sm=NOTES;f=%s#p_%d\">%s</a>%s" a
                     (commd conf :> string)
@@ -1176,6 +1181,8 @@ let linked_page_text conf base p s key (str : Adef.safe_string) (pg, (_, il)) :
                     text.Def.NLDB.lnPos b c
                   |> Util.safe_html
                 in
+                (* ignore spaces before a leading <li> *)
+                let str1 = Adef.safe (String.trim (str1 :> string)) in
                 (* see FIXME above: if str1 starts with <li> then no ", " *)
                 (* is <li> is within str1, we are toast *)
                 (* template: no punctuation at the end of linked_page.XXX *)

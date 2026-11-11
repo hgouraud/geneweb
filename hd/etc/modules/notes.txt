@@ -23,11 +23,15 @@
   %if;(count>0 or has_linked_page.BNOTE and linked_page.BNOTE!="")
     <h2 class="h3 mt-2">[*individual notes]</h2>
     %if;(has_linked_page.BNOTE and linked_page.BNOTE!="")
-      <div class="ms-3">%apply;capitalize(linked_page.BNOTE)</div>
+      <ul class="ps-4">%apply;capitalize(linked_page.BNOTE)</ul>
     %end;
-    <div class="ms-4 ind-notes">
+    <div class="p-4 ind-notes">
       %notes;
     </div>
+  %end;
+  %if;(has_linked_page.NOTE and linked_page.NOTE!="")
+    <h2 class="h3 mt-2">[*linked pages]</h2>
+    <ul class="ps-4">%apply;capitalize(linked_page.NOTE)</ul>
   %end;
   %if;(count2>0 and has_families)
     %( On remet les compteurs à zéro, on démarre à 1 - synchro avec unions.txt %)
@@ -56,13 +60,10 @@
       </div>
     %end;
   %end;
-  %if;(has_linked_page.NOTE and linked_page.NOTE!="")
-    <div class="ms-3">%apply;capitalize(linked_page.NOTE)</div>
-  %end;
 %elseif;((count>0 or count2>0) and op_m=2)
   <h3 id="notes" class="mt-2">[*note/notes]1</h3>
     %if;(has_linked_page.BNOTE and linked_page.BNOTE!="")
-      <blockquote>%apply;capitalize(linked_page.BNOTE)</blockquote>
+      <ul class="ps-4">%apply;capitalize(linked_page.BNOTE)</ul>
     %end;
     %if;has_notes;
       <h2 class="h3">[*individual notes]</h2>
@@ -107,7 +108,7 @@
       %end;
     %end;
     %if;(has_linked_page.NOTE and linked_page.NOTE!="")
-      <blockquote>%apply;capitalize(linked_page.NOTE)</blockquote>
+      <ul class="ps-4">%apply;capitalize(linked_page.NOTE)</ul>
     %end;
   %nl;
 %end;
