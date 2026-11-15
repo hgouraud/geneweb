@@ -9,6 +9,21 @@
   <link rel="shortcut icon" href="%images_prefix;favicon_gwd.png">
   %permalink;
   %include;css
+  <style>
+    /* Barre d'actions des images : inactif estompé, actif en couleur pleine */
+    .img-section .img-act:disabled {
+      opacity: .25;
+      filter: grayscale(1);
+    }
+    .img-section .img-act:not(:disabled) {
+      color: var(--bs-btn-hover-color);
+      background-color: var(--bs-btn-hover-bg);
+      border-color: var(--bs-btn-hover-border-color);
+    }
+    .img-section .img-act:not(:disabled):hover {
+      filter: brightness(.9);
+    }
+  </style>
 </head>
 <body%body_prop; id="person">
 %include.hed;
@@ -368,79 +383,104 @@
         %end;
       %end;
       %if;(carrousel_img_nbr>0)
-        <h1 class="display-5">[*image/images]1</h1>
+        <div class="img-section" data-reload="%prefix;m=SND_IMAGE_C&i=%index;">
+        <div class="d-flex align-items-center flex-wrap">
+          <h1 class="display-5 mb-0">[*image/images]1</h1>
+          <div class="btn-toolbar ms-auto" role="toolbar">
+            <div class="btn-group btn-group-sm me-2">
+              <input type="checkbox" class="btn-check img-toggle-all" id="img_toggle_all_cur" autocomplete="off">
+              <label class="btn btn-outline-secondary" for="img_toggle_all_cur" title="[*toggle all]">
+                <i class="far fa-square-check fa-fw"></i></label>
+            </div>
+            <div class="btn-group btn-group-sm">
+              <button type="button" class="btn btn-outline-primary img-act" data-act="note"
+                data-min="1" data-max="1" title="[*update image note]" disabled>
+                <i class="far fa-pen-to-square fa-fw"></i></button>
+              <button type="button" class="btn btn-outline-success img-act" data-act="blason"
+                data-min="1" data-max="1" title="[*copy image to blason]" disabled>
+                <i class="fa fa-user-shield fa-fw"></i></button>
+              <button type="button" class="btn btn-outline-info img-act" data-act="gallery"
+                data-min="1" data-max="1" title="[*create gallery]2" disabled>
+                <i class="fa-regular fa-images fa-fw"></i></button>
+              <button type="button" class="btn btn-outline-warning img-act" data-act="delete"
+                data-min="1" data-max="0" title="[*delete image]" disabled>
+                <i class="far fa-trash-can fa-fw"></i></button>
+            </div>
+          </div>
+        </div>
         <div class="d-flex align-items-center">
           <i class="fa fa-folder-open fa-lg text-warning mx-2" aria-hidden="true"></i>
           <strong><samp class="text-truncate" title="%images_store;%X;%carrousel;">%images_store;%X;%carrousel;%X;</samp></strong>
-          <div class="ms-auto">(%carrousel_img_nbr;)</div>
+          <div class="ms-auto">(<span class="img-sel-count"></span>%carrousel_img_nbr;)</div>
         </div>
         %foreach;img_in_carrousel;
-          <div class="d-flex mt-1">
-            <a role="button" href="#" id="source_%img_cnt;"
-              onclick='editImageNote(%img_cnt;, "%carrousel_img_raw;"); return false;'
-              data-source="%carrousel_img_src;" data-note="%carrousel_img_note;"
+          <div class="form-check d-flex align-items-center mt-1 ms-2">
+            <input class="form-check-input img-sel flex-shrink-0 me-2" type="checkbox"
+              id="source_%img_cnt;" data-cnt="%img_cnt;" data-raw="%carrousel_img_raw;"
+              data-note="%carrousel_img_note;" data-source="%carrousel_img_src;"
+              data-blason="%prefix;m=IMAGE_TO_BLASON&i=%index;&mode=blasons&file_name=%carrousel_img;"
+              data-gallery="%prefix;m=MOD_GALLERY&new&src=%keydir;/%carrousel_img;"
+              data-del="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=carrousel&file_name=%carrousel_img;">
+            <label class="form-check-label text-truncate" for="source_%img_cnt;"
               data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="left"
-              title="<strong><i class='fas fa-images fa-xs me-1'></i>[*see] [image/images]0</strong><br>
-                <span class='small'>%carrousel_img_raw;</span><br>
+              title="<span class='small'>%carrousel_img_raw;</span><br>
                 <img class='rounded my-1' width='185px'
                   src=%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C&i=%index;&s=%carrousel_img;%end;>
                 %if;(carrousel_img_note!="")<br><strong>[*note/notes]0[:]</strong> %carrousel_img_note;%end;
                 %if;(carrousel_img_src!="")<br><strong>[*source/sources]0[:]</strong> %carrousel_img_src;%end;">
-              <i class="far fa-file-image fa-fw text-primary"></i></a>
-            <a href="%prefix;m=IMAGE_TO_BLASON&i=%index;&mode=blasons&file_name=%carrousel_img;"
-              title="[*copy image to blason]">
-              <i class="fa fa-user-shield fa-xs text-success me-1"></i></a>
-            <a href="%prefix;m=MOD_GALLERY&new&src=%keydir;/%carrousel_img;"
-              title="[*create gallery]2">
-               <i class="fa-regular fa-images fa-xs text-info"></i></a>
-            <samp class="text-truncate ms-1" title="%images_store;%X;%carrousel;%X;%carrousel_img_raw;">%carrousel_img_raw;</samp>
-            <div class="ms-auto">
-              <a role="button"
-                href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=carrousel&file_name=%carrousel_img;"
-                data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="left"
-                title="<i class='far fa-trash-can text-warning me-1'></i><strong>[*delete image]</strong><br>
-                  <span class='small'>%carrousel_img_raw;</span><br>
-                  <img class='rounded my-1' width='185px'
-                    src=%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C&i=%index;&s=%carrousel_img;%end;>">
-                <i class="far fa-trash-can text-warning"></i></a>
-            </div>
+              <samp>%carrousel_img_raw;</samp></label>
+            %if;(carrousel_img_note!="" or carrousel_img_src!="")
+              <i class="far fa-note-sticky fa-xs text-secondary ms-2" aria-hidden="true"></i>
+            %end;
           </div>
         %end;
+      </div>
       %end;
 
       %if;(carrousel_old_img_nbr>0)
-        <h1 class="display-5">[*saved images]1</h1>
-        <div class="d-flex align-items-center">
-          <i class="fa fa-folder-open fa-lg text-warning mx-2" aria-hidden="true"></i>
-          <strong><samp class="text-truncate" title="%images_store;%X;%carrousel;%X;saved%X;">%images_store%X;%carrousel;%X;saved%X;</samp></strong>
-          <div class="ms-auto">(%carrousel_old_img_nbr;)</div>
-        </div>
-        %foreach;img_in_carrousel_old;
-          <div class="d-flex mt-1">
-            <a role="button"
-              href="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;%end;"
-              target="_blank" rel="noopener"
-              data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="left"
-              title="<strong><i class='fas fa-images fa-xs me-1'></i>[*see] [saved images]0</strong><br>
-                <span class='small'>%carrousel_img_raw;</span><br>
-                <img class='rounded my-1' width='185px'
-                  src=%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;%end;>">
-              <i class="far fa-file-image fa-fw text-primary"></i></a>
-            <a role="button" href="%prefix;m=RESET_IMAGE_C_OK&i=%index;&mode=carrousel&delete=on&file_name=%carrousel_img;"
-              %if;(url_in_env!="")%else;data-bs-toggle="tooltip" data-bs-placement="top"%end;
-              title="[*restore image saved]">
-              <i class="fa fa-retweet fa-rotate-90 fa-fw text-success"></i></a>
-            <samp class="text-truncate ms-1" title="%images_store;%X;saved%X;%carrousel_img_raw;">%carrousel_img_raw;</samp>
-            <a role="button" class="ms-auto"
-              href="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=carrousel&delete=on&file_name=%carrousel_img;"
-              data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="left"
-              title="<i class='far fa-trash-can text-warning me-1'></i><strong>[*delete saved image]</strong><br>
-                <span class='small'>%carrousel_img_raw;</span><br>
-                <img class='rounded my-1' width='185px'
-                  src=%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;%end;>">
-              <i class="far fa-trash-can text-danger"></i></a>
+        <div class="img-section mt-3" data-reload="%prefix;m=SND_IMAGE_C&i=%index;">
+          <div class="d-flex align-items-center flex-wrap">
+            <h1 class="display-5 mb-0">[*saved images]1</h1>
+            <div class="btn-toolbar ms-auto" role="toolbar">
+              <div class="btn-group btn-group-sm me-2">
+                <input type="checkbox" class="btn-check img-toggle-all" id="img_toggle_all_saved" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="img_toggle_all_saved" title="[*toggle all]">
+                  <i class="far fa-square-check fa-fw"></i></label>
+              </div>
+              <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-primary img-act" data-act="view"
+                  data-min="1" data-max="1" title="[*see] [saved images]0" disabled>
+                  <i class="far fa-file-image fa-fw"></i></button>
+                <button type="button" class="btn btn-outline-success img-act" data-act="restore"
+                  data-min="1" data-max="0" title="[*restore image saved]" disabled>
+                  <i class="fa fa-retweet fa-rotate-90 fa-fw"></i></button>
+                <button type="button" class="btn btn-outline-danger img-act" data-act="delete"
+                  data-min="1" data-max="0" data-confirm="always" title="[*delete saved image]" disabled>
+                  <i class="far fa-trash-can fa-fw"></i></button>
+              </div>
+            </div>
           </div>
-        %end;
+          <div class="d-flex align-items-center">
+            <i class="fa fa-folder-open fa-lg text-warning mx-2" aria-hidden="true"></i>
+            <strong><samp class="text-truncate" title="%images_store;%X;%carrousel;%X;saved%X;">%images_store%X;%carrousel;%X;saved%X;</samp></strong>
+            <div class="ms-auto">(<span class="img-sel-count"></span>%carrousel_old_img_nbr;)</div>
+          </div>
+          %foreach;img_in_carrousel_old;
+            <div class="form-check d-flex align-items-center mt-1 ms-2">
+              <input class="form-check-input img-sel flex-shrink-0 me-2" type="checkbox"
+                id="saved_%img_cnt;" data-raw="%carrousel_img_raw;"
+                data-view="%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;%end;"
+                data-restore="%prefix;m=RESET_IMAGE_C_OK&i=%index;&mode=carrousel&delete=on&file_name=%carrousel_img;"
+                data-del="%prefix;m=DEL_IMAGE_C_OK&i=%index;&mode=carrousel&delete=on&file_name=%carrousel_img;">
+              <label class="form-check-label text-truncate" for="saved_%img_cnt;"
+                data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="left"
+                title="<span class='small'>%carrousel_img_raw;</span><br>
+                  <img class='rounded my-1' width='185px'
+                    src=%if;(url_in_env!="")%url_in_env;%else;%prefix;m=IM_C_S&i=%index;&s=%carrousel_img;%end;>">
+                <samp>%carrousel_img_raw;</samp></label>
+            </div>
+          %end;
+        </div>
       %end;
     </div>
   </div>
@@ -667,11 +707,92 @@ $qa('form').forEach(form => {
   });
 });
 
+// ── Sélection d'images et barre d'actions (une instance par section) ──────
+// NB : crochets à échapper en les préfixant de %% (sinon traduits via le lexique).
+async function runSequential(sel, attr, reload) {
+  for (const b of sel) {
+    try { await fetch(b.dataset%[attr%], { credentials: 'same-origin' }); }
+    catch (err) { console.error(attr, 'failed', b.dataset.raw, err); }
+  }
+  location.href = reload;
+}
+
+function setupImageSection(section) {
+  const boxes   = %[...section.querySelectorAll('.img-sel')%];
+  const toggle  = section.querySelector('.img-toggle-all');
+  const counter = section.querySelector('.img-sel-count');
+  const acts    = %[...section.querySelectorAll('.img-act')%];
+  const reload  = section.dataset.reload;
+  if (!boxes.length) return;
+
+  const selected = () => boxes.filter(b => b.checked);
+
+  const refresh = () => {
+    const n = selected().length;
+    acts.forEach(btn => {
+      const min = +btn.dataset.min, max = +btn.dataset.max;
+      btn.disabled = n < min || (max > 0 && n > max);
+    });
+    if (toggle) {
+      toggle.checked = n === boxes.length;
+      toggle.indeterminate = n > 0 && n < boxes.length;
+    }
+    if (counter) counter.textContent = n ? `${n}/` : '';
+  };
+
+  boxes.forEach(b => b.addEventListener('change', refresh));
+  toggle?.addEventListener('change', () => {
+    boxes.forEach(b => { b.checked = toggle.checked; });
+    refresh();
+  });
+
+  // Double-clic sur un nom : sélectionner cette seule image et lancer l'action par défaut
+  section.querySelectorAll('.img-sel + label').forEach(lbl => {
+    lbl.addEventListener('dblclick', e => {
+      e.preventDefault();
+      const box = $(lbl.htmlFor);
+      boxes.forEach(b => { b.checked = b === box; });
+      refresh();
+      if (box.dataset.cnt) editImageNote(box.dataset.cnt, box.dataset.raw);
+      else if (box.dataset.view) window.open(box.dataset.view, '_blank', 'noopener');
+    });
+  });
+
+  const confirmList = (btn, sel) =>
+    confirm(`${btn.title} (${sel.length})\n` + sel.map(b => '  • ' + b.dataset.raw).join('\n'));
+
+  // Action applicable à 1..n images : lien direct si une seule, fetch séquentiel sinon
+  const many = (btn, sel, attr) => {
+    const mustConfirm = sel.length > 1 || btn.dataset.confirm === 'always';
+    if (mustConfirm && !confirmList(btn, sel)) return;
+    if (sel.length === 1) { location.href = sel%[0%].dataset%[attr%]; return; }
+    acts.forEach(a => { a.disabled = true; });
+    runSequential(sel, attr, reload);
+  };
+
+  acts.forEach(btn => btn.addEventListener('click', () => {
+    const sel = selected();
+    if (!sel.length) return;
+    const one = sel%[0%];
+    switch (btn.dataset.act) {
+      case 'note':    editImageNote(one.dataset.cnt, one.dataset.raw); break;
+      case 'blason':  location.href = one.dataset.blason; break;
+      case 'gallery': location.href = one.dataset.gallery; break;
+      case 'view':    window.open(one.dataset.view, '_blank', 'noopener'); break;
+      case 'restore': many(btn, sel, 'restore'); break;
+      case 'delete':  many(btn, sel, 'del'); break;
+    }
+  }));
+
+  refresh();
+}
+
 // ── Tooltips BS5 ──────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   setupFileInput('.custom-portrait', '.snd-btn-portrait', false);
   setupFileInput('.custom-blason',   '.snd-btn-blason',   false);
   setupFileInput('.custom-others',   '.btn-quick-upload', true);
+  $qa('.img-section').forEach(setupImageSection);
 
   $qa('[data-bs-toggle="tooltip"]').forEach(el => {
     new bootstrap.Tooltip(el, { html: true });
