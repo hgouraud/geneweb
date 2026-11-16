@@ -257,6 +257,73 @@ let w_lock ~onerror ?onbulk fn conn conf (base_name : string option) =
               | None -> wait ())
           | _ -> wait ())
 
+type 'a attempt = Busy | Queue | Ran of 'a
+
+(* The queue runner forked by the gwd master sets this variable for its
+   workers: without it (CGI, no workers), the requests wait for the lock. *)
+let queue_enabled () = Sys.getenv_opt "GWD_WRITE_QUEUE" = Some "1"
+let queue_delay = 2.
+
+let w_queue ~onerror ~onbulk ~onqueued ~redisplay fn conn conf
+    (base_name : string option) =
+  match conf.write_log with
+  | Some _ ->
+      (* replayed by the queue runner, which holds the lock *)
+      fn conn conf base_name
+  | None when not (queue_enabled ()) ->
+      w_lock ~onerror ~onbulk fn conn conf base_name
+  | None ->
+      let bfile = !GWPARAM.bpath conf.bname in
+      let lock_file = Mutil.lock_file bfile in
+      let enqueue () =
+        if redisplay conf base_name then
+          (* the form is displayed again: nothing is written *)
+          fn conn conf base_name
+        else
+          let identity =
+            WriteQueue.
+              {
+                wizard = conf.wizard;
+                friend = conf.friend;
+                user = conf.user;
+                username = conf.username;
+                userkey = conf.userkey;
+              }
+          in
+          let item =
+            WriteQueue.enqueue bfile ~identity
+              ~command:(Option.value ~default:"" (p_getenv conf.env "m"))
+              ~from:conf.from ~lang:conf.lang ~request:conf.request
+              ~env:conf.env
+          in
+          Log.info (fun k ->
+              k "%s: request %d of %s queued" conf.bname item.id conf.user);
+          onqueued conn conf base_name item
+      in
+      let attempt () =
+        Lock.control ~wait:false ~lock_file
+          ~on_exn:(fun exn _bt ->
+            match exn with
+            | Unix.Unix_error ((Unix.EAGAIN | Unix.EACCES), _, _) -> Busy
+            | _ -> raise exn)
+          (fun () ->
+            (* checked under the lock: no request overtakes a queued one *)
+            if WriteQueue.has_pending bfile then Queue
+            else Ran (fn conn conf base_name))
+      in
+      let deadline = Unix.gettimeofday () +. queue_delay in
+      let rec loop () =
+        match attempt () with
+        | Ran x -> x
+        | Queue -> enqueue ()
+        | Busy ->
+            if Unix.gettimeofday () < deadline then (
+              Unix.sleepf 0.1;
+              loop ())
+            else enqueue ()
+      in
+      if WriteQueue.has_pending bfile then enqueue () else loop ()
+
 (* To be put inside [w_lock]: marks the base as held by a bulk task for the
    requests arriving meanwhile. *)
 let w_bulk ~command fn conn conf (base_name : string option) =
@@ -359,6 +426,7 @@ let w_base ~none fn conn conf (bfile : string option) =
                 }
           in
           check_nldb_format conf base;
+          WriteQueueDisplay.notify conf;
           let conf = Notif.inject_pending conf in
           fn conn conf base)
 
@@ -389,6 +457,24 @@ let treat_request =
       ~onerror:(fun _conn conf _ -> Update.error_locked conf)
       ~onbulk:(fun _conn conf _ st -> Update.error_bulk conf st)
   in
+  let w_queue =
+    w_queue
+      ~onerror:(fun _conn conf _ -> Update.error_locked conf)
+      ~onbulk:(fun _conn conf _ st -> Update.error_bulk conf st)
+      ~onqueued:(fun _conn conf _ item ->
+        WriteQueueDisplay.print_queued conf (!GWPARAM.bpath conf.bname) item)
+  in
+  let never _conf _bfile = false in
+  let on_return conf _bfile = Option.is_some (p_getenv conf.env "return") in
+  let with_base check conf bfile =
+    match bfile with
+    | None -> false
+    | Some bfile -> (
+        try Driver.with_database bfile (fun base -> check conf base)
+        with _ -> false)
+  in
+  let fam_redisplay = with_base UpdateFamOk.is_redisplay in
+  let ind_redisplay conf _bfile = UpdateIndOk.is_redisplay conf in
   let w_base =
     let none conf =
       if conf.bname = "" then GWPARAM.output_error conf Code.Bad_Request
@@ -498,6 +584,9 @@ let treat_request =
              let w_person hdl = w_person (fun _conn -> hdl) conn in
              let w_index hdl = w_index (fun _conn -> hdl) conn in
              let w_lock hdl = w_lock (fun _conn -> hdl) conn in
+             let w_queue ~redisplay hdl =
+               w_queue ~redisplay (fun _conn -> hdl) conn
+             in
              let w_bulk hdl = w_bulk ~command:m (fun _conn -> hdl) conn in
              let w_wizard hdl = w_wizard (fun _conn -> hdl) conn in
              match m with
@@ -515,10 +604,13 @@ let treat_request =
              | "A" -> w_base @@ w_person @@ AscendDisplay.print
              | "ADD_FAM" -> w_wizard @@ w_base @@ UpdateFam.print_add
              | "ADD_FAM_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ UpdateFamOk.print_add
+                 w_wizard
+                 @@ w_queue ~redisplay:fam_redisplay
+                 @@ w_base @@ UpdateFamOk.print_add
              | "ADD_PAR" -> w_wizard @@ w_base @@ UpdateFam.print_add_parents
              | "ADD_PAR_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ UpdateFamOk.print_add_parents
+                 w_wizard @@ w_queue ~redisplay:never @@ w_base
+                 @@ UpdateFamOk.print_add_parents
              | "ANOMA" -> w_wizard @@ w_base @@ AnomalyDisplay.print
              | "ANM" ->
                  w_base @@ fun conf _ ->
@@ -557,15 +649,20 @@ let treat_request =
              | "CHG_CHN" when conf.wizard ->
                  w_wizard @@ w_base @@ ChangeChildrenDisplay.print
              | "CHG_CHN_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ ChangeChildrenDisplay.print_ok
+                 w_wizard @@ w_queue ~redisplay:never @@ w_base
+                 @@ ChangeChildrenDisplay.print_ok
              | "CHG_EVT_IND_ORD_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ UpdateOrder.print_pevents
+                 w_wizard @@ w_queue ~redisplay:never @@ w_base
+                 @@ UpdateOrder.print_pevents
              | "CHG_EVT_FAM_ORD_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ UpdateOrder.print_fevents
+                 w_wizard @@ w_queue ~redisplay:never @@ w_base
+                 @@ UpdateOrder.print_fevents
              | "CHG_FAM_ORD_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ UpdateOrder.print_families
+                 w_wizard @@ w_queue ~redisplay:never @@ w_base
+                 @@ UpdateOrder.print_families
              | "CHG_TIT_ORD_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ UpdateOrder.print_titles
+                 w_wizard @@ w_queue ~redisplay:never @@ w_base
+                 @@ UpdateOrder.print_titles
              | "CHK_DATA" ->
                  w_wizard @@ w_base @@ w_index @@ CheckDataDisplay.print
              | "CHK_DIGEST" -> w_wizard @@ w_base @@ UpdateCheck.print
@@ -581,7 +678,8 @@ let treat_request =
              | "DAG" -> w_base @@ DagDisplay.print conn
              | "DEL_FAM" -> w_wizard @@ w_base @@ UpdateFam.print_del
              | "DEL_FAM_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ UpdateFamOk.print_del
+                 w_wizard @@ w_queue ~redisplay:never @@ w_base
+                 @@ UpdateFamOk.print_del
              | "DEL_IMAGE" ->
                  w_wizard @@ w_lock @@ w_base @@ ImageCarrousel.print_del
              | "DEL_IMAGE_OK" ->
@@ -590,7 +688,8 @@ let treat_request =
                  w_wizard @@ w_lock @@ w_base @@ ImageCarrousel.print_main_c
              | "DEL_IND" -> w_wizard @@ w_base @@ UpdateInd.print_del
              | "DEL_IND_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ UpdateIndOk.print_del
+                 w_wizard @@ w_queue ~redisplay:never @@ w_base
+                 @@ UpdateIndOk.print_del
              | "DOC" ->
                  w_base @@ fun conf base ->
                  doc_aux conf base ImageDisplay.print_source
@@ -700,18 +799,27 @@ let treat_request =
                  @@ UpdateDataDisplay.print_mod_ok
              | "MOD_FAM" -> w_wizard @@ w_base @@ UpdateFam.print_mod
              | "MOD_FAM_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ UpdateFamOk.print_mod
+                 w_wizard
+                 @@ w_queue ~redisplay:fam_redisplay
+                 @@ w_base @@ UpdateFamOk.print_mod
              | "MOD_IND" -> w_wizard @@ w_base @@ UpdateInd.print_mod
              | "MOD_IND_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ UpdateIndOk.print_mod
+                 w_wizard
+                 @@ w_queue ~redisplay:ind_redisplay
+                 @@ w_base @@ UpdateIndOk.print_mod
              | "MOD_NOTES" -> w_wizard @@ w_base @@ NotesDisplay.print_mod
              | "MOD_NOTES_OK" ->
-                 w_wizard @@ w_lock @@ w_base @@ NotesDisplay.print_mod_ok
+                 w_wizard
+                 @@ w_queue ~redisplay:on_return
+                 @@ w_base @@ NotesDisplay.print_mod_ok
              | "MOD_WIZNOTES" when conf.authorized_wizards_notes ->
                  w_base @@ WiznotesDisplay.print_mod
              | "MOD_WIZNOTES_OK" when conf.authorized_wizards_notes ->
-                 w_lock @@ w_base @@ WiznotesDisplay.print_mod_ok
+                 w_queue ~redisplay:on_return
+                 @@ w_base @@ WiznotesDisplay.print_mod_ok
              | "MRG" -> w_wizard @@ w_base @@ w_person @@ MergeDisplay.print
+             | "QUEUE" when conf.wizard || conf.friend ->
+                 w_base @@ WriteQueueDisplay.print_list
              | "MRG_DUP" -> w_wizard @@ w_base @@ MergeDupDisplay.main_page
              | "MRG_DUP_IND_Y_N" ->
                  w_wizard @@ w_lock @@ w_base @@ MergeDupDisplay.answ_ind_y_n

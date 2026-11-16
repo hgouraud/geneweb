@@ -114,3 +114,9 @@ val merge_note :
     in the JSON of {!merge_person}, whose differences carry [text]: the name of
     the text area, and the lines of [a] and of [b] with the unchanged line
     before and after them, to swap them in the text area. *)
+
+val conflicts : string -> int
+(** [conflicts review] is the number of differences to check in the [review]
+    returned by {!merge_person}, {!merge_family} or {!merge_note}; 1 when
+    [review] cannot be read, so that it is never taken for a merge without
+    conflict. *)

@@ -37,6 +37,7 @@ type output_conf = {
 }
 
 type env = (string * Adef.encoded_string) list
+type write_log = { mutable committed : bool }
 
 type connections = {
   cn_total : int;
@@ -131,6 +132,7 @@ type config = {
   allowed_plugins : string list;
   secret_salt : string option;
   predictable_mode : bool;
+  write_log : write_log option;
 }
 
 (**/**)
@@ -211,6 +213,7 @@ let empty =
     allowed_plugins = [];
     secret_salt = None;
     predictable_mode = false;
+    write_log = None;
   }
 
 (**/**)

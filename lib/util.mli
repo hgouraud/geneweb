@@ -52,6 +52,11 @@ val escache_value : Geneweb_db.Driver.base -> Adef.encoded_string
 val commit_patches : config -> Geneweb_db.Driver.base -> unit
 (** Commits the patches and logs the modification *)
 
+val mark_committed : config -> unit
+(** [mark_committed conf] tells the queue runner, when [conf] replays a request
+    of the write queue ({!Config.write_log}), that the request wrote into the
+    base. *)
+
 val update_wf_trace : config -> string -> unit
 
 val get_referer : config -> Adef.escaped_string

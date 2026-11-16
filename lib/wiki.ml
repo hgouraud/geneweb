@@ -1130,6 +1130,19 @@ let print_ok conf wi edit_mode fname title_is_1st s =
   print_sub_part conf wi ~has_next conf.wizard edit_mode fname v lines;
   Hutil.trailer conf
 
+(* The note [entry] posted, merged with the note [stored] meanwhile. *)
+let merge_entry conf fname stored entry =
+  let o =
+    UpdateConflict.note_of_snapshot conf fname
+      (Option.value ~default:"" (Util.p_getenv conf.env "snapshot"))
+  in
+  let entry =
+    match Util.p_getint conf.env "v" with
+    | Some v -> insert_sub_part (Option.value ~default:stored o) v entry
+    | None -> entry
+  in
+  UpdateConflict.merge_note conf o stored entry
+
 let mod_ok conf edit_mode fname read_string commit ~conflict =
   let new_fname = Util.p_getenv conf.env "new_f" in
   let fname =
@@ -1146,7 +1159,7 @@ let mod_ok conf edit_mode fname read_string commit ~conflict =
       if Sys.file_exists new_fn_path then Update.error_same_file conf
   | _ -> ());
   match edit_mode fname with
-  | Some mode ->
+  | Some mode -> (
       let old_string =
         let e, s = read_string fname in
         List.fold_left (fun s (k, v) -> s ^ k ^ "=" ^ v ^ "\n") "" e ^ s
@@ -1159,20 +1172,30 @@ let mod_ok conf edit_mode fname read_string commit ~conflict =
       let digest =
         match Util.p_getenv conf.env "digest" with Some s -> s | None -> ""
       in
-      if
-        digest <> Mutil.digest old_string
-        || Option.is_some (Util.p_getenv conf.env "return")
-      then (
-        conflict mode fname old_string sub_part;
-        None)
-      else
-        let s =
-          match Util.p_getint conf.env "v" with
-          | Some v -> insert_sub_part old_string v sub_part
-          | None -> sub_part
-        in
-        if s <> old_string then commit fname s;
-        Some fname
+      let changed = digest <> Mutil.digest old_string in
+      let redisp = Option.is_some (Util.p_getenv conf.env "return") in
+      let merged =
+        (* replayed from the write queue: nobody is there to save the merge *)
+        if Option.is_none conf.write_log || redisp || not changed then None
+        else
+          let merged, review = merge_entry conf fname old_string sub_part in
+          if UpdateConflict.conflicts review = 0 then Some merged else None
+      in
+      match merged with
+      | Some s ->
+          if s <> old_string then commit fname s;
+          Some fname
+      | None when changed || redisp ->
+          conflict mode fname old_string sub_part;
+          None
+      | None ->
+          let s =
+            match Util.p_getint conf.env "v" with
+            | Some v -> insert_sub_part old_string v sub_part
+            | None -> sub_part
+          in
+          if s <> old_string then commit fname s;
+          Some fname)
   | None ->
       Hutil.incorrect_request conf;
       Some ""
@@ -1183,16 +1206,7 @@ let do_mod_ok conf edit_mode fname read_string commit =
          Update.error_digest conf))
 
 let print_conflict conf mode fname stored entry =
-  let o =
-    UpdateConflict.note_of_snapshot conf fname
-      (Option.value ~default:"" (Util.p_getenv conf.env "snapshot"))
-  in
-  let entry =
-    match Util.p_getint conf.env "v" with
-    | Some v -> insert_sub_part (Option.value ~default:stored o) v entry
-    | None -> entry
-  in
-  let merged, review = UpdateConflict.merge_note conf o stored entry in
+  let merged, review = merge_entry conf fname stored entry in
   Notif.warning ~mode:Notif.Dismissible
     (Utf8.capitalize_fst (transl_nth conf "edit conflict" 0));
   let conf =

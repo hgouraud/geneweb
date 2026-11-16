@@ -2879,9 +2879,13 @@ let test_cnt_d conf =
   else ();
   cnt_d
 
+let mark_committed conf =
+  Option.iter (fun (w : write_log) -> w.committed <- true) conf.write_log
+
 let commit_patches conf base =
   let _ = test_cnt_d in
   Driver.commit_patches base;
+  mark_committed conf;
   conf.henv <-
     List.map
       (fun (k, v) -> if k = "escache" then (k, escache_value base) else (k, v))

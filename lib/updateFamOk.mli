@@ -151,3 +151,9 @@ val print_mod : config -> Driver.base -> unit
 val print_del : config -> Driver.base -> unit
 (** [print_del conf base] handles [m=DEL_FAM_OK]: deletes family [i], commits
     and prints the confirmation. *)
+
+val is_redisplay : Config.config -> Geneweb_db.Driver.base -> bool
+(** [is_redisplay conf base] tells whether the family form posted to
+    [MOD_FAM_OK] or [ADD_FAM_OK] displays the form again (an inserted line,
+    [return]) instead of saving it: such a request does not write into the base.
+*)

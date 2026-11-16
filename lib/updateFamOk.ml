@@ -1379,20 +1379,30 @@ let print_mod_aux conf base callback =
           let sfam, sdes = strip_family sfam sdes in
           callback sfam scpl sdes
   else
-    let fcd, review =
+    let ((m_fam, m_cpl, m_des) as fcd), review =
       let sfam, sdes = strip_family sfam sdes in
       UpdateConflict.merge_family conf
         ~snapshot:(Option.value ~default:"" (p_getenv conf.env "snapshot"))
         ini_sfam (sfam, scpl, sdes)
     in
-    Notif.warning ~mode:Notif.Dismissible
-      (Utf8.capitalize_fst (transl_nth conf "edit conflict" 0));
-    UpdateFam.print_update_fam
-      ~grandparents:(reconstitute_grandparents conf)
-      ~snapshot:(UpdateConflict.family_snapshot conf ini_sfam)
-      ~review
-      (Notif.inject_pending conf)
-      base fcd digest
+    if
+      Option.is_some conf.write_log
+      && (not (ext || redisp))
+      && UpdateConflict.conflicts review = 0
+    then
+      (* replayed from the write queue: nobody is there to save the merge *)
+      match check_family conf m_fam m_cpl with
+      | Some err, _ | _, Some err -> error_family conf err
+      | None, None -> callback m_fam m_cpl m_des
+    else (
+      Notif.warning ~mode:Notif.Dismissible
+        (Utf8.capitalize_fst (transl_nth conf "edit conflict" 0));
+      UpdateFam.print_update_fam
+        ~grandparents:(reconstitute_grandparents conf)
+        ~snapshot:(UpdateConflict.family_snapshot conf ini_sfam)
+        ~review
+        (Notif.inject_pending conf)
+        base fcd digest)
 
 let family_structure base ifam =
   let fam = Driver.foi base ifam in
@@ -1461,3 +1471,10 @@ let print_mod o_conf base =
       print_mod_ok ~with_parents:ipl conf base changed (wl, ml) cpl des
   in
   print_mod_aux conf base callback
+
+let is_redisplay conf base =
+  let conf = Update.update_conf conf in
+  let () = removed_string := [] in
+  let nsck = p_getenv conf.env "nsck" = Some "on" in
+  let _, _, _, ext = reconstitute_family conf base nsck in
+  ext || Option.is_some (p_getenv conf.env "return")

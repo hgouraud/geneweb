@@ -65,3 +65,8 @@ val check_person :
     string )
   Def.gen_person ->
   Update.update_error option
+
+val is_redisplay : Config.config -> bool
+(** [is_redisplay conf] tells whether the person form posted displays the form
+    again (an inserted line, [return]) instead of saving it: such a request does
+    not write into the base. *)

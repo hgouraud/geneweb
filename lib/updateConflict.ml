@@ -780,3 +780,12 @@ let merge_note conf o a b =
   let r = { changes = []; conflicts = [] } in
   let s = merge_lines conf r ~name:"notes" ~what:"" o a b in
   (s, review_json ~kind:"merge" (Option.is_some o) r)
+
+let conflicts review =
+  match Yojson.Safe.from_string review with
+  | `Assoc l -> (
+      match List.assoc_opt "conflicts" l with
+      | Some (`List c) -> List.length c
+      | Some _ | None -> 1)
+  | _ -> 1
+  | exception Yojson.Json_error _ -> 1

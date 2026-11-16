@@ -19,6 +19,7 @@
   geneweb.robot
   geneweb_http
   geneweb_register
+  geneweb_write_queue
   digestif
   dune-site
   dune-site.plugins
@@ -47,6 +48,7 @@
   geneweb.oidc
   geneweb_http
   geneweb_register
+  geneweb_write_queue
   gwd_lib
   ipaddr
   logs
