@@ -37,4 +37,5 @@ let () =
          Userkey_test.v;
          Util_test.v;
          Wiki_test.v;
+         Write_queue_test.v;
        ])

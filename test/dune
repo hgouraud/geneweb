@@ -29,8 +29,16 @@
   update_order_test
   update_conflict_test
   collation_test
-  book_test)
- (libraries alcotest geneweb geneweb.oidc fmt unix yojson))
+  book_test
+  write_queue_test)
+ (libraries
+  alcotest
+  geneweb
+  geneweb.oidc
+  geneweb.write_queue
+  fmt
+  unix
+  yojson))
 
 (test
  (package geneweb)
