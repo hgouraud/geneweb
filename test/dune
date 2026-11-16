@@ -27,8 +27,16 @@
   notes_rename_test
   anomaly_test
   update_order_test
-  update_conflict_test)
- (libraries alcotest geneweb geneweb.oidc fmt unix yojson))
+  update_conflict_test
+  write_queue_test)
+ (libraries
+  alcotest
+  geneweb
+  geneweb.oidc
+  geneweb.write_queue
+  fmt
+  unix
+  yojson))
 
 (test
  (package geneweb)
