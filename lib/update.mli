@@ -187,6 +187,10 @@ val error : config -> update_error -> 'exn
 (** [error conf err] prints an error page with the message of [err] and a
     "return" form (see {!prerr}), then raises [ModErr err]. *)
 
+val is_label_note : string -> bool
+(** [is_label_note lbl] tells whether the input [lbl] holds a note, posted again
+    in a text area rather than in an input. *)
+
 val error_locked : config -> 'exn
 (** [error_locked conf] prints the "file temporarily locked" page, with a form
     resubmitting the current request and a form cancelling it, then raises

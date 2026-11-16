@@ -1074,13 +1074,23 @@ let print_mod_aux conf base callback =
         ~snapshot:(Option.value ~default:"" (p_getenv conf.env "snapshot"))
         ini_ps (strip_person p)
     in
-    Notif.warning ~mode:Notif.Dismissible
-      (Utf8.capitalize_fst (transl_nth conf "edit conflict" 0));
-    UpdateInd.print_update_ind
-      ~snapshot:(UpdateConflict.person_snapshot conf ini_ps)
-      ~review
-      (Notif.inject_pending conf)
-      base p digest
+    if
+      Option.is_some conf.write_log
+      && (not (ext || redisp))
+      && UpdateConflict.conflicts review = 0
+    then
+      (* replayed from the write queue: nobody is there to save the merge *)
+      match check_person conf base p with
+      | Some err -> error_person conf err
+      | None -> callback p
+    else (
+      Notif.warning ~mode:Notif.Dismissible
+        (Utf8.capitalize_fst (transl_nth conf "edit conflict" 0));
+      UpdateInd.print_update_ind
+        ~snapshot:(UpdateConflict.person_snapshot conf ini_ps)
+        ~review
+        (Notif.inject_pending conf)
+        base p digest)
 
 let print_mod ?prerr o_conf base =
   (* Attention ! On pense à remettre les compteurs à *)
@@ -1136,3 +1146,9 @@ let print_mod ?prerr o_conf base =
       print_mod_ok conf base wl pgl ~remains changed p ofn osn oocc
   in
   print_mod_aux conf base callback
+
+let is_redisplay conf =
+  let conf = Update.update_conf conf in
+  let () = removed_string := [] in
+  let _, ext = reconstitute_person conf in
+  ext || Option.is_some (p_getenv conf.env "return")

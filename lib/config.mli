@@ -42,6 +42,10 @@ type output_conf = {
 
 type env = (string * Adef.encoded_string) list
 
+type write_log = { mutable committed : bool }
+(** Outcome of a request replayed from the write queue: [committed] is set when
+    the request writes into the base (patches or notes). *)
+
 (** Geneweb configuration data type *)
 type config = {
   from : string;
@@ -129,6 +133,9 @@ type config = {
   predictable_mode : bool;
       (** Determine if we are in predictable mode. In this mode, output must not
           depend on random state. *)
+  write_log : write_log option;
+      (** [Some] when the request is replayed from the write queue by the queue
+          runner, which holds the lock of the base. *)
 }
 (** Geneweb configuration data type *)
 

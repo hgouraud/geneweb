@@ -16721,6 +16721,17 @@ en: no more
 es: no hay más
 fr: pas d’autres
 
+    no queued modification
+de: keine Änderung in der Warteschlange
+en: no queued modification
+es: ninguna modificación en espera
+fr: aucune modification en attente
+it: nessuna modifica in attesa
+nl: geen wijziging in de wachtrij
+pl: brak zmian w kolejce
+pt: nenhuma modificação em espera
+sv: inga ändringar i kö
+
     no user key
 co: stu liame pò cundunce à un omonimu o ancu fiascà perchè a chjave di l’utilizatore ùn hè micca definita in u schedariu «.auth»
 de: dieser Link kann zu einem Homonym führen oder sogar fehlschlagen, weil der Nutzerschlüssel nicht in der „.auth“ Datei definiert ist
@@ -20549,6 +20560,17 @@ nl: resultaat/resultaten
 pt: resultado/resultados
 sv: resultat/resultat
 
+    resume
+de: wieder aufnehmen
+en: resume
+es: retomar
+fr: reprendre
+it: riprendere
+nl: hervatten
+pl: wznów
+pt: retomar
+sv: återuppta
+
     retired
 co: ritirata
 de: Ruhestand
@@ -23209,6 +23231,17 @@ sl: baza podatkov se je spremenila: kliknite „back“ in „reload“ ter pono
 sv: databasen har ändrats; gå tillbaka, klicka uppdatera och fyll i formuläret igen
 tr: taban değişti; “geri” yapın, “yeniden yükleyin” ve formu yeniden doldurun
 
+    the base is busy: your modification is queued (%d)
+de: die Datenbank ist beschäftigt: Ihre Änderung wurde in die Warteschlange gestellt (Position %d) und wird automatisch ausgeführt
+en: the base is busy: your modification has been queued (position %d) and will be applied automatically
+es: la base está ocupada: su modificación se ha puesto en espera (posición %d) y se aplicará automáticamente
+fr: la base est occupée : votre modification a été mise en file d’attente (position %d) et sera appliquée automatiquement
+it: la base è occupata: la sua modifica è stata messa in coda (posizione %d) e sarà applicata automaticamente
+nl: de database is bezet: uw wijziging is in de wachtrij geplaatst (positie %d) en wordt automatisch uitgevoerd
+pl: baza jest zajęta: Twoja zmiana została dodana do kolejki (pozycja %d) i zostanie zastosowana automatycznie
+pt: a base está ocupada: a sua modificação foi colocada em espera (posição %d) e será aplicada automaticamente
+sv: databasen är upptagen: din ändring har köats (plats %d) och utförs automatiskt
+
     the birthday
 af: die verjaarsdag
 bg: рожденият ден
@@ -25860,6 +25893,61 @@ sl: bi bil svoj lasten prednik
 sv: skulle vara sin egen ana
 tr: kendi atası olurdu
 
+    write queue
+de: Änderungen in der Warteschlange
+en: queued modifications
+es: modificaciones en espera
+fr: modifications en attente
+it: modifiche in attesa
+nl: wijzigingen in de wachtrij
+pl: zmiany w kolejce
+pt: modificações em espera
+sv: ändringar i kö
+
+    write queue applied %s %s
+de: %s, eingereiht um %s, wurde ausgeführt
+en: %s, queued at %s, has been applied
+es: %s, puesta en espera a las %s, se ha aplicado
+fr: %s, mise en attente à %s, a été appliquée
+it: %s, messa in coda alle %s, è stata applicata
+nl: %s, in de wachtrij geplaatst om %s, is uitgevoerd
+pl: %s, dodana do kolejki o %s, została zastosowana
+pt: %s, colocada em espera às %s, foi aplicada
+sv: %s, köad kl. %s, har utförts
+
+    write queue command
+de: Änderung einer Person/Änderung einer Familie/Hinzufügen einer Familie/Hinzufügen von Eltern/Löschen einer Person/Löschen einer Familie/Änderung der Namen der Kinder/Reihenfolge der Ereignisse einer Person/Reihenfolge der Ereignisse einer Familie/Reihenfolge der Familien/Änderung einer Notiz/Änderung einer Notiz
+en: modification of a person/modification of a family/addition of a family/addition of parents/deletion of a person/deletion of a family/change of the names of the children/order of the events of a person/order of the events of a family/order of the families/modification of a note/modification of a note
+es: modificación de una persona/modificación de una familia/adición de una familia/adición de padres/supresión de una persona/supresión de una familia/cambio de los nombres de los hijos/orden de los eventos de una persona/orden de los eventos de una familia/orden de las familias/modificación de una nota/modificación de una nota
+fr: modification d’une personne/modification d’une famille/ajout d’une famille/ajout de parents/suppression d’une personne/suppression d’une famille/changement des noms des enfants/ordre des évènements d’une personne/ordre des évènements d’une famille/ordre des familles/modification d’une note/modification d’une note
+it: modifica di una persona/modifica di una famiglia/aggiunta di una famiglia/aggiunta di genitori/eliminazione di una persona/eliminazione di una famiglia/cambio dei nomi dei figli/ordine degli eventi di una persona/ordine degli eventi di una famiglia/ordine delle famiglie/modifica di una nota/modifica di una nota
+nl: wijziging van een persoon/wijziging van een gezin/toevoeging van een gezin/toevoeging van ouders/verwijdering van een persoon/verwijdering van een gezin/wijziging van de namen van de kinderen/volgorde van de gebeurtenissen van een persoon/volgorde van de gebeurtenissen van een gezin/volgorde van de gezinnen/wijziging van een notitie/wijziging van een notitie
+pl: zmiana osoby/zmiana rodziny/dodanie rodziny/dodanie rodziców/usunięcie osoby/usunięcie rodziny/zmiana nazwisk dzieci/kolejność wydarzeń osoby/kolejność wydarzeń rodziny/kolejność rodzin/zmiana notatki/zmiana notatki
+pt: modificação de uma pessoa/modificação de uma família/adição de uma família/adição de pais/supressão de uma pessoa/supressão de uma família/alteração dos nomes dos filhos/ordem dos eventos de uma pessoa/ordem dos eventos de uma família/ordem das famílias/modificação de uma nota/modificação de uma nota
+sv: ändring av en person/ändring av en familj/tillägg av en familj/tillägg av föräldrar/borttagning av en person/borttagning av en familj/ändring av barnens namn/ordning för en persons händelser/ordning för en familjs händelser/ordning för familjerna/ändring av en anteckning/ändring av en anteckning
+
+    write queue state
+de: wartend/wird ausgeführt/ausgeführt/ausgeführt, unverändert/zu prüfen/abgelehnt
+en: waiting/being applied/applied/applied, unchanged/to check/refused
+es: en espera/en curso/aplicada/aplicada, sin cambios/por revisar/rechazada
+fr: en attente/en cours/appliquée/appliquée, sans changement/à revoir/refusée
+it: in attesa/in corso/applicata/applicata, senza modifiche/da verificare/rifiutata
+nl: wachtend/bezig/uitgevoerd/uitgevoerd, ongewijzigd/te controleren/geweigerd
+pl: oczekuje/w trakcie/zastosowana/zastosowana, bez zmian/do sprawdzenia/odrzucona
+pt: em espera/em curso/aplicada/aplicada, sem alteração/a rever/recusada
+sv: väntar/pågår/utförd/utförd, oförändrad/att granska/avvisad
+
+    write queue to check %s %s
+de: %s, eingereiht um %s, ist zu prüfen: siehe Ihre Änderungen in der Warteschlange
+en: %s, queued at %s, has to be checked: see your queued modifications
+es: %s, puesta en espera a las %s, debe revisarse: vea sus modificaciones en espera
+fr: %s, mise en attente à %s, est à revoir : voir vos modifications en attente
+it: %s, messa in coda alle %s, deve essere verificata: vedere le sue modifiche in attesa
+nl: %s, in de wachtrij geplaatst om %s, moet worden gecontroleerd: zie uw wijzigingen in de wachtrij
+pl: %s, dodana do kolejki o %s, wymaga sprawdzenia: zobacz swoje zmiany w kolejce
+pt: %s, colocada em espera às %s, deve ser revista: veja as suas modificações em espera
+sv: %s, köad kl. %s, måste granskas: se dina ändringar i kö
+
     Y/N
 af: J/N
 bg: Д/Н
@@ -25976,6 +26064,17 @@ ro: tu esti vizibil/tu nu esti vizibil
 ru: вы видны/вы скрыты
 sv: du är synlig/du är ej synlig
 tr: görünürsünüz/görünmezsiniz
+
+    you can leave this page
+de: Sie können diese Seite verlassen: Sie werden benachrichtigt, sobald sie ausgeführt wurde
+en: you can leave this page: you will be told when it has been applied
+es: puede salir de esta página: se le avisará cuando se haya aplicado
+fr: vous pouvez quitter cette page : vous serez prévenu quand elle aura été appliquée
+it: può lasciare questa pagina: sarà avvisato quando sarà stata applicata
+nl: u kunt deze pagina verlaten: u wordt verwittigd wanneer ze is uitgevoerd
+pl: możesz opuścić tę stronę: zostaniesz powiadomiony, gdy zostanie zastosowana
+pt: pode sair desta página: será avisado quando tiver sido aplicada
+sv: du kan lämna den här sidan: du meddelas när den har utförts
 
     you must first merge
 af: jy moet eers saamvoeg

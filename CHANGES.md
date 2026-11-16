@@ -226,6 +226,22 @@
   and notes of events are merged line by line likewise. A form opened on a
   section of a note is displayed again on the whole note. The note
   forms of the base are watched like the person and family forms.
+- A form saved while the base is busy (a large update, another save) is
+  no longer left waiting for the lock, at the risk of the time limit of
+  the request or of the proxy, nor resubmitted by the browser: after two
+  seconds it is put in the write queue of the base (`base.queue`, next
+  to `base.gwb`) and the wizard may leave the page. A queue runner,
+  started by gwd beside its workers, applies the queued requests one at
+  a time, in their order of arrival, with the rights of their wizard;
+  while requests wait, the new ones are queued behind them. A request
+  whose record changed meanwhile is merged as on saving, and applied
+  when nothing is to be checked. The wizard is told by a notification
+  when his request is applied, and `m=QUEUE` lists his requests of the
+  last week with their state; those to check, or refused, can be posted
+  again from there. The person, family and note forms, the deletions,
+  the changes of children's names and the reordering of events and
+  families are queued; the other commands, and gwd in CGI mode or
+  without workers, still wait for the lock.
 - A person form is no longer refused with "the base has changed" when,
   meanwhile, the form of another person added or removed it as a
   witness, a godparent or a relation.

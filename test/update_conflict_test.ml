@@ -88,11 +88,14 @@ let test_merge_person () =
   (check string) "their change" "x" p.notes;
   (check string) "my change" "meunier" p.occupation;
   (check (pair int int)) "no conflict" (1, 0) (counts review);
+  (check int) "no conflicts" 0 (UpdateConflict.conflicts review);
   let p, review =
     merge { o with occupation = "tisserand" } { o with occupation = "meunier" }
   in
   (check string) "conflict keeps theirs" "tisserand" p.occupation;
   (check (pair int int)) "one conflict" (1, 1) (counts review);
+  (check int) "conflicts" 1 (UpdateConflict.conflicts review);
+  (check int) "unreadable review" 1 (UpdateConflict.conflicts "{");
   let birth, death =
     match o.pevents with [ b; d ] -> (b, d) | _ -> assert false
   in

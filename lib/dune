@@ -23,6 +23,7 @@
   geneweb_sosa
   geneweb_util
   geneweb_templ
+  geneweb_write_queue
   yojson
   base64
   markup

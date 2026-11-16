@@ -1220,8 +1220,8 @@ let allowed_plugins ~loaded_plugins base_env =
   | Allowed s ->
       List.of_seq @@ SS.to_seq @@ SS.filter (fun p -> SS.mem p s) loaded_set
 
-let make_conf ~predictable_mode ~cgi ~loaded_plugins ~secret_salt conn from_addr
-    request script_name env =
+let make_conf ?ar ~predictable_mode ~cgi ~loaded_plugins ~secret_salt conn
+    from_addr request script_name env =
   if !allowed_tags_file <> "" && not (Sys.file_exists !allowed_tags_file) then (
     let str =
       Printf.sprintf "Requested allowed_tags file (%s) absent"
@@ -1321,8 +1321,11 @@ let make_conf ~predictable_mode ~cgi ~loaded_plugins ~secret_salt conn from_addr
   (* Il sera mis à jour par effet de bord dans request.ml       *)
   let default_sosa_ref = (Driver.Iper.dummy, None) in
   let ar =
-    authorization ~cgi from_addr request base_env passwd access_type utm
-      base_file command
+    match ar with
+    | Some ar -> ar
+    | None ->
+        authorization ~cgi from_addr request base_env passwd access_type utm
+          base_file command
   in
   let wizard_just_friend =
     if !wizard_just_friend then true
@@ -1481,6 +1484,7 @@ let make_conf ~predictable_mode ~cgi ~loaded_plugins ~secret_salt conn from_addr
       allowed_plugins;
       secret_salt = Some secret_salt;
       predictable_mode;
+      write_log = None;
     }
   in
   if access_type = ATset && not (ar.ar_wizard || ar.ar_friend) then
@@ -2105,6 +2109,167 @@ let connection ~predictable_mode ~cgi ~loaded_plugins ~secret_salt
                 ~secret_salt from request script_name contents env conn
           with Exit -> ())
 
+(* The queue runner: a process applying the requests of the write queues
+   (see WriteQueue), one at a time, in their order of arrival, while holding
+   the lock of their base. A request is replayed through Request.treat_request
+   with the rights of its wizard as authenticated when it was posted, its
+   output captured and its outcome kept for the wizard. *)
+
+let queue_report (id : WriteQueue.identity) base_file =
+  {
+    ar_ok = true;
+    ar_command = base_file;
+    ar_passwd = "";
+    ar_scheme =
+      (if id.user = "" then NoAuth
+       else TokenAuth { ts_user = id.user; ts_pass = "" });
+    ar_user = id.user;
+    ar_name =
+      (if id.userkey = "" then id.username else id.username ^ "|" ^ id.userkey);
+    ar_wizard = id.wizard;
+    ar_friend = id.friend;
+    ar_uauth = "";
+    ar_can_stale = false;
+  }
+
+let replay_queued ~predictable_mode ~loaded_plugins ~secret_salt conn bname
+    (item : WriteQueue.item) =
+  let status = ref Code.OK in
+  let headers = ref [] in
+  let output_conf =
+    {
+      status = (fun st -> status := st);
+      header = (fun h -> headers := h :: !headers);
+      body = ignore;
+      flush = ignore;
+    }
+  in
+  let log = { committed = false } in
+  let conf, _, _ =
+    make_conf
+      ~ar:(queue_report item.identity bname)
+      ~predictable_mode ~cgi:false ~loaded_plugins ~secret_salt conn item.from
+      item.request bname
+      [ ("lang", Mutil.encode item.lang) ]
+  in
+  let conf = { conf with env = item.env; output_conf; write_log = Some log } in
+  Notif.clear ();
+  let outcome =
+    match Request.treat_request conn conf with
+    | () -> None
+    | exception (Update.ModErr _ | Exit) -> Some WriteQueue.Failed
+    | exception exn ->
+        let bt = Printexc.get_raw_backtrace () in
+        Log.err (fun k -> k "%a" (pp_exception ~predictable_mode) (exn, bt));
+        Some WriteQueue.Failed
+  in
+  Notif.clear ();
+  let unchanged () =
+    !status = Code.Moved_Temporarily
+    && List.exists (fun h -> Mutil.contains h "nomod=1") !headers
+  in
+  if log.committed then WriteQueue.Applied
+  else
+    match outcome with
+    | Some state -> state
+    | None -> if unchanged () then WriteQueue.Unchanged else WriteQueue.Review
+
+let drain_queue ~predictable_mode ~loaded_plugins ~secret_salt conn bname =
+  let bfile = Filename.concat (Secure.base_dir ()) (bname ^ ".gwb") in
+  if WriteQueue.has_pending bfile then
+    Lock.control ~wait:false ~lock_file:(Mutil.lock_file bfile)
+      ~on_exn:(fun _exn _bt -> (* busy: next round *) ())
+      (fun () ->
+        let rec loop () =
+          match WriteQueue.next bfile with
+          | None -> ()
+          | Some item ->
+              let state =
+                replay_queued ~predictable_mode ~loaded_plugins ~secret_salt
+                  conn bname item
+              in
+              WriteQueue.finish bfile item state;
+              Log.info (fun k ->
+                  k "%s: request %d of %s (%s) %s" bname item.id
+                    item.identity.user item.command
+                    (match state with
+                    | Applied -> "applied"
+                    | Unchanged -> "unchanged"
+                    | Review -> "to check"
+                    | Failed -> "refused"
+                    | Pending | Running -> "pending"));
+              loop ()
+        in
+        loop ())
+
+(* Requests finished more than a week ago are forgotten. *)
+let queue_max_age = 7. *. 86400.
+
+let queue_runner ~predictable_mode ~loaded_plugins ~secret_salt ~master () =
+  (* a page written to the socket by a handler is thrown away *)
+  (try
+     let null = Unix.openfile "/dev/null" [ Unix.O_WRONLY ] 0 in
+     Unix.dup2 null Unix.stdout;
+     Unix.close null
+   with Unix.Unix_error _ -> ());
+  let conn = Connection.of_out_channel ~cgi:false stdout in
+  let alive () =
+    match Unix.kill master 0 with
+    | () -> true
+    | exception Unix.Unix_error (Unix.ESRCH, _, _) -> false
+    | exception Unix.Unix_error _ -> true
+  in
+  let rec loop last_purge =
+    if alive () then (
+      let bases = try Util.get_bases_list () with Unix.Unix_error _ -> [] in
+      List.iter
+        (fun bname ->
+          try
+            drain_queue ~predictable_mode ~loaded_plugins ~secret_salt conn
+              bname
+          with exn ->
+            let bt = Printexc.get_raw_backtrace () in
+            Log.err (fun k -> k "%a" (pp_exception ~predictable_mode) (exn, bt)))
+        bases;
+      let now = Unix.time () in
+      let last_purge =
+        if now -. last_purge < 3600. then last_purge
+        else (
+          List.iter
+            (fun bname ->
+              WriteQueue.purge
+                (Filename.concat (Secure.base_dir ()) (bname ^ ".gwb"))
+                ~max_age:queue_max_age)
+            bases;
+          now)
+      in
+      Unix.sleepf 1.;
+      loop last_purge)
+  in
+  loop 0.
+
+(* Forked twice, so that the runner is not a child of the master, whose pool
+   of workers waits for its own children only: it stops with the master. *)
+let start_queue_runner ~predictable_mode ~loaded_plugins ~secret_salt =
+  let master = Unix.getpid () in
+  match Unix.fork () with
+  | 0 -> (
+      match Unix.fork () with
+      | 0 ->
+          (try
+             queue_runner ~predictable_mode ~loaded_plugins ~secret_salt ~master
+               ()
+           with exn ->
+             let bt = Printexc.get_raw_backtrace () in
+             Log.err (fun k ->
+                 k "%a" (pp_exception ~predictable_mode) (exn, bt)));
+          Unix._exit 0
+      | _ -> Unix._exit 0)
+  | pid ->
+      ignore (My_unix.waitpid_noeintr [] pid : int * Unix.process_status);
+      Unix.putenv "GWD_WRITE_QUEUE" "1";
+      Log.info (fun k -> k "Write queue runner started")
+
 let null_reopen flags fd =
   if Sys.unix then (
     let fd2 = Unix.openfile "/dev/null" flags 0 in
@@ -2230,6 +2395,8 @@ let geneweb_server ~predictable_mode ~loaded_plugins ~trusted_proxies ?interface
            use the same salt for digests on both Unix and Windows platforms. *)
         let secret_salt = load_secret_salt ~predictable_mode () in
         Unix.putenv "SECRET_SALT" secret_salt;
+        if Sys.unix && !n_workers > 0 then
+          start_queue_runner ~predictable_mode ~loaded_plugins ~secret_salt;
         secret_salt
   in
   (* FIXME: this hack is necessary to avoid a cyclic dependency between
