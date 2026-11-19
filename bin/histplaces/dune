@@ -1,0 +1,6 @@
+(executable
+ (package geneweb)
+ (name gwhistplaces)
+ (public_name gwhistplaces)
+ (modules gwhistplaces)
+ (libraries unix str geneweb))
