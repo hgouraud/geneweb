@@ -41,7 +41,7 @@
       const f = document.getElementById(id);
       if (!f) return;
       const cur = f.value.trim();
-      f.value = cur ? cur + ', ' + sig : sig;
+      f.value = cur ? cur.replace(/[;,]$/, '') + '; ' + sig : sig;
       f.dispatchEvent(new Event('input', { bubbles: true }));
     });
     save();

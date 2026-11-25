@@ -92,7 +92,7 @@ let merge_events conf l1 l2 =
                     let note =
                       merge_strings e.efam_note "<br>\n" e1.efam_note
                     in
-                    let src = merge_strings e.efam_src ", " e1.efam_src in
+                    let src = merge_strings e.efam_src "; " e1.efam_src in
                     let witnesses =
                       merge_event_witnesses e1.efam_witnesses e.efam_witnesses
                     in
@@ -120,7 +120,7 @@ let merge_events conf l1 l2 =
                     let note =
                       merge_strings e.efam_note "<br>\n" e1.efam_note
                     in
-                    let src = merge_strings e.efam_src ", " e1.efam_src in
+                    let src = merge_strings e.efam_src "; " e1.efam_src in
                     let witnesses =
                       merge_event_witnesses e1.efam_witnesses e.efam_witnesses
                     in
@@ -181,7 +181,7 @@ let reconstitute conf base ifam1 fam1 fam2 =
       marriage_src =
         merge_strings base
           (Driver.get_marriage_src fam1)
-          ", "
+          "; "
           (Driver.get_marriage_src fam2);
       witnesses =
         merge_witnesses base
@@ -198,7 +198,7 @@ let reconstitute conf base ifam1 fam1 fam2 =
           (Driver.get_comment fam2);
       origin_file = Driver.sou base (Driver.get_origin_file fam1);
       fsources =
-        merge_strings base (Driver.get_fsources fam1) ", "
+        merge_strings base (Driver.get_fsources fam1) "; "
           (Driver.get_fsources fam2);
       fam_index = ifam1;
     }
