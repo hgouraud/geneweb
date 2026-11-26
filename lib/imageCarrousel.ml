@@ -8,8 +8,6 @@ module Log = (val Logs.src_log src : Logs.LOG)
 module Driver = Geneweb_db.Driver
 module Code = Geneweb_http.Code
 
-let cp = Filesystem.copy_file ~perm:0o666
-
 let rn fname s =
   try if Sys.file_exists fname then Sys.rename fname s
   with Failure _ ->
@@ -274,6 +272,25 @@ let get_extension conf keydir mode saved fname =
 (*                                                                          *)
 (* ************************************************************************ *)
 
+(* Moves the portrait (or the blason, by [mode]) of his own of [p] to the
+   saved images of [p], with its note and source. The url of the image field
+   stays: only MOD_IND changes it. Raises [Sys_error]. *)
+let save_portrait_or_blason conf base p mode =
+  let stem =
+    Filename.concat
+      (Layout.portraits conf.layout)
+      (Image.default_image_filename mode base p)
+  in
+  Array.iter
+    (fun ext ->
+      if Sys.file_exists (stem ^ ext) then (
+        let saved = Image.saved_images_folder conf base p in
+        Filesystem.create_dir ~parent:true saved;
+        let now = Unix.localtime (Unix.time ()) in
+        Image.move_with_sidecars stem ext
+          (Filename.concat saved (Image.saved_portrait_stem saved mode now))))
+    Image.portrait_extensions
+
 let send_portrait ?code conf base p mode ext content =
   let dir = Layout.portraits conf.layout in
   let name = Image.default_image_filename mode base p in
@@ -281,19 +298,7 @@ let send_portrait ?code conf base p mode ext content =
     try
       Filesystem.create_dir ~parent:true dir;
       if mode = "blasons" then remove_blason_stop conf base p;
-      (match
-         if mode = "portraits" then Image.get_portrait conf base p
-         else Image.get_blason conf base p true
-       with
-      | Some (`Path old) ->
-          if move_file_to_save dir old = 0 then
-            failwith "cannot save the previous file"
-      | Some (`Url url) ->
-          (* TODO update person to supress url image *)
-          let saved = Filename.concat dir "saved" in
-          Filesystem.create_dir ~parent:true saved;
-          write_file (Filename.concat saved name ^ ".url") url
-      | None -> ());
+      save_portrait_or_blason conf base p mode;
       if content <> "" then
         write_file (Filename.concat dir (name ^ ext)) content;
       Ok ()
@@ -464,14 +469,8 @@ let print_deleted conf base p =
   Hutil.trailer conf
 
 let effective_delete_ok conf base p =
-  let mode =
-    try (List.assoc "mode" conf.env :> string) with Not_found -> "portraits"
-  in
-  let fname = Image.default_image_filename "portraits" base p in
-  let ext = get_extension conf fname mode false fname in
-  let dir = Layout.portraits conf.layout in
-  if move_file_to_save dir (fname ^ ext) = 0 then
-    incorrect conf ("effective delete ok (" ^ (fname ^ ext) ^ ")");
+  (try save_portrait_or_blason conf base p "portraits"
+   with Sys_error e -> incorrect conf ("effective delete ok: " ^ e));
   let changed =
     U_Delete_image (Util.string_gen_person base (Driver.gen_person_of_person p))
   in
@@ -493,11 +492,9 @@ let print_del conf base =
       | Some _ -> print_delete_image conf base p
       | None -> Hutil.incorrect_request conf)
 
-(*carrousel *)
-(* removes portrait or other image and saves it into old folder *)
-(* if delete=on permanently deletes the file in old folder *)
-
-let effective_delete_c_ok conf base ?(f_name = "") p =
+(* Removes the portrait, the blason or an image of the carrousel to the saved
+   images of the person; with delete=on, deletes a saved image. *)
+let effective_delete_c_ok conf base p =
   let keydir = Image.default_image_filename "portraits" base p in
   let mode =
     try (List.assoc "mode" conf.env :> string) with Not_found -> "portraits"
@@ -507,92 +504,80 @@ let effective_delete_c_ok conf base ?(f_name = "") p =
     with Not_found -> false
   in
   let fname =
-    if f_name = "" then
-      try List.assoc "file_name" conf.env |> Mutil.decode with Not_found -> ""
-    else f_name
+    try List.assoc "file_name" conf.env |> Mutil.decode with Not_found -> ""
   in
-  let dir =
-    if mode = "portraits" || mode = "blasons" then Layout.portraits conf.layout
-    else Filename.concat (Layout.images conf.layout) keydir
-  in
-  Filesystem.create_dir ~parent:true dir;
-  (* TODO verify we dont destroy a saved image
-      having the same name as portrait! *)
-  let orig_file =
-    if delete then String.concat Filename.dir_sep [ dir; "saved"; fname ]
-    else Filename.concat dir fname
-  in
-  let orig_file =
-    let ext = Filename.extension orig_file in
-    if
-      (ext = ".url" || Array.mem ext Image.ext_list_doc)
-      && Sys.file_exists orig_file
-    then orig_file
-    else Filename.remove_extension orig_file |> Image.find_file_without_ext
-  in
-  (* FIXME basename *)
-  let file = Filename.basename orig_file in
-  if orig_file = "" then incorrect conf "empty file name"
-    (* if delete is on, we are talking about saved files *)
-  else if delete then Mutil.rm orig_file (* is it needed ?, move should do it *)
-  else if move_file_to_save dir file = 0 then
-    incorrect conf ("effective delete c_ok (" ^ file ^ ")");
   let changed =
     U_Delete_image (Util.string_gen_person base (Driver.gen_person_of_person p))
   in
-  History.record conf base changed
-    (match mode with
-    | "portraits" -> if delete then "di" else "dq"
-    | "blasons" -> if delete then "eb" else "db"
-    | "carrousel" -> if delete then "ec" else "dc"
-    | _ -> "d?");
-  fname
+  if mode = "portraits" || mode = "blasons" then (
+    if delete then incorrect conf "saved portraits are saved images";
+    (try
+       if mode = "blasons" && Filename.extension fname = ".stop" then
+         remove_blason_stop conf base p
+       else save_portrait_or_blason conf base p mode
+     with Sys_error e -> incorrect conf ("effective delete c_ok: " ^ e));
+    History.record conf base changed (if mode = "blasons" then "db" else "dq");
+    fname)
+  else
+    let dir = Filename.concat (Layout.images conf.layout) keydir in
+    Filesystem.create_dir ~parent:true dir;
+    let orig_file =
+      if delete then
+        String.concat Filename.dir_sep [ dir; MediaDir.saved; fname ]
+      else Filename.concat dir fname
+    in
+    let orig_file =
+      let ext = Filename.extension orig_file in
+      if
+        (ext = ".url" || Array.mem ext Image.ext_list_doc)
+        && Sys.file_exists orig_file
+      then orig_file
+      else Filename.remove_extension orig_file |> Image.find_file_without_ext
+    in
+    let file = Filename.basename orig_file in
+    if orig_file = "" then incorrect conf "empty file name"
+    else if delete then Mutil.rm orig_file
+    else if move_file_to_save dir file = 0 then
+      incorrect conf ("effective delete c_ok (" ^ file ^ ")");
+    History.record conf base changed (if delete then "ec" else "dc");
+    fname
 
+(* The portrait becomes the blason too: a copy of its file, or of the url of
+   the image field. Returns the name of the blason, or "error". *)
 let effective_copy_portrait_to_blason conf base p =
-  let mode =
-    try (List.assoc "mode" conf.env :> string) with Not_found -> "portraits"
-  in
-  let keydir = Image.default_image_filename "portraits" base p in
-  let dir = Layout.portraits conf.layout in
-  let field_url =
+  let src =
     match Image.src_of_string conf (Driver.sou base (Driver.get_image p)) with
-    | `Url u -> Some u
-    | `Empty | `Path _ | `Src_with_size_info _ -> None
+    | `Url u -> Some (".url", u)
+    | `Empty | `Path _ | `Src_with_size_info _ -> (
+        let stem =
+          Filename.concat
+            (Layout.portraits conf.layout)
+            (Image.default_image_filename "portraits" base p)
+        in
+        match
+          Array.find_opt
+            (fun ext -> Sys.file_exists (stem ^ ext))
+            Image.portrait_extensions
+        with
+        | Some ext ->
+            Some
+              (ext, In_channel.with_open_bin (stem ^ ext) In_channel.input_all)
+        | None -> None)
   in
-  let ext =
-    match field_url with
-    | Some _ -> ".url"
-    | None -> get_extension conf keydir mode false keydir
-  in
-  let blason_filename =
-    String.concat Filename.dir_sep
-      [ dir; Image.default_image_filename "blasons" base p ^ ext ]
-  in
-  let has_blason_self = Image.has_blason conf base p true in
-  (* attention, xxx.url has to be removed too *)
-  let _deleted =
-    (if has_blason_self then
-       effective_delete_c_ok conf base
-         ~f_name:(Filename.basename blason_filename)
-         p
-     else "OK")
-    <> ""
-  in
-  remove_blason_stop conf base p;
-  (match field_url with
-  | Some u -> write_file blason_filename u
-  | None ->
-      cp (String.concat Filename.dir_sep [ dir; keydir ^ ext ]) blason_filename);
-  History.record conf base
-    (U_Send_image (Util.string_gen_person base (Driver.gen_person_of_person p)))
-    "cb";
-  blason_filename
+  match src with
+  | None -> "error"
+  | Some (ext, content) -> (
+      match send_portrait ~code:"cb" conf base p "blasons" ext content with
+      | Ok () -> Image.default_image_filename "blasons" base p ^ ext
+      | Error e ->
+          Log.err (fun k -> k "copy portrait to blason: %s" e);
+          "error")
 
-(* The portrait becomes the blason: copy it, move the portrait to saved
-   (unless it is an url of the image field, which only MOD_IND can clear) and
-   point the blason notes to the blason (m=FIM, or the url itself for an url
-   portrait). Returns the blason file name and the names of the updated
-   notes. *)
+(* The portrait becomes the blason: copy it, move the portrait to the saved
+   images (unless it is an url of the image field, which only MOD_IND can
+   clear) and point the blason notes to the blason (m=FIM, or the url itself
+   for an url portrait). Returns the blason file name and the names of the
+   updated notes. *)
 let effective_move_portrait_to_blason conf base p =
   let image_field_is_url =
     match Image.src_of_string conf (Driver.sou base (Driver.get_image p)) with
@@ -604,63 +589,37 @@ let effective_move_portrait_to_blason conf base p =
     | Some (`Url u) -> BlasonNotes.Url u
     | Some (`Path _) | None -> BlasonNotes.Fim
   in
-  let blason_filename = effective_copy_portrait_to_blason conf base p in
-  (if not image_field_is_url then
-     let portrait =
-       Image.default_image_filename "portraits" base p
-       ^ Filename.extension blason_filename
-     in
-     ignore (effective_delete_c_ok conf base ~f_name:portrait p));
-  (blason_filename, BlasonNotes.redirect_portrait_refs conf base p target)
+  let blason = effective_copy_portrait_to_blason conf base p in
+  if blason = "error" then (blason, [])
+  else (
+    if not image_field_is_url then (
+      (try save_portrait_or_blason conf base p "portraits"
+       with Sys_error e -> incorrect conf ("move portrait to blason: " ^ e));
+      History.record conf base
+        (U_Delete_image
+           (Util.string_gen_person base (Driver.gen_person_of_person p)))
+        "dq");
+    (blason, BlasonNotes.redirect_portrait_refs conf base p target))
 
-let effective_copy_image_to_blason conf base p =
-  let fname =
-    try List.assoc "file_name" conf.env |> Mutil.decode with Not_found -> ""
+(* The image [file_name] of the carrousel, or of the saved images with
+   [saved=on], becomes the portrait or the blason (by [mode]) of [p], the
+   previous one going to the saved images. An image of the carrousel is
+   copied; a saved one moves, with its note and source, so that taking back a
+   former portrait swaps it with the current one. Returns the name of the new
+   file, or "error". *)
+let effective_image_to conf base p mode =
+  let fname = Option.value ~default:"" (Util.p_getenv conf.env "file_name") in
+  let saved = Util.p_getenv conf.env "saved" = Some "on" in
+  let dir =
+    if saved then Image.saved_images_folder conf base p
+    else
+      Filename.concat
+        (Image.carrousel_folder conf)
+        (Image.default_image_filename "portraits" base p)
   in
-  let fname = Mutil.decode (Adef.encoded fname) in
-  let keydir = Image.default_image_filename "portraits" base p in
-  let ext = Filename.extension fname in
-  let blason_filename =
-    String.concat Filename.dir_sep
-      [
-        Image.portrait_folder conf;
-        Image.default_image_filename "blasons" base p ^ ext;
-      ]
-  in
-  let has_blason_self = Image.has_blason conf base p true in
-  let _deleted =
-    (if has_blason_self then
-       effective_delete_c_ok conf base
-         ~f_name:(Filename.basename blason_filename)
-         p
-     else "OK")
-    <> ""
-  in
-  let fname =
-    String.concat Filename.dir_sep
-      [ Image.carrousel_folder conf; keydir; fname ]
-  in
-  remove_blason_stop conf base p;
-  cp fname blason_filename;
-  History.record conf base
-    (U_Send_image (Util.string_gen_person base (Driver.gen_person_of_person p)))
-    "cd";
-  blason_filename
-
-(* The image [file_name] of the carrousel becomes the portrait: it is copied,
-   and the previous portrait goes to saved as with an upload. Returns the name
-   of the portrait, or "error". *)
-let effective_copy_image_to_portrait conf base p =
-  let fname =
-    match Util.p_getenv conf.env "file_name" with Some f -> f | None -> ""
-  in
-  let keydir = Image.default_image_filename "portraits" base p in
   let ext = String.lowercase_ascii (Filename.extension fname) in
   let ext = if ext = ".jpeg" then ".jpg" else ext in
-  let src =
-    String.concat Filename.dir_sep
-      [ Image.carrousel_folder conf; keydir; fname ]
-  in
+  let src = Filename.concat dir fname in
   if
     fname = ""
     || Filename.basename fname <> fname
@@ -669,46 +628,40 @@ let effective_copy_image_to_portrait conf base p =
   then "error"
   else
     let content = In_channel.with_open_bin src In_channel.input_all in
-    match send_portrait ~code:"ci" conf base p "portraits" ext content with
-    | Ok () -> Image.default_image_filename "portraits" base p ^ ext
+    let code = if mode = "blasons" then "cd" else "ci" in
+    match send_portrait ~code conf base p mode ext content with
     | Error e ->
-        Log.err (fun k -> k "copy image %s to portrait: %s" src e);
+        Log.err (fun k -> k "image %s to %s: %s" src mode e);
         "error"
+    | Ok () ->
+        let name = Image.default_image_filename mode base p in
+        (if saved then
+           try
+             Mutil.rm src;
+             let dst = Filename.concat (Layout.portraits conf.layout) name in
+             List.iter
+               (fun side ->
+                 let f = Filename.remove_extension src ^ side in
+                 if Sys.file_exists f then Sys.rename f (dst ^ side))
+               [ ".txt"; ".src" ]
+           with Sys_error e ->
+             Log.err (fun k -> k "image %s to %s: %s" src mode e));
+        name ^ ext
 
-(* reset portrait or image from old folder to portrait or others *)
-
+(* An image of the carrousel and its saved version swap. *)
 let effective_reset_c_ok conf base p =
-  (* WARNING: when saved portrait is an url, we should update the person record
-     when doing a reset  idem for delete *)
-  let mode =
-    try (List.assoc "mode" conf.env :> string) with Not_found -> "portraits"
-  in
   let keydir = Image.default_image_filename "portraits" base p in
   let file_name =
-    match mode with
-    | "portraits" -> Image.default_image_filename "portraits" base p
-    | "blasons" -> Image.default_image_filename "blasons" base p
-    | "carrousel" -> (
-        try List.assoc "file_name" conf.env |> Mutil.decode
-        with Not_found -> "")
-    | _ -> ""
+    try List.assoc "file_name" conf.env |> Mutil.decode with Not_found -> ""
   in
-  let ext = get_extension conf keydir mode false file_name in
-  let old_ext = get_extension conf keydir mode true file_name in
+  let ext = get_extension conf keydir "carrousel" false file_name in
+  let old_ext = get_extension conf keydir "carrousel" true file_name in
   let t_ext = Filename.extension file_name in
   let file_name_no_ext =
     if Array.mem t_ext known_extensions then Filename.remove_extension file_name
     else file_name
   in
-  let ext =
-    match Image.get_portrait conf base p with
-    | Some src -> if Image.is_url (Image.src_to_string src) then ".url" else ext
-    | _ -> ext
-  in
-  let dir =
-    if mode = "portraits" || mode = "blasons" then Layout.portraits conf.layout
-    else Filename.concat (Layout.images conf.layout) keydir
-  in
+  let dir = Filename.concat (Layout.images conf.layout) keydir in
   let file_in_new =
     if ext <> "." then Filename.concat dir (file_name_no_ext ^ ext)
     else Filename.concat dir (file_name_no_ext ^ old_ext)
@@ -716,19 +669,16 @@ let effective_reset_c_ok conf base p =
   let file_in_old =
     if old_ext <> "." then
       String.concat Filename.dir_sep
-        [ dir; "saved"; file_name_no_ext ^ old_ext ]
-    else String.concat Filename.dir_sep [ dir; "saved"; file_name_no_ext ^ ext ]
+        [ dir; MediaDir.saved; file_name_no_ext ^ old_ext ]
+    else
+      String.concat Filename.dir_sep
+        [ dir; MediaDir.saved; file_name_no_ext ^ ext ]
   in
   swap_files file_in_new file_in_old;
   let changed =
     U_Send_image (Util.string_gen_person base (Driver.gen_person_of_person p))
   in
-  History.record conf base changed
-    (match mode with
-    | "portraits" -> "rp"
-    | "blasons" -> "rb"
-    | "carrousel" -> "rc"
-    | _ -> "r?");
+  History.record conf base changed "rc";
   file_name
 
 (* ************************************************************************** *)
@@ -796,8 +746,7 @@ let print_main_c conf base =
                         | None -> ""
                       else ""
                   | "PORTRAIT_TO_BLASON" ->
-                      Filename.basename
-                        (effective_copy_portrait_to_blason conf base p)
+                      effective_copy_portrait_to_blason conf base p
                   | "PORTRAIT_MOVE_TO_BLASON" ->
                       let blason, notes =
                         effective_move_portrait_to_blason conf base p
@@ -805,10 +754,9 @@ let print_main_c conf base =
                       updated_notes := notes;
                       Filename.basename blason
                   | "IMAGE_TO_BLASON" ->
-                      Filename.basename
-                        (effective_copy_image_to_blason conf base p)
+                      effective_image_to conf base p "blasons"
                   | "IMAGE_TO_PORTRAIT" ->
-                      effective_copy_image_to_portrait conf base p
+                      effective_image_to conf base p "portraits"
                   | "BLASON_STOP" ->
                       let has_blason_self = Image.has_blason conf base p true in
                       let has_blason = Image.has_blason conf base p false in
@@ -862,10 +810,6 @@ let print_main_c conf base =
                        if fn2 <> "" then
                          url_params := ("file_name_2", fn2) :: !url_params
                      with Not_found -> ());
-                    (if m = "IMAGE_TO_BLASON" then
-                       let ext = Filename.extension processed_filename in
-                       if ext <> "" then
-                         url_params := ("ext", ext) :: !url_params);
                     if !updated_notes <> [] then
                       url_params :=
                         ("bn", String.concat " " !updated_notes) :: !url_params;
@@ -899,10 +843,9 @@ let print_c ?(saved = false) ?(portrait = true) conf base =
       let f = Filename.concat k f in
       ImageDisplay.print_source conf base (if saved then insert_saved f else f)
   | Some f, _ -> ImageDisplay.print_source conf base f
-  | _, Some p -> (
+  | _, Some p when not saved -> (
       match
-        if saved then Image.get_old_portrait_or_blason conf base "portraits" p
-        else if mode = "portraits" then Image.get_portrait conf base p
+        if mode = "portraits" then Image.get_portrait conf base p
         else Image.get_blason conf base p false
       with
       | Some (`Path f) ->

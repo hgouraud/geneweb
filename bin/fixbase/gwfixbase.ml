@@ -232,6 +232,7 @@ let key = ref false
 let children_order = ref false
 let index = ref false
 let history = ref false
+let saved_portraits = ref false
 let dry_run = ref false
 let dump = ref false
 let ofile = ref ""
@@ -274,6 +275,10 @@ let speclist =
     ( "-history",
       Arg.Set history,
       " convert the history of changes (history_d) to the current format" );
+    ( "-saved-portraits",
+      Arg.Set saved_portraits,
+      " move the saved portraits and blasons to the saved images of their \
+       persons" );
   ]
   |> List.sort (fun (a, _, _) (b, _, _) -> String.compare a b)
   |> Arg.align
@@ -310,7 +315,8 @@ let main () =
         || !pevents_witnesses || !fevents_witnesses || !marriage_divorce
         || !p_NBDS || !invalid_utf8 || !key || !index || !children_order
       in
-      if fixes || !history then ()
+      let files_only = !history || !saved_portraits in
+      if fixes || files_only then ()
       else (
         f_parents := true;
         f_children := true;
@@ -322,12 +328,12 @@ let main () =
         p_NBDS := true;
         invalid_utf8 := true;
         key := true);
-      if fixes || not !history then
+      if fixes || not files_only then
         check base ~dry_run ~fast ~verbosity ~f_parents ~f_children ~p_NBDS
           ~p_parents ~p_families ~pevents_witnesses ~fevents_witnesses
           ~marriage_divorce ~invalid_utf8 ~key ~children_order;
+      let layout = Layout.of_bname ~mode:Layout.Detect bname in
       (if !history then
-         let layout = Layout.of_bname ~mode:Layout.Detect bname in
          let conf =
            {
              Config.empty with
@@ -337,6 +343,9 @@ let main () =
          in
          let n = HistoryDiff.convert ~dry_run:!dry_run conf base in
          Printf.eprintf "%d history files converted\n" n);
+      (if !saved_portraits then
+         let n = Image.move_saved_portraits ~dry_run:!dry_run layout in
+         Printf.eprintf "%d saved portraits and blasons moved\n" n);
       if !dump then dump_persons bpath !ofile
 
 let _ = main ()

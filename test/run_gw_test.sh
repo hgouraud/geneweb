@@ -392,7 +392,6 @@ crl "m=IMH&s=$IMG_SRC"
 # ATTENTION, Test only a subset of carrousel (m=IM_C*)
 # ATTENTION, les autres fonctions du carrousel (_OK) ont une action immédiate!!
 crl "m=IM_C&i=$ID" $nodiff
-crl "m=IM_C_S&i=$ID" $nodiff
 crl "m=IM_C&i=$ID&s=$IMG_C" $nodiff
 crl "m=IM_C_S&i=$ID&s=$IMG_C_S" $nodiff
 crl "m=L"

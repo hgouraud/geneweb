@@ -8978,26 +8978,12 @@ en: delete portrait
 es: eliminar el retrato
 fr: supprimer le portrait
 
-    delete saved coat of arms
-co: squassà l’armuratura arregistrata
-de: lösche das gespeicherte Wappen
-en: delete the saved coat of arms
-es: eliminar el blasón guardado
-fr: supprimer le blason sauvegardé
-
     delete saved image
 co: squassà a fiura arregistrata
 de: das gespeicherte Bild löschen
 en: delete saved image
 es: eliminar la imagen guardada
 fr: supprimer une image sauvegardée
-
-    delete saved portrait
-co: squassà u ritrattu arregistratu
-de: das gespeicherte Porträt löschen
-en: delete saved portrait
-es: eliminar el retrato guardado
-fr: supprimer le portrait sauvegardé
 
     deleted
 co: squassatu/squassata
@@ -18864,11 +18850,10 @@ en: previous occurrence number
 fr: numéro d’occurrence précédent
 
     previous portrait
-co: un arregistramentu precedente di u ritrattu, s’ellu esiste, serà squassatu. Impiegà MOD_IND ùn arregistreghja micca u ritrattu.
-de: wenn schon ein gespeichertes Porträt mit dem gleichen Namen existiert, wird es gelöscht. MOD_IND speichert das Porträt nicht.
-en: a possible previous version of the saved portrait will be deleted. Using MOD_IND does not save the portrait.
-es: si existe una versión anterior del retrato guardado, se eliminará.<br> Usar MOD_IND no guarda el retrato.
-fr: une sauvegarde pré-existante du portrait sera supprimée.<br> Utiliser MOD_IND ne sauvegarde pas le portrait.
+de: das aktuelle Porträt wird zu den gespeicherten Bildern verschoben. MOD_IND speichert das Porträt nicht.
+en: the current portrait goes to the saved images. Using MOD_IND does not save the portrait.
+es: el retrato actual pasa a las imágenes guardadas.<br> Usar MOD_IND no guarda el retrato.
+fr: le portrait actuel passe dans les images sauvegardées.<br> Utiliser MOD_IND ne sauvegarde pas le portrait.
 
     previous sibling
 af: vorige broer/vorige suster/vorige broer of suster
@@ -20138,20 +20123,6 @@ de: das gespeicherte Bild wiederherstellen
 en: restore saved image
 es: restaurar la imagen guardada
 fr: restaurer une image sauvegardée
-
-    restore portrait saved
-co: risturà u ritrattu arregistratu
-de: das gespeicherte Porträt wiederherstellen
-en: restore saved portrait
-es: restaurar el retrato guardado
-fr: restaurer le portrait sauvegardé
-
-    restored
-co: risturatu/risturata
-de: wiederhergestellt
-en: restored
-es: restaurado/restaurada
-fr: restauré/restaurée
 
     restricted access
 co: L’accessu hè riservatu à l’amichi è à i maghi di a basa di dati !

@@ -8,6 +8,26 @@ val ext_list_2 : string array
 val ext_list_doc : string array
 (** Extensions of the documents listed with the images of a person. *)
 
+val portrait_extensions : string array
+(** Extensions of the file of a portrait or a blason: the images and [.url]. *)
+
+val saved_portrait_stem : string -> string -> Unix.tm -> string
+(** [saved_portrait_stem saved mode tm] is a name without extension, free in the
+    directory [saved], for a portrait (or a blason if [mode] is ["blasons"])
+    replaced at the time [tm]: [portrait-YYYYMMDD-HHMMSS], with a suffix [-1],
+    [-2]… if it is taken. *)
+
+val move_with_sidecars : string -> string -> string -> unit
+(** [move_with_sidecars src ext dst] renames [src ^ ext] to [dst ^ ext], and the
+    note ([.txt]) and source ([.src]) of [src], if any. Raises [Sys_error]. *)
+
+val move_saved_portraits : dry_run:bool -> Layout.t -> int
+(** [move_saved_portraits ~dry_run layout] moves the portraits and blasons kept
+    by the former versions in the [saved] directory of the portraits to the
+    saved images of their persons, named by {!saved_portrait_stem} after their
+    modification time, and removes that directory once empty. Returns the number
+    of files moved, or to move if [dry_run], which only prints them. *)
+
 val find_file_without_ext : string -> string
 val is_url : string -> bool
 
@@ -53,6 +73,12 @@ val default_image_filename :
     portrait or blason. Without it's file extension. e.g: default_image_filename
     "Jean Claude" "DUPOND" 3 is "jean_claude.3.dupond" or
     "jean_claude.3.dupond.blason" *)
+
+val saved_images_folder :
+  config -> Geneweb_db.Driver.base -> Geneweb_db.Driver.person -> string
+(** [saved_images_folder conf base p] is the {!MediaDir.saved} directory of the
+    images of [p]: it keeps the images, the portraits and the blasons of [p]
+    that were replaced or removed. *)
 
 val size_from_path : string -> (int * int, unit) result
 (** [size_from_path path]
@@ -132,58 +158,22 @@ val get_portrait :
     - [None] if we don't have access to [p]'s portrait or it doesn't exist.
     - [Some src] with [src] the url or path of [p]'s portrait. *)
 
-val get_old_portrait :
-  config ->
-  Geneweb_db.Driver.base ->
-  Geneweb_db.Driver.person ->
-  [> `Path of string | `Url of string ] option
-
-val get_blason_aux :
-  config ->
-  Geneweb_db.Driver.base ->
-  Geneweb_db.Driver.person ->
-  bool ->
-  bool ->
-  [> `Path of string | `Url of string ] option
-(** [get_blason conf base p self saved] is
-    - [None] if we don't have access to [p]'s blason or it doesn't exist.
-    - [Some src] with [src] the url or path of [p]'s blason. *)
-
 val get_blason :
   config ->
   Geneweb_db.Driver.base ->
   Geneweb_db.Driver.person ->
   bool ->
   [> `Path of string | `Url of string ] option
-
-val get_old_blason :
-  config ->
-  Geneweb_db.Driver.base ->
-  Geneweb_db.Driver.person ->
-  bool ->
-  [> `Path of string | `Url of string ] option
+(** [get_blason conf base p self] is
+    - [None] if we don't have access to [p]'s blason or it doesn't exist.
+    - [Some src] with [src] the url or path of [p]'s blason, his own one if
+      [self], else the first one of his paternal line. *)
 
 val get_portrait_name :
   config -> Geneweb_db.Driver.base -> Geneweb_db.Driver.person -> string
 
-val get_old_portrait_name :
-  config -> Geneweb_db.Driver.base -> Geneweb_db.Driver.person -> string
-
 val get_blason_name :
   config -> Geneweb_db.Driver.base -> Geneweb_db.Driver.person -> string
-
-val get_old_blason_name :
-  config -> Geneweb_db.Driver.base -> Geneweb_db.Driver.person -> string
-
-val get_old_portrait_or_blason :
-  config ->
-  Geneweb_db.Driver.base ->
-  string ->
-  Geneweb_db.Driver.person ->
-  [> `Path of string | `Url of string ] option
-(** [get_portrait conf base p] is
-    - [None] if we don't have access to [p]'s portrait or it doesn't exist.
-    - [Some src] with [src] the url or path of [p]'s portrait. *)
 
 val get_blason_owner :
   config ->

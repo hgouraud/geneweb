@@ -1556,6 +1556,13 @@ de: Reihenfolge der Kinder (nur datierte Kinder werden verschoben).
 en: children order (only dated children are moved).
 fr: ordre des enfants (seuls les enfants datés sont déplacés).
 
+    saved portraits.
+aa: gwfix.htm
+de: gespeicherte Porträts und Wappen zu den gespeicherten Bildern ihrer Personen verschieben.
+en: move the saved portraits and coats of arms to the saved images of their persons.
+es: mover los retratos y escudos guardados a las imágenes guardadas de sus personas.
+fr: déplacer les portraits et blasons sauvegardés dans les images sauvegardées de leurs personnes.
+
     families' parents.
 aa: gwfix.htm
 co: genitori di e famiglie.

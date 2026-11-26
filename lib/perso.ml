@@ -3694,17 +3694,6 @@ and eval_bool_person_field conf base env (p, p_auth) = function
       match get_env "carrousel_img" env with
       | Vstring s -> Image.is_url s
       | _ -> false)
-  | "has_old_image_url" | "has_old_portrait_url" -> (
-      match Image.get_old_portrait_or_blason conf base "portraits" p with
-      | Some (`Url _url) -> true
-      | _ -> false)
-  (* carrousel *)
-  | "has_old_image" | "has_old_portrait" ->
-      Image.get_old_portrait_or_blason conf base "portraits" p |> Option.is_some
-  | "has_old_blason" ->
-      p_auth
-      && Image.get_old_portrait_or_blason conf base "blasons" p
-         |> Option.is_some
   | "has_nephews_or_nieces" -> has_nephews_or_nieces conf base p
   | "has_nobility_titles" -> p_auth && Util.nobtit conf base p <> []
   | "has_notes" | "has_pnotes" ->
@@ -3978,13 +3967,8 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       match Image.get_portrait conf base p with
       | Some src -> Image.src_to_string src |> str_val
       | None -> null_val)
-  | "old_image" | "old_portrait" -> (
-      match Image.get_old_portrait conf base p with
-      | Some (`Path s) -> str_val s
-      | Some (`Url u) -> str_val u
-      | None -> null_val)
   | "image_html_url" | "portrait_html_url" ->
-      string_of_image_url conf base ep true false |> safe_val
+      string_of_image_url conf base ep true |> safe_val
   | "image_size" | "portrait_size" ->
       string_of_image_size conf base ep |> str_val
   | "blason_size" -> string_of_blason_size conf base ep |> str_val
@@ -3997,11 +3981,8 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
   | "blason_extra_small_size" ->
       string_of_blason_extra_small_size conf base ep |> str_val
   | "image_url" | "portrait_url" ->
-      string_of_image_url conf base ep false false |> safe_val
-  | "old_image_url" | "old_portrait_url" ->
-      string_of_image_url conf base ep false true |> safe_val
-  | "blason_url" -> string_of_blason_url conf base ep false false |> safe_val
-  | "old_blason_url" -> string_of_blason_url conf base ep false true |> safe_val
+      string_of_image_url conf base ep false |> safe_val
+  | "blason_url" -> string_of_blason_url conf base ep false |> safe_val
   | "index" ->
       Driver.get_iper p |> Driver.Iper.to_string |> Mutil.encode |> safe_val
   | "carrousel" -> Image.default_image_filename "portraits" base p |> str_val
@@ -4026,11 +4007,6 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       | Some (`Path p) when Filename.extension p = ".stop" -> null_val
       | Some src -> Image.src_to_string src |> str_val
       | None -> null_val)
-  | "old_blason" -> (
-      match Image.get_old_blason conf base p false with
-      | Some (`Path p) when Filename.extension p = ".stop" -> null_val
-      | Some src -> Image.src_to_string src |> str_val
-      | None -> null_val)
   | "blason_self" -> (
       match Image.get_blason conf base p true with
       | Some (`Path p) when Filename.extension p = ".stop" -> null_val
@@ -4038,8 +4014,6 @@ and eval_str_person_field conf base env ((p, p_auth) as ep) = function
       | None -> null_val)
   | "portrait_name" -> str_val (Image.get_portrait_name conf base p)
   | "blason_name" -> str_val (Image.get_blason_name conf base p)
-  | "old_portrait_name" -> str_val (Image.get_old_portrait_name conf base p)
-  | "old_blason_name" -> str_val (Image.get_old_blason_name conf base p)
   | "blason_stop_name" ->
       str_val (Image.default_image_filename "blasons" base p ^ ".stop")
   | "X" -> str_val Filename.dir_sep
@@ -4484,12 +4458,9 @@ and string_of_died conf p p_auth =
     | NotDead | DontKnowIfDead | OfCourseDead -> ""
   else ""
 
-and string_of_image_url conf base (p, p_auth) html saved : Adef.escaped_string =
+and string_of_image_url conf base (p, p_auth) html : Adef.escaped_string =
   if p_auth then
-    match
-      if saved then Image.get_old_portrait conf base p
-      else Image.get_portrait conf base p
-    with
+    match Image.get_portrait conf base p with
     | Some (`Path fname) when Filename.extension fname = ".url" ->
         Adef.escaped (Image.read_url_file fname)
     | Some (`Path fname) ->
@@ -4507,10 +4478,9 @@ and string_of_image_url conf base (p, p_auth) html saved : Adef.escaped_string =
     | None -> Adef.escaped ""
   else Adef.escaped ""
 
-and string_of_blason_url conf base (p, p_auth) html saved : Adef.escaped_string
-    =
+and string_of_blason_url conf base (p, p_auth) html : Adef.escaped_string =
   if p_auth then
-    match Image.get_blason_aux conf base p false saved with
+    match Image.get_blason conf base p false with
     | Some (`Path fname) when Filename.extension fname = ".url" -> (
         match Some (Secure.open_in fname) with
         | Some ic -> Adef.escaped (input_line ic)

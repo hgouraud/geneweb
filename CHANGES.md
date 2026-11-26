@@ -345,6 +345,15 @@
   (`folder=a/b`).
 - The actions of the carrousel (send, delete, restore an image) accept
   the person by its key (`p`, `n`, `oc`) as well as by its index.
+- A replaced or deleted portrait or coat of arms goes to the saved images
+  of its person (`images/<key>/saved/`), named after what it was and
+  when (`portrait-20261126-004200.jpg`, `blason-….png`), instead of
+  `portraits/saved/`, which kept only the last one. Each image of the
+  carrousel, saved or not, can become the portrait (new
+  `m=IMAGE_TO_PORTRAIT`) or the coat of arms (`m=IMAGE_TO_BLASON`);
+  taking back a saved one swaps it with the current one.
+  `gwfixbase -saved-portraits`, also offered on the gwfixbase page of
+  gwsetup, moves the files of `portraits/saved/` there.
 
 ## Gwsetup
 - Bind `127.0.0.1` instead of resolving `localhost`, which selects the
@@ -512,6 +521,15 @@
   the names that `gwc`, `ged2gwb` and `gwsetup` accept: a base with
   another name (accented letters, `_`, `.`) must be renamed to be
   served, and `--cache-database` refuses it.
+- The template variables of the saved portrait and coat of arms
+  (`old_portrait`, `old_image`, `old_portrait_url`, `old_image_url`,
+  `old_portrait_name`, `has_old_portrait`, `has_old_image`,
+  `has_old_portrait_url`, `has_old_image_url`, `old_blason`,
+  `old_blason_url`, `old_blason_name`, `has_old_blason`) are removed,
+  with the `portraits` and `blasons` modes of `m=RESET_IMAGE_C_OK`,
+  `delete=on` for these modes in `m=DEL_IMAGE_C_OK`, and `m=IM_C_S`
+  without `s`: they are saved images of the carrousel. Run
+  `gwfixbase -saved-portraits` to move the files kept before.
 - `m=SND_IMAGE`, the page that sent a portrait alone, is removed, with
   its links in the templm templates: the portrait, the coat of arms and
   the images of a person are managed in `m=MEDIA`.

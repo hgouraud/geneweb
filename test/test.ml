@@ -28,6 +28,7 @@ let () =
          Oidc_test.v;
          Place_rename_test.v;
          Place_test.v;
+         Saved_portraits_test.v;
          Sosa_test.v;
          Source_test.v;
          Surname_index_test.v;

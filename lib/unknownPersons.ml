@@ -90,7 +90,6 @@ let family_has_data fam =
 
 let has_images conf base p =
   Option.is_some (Image.get_portrait conf base p)
-  || Option.is_some (Image.get_old_portrait conf base p)
   || Image.has_blason conf base p true
   || Image.get_carrousel_imgs conf base p <> []
   || Image.get_carrousel_old_imgs conf base p <> []

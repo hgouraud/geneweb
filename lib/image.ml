@@ -64,20 +64,84 @@ let default_image_filename_of_key mode first_name surname occ =
   let basename = key_dir_basename first_name surname occ in
   if mode = "blasons" then basename ^ ".blason" else basename
 
-let default_image_filename_aux mode base p saved =
-  let name =
-    default_image_filename_of_key mode
-      (Driver.p_first_name base p)
-      (Driver.p_surname base p) (Driver.get_occ p)
-  in
-  if saved then Filename.concat "saved" name else name
-
 let default_image_filename mode base p =
-  default_image_filename_aux mode base p false
+  default_image_filename_of_key mode
+    (Driver.p_first_name base p)
+    (Driver.p_surname base p) (Driver.get_occ p)
+
+let saved_images_folder conf base p =
+  String.concat Filename.dir_sep
+    [
+      carrousel_folder conf;
+      default_image_filename "portraits" base p;
+      MediaDir.saved;
+    ]
 
 let ext_list_1 = [| ".jpg"; ".jpeg"; ".png"; ".gif" |]
 let ext_list_2 = [| ".jpg"; ".jpeg"; ".png"; ".gif"; ".url"; ".stop" |]
 let ext_list_doc = [| ".pdf"; ".docx"; ".odt" |]
+let portrait_extensions = [| ".jpg"; ".jpeg"; ".png"; ".gif"; ".url" |]
+
+let saved_portrait_stem saved mode tm =
+  let stem =
+    Printf.sprintf "%s-%04d%02d%02d-%02d%02d%02d"
+      (if mode = "blasons" then "blason" else "portrait")
+      (tm.Unix.tm_year + 1900) (tm.Unix.tm_mon + 1) tm.Unix.tm_mday
+      tm.Unix.tm_hour tm.Unix.tm_min tm.Unix.tm_sec
+  in
+  let taken s =
+    Array.exists
+      (fun ext -> Sys.file_exists (Filename.concat saved (s ^ ext)))
+      (Array.append portrait_extensions [| ".txt"; ".src" |])
+  in
+  let rec free n =
+    let s = if n = 0 then stem else stem ^ "-" ^ string_of_int n in
+    if taken s then free (n + 1) else s
+  in
+  free 0
+
+let move_with_sidecars src_stem ext dst_stem =
+  Sys.rename (src_stem ^ ext) (dst_stem ^ ext);
+  List.iter
+    (fun side ->
+      if Sys.file_exists (src_stem ^ side) then
+        Sys.rename (src_stem ^ side) (dst_stem ^ side))
+    [ ".txt"; ".src" ]
+
+let move_saved_portraits ~dry_run layout =
+  let old = Filename.concat (Layout.portraits layout) MediaDir.saved in
+  if not (Sys.file_exists old && Sys.is_directory old) then 0
+  else
+    let moved =
+      Array.fold_left
+        (fun n f ->
+          let ext = Filename.extension f in
+          let stem = Filename.remove_extension f in
+          if (not (Array.mem ext portrait_extensions)) || stem = "" then n
+          else
+            let mode, key =
+              if Filename.check_suffix stem ".blason" then
+                ("blasons", Filename.chop_suffix stem ".blason")
+              else ("portraits", stem)
+            in
+            let saved =
+              String.concat Filename.dir_sep
+                [ Layout.images layout; key; MediaDir.saved ]
+            in
+            let src = Filename.concat old f in
+            let tm = Unix.localtime (Unix.stat src).Unix.st_mtime in
+            if dry_run then (
+              Printf.printf "%s -> %s\n" src saved;
+              n + 1)
+            else (
+              Filesystem.create_dir ~parent:true saved;
+              move_with_sidecars (Filename.concat old stem) ext
+                (Filename.concat saved (saved_portrait_stem saved mode tm));
+              n + 1))
+        0 (Sys.readdir old)
+    in
+    (if not dry_run then try Unix.rmdir old with Unix.Unix_error _ -> ());
+    moved
 
 let read_url_file f =
   try
@@ -113,9 +177,9 @@ let find_file_without_ext f =
 
 (** [full_image_path mode conf base p] is [Some path] if [p] has a portrait or a
     blason. [path] is a the full path of the file with file extension. *)
-let full_image_path mode conf base p saved =
+let full_image_path mode conf base p =
   (* TODO why is extension not in filename..? *)
-  let s = default_image_filename_aux mode base p saved in
+  let s = default_image_filename mode base p in
   let f = Filename.concat (portrait_folder conf) s in
   match find_img_opt f with
   | Some (`Path _) as full_path -> full_path
@@ -249,7 +313,7 @@ let has_access_to_image mode conf base p =
   || (not conf.no_image)
      && Util.authorized_age conf base p
      && ((not (Driver.Istr.is_empty img))
-        || full_image_path mode conf base p false <> None)
+        || full_image_path mode conf base p <> None)
      && is_not_private_img conf (Driver.sou base img)
 
 (* A blason may be inherited from the paternal line: unlike
@@ -269,7 +333,7 @@ let has_access_to_carrousel conf base p =
 
 let get_portrait_path conf base p =
   if has_access_to_image "portraits" conf base p then
-    full_image_path "portraits" conf base p false
+    full_image_path "portraits" conf base p
   else None
 
 let is_url str =
@@ -313,61 +377,30 @@ let parse_src_with_size_info conf s =
     Log.err (fun k -> k "Error parsing portrait source with size info %s" s);
     Error "Failed to parse url with size info"
 
-(* In images/carrousel we store either
-   - the image as the original image.jpg/png/tif image
-   - the url to the image as content of a image.url text file
-*)
-let get_old_portrait_or_blason conf base mode p =
-  if has_access_to_image mode conf base p then
-    let f =
-      Filename.concat (portrait_folder conf)
-        (default_image_filename_aux mode base p true)
-    in
-    find_img_opt f
-  else None
-
-let get_portrait_aux conf base p saved =
-  let f =
-    Filename.concat (portrait_folder conf)
-      (default_image_filename_aux "portraits" base p saved)
-  in
+let get_portrait conf base p =
   if has_access_to_image "portraits" conf base p then
-    if not saved then
-      match src_of_string conf (Driver.sou base (Driver.get_image p)) with
-      | `Src_with_size_info _s as s_info -> (
-          match parse_src_with_size_info conf s_info with
-          | Error _e -> None
-          | Ok (s, _size) -> Some s)
-      | `Url _s as url -> Some url
-      | `Path p as path -> if Sys.file_exists p then Some path else None
-      | `Empty -> full_image_path "portraits" conf base p false
-    else find_img_opt f
+    match src_of_string conf (Driver.sou base (Driver.get_image p)) with
+    | `Src_with_size_info _s as s_info -> (
+        match parse_src_with_size_info conf s_info with
+        | Error _e -> None
+        | Ok (s, _size) -> Some s)
+    | `Url _s as url -> Some url
+    | `Path p as path -> if Sys.file_exists p then Some path else None
+    | `Empty -> full_image_path "portraits" conf base p
   else None
 
-let get_portrait conf base p = get_portrait_aux conf base p false
-let get_old_portrait conf base p = get_portrait_aux conf base p true
-
-let get_portrait_name_aux conf base p saved =
-  let name = default_image_filename_aux "portraits" base p saved in
-  let f = Filename.concat (portrait_folder conf) name in
-  Printf.eprintf "Get_portrait_name: %s, %s\n" name f;
-  match find_img_opt f with
-  | Some (`Path p) ->
-      Printf.eprintf "Path %s\n" p;
-      Filename.basename p
-  | Some (`Url u) ->
-      Printf.eprintf "Url %s\n" u;
-      Filename.basename name ^ ".url"
+let get_portrait_name conf base p =
+  let name = default_image_filename "portraits" base p in
+  match find_img_opt (Filename.concat (portrait_folder conf) name) with
+  | Some (`Path p) -> Filename.basename p
+  | Some (`Url _u) -> name ^ ".url"
   | None -> ""
 
-let get_portrait_name conf base p = get_portrait_name_aux conf base p false
-let get_old_portrait_name conf base p = get_portrait_name_aux conf base p true
-
 (* if self = true, then do not loop for fathers *)
-let get_blason_aux conf base p self saved =
+let get_blason conf base p self =
   if has_access_to_blason conf base p then
     let rec loop p =
-      match full_image_path "blasons" conf base p saved with
+      match full_image_path "blasons" conf base p with
       | Some (`Path p) when Filename.extension p = ".stop" -> None
       | Some _ as result -> result
       | None -> (
@@ -381,19 +414,12 @@ let get_blason_aux conf base p self saved =
     loop p
   else None
 
-let get_blason conf base p self = get_blason_aux conf base p self false
-let get_old_blason conf base p self = get_blason_aux conf base p self true
-
-let get_blason_name_aux conf base p saved =
-  let name = default_image_filename_aux "blasons" base p saved in
-  let f = Filename.concat (portrait_folder conf) name in
-  match find_img_opt f with
+let get_blason_name conf base p =
+  let name = default_image_filename "blasons" base p in
+  match find_img_opt (Filename.concat (portrait_folder conf) name) with
   | Some (`Path p) -> Filename.basename p
-  | Some (`Url _u) -> Filename.basename name ^ ".url"
+  | Some (`Url _u) -> name ^ ".url"
   | None -> ""
-
-let get_blason_name conf base p = get_blason_name_aux conf base p false
-let get_old_blason_name conf base p = get_blason_name_aux conf base p true
 
 let has_blason conf base p self =
   match get_blason conf base p self with
@@ -404,7 +430,7 @@ let has_blason conf base p self =
 
 let has_blason_stop conf base p =
   match
-    src_of_string conf (path_str (full_image_path "blasons" conf base p false))
+    src_of_string conf (path_str (full_image_path "blasons" conf base p))
   with
   | `Path p when Filename.extension p = ".stop" -> true
   | _ -> false
@@ -465,11 +491,7 @@ let rename_portrait_and_blason conf base p (nfn, nsn, noc) =
         ext_list_2
     in
     rename_files_with_extensions p_dir old_key;
-    rename_files_with_extensions p_dir (old_key ^ ".blason");
-    let saved_dir = Filename.concat p_dir "saved" in
-    if Sys.file_exists saved_dir then (
-      rename_files_with_extensions saved_dir old_key;
-      rename_files_with_extensions saved_dir (old_key ^ ".blason"))
+    rename_files_with_extensions p_dir (old_key ^ ".blason")
 
 let get_portrait_with_size conf base p =
   if has_access_to_image "portraits" conf base p then
@@ -484,7 +506,7 @@ let get_portrait_with_size conf base p =
           Some (path, size_from_path p |> Result.to_option)
         else None
     | `Empty -> (
-        match full_image_path "portraits" conf base p false with
+        match full_image_path "portraits" conf base p with
         | Some (`Path p) -> Some (`Path p, size_from_path p |> Result.to_option)
         | Some (`Url u) -> Some (`Url u, None)
         | None -> None)
@@ -494,8 +516,7 @@ let get_blason_with_size conf base p self =
   if has_access_to_blason conf base p then
     let rec loop p =
       match
-        src_of_string conf
-          (path_str (full_image_path "blasons" conf base p false))
+        src_of_string conf (path_str (full_image_path "blasons" conf base p))
       with
       | `Src_with_size_info _s as s_info -> (
           match parse_src_with_size_info conf s_info with
@@ -513,7 +534,7 @@ let get_blason_with_size conf base p self =
               let fa = Driver.poi base (Driver.get_father cpl) in
               loop fa
           | _ -> (
-              match full_image_path "blasons" conf base p false with
+              match full_image_path "blasons" conf base p with
               | Some (`Path p) ->
                   Some (`Path p, size_from_path p |> Result.to_option)
               | Some (`Url u) -> Some (`Url u, None)
@@ -527,7 +548,7 @@ let get_blason_with_size conf base p self =
 let carrousel_file_path conf base p fname old =
   let dir =
     let dir = default_image_filename "portraits" base p in
-    if old then Filename.concat dir "saved" else dir
+    if old then Filename.concat dir MediaDir.saved else dir
   in
   String.concat Filename.dir_sep
     ([ carrousel_folder conf; dir ] @ if fname = "" then [] else [ fname ])
