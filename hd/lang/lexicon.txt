@@ -6461,6 +6461,13 @@ en: use image as coats of arme
 es: usar la imagen como blasón
 fr: utiliser l’image comme blason
 
+    copy image to portrait
+co: impiegà a fiura cum’è ritrattu
+de: das Bild als Porträt verwenden
+en: use image as portrait
+es: usar la imagen como retrato
+fr: utiliser l’image comme portrait
+
     copy link %s
 co: cupià u liame %s in u preme’papei
 de: kopiere den %s Link in die Zwischenablage

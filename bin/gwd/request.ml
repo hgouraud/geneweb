@@ -25,10 +25,10 @@ let this_request_updates_database conf =
       ( "ADD_FAM" | "BLASON_MOVE_TO_ANC" | "BLASON_STOP" | "CHANGE_WIZ_VIS"
       | "CHG_CHN" | "CHG_EVT_FAM_ORD_OK" | "CHG_EVT_IND_ORD_OK"
       | "CHG_FAM_ORD_OK" | "CHG_TIT_ORD_OK" | "DEL_FAM" | "DEL_IMAGE"
-      | "DEL_IND" | "IMAGE_TO_BLASON" | "KILL_ANC" | "MOD_FAM" | "MOD_IND"
-      | "MOD_NOTES" | "MOD_WIZNOTES" | "MRG_DUP_IND_Y_N" | "MRG_DUP_FAM_Y_N"
-      | "OK_ADD" | "OK_DEL" | "OK_FOLD" | "UNKNOWN_OK" | "MRG_IND"
-      | "MRG_MOD_FAM" | "MRG_MOD_IND" | "MOD_DATA_OK"
+      | "DEL_IND" | "IMAGE_TO_BLASON" | "IMAGE_TO_PORTRAIT" | "KILL_ANC"
+      | "MOD_FAM" | "MOD_IND" | "MOD_NOTES" | "MOD_WIZNOTES" | "MRG_DUP_IND_Y_N"
+      | "MRG_DUP_FAM_Y_N" | "OK_ADD" | "OK_DEL" | "OK_FOLD" | "UNKNOWN_OK"
+      | "MRG_IND" | "MRG_MOD_FAM" | "MRG_MOD_IND" | "MOD_DATA_OK"
       | "PORTRAIT_MOVE_TO_BLASON" | "PORTRAIT_TO_BLASON" | "RESET_IMAGE_C_OK"
       | "PLACE_TERMS_OK" | "SOURCE_TERMS_OK" | "OCCU_TERMS_OK" | "MEDIA_SEND_OK"
         ) ->
@@ -46,7 +46,8 @@ let this_request_edits conf =
   | Some
       ( "ADD_PAR" | "CHG_EVT_IND_ORD" | "CHG_EVT_FAM_ORD" | "MOD_GALLERY"
       | "HIST_CLEAN" | "MRG" | "MRG_DUP" | "MRG_FAM" | "UNKNOWN" | "MEDIA"
-      | "BLASON_MOVE_TO_ANC" | "PORTRAIT_TO_BLASON" | "IMAGE_TO_BLASON" ) ->
+      | "BLASON_MOVE_TO_ANC" | "PORTRAIT_TO_BLASON" | "IMAGE_TO_BLASON"
+      | "IMAGE_TO_PORTRAIT" ) ->
       true
   | Some m -> String.ends_with ~suffix:"_OK" m
 
@@ -686,7 +687,7 @@ let treat_request =
              | "IM_C" -> w_base @@ ImageCarrousel.print_c ~saved:false
              | "IM_C_S" -> w_base @@ ImageCarrousel.print_c ~saved:true
              | "IM" -> w_base @@ ImageDisplay.print
-             | "IMAGE_TO_BLASON" ->
+             | "IMAGE_TO_BLASON" | "IMAGE_TO_PORTRAIT" ->
                  w_wizard @@ w_lock @@ w_base @@ ImageCarrousel.print_main_c
              | "IMH" -> w_base @@ fun conf _ -> ImageDisplay.print_html conf
              | "ISOLATED" ->

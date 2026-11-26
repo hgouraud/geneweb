@@ -274,7 +274,7 @@ let get_extension conf keydir mode saved fname =
 (*                                                                          *)
 (* ************************************************************************ *)
 
-let send_portrait conf base p mode ext content =
+let send_portrait ?code conf base p mode ext content =
   let dir = Layout.portraits conf.layout in
   let name = Image.default_image_filename mode base p in
   let written =
@@ -304,7 +304,9 @@ let send_portrait conf base p mode ext content =
     History.record conf base
       (U_Send_image
          (Util.string_gen_person base (Driver.gen_person_of_person p)))
-      (if mode = "blasons" then "sb" else "si");
+      (match code with
+      | Some code -> code
+      | None -> if mode = "blasons" then "sb" else "si");
   written
 
 (* carrousel *)
@@ -645,6 +647,34 @@ let effective_copy_image_to_blason conf base p =
     "cd";
   blason_filename
 
+(* The image [file_name] of the carrousel becomes the portrait: it is copied,
+   and the previous portrait goes to saved as with an upload. Returns the name
+   of the portrait, or "error". *)
+let effective_copy_image_to_portrait conf base p =
+  let fname =
+    match Util.p_getenv conf.env "file_name" with Some f -> f | None -> ""
+  in
+  let keydir = Image.default_image_filename "portraits" base p in
+  let ext = String.lowercase_ascii (Filename.extension fname) in
+  let ext = if ext = ".jpeg" then ".jpg" else ext in
+  let src =
+    String.concat Filename.dir_sep
+      [ Image.carrousel_folder conf; keydir; fname ]
+  in
+  if
+    fname = ""
+    || Filename.basename fname <> fname
+    || (not (Array.mem ext Image.ext_list_1 || ext = ".url"))
+    || not (Sys.file_exists src)
+  then "error"
+  else
+    let content = In_channel.with_open_bin src In_channel.input_all in
+    match send_portrait ~code:"ci" conf base p "portraits" ext content with
+    | Ok () -> Image.default_image_filename "portraits" base p ^ ext
+    | Error e ->
+        Log.err (fun k -> k "copy image %s to portrait: %s" src e);
+        "error"
+
 (* reset portrait or image from old folder to portrait or others *)
 
 let effective_reset_c_ok conf base p =
@@ -777,6 +807,8 @@ let print_main_c conf base =
                   | "IMAGE_TO_BLASON" ->
                       Filename.basename
                         (effective_copy_image_to_blason conf base p)
+                  | "IMAGE_TO_PORTRAIT" ->
+                      effective_copy_image_to_portrait conf base p
                   | "BLASON_STOP" ->
                       let has_blason_self = Image.has_blason conf base p true in
                       let has_blason = Image.has_blason conf base p false in

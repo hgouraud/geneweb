@@ -41,6 +41,7 @@
     %elseif;(e.em="DEL_IMAGE_C_OK")[*portrait] [deleted]0%if;(e.delete!="on") [and] [saved]0%end;%nn;
     %elseif;(e.em="RESET_IMAGE_C_OK")[*portrait] [restored]0%nn;
     %elseif;(e.em="PORTRAIT_MOVE_TO_BLASON")[*portrait moved to blason]%nn;
+    %elseif;(e.em="IMAGE_TO_PORTRAIT")[*image/images]0 [copied/copied]1 [to] [portrait]%nn;
     %end;%nn;
   %elseif;(e.mode="note")
     %if;(e.em="SND_IMAGE_OK")[*note/notes]0 [update::]%nn;
@@ -75,6 +76,7 @@
     %elseif;(e.em="RESET_IMAGE_C_OK")%portraits_store;%X;%carrousel;%X;saved%X;%e.file_name; <strong><></strong> %portraits_store;%X;%carrousel;%X;%e.file_name;%nn;
     %elseif;(e.em="PORTRAIT_MOVE_TO_BLASON")%portraits_store;%X;%e.file_name;%nn;
       %if;(e.bn!="")<br>[*blason notes updated]%sp;%e.bn;%end;%nn;
+    %elseif;(e.em="IMAGE_TO_PORTRAIT")%portraits_store;%X;%e.file_name;%nn;
     %else;bad command %e.em; (%e.mode;)%end;
     </samp>
   %elseif;(e.mode="blasons")<samp>
@@ -360,6 +362,9 @@
                 target="_blank" rel="noopener"
                 title="%images_store;%X;%carrousel;%X;%carrousel_img_raw;"><samp>%carrousel_img_raw;</samp></a>
             %else;
+              <a href="%prefix;m=IMAGE_TO_PORTRAIT&i=%index;&mode=portraits&file_name=%carrousel_img;"
+                title="[*copy image to portrait]">
+                <i class="fa fa-user fa-xs text-success me-1"></i></a>
               <a href="%prefix;m=IMAGE_TO_BLASON&i=%index;&mode=blasons&file_name=%carrousel_img;"
                 title="[*copy image to blason]">
                 <i class="fa fa-user-shield fa-xs text-success me-1"></i></a>
