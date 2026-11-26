@@ -1,4 +1,4 @@
-<!-- $Id: media_zone.txt v7.1 24/11/2026 $ -->
+<!-- $Id: media_zone.txt v7.1 26/11/2026 $ -->
 %( Drop zone, wall and preview of the files to send, driven by media.js.
    Included in the #media element of the page, which holds the place of
    the files. %)
@@ -9,7 +9,6 @@
   data-units="[file size units]"
   data-too-big="[*file too big (max %s):::{max}]"
   data-type-refused="[*file type not accepted here]"
-  data-slot-taken="[*upload slot taken]"
   data-error="[*error]">
   <div class="dz-message">
     <button type="button" class="dz-button">[*upload zone]</button>
@@ -31,20 +30,22 @@
     <div class="flex-grow-1 upload-body">
       <fieldset class="upload-controls">
         <div class="row g-2">
-          <div class="col-auto upload-dest-col">
-            <select class="form-select upload-dest" aria-label="[*upload destination]"
-              title="[*upload destination]">
-              <option value="portrait">[*upload dest/portrait/blason/person]0</option>
-              <option value="blason">[*upload dest/portrait/blason/person]1</option>
-              <option value="person">[*upload dest/portrait/blason/person]2</option>
-            </select>
-          </div>
           <div class="col upload-name-col">
             <div class="input-group has-validation">
               <input type="text" class="form-control upload-name" autocomplete="off"
                 aria-label="[*name]" title="[*name]">
               <span class="input-group-text upload-ext"></span>
               <div class="invalid-feedback">[*invalid file name]</div>
+            </div>
+          </div>
+          <div class="col-12 upload-dest-col">
+            <div class="d-flex flex-wrap gap-2" role="group" aria-label="[*upload destination]">
+              <button type="button" class="btn btn-primary upload-dest"
+                data-dest="portrait">[*portrait]</button>
+              <button type="button" class="btn btn-primary upload-dest"
+                data-dest="blason">[*blason/blasons]0</button>
+              <button type="button" class="btn btn-primary upload-dest"
+                data-dest="person">[*image/images]0</button>
             </div>
           </div>
         </div>

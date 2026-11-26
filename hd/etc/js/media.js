@@ -1,8 +1,10 @@
 // Media page (m=MEDIA), of a person (the carrousel page, mode "person") or
 // of the base (mode "base", media.txt).
 // Files dropped on the zone, pasted (Ctrl+V) or picked wait on a wall where
-// the user chooses their name, and for a person their destination, then they
-// are sent one by one to m=MEDIA_SEND_OK. For the base, the files go to the
+// the user chooses their name. For a person, each file is sent to
+// m=MEDIA_SEND_OK by one of the three buttons of its preview: portrait,
+// blason or image (under its name). For the base, the files are sent one by
+// one by the Send button and go to the
 // images or the album shown in the list of the page, where an image is only
 // loaded on the hover of its icon. Needs dropzone-min.js and Bootstrap. The
 // place of the files comes from the data-* attributes of #media, the limits
@@ -31,6 +33,8 @@
   const TYPED_EXT = IMAGE_EXT.concat([".jpeg", ".pdf", ".docx", ".odt", ".txt"]);
 
   let sending = false;
+  // A file of the person was sent: the page is reloaded at the end.
+  let sent = false;
 
   // ── Names ───────────────────────────────────────────────────────────────
 
@@ -123,8 +127,10 @@
         stem: typedStem(file.gw.els.name.value)
       };
     }
-    const dest = file.gw.els.dest.value;
-    const named = dest !== "portrait" && dest !== "blason";
+    // Before a button is clicked, the file is seen as an image of the
+    // person, the only destination that needs a name.
+    const dest = file.gw.dest;
+    const named = dest === "person";
     return {
       dest: dest,
       subdir: "",
@@ -163,25 +169,11 @@
   // Updates every preview and the Send button after any change on the wall.
   function refresh() {
     const queued = dz.getQueuedFiles();
-    const slots = {};
-    for (const file of queued) {
-      const dest = file.gw.els.dest.value;
-      if ((dest === "portrait" || dest === "blason") && !slots[dest]) {
-        slots[dest] = file;
-      }
-    }
     const seen = new Set();
     let ready = queued.length > 0 && !noAlbum();
 
     for (const file of queued) {
       const els = file.gw.els;
-      for (const option of els.dest.options) {
-        const taken = slots[option.value] && slots[option.value] !== file;
-        const refused = !accepts(option.value, file);
-        option.disabled = refused || taken;
-        option.title = refused ? cfg.typeRefused : taken ? cfg.slotTaken : "";
-      }
-
       const c = choice(file);
       const refused = baseMode && !accepts(c.dest, file);
       const nameOk = !c.named || validName(c.stem);
@@ -207,10 +199,20 @@
 
       const unresolved = duplicate || (conflict && !file.gw.replace);
       if (refused || !nameOk || pending || unresolved) ready = false;
+
+      if (!baseMode) {
+        const nameReady = nameOk && !pending && !unresolved;
+        for (const btn of els.dests) {
+          const refusedHere = !accepts(btn.dataset.dest, file);
+          btn.disabled = sending || refusedHere
+            || (btn.dataset.dest === "person" && !nameReady);
+          btn.title = refusedHere ? cfg.typeRefused : "";
+        }
+      }
     }
 
     if (baseMode) show(document.getElementById("media-album-hint"), noAlbum());
-    show(sendBtn, queued.length > 0);
+    show(sendBtn, baseMode && queued.length > 0);
     sendBtn.disabled = !ready || sending;
   }
 
@@ -256,9 +258,10 @@
       ext: ext,
       image: IMAGE_EXT.includes(ext),
       replace: false,
+      dest: "person",
       els: {
         controls: find(".upload-controls"),
-        dest: find(".upload-dest"),
+        dests: preview.querySelectorAll(".upload-dest"),
         nameCol: find(".upload-name-col"),
         name: find(".upload-name"),
         conflict: find(".upload-conflict"),
@@ -271,14 +274,15 @@
     find(".upload-ext").textContent = ext;
     find(".upload-size").textContent = humanSize(file.size);
     els.name.value = withoutExtension(file.name);
-    els.dest.value = "person";
     if (baseMode) find(".upload-dest-col").remove();
 
     const changed = () => {
       file.gw.replace = false;
       refresh();
     };
-    els.dest.addEventListener("change", changed);
+    for (const btn of els.dests) {
+      btn.addEventListener("click", () => sendOne(file, btn.dataset.dest));
+    }
     els.name.addEventListener("input", changed);
     els.replace.addEventListener("click", () => {
       file.gw.replace = true;
@@ -297,7 +301,27 @@
     }, 0);
   });
 
-  dz.on("removedfile", refresh);
+  dz.on("removedfile", () => {
+    if (!baseMode && !sending) afterSend();
+    refresh();
+  });
+
+  // A file of the person goes alone to the destination of its button.
+  function sendOne(file, dest) {
+    if (sending || file.status !== Dropzone.QUEUED) return;
+    file.gw.dest = dest;
+    sending = true;
+    refresh();
+    dz.processFile(file);
+  }
+
+  // Once the wall of the person holds no file to send, the page is reloaded,
+  // unless a file failed: its message stays until Finish.
+  function afterSend() {
+    if (!sent || dz.getQueuedFiles().length > 0) return;
+    if (dz.files.every(file => file.status === Dropzone.SUCCESS)) finish();
+    else show(finishBtn, true);
+  }
 
   dz.on("processing", file => {
     file.gw.els.controls.disabled = true;
@@ -332,7 +356,15 @@
 
   // Without autoProcessQueue, Dropzone stops after each file.
   dz.on("complete", () => {
-    if (sending) dz.processQueue();
+    if (!sending) return;
+    if (baseMode) {
+      dz.processQueue();
+      return;
+    }
+    sending = false;
+    sent = true;
+    afterSend();
+    refresh();
   });
 
   // The page of a person is reloaded; for the base, the wall is emptied and
@@ -348,7 +380,7 @@
   }
 
   dz.on("queuecomplete", () => {
-    if (!sending) return;
+    if (!baseMode || !sending) return;
     sending = false;
     if (dz.files.every(file => file.status === Dropzone.SUCCESS)) {
       finish();

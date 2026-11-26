@@ -24302,21 +24302,6 @@ pt: já existe um ficheiro com este nome
 ru: файл с таким именем уже существует
 sv: en fil med detta namn finns redan
 
-    upload dest/portrait/blason/person
-ca: retrat/escut d’armes/imatge de la persona
-da: portræt/våbenskjold/billede af personen
-de: Porträt/Wappen/Bild der Person
-en: portrait/coat of arms/image of the person
-es: retrato/escudo de armas/imagen de la persona
-fr: portrait/blason/image de la personne
-it: ritratto/stemma/immagine della persona
-nl: portret/wapen/afbeelding van de persoon
-no: portrett/våpenskjold/bilde av personen
-pl: portret/herb/obraz osoby
-pt: retrato/brasão/imagem da pessoa
-ru: портрет/герб/изображение персоны
-sv: porträtt/vapensköld/bild av personen
-
     upload destination
 ca: destinació
 da: destination
@@ -24346,21 +24331,6 @@ pl: wyślij/zakończ
 pt: enviar/terminar
 ru: отправить/завершить
 sv: skicka/slutför
-
-    upload slot taken
-ca: ja triat per a un altre fitxer
-da: allerede valgt til en anden fil
-de: bereits für eine andere Datei gewählt
-en: already chosen for another file
-es: ya elegido para otro archivo
-fr: déjà choisi pour un autre fichier
-it: già scelto per un altro file
-nl: al gekozen voor een ander bestand
-no: allerede valgt for en annen fil
-pl: już wybrane dla innego pliku
-pt: já escolhido para outro ficheiro
-ru: уже выбрано для другого файла
-sv: redan valt för en annan fil
 
     upload zone
 ca: deixeu anar fitxers aquí, enganxeu-los (Ctrl+V) o feu clic per triar-los
