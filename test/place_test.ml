@@ -404,6 +404,193 @@ let summary () =
           false places));
   ()
 
+let fix_dept () =
+  let ok s expected =
+    (check (option string)) s (Some expected) (PlaceFix.dept_suffix s)
+  and no s = (check (option string)) s None (PlaceFix.dept_suffix s) in
+  (* the three separators *)
+  ok "(Le Bourg) Saint-Pair, Manche" "[Le Bourg] - Saint-Pair (Manche)";
+  ok "(Le Bourg)   Saint-Pair, Manche" "[Le Bourg] - Saint-Pair (Manche)";
+  ok "(Le Bourg), Saint-Pair, Manche" "[Le Bourg] - Saint-Pair (Manche)";
+  ok "(Le Bourg) - Saint-Pair, Manche" "[Le Bourg] - Saint-Pair (Manche)";
+  ok "(Le Bourg)-Saint-Pair, Manche" "[Le Bourg] - Saint-Pair (Manche)";
+  ok "(Le Bourg) \xE2\x80\x93 Saint-Pair, Manche"
+    "[Le Bourg] - Saint-Pair (Manche)";
+  (* several terms, the department already in parentheses *)
+  ok "(La Lande) Saint-Pair, Granville, Manche"
+    "[La Lande] - Saint-Pair, Granville (Manche)";
+  ok "(La Lande) Saint-Pair (Manche)" "[La Lande] - Saint-Pair (Manche)";
+  (* the department in its official spelling, former departments *)
+  ok "(Kerlouan) Brest, finistere" "[Kerlouan] - Brest (Finist\xC3\xA8re)";
+  ok "(Le Moulin) Plouha, Cotes du Nord"
+    "[Le Moulin] - Plouha (C\xC3\xB4tes-du-Nord)";
+  ok "(x) Saint-Denis, Seine St Denis" "[x] - Saint-Denis (Seine-Saint-Denis)";
+  (* not this form *)
+  no "Saint-Pair, Manche";
+  no "(Le Bourg) Manche";
+  no "(Le Bourg) Saint-Pair, Normandie";
+  no "() Saint-Pair, Manche";
+  no "(Le (Haut) Bourg) Saint-Pair, Manche";
+  no "(Le Bourg)Saint-Pair, Manche";
+  no "(Le Bourg) Saint-Pair, , Manche";
+  no "(Le Bourg) Saint-Pair (Haut), Manche";
+  no "(rue X) 16e, Paris";
+  no "[Le Bourg] - Saint-Pair (Manche)";
+  ()
+
+let fix_dept_info () =
+  let ok s expected =
+    (check (option string)) s (Some expected) (PlaceFix.dept_info_last s)
+  and no s = (check (option string)) s None (PlaceFix.dept_info_last s) in
+  ok "Saint-Pair, Manche, Le Bourg" "[Le Bourg] - Saint-Pair (Manche)";
+  ok "Saint-Pair (Manche), Le Bourg" "[Le Bourg] - Saint-Pair (Manche)";
+  ok "Saint-Pair (Manche) , Le Bourg" "[Le Bourg] - Saint-Pair (Manche)";
+  ok "Saint-Pair, Granville, Manche, La Lande"
+    "[La Lande] - Saint-Pair, Granville (Manche)";
+  ok "Plouha, Cotes du Nord, Le Moulin"
+    "[Le Moulin] - Plouha (C\xC3\xB4tes-du-Nord)";
+  ok "Saint-Pair, Manche (Le Bourg)" "[Le Bourg] - Saint-Pair (Manche)";
+  ok "Saint-Pair, Granville, Manche (La Lande)"
+    "[La Lande] - Saint-Pair, Granville (Manche)";
+  ok "Saint-Pair, Manche ( Le Bourg )" "[Le Bourg] - Saint-Pair (Manche)";
+  (* the last term is no information on the place *)
+  no "Saint-Pair, Manche, France";
+  no "Saint-Pair, Manche (France)";
+  no "Le Lamentin, Martinique, Antilles";
+  no "Le Lamentin, Martinique, antilles";
+  no "Le Lamentin (Martinique), Antilles fran\xC3\xA7aises";
+  no "Le Lamentin, Martinique (DOM)";
+  no "Le Lamentin, Martinique, D\xC3\xA9partements d'outre-mer";
+  no "Le Lamentin, Martinique, departements d outre mer";
+  no "Saint-Paul, R\xC3\xA9union, Ile Bourbon";
+  no "Basse-Terre, Guadeloupe, Martinique";
+  ok "Le Lamentin, Martinique, Morne Pitault"
+    "[Morne Pitault] - Le Lamentin (Martinique)";
+  no "Saint-Pair, Manche (Normandie)";
+  no "Granville, Saint-Pair (Manche)";
+  no "Saint-Pair (Manche)";
+  no "Saint-Pair, Manche ()";
+  no "Saint-Pair (Manche), Normandie";
+  no "Saint-Pair, Manche, Basse-Normandie";
+  no "Saint-Pair, Manche, Calvados";
+  (* not this form *)
+  no "Saint-Pair, Manche";
+  no "Manche, Le Bourg";
+  no "Saint-Pair, Normandie, Le Bourg";
+  no "[Le Bourg] - Saint-Pair (Manche)";
+  no "(Le Bourg) Saint-Pair, Manche";
+  no "Saint-Pair, Manche, (Le Bourg)";
+  ()
+
+let fix_dept_number () =
+  let places =
+    [ "Saint-Pair (Manche)"; "Granville, Manche"; "Versailles (Seine-et-Oise)" ]
+  in
+  let exists s = List.mem s places in
+  let ok s expected =
+    (check (option string)) s (Some expected) (PlaceFix.dept_number ~exists s)
+  and no s = (check (option string)) s None (PlaceFix.dept_number ~exists s) in
+  (* both forms in the place *)
+  ok "Saint-Pair, 50, Manche" "Saint-Pair (Manche)";
+  ok "Saint-Pair, Manche, 50" "Saint-Pair (Manche)";
+  ok "Saint-Pair, Manche (50)" "Saint-Pair (Manche)";
+  ok "Saint-Pair (50), Manche" "Saint-Pair (Manche)";
+  ok "Saint-Pair, Manche 50" "Saint-Pair (Manche)";
+  ok "Saint-Pair (Manche - 50)" "Saint-Pair (Manche)";
+  ok "Saint-Pair, 50-Manche" "Saint-Pair (Manche)";
+  ok "Chaumont, 52-Haute-Marne" "Chaumont (Haute-Marne)";
+  ok "Lolif, Avranches, 050, manche" "Lolif, Avranches (Manche)";
+  ok "[Le Bourg] - Saint-Pair, 50, Manche" "[Le Bourg] - Saint-Pair (Manche)";
+  ok "Ajaccio, Corse-du-Sud (2A)" "Ajaccio (Corse-du-Sud)";
+  ok "Ajaccio, 20, Corse-du-Sud" "Ajaccio (Corse-du-Sud)";
+  no "Ajaccio, Haute-Corse (2A)";
+  ok "Versailles, 78, Seine-et-Oise" "Versailles (Seine-et-Oise)";
+  no "Saint-Pair, 14, Manche";
+  no "Saint-Pair (Manche)";
+  no "50, Manche";
+  (* the number alone, the city with its department in the dictionary *)
+  ok "Saint-Pair (50)" "Saint-Pair (Manche)";
+  ok "Saint-Pair, 50" "Saint-Pair (Manche)";
+  ok "Granville (50)" "Granville, Manche";
+  ok "Versailles (78)" "Versailles (Seine-et-Oise)";
+  ok "[Le Bourg] - Saint-Pair (50)" "[Le Bourg] - Saint-Pair (Manche)";
+  no "Coutances (50)";
+  no "Saint-Pair (14)";
+  no "Saint-Pair (96)";
+  (* a number inside a term may be a district *)
+  no "Paris 16";
+  no "Marseille 13, Bouches-du-Rh\xC3\xB4ne";
+  ()
+
+let fix_address () =
+  let ok s expected =
+    (check (option string)) s (Some expected) (PlaceFix.address s)
+  and no s = (check (option string)) s None (PlaceFix.address s) in
+  ok "12, rue Lecampion, Granville (Manche)"
+    "[12, rue Lecampion] - Granville (Manche)";
+  ok "12 rue Lecampion, Granville (Manche)"
+    "[12, rue Lecampion] - Granville (Manche)";
+  ok "12 rue Lecampion, Granville, Manche"
+    "[12, rue Lecampion] - Granville (Manche)";
+  ok "12 bis, Avenue de la Gare, Saint-Pair, Granville, (Manche)"
+    "[12 bis, Avenue de la Gare] - Saint-Pair, Granville (Manche)";
+  ok "3-5 boulevard des Amiraux, Granville, manche"
+    "[3-5, boulevard des Amiraux] - Granville (Manche)";
+  ok "7b all\xC3\xA9e des Pins, Granville (Manche)"
+    "[7b, all\xC3\xA9e des Pins] - Granville (Manche)";
+  ok "paroisse Saint-Paterne, Granville (Manche)"
+    "[paroisse Saint-Paterne] - Granville (Manche)";
+  ok "Eglise Notre-Dame, Granville, (Manche)"
+    "[Eglise Notre-Dame] - Granville (Manche)";
+  ok "chapelle de Lihou, Saint-Pair, Granville, Manche"
+    "[chapelle de Lihou] - Saint-Pair, Granville (Manche)";
+  (* the address last *)
+  ok "Granville (Manche), 12 rue Lecampion"
+    "[12, rue Lecampion] - Granville (Manche)";
+  ok "Granville, Manche, 12, rue Lecampion"
+    "[12, rue Lecampion] - Granville (Manche)";
+  ok "Granville, Manche (12 rue Lecampion)"
+    "[12, rue Lecampion] - Granville (Manche)";
+  ok "Granville (Manche) (12 bis, rue Lecampion)"
+    "[12 bis, rue Lecampion] - Granville (Manche)";
+  ok "Saint-Pair, Granville, Manche, paroisse Saint-Pair"
+    "[paroisse Saint-Pair] - Saint-Pair, Granville (Manche)";
+  ok "Granville, Manche (chapelle Notre-Dame du Cap Lihou)"
+    "[chapelle Notre-Dame du Cap Lihou] - Granville (Manche)";
+  (* no number, or the number after the street *)
+  ok "rue Lecampion, Granville (Manche)" "[rue Lecampion] - Granville (Manche)";
+  ok "Granville, Manche, rue Lecampion" "[rue Lecampion] - Granville (Manche)";
+  ok "Place du March\xC3\xA9, Granville, Manche"
+    "[Place du March\xC3\xA9] - Granville (Manche)";
+  ok "rue Lecampion 12, Granville (Manche)"
+    "[12, rue Lecampion] - Granville (Manche)";
+  ok "rue Lecampion, 12, Granville (Manche)"
+    "[12, rue Lecampion] - Granville (Manche)";
+  ok "rue Lecampion 12 bis, Granville (Manche)"
+    "[12 bis, rue Lecampion] - Granville (Manche)";
+  ok "rue Lecampion n\xC2\xB0 12, Granville (Manche)"
+    "[12, rue Lecampion] - Granville (Manche)";
+  ok "Granville (Manche), rue Lecampion, 12"
+    "[12, rue Lecampion] - Granville (Manche)";
+  ok "Granville, Manche (rue Lecampion 12)"
+    "[12, rue Lecampion] - Granville (Manche)";
+  ok "Granville, Manche (rue Lecampion)" "[rue Lecampion] - Granville (Manche)";
+  no "rue Lecampion, Manche";
+  no "rue, Granville, Manche";
+  no "12 rue, Granville, Manche";
+  no "Granville, 12 rue Lecampion";
+  no "Manche, 12 rue Lecampion";
+  no "Granville, Manche, 12 Lecampion";
+  no "12 rue Lecampion, Granville";
+  no "12 rue Lecampion, Manche";
+  no "12 Lecampion, Granville (Manche)";
+  no "12rue Lecampion, Granville (Manche)";
+  no "paroissien, Granville (Manche)";
+  no "Granville (Manche)";
+  no "[12, rue Lecampion] - Granville (Manche)";
+  no "12 rue (haute), Granville (Manche)";
+  ()
+
 let v =
   [
     ("place-normalize", [ test_case "Place normalize" `Quick normalize ]);
@@ -425,6 +612,13 @@ let v =
     ("place-groups", [ test_case "PlaceGroups of_places" `Quick groups ]);
     ( "place-clusters",
       [ test_case "PlaceTerms cluster_key and clusters" `Quick clusters ] );
+    ( "place-fix",
+      [
+        test_case "PlaceFix dept_suffix" `Quick fix_dept;
+        test_case "PlaceFix dept_info_last" `Quick fix_dept_info;
+        test_case "PlaceFix dept_number" `Quick fix_dept_number;
+        test_case "PlaceFix address" `Quick fix_address;
+      ] );
     ( "place-rename",
       [
         test_case "PlaceRename rewrite" `Quick rename_rewrite;

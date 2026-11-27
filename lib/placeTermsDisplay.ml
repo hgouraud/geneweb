@@ -585,11 +585,19 @@ let done_lines conf =
 let hidden_done conf dn =
   if dn > 0 then Util.hidden_input conf "dn" (Adef.encoded (string_of_int dn))
 
-(* "201–400 / 1234 ", or nothing when everything is shown at once *)
-let lines_range dn total =
-  if total > preview_max || dn > 0 then
-    Printf.sprintf "%d–%d / " (dn + 1) (dn + min preview_max total)
+(* "page 2/7 · ", or nothing when everything is shown at once *)
+let page_of conf ~page ~pages =
+  if pages > 1 then
+    Printf.sprintf (ftransl conf "page %d/%d") page pages ^ " · "
   else ""
+
+(* the page of [preview_max] lines after the [dn] lines already confirmed,
+   among [dn + total] *)
+let lines_range conf dn total =
+  let all = dn + total in
+  page_of conf
+    ~page:((dn / preview_max) + 1)
+    ~pages:((all + preview_max - 1) / preview_max)
 
 (* [items] as confirmed on the preview. With [shown_only], the items whose
    line was not in the form are left out: the preview of sources and
@@ -624,7 +632,8 @@ let edited_items ?(valid = fun _ -> true) ?(shown_only = false) conf base items
    checked places are changed by [m=PLACE_TERMS_OK]. The new place of each
    item can be edited ([new_key]). [hidden] emits the fields describing the
    change, [old_html] renders the old place of an item. *)
-let print_plan conf base u items ~hidden ~back ~old_html =
+let print_plan ?(keys = false) ?range ?(size = preview_max) conf base u items
+    ~hidden ~back ~old_html =
   Output.printf conf "<form method=\"post\" action=\"%s\">\n" conf.command;
   Util.hidden_env conf;
   Util.hidden_input conf "m" (Adef.encoded "PLACE_TERMS_OK");
@@ -642,23 +651,45 @@ let print_plan conf base u items ~hidden ~back ~old_html =
             (Adef.encoded "on"))
         it.depths)
     items;
-  Output.printf conf "<p>%s%d %s</p>\n" (lines_range dn total) (dn + total)
-    (transl_nth conf "full place/full places" (if dn + total > 1 then 1 else 0));
-  Output.print_sstring conf
-    "<table class=\"table table-sm\">\n\
+  (* [range]: the page shown and the numbers of pages and of lines, when
+     [items] is a page of them *)
+  let head, all =
+    match range with
+    | Some (page, pages, all) -> (page_of conf ~page ~pages, all)
+    | None -> (lines_range conf dn total, dn + total)
+  in
+  Output.printf conf "<p>%s%d %s</p>\n" head all
+    (transl_nth conf "full place/full places" (if all > 1 then 1 else 0));
+  (* [keys]: Return applies the line being edited at once, Shift+Return
+     skips it; the lines are unchecked, and the submit button asks for a
+     confirmation of the lines checked (placeFix.js, table.plan-keys) *)
+  if keys then
+    Output.printf conf "<p class=\"text-muted small\">%s</p>\n"
+      (esc
+         (transl conf "Return: apply this line · Shift+Return: skip to the next"));
+  let checked = if keys then "" else " checked" in
+  Output.printf conf
+    "<table class=\"table table-sm%s\"%s>\n\
      <thead><tr><th><input type=\"checkbox\" class=\"form-check-input \
-     ctx-all\" data-ctx=\"0\" checked></th><th colspan=\"4\"></th></tr></thead>\n\
-     <tbody>\n";
+     ctx-all\" data-ctx=\"0\"%s></th><th colspan=\"4\"></th></tr></thead>\n\
+     <tbody>\n"
+    (if keys then " plan-keys" else "")
+    (if keys then
+       Printf.sprintf " data-confirm=\"%s\" data-none=\"%s\""
+         (esc
+            (Utf8.capitalize_fst (transl conf "apply the %d checked changes?")))
+         (esc (Utf8.capitalize_fst (transl conf "no change checked")))
+     else "")
+    checked;
   List.iteri
     (fun i (it : PlaceRename.item) ->
-      if i < preview_max then
+      if i < size then
         Output.printf conf
           "<tr><td><input type=\"checkbox\" class=\"form-check-input ctx0\" \
-           name=\"%s\" value=\"on\" \
-           checked></td><td>%s</td><td>→</td><td>%s</td><td class=\"text-end \
-           text-muted\">%d</td><td>%s</td></tr>\n"
+           name=\"%s\" value=\"on\"%s></td><td>%s</td><td>→</td><td>%s</td><td \
+           class=\"text-end text-muted\">%d</td><td>%s</td></tr>\n"
           (PlaceRename.place_key it.istr)
-          (old_html it)
+          checked (old_html it)
           (Printf.sprintf
              "<input type=\"text\" class=\"form-control form-control-sm\" \
               name=\"%s\" value=\"%s\" size=\"%d\">"
@@ -905,6 +936,114 @@ let print_group_preview conf base =
           ~back:(groups_href conf)
           ~old_html:(fun (it : PlaceRename.item) -> vis conf it.old_s)
 
+(* ---- bulk corrections ---- *)
+
+let fix_href conf rule =
+  Printf.sprintf "%sm=PLACE_TERMS&fix=%s" (prefix conf)
+    (PlaceFix.string_of_rule rule)
+
+let fix_rule conf =
+  Option.bind (p_getenv conf.env "fix") PlaceFix.rule_of_string
+
+let fix_description conf rule =
+  match rule with
+  | PlaceFix.Dept_suffix ->
+      transl conf "(info) terms, department → [info] - terms (department)"
+  | PlaceFix.Dept_info_last ->
+      transl conf "terms, department, info → [info] - terms (department)"
+  | PlaceFix.Dept_number ->
+      transl conf "terms (department number) → terms (department)"
+  | PlaceFix.Address ->
+      transl conf
+        "address or parish, terms (department) → [address] - terms (department)"
+
+(* one tab per rule, each a separate pass *)
+let print_fix_tabs conf rule =
+  Output.print_sstring conf "<ul class=\"nav nav-tabs mt-2\">\n";
+  List.iter
+    (fun r ->
+      Output.printf conf
+        "<li class=\"nav-item\"><a class=\"nav-link%s\" href=\"%s\">%s</a></li>\n"
+        (if r = rule then " active" else "")
+        (fix_href conf r)
+        (esc (fix_description conf r)))
+    PlaceFix.rules;
+  Output.print_sstring conf "</ul>\n"
+
+(* the page [pg] of the places rewritten by a rule, [n] lines a page
+   ({!page_size}) *)
+let fix_page conf total =
+  let size = page_size conf in
+  let pages = max 1 ((total + size - 1) / size) in
+  let pg =
+    match p_getint conf.env "pg" with
+    | Some p when p >= 1 -> min p pages
+    | Some _ | None -> 1
+  in
+  (size, pg, pages)
+
+let fix_page_href conf rule ~pg ~size =
+  Printf.sprintf "%s&pg=%d&n=%d" (fix_href conf rule) pg size
+
+(* previous and next pages, a field to go to a page, the rows per page *)
+let print_fix_bar conf rule ~size ~pg ~pages =
+  let button label pg =
+    Printf.sprintf
+      "<a class=\"btn btn-sm btn-outline-primary\" href=\"%s\">%s</a>"
+      (fix_page_href conf rule ~pg ~size)
+      (esc (Utf8.capitalize_fst (transl conf label)))
+  in
+  Output.printf conf
+    "<form method=\"get\" action=\"%s\" class=\"d-flex flex-wrap \
+     align-items-center gap-2 my-2\">\n"
+    conf.command;
+  Util.hidden_env conf;
+  Util.hidden_input conf "m" (Adef.encoded "PLACE_TERMS");
+  Util.hidden_input_s conf "fix" (PlaceFix.string_of_rule rule);
+  if pg > 1 then Output.print_sstring conf (button "previous" (pg - 1));
+  Output.printf conf
+    "<input type=\"number\" class=\"form-control form-control-sm w-auto\" \
+     name=\"pg\" value=\"%d\" min=\"1\" max=\"%d\" aria-label=\"%s\"><span \
+     class=\"text-nowrap\">/ %d</span>\n"
+    pg pages
+    (esc (Printf.sprintf (ftransl conf "page %d/%d") pg pages))
+    pages;
+  if pg < pages then Output.print_sstring conf (button "next" (pg + 1));
+  Output.printf conf
+    "<select class=\"form-select form-select-sm w-auto ms-3 auto-submit\" \
+     name=\"n\" aria-label=\"%s\" title=\"%s\">\n"
+    (esc (Utf8.capitalize_fst (transl conf "rows per page")))
+    (esc (Utf8.capitalize_fst (transl conf "rows per page")));
+  List.iter
+    (fun k ->
+      Output.printf conf "<option value=\"%d\"%s>%d</option>\n" k
+        (if k = size then " selected" else "")
+        k)
+    (List.sort_uniq compare (size :: page_sizes));
+  Output.print_sstring conf "</select>\n</form>\n"
+
+(* a page of the places rewritten by [rule]; the new places can be edited,
+   the lines come unchecked *)
+let print_fix conf base rule =
+  print_fix_tabs conf rule;
+  let all = PlaceFix.plan base rule in
+  let total = List.length all in
+  let size, pg, pages = fix_page conf total in
+  if total = 0 then
+    Output.printf conf "<p>%s</p>\n"
+      (Utf8.capitalize_fst (transl conf "no modification"))
+  else (
+    if pages > 1 then print_fix_bar conf rule ~size ~pg ~pages;
+    let items = take (((pg - 1) * size) + 1, pg * size) all in
+    print_plan ~keys:true ~range:(pg, pages, total) ~size conf base
+      (PlaceRename.usage base) items
+      ~hidden:(fun () ->
+        Util.hidden_input_s conf "fix" (PlaceFix.string_of_rule rule);
+        Util.hidden_input_s conf "pg" (string_of_int pg);
+        Util.hidden_input_s conf "n" (string_of_int size))
+      ~back:(prefix conf ^ "m=PLACE_TERMS")
+      ~old_html:(fun (it : PlaceRename.item) -> vis conf it.old_s))
+
 (* ---- sources to group ---- *)
 
 let src_href conf part =
@@ -1065,7 +1204,9 @@ let print_spans_preview conf base pg terms nt ~items =
     let items : (PlaceRename.item * SourceTerms.span list) list = items nt in
     let u = PlaceRename.usage ~field:pg.field base in
     let total = List.length items in
-    Output.printf conf "<p>%s%d %s</p>\n" (lines_range dn total) (dn + total)
+    Output.printf conf "<p>%s%d %s</p>\n"
+      (lines_range conf dn total)
+      (dn + total)
       (transl_nth conf pg.plural (if dn + total > 1 then 1 else 0));
     if items = [] then
       Output.printf conf "<p>%s</p>\n"
@@ -1287,11 +1428,17 @@ let header ?(section = Places) ~title conf =
                "object-group" "spelling clusters";
              link (groups_href conf) "up-right-and-down-left-from-center"
                "places to complete";
+             link
+               (fix_href conf PlaceFix.Dept_suffix)
+               "wand-magic-sparkles" "bulk corrections";
            ]))
 
 let place_page conf base =
   let nonempty = nonempty conf in
   match (PlaceRename.terms_of_env conf, new_term_of_env conf) with
+  | _ when fix_rule conf <> None ->
+      page conf "bulk corrections" (fun () ->
+          print_fix conf base (Option.get (fix_rule conf)))
   | (_ :: _ as terms), Some nt ->
       page conf "preview of the changes" (fun () ->
           print_preview conf base terms nt)
@@ -1348,7 +1495,7 @@ let continue_form ~m conf =
     (List.filter
        (fun (k, _) ->
          k = "nt" || k = "t" || k = "g" || k = "gt" || k = "gn" || k = "part"
-         || k = "dn"
+         || k = "fix" || k = "pg" || k = "dn"
          || PlaceRename.occurrence_of_key k <> None
          || String.starts_with ~prefix:"np" k
          || String.length k > 1
@@ -1410,6 +1557,20 @@ let print_ok conf base =
     ~title:(Utf8.capitalize_fst (transl conf "modification successful"))
     conf;
   (match (PlaceRename.terms_of_env conf, p_getenv_notrim conf.env "nt") with
+  | _ when fix_rule conf <> None ->
+      let rule = Option.get (fix_rule conf) in
+      (* recomputed: the base may have changed since the preview; only the
+         lines shown and checked are changed *)
+      let items =
+        PlaceFix.plan ~only:(PlaceRename.places_of_env conf) base rule
+      in
+      apply_confirmed ~valid:PlaceRename.valid_place ~shown_only:true conf base
+        items;
+      Output.printf conf "<p><a href=\"%s\">%s</a></p>\n"
+        (fix_page_href conf rule
+           ~pg:(Option.value ~default:1 (p_getint conf.env "pg"))
+           ~size:(page_size conf))
+        (Utf8.capitalize_fst (transl conf "continue correcting"))
   | _ when p_getenv conf.env "gt" <> None -> (
       (* recomputed: the base may have changed since the preview *)
       match group_items conf base with

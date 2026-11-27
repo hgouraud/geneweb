@@ -190,6 +190,15 @@
 
 (rule
   (package geneweb)
+  (targets placeFix.js.gz placeFix.js.br)
+  (deps (:input placeFix.js))
+  (action
+    (concurrent
+      (run gzip -9 -k -f %{input})
+      (run brotli -q 11 %{input}))))
+
+(rule
+  (package geneweb)
   (targets regex.min.js.gz regex.min.js.br)
   (deps (:input regex.min.js))
   (action

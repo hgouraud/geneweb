@@ -9,6 +9,8 @@ val print : Config.config -> Geneweb_db.Driver.base -> unit
     - [g=<istr>]: a group of places to complete, the complete place to keep and
       the places to replace by it; with [gt=<istr>&p<istr>=on...]: the preview
       of that change;
+    - [fix=<rule>]: the places rewritten by a rule of bulk correction
+      ({!PlaceFix}), with the form leading to [m=PLACE_TERMS_OK];
     - [s=<prefix>]: index of the terms whose lowered form starts with [prefix]
       (not linked from the pages);
     - [t=<term>] (or [t1], [t2]... for several)

@@ -793,6 +793,16 @@ sl: tichri/marhechvan/kislev/tevet/chevat/adar 1/adar 2/nissan/iyar/sivan/tamouz
 sv: tishri/heshvan/kislev/tevet/shevat/adar I/adar II/nisan/iyyar/sivan/tammuz/av/elul
 tr: Tishri/Heshvan/Kislev/Tevet/Shevat/Adar I/Adar II/Nisan/Iyyar/Sivan/Tammuz/Av/Elul
 
+    (info) terms, department → [info] - terms (department)
+de: (Info) Begriffe, Departement → [Info] - Begriffe (Departement)
+en: (info) terms, department → [info] - terms (department)
+es: (info) términos, departamento → [info] - términos (departamento)
+fr: (info) termes, département → [info] - termes (département)
+it: (info) termini, dipartimento → [info] - termini (dipartimento)
+nl: (info) termen, departement → [info] - termen (departement)
+pt: (info) termos, departamento → [info] - termos (departamento)
+sv: (info) termer, departement → [info] - termer (departement)
+
     (month)
 af: Januarie/Februarie/Maart/April/Mei/Junie/Julie/Augustus/September/Oktober/November/Desember
 ar: جانفي/فيفري/مارس/أفريل/ماي/جوان/جويلية/أوت/سبتمبر/أكتوبر/نوفمبر/ديسمبر
@@ -2199,6 +2209,16 @@ pl: tytuł szlachecki dodany przez notatkę %s/przynależność dodana przez not
 pt: título nobiliárquico acrescentado pela nota %s/pertença acrescentada pela nota %s/profissão acrescentada pela nota %s/menção acrescentada pela nota %s/informação acrescentada pela nota %s
 sv: adelstitel tillagd av anteckningen %s/tillhörighet tillagd av anteckningen %s/yrke tillagt av anteckningen %s/omnämnande tillagt av anteckningen %s/uppgift tillagd av anteckningen %s
 
+    address or parish, terms (department) → [address] - terms (department)
+de: Adresse oder Pfarrei, Begriffe (Departement) → [Adresse] - Begriffe (Departement)
+en: address or parish, terms (department) → [address] - terms (department)
+es: dirección o parroquia, términos (departamento) → [dirección] - términos (departamento)
+fr: adresse ou paroisse, termes (département) → [adresse] - termes (département)
+it: indirizzo o parrocchia, termini (dipartimento) → [indirizzo] - termini (dipartimento)
+nl: adres of parochie, termen (departement) → [adres] - termen (departement)
+pt: endereço ou paróquia, termos (departamento) → [endereço] - termos (departamento)
+sv: adress eller församling, termer (departement) → [adress] - termer (departement)
+
     adhesion
 co: adesione
 de: Beitritt
@@ -3439,6 +3459,16 @@ fr: rechercher dans la liste des sous-lieux
 de: erscheint/Mal/Male
 en: appears/time/times
 fr: apparaît/fois/fois
+
+    apply the %d checked changes?
+de: die %d markierten Änderungen anwenden?
+en: apply the %d checked changes?
+es: ¿aplicar los %d cambios marcados?
+fr: appliquer les %d modifications cochées ?
+it: applicare le %d modifiche selezionate?
+nl: de %d aangevinkte wijzigingen toepassen?
+pt: aplicar as %d alterações marcadas?
+sv: tillämpa de %d markerade ändringarna?
 
     arbre 8 gen
 co: arburu in H d’8 generazioni
@@ -4839,6 +4869,16 @@ sl: graditi informacije
 sv: bygginformation
 tr: derleme bilgisi
 zh: 构建信息
+
+    bulk corrections
+de: Sammelkorrekturen
+en: bulk corrections
+es: correcciones en bloque
+fr: corrections en masse
+it: correzioni in blocco
+nl: bulkcorrecties
+pt: correções em massa
+sv: masskorrigeringar
 
     burial
 af: begrawe
@@ -16202,6 +16242,16 @@ sl: nobenega rojstnega dneva
 sv: ingen födelsedag
 tr: doğum günü yok
 
+    no change checked
+de: keine Änderung markiert
+en: no change checked
+es: ningún cambio marcado
+fr: aucune modification cochée
+it: nessuna modifica selezionata
+nl: geen wijziging aangevinkt
+pt: nenhuma alteração marcada
+sv: ingen ändring markerad
+
     no data
 af: geen data
 bg: няма данни
@@ -18277,6 +18327,16 @@ pt: pacto civil de solidariedade%t com
 sv: sambo%t med
 tr: sivil dayanışma paktı%t ile
 
+    page %d/%d
+de: Seite %d/%d
+en: page %d/%d
+es: página %d/%d
+fr: page %d/%d
+it: pagina %d/%d
+nl: pagina %d/%d
+pt: página %d/%d
+sv: sida %d/%d
+
     parents
 af: ouers
 ar: والد
@@ -20233,6 +20293,16 @@ sl: nazaj na vrh
 sv: gå till toppen
 tr: başa dön
 zh: 返回顶部
+
+    Return: apply this line · Shift+Return: skip to the next
+de: Eingabe: diese Zeile anwenden · Umschalt+Eingabe: zur nächsten springen
+en: Return: apply this line · Shift+Return: skip to the next
+es: Intro: aplicar esta línea · Mayús+Intro: pasar a la siguiente
+fr: Entrée : appliquer cette ligne · Maj+Entrée : passer à la suivante
+it: Invio: applica questa riga · Maiusc+Invio: passa alla successiva
+nl: Enter: deze regel toepassen · Shift+Enter: naar de volgende
+pt: Enter: aplicar esta linha · Shift+Enter: passar à seguinte
+sv: Retur: tillämpa denna rad · Skift+Retur: hoppa till nästa
 
     revision history
 co: cronolugia di e revisioni
@@ -22222,6 +22292,26 @@ sl: ni podatkov v tabeli
 sv: inga data i tabellen
 tr: tabloda veri yok
 zh: 表中无数据
+
+    terms (department number) → terms (department)
+de: Begriffe (Departementsnummer) → Begriffe (Departement)
+en: terms (department number) → terms (department)
+es: términos (número de departamento) → términos (departamento)
+fr: termes (numéro de département) → termes (département)
+it: termini (numero di dipartimento) → termini (dipartimento)
+nl: termen (departementsnummer) → termen (departement)
+pt: termos (número de departamento) → termos (departamento)
+sv: termer (departementsnummer) → termer (departement)
+
+    terms, department, info → [info] - terms (department)
+de: Begriffe, Departement, Info → [Info] - Begriffe (Departement)
+en: terms, department, info → [info] - terms (department)
+es: términos, departamento, info → [info] - términos (departamento)
+fr: termes, département, info → [info] - termes (département)
+it: termini, dipartimento, info → [info] - termini (dipartimento)
+nl: termen, departement, info → [info] - termen (departement)
+pt: termos, departamento, info → [info] - termos (departamento)
+sv: termer, departement, info → [info] - termer (departement)
 
     text
 af: teks

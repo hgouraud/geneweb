@@ -85,6 +85,9 @@
   %if;(e.m="A" and e.t="T" and (e.t1="m" or e.t1="CT"))
     <script src="%etc_prefix;js/line.js?hash=%apply;hash%with;%etc_prefix;js/line.js%end;"></script>
   %end;
+  %if;(e.m="PLACE_TERMS" and e.fix!="")
+    <script src="%etc_prefix;js/placeFix.js?hash=%apply;hash%with;%etc_prefix;js/placeFix.js%end;"></script>
+  %end;
   %if;(e.m="CHK_DATA")
     <script src="%etc_prefix;js/checkdata.js?hash=%apply;hash%with;%etc_prefix;js/checkdata.js%end;"></script>
   %end;
